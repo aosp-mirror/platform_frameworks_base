@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.tuner.TunerService
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -48,7 +47,6 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     private val faceAuthEnabledChangedCallback = object : KeyguardStateController.Callback {
         override fun onFaceAuthEnabledChanged() = notifyListeners()
     }
-    var userHasDeviceEntryIntent: Boolean = false // ie: attempted udfps auth
 
     @IntDef(
         FACE_UNLOCK_BYPASS_NO_OVERRIDE,
@@ -198,25 +196,11 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         return false
     }
 
-    /**
-     * If shorter animations should be played when unlocking.
-     */
-    fun canPlaySubtleWindowAnimations(): Boolean {
-        if (bypassEnabled) {
-            return when {
-                statusBarStateController.state != StatusBarState.KEYGUARD -> false
-                qSExpanded -> false
-                else -> true
-            }
-        }
-        return false
-    }
-
     fun onStartedGoingToSleep() {
         pendingUnlock = null
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("KeyguardBypassController:")
         if (pendingUnlock != null) {
             pw.println("  mPendingUnlock.pendingUnlockType: ${pendingUnlock!!.pendingUnlockType}")
@@ -232,7 +216,6 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         pw.println("  launchingAffordance: $launchingAffordance")
         pw.println("  qSExpanded: $qSExpanded")
         pw.println("  hasFaceFeature: $hasFaceFeature")
-        pw.println("  userHasDeviceEntryIntent: $userHasDeviceEntryIntent")
     }
 
     /** Registers a listener for bypass state changes. */

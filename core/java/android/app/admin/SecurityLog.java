@@ -16,8 +16,12 @@
 
 package android.app.admin;
 
+import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -86,7 +90,12 @@ public class SecurityLog {
             TAG_KEY_INTEGRITY_VIOLATION,
             TAG_CERT_VALIDATION_FAILURE,
             TAG_CAMERA_POLICY_SET,
-            TAG_PASSWORD_COMPLEXITY_REQUIRED
+            TAG_PASSWORD_COMPLEXITY_REQUIRED,
+            TAG_PASSWORD_CHANGED,
+            TAG_WIFI_CONNECTION,
+            TAG_WIFI_DISCONNECTION,
+            TAG_BLUETOOTH_CONNECTION,
+            TAG_BLUETOOTH_DISCONNECTION,
     })
     public @interface SecurityLogTag {}
 
@@ -495,6 +504,65 @@ public class SecurityLog {
             SecurityLogTags.SECURITY_PASSWORD_COMPLEXITY_REQUIRED;
 
     /**
+     * Indicates that a user has just changed their lockscreen password.
+     * The log entry contains the following information about the
+     * event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] complexity for the new password ({@code Integer})
+     * <li> [1] target user ID ({@code Integer})
+     *
+     * <p>Password complexity levels are defined as in
+     * {@link DevicePolicyManager#getPasswordComplexity()}
+     */
+    public static final int TAG_PASSWORD_CHANGED = SecurityLogTags.SECURITY_PASSWORD_CHANGED;
+
+    /**
+     * Indicates that an event occurred as the device attempted to connect to
+     * a WiFi network. The log entry contains the following information about the
+     * event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] Last 2 octets of the network BSSID ({@code String}, in the form "xx:xx:xx:xx:AA:BB")
+     * <li> [1] Type of event that occurred ({@code String}). Event types are CONNECTED,
+     *      DISCONNECTED, ASSOCIATING, ASSOCIATED, EAP_METHOD_SELECTED, EAP_FAILURE,
+     *      SSID_TEMP_DISABLED, and OPEN_SSL_FAILURE.
+     * <li> [2] Optional human-readable failure reason, empty string if none ({@code String})
+     */
+    public static final int TAG_WIFI_CONNECTION = SecurityLogTags.SECURITY_WIFI_CONNECTION;
+
+    /**
+     * Indicates that the device disconnects from a connected WiFi network.
+     * The log entry contains the following information about the
+     * event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] Last 2 octets of the network BSSID ({@code String}, in the form "xx:xx:xx:xx:AA:BB")
+     * <li> [1] Optional human-readable disconnection reason, empty string if none ({@code String})
+     */
+    public static final int TAG_WIFI_DISCONNECTION = SecurityLogTags.SECURITY_WIFI_DISCONNECTION;
+
+    /**
+     * Indicates that the device attempts to connect to a Bluetooth device.
+     * The log entry contains the following information about the
+     * event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] The MAC address of the Bluetooth device ({@code String})
+     * <li> [1] Whether the connection is successful ({@code Integer}, 1 if successful, 0 otherwise)
+     * <li> [2] Optional human-readable failure reason, empty string if none ({@code String})
+     */
+    public static final int TAG_BLUETOOTH_CONNECTION =
+            SecurityLogTags.SECURITY_BLUETOOTH_CONNECTION;
+
+    /**
+     * Indicates that the device disconnects from a connected Bluetooth device.
+     * The log entry contains the following information about the
+     * event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] The MAC address of the connected Bluetooth device ({@code String})
+     * <li> [1] Optional human-readable disconnection reason, empty string if none ({@code String})
+     */
+    public static final int TAG_BLUETOOTH_DISCONNECTION =
+            SecurityLogTags.SECURITY_BLUETOOTH_DISCONNECTION;
+
+    /**
      * Event severity level indicating that the event corresponds to normal workflow.
      */
     public static final int LEVEL_INFO = 1;
@@ -635,6 +703,7 @@ public class SecurityLog {
                 case TAG_USER_RESTRICTION_REMOVED:
                 case TAG_CAMERA_POLICY_SET:
                 case TAG_PASSWORD_COMPLEXITY_REQUIRED:
+                case TAG_PASSWORD_CHANGED:
                     return LEVEL_INFO;
                 case TAG_CERT_AUTHORITY_REMOVED:
                 case TAG_CRYPTO_SELF_TEST_COMPLETED:
@@ -721,6 +790,13 @@ public class SecurityLog {
                 case SecurityLog.TAG_KEY_INTEGRITY_VIOLATION:
                     try {
                         userId = UserHandle.getUserId(getIntegerData(1));
+                    } catch (Exception e) {
+                        return null;
+                    }
+                    break;
+                case SecurityLog.TAG_PASSWORD_CHANGED:
+                    try {
+                        userId = getIntegerData(1);
                     } catch (Exception e) {
                         return null;
                     }
@@ -840,15 +916,21 @@ public class SecurityLog {
             throws IOException;
 
     /**
-     * Write a log entry to the underlying storage, with a string payload.
-     * @hide
-     */
-    public static native int writeEvent(int tag, String str);
-
-    /**
      * Write a log entry to the underlying storage, with several payloads.
      * Supported types of payload are: integer, long, float, string plus array of supported types.
+     *
+     * <p>Security log is part of Android's device management capability that tracks
+     * security-sensitive events for auditing purposes.
+     *
+     * @param tag the tag ID of the security event
+     * @param payloads a list of payload values. Each tag dictates the expected payload types
+     *                 and their meanings
+     * @see DevicePolicyManager#setSecurityLoggingEnabled(ComponentName, boolean)
+     *
      * @hide
      */
-    public static native int writeEvent(int tag, Object... payloads);
+    // TODO(b/218658622): enforce WRITE_SECURITY_LOG in logd.
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_SECURITY_LOG)
+    public static native int writeEvent(@SecurityLogTag int tag, @NonNull Object... payloads);
 }

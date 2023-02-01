@@ -295,6 +295,16 @@ public final class HdmiControlServiceWrapper {
         }
 
         @Override
+        public int getMessageHistorySize() {
+            return HdmiControlServiceWrapper.this.getMessageHistorySize();
+        }
+
+        @Override
+        public boolean setMessageHistorySize(int newSize) {
+            return HdmiControlServiceWrapper.this.setMessageHistorySize(newSize);
+        }
+
+        @Override
         public void addCecSettingChangeListener(String name,
                 IHdmiCecSettingChangeListener listener) {
             HdmiControlServiceWrapper.this.addCecSettingChangeListener(name, listener);
@@ -521,6 +531,16 @@ public final class HdmiControlServiceWrapper {
     /** @hide */
     public void removeHdmiCecVolumeControlFeatureListener(
             IHdmiCecVolumeControlFeatureListener listener) {}
+
+    /** @hide */
+    public int getMessageHistorySize() {
+        return 0;
+    }
+
+    /** @hide */
+    public boolean setMessageHistorySize(int newSize) {
+        return true;
+    }
 
     /** @hide */
     public void addCecSettingChangeListener(String name,

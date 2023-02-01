@@ -26,6 +26,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioMixingRule;
+import android.media.audiopolicy.AudioPolicy;
 import android.media.metrics.LogSessionId;
 import android.os.Binder;
 import android.os.Build;
@@ -45,8 +48,8 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -263,15 +266,19 @@ public class AudioTrack extends PlayerBase
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public static final int ENCAPSULATION_MODE_HANDLE = 2;
 
-    /* Enumeration of metadata types permitted for use by
+    /**
+     * Enumeration of metadata types permitted for use by
      * encapsulation mode audio streams.
+     * @hide
      */
-    /** @hide */
-    @IntDef(prefix = { "ENCAPSULATION_METADATA_TYPE_" }, value = {
-        ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
-        ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
-        ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
-    })
+    @IntDef(prefix = {"ENCAPSULATION_METADATA_TYPE_"},
+            value =
+                    {
+                            ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
+                            ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
+                            ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
+                            ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT,
+                    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncapsulationMetadataType {}
 
@@ -294,6 +301,45 @@ public class AudioTrack extends PlayerBase
      * This metadata is formatted per ETSI TS 101 154 Table E.1: AD_descriptor.
      */
     public static final int ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR = 2;
+
+    /**
+     * Encapsulation metadata type for placement of supplementary audio.
+     *
+     * A 32 bit integer constant, one of {@link #SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL}, {@link
+     * #SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT}, {@link #SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT}.
+     */
+    public static final int ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT = 3;
+
+    /**
+     * Enumeration of supplementary audio placement types.
+     * @hide
+     */
+    @IntDef(prefix = {"SUPPLEMENTARY_AUDIO_PLACEMENT_"},
+            value =
+                    {
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL,
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT,
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT,
+                    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SupplementaryAudioPlacement {}
+    // Important: The SUPPLEMENTARY_AUDIO_PLACEMENT values must be kept in sync with native header
+    // files.
+
+    /**
+     * Supplementary audio placement normal.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL = 0;
+
+    /**
+     * Supplementary audio placement left.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT = 1;
+
+    /**
+     * Supplementary audio placement right.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT = 2;
 
     /* Dual Mono handling is used when a stereo audio stream
      * contains separate audio content on the left and right channels.
@@ -573,6 +619,8 @@ public class AudioTrack extends PlayerBase
      * {@link LogSessionId#LOG_SESSION_ID_NONE} here means it is not set.
      */
     @NonNull private LogSessionId mLogSessionId = LogSessionId.LOG_SESSION_ID_NONE;
+
+    private AudioPolicy mAudioPolicy;
 
     //--------------------------------
     // Used exclusively by native code
@@ -1032,6 +1080,7 @@ public class AudioTrack extends PlayerBase
         private int mPerformanceMode = PERFORMANCE_MODE_NONE;
         private boolean mOffload = false;
         private TunerConfiguration mTunerConfiguration;
+        private int mCallRedirectionMode = AudioManager.CALL_REDIRECT_NONE;
 
         /**
          * Constructs a new Builder with the default values as described above.
@@ -1227,6 +1276,74 @@ public class AudioTrack extends PlayerBase
         }
 
         /**
+         * Sets the tuner configuration for the {@code AudioTrack}.
+         *
+         * The {@link AudioTrack.TunerConfiguration} consists of parameters obtained from
+         * the Android TV tuner API which indicate the audio content stream id and the
+         * synchronization id for the {@code AudioTrack}.
+         *
+         * @param tunerConfiguration obtained by {@link AudioTrack.TunerConfiguration.Builder}.
+         * @return the same Builder instance.
+         * @hide
+         */
+
+        /**
+         * @hide
+         * Sets the {@link AudioTrack} call redirection mode.
+         * Used when creating an AudioTrack to inject audio to call uplink path. The mode
+         * indicates if the call is a PSTN call or a VoIP call in which case a dynamic audio
+         * policy is created to use this track as the source for all capture with voice
+         * communication preset.
+         *
+         * @param callRedirectionMode one of
+         * {@link AudioManager#CALL_REDIRECT_NONE},
+         * {@link AudioManager#CALL_REDIRECT_PSTN},
+         * or {@link AAudioManager#CALL_REDIRECT_VOIP}.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException if {@code callRedirectionMode} is not valid.
+         */
+        public @NonNull Builder setCallRedirectionMode(
+                @AudioManager.CallRedirectionMode int callRedirectionMode) {
+            switch (callRedirectionMode) {
+                case AudioManager.CALL_REDIRECT_NONE:
+                case AudioManager.CALL_REDIRECT_PSTN:
+                case AudioManager.CALL_REDIRECT_VOIP:
+                    mCallRedirectionMode = callRedirectionMode;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            "Invalid call redirection mode " + callRedirectionMode);
+            }
+            return this;
+        }
+
+        private @NonNull AudioTrack buildCallInjectionTrack() {
+            AudioMixingRule audioMixingRule = new AudioMixingRule.Builder()
+                    .addMixRule(AudioMixingRule.RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET,
+                            new AudioAttributes.Builder()
+                                   .setCapturePreset(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
+                                   .setForCallRedirection()
+                                   .build())
+                    .setTargetMixRole(AudioMixingRule.MIX_ROLE_INJECTOR)
+                    .build();
+            AudioMix audioMix = new AudioMix.Builder(audioMixingRule)
+                    .setFormat(mFormat)
+                    .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK)
+                    .build();
+            AudioPolicy audioPolicy =
+                    new AudioPolicy.Builder(/*context=*/ null).addMix(audioMix).build();
+            if (AudioManager.registerAudioPolicyStatic(audioPolicy) != 0) {
+                throw new UnsupportedOperationException("Error: could not register audio policy");
+            }
+            AudioTrack track = audioPolicy.createAudioTrackSource(audioMix);
+            if (track == null) {
+                throw new UnsupportedOperationException("Cannot create injection AudioTrack");
+            }
+            track.unregisterAudioPolicyOnRelease(audioPolicy);
+            return track;
+        }
+
+        /**
          * Builds an {@link AudioTrack} instance initialized with all the parameters set
          * on this <code>Builder</code>.
          * @return a new successfully initialized {@link AudioTrack} instance.
@@ -1270,13 +1387,21 @@ public class AudioTrack extends PlayerBase
                         .build();
             }
 
+            if (mCallRedirectionMode == AudioManager.CALL_REDIRECT_VOIP) {
+                return buildCallInjectionTrack();
+            } else if (mCallRedirectionMode == AudioManager.CALL_REDIRECT_PSTN) {
+                mAttributes = new AudioAttributes.Builder(mAttributes)
+                        .setForCallRedirection()
+                        .build();
+            }
+
             if (mOffload) {
                 if (mPerformanceMode == PERFORMANCE_MODE_LOW_LATENCY) {
                     throw new UnsupportedOperationException(
                             "Offload and low latency modes are incompatible");
                 }
-                if (AudioSystem.getOffloadSupport(mFormat, mAttributes)
-                        == AudioSystem.OFFLOAD_NOT_SUPPORTED) {
+                if (AudioSystem.getDirectPlaybackSupport(mFormat, mAttributes)
+                        == AudioSystem.DIRECT_NOT_SUPPORTED) {
                     throw new UnsupportedOperationException(
                             "Cannot create AudioTrack, offload format / attributes not supported");
                 }
@@ -1312,6 +1437,16 @@ public class AudioTrack extends PlayerBase
                 throw new UnsupportedOperationException(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Sets an {@link AudioPolicy} to automatically unregister when the track is released.
+     *
+     * <p>This is to prevent users of the call audio injection API from having to manually
+     * unregister the policy that was used to create the track.
+     */
+    private void unregisterAudioPolicyOnRelease(AudioPolicy audioPolicy) {
+        mAudioPolicy = audioPolicy;
     }
 
     /**
@@ -1438,7 +1573,10 @@ public class AudioTrack extends PlayerBase
      *   the audio data.
      * @param attributes a non-null {@link AudioAttributes} instance.
      * @return true if the given audio format can be played directly.
+     * @deprecated Use {@link AudioManager#getDirectPlaybackSupport(AudioFormat, AudioAttributes)}
+     *             instead.
      */
+    @Deprecated
     public static boolean isDirectPlaybackSupported(@NonNull AudioFormat format,
             @NonNull AudioAttributes attributes) {
         if (format == null) {
@@ -1772,26 +1910,24 @@ public class AudioTrack extends PlayerBase
     }
 
     // General pair map
-    private static final HashMap<String, Integer> CHANNEL_PAIR_MAP = new HashMap<>() {{
-        put("front", AudioFormat.CHANNEL_OUT_FRONT_LEFT
-                | AudioFormat.CHANNEL_OUT_FRONT_RIGHT);
-        put("back", AudioFormat.CHANNEL_OUT_BACK_LEFT
-                | AudioFormat.CHANNEL_OUT_BACK_RIGHT);
-        put("front of center", AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER
-                | AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER);
-        put("side", AudioFormat.CHANNEL_OUT_SIDE_LEFT
-                | AudioFormat.CHANNEL_OUT_SIDE_RIGHT);
-        put("top front", AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT
-                | AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT);
-        put("top back", AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT
-                | AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT);
-        put("top side", AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT
-                | AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT);
-        put("bottom front", AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT
-                | AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT);
-        put("front wide", AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT
-                | AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT);
-    }};
+    private static final Map<String, Integer> CHANNEL_PAIR_MAP = Map.of(
+            "front", AudioFormat.CHANNEL_OUT_FRONT_LEFT
+                    | AudioFormat.CHANNEL_OUT_FRONT_RIGHT,
+            "back", AudioFormat.CHANNEL_OUT_BACK_LEFT
+                    | AudioFormat.CHANNEL_OUT_BACK_RIGHT,
+            "front of center", AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER
+                    | AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER,
+            "side", AudioFormat.CHANNEL_OUT_SIDE_LEFT | AudioFormat.CHANNEL_OUT_SIDE_RIGHT,
+            "top front", AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT
+                    | AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT,
+            "top back", AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT
+                    | AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT,
+            "top side", AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT
+                    | AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT,
+            "bottom front", AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT
+                    | AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT,
+            "front wide", AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT
+                    | AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT);
 
     /**
      * Convenience method to check that the channel configuration (a.k.a channel mask) is supported
@@ -1829,7 +1965,7 @@ public class AudioTrack extends PlayerBase
                 return false;
         }
         // Check all pairs to see that they are matched (front duplicated here).
-        for (HashMap.Entry<String, Integer> e : CHANNEL_PAIR_MAP.entrySet()) {
+        for (Map.Entry<String, Integer> e : CHANNEL_PAIR_MAP.entrySet()) {
             final int positionPair = e.getValue();
             if ((channelConfig & positionPair) != 0
                     && (channelConfig & positionPair) != positionPair) {
@@ -1879,6 +2015,11 @@ public class AudioTrack extends PlayerBase
         } catch(IllegalStateException ise) {
             // don't raise an exception, we're releasing the resources.
         }
+        if (mAudioPolicy != null) {
+            AudioManager.unregisterAudioPolicyAsyncStatic(mAudioPolicy);
+            mAudioPolicy = null;
+        }
+
         baseRelease();
         native_release();
         synchronized (mPlayStateLock) {
@@ -2092,8 +2233,9 @@ public class AudioTrack extends PlayerBase
      * It may also be adjusted slightly for internal reasons.
      * If bufferSizeInFrames is less than zero then {@link #ERROR_BAD_VALUE}
      * will be returned.
-     * <p>This method is only supported for PCM audio.
-     * It is not supported for compressed audio tracks.
+     * <p>This method is supported for PCM audio at all API levels.
+     * Compressed audio is supported in API levels 33 and above.
+     * For compressed streams the size of a frame is considered to be exactly one byte.
      *
      * @param bufferSizeInFrames requested buffer size in frames
      * @return the actual buffer size in frames or an error code,
@@ -2809,6 +2951,10 @@ public class AudioTrack extends PlayerBase
      * For portability, an application should prime the data path to the maximum allowed
      * by writing data until the write() method returns a short transfer count.
      * This allows play() to start immediately, and reduces the chance of underrun.
+     *<p>
+     * As of {@link android.os.Build.VERSION_CODES#S} the minimum level to start playing
+     * can be obtained using {@link #getStartThresholdInFrames()} and set with
+     * {@link #setStartThresholdInFrames(int)}.
      *
      * @throws IllegalStateException if the track isn't properly initialized
      */

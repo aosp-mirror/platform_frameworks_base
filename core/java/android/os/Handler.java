@@ -799,6 +799,10 @@ public class Handler {
      * Remove any pending posts of messages with code 'what' and whose obj is
      * 'object' that are in the message queue.  If <var>object</var> is null,
      * all messages will be removed.
+     * <p>
+     * Similar to {@link #removeMessages(int, Object)} but uses object equality
+     * ({@link Object#equals(Object)}) instead of reference equality (==) in
+     * determining whether object is the message's obj'.
      *
      *@hide
      */

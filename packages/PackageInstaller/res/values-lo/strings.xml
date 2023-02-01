@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"ທ່ານຕ້ອງການຖອນການຕິດຕັ້ງແອັບນີ້ບໍ່?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ທ່ານຕ້ອງການທີ່ຈະຖອນການຕິດຕັ້ງແອັບນີ້ສຳລັງຜູ້ໃຊ້"<b>"ທຸກຄົນ"</b>"ບໍ່? ແອັບພລິເຄຊັນ ແລະ ຂໍ້ມູນຂອງມັນຈະຖືກລຶບອອກຈາກຜູ້ໃຊ້"<b>"ທັງໝົດ"</b>"ໃນອຸປະກອນນີ້."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"ທ່ານ​ຕ້ອງ​ການ​ຖອນ​ການ​ຕິດ​ຕັ້ງ​ແອັບ​ນີ້​ສຳ​ລັບ​ຜູ້​ໃຊ້ <xliff:g id="USERNAME">%1$s</xliff:g> ບໍ່?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"ທ່ານຕ້ອງການຖອນການຕິດຕັ້ງແອັບນີ້ຈາກ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກບໍ?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"ແທນທີ່ແອັບນີ້ດ້ວຍເວີຊັນທີ່ມາຈາກໂຮງງານບໍ? ຂໍ້ມູນທັງໝົດຈະຖືກລຶບອອກ."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ແທນທີ່ແອັບນີ້ດ້ວຍເວີຊັນທີ່ມາຈາກໂຮງງານບໍ? ຂໍ້ມູນທັງໝົດຈະຖືກລຶບອອກ ເຊິ່ງມີຜົນກັບຜູ້ໃຊ້ອຸປະກອນນີ້ທຸກຄົນ ຮວມທັງຄົນທີ່ມີໂປຣໄຟລ໌ບ່ອນເຮັດວຽກນຳ."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ຮັກສາຂະໜາດຂໍ້ມູນແອັບ <xliff:g id="SIZE">%1$s</xliff:g> ໄວ້."</string>

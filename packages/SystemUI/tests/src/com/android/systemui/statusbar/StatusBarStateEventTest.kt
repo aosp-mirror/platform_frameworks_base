@@ -33,14 +33,12 @@ class StatusBarStateEventTest : SysuiTestCase() {
                 StatusBarStateEvent.STATUS_BAR_STATE_SHADE,
                 StatusBarStateEvent.STATUS_BAR_STATE_SHADE_LOCKED,
                 StatusBarStateEvent.STATUS_BAR_STATE_KEYGUARD,
-                StatusBarStateEvent.STATUS_BAR_STATE_FULLSCREEN_USER_SWITCHER,
                 StatusBarStateEvent.STATUS_BAR_STATE_UNKNOWN
         )
         val states = listOf(
                 StatusBarState.SHADE,
                 StatusBarState.SHADE_LOCKED,
                 StatusBarState.KEYGUARD,
-                StatusBarState.FULLSCREEN_USER_SWITCHER,
                 -1
         )
         events.zip(states).forEach { (event, state) ->

@@ -19,6 +19,7 @@ package android.media.tv.tuner.filter;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.media.tv.tuner.TunerUtils;
+import android.media.tv.tuner.TunerVersionChecker;
 
 /**
  * Filter Settings for a Download.
@@ -27,10 +28,12 @@ import android.media.tv.tuner.TunerUtils;
  */
 @SystemApi
 public class DownloadSettings extends Settings {
+    private final boolean mUseDownloadId;
     private final int mDownloadId;
 
-    private DownloadSettings(int mainType, int downloadId) {
+    private DownloadSettings(int mainType, boolean useDownloadId, int downloadId) {
         super(TunerUtils.getFilterSubtype(mainType, Filter.SUBTYPE_DOWNLOAD));
+        mUseDownloadId = useDownloadId;
         mDownloadId = downloadId;
     }
 
@@ -40,6 +43,18 @@ public class DownloadSettings extends Settings {
     public int getDownloadId() {
         return mDownloadId;
     }
+
+    /**
+     * Gets whether download ID is used.
+     *
+     * If it's set to false, HAL will begin to send data before it knows downloadId and document
+     * structures.
+     *
+     * <p>This query is only supported in Tuner 2.0 or higher version. Unsupported version will
+     * return {@code false}. Use {@link TunerVersionChecker#getTunerVersion()} to get the version
+     * information.
+     */
+    public boolean useDownloadId() { return mUseDownloadId; }
 
     /**
      * Creates a builder for {@link DownloadSettings}.
@@ -56,10 +71,32 @@ public class DownloadSettings extends Settings {
      */
     public static class Builder {
         private final int mMainType;
+        private boolean mUseDownloadId = false;
         private int mDownloadId;
 
         private Builder(int mainType) {
             mMainType = mainType;
+        }
+
+        /**
+         * Sets whether download ID is used or not.
+         *
+         * If it's set to false, HAL will begin to send data before it knows downloadId and document
+         * structures.
+         *
+         * <p>This configuration is only supported in Tuner 2.0 or higher version. Unsupported
+         * version will cause no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the
+         * version information.
+         *
+         * <p>Default value is {@code false}.
+         */
+        @NonNull
+        public Builder setUseDownloadId(boolean useDownloadId) {
+            if (TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_2_0, "setUseDownloadId")) {
+                mUseDownloadId = useDownloadId;
+            }
+            return this;
         }
 
         /**
@@ -76,7 +113,7 @@ public class DownloadSettings extends Settings {
          */
         @NonNull
         public DownloadSettings build() {
-            return new DownloadSettings(mMainType, mDownloadId);
+            return new DownloadSettings(mMainType, mUseDownloadId, mDownloadId);
         }
     }
 }

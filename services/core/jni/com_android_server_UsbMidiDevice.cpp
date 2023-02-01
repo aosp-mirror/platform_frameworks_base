@@ -24,14 +24,14 @@
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
 
-#include <stdio.h>
-#include <errno.h>
 #include <asm/byteorder.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <errno.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
 #include <sound/asound.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 namespace android
 {
@@ -39,78 +39,62 @@ namespace android
 static jclass sFileDescriptorClass;
 static jfieldID sPipeFDField;
 
-static jint
-android_server_UsbMidiDevice_get_subdevice_count(JNIEnv *env, jobject /* thiz */,
-        jint card, jint device)
-{
+// This function returns an array of integers, each representing a file descriptor.
+// The will be in the order of inputs then outputs.
+// The last input fd will be for a file descriptor that simply allows Os.poll() to keep working.
+// For example, if numInputs is 2 and numOutputs is 1, the resulting fds are as follows:
+// 1. Input O_RDONLY file descriptor
+// 2. Special input file descriptor to block the input thread
+// 3. Output O_WRONLY file descriptor
+static jobjectArray android_server_UsbMidiDevice_open(JNIEnv *env, jobject thiz, jint card,
+                                                      jint device, jint numInputs,
+                                                      jint numOutputs) {
     char    path[100];
-    int     fd;
-    const   int kMaxRetries = 10;
-    const   int kSleepMicroseconds = 2000;
-
-    snprintf(path, sizeof(path), "/dev/snd/controlC%d", card);
-    // This control device may not have been created yet. So we should
-    // try to open it several times to prevent intermittent failure
-    // from a race condition.
-    int retryCounter = 0;
-    while ((fd = open(path, O_RDWR)) < 0) {
-        if (++retryCounter > kMaxRetries) {
-            ALOGE("timed out after %d tries, could not open %s", retryCounter, path);
-            return 0;
-        } else {
-            ALOGW("attempt #%d, could not open %s", retryCounter, path);
-            // Increase the sleep interval each time.
-            // 10 retries will total 2 * sum(1..10) = 110 milliseconds.
-            // Typically the device should be ready in 5-10 milliseconds.
-            usleep(kSleepMicroseconds * retryCounter);
-        }
-    }
-
-    struct snd_rawmidi_info info;
-    memset(&info, 0, sizeof(info));
-    info.device = device;
-    int ret = ioctl(fd, SNDRV_CTL_IOCTL_RAWMIDI_INFO, &info);
-    close(fd);
-
-    if (ret < 0) {
-        ALOGE("SNDRV_CTL_IOCTL_RAWMIDI_INFO failed, errno: %d path: %s", errno, path);
-        return -1;
-    }
-
-    ALOGD("subdevices_count: %d", info.subdevices_count);
-    return info.subdevices_count;
-}
-
-static jobjectArray
-android_server_UsbMidiDevice_open(JNIEnv *env, jobject thiz, jint card, jint device,
-        jint subdevice_count)
-{
-    char    path[100];
+    int fd;
 
     snprintf(path, sizeof(path), "/dev/snd/midiC%dD%d", card, device);
 
-    // allocate one extra file descriptor for close pipe
-    jobjectArray fds = env->NewObjectArray(subdevice_count + 1, sFileDescriptorClass, NULL);
+    ALOGD("Opening %d inputs and %d outputs", numInputs, numOutputs);
+
+    jobjectArray fds = env->NewObjectArray(numInputs + numOutputs, sFileDescriptorClass, NULL);
     if (!fds) {
         return NULL;
     }
 
-    // to support multiple subdevices we open the same file multiple times
-    for (int i = 0; i < subdevice_count; i++) {
-        int fd = open(path, O_RDWR);
+    // open the path for the read pipes. The last one is special and used to
+    // unblock Os.poll()
+    for (int i = 0; i < numInputs - 1; i++) {
+        fd = open(path, O_RDONLY);
         if (fd < 0) {
             ALOGE("open failed on %s for index %d", path, i);
             goto release_fds;
         }
         ScopedLocalRef<jobject> jifd(env, jniCreateFileDescriptor(env, fd));
         if (jifd.get() == NULL) {
+            close(fd);
             goto release_fds;
         }
         env->SetObjectArrayElement(fds, i, jifd.get());
     }
 
-    // create a pipe to use for unblocking our input thread
-    {
+    // open the path for the write pipes
+    for (int i = 0; i < numOutputs; i++) {
+        fd = open(path, O_WRONLY);
+        if (fd < 0) {
+            ALOGE("open failed on %s for index %d", path, i);
+            goto release_fds;
+        }
+        ScopedLocalRef<jobject> jifd(env, jniCreateFileDescriptor(env, fd));
+        if (jifd.get() == NULL) {
+            close(fd);
+            goto release_fds;
+        }
+        env->SetObjectArrayElement(fds, i + numInputs, jifd.get());
+    }
+
+    // create a pipe to use for unblocking our input thread. The caller should
+    // set numInputs as 0 when there are zero real input threads.
+    if (numInputs > 0) {
         int pipeFD[2];
         if (pipe(pipeFD) == -1) {
             ALOGE("pipe() failed, errno = %d", errno);
@@ -123,20 +107,21 @@ android_server_UsbMidiDevice_open(JNIEnv *env, jobject thiz, jint card, jint dev
             close(pipeFD[1]);
             goto release_fds;
         }
-        env->SetObjectArrayElement(fds, subdevice_count, jifd.get());
+
+        // store as last input file descriptor
+        env->SetObjectArrayElement(fds, numInputs - 1, jifd.get());
         // store our end of the pipe in mPipeFD
         env->SetIntField(thiz, sPipeFDField, pipeFD[1]);
     }
     return fds;
 
 release_fds:
-    for (int i = 0; i < subdevice_count + 1; ++i) {
+    for (int i = 0; i < numInputs + numOutputs; ++i) {
         ScopedLocalRef<jobject> jifd(env, env->GetObjectArrayElement(fds, i));
-        if (jifd.get() == NULL) {
-            break;
+        if (jifd.get() != NULL) {
+            int fd = jniGetFDFromFileDescriptor(env, jifd.get());
+            close(fd);
         }
-        int fd = jniGetFDFromFileDescriptor(env, jifd.get());
-        close(fd);
     }
     return NULL;
 }
@@ -158,9 +143,9 @@ android_server_UsbMidiDevice_close(JNIEnv *env, jobject thiz, jobjectArray fds)
 }
 
 static JNINativeMethod method_table[] = {
-    { "nativeGetSubdeviceCount", "(II)I", (void*)android_server_UsbMidiDevice_get_subdevice_count },
-    { "nativeOpen", "(III)[Ljava/io/FileDescriptor;", (void*)android_server_UsbMidiDevice_open },
-    { "nativeClose", "([Ljava/io/FileDescriptor;)V", (void*)android_server_UsbMidiDevice_close },
+        {"nativeOpen", "(IIII)[Ljava/io/FileDescriptor;",
+         (void *)android_server_UsbMidiDevice_open},
+        {"nativeClose", "([Ljava/io/FileDescriptor;)V", (void *)android_server_UsbMidiDevice_close},
 };
 
 int register_android_server_UsbMidiDevice(JNIEnv *env)

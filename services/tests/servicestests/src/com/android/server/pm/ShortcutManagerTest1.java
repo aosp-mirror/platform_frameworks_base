@@ -95,12 +95,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
 import android.os.UserHandle;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.servicestests.R;
 import com.android.server.pm.ShortcutService.ConfigConstants;
@@ -135,6 +137,7 @@ import java.util.function.BiConsumer;
  adb shell am instrument -e class com.android.server.pm.ShortcutManagerTest1 \
  -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
+@Presubmit
 @SmallTest
 public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
@@ -6898,6 +6901,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     }
 
     public void testGetShareTargets_permission() {
+        addPackage(CHOOSER_ACTIVITY_PACKAGE, CHOOSER_ACTIVITY_UID, 10, "sig1");
+        mInjectedChooserActivity =
+                ComponentName.createRelative(CHOOSER_ACTIVITY_PACKAGE, ".ChooserActivity");
         IntentFilter filter = new IntentFilter();
 
         assertExpectException(SecurityException.class, "Missing permission", () ->
@@ -6906,6 +6912,11 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // Has permission, now it should pass.
         mCallerPermissions.add(permission.MANAGE_APP_PREDICTIONS);
         mManager.getShareTargets(filter);
+
+        runWithCaller(CHOOSER_ACTIVITY_PACKAGE, USER_0, () -> {
+            // Access is allowed when called from the configured system ChooserActivity
+            mManager.getShareTargets(filter);
+        });
     }
 
     public void testHasShareTargets_permission() {
@@ -8895,6 +8906,48 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 filter_any));
         assertTrue(mInternal.isSharingShortcut(USER_0, LAUNCHER_1, CALLING_PACKAGE_1, "s3", USER_0,
                 filter_any));
+    }
+
+    public void testAddingShortcuts_ExcludesHiddenFromLauncherShortcuts() {
+        final ShortcutInfo s1 = makeShortcutExcludedFromLauncher("s1");
+        final ShortcutInfo s2 = makeShortcutExcludedFromLauncher("s2");
+        final ShortcutInfo s3 = makeShortcutExcludedFromLauncher("s3");
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(s1, s2, s3)));
+            assertEmpty(mManager.getDynamicShortcuts());
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.addDynamicShortcuts(list(s1, s2, s3)));
+            assertEmpty(mManager.getDynamicShortcuts());
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            mManager.pushDynamicShortcut(s1);
+            assertEmpty(mManager.getDynamicShortcuts());
+        });
+    }
+
+    public void testUpdateShortcuts_ExcludesHiddenFromLauncherShortcuts() {
+        final ShortcutInfo s1 = makeShortcut("s1");
+        final ShortcutInfo s2 = makeShortcut("s2");
+        final ShortcutInfo s3 = makeShortcut("s3");
+
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertTrue(mManager.setDynamicShortcuts(list(s1, s2, s3)));
+            assertThrown(IllegalArgumentException.class, () -> {
+                mManager.updateShortcuts(list(makeShortcutExcludedFromLauncher("s1")));
+            });
+        });
+    }
+
+    public void testPinHiddenShortcuts_ThrowsException() {
+        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+            assertThrown(IllegalArgumentException.class, () -> {
+                mManager.requestPinShortcut(makeShortcutExcludedFromLauncher("s1"), null);
+            });
+        });
     }
 
     private Uri getFileUriFromResource(String fileName, int resId) throws IOException {

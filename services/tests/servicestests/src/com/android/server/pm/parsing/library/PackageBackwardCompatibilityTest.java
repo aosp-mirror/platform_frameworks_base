@@ -23,7 +23,7 @@ import static com.android.server.pm.parsing.library.SharedLibraryNames.ORG_APACH
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.content.pm.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
 import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 

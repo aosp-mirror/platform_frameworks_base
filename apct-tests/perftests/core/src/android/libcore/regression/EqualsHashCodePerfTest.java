@@ -20,11 +20,12 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import org.junit.Before;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.net.URI;
 import java.net.URL;
@@ -32,38 +33,38 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public final class EqualsHashCodePerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     private enum Type {
         URI() {
-            @Override Object newInstance(String text) throws Exception {
+            @Override
+            Object newInstance(String text) throws Exception {
                 return new URI(text);
             }
         },
         URL() {
-            @Override Object newInstance(String text) throws Exception {
+            @Override
+            Object newInstance(String text) throws Exception {
                 return new URL(text);
             }
         };
+
         abstract Object newInstance(String text) throws Exception;
     }
 
-    private static final String QUERY = "%E0%AE%A8%E0%AE%BE%E0%AE%AE%E0%AF%8D+%E0%AE%AE%E0%AF%81%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BF%E0%AE%AF%E0%AE%AE%E0%AE%BE%E0%AE%A9%2C+%E0%AE%9A%E0%AF%81%E0%AE%B5%E0%AE%BE%E0%AE%B0%E0%AE%B8%E0%AF%8D%E0%AE%AF%E0%AE%AE%E0%AE%BE%E0%AE%A9+%E0%AE%87%E0%AE%B0%E0%AF%81%E0%AE%AA%E0%AF%8D%E0%AE%AA%E0%AF%87%E0%AE%BE%E0%AE%AE%E0%AF%8D%2C+%E0%AE%86%E0%AE%A9%E0%AE%BE%E0%AE%B2%E0%AF%8D+%E0%AE%9A%E0%AE%BF%E0%AE%B2+%E0%AE%A8%E0%AF%87%E0%AE%B0%E0%AE%99%E0%AF%8D%E0%AE%95%E0%AE%B3%E0%AE%BF%E0%AE%B2%E0%AF%8D+%E0%AE%9A%E0%AF%82%E0%AE%B4%E0%AF%8D%E0%AE%A8%E0%AE%BF%E0%AE%B2%E0%AF%88+%E0%AE%8F%E0%AE%B1%E0%AF%8D%E0%AE%AA%E0%AE%9F%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%8E%E0%AE%A9%E0%AF%8D%E0%AE%AA%E0%AE%A4%E0%AE%BE%E0%AE%B2%E0%AF%8D+%E0%AE%AA%E0%AE%A3%E0%AE%BF%E0%AE%AF%E0%AF%88%E0%AE%AF%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%B5%E0%AE%B2%E0%AE%BF+%E0%AE%85%E0%AE%B5%E0%AE%B0%E0%AF%88+%E0%AE%9A%E0%AE%BF%E0%AE%B2+%E0%AE%AA%E0%AF%86%E0%AE%B0%E0%AE%BF%E0%AE%AF+%E0%AE%95%E0%AF%86%E0%AE%BE%E0%AE%B3%E0%AF%8D%E0%AE%AE%E0%AF%81%E0%AE%A4%E0%AE%B2%E0%AF%8D+%E0%AE%AE%E0%AF%81%E0%AE%9F%E0%AE%BF%E0%AE%AF%E0%AF%81%E0%AE%AE%E0%AF%8D.+%E0%AE%85%E0%AE%A4%E0%AF%81+%E0%AE%9A%E0%AE%BF%E0%AE%B2+%E0%AE%A8%E0%AE%A9%E0%AF%8D%E0%AE%AE%E0%AF%88%E0%AE%95%E0%AE%B3%E0%AF%88+%E0%AE%AA%E0%AF%86%E0%AE%B1+%E0%AE%A4%E0%AE%B5%E0%AE%BF%E0%AE%B0%2C+%E0%AE%8E%E0%AE%AA%E0%AF%8D%E0%AE%AA%E0%AF%87%E0%AE%BE%E0%AE%A4%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%89%E0%AE%B4%E0%AF%88%E0%AE%95%E0%AF%8D%E0%AE%95+%E0%AE%89%E0%AE%9F%E0%AE%B1%E0%AF%8D%E0%AE%AA%E0%AE%AF%E0%AE%BF%E0%AE%B1%E0%AF%8D%E0%AE%9A%E0%AE%BF+%E0%AE%AE%E0%AF%87%E0%AE%B1%E0%AF%8D%E0%AE%95%E0%AF%86%E0%AE%BE%E0%AE%B3%E0%AF%8D%E0%AE%95%E0%AE%BF%E0%AE%B1%E0%AE%A4%E0%AF%81+%E0%AE%8E%E0%AE%99%E0%AF%8D%E0%AE%95%E0%AE%B3%E0%AF%81%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AF%81+%E0%AE%87%E0%AE%A4%E0%AF%81+%E0%AE%92%E0%AE%B0%E0%AF%81+%E0%AE%9A%E0%AE%BF%E0%AE%B1%E0%AE%BF%E0%AE%AF+%E0%AE%89%E0%AE%A4%E0%AE%BE%E0%AE%B0%E0%AE%A3%E0%AE%AE%E0%AF%8D%2C+%E0%AE%8E%E0%AE%9F%E0%AF%81%E0%AE%95%E0%AF%8D%E0%AE%95.+%E0%AE%B0%E0%AE%AF%E0%AE%BF%E0%AE%B2%E0%AF%8D+%E0%AE%8E%E0%AE%A8%E0%AF%8D%E0%AE%A4+%E0%AE%B5%E0%AE%BF%E0%AE%B3%E0%AF%88%E0%AE%B5%E0%AE%BE%E0%AE%95+%E0%AE%87%E0%AE%A9%E0%AF%8D%E0%AE%AA%E0%AE%AE%E0%AF%8D+%E0%AE%86%E0%AE%A9%E0%AF%8D%E0%AE%B2%E0%AF%88%E0%AE%A9%E0%AF%8D+%E0%AE%AA%E0%AE%AF%E0%AE%A9%E0%AF%8D%E0%AE%AA%E0%AE%BE%E0%AE%9F%E0%AF%81%E0%AE%95%E0%AE%B3%E0%AF%8D+%E0%AE%87%E0%AE%B0%E0%AF%81%E0%AE%95%E0%AF%8D%E0%AE%95+%E0%AE%B5%E0%AF%87%E0%AE%A3%E0%AF%8D%E0%AE%9F%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%A4%E0%AE%AF%E0%AE%BE%E0%AE%B0%E0%AE%BF%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%A4%E0%AE%B5%E0%AE%B1%E0%AF%81+%E0%AE%95%E0%AE%A3%E0%AF%8D%E0%AE%9F%E0%AF%81%E0%AE%AA%E0%AE%BF%E0%AE%9F%E0%AE%BF%E0%AE%95%E0%AF%8D%E0%AE%95+%E0%AE%B5%E0%AE%B0%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%A8%E0%AE%BE%E0%AE%AE%E0%AF%8D+%E0%AE%A4%E0%AE%B1%E0%AF%8D%E0%AE%AA%E0%AF%87%E0%AE%BE%E0%AE%A4%E0%AF%81+%E0%AE%87%E0%AE%B0%E0%AF%81%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BF%E0%AE%B1%E0%AF%87%E0%AE%BE%E0%AE%AE%E0%AF%8D.+%E0%AE%87%E0%AE%A8%E0%AF%8D%E0%AE%A4+%E0%AE%A8%E0%AE%BF%E0%AE%95%E0%AE%B4%E0%AF%8D%E0%AE%B5%E0%AF%81%E0%AE%95%E0%AE%B3%E0%AE%BF%E0%AE%B2%E0%AF%8D+%E0%AE%9A%E0%AF%86%E0%AE%AF%E0%AF%8D%E0%AE%A4%E0%AE%AA%E0%AE%BF%E0%AE%A9%E0%AF%8D+%E0%AE%85%E0%AE%AE%E0%AF%88%E0%AE%AA%E0%AF%8D%E0%AE%AA%E0%AE%BF%E0%AE%A9%E0%AF%8D+%E0%AE%95%E0%AE%A3%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AF%81%2C+%E0%AE%85%E0%AE%B5%E0%AE%B0%E0%AF%8D%E0%AE%95%E0%AE%B3%E0%AF%8D+%E0%AE%A4%E0%AE%B5%E0%AE%B1%E0%AF%81+%E0%AE%B5%E0%AE%BF%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AF%81+quae+%E0%AE%AA%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AE%B1%E0%AF%88+%E0%AE%A8%E0%AF%80%E0%AE%99%E0%AF%8D%E0%AE%95%E0%AE%B3%E0%AF%8D+%E0%AE%AA%E0%AE%B0%E0%AE%BF%E0%AE%A8%E0%AF%8D%E0%AE%A4%E0%AF%81%E0%AE%B0%E0%AF%88%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BF%E0%AE%B1%E0%AF%87%E0%AE%BE%E0%AE%AE%E0%AF%8D+%E0%AE%AE%E0%AF%86%E0%AE%A9%E0%AF%8D%E0%AE%AE%E0%AF%88%E0%AE%AF%E0%AE%BE%E0%AE%95+%E0%AE%AE%E0%AE%BE%E0%AE%B1%E0%AF%81%E0%AE%AE%E0%AF%8D";
+    private static final String QUERY =
+            "%E0%AE%A8%E0%AE%BE%E0%AE%AE%E0%AF%8D+%E0%AE%AE%E0%AF%81%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BF%E0%AE%AF%E0%AE%AE%E0%AE%BE%E0%AE%A9%2C+%E0%AE%9A%E0%AF%81%E0%AE%B5%E0%AE%BE%E0%AE%B0%E0%AE%B8%E0%AF%8D%E0%AE%AF%E0%AE%AE%E0%AE%BE%E0%AE%A9+%E0%AE%87%E0%AE%B0%E0%AF%81%E0%AE%AA%E0%AF%8D%E0%AE%AA%E0%AF%87%E0%AE%BE%E0%AE%AE%E0%AF%8D%2C+%E0%AE%86%E0%AE%A9%E0%AE%BE%E0%AE%B2%E0%AF%8D+%E0%AE%9A%E0%AE%BF%E0%AE%B2+%E0%AE%A8%E0%AF%87%E0%AE%B0%E0%AE%99%E0%AF%8D%E0%AE%95%E0%AE%B3%E0%AE%BF%E0%AE%B2%E0%AF%8D+%E0%AE%9A%E0%AF%82%E0%AE%B4%E0%AF%8D%E0%AE%A8%E0%AE%BF%E0%AE%B2%E0%AF%88+%E0%AE%8F%E0%AE%B1%E0%AF%8D%E0%AE%AA%E0%AE%9F%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%8E%E0%AE%A9%E0%AF%8D%E0%AE%AA%E0%AE%A4%E0%AE%BE%E0%AE%B2%E0%AF%8D+%E0%AE%AA%E0%AE%A3%E0%AE%BF%E0%AE%AF%E0%AF%88%E0%AE%AF%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%B5%E0%AE%B2%E0%AE%BF+%E0%AE%85%E0%AE%B5%E0%AE%B0%E0%AF%88+%E0%AE%9A%E0%AE%BF%E0%AE%B2+%E0%AE%AA%E0%AF%86%E0%AE%B0%E0%AE%BF%E0%AE%AF+%E0%AE%95%E0%AF%86%E0%AE%BE%E0%AE%B3%E0%AF%8D%E0%AE%AE%E0%AF%81%E0%AE%A4%E0%AE%B2%E0%AF%8D+%E0%AE%AE%E0%AF%81%E0%AE%9F%E0%AE%BF%E0%AE%AF%E0%AF%81%E0%AE%AE%E0%AF%8D.+%E0%AE%85%E0%AE%A4%E0%AF%81+%E0%AE%9A%E0%AE%BF%E0%AE%B2+%E0%AE%A8%E0%AE%A9%E0%AF%8D%E0%AE%AE%E0%AF%88%E0%AE%95%E0%AE%B3%E0%AF%88+%E0%AE%AA%E0%AF%86%E0%AE%B1+%E0%AE%A4%E0%AE%B5%E0%AE%BF%E0%AE%B0%2C+%E0%AE%8E%E0%AE%AA%E0%AF%8D%E0%AE%AA%E0%AF%87%E0%AE%BE%E0%AE%A4%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%89%E0%AE%B4%E0%AF%88%E0%AE%95%E0%AF%8D%E0%AE%95+%E0%AE%89%E0%AE%9F%E0%AE%B1%E0%AF%8D%E0%AE%AA%E0%AE%AF%E0%AE%BF%E0%AE%B1%E0%AF%8D%E0%AE%9A%E0%AE%BF+%E0%AE%AE%E0%AF%87%E0%AE%B1%E0%AF%8D%E0%AE%95%E0%AF%86%E0%AE%BE%E0%AE%B3%E0%AF%8D%E0%AE%95%E0%AE%BF%E0%AE%B1%E0%AE%A4%E0%AF%81+%E0%AE%8E%E0%AE%99%E0%AF%8D%E0%AE%95%E0%AE%B3%E0%AF%81%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AF%81+%E0%AE%87%E0%AE%A4%E0%AF%81+%E0%AE%92%E0%AE%B0%E0%AF%81+%E0%AE%9A%E0%AE%BF%E0%AE%B1%E0%AE%BF%E0%AE%AF+%E0%AE%89%E0%AE%A4%E0%AE%BE%E0%AE%B0%E0%AE%A3%E0%AE%AE%E0%AF%8D%2C+%E0%AE%8E%E0%AE%9F%E0%AF%81%E0%AE%95%E0%AF%8D%E0%AE%95.+%E0%AE%B0%E0%AE%AF%E0%AE%BF%E0%AE%B2%E0%AF%8D+%E0%AE%8E%E0%AE%A8%E0%AF%8D%E0%AE%A4+%E0%AE%B5%E0%AE%BF%E0%AE%B3%E0%AF%88%E0%AE%B5%E0%AE%BE%E0%AE%95+%E0%AE%87%E0%AE%A9%E0%AF%8D%E0%AE%AA%E0%AE%AE%E0%AF%8D+%E0%AE%86%E0%AE%A9%E0%AF%8D%E0%AE%B2%E0%AF%88%E0%AE%A9%E0%AF%8D+%E0%AE%AA%E0%AE%AF%E0%AE%A9%E0%AF%8D%E0%AE%AA%E0%AE%BE%E0%AE%9F%E0%AF%81%E0%AE%95%E0%AE%B3%E0%AF%8D+%E0%AE%87%E0%AE%B0%E0%AF%81%E0%AE%95%E0%AF%8D%E0%AE%95+%E0%AE%B5%E0%AF%87%E0%AE%A3%E0%AF%8D%E0%AE%9F%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%A4%E0%AE%AF%E0%AE%BE%E0%AE%B0%E0%AE%BF%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%A4%E0%AE%B5%E0%AE%B1%E0%AF%81+%E0%AE%95%E0%AE%A3%E0%AF%8D%E0%AE%9F%E0%AF%81%E0%AE%AA%E0%AE%BF%E0%AE%9F%E0%AE%BF%E0%AE%95%E0%AF%8D%E0%AE%95+%E0%AE%B5%E0%AE%B0%E0%AF%81%E0%AE%AE%E0%AF%8D+%E0%AE%A8%E0%AE%BE%E0%AE%AE%E0%AF%8D+%E0%AE%A4%E0%AE%B1%E0%AF%8D%E0%AE%AA%E0%AF%87%E0%AE%BE%E0%AE%A4%E0%AF%81+%E0%AE%87%E0%AE%B0%E0%AF%81%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BF%E0%AE%B1%E0%AF%87%E0%AE%BE%E0%AE%AE%E0%AF%8D.+%E0%AE%87%E0%AE%A8%E0%AF%8D%E0%AE%A4+%E0%AE%A8%E0%AE%BF%E0%AE%95%E0%AE%B4%E0%AF%8D%E0%AE%B5%E0%AF%81%E0%AE%95%E0%AE%B3%E0%AE%BF%E0%AE%B2%E0%AF%8D+%E0%AE%9A%E0%AF%86%E0%AE%AF%E0%AF%8D%E0%AE%A4%E0%AE%AA%E0%AE%BF%E0%AE%A9%E0%AF%8D+%E0%AE%85%E0%AE%AE%E0%AF%88%E0%AE%AA%E0%AF%8D%E0%AE%AA%E0%AE%BF%E0%AE%A9%E0%AF%8D+%E0%AE%95%E0%AE%A3%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AF%81%2C+%E0%AE%85%E0%AE%B5%E0%AE%B0%E0%AF%8D%E0%AE%95%E0%AE%B3%E0%AF%8D+%E0%AE%A4%E0%AE%B5%E0%AE%B1%E0%AF%81+%E0%AE%B5%E0%AE%BF%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AF%81+quae+%E0%AE%AA%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AE%B1%E0%AF%88+%E0%AE%A8%E0%AF%80%E0%AE%99%E0%AF%8D%E0%AE%95%E0%AE%B3%E0%AF%8D+%E0%AE%AA%E0%AE%B0%E0%AE%BF%E0%AE%A8%E0%AF%8D%E0%AE%A4%E0%AF%81%E0%AE%B0%E0%AF%88%E0%AE%95%E0%AF%8D%E0%AE%95%E0%AE%BF%E0%AE%B1%E0%AF%87%E0%AE%BE%E0%AE%AE%E0%AF%8D+%E0%AE%AE%E0%AF%86%E0%AE%A9%E0%AF%8D%E0%AE%AE%E0%AF%88%E0%AE%AF%E0%AE%BE%E0%AE%95+%E0%AE%AE%E0%AE%BE%E0%AE%B1%E0%AF%81%E0%AE%AE%E0%AF%8D";
 
-    @Parameterized.Parameters(name = "mType({0})")
-    public static Collection cases() {
+    public static Collection getCases() {
         final List<Object[]> params = new ArrayList<>();
         for (Type type : Type.values()) {
-            params.add(new Object[]{type});
+            params.add(new Object[] {type});
         }
         return params;
     }
-
-    @Parameterized.Parameter(0)
-    public Type mType;
 
     Object mA1;
     Object mA2;
@@ -73,20 +74,13 @@ public final class EqualsHashCodePerfTest {
     Object mC1;
     Object mC2;
 
-    @Before
-    public void setUp() throws Exception {
-        mA1 = mType.newInstance("https://mail.google.com/mail/u/0/?shva=1#inbox");
-        mA2 = mType.newInstance("https://mail.google.com/mail/u/0/?shva=1#inbox");
-        mB1 = mType.newInstance("http://developer.android.com/reference/java/net/URI.html");
-        mB2 = mType.newInstance("http://developer.android.com/reference/java/net/URI.html");
-
-        mC1 = mType.newInstance("http://developer.android.com/query?q=" + QUERY);
-        // Replace the very last char.
-        mC2 = mType.newInstance("http://developer.android.com/query?q=" + QUERY.substring(0, QUERY.length() - 3) + "%AF");
-    }
-
     @Test
-    public void timeEquals() {
+    @Parameters(method = "getCases")
+    public void timeEquals(Type type) throws Exception {
+        mA1 = type.newInstance("https://mail.google.com/mail/u/0/?shva=1#inbox");
+        mA2 = type.newInstance("https://mail.google.com/mail/u/0/?shva=1#inbox");
+        mB1 = type.newInstance("http://developer.android.com/reference/java/net/URI.html");
+        mB2 = type.newInstance("http://developer.android.com/reference/java/net/URI.html");
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mA1.equals(mB1);
@@ -96,7 +90,10 @@ public final class EqualsHashCodePerfTest {
     }
 
     @Test
-    public void timeHashCode() {
+    @Parameters(method = "getCases")
+    public void timeHashCode(Type type) throws Exception {
+        mA1 = type.newInstance("https://mail.google.com/mail/u/0/?shva=1#inbox");
+        mB1 = type.newInstance("http://developer.android.com/reference/java/net/URI.html");
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mA1.hashCode();
@@ -105,7 +102,15 @@ public final class EqualsHashCodePerfTest {
     }
 
     @Test
-    public void timeEqualsWithHeavilyEscapedComponent() {
+    @Parameters(method = "getCases")
+    public void timeEqualsWithHeavilyEscapedComponent(Type type) throws Exception {
+        mC1 = type.newInstance("http://developer.android.com/query?q=" + QUERY);
+        // Replace the very last char.
+        mC2 =
+                type.newInstance(
+                        "http://developer.android.com/query?q="
+                                + QUERY.substring(0, QUERY.length() - 3)
+                                + "%AF");
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             mC1.equals(mC2);

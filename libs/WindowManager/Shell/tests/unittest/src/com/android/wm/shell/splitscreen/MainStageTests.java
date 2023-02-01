@@ -61,14 +61,13 @@ public class MainStageTests extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
         mMainStage = new MainStage(mContext, mTaskOrganizer, DEFAULT_DISPLAY, mCallbacks,
-                mSyncQueue, mSurfaceSession, mIconProvider, null);
+                mSyncQueue, mSurfaceSession, mIconProvider);
         mMainStage.onTaskAppeared(mRootTaskInfo, mRootLeash);
     }
 
     @Test
     public void testActiveDeactivate() {
-        mMainStage.activate(mRootTaskInfo.configuration.windowConfiguration.getBounds(), mWct,
-                true /* reparent */);
+        mMainStage.activate(mWct, true /* reparent */);
         assertThat(mMainStage.isActive()).isTrue();
 
         mMainStage.deactivate(mWct);

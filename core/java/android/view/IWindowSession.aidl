@@ -37,6 +37,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.window.ClientWindowFrames;
+import android.window.OnBackInvokedCallbackInfo;
 
 import java.util.List;
 
@@ -49,13 +50,16 @@ interface IWindowSession {
     int addToDisplay(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, in InsetsVisibilities requestedVisibilities,
             out InputChannel outInputChannel, out InsetsState insetsState,
-            out InsetsSourceControl[] activeControls);
+            out InsetsSourceControl[] activeControls, out Rect attachedFrame,
+            out float[] sizeCompatScale);
     int addToDisplayAsUser(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, in int userId,
             in InsetsVisibilities requestedVisibilities, out InputChannel outInputChannel,
-            out InsetsState insetsState, out InsetsSourceControl[] activeControls);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
+            out Rect attachedFrame, out float[] sizeCompatScale);
     int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, out InsetsState insetsState);
+            in int viewVisibility, in int layerStackId, out InsetsState insetsState,
+            out Rect attachedFrame, out float[] sizeCompatScale);
     @UnsupportedAppUsage
     void remove(IWindow window);
 
@@ -71,42 +75,41 @@ interface IWindowSession {
      * @param requestedWidth The width the window wants to be.
      * @param requestedHeight The height the window wants to be.
      * @param viewVisibility Window root view's visibility.
-     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING},
-     * {@link WindowManagerGlobal#RELAYOUT_DEFER_SURFACE_DESTROY}.
-     * @param frameNumber A frame number in which changes requested in this layout will be rendered.
-     * @param outFrame Rect in which is placed the new position/size on
-     * screen.
-     * @param outContentInsets Rect in which is placed the offsets from
-     * <var>outFrame</var> in which the content of the window should be
-     * placed.  This can be used to modify the window layout to ensure its
-     * contents are visible to the user, taking into account system windows
-     * like the status bar or a soft keyboard.
-     * @param outVisibleInsets Rect in which is placed the offsets from
-     * <var>outFrame</var> in which the window is actually completely visible
-     * to the user.  This can be used to temporarily scroll the window's
-     * contents to make sure the user can see it.  This is different than
-     * <var>outContentInsets</var> in that these insets change transiently,
-     * so complex relayout of the window should not happen based on them.
-     * @param outOutsets Rect in which is placed the dead area of the screen that we would like to
-     * treat as real display. Example of such area is a chin in some models of wearable devices.
-     * @param outBackdropFrame Rect which is used draw the resizing background during a resize
-     * operation.
+     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
+     * @param seq The calling sequence of {@link #relayout} and {@link #relayoutAsync}.
+     * @param lastSyncSeqId The last SyncSeqId that the client applied.
+     * @param outFrames The window frames used by the client side for layout.
      * @param outMergedConfiguration New config container that holds global, override and merged
-     * config for window, if it is now becoming visible and the merged configuration has changed
-     * since it was last displayed.
-     * @param outSurface Object in which is placed the new display surface.
+     *                               config for window, if it is now becoming visible and the merged
+     *                               config has changed since it was last displayed.
+     * @param outSurfaceControl Object in which is placed the new display surface.
      * @param insetsState The current insets state in the system.
-     * @param outSurfaceSize The width and height of the surface control
-     *
-     * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
-     * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
+     * @param activeControls Objects which allow controlling {@link InsetsSource}s.
+     * @param bundle A temporary object to obtain the latest SyncSeqId.
+     * @return int Result flags, defined in {@link WindowManagerGlobal}.
      */
     int relayout(IWindow window, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, long frameNumber, out ClientWindowFrames outFrames,
+            int flags, int seq, int lastSyncSeqId, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls,
-            out Point outSurfaceSize);
+            out Bundle bundle);
+
+    /**
+     * Similar to {@link #relayout} but this is an oneway method which doesn't return anything.
+     *
+     * @param window The window being modified.
+     * @param attrs If non-null, new attributes to apply to the window.
+     * @param requestedWidth The width the window wants to be.
+     * @param requestedHeight The height the window wants to be.
+     * @param viewVisibility Window root view's visibility.
+     * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING}.
+     * @param seq The calling sequence of {@link #relayout} and {@link #relayoutAsync}.
+     * @param lastSyncSeqId The last SyncSeqId that the client applied.
+     */
+    oneway void relayoutAsync(IWindow window, in WindowManager.LayoutParams attrs,
+            int requestedWidth, int requestedHeight, int viewVisibility, int flags, int seq,
+            int lastSyncSeqId);
 
     /*
      * Notify the window manager that an application is relaunching and
@@ -144,7 +147,8 @@ interface IWindowSession {
      * is null if there is no sync required.
      */
     @UnsupportedAppUsage
-    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction);
+    oneway void finishDrawing(IWindow window, in SurfaceControl.Transaction postDrawTransaction,
+            int seqId);
 
     @UnsupportedAppUsage
     oneway void setInTouchMode(boolean showFocus);
@@ -273,17 +277,6 @@ interface IWindowSession {
     oneway void updatePointerIcon(IWindow window);
 
     /**
-     * Update the location of a child display in its parent window. This enables windows in the
-     * child display to compute the global transformation matrix.
-     *
-     * @param window The parent window of the display.
-     * @param x The x coordinate in the parent window.
-     * @param y The y coordinate in the parent window.
-     * @param displayId The id of the display to be notified.
-     */
-    oneway void updateDisplayContentLocation(IWindow window, int x, int y, int displayId);
-
-    /**
      * Update a tap exclude region identified by provided id in the window. Touches on this region
      * will neither be dispatched to this window nor change the focus to this window. Passing an
      * invalid region will remove the area from the exclude region of this window.
@@ -301,12 +294,18 @@ interface IWindowSession {
     oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
 
     /**
+     * Called when the keep-clear areas for this window have changed.
+     */
+    oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> restricted,
+           in List<Rect> unrestricted);
+
+    /**
     * Request the server to call setInputWindowInfo on a given Surface, and return
     * an input channel where the client can receive input.
     */
     void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
             in IBinder hostInputToken, int flags, int privateFlags, int type,
-            in IBinder focusGrantToken, out InputChannel outInputChannel);
+            in IBinder focusGrantToken, String inputHandleName, out InputChannel outInputChannel);
 
     /**
      * Update the flags on an input channel associated with a particular surface.
@@ -339,4 +338,24 @@ interface IWindowSession {
      */
     oneway void generateDisplayHash(IWindow window, in Rect boundsInWindow,
             in String hashAlgorithm, in RemoteCallback callback);
+
+    /**
+     * Sets the {@link OnBackInvokedCallbackInfo} containing the callback to be invoked for
+     * a window when back is triggered.
+     *
+     * @param window The token for the window to set the callback to.
+     * @param callbackInfo The {@link OnBackInvokedCallbackInfo} to set.
+     */
+    oneway void setOnBackInvokedCallbackInfo(
+            IWindow window, in OnBackInvokedCallbackInfo callbackInfo);
+
+    /**
+     * Clears a touchable region set by {@link #setInsets}.
+     */
+    void clearTouchableRegion(IWindow window);
+
+    /**
+     * Returns whether this window needs to cancel draw and retry later.
+     */
+    boolean cancelDraw(IWindow window);
 }

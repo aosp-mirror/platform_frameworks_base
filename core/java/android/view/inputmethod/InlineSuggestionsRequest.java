@@ -440,7 +440,7 @@ public final class InlineSuggestionsRequest implements Parcelable {
         int flg = in.readInt();
         int maxSuggestionCount = in.readInt();
         List<InlinePresentationSpec> inlinePresentationSpecs = new ArrayList<>();
-        in.readParcelableList(inlinePresentationSpecs, InlinePresentationSpec.class.getClassLoader());
+        in.readParcelableList(inlinePresentationSpecs, InlinePresentationSpec.class.getClassLoader(), android.widget.inline.InlinePresentationSpec.class);
         String hostPackageName = in.readString();
         LocaleList supportedLocales = (LocaleList) in.readTypedObject(LocaleList.CREATOR);
         Bundle extras = in.readBundle();

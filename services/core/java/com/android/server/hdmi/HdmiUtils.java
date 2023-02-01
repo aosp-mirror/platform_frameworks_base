@@ -20,6 +20,8 @@ import static com.android.server.hdmi.Constants.ADDR_BACKUP_1;
 import static com.android.server.hdmi.Constants.ADDR_BACKUP_2;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 
+import static java.util.Map.entry;
+
 import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -45,7 +47,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,38 +58,34 @@ final class HdmiUtils {
 
     private static final String TAG = "HdmiUtils";
 
-    private static final Map<Integer, List<Integer>> ADDRESS_TO_TYPE =
-            new HashMap<Integer, List<Integer>>() {
-                {
-                    put(Constants.ADDR_TV, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV));
-                    put(Constants.ADDR_RECORDER_1,
-                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_RECORDER));
-                    put(Constants.ADDR_RECORDER_2,
-                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_RECORDER));
-                    put(Constants.ADDR_TUNER_1, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER));
-                    put(Constants.ADDR_PLAYBACK_1,
-                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK));
-                    put(Constants.ADDR_AUDIO_SYSTEM,
-                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM));
-                    put(Constants.ADDR_TUNER_2, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER));
-                    put(Constants.ADDR_TUNER_3, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER));
-                    put(Constants.ADDR_PLAYBACK_2,
-                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK));
-                    put(Constants.ADDR_RECORDER_3,
-                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_RECORDER));
-                    put(Constants.ADDR_TUNER_4, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER));
-                    put(Constants.ADDR_PLAYBACK_3,
-                            Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK));
-                    put(Constants.ADDR_BACKUP_1, Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK,
-                            HdmiDeviceInfo.DEVICE_RECORDER, HdmiDeviceInfo.DEVICE_TUNER,
-                            HdmiDeviceInfo.DEVICE_VIDEO_PROCESSOR));
-                    put(Constants.ADDR_BACKUP_2, Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK,
-                            HdmiDeviceInfo.DEVICE_RECORDER, HdmiDeviceInfo.DEVICE_TUNER,
-                            HdmiDeviceInfo.DEVICE_VIDEO_PROCESSOR));
-                    put(Constants.ADDR_SPECIFIC_USE, Lists.newArrayList(ADDR_TV));
-                    put(Constants.ADDR_UNREGISTERED, Collections.emptyList());
-                }
-            };
+    private static final Map<Integer, List<Integer>> ADDRESS_TO_TYPE = Map.ofEntries(
+            entry(Constants.ADDR_TV, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TV)),
+            entry(Constants.ADDR_RECORDER_1,
+                    Lists.newArrayList(HdmiDeviceInfo.DEVICE_RECORDER)),
+            entry(Constants.ADDR_RECORDER_2,
+                    Lists.newArrayList(HdmiDeviceInfo.DEVICE_RECORDER)),
+            entry(Constants.ADDR_TUNER_1, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER)),
+            entry(Constants.ADDR_PLAYBACK_1,
+                    Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK)),
+            entry(Constants.ADDR_AUDIO_SYSTEM,
+                    Lists.newArrayList(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)),
+            entry(Constants.ADDR_TUNER_2, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER)),
+            entry(Constants.ADDR_TUNER_3, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER)),
+            entry(Constants.ADDR_PLAYBACK_2,
+                    Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK)),
+            entry(Constants.ADDR_RECORDER_3,
+                    Lists.newArrayList(HdmiDeviceInfo.DEVICE_RECORDER)),
+            entry(Constants.ADDR_TUNER_4, Lists.newArrayList(HdmiDeviceInfo.DEVICE_TUNER)),
+            entry(Constants.ADDR_PLAYBACK_3,
+                    Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK)),
+            entry(Constants.ADDR_BACKUP_1, Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK,
+                    HdmiDeviceInfo.DEVICE_RECORDER, HdmiDeviceInfo.DEVICE_TUNER,
+                    HdmiDeviceInfo.DEVICE_VIDEO_PROCESSOR)),
+            entry(Constants.ADDR_BACKUP_2, Lists.newArrayList(HdmiDeviceInfo.DEVICE_PLAYBACK,
+                    HdmiDeviceInfo.DEVICE_RECORDER, HdmiDeviceInfo.DEVICE_TUNER,
+                    HdmiDeviceInfo.DEVICE_VIDEO_PROCESSOR)),
+            entry(Constants.ADDR_SPECIFIC_USE, Lists.newArrayList(ADDR_TV)),
+            entry(Constants.ADDR_UNREGISTERED, Collections.emptyList()));
 
     private static final String[] DEFAULT_NAMES = {
         "TV",
@@ -391,15 +388,6 @@ final class HdmiUtils {
     }
 
     /**
-     * Clone {@link HdmiDeviceInfo} with new power status.
-     */
-    static HdmiDeviceInfo cloneHdmiDeviceInfo(HdmiDeviceInfo info, int newPowerStatus) {
-        return new HdmiDeviceInfo(info.getLogicalAddress(),
-                info.getPhysicalAddress(), info.getPortId(), info.getDeviceType(),
-                info.getVendorId(), info.getDisplayName(), newPowerStatus, info.getCecVersion());
-    }
-
-    /**
      * Dump a {@link SparseArray} to the print writer.
      *
      * <p>The dump is formatted:
@@ -470,7 +458,7 @@ final class HdmiUtils {
     }
 
     /**
-     * Method to parse target physical address to the port number on the current device.
+     * Method to build target physical address to the port number on the current device.
      *
      * <p>This check assumes target address is valid.
      *
@@ -562,7 +550,28 @@ final class HdmiUtils {
         for (int i = 0; i < params.length; i++) {
             params[i] = (byte) Integer.parseInt(parts[i + 2], 16);
         }
-        return new HdmiCecMessage(src, dest, opcode, params);
+        return HdmiCecMessage.build(src, dest, opcode, params);
+    }
+
+    /**
+     * Some operands in the CEC spec consist of a variable number of bytes, where each byte except
+     * the last one has bit 7 set to 1.
+     * Given the index of a byte in such an operand, this method returns the index of the last byte
+     * in the operand, or -1 if the input is invalid (e.g. operand not terminated properly).
+     * @param params Byte array representing a CEC message's parameters
+     * @param offset Index of a byte in the operand to find the end of
+     */
+    public static int getEndOfSequence(byte[] params, int offset) {
+        if (offset < 0) {
+            return -1;
+        }
+        while (offset < params.length && ((params[offset] >> 7) & 1) == 1) {
+            offset++;
+        }
+        if (offset >= params.length) {
+            return -1;
+        }
+        return offset;
     }
 
     public static class ShortAudioDescriptorXmlParser {

@@ -65,7 +65,7 @@ public class ImageExporterTest extends SysuiTestCase {
     private static final byte[] EXIF_FILE_TAG = "Exif\u0000\u0000".getBytes(US_ASCII);
 
     private static final ZonedDateTime CAPTURE_TIME =
-            ZonedDateTime.of(LocalDateTime.of(2020, 12, 15, 13, 15), ZoneId.of("EST"));
+            ZonedDateTime.of(LocalDateTime.of(2020, 12, 15, 13, 15), ZoneId.of("America/New_York"));
 
     @Test
     public void testImageFilename() {

@@ -15,30 +15,42 @@
  */
 package com.android.internal.os;
 
+import android.annotation.Nullable;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryStats.ControllerActivityCounter;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.Process;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.List;
+import java.util.Arrays;
 
 public class BluetoothPowerCalculator extends PowerCalculator {
     private static final String TAG = "BluetoothPowerCalc";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = PowerCalculator.DEBUG;
+
+    private static final BatteryConsumer.Key[] UNINITIALIZED_KEYS = new BatteryConsumer.Key[0];
+
     private final double mIdleMa;
     private final double mRxMa;
     private final double mTxMa;
     private final boolean mHasBluetoothPowerController;
 
     private static class PowerAndDuration {
+        // Return value of BT duration per app
         public long durationMs;
+        // Return value of BT power per app
         public double powerMah;
+
+        public BatteryConsumer.Key[] keys;
+        public double[] powerPerKeyMah;
+
+        // Aggregated BT duration across all apps
+        public long totalDurationMs;
+        // Aggregated BT power across all apps
+        public double totalPowerMah;
     }
 
     public BluetoothPowerCalculator(PowerProfile profile) {
@@ -49,176 +61,183 @@ public class BluetoothPowerCalculator extends PowerCalculator {
     }
 
     @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_BLUETOOTH;
+    }
+
+    @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         if (!batteryStats.hasBluetoothActivityReporting()) {
             return;
         }
 
-        final PowerAndDuration total = new PowerAndDuration();
+        BatteryConsumer.Key[] keys = UNINITIALIZED_KEYS;
+        final PowerAndDuration powerAndDuration = new PowerAndDuration();
 
         final SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
                 builder.getUidBatteryConsumerBuilders();
         for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
-            calculateApp(app, total, query);
+            if (keys == UNINITIALIZED_KEYS) {
+                if (query.isProcessStateDataNeeded()) {
+                    keys = app.getKeys(BatteryConsumer.POWER_COMPONENT_BLUETOOTH);
+                    powerAndDuration.keys = keys;
+                    powerAndDuration.powerPerKeyMah = new double[keys.length];
+                } else {
+                    keys = null;
+                }
+            }
+            calculateApp(app, powerAndDuration, query);
         }
 
         final long measuredChargeUC = batteryStats.getBluetoothMeasuredBatteryConsumptionUC();
         final int powerModel = getPowerModel(measuredChargeUC, query);
         final ControllerActivityCounter activityCounter =
                 batteryStats.getBluetoothControllerActivity();
-        final long systemDurationMs = calculateDuration(activityCounter);
-        final double systemPowerMah = calculatePowerMah(powerModel, measuredChargeUC,
-                activityCounter, query.shouldForceUsePowerProfileModel());
+        calculatePowerAndDuration(null, powerModel, measuredChargeUC,
+                activityCounter, query.shouldForceUsePowerProfileModel(), powerAndDuration);
 
         // Subtract what the apps used, but clamp to 0.
-        final long systemComponentDurationMs = Math.max(0, systemDurationMs - total.durationMs);
+        final long systemComponentDurationMs = Math.max(0,
+                powerAndDuration.durationMs - powerAndDuration.totalDurationMs);
         if (DEBUG) {
             Log.d(TAG, "Bluetooth active: time=" + (systemComponentDurationMs)
-                    + " power=" + formatCharge(systemPowerMah));
+                    + " power=" + BatteryStats.formatCharge(powerAndDuration.powerMah));
         }
 
         builder.getAggregateBatteryConsumerBuilder(
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
-                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_BLUETOOTH, systemDurationMs)
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                        powerAndDuration.durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
-                        Math.max(systemPowerMah, total.powerMah), powerModel);
+                        Math.max(powerAndDuration.powerMah, powerAndDuration.totalPowerMah),
+                        powerModel);
 
         builder.getAggregateBatteryConsumerBuilder(
-                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
-                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_BLUETOOTH, total.durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH, total.powerMah,
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
+                .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                        powerAndDuration.totalDurationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH,
+                        powerAndDuration.totalPowerMah,
                         powerModel);
     }
 
-    private void calculateApp(UidBatteryConsumer.Builder app, PowerAndDuration total,
+    private void calculateApp(UidBatteryConsumer.Builder app, PowerAndDuration powerAndDuration,
             BatteryUsageStatsQuery query) {
         final long measuredChargeUC =
                 app.getBatteryStatsUid().getBluetoothMeasuredBatteryConsumptionUC();
         final int powerModel = getPowerModel(measuredChargeUC, query);
         final ControllerActivityCounter activityCounter =
                 app.getBatteryStatsUid().getBluetoothControllerActivity();
-        final long durationMs = calculateDuration(activityCounter);
-        final double powerMah = calculatePowerMah(powerModel, measuredChargeUC, activityCounter,
-                query.shouldForceUsePowerProfileModel());
+        calculatePowerAndDuration(app.getBatteryStatsUid(), powerModel, measuredChargeUC,
+                activityCounter, query.shouldForceUsePowerProfileModel(), powerAndDuration);
 
-        app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_BLUETOOTH, durationMs)
-                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_BLUETOOTH, powerMah, powerModel);
+        app.setUsageDurationMillis(
+                        BatteryConsumer.POWER_COMPONENT_BLUETOOTH, powerAndDuration.durationMs)
+                .setConsumedPower(
+                        BatteryConsumer.POWER_COMPONENT_BLUETOOTH, powerAndDuration.powerMah,
+                        powerModel);
 
-        total.durationMs += durationMs;
-        total.powerMah += powerMah;
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        if (!mHasBluetoothPowerController || !batteryStats.hasBluetoothActivityReporting()) {
-            return;
+        if (!app.isVirtualUid()) {
+            powerAndDuration.totalDurationMs += powerAndDuration.durationMs;
+            powerAndDuration.totalPowerMah += powerAndDuration.powerMah;
         }
 
-        PowerAndDuration total = new PowerAndDuration();
+        if (query.isProcessStateDataNeeded() && powerAndDuration.keys != null) {
+            for (int j = 0; j < powerAndDuration.keys.length; j++) {
+                BatteryConsumer.Key key = powerAndDuration.keys[j];
+                final int processState = key.processState;
+                if (processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
+                    // Already populated with the powerAndDuration across all process states
+                    continue;
+                }
 
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                calculateApp(app, app.uidObj, statsType, total);
+                app.setConsumedPower(key, powerAndDuration.powerPerKeyMah[j], powerModel);
             }
         }
-
-        BatterySipper bs = new BatterySipper(BatterySipper.DrainType.BLUETOOTH, null, 0);
-        final long measuredChargeUC = batteryStats.getBluetoothMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(measuredChargeUC);
-        final ControllerActivityCounter activityCounter =
-                batteryStats.getBluetoothControllerActivity();
-        final long systemDurationMs = calculateDuration(activityCounter);
-        final double systemPowerMah =
-                calculatePowerMah(powerModel, measuredChargeUC, activityCounter, false);
-
-        // Subtract what the apps used, but clamp to 0.
-        final double powerMah = Math.max(0, systemPowerMah - total.powerMah);
-        final long durationMs = Math.max(0, systemDurationMs - total.durationMs);
-        if (DEBUG && powerMah != 0) {
-            Log.d(TAG, "Bluetooth active: time=" + (durationMs)
-                    + " power=" + formatCharge(powerMah));
-        }
-
-        bs.bluetoothPowerMah = powerMah;
-        bs.bluetoothRunningTimeMs = durationMs;
-
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            BatterySipper app = sippers.get(i);
-            if (app.getUid() == Process.BLUETOOTH_UID) {
-                if (DEBUG) Log.d(TAG, "Bluetooth adding sipper " + app + ": cpu=" + app.cpuTimeMs);
-                app.isAggregated = true;
-                bs.add(app);
-            }
-        }
-        if (bs.sumPower() > 0) {
-            sippers.add(bs);
-        }
-    }
-
-    private void calculateApp(BatterySipper app, BatteryStats.Uid u, int statsType,
-            PowerAndDuration total) {
-
-        final long measuredChargeUC = u.getBluetoothMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(measuredChargeUC);
-        final ControllerActivityCounter activityCounter = u.getBluetoothControllerActivity();
-        final long durationMs = calculateDuration(activityCounter);
-        final double powerMah = calculatePowerMah(powerModel, measuredChargeUC, activityCounter,
-                false);
-
-        app.bluetoothRunningTimeMs = durationMs;
-        app.bluetoothPowerMah = powerMah;
-        app.btRxBytes = u.getNetworkActivityBytes(BatteryStats.NETWORK_BT_RX_DATA, statsType);
-        app.btTxBytes = u.getNetworkActivityBytes(BatteryStats.NETWORK_BT_TX_DATA, statsType);
-
-        total.durationMs += durationMs;
-        total.powerMah += powerMah;
-    }
-
-    private long calculateDuration(ControllerActivityCounter counter) {
-        if (counter == null) {
-            return 0;
-        }
-
-        return counter.getIdleTimeCounter().getCountLocked(BatteryStats.STATS_SINCE_CHARGED)
-                + counter.getRxTimeCounter().getCountLocked(BatteryStats.STATS_SINCE_CHARGED)
-                + counter.getTxTimeCounters()[0].getCountLocked(BatteryStats.STATS_SINCE_CHARGED);
     }
 
     /** Returns bluetooth power usage based on the best data available. */
-    private double calculatePowerMah(@BatteryConsumer.PowerModel int powerModel,
-            long measuredChargeUC, ControllerActivityCounter counter, boolean ignoreReportedPower) {
-        if (powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
-            return uCtoMah(measuredChargeUC);
-        }
-
+    private void calculatePowerAndDuration(@Nullable BatteryStats.Uid uid,
+            @BatteryConsumer.PowerModel int powerModel,
+            long measuredChargeUC, ControllerActivityCounter counter, boolean ignoreReportedPower,
+            PowerAndDuration powerAndDuration) {
         if (counter == null) {
-            return 0;
+            powerAndDuration.durationMs = 0;
+            powerAndDuration.powerMah = 0;
+            if (powerAndDuration.powerPerKeyMah != null) {
+                Arrays.fill(powerAndDuration.powerPerKeyMah, 0);
+            }
+            return;
         }
 
-        if (!ignoreReportedPower) {
-            final double powerMah =
-                    counter.getPowerCounter().getCountLocked(BatteryStats.STATS_SINCE_CHARGED)
-                            / (double) (1000 * 60 * 60);
-            if (powerMah != 0) {
-                return powerMah;
+        final BatteryStats.LongCounter idleTimeCounter = counter.getIdleTimeCounter();
+        final BatteryStats.LongCounter rxTimeCounter = counter.getRxTimeCounter();
+        final BatteryStats.LongCounter txTimeCounter = counter.getTxTimeCounters()[0];
+        final long idleTimeMs = idleTimeCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED);
+        final long rxTimeMs = rxTimeCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED);
+        final long txTimeMs = txTimeCounter.getCountLocked(BatteryStats.STATS_SINCE_CHARGED);
+
+        powerAndDuration.durationMs = idleTimeMs + rxTimeMs + txTimeMs;
+
+        if (powerModel == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
+            powerAndDuration.powerMah = uCtoMah(measuredChargeUC);
+            if (uid != null && powerAndDuration.keys != null) {
+                for (int i = 0; i < powerAndDuration.keys.length; i++) {
+                    BatteryConsumer.Key key = powerAndDuration.keys[i];
+                    final int processState = key.processState;
+                    if (processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
+                        // Already populated with the powerAndDuration across all process states
+                        continue;
+                    }
+
+                    powerAndDuration.powerPerKeyMah[i] =
+                            uCtoMah(uid.getBluetoothMeasuredBatteryConsumptionUC(processState));
+                }
+            }
+        } else {
+            if (!ignoreReportedPower) {
+                final double powerMah =
+                        counter.getPowerCounter().getCountLocked(BatteryStats.STATS_SINCE_CHARGED)
+                                / (double) (1000 * 60 * 60);
+                if (powerMah != 0) {
+                    powerAndDuration.powerMah = powerMah;
+                    if (powerAndDuration.powerPerKeyMah != null) {
+                        // Leave this use case unsupported: used energy is reported
+                        // via BluetoothActivityEnergyInfo rather than PowerStats HAL.
+                        Arrays.fill(powerAndDuration.powerPerKeyMah, 0);
+                    }
+                    return;
+                }
+            }
+
+            if (mHasBluetoothPowerController) {
+                powerAndDuration.powerMah = calculatePowerMah(rxTimeMs, txTimeMs, idleTimeMs);
+
+                if (powerAndDuration.keys != null) {
+                    for (int i = 0; i < powerAndDuration.keys.length; i++) {
+                        BatteryConsumer.Key key = powerAndDuration.keys[i];
+                        final int processState = key.processState;
+                        if (processState == BatteryConsumer.PROCESS_STATE_UNSPECIFIED) {
+                            // Already populated with the powerAndDuration across all process states
+                            continue;
+                        }
+
+                        powerAndDuration.powerPerKeyMah[i] =
+                                calculatePowerMah(
+                                        rxTimeCounter.getCountForProcessState(processState),
+                                        txTimeCounter.getCountForProcessState(processState),
+                                        idleTimeCounter.getCountForProcessState(processState));
+                    }
+                }
+            } else {
+                powerAndDuration.powerMah = 0;
+                if (powerAndDuration.powerPerKeyMah != null) {
+                    Arrays.fill(powerAndDuration.powerPerKeyMah, 0);
+                }
             }
         }
-
-        if (!mHasBluetoothPowerController) {
-            return 0;
-        }
-
-        final long idleTimeMs =
-                counter.getIdleTimeCounter().getCountLocked(BatteryStats.STATS_SINCE_CHARGED);
-        final long rxTimeMs =
-                counter.getRxTimeCounter().getCountLocked(BatteryStats.STATS_SINCE_CHARGED);
-        final long txTimeMs =
-                counter.getTxTimeCounters()[0].getCountLocked(BatteryStats.STATS_SINCE_CHARGED);
-        return calculatePowerMah(rxTimeMs, txTimeMs, idleTimeMs);
     }
 
     /** Returns estimated bluetooth power usage based on usage times. */

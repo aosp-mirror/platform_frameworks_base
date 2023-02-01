@@ -23,6 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import androidx.test.filters.SmallTest;
@@ -41,6 +42,7 @@ import java.util.Objects;
  * Run with: atest FrameworksCoreTests:android.os.BundleTest
  */
 @SmallTest
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class BundleTest {
     private Log.TerribleFailureHandler mWtfHandler;
@@ -404,6 +406,69 @@ public class BundleTest {
 
         // We're able to retrieve it even though we failed before
         assertThat(bundle.<Parcelable>getParcelable("key")).isEqualTo(parcelable);
+    }
+
+    @Test
+    public void readFromParcel_withLazyValues_copiesUnderlyingParcel() {
+        Bundle bundle = new Bundle();
+        Parcelable parcelable = new CustomParcelable(13, "Tiramisu");
+        bundle.putParcelable("key", parcelable);
+        bundle.putString("string", "value");
+        Parcel parcelledBundle = getParcelledBundle(bundle);
+
+        Bundle testBundle = new Bundle();
+        testBundle.setClassLoader(getClass().getClassLoader());
+        testBundle.readFromParcel(parcelledBundle);
+        // Recycle the parcel as it should have been copied
+        parcelledBundle.recycle();
+        assertThat(testBundle.getString("string")).isEqualTo("value");
+        assertThat(testBundle.<Parcelable>getParcelable("key")).isEqualTo(parcelable);
+    }
+
+    @Test
+    public void readFromParcelWithRwHelper_whenThrowingAndNotDefusing_throws() {
+        Bundle bundle = new Bundle();
+        Parcelable parcelable = new CustomParcelable(13, "Tiramisu");
+        bundle.putParcelable("key", parcelable);
+        bundle.putString("string", "value");
+        Parcel parcelledBundle = getParcelledBundle(bundle);
+        parcelledBundle.setReadWriteHelper(new Parcel.ReadWriteHelper());
+
+        Bundle testBundle = new Bundle();
+        assertThrows(BadParcelableException.class,
+                () -> testBundle.readFromParcel(parcelledBundle));
+    }
+
+    @Test
+    public void readFromParcelWithRwHelper_whenThrowingAndDefusing_returnsNull() {
+        Bundle bundle = new Bundle();
+        Parcelable parcelable = new CustomParcelable(13, "Tiramisu");
+        bundle.putParcelable("key", parcelable);
+        bundle.putString("string", "value");
+        Parcel parcelledBundle = getParcelledBundle(bundle);
+        parcelledBundle.setReadWriteHelper(new Parcel.ReadWriteHelper());
+
+        Bundle.setShouldDefuse(true);
+        Bundle testBundle = new Bundle();
+        testBundle.readFromParcel(parcelledBundle);
+        // Recycle the parcel as it should not be referenced
+        parcelledBundle.recycle();
+        assertThat(testBundle.getString("string")).isNull();
+        assertThat(testBundle.<Parcelable>getParcelable("key")).isNull();
+    }
+
+    @Test
+    public void readFromParcelWithRwHelper_withoutLazyObject_returnsValue() {
+        Bundle bundle = new Bundle();
+        bundle.putString("string", "value");
+        Parcel parcelledBundle = getParcelledBundle(bundle);
+        parcelledBundle.setReadWriteHelper(new Parcel.ReadWriteHelper());
+
+        Bundle testBundle = new Bundle();
+        testBundle.readFromParcel(parcelledBundle);
+        // Recycle the parcel as it should not be referenced
+        parcelledBundle.recycle();
+        assertThat(testBundle.getString("string")).isEqualTo("value");
     }
 
     @Test

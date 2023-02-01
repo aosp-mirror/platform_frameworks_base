@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.net.ConnectivityDiagnosticsManager;
 import android.net.ConnectivityManager;
 import android.net.InetAddresses;
 import android.net.IpSecConfig;
@@ -108,9 +109,23 @@ public class VcnGatewayConnectionTestBase {
     protected static final long ELAPSED_REAL_TIME = 123456789L;
     protected static final String TEST_IPSEC_TUNNEL_IFACE = "IPSEC_IFACE";
 
+    protected static UnderlyingNetworkRecord getTestNetworkRecord(
+            Network network,
+            NetworkCapabilities networkCapabilities,
+            LinkProperties linkProperties,
+            boolean isBlocked) {
+        return new UnderlyingNetworkRecord(
+                network,
+                networkCapabilities,
+                linkProperties,
+                isBlocked,
+                false /* isSelected */,
+                0 /* priorityClass */);
+    }
+
     protected static final String TEST_TCP_BUFFER_SIZES_1 = "1,2,3,4";
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_1 =
-            new UnderlyingNetworkRecord(
+            getTestNetworkRecord(
                     mock(Network.class, CALLS_REAL_METHODS),
                     new NetworkCapabilities(),
                     new LinkProperties(),
@@ -123,7 +138,7 @@ public class VcnGatewayConnectionTestBase {
 
     protected static final String TEST_TCP_BUFFER_SIZES_2 = "2,3,4,5";
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_2 =
-            new UnderlyingNetworkRecord(
+            getTestNetworkRecord(
                     mock(Network.class, CALLS_REAL_METHODS),
                     new NetworkCapabilities(),
                     new LinkProperties(),
@@ -157,6 +172,7 @@ public class VcnGatewayConnectionTestBase {
 
     @NonNull protected final IpSecService mIpSecSvc;
     @NonNull protected final ConnectivityManager mConnMgr;
+    @NonNull protected final ConnectivityDiagnosticsManager mConnDiagMgr;
 
     @NonNull protected final IkeSessionConnectionInfo mIkeConnectionInfo;
     @NonNull protected final IkeSessionConfiguration mIkeSessionConfiguration;
@@ -186,6 +202,13 @@ public class VcnGatewayConnectionTestBase {
         VcnTestUtils.setupSystemService(
                 mContext, mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
 
+        mConnDiagMgr = mock(ConnectivityDiagnosticsManager.class);
+        VcnTestUtils.setupSystemService(
+                mContext,
+                mConnDiagMgr,
+                Context.CONNECTIVITY_DIAGNOSTICS_SERVICE,
+                ConnectivityDiagnosticsManager.class);
+
         mIkeConnectionInfo =
                 new IkeSessionConnectionInfo(TEST_ADDR, TEST_ADDR_2, mock(Network.class));
         mIkeSessionConfiguration = new IkeSessionConfiguration.Builder(mIkeConnectionInfo).build();
@@ -200,6 +223,9 @@ public class VcnGatewayConnectionTestBase {
         doReturn(mWakeLock)
                 .when(mDeps)
                 .newWakeLock(eq(mContext), eq(PowerManager.PARTIAL_WAKE_LOCK), any());
+        doReturn(1)
+                .when(mDeps)
+                .getParallelTunnelCount(eq(TEST_SUBSCRIPTION_SNAPSHOT), eq(TEST_SUB_GRP));
 
         setUpWakeupMessage(mTeardownTimeoutAlarm, VcnGatewayConnection.TEARDOWN_TIMEOUT_ALARM);
         setUpWakeupMessage(mDisconnectRequestAlarm, VcnGatewayConnection.DISCONNECT_REQUEST_ALARM);

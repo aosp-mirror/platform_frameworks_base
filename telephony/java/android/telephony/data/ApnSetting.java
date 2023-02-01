@@ -963,7 +963,7 @@ public class ApnSetting implements Parcelable {
                 ServiceState.convertBearerBitmaskToNetworkTypeBitmask(bearerBitmask);
         }
         int mtuV4 = cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MTU_V4));
-        if (mtuV4 == -1) {
+        if (mtuV4 == UNSET_MTU) {
             mtuV4 = cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MTU));
         }
 
@@ -1101,12 +1101,15 @@ public class ApnSetting implements Parcelable {
         sb.append(", ").append(MVNO_TYPE_INT_MAP.get(mMvnoType));
         sb.append(", ").append(mMvnoMatchData);
         sb.append(", ").append(mPermanentFailed);
-        sb.append(", ").append(mNetworkTypeBitmask);
-        sb.append(", ").append(mLingeringNetworkTypeBitmask);
+        sb.append(", ").append(TelephonyManager.convertNetworkTypeBitmaskToString(
+                mNetworkTypeBitmask));
+        sb.append(", ").append(TelephonyManager.convertNetworkTypeBitmaskToString(
+                mLingeringNetworkTypeBitmask));
         sb.append(", ").append(mApnSetId);
         sb.append(", ").append(mCarrierId);
         sb.append(", ").append(mSkip464Xlat);
         sb.append(", ").append(mAlwaysOn);
+        sb.append(", ").append(Objects.hash(mUser, mPassword));
         return sb.toString();
     }
 
@@ -1282,7 +1285,7 @@ public class ApnSetting implements Parcelable {
                 && xorEqualsInt(this.mMmsProxyPort, other.mMmsProxyPort))
                 && xorEqualsString(this.mUser, other.mUser)
                 && xorEqualsString(this.mPassword, other.mPassword)
-                && xorEqualsInt(this.mAuthType, other.mAuthType)
+                && Objects.equals(this.mAuthType, other.mAuthType)
                 && !typeSameAny(this, other)
                 && Objects.equals(this.mOperatorNumeric, other.mOperatorNumeric)
                 && Objects.equals(this.mProtocol, other.mProtocol)
@@ -1295,8 +1298,6 @@ public class ApnSetting implements Parcelable {
                 other.mLingeringNetworkTypeBitmask)
                 && Objects.equals(this.mProfileId, other.mProfileId)
                 && Objects.equals(this.mPersistent, other.mPersistent)
-                && Objects.equals(this.mMvnoType, other.mMvnoType)
-                && Objects.equals(this.mMvnoMatchData, other.mMvnoMatchData)
                 && Objects.equals(this.mApnSetId, other.mApnSetId)
                 && Objects.equals(this.mCarrierId, other.mCarrierId)
                 && Objects.equals(this.mSkip464Xlat, other.mSkip464Xlat)
@@ -1575,7 +1576,9 @@ public class ApnSetting implements Parcelable {
      * @hide
      */
     public boolean canSupportLingeringNetworkType(@NetworkType int networkType) {
-        if (networkType == 0) {
+        // For backwards compatibility, if this field is not set, we just use the existing
+        // network type bitmask.
+        if (mLingeringNetworkTypeBitmask == 0) {
             return canSupportNetworkType(networkType);
         }
         // Do a special checking for GSM. In reality, GSM is a voice only network type and can never
@@ -1642,7 +1645,7 @@ public class ApnSetting implements Parcelable {
                 .setApnName(in.readString())
                 .setProxyAddress(in.readString())
                 .setProxyPort(in.readInt())
-                .setMmsc(in.readParcelable(Uri.class.getClassLoader()))
+                .setMmsc(in.readParcelable(Uri.class.getClassLoader(), android.net.Uri.class))
                 .setMmsProxyAddress(in.readString())
                 .setMmsProxyPort(in.readInt())
                 .setUser(in.readString())
@@ -2182,6 +2185,13 @@ public class ApnSetting implements Parcelable {
                     | TYPE_XCAP | TYPE_VSIM | TYPE_BIP | TYPE_ENTERPRISE)) == 0
                 || TextUtils.isEmpty(mApnName) || TextUtils.isEmpty(mEntryName)) {
                 return null;
+            }
+            if ((mApnTypeBitmask & TYPE_MMS) != 0 && !TextUtils.isEmpty(mMmsProxyAddress)
+                    && mMmsProxyAddress.startsWith("http")) {
+                Log.wtf(LOG_TAG,"mms proxy(" + mMmsProxyAddress
+                        + ") should be a hostname, not a url");
+                Uri mMmsProxyAddressUri = Uri.parse(mMmsProxyAddress);
+                mMmsProxyAddress = mMmsProxyAddressUri.getHost();
             }
             return new ApnSetting(this);
         }

@@ -75,8 +75,8 @@ const SymbolTable::Symbol* SymbolTable::FindByName(const ResourceName& name) {
 
   // Fill in the package name if necessary.
   // If there is no package in `name`, we will need to copy the ResourceName
-  // and store it somewhere; we use the Maybe<> class to reserve storage.
-  Maybe<ResourceName> name_with_package_impl;
+  // and store it somewhere; we use the std::optional<> class to reserve storage.
+  std::optional<ResourceName> name_with_package_impl;
   if (name.package.empty()) {
     name_with_package_impl = ResourceName(mangler_->GetTargetPackageName(), name.type, name.entry);
     name_with_package = &name_with_package_impl.value();
@@ -88,9 +88,9 @@ const SymbolTable::Symbol* SymbolTable::FindByName(const ResourceName& name) {
   }
 
   // The name was not found in the cache. Mangle it (if necessary) and find it in our sources.
-  // Again, here we use a Maybe<> object to reserve storage if we need to mangle.
+  // Again, here we use a std::optional<> object to reserve storage if we need to mangle.
   const ResourceName* mangled_name = name_with_package;
-  Maybe<ResourceName> mangled_name_impl;
+  std::optional<ResourceName> mangled_name_impl;
   if (mangler_->ShouldMangle(name_with_package->package)) {
     mangled_name_impl = mangler_->MangleName(*name_with_package);
     mangled_name = &mangled_name_impl.value();
@@ -183,9 +183,9 @@ std::unique_ptr<SymbolTable::Symbol> DefaultSymbolTableDelegate::FindById(
 
 std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
     const ResourceName& name) {
-  Maybe<ResourceTable::SearchResult> result = table_->FindResource(name);
+  std::optional<ResourceTable::SearchResult> result = table_->FindResource(name);
   if (!result) {
-    if (name.type == ResourceType::kAttr) {
+    if (name.type.type == ResourceType::kAttr) {
       // Recurse and try looking up a private attribute.
       return FindByName(ResourceName(name.package, ResourceType::kAttrPrivate, name.entry));
     }
@@ -203,7 +203,7 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
         (sr.entry->id.value().package_id() == 0) || sr.entry->visibility.staged_api;
   }
 
-  if (name.type == ResourceType::kAttr || name.type == ResourceType::kAttrPrivate) {
+  if (name.type.type == ResourceType::kAttr || name.type.type == ResourceType::kAttrPrivate) {
     const ConfigDescription kDefaultConfig;
     ResourceConfigValue* config_value = sr.entry->FindValue(kDefaultConfig);
     if (config_value) {
@@ -306,7 +306,7 @@ static std::unique_ptr<SymbolTable::Symbol> LookupAttributeInTable(
         return nullptr;
       }
 
-      Maybe<ResourceName> parsed_name = ResourceUtils::ToResourceName(*name);
+      std::optional<ResourceName> parsed_name = ResourceUtils::ToResourceName(*name);
       if (!parsed_name) {
         return nullptr;
       }
@@ -366,7 +366,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   }
 
   std::unique_ptr<SymbolTable::Symbol> s;
-  if (real_name.type == ResourceType::kAttr) {
+  if (real_name.type.type == ResourceType::kAttr) {
     s = LookupAttributeInTable(asset_manager_, res_id);
   } else {
     s = util::make_unique<SymbolTable::Symbol>();
@@ -382,8 +382,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   return {};
 }
 
-static Maybe<ResourceName> GetResourceName(android::AssetManager2& am,
-                                           ResourceId id) {
+static std::optional<ResourceName> GetResourceName(android::AssetManager2& am, ResourceId id) {
   auto name = am.GetResourceName(id.id);
   if (!name.has_value()) {
     return {};
@@ -402,7 +401,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
     return {};
   }
 
-  Maybe<ResourceName> maybe_name = GetResourceName(asset_manager_, id);
+  std::optional<ResourceName> maybe_name = GetResourceName(asset_manager_, id);
   if (!maybe_name) {
     return {};
   }
@@ -414,7 +413,7 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindById(
 
   ResourceName& name = maybe_name.value();
   std::unique_ptr<SymbolTable::Symbol> s;
-  if (name.type == ResourceType::kAttr) {
+  if (name.type.type == ResourceType::kAttr) {
     s = LookupAttributeInTable(asset_manager_, id);
   } else {
     s = util::make_unique<SymbolTable::Symbol>();

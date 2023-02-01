@@ -35,7 +35,8 @@
         android:layout_height="wrap_content"
         android:clipChildren="false"
         android:orientation="vertical"
-        android:clipToPadding="false" />
+        android:clipToPadding="false"
+        android:paddingHorizontal="@dimen/controls_padding_horizontal" />
 
   </com.android.systemui.globalactions.MinHeightScrollView>
 </LinearLayout>

@@ -16,19 +16,22 @@
 
 package com.android.systemui.media
 
+import android.provider.Settings
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
+import android.testing.TestableLooper
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.FrameLayout
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.notification.stack.MediaHeaderView
+import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.UniqueObjectHostView
+import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertTrue
 import org.junit.Before
@@ -36,11 +39,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@TestableLooper.RunWithLooper
 class KeyguardMediaControllerTest : SysuiTestCase() {
 
     @Mock
@@ -52,33 +57,35 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var configurationController: ConfigurationController
 
-    @Mock
-    private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
     @JvmField @Rule
     val mockito = MockitoJUnit.rule()
 
-    private val mediaHeaderView: MediaHeaderView = MediaHeaderView(context, null)
+    private val mediaContainerView: MediaContainerView = MediaContainerView(context, null)
     private val hostView = UniqueObjectHostView(context)
+    private val settings = FakeSettings()
     private lateinit var keyguardMediaController: KeyguardMediaController
+    private lateinit var testableLooper: TestableLooper
+    private lateinit var fakeHandler: FakeHandler
 
     @Before
     fun setup() {
         // default state is positive, media should show up
         whenever(mediaHost.visible).thenReturn(true)
         whenever(statusBarStateController.state).thenReturn(StatusBarState.KEYGUARD)
-        whenever(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
-                .thenReturn(true)
         whenever(mediaHost.hostView).thenReturn(hostView)
         hostView.layoutParams = FrameLayout.LayoutParams(100, 100)
+        testableLooper = TestableLooper.get(this)
+        fakeHandler = FakeHandler(testableLooper.looper)
         keyguardMediaController = KeyguardMediaController(
             mediaHost,
             bypassController,
             statusBarStateController,
-            notificationLockscreenUserManager,
             context,
-            configurationController
+            settings,
+            fakeHandler,
+            configurationController,
         )
-        keyguardMediaController.attachSinglePaneContainer(mediaHeaderView)
+        keyguardMediaController.attachSinglePaneContainer(mediaContainerView)
         keyguardMediaController.useSplitShade = false
     }
 
@@ -88,31 +95,38 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
 
         keyguardMediaController.refreshMediaPosition()
 
-        assertThat(mediaHeaderView.visibility).isEqualTo(GONE)
+        assertThat(mediaContainerView.visibility).isEqualTo(GONE)
     }
 
     @Test
     fun testVisibleOnKeyguardOrFullScreenUserSwitcher() {
         testStateVisibility(StatusBarState.SHADE, GONE)
         testStateVisibility(StatusBarState.SHADE_LOCKED, GONE)
-        testStateVisibility(StatusBarState.FULLSCREEN_USER_SWITCHER, VISIBLE)
         testStateVisibility(StatusBarState.KEYGUARD, VISIBLE)
     }
 
     private fun testStateVisibility(state: Int, visibility: Int) {
         whenever(statusBarStateController.state).thenReturn(state)
         keyguardMediaController.refreshMediaPosition()
-        assertThat(mediaHeaderView.visibility).isEqualTo(visibility)
+        assertThat(mediaContainerView.visibility).isEqualTo(visibility)
     }
 
     @Test
-    fun testHiddenOnKeyguard_whenNotificationsAreHidden() {
-        whenever(notificationLockscreenUserManager.shouldShowLockscreenNotifications())
-                .thenReturn(false)
+    fun testHiddenOnKeyguard_whenMediaOnLockScreenDisabled() {
+        settings.putInt(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, 0)
 
         keyguardMediaController.refreshMediaPosition()
 
-        assertThat(mediaHeaderView.visibility).isEqualTo(GONE)
+        assertThat(mediaContainerView.visibility).isEqualTo(GONE)
+    }
+
+    @Test
+    fun testAvailableOnKeyguard_whenMediaOnLockScreenEnabled() {
+        settings.putInt(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, 1)
+
+        keyguardMediaController.refreshMediaPosition()
+
+        assertThat(mediaContainerView.visibility).isEqualTo(VISIBLE)
     }
 
     @Test
@@ -130,7 +144,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
 
         assertThat(splitShadeContainer.visibility).isEqualTo(GONE)
-        assertThat(mediaHeaderView.visibility).isEqualTo(VISIBLE)
+        assertThat(mediaContainerView.visibility).isEqualTo(VISIBLE)
     }
 
     @Test
@@ -149,6 +163,11 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
         keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
 
         assertTrue("HostView wasn't attached to the single pane container",
-            mediaHeaderView.childCount == 1)
+            mediaContainerView.childCount == 1)
+    }
+
+    @Test
+    fun testMediaHost_expandedPlayer() {
+        verify(mediaHost).expansion = MediaHostState.EXPANDED
     }
 }

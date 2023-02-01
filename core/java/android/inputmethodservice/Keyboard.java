@@ -217,6 +217,7 @@ public class Keyboard {
             rowEdgeFlags = a.getInt(com.android.internal.R.styleable.Keyboard_Row_rowEdgeFlags, 0);
             mode = a.getResourceId(com.android.internal.R.styleable.Keyboard_Row_keyboardMode,
                     0);
+            a.recycle();
         }
     }
 

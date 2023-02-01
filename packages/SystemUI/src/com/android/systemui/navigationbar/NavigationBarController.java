@@ -31,6 +31,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -50,6 +51,8 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -58,15 +61,15 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Optional;
 
 import javax.inject.Inject;
-
 
 /** A controller to handle navigation bars. */
 @SysUISingleton
@@ -80,9 +83,11 @@ public class NavigationBarController implements
 
     private final Context mContext;
     private final Handler mHandler;
-    private final NavigationBar.Factory mNavigationBarFactory;
+    private final NavigationBarComponent.Factory mNavigationBarComponentFactory;
+    private FeatureFlags mFeatureFlags;
     private final DisplayManager mDisplayManager;
     private final TaskbarDelegate mTaskbarDelegate;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mNavMode;
     @VisibleForTesting boolean mIsTablet;
 
@@ -105,23 +110,29 @@ public class NavigationBarController implements
             ConfigurationController configurationController,
             NavBarHelper navBarHelper,
             TaskbarDelegate taskbarDelegate,
-            NavigationBar.Factory navigationBarFactory,
+            NavigationBarComponent.Factory navigationBarComponentFactory,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             DumpManager dumpManager,
             AutoHideController autoHideController,
             LightBarController lightBarController,
-            Optional<Pip> pipOptional) {
+            Optional<Pip> pipOptional,
+            Optional<BackAnimation> backAnimation,
+            FeatureFlags featureFlags) {
         mContext = context;
         mHandler = mainHandler;
-        mNavigationBarFactory = navigationBarFactory;
+        mNavigationBarComponentFactory = navigationBarComponentFactory;
+        mFeatureFlags = featureFlags;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         commandQueue.addCallback(this);
         configurationController.addCallback(this);
         mConfigChanges.applyNewConfig(mContext.getResources());
         mNavMode = navigationModeController.addListener(this);
         mTaskbarDelegate = taskbarDelegate;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
-                dumpManager, autoHideController, lightBarController, pipOptional);
+                dumpManager, autoHideController, lightBarController, pipOptional,
+                backAnimation.orElse(null));
         mIsTablet = isTablet(mContext);
         dumpManager.registerDumpable(this);
     }
@@ -211,14 +222,19 @@ public class NavigationBarController implements
 
     /** @return {@code true} if taskbar is enabled, false otherwise */
     private boolean initializeTaskbarIfNecessary() {
-        if (mIsTablet) {
+        // Enable for tablet or (phone AND flag is set); assuming phone = !mIsTablet
+        boolean taskbarEnabled = mIsTablet || mFeatureFlags.isEnabled(Flags.HIDE_NAVBAR_WINDOW);
+
+        if (taskbarEnabled) {
+            Trace.beginSection("NavigationBarController#initializeTaskbarIfNecessary");
             // Remove navigation bar when taskbar is showing
             removeNavigationBar(mContext.getDisplayId());
             mTaskbarDelegate.init(mContext.getDisplayId());
+            Trace.endSection();
         } else {
             mTaskbarDelegate.destroy();
         }
-        return mIsTablet;
+        return taskbarEnabled;
     }
 
     @Override
@@ -235,9 +251,9 @@ public class NavigationBarController implements
 
     @Override
     public void setNavigationBarLumaSamplingEnabled(int displayId, boolean enable) {
-        final NavigationBarView navigationBarView = getNavigationBarView(displayId);
-        if (navigationBarView != null) {
-            navigationBarView.setNavigationBarLumaSamplingEnabled(enable);
+        final NavigationBar navigationBar = getNavigationBar(displayId);
+        if (navigationBar != null) {
+            navigationBar.setNavigationBarLumaSamplingEnabled(enable);
         }
     }
 
@@ -295,7 +311,7 @@ public class NavigationBarController implements
 
         // We may show TaskBar on the default display for large screen device. Don't need to create
         // navigation bar for this case.
-        if (mIsTablet && isOnDefaultDisplay) {
+        if (isOnDefaultDisplay && initializeTaskbarIfNecessary()) {
             return;
         }
 
@@ -313,12 +329,13 @@ public class NavigationBarController implements
         final Context context = isOnDefaultDisplay
                 ? mContext
                 : mContext.createDisplayContext(display);
-        NavigationBar navBar = mNavigationBarFactory.create(context);
-
+        NavigationBarComponent component = mNavigationBarComponentFactory.create(
+                context, savedState);
+        NavigationBar navBar = component.getNavigationBar();
+        navBar.init();
         mNavigationBars.put(displayId, navBar);
 
-        View navigationBarView = navBar.createView(savedState);
-        navigationBarView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+        navBar.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
                 if (result != null) {
@@ -394,8 +411,12 @@ public class NavigationBarController implements
      *         {@code null} if no navigation bar on that display.
      */
     public @Nullable NavigationBarView getNavigationBarView(int displayId) {
-        NavigationBar navBar = mNavigationBars.get(displayId);
+        NavigationBar navBar = getNavigationBar(displayId);
         return (navBar == null) ? null : navBar.getView();
+    }
+
+    private @Nullable NavigationBar getNavigationBar(int displayId) {
+        return mNavigationBars.get(displayId);
     }
 
     public void showPinningEnterExitToast(int displayId, boolean entering) {
@@ -416,6 +437,15 @@ public class NavigationBarController implements
         }
     }
 
+    public boolean isOverviewEnabled(int displayId) {
+        final NavigationBarView navBarView = getNavigationBarView(displayId);
+        if (navBarView != null) {
+            return navBarView.isOverviewEnabled();
+        } else {
+            return mTaskbarDelegate.isOverviewEnabled();
+        }
+    }
+
     /** @return {@link NavigationBar} on the default display. */
     @Nullable
     public NavigationBar getDefaultNavigationBar() {
@@ -423,7 +453,7 @@ public class NavigationBarController implements
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         for (int i = 0; i < mNavigationBars.size(); i++) {
             if (i > 0) {
                 pw.println();

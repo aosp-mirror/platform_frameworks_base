@@ -230,7 +230,8 @@ public class RemoteBugreportManager {
         try {
             final IntentFilter filterFinished =
                     new IntentFilter(ACTION_REMOTE_BUGREPORT_DISPATCH, BUGREPORT_MIMETYPE);
-            mContext.registerReceiver(mRemoteBugreportFinishedReceiver, filterFinished);
+            mContext.registerReceiver(mRemoteBugreportFinishedReceiver, filterFinished,
+                    Context.RECEIVER_EXPORTED);
         } catch (IntentFilter.MalformedMimeTypeException e) {
             // should never happen, as setting a constant
             Slogf.w(LOG_TAG, e, "Failed to set type %s", BUGREPORT_MIMETYPE);

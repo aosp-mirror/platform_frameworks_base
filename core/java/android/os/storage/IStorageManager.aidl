@@ -78,9 +78,9 @@ interface IStorageManager {
      */
     String getMountedObbPath(in String rawPath) = 24;
     /**
-     * Returns list of all mountable volumes.
+     * Returns list of all mountable volumes for the specified userId
      */
-    StorageVolume[] getVolumeList(int uid, in String packageName, int flags) = 29;
+    StorageVolume[] getVolumeList(int userId, in String callingPackage, int flags) = 29;
     /**
      * Ensure that all directories along given path exist, creating parent
      * directories as needed. Validates that given path is absolute and that it
@@ -144,9 +144,11 @@ interface IStorageManager {
     void clearUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 88;
     void fixupAppDir(in String path) = 89;
     void disableAppDataIsolation(in String pkgName, int pid, int userId) = 90;
-    void notifyAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 91;
-    void notifyAppIoResumed(in String volumeUuid, int uid, int tid, int reason) = 92;
-    PendingIntent getManageSpaceActivityIntent(in String packageName, int requestCode) = 93;
-    boolean isAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 94;
-    int getExternalStorageMountMode(int uid, in String packageName) = 95;
+    PendingIntent getManageSpaceActivityIntent(in String packageName, int requestCode) = 91;
+    void notifyAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 92;
+    void notifyAppIoResumed(in String volumeUuid, int uid, int tid, int reason) = 93;
+    int getExternalStorageMountMode(int uid, in String packageName) = 94;
+    boolean isAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 95;
+    void setCloudMediaProvider(in String authority) = 96;
+    String getCloudMediaProvider() = 97;
 }

@@ -17,13 +17,15 @@
 <!-- Manifest for the system CTS shim -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.android.cts.ctsshim" >
+    package="com.android.cts.ctsshim"
+    android:sharedUserId="com.android.cts.ctsshim" >
 
-    <uses-sdk android:minSdkVersion="24"
+    <uses-sdk
+        android:minSdkVersion="24"
         android:targetSdkVersion="28" />
 
     <restrict-update
-        android:hash="__CAN_NOT_BE_UPDATED__" />
+        android:hash="__HASH__" />
 
     <application
         android:hasCode="false"

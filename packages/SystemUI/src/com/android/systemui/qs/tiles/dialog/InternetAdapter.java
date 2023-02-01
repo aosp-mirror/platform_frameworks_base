@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,11 +48,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.InternetViewHolder> {
 
     private static final String TAG = "InternetAdapter";
-    private static final String ACTION_WIFI_DIALOG = "com.android.settings.WIFI_DIALOG";
-    private static final String EXTRA_CHOSEN_WIFI_ENTRY_KEY = "key_chosen_wifientry_key";
-    private static final String EXTRA_CONNECT_FOR_CALLER = "connect_for_caller";
 
     private final InternetDialogController mInternetDialogController;
+    @Nullable
     private List<WifiEntry> mWifiEntries;
     @VisibleForTesting
     protected int mWifiEntriesCount;
@@ -160,23 +159,47 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             final int security = wifiEntry.getSecurity();
             updateEndIcon(connectedState, security);
 
+            mWifiListLayout.setEnabled(shouldEnabled(wifiEntry));
             if (connectedState != WifiEntry.CONNECTED_STATE_DISCONNECTED) {
                 mWifiListLayout.setOnClickListener(
-                        v -> mInternetDialogController.launchWifiNetworkDetailsSetting(
-                                wifiEntry.getKey()));
+                        v -> mInternetDialogController.launchWifiDetailsSetting(
+                                wifiEntry.getKey(), v));
                 return;
             }
-            mWifiListLayout.setOnClickListener(v -> {
-                if (wifiEntry.shouldEditBeforeConnect()) {
-                    final Intent intent = new Intent(ACTION_WIFI_DIALOG);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    intent.putExtra(EXTRA_CHOSEN_WIFI_ENTRY_KEY, wifiEntry.getKey());
-                    intent.putExtra(EXTRA_CONNECT_FOR_CALLER, false);
-                    mContext.startActivity(intent);
-                }
+            mWifiListLayout.setOnClickListener(v -> onWifiClick(wifiEntry, v));
+        }
+
+        boolean shouldEnabled(@NonNull WifiEntry wifiEntry) {
+            if (wifiEntry.canConnect()) {
+                return true;
+            }
+            // If Wi-Fi is connected or saved network, leave it enabled to disconnect or configure.
+            if (wifiEntry.canDisconnect() || wifiEntry.isSaved()) {
+                return true;
+            }
+            return false;
+        }
+
+        void onWifiClick(@NonNull WifiEntry wifiEntry, @NonNull View view) {
+            if (wifiEntry.shouldEditBeforeConnect()) {
+                final Intent intent = WifiUtils.getWifiDialogIntent(wifiEntry.getKey(),
+                        true /* connectForCaller */);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                mContext.startActivity(intent);
+                return;
+            }
+
+            if (wifiEntry.canConnect()) {
                 mInternetDialogController.connect(wifiEntry);
-            });
+                return;
+            }
+
+            if (wifiEntry.isSaved()) {
+                Log.w(TAG, "The saved Wi-Fi network does not allow to connect. SSID:"
+                        + wifiEntry.getSsid());
+                mInternetDialogController.launchWifiDetailsSetting(wifiEntry.getKey(), view);
+            }
         }
 
         void setWifiNetworkLayout(CharSequence title, CharSequence summary) {
@@ -189,6 +212,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             mWifiSummaryText.setText(summary);
         }
 
+        @Nullable
         Drawable getWifiDrawable(int level, boolean hasNoInternet) {
             // If the Wi-Fi level is equal to WIFI_LEVEL_UNREACHABLE(-1), then a null drawable
             // will be returned.

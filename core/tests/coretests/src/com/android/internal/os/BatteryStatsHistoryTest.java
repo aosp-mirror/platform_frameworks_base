@@ -45,7 +45,13 @@ import org.mockito.MockitoAnnotations;
 public class BatteryStatsHistoryTest {
     private static final String TAG = "BatteryStatsHistoryTest";
     private static final int MAX_HISTORY_FILES = 32;
-    private final BatteryStatsImpl mBatteryStatsImpl = new MockBatteryStatsImpl();
+    private static final int MAX_HISTORY_BUFFER_KB = 128;
+
+    // Initializing max history files and buffer to the default values of non-low-ram device
+    // to maintain consistency in the tests
+    private final BatteryStatsImpl mBatteryStatsImpl = new MockBatteryStatsImpl()
+            .setMaxHistoryFiles(MAX_HISTORY_FILES)
+            .setMaxHistoryBuffer(MAX_HISTORY_BUFFER_KB * 1024);
     private final Parcel mHistoryBuffer = Parcel.obtain();
     private File mSystemDir;
     private File mHistoryDir;

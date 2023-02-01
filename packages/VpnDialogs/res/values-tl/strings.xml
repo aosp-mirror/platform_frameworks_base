@@ -18,6 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Kahilingan sa koneksyon"</string>
     <string name="warning" msgid="809658604548412033">"Gusto ng <xliff:g id="APP">%s</xliff:g> na mag-set up ng koneksyon sa VPN na nagbibigay-daan ditong masubaybayan ang trapiko ng network. Tanggapin lang kung pinagkakatiwalaan mo ang pinagmulan. Lalabas ang &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; sa itaas ng iyong screen kapag aktibo ang VPN."</string>
+    <string name="warning" product="tv" msgid="5188957997628124947">"Gusto ng <xliff:g id="APP">%s</xliff:g> na mag-set up ng koneksyon sa VPN na nagbibigay-daan ditong masubaybayan ang trapiko sa network. Tanggapin lang kung pinagkakatiwalaan mo ang pinagmulan. Lalabas ang &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; sa iyong screen kapag aktibo ang VPN."</string>
     <string name="legacy_title" msgid="192936250066580964">"Nakakonekta ang VPN"</string>
     <string name="session" msgid="6470628549473641030">"Session:"</string>
     <string name="duration" msgid="3584782459928719435">"Tagal:"</string>

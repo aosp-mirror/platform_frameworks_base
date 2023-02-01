@@ -18,15 +18,4 @@
     <style name="BrightnessDialogContainer" parent="@style/BaseBrightnessDialogContainer">
         <item name="android:layout_width">360dp</item>
     </style>
-
-    <style name="DockedDividerBackground">
-        <item name="android:layout_width">10dp</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_gravity">center_horizontal</item>
-    </style>
-
-    <style name="DockedDividerMinimizedShadow">
-        <item name="android:layout_width">8dp</item>
-        <item name="android:layout_height">match_parent</item>
-    </style>
 </resources>

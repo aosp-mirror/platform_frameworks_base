@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<root>
+    <device-owner package="com.afwsamples.testdpc" name="" component="com.afwsamples.testdpc/com.afwsamples.testdpc.DeviceAdminReceiver" isPoOrganizationOwnedDevice="true" />
+    <device-owner-context userId="0" />
+    <system-update-policy policy_type="2" install_window_start="0" install_window_end="540" />
+</root>

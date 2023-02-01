@@ -114,7 +114,7 @@ public final class AudioVolumeGroup implements Parcelable {
         AudioVolumeGroup thatAvg = (AudioVolumeGroup) o;
 
         return mName == thatAvg.mName && mId == thatAvg.mId
-                && mAudioAttributes.equals(thatAvg.mAudioAttributes);
+                && Arrays.equals(mAudioAttributes, thatAvg.mAudioAttributes);
     }
 
     /**

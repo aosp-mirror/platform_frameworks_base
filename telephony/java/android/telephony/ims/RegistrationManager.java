@@ -78,24 +78,22 @@ public interface RegistrationManager {
     /**@hide*/
     // Translate ImsRegistrationImplBase API to new AccessNetworkConstant because WLAN
     // and WWAN are more accurate constants.
-    Map<Integer, Integer> IMS_REG_TO_ACCESS_TYPE_MAP =
-            new HashMap<Integer, Integer>() {{
-                // Map NONE to -1 to make sure that we handle the REGISTRATION_TECH_NONE
-                // case, since it is defined.
-                put(ImsRegistrationImplBase.REGISTRATION_TECH_NONE,
-                        AccessNetworkConstants.TRANSPORT_TYPE_INVALID);
-                put(ImsRegistrationImplBase.REGISTRATION_TECH_LTE,
-                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-                put(ImsRegistrationImplBase.REGISTRATION_TECH_NR,
-                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-                put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
-                        AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
-                /* As the cross sim will be using ePDG tunnel over internet, it behaves
-                   like IWLAN in most cases. Hence setting the access type as IWLAN
-                 */
-                put(ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM,
-                        AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
-            }};
+    Map<Integer, Integer> IMS_REG_TO_ACCESS_TYPE_MAP = Map.of(
+            // Map NONE to -1 to make sure that we handle the REGISTRATION_TECH_NONE
+            // case, since it is defined.
+            ImsRegistrationImplBase.REGISTRATION_TECH_NONE,
+                    AccessNetworkConstants.TRANSPORT_TYPE_INVALID,
+            ImsRegistrationImplBase.REGISTRATION_TECH_LTE,
+                    AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+            ImsRegistrationImplBase.REGISTRATION_TECH_NR,
+                    AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+            ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
+                    AccessNetworkConstants.TRANSPORT_TYPE_WLAN,
+            /* As the cross sim will be using ePDG tunnel over internet, it behaves
+               like IWLAN in most cases. Hence setting the access type as IWLAN
+             */
+            ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM,
+                    AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
 
     /** @hide */
     @NonNull

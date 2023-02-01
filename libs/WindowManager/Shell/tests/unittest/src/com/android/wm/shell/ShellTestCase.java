@@ -22,7 +22,9 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.testing.TestableContext;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.android.internal.protolog.common.ProtoLog;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,6 +39,9 @@ public abstract class ShellTestCase {
 
     @Before
     public void shellSetup() {
+        // Disable protolog tool when running the tests from studio
+        ProtoLog.REQUIRE_PROTOLOGTOOL = false;
+
         MockitoAnnotations.initMocks(this);
         final Context context =
                 InstrumentationRegistry.getInstrumentation().getTargetContext();

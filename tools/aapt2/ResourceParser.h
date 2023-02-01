@@ -18,6 +18,7 @@
 #define AAPT_RESOURCE_PARSER_H
 
 #include <memory>
+#include <optional>
 
 #include "android-base/macros.h"
 #include "androidfw/ConfigDescription.h"
@@ -27,7 +28,6 @@
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "StringPool.h"
-#include "util/Maybe.h"
 #include "xml/XmlPullParser.h"
 
 namespace aapt {
@@ -54,7 +54,7 @@ struct ResourceParserOptions {
 
   // If visibility was forced, we need to use it when creating a new resource and also error if we
   // try to parse the <public>, <public-group>, <java-symbol> or <symbol> tags.
-  Maybe<Visibility::Level> visibility;
+  std::optional<Visibility::Level> visibility;
 };
 
 struct FlattenedXmlSubTree {
@@ -122,8 +122,8 @@ class ResourceParser {
   bool ParseAddResource(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseAttr(xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseAttrImpl(xml::XmlPullParser* parser, ParsedResource* out_resource, bool weak);
-  Maybe<Attribute::Symbol> ParseEnumOrFlagItem(xml::XmlPullParser* parser,
-                                               const android::StringPiece& tag);
+  std::optional<Attribute::Symbol> ParseEnumOrFlagItem(xml::XmlPullParser* parser,
+                                                       const android::StringPiece& tag);
   bool ParseStyle(ResourceType type, xml::XmlPullParser* parser, ParsedResource* out_resource);
   bool ParseStyleItem(xml::XmlPullParser* parser, Style* style);
   bool ParseDeclareStyleable(xml::XmlPullParser* parser, ParsedResource* out_resource);

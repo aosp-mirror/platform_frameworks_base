@@ -31,6 +31,7 @@ import androidx.annotation.Nullable;
 
 import com.android.settingslib.users.EditUserInfoController;
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 
 import javax.inject.Inject;
 
@@ -44,7 +45,9 @@ public class CreateUserActivity extends Activity {
      * Creates an intent to start this activity.
      */
     public static Intent createIntentForStart(Context context) {
-        return new Intent(context, CreateUserActivity.class);
+        Intent intent = new Intent(context, CreateUserActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        return intent;
     }
 
     private static final String TAG = "CreateUserActivity";
@@ -53,15 +56,18 @@ public class CreateUserActivity extends Activity {
     private final UserCreator mUserCreator;
     private final EditUserInfoController mEditUserInfoController;
     private final IActivityManager mActivityManager;
+    private final ActivityStarter mActivityStarter;
 
     private Dialog mSetupUserDialog;
 
     @Inject
     public CreateUserActivity(UserCreator userCreator,
-            EditUserInfoController editUserInfoController, IActivityManager activityManager) {
+            EditUserInfoController editUserInfoController, IActivityManager activityManager,
+            ActivityStarter activityStarter) {
         mUserCreator = userCreator;
         mEditUserInfoController = editUserInfoController;
         mActivityManager = activityManager;
+        mActivityStarter = activityStarter;
     }
 
     @Override
@@ -102,13 +108,10 @@ public class CreateUserActivity extends Activity {
 
         return mEditUserInfoController.createDialog(
                 this,
-                (intent, requestCode) -> {
-                    mEditUserInfoController.startingActivityForResult();
-                    startActivityForResult(intent, requestCode);
-                },
+                this::startActivity,
                 null,
                 defaultUserName,
-                getString(R.string.user_add_user),
+                getString(com.android.settingslib.R.string.user_add_user),
                 this::addUserNow,
                 this::finish
         );
@@ -132,7 +135,7 @@ public class CreateUserActivity extends Activity {
         mSetupUserDialog.dismiss();
 
         userName = (userName == null || userName.trim().isEmpty())
-                ? getString(R.string.user_new_user_name)
+                ? getString(com.android.settingslib.R.string.user_new_user_name)
                 : userName;
 
         mUserCreator.createUser(userName, userIcon,
@@ -157,5 +160,18 @@ public class CreateUserActivity extends Activity {
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't switch user.", e);
         }
+    }
+
+    /**
+     * Lambda to start activity from an intent. Ensures that device is unlocked first.
+     * @param intent
+     * @param requestCode
+     */
+    private void startActivity(Intent intent, int requestCode) {
+        mActivityStarter.dismissKeyguardThenExecute(() -> {
+            mEditUserInfoController.startingActivityForResult();
+            startActivityForResult(intent, requestCode);
+            return true;
+        }, /* cancel= */ null, /* afterKeyguardGone= */ true);
     }
 }

@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.window;
 
-import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
-import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
@@ -33,7 +31,9 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Log;
+import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.Surface;
@@ -49,6 +49,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
+import com.android.systemui.unfold.util.JankMonitorTransitionProgressListener;
 
 import java.util.Optional;
 
@@ -66,9 +68,9 @@ public class StatusBarWindowController {
     private final WindowManager mWindowManager;
     private final IWindowManager mIWindowManager;
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
-    private final Resources mResources;
     private int mBarHeight = -1;
     private final State mCurrentState = new State();
+    private boolean mIsAttached;
 
     private final ViewGroup mStatusBarWindowView;
     // The container in which we should run launch animations started from the status bar and
@@ -84,7 +86,8 @@ public class StatusBarWindowController {
             WindowManager windowManager,
             IWindowManager iWindowManager,
             StatusBarContentInsetsProvider contentInsetsProvider,
-            @Main Resources resources) {
+            @Main Resources resources,
+            Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider) {
         mContext = context;
         mWindowManager = windowManager;
         mIWindowManager = iWindowManager;
@@ -93,11 +96,14 @@ public class StatusBarWindowController {
         mLaunchAnimationContainer = mStatusBarWindowView.findViewById(
                 R.id.status_bar_launch_animation_container);
         mLpChanged = new WindowManager.LayoutParams();
-        mResources = resources;
 
         if (mBarHeight < 0) {
             mBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         }
+        unfoldTransitionProgressProvider.ifPresent(
+                unfoldProgressProvider -> unfoldProgressProvider.addCallback(
+                        new JankMonitorTransitionProgressListener(
+                                /* attachedViewProvider=*/ () -> mStatusBarWindowView)));
     }
 
     public int getStatusBarHeight() {
@@ -126,13 +132,17 @@ public class StatusBarWindowController {
         // Now that the status bar window encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
         // hardware-accelerated.
+        Trace.beginSection("StatusBarWindowController.getBarLayoutParams");
         mLp = getBarLayoutParams(mContext.getDisplay().getRotation());
+        Trace.endSection();
 
         mWindowManager.addView(mStatusBarWindowView, mLp);
         mLpChanged.copyFrom(mLp);
 
         mContentInsetsProvider.addCallback(this::calculateStatusBarLocationsForAllRotations);
         calculateStatusBarLocationsForAllRotations();
+        mIsAttached = true;
+        apply(mCurrentState);
     }
 
     /** Adds the given view to the status bar window view. */
@@ -195,25 +205,7 @@ public class StatusBarWindowController {
     }
 
     private WindowManager.LayoutParams getBarLayoutParamsForRotation(int rotation) {
-        int height = mBarHeight;
-        if (INSETS_LAYOUT_GENERALIZATION) {
-            switch (rotation) {
-                case ROTATION_UNDEFINED:
-                case Surface.ROTATION_0:
-                case Surface.ROTATION_180:
-                    height = SystemBarUtils.getStatusBarHeightForRotation(
-                            mContext, Surface.ROTATION_0);
-                    break;
-                case Surface.ROTATION_90:
-                    height = SystemBarUtils.getStatusBarHeightForRotation(
-                            mContext, Surface.ROTATION_90);
-                    break;
-                case Surface.ROTATION_270:
-                    height = SystemBarUtils.getStatusBarHeightForRotation(
-                            mContext, Surface.ROTATION_270);
-                    break;
-            }
-        }
+        int height = SystemBarUtils.getStatusBarHeightForRotation(mContext, rotation);
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.MATCH_PARENT,
                 height,
@@ -235,14 +227,15 @@ public class StatusBarWindowController {
 
     private void calculateStatusBarLocationsForAllRotations() {
         Rect[] bounds = new Rect[4];
+        final DisplayCutout displayCutout = mContext.getDisplay().getCutout();
         bounds[0] = mContentInsetsProvider
-                .getBoundingRectForPrivacyChipForRotation(ROTATION_NONE);
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_NONE, displayCutout);
         bounds[1] = mContentInsetsProvider
-                .getBoundingRectForPrivacyChipForRotation(ROTATION_LANDSCAPE);
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_LANDSCAPE, displayCutout);
         bounds[2] = mContentInsetsProvider
-                .getBoundingRectForPrivacyChipForRotation(ROTATION_UPSIDE_DOWN);
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_UPSIDE_DOWN, displayCutout);
         bounds[3] = mContentInsetsProvider
-                .getBoundingRectForPrivacyChipForRotation(ROTATION_SEASCAPE);
+                .getBoundingRectForPrivacyChipForRotation(ROTATION_SEASCAPE, displayCutout);
 
         try {
             mIWindowManager.updateStaticPrivacyIndicatorBounds(mContext.getDisplayId(), bounds);
@@ -289,9 +282,17 @@ public class StatusBarWindowController {
     private void applyHeight(State state) {
         mLpChanged.height =
                 state.mIsLaunchAnimationRunning ? ViewGroup.LayoutParams.MATCH_PARENT : mBarHeight;
+        for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+            mLpChanged.paramsForRotation[rot].height =
+                    state.mIsLaunchAnimationRunning ? ViewGroup.LayoutParams.MATCH_PARENT :
+                    SystemBarUtils.getStatusBarHeightForRotation(mContext, rot);
+        }
     }
 
     private void apply(State state) {
+        if (!mIsAttached) {
+            return;
+        }
         applyForceStatusBarVisibleFlag(state);
         applyHeight(state);
         if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {

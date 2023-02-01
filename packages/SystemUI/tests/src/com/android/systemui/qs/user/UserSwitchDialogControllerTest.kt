@@ -21,12 +21,15 @@ import android.content.Intent
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.view.View
+import android.widget.Button
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PseudoGridView
+import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.tiles.UserDetailView
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.mockito.any
@@ -39,11 +42,12 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatcher
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.argThat
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -61,7 +65,11 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var launchView: View
     @Mock
+    private lateinit var neutralButton: Button
+    @Mock
     private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock
+    private lateinit var uiEventLogger: UiEventLogger
     @Captor
     private lateinit var clickCaptor: ArgumentCaptor<DialogInterface.OnClickListener>
 
@@ -75,18 +83,20 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
         `when`(dialog.context).thenReturn(mContext)
 
         controller = UserSwitchDialogController(
-                { userDetailViewAdapter },
-                activityStarter,
-                falsingManager,
-                dialogLaunchAnimator,
-                { dialog }
+            { userDetailViewAdapter },
+            activityStarter,
+            falsingManager,
+            dialogLaunchAnimator,
+            uiEventLogger,
+            { dialog }
         )
     }
 
     @Test
     fun showDialog_callsDialogShow() {
         controller.showDialog(launchView)
-        verify(dialogLaunchAnimator).showFromView(dialog, launchView)
+        verify(dialogLaunchAnimator).showFromView(eq(dialog), eq(launchView), any(), anyBoolean())
+        verify(uiEventLogger).log(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN)
     }
 
     @Test
@@ -108,10 +118,14 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun doneButtonSetWithNullHandler() {
+    fun doneButtonLogsCorrectly() {
         controller.showDialog(launchView)
 
-        verify(dialog).setPositiveButton(anyInt(), eq(null))
+        verify(dialog).setPositiveButton(anyInt(), capture(clickCaptor))
+
+        clickCaptor.value.onClick(dialog, DialogInterface.BUTTON_NEUTRAL)
+
+        verify(uiEventLogger).log(QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE)
     }
 
     @Test
@@ -120,15 +134,19 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
 
         controller.showDialog(launchView)
 
-        verify(dialog).setNeutralButton(anyInt(), capture(clickCaptor))
+        verify(dialog)
+            .setNeutralButton(anyInt(), capture(clickCaptor), eq(false) /* dismissOnClick */)
+        `when`(dialog.getButton(DialogInterface.BUTTON_NEUTRAL)).thenReturn(neutralButton)
 
         clickCaptor.value.onClick(dialog, DialogInterface.BUTTON_NEUTRAL)
 
         verify(activityStarter)
-                .postStartActivityDismissingKeyguard(
-                        argThat(IntentMatcher(Settings.ACTION_USER_SETTINGS)),
-                        eq(0)
-                )
+            .postStartActivityDismissingKeyguard(
+                argThat(IntentMatcher(Settings.ACTION_USER_SETTINGS)),
+                eq(0),
+                eq(null)
+            )
+        verify(uiEventLogger).log(QSUserSwitcherEvent.QS_USER_MORE_SETTINGS)
     }
 
     @Test
@@ -137,7 +155,8 @@ class UserSwitchDialogControllerTest : SysuiTestCase() {
 
         controller.showDialog(launchView)
 
-        verify(dialog).setNeutralButton(anyInt(), capture(clickCaptor))
+        verify(dialog)
+            .setNeutralButton(anyInt(), capture(clickCaptor), eq(false) /* dismissOnClick */)
 
         clickCaptor.value.onClick(dialog, DialogInterface.BUTTON_NEUTRAL)
 

@@ -27,6 +27,7 @@ import android.os.Looper;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.Postsubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
@@ -48,6 +49,7 @@ import java.util.List;
  * runtest -c com.android.server.pm.UserManagerServiceCreateProfileTest frameworks-services
  * </pre>
  */
+@Postsubmit
 @RunWith(AndroidJUnit4.class)
 @MediumTest
 public class UserManagerServiceCreateProfileTest {

@@ -20,28 +20,19 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
-import java.util.Arrays;
-import java.util.Collection;
 
 /** Tests the performance of various StringBuilder methods. */
-@RunWith(Parameterized.class)
+@RunWith(AndroidJUnit4.class)
 @LargeTest
 public class StringBuilderPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mLength={0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {{1}, {10}, {100}});
-    }
-
-    @Parameterized.Parameter(0)
-    public int mLength;
+    public int mLength = 100;
 
     @Test
     public void timeAppendBoolean() {

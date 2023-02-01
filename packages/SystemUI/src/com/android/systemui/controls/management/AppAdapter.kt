@@ -28,6 +28,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsServiceInfo
+import com.android.systemui.util.icuMessageFormat
 import java.text.Collator
 import java.util.concurrent.Executor
 
@@ -61,7 +62,7 @@ class AppAdapter(
             backgroundExecutor.execute {
                 val collator = Collator.getInstance(resources.configuration.locales[0])
                 val localeComparator = compareBy<ControlsServiceInfo, CharSequence>(collator) {
-                    it.loadLabel()
+                    it.loadLabel() ?: ""
                 }
                 listOfServices = serviceInfos.sortedWith(localeComparator)
                 uiExecutor.execute(::notifyDataSetChanged)
@@ -74,8 +75,10 @@ class AppAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, i: Int): Holder {
-        return Holder(layoutInflater.inflate(R.layout.controls_app_item, parent, false),
-                favoritesRenderer)
+        return Holder(
+            layoutInflater.inflate(R.layout.controls_app_item, parent, false),
+            favoritesRenderer
+        )
     }
 
     override fun getItemCount() = listOfServices.size
@@ -116,10 +119,10 @@ class FavoritesRenderer(
 
     fun renderFavoritesForComponent(component: ComponentName): String? {
         val qty = favoriteFunction(component)
-        if (qty != 0) {
-            return resources.getQuantityString(R.plurals.controls_number_of_favorites, qty, qty)
+        return if (qty != 0) {
+            icuMessageFormat(resources, R.string.controls_number_of_favorites, qty)
         } else {
-            return null
+            null
         }
     }
 }

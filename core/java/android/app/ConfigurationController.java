@@ -124,12 +124,6 @@ class ConfigurationController {
      * @param config The new configuration.
      */
     void handleConfigurationChanged(@NonNull Configuration config) {
-        if (mActivityThread.isCachedProcessState()) {
-            updatePendingConfiguration(config);
-            // If the process is in a cached state, delay the handling until the process is no
-            // longer cached.
-            return;
-        }
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "configChanged");
         handleConfigurationChanged(config, null /* compat */);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -185,14 +179,7 @@ class ConfigurationController {
 
             final Application app = mActivityThread.getApplication();
             final Resources appResources = app.getResources();
-            if (appResources.hasOverrideDisplayAdjustments()) {
-                // The value of Display#getRealSize will be adjusted by FixedRotationAdjustments,
-                // but Display#getSize refers to DisplayAdjustments#mConfiguration. So the rotated
-                // configuration also needs to set to the adjustments for consistency.
-                appResources.getDisplayAdjustments().getConfiguration().updateFrom(config);
-            }
-            mResourcesManager.applyConfigurationToResources(config, compat,
-                    appResources.getDisplayAdjustments());
+            mResourcesManager.applyConfigurationToResources(config, compat);
             updateLocaleListFromAppContext(app.getApplicationContext());
 
             if (mConfiguration == null) {

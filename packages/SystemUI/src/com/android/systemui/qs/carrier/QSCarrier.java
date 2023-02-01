@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.carrier;
 
+import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.text.TextUtils;
@@ -25,10 +26,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 
 import java.util.Objects;
@@ -40,8 +43,9 @@ public class QSCarrier extends LinearLayout {
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
     private View mSpacer;
+    @Nullable
     private CellSignalState mLastSignalState;
-    private boolean mProviderModelInitialized = false;
+    private boolean mMobileSignalInitialized = false;
     private boolean mIsSingleCarrier;
 
     public QSCarrier(Context context) {
@@ -92,40 +96,30 @@ public class QSCarrier extends LinearLayout {
             mMobileRoaming.setImageTintList(colorStateList);
             mMobileSignal.setImageTintList(colorStateList);
 
-            if (state.providerModelBehavior) {
-                if (!mProviderModelInitialized) {
-                    mProviderModelInitialized = true;
-                    mMobileSignal.setImageDrawable(
-                            mContext.getDrawable(R.drawable.ic_qs_no_calling_sms));
-                }
-                mMobileSignal.setImageDrawable(mContext.getDrawable(state.mobileSignalIconId));
-                mMobileSignal.setContentDescription(state.contentDescription);
-            } else {
-                if (!mProviderModelInitialized) {
-                    mProviderModelInitialized = true;
-                    mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
-                }
-                mMobileSignal.setImageLevel(state.mobileSignalIconId);
-                StringBuilder contentDescription = new StringBuilder();
-                if (state.contentDescription != null) {
-                    contentDescription.append(state.contentDescription).append(", ");
-                }
-                if (state.roaming) {
-                    contentDescription
-                            .append(mContext.getString(R.string.data_connection_roaming))
-                            .append(", ");
-                }
-                // TODO: show mobile data off/no internet text for 5 seconds before carrier text
-                if (hasValidTypeContentDescription(state.typeContentDescription)) {
-                    contentDescription.append(state.typeContentDescription);
-                }
-                mMobileSignal.setContentDescription(contentDescription);
+            if (!mMobileSignalInitialized) {
+                mMobileSignalInitialized = true;
+                mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
             }
+            mMobileSignal.setImageLevel(state.mobileSignalIconId);
+            StringBuilder contentDescription = new StringBuilder();
+            if (state.contentDescription != null) {
+                contentDescription.append(state.contentDescription).append(", ");
+            }
+            if (state.roaming) {
+                contentDescription
+                        .append(mContext.getString(R.string.data_connection_roaming))
+                        .append(", ");
+            }
+            // TODO: show mobile data off/no internet text for 5 seconds before carrier text
+            if (hasValidTypeContentDescription(state.typeContentDescription)) {
+                contentDescription.append(state.typeContentDescription);
+            }
+            mMobileSignal.setContentDescription(contentDescription);
         }
         return true;
     }
 
-    private boolean hasValidTypeContentDescription(String typeContentDescription) {
+    private boolean hasValidTypeContentDescription(@Nullable String typeContentDescription) {
         return TextUtils.equals(typeContentDescription,
                 mContext.getString(R.string.data_connection_no_internet))
                 || TextUtils.equals(typeContentDescription,
@@ -143,5 +137,9 @@ public class QSCarrier extends LinearLayout {
 
     public void setCarrierText(CharSequence text) {
         mCarrierText.setText(text);
+    }
+
+    public void updateTextAppearance(@StyleRes int resId) {
+        FontSizeUtils.updateFontSizeFromStyle(mCarrierText, resId);
     }
 }

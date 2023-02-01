@@ -61,6 +61,8 @@ java_test_host {
         ":StagedInstallTestApexV2_WrongSha",
         ":TestAppAv1",
         ":test.rebootless_apex_v1",
+        ":test.rebootless_apex_v2",
+        ":test_com.android.server",
     ],
     test_suites: ["general-tests"],
     test_config: "StagedInstallInternalTest.xml",

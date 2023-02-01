@@ -46,6 +46,8 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
 
     /**
      * List of profiles associated with the current user.
+     *
+     * Quiet work profiles will still appear here, but will have the `QUIET_MODE` flag.
      */
     val userProfiles: List<UserInfo>
 
@@ -74,6 +76,6 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
          * Notifies that the current user's profiles have changed.
          */
         @JvmDefault
-        fun onProfilesChanged(profiles: List<UserInfo>) {}
+        fun onProfilesChanged(profiles: List<@JvmSuppressWildcards UserInfo>) {}
     }
 }

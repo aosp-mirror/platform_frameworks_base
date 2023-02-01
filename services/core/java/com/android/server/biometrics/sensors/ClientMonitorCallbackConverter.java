@@ -59,7 +59,7 @@ public class ClientMonitorCallbackConverter {
 
     // The following apply to all clients
 
-    void onAcquired(int sensorId, int acquiredInfo, int vendorCode) throws RemoteException {
+    public void onAcquired(int sensorId, int acquiredInfo, int vendorCode) throws RemoteException {
         if (mSensorReceiver != null) {
             mSensorReceiver.onAcquired(sensorId, acquiredInfo, vendorCode);
         } else if (mFaceServiceReceiver != null) {
@@ -123,7 +123,8 @@ public class ClientMonitorCallbackConverter {
         }
     }
 
-    void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining)
+    /** Called when a user has been removed. */
+    public void onRemoved(BiometricAuthenticator.Identifier identifier, int remaining)
             throws RemoteException {
         if (mFaceServiceReceiver != null) {
             mFaceServiceReceiver.onRemoved((Face) identifier, remaining);

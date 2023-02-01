@@ -19,16 +19,24 @@ package com.android.systemui.statusbar;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK;
+import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_TIMEOUT;
 
+import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
+import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_ALIGNMENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_DISCLOSURE;
+import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_LOGOUT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_OWNER_INFO;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_RESTING;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRANSIENT;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_TRUST;
 import static com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController.INDICATION_TYPE_USER_LOCKED;
+import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_OFF;
+import static com.android.systemui.keyguard.ScreenLifecycle.SCREEN_ON;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -48,9 +56,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.IActivityManager;
 import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyResourcesManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -58,34 +66,38 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.graphics.Color;
+import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricSourceType;
-import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.BatteryManager;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.biometrics.FaceHelpMessageDeferral;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController;
+import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
-import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -103,9 +115,13 @@ import org.mockito.MockitoAnnotations;
 
 import java.text.NumberFormat;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     private static final String ORGANIZATION_NAME = "organization";
@@ -115,13 +131,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     private static final int TEST_STRING_RES = R.string.keyguard_indication_trust_unlocked;
 
-    private String mKeyguardTryFingerprintMsg;
     private String mDisclosureWithOrganization;
     private String mDisclosureGeneric;
     private String mFinancedDisclosureWithOrganization;
 
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private DevicePolicyResourcesManager mDevicePolicyResourcesManager;
     @Mock
     private ViewGroup mIndicationArea;
     @Mock
@@ -130,8 +147,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     private KeyguardIndicationTextView mIndicationAreaBottom;
     @Mock
     private BroadcastDispatcher mBroadcastDispatcher;
-    @Mock
-    private LockIcon mLockIcon;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -151,9 +166,13 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Mock
     private LockPatternUtils mLockPatternUtils;
     @Mock
-    private IActivityManager mIActivityManager;
-    @Mock
     private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private FaceHelpMessageDeferral mFaceHelpMessageDeferral;
+    @Mock
+    private ScreenLifecycle mScreenLifecycle;
     @Captor
     private ArgumentCaptor<DockManager.AlignmentStateListener> mAlignmentListener;
     @Captor
@@ -163,11 +182,18 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<KeyguardIndication> mKeyguardIndicationCaptor;
     @Captor
+    private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallbackCaptor;
+    @Captor
     private ArgumentCaptor<KeyguardStateController.Callback> mKeyguardStateControllerCallbackCaptor;
+    @Captor
+    private ArgumentCaptor<ScreenLifecycle.Observer> mScreenObserverCaptor;
     private KeyguardStateController.Callback mKeyguardStateControllerCallback;
+    private KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback;
     private StatusBarStateController.StateListener mStatusBarStateListener;
+    private ScreenLifecycle.Observer mScreenObserver;
     private BroadcastReceiver mBroadcastReceiver;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+    private TestableLooper mTestableLooper;
 
     private KeyguardIndicationTextView mTextView; // AOD text
 
@@ -180,6 +206,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
+        mTestableLooper = TestableLooper.get(this);
         mTextView = new KeyguardIndicationTextView(mContext);
         mTextView.setAnimationsEnabled(false);
 
@@ -187,7 +214,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(UserManager.class, mUserManager);
         mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
         mContext.addMockSystemService(Context.FINGERPRINT_SERVICE, mock(FingerprintManager.class));
-        mKeyguardTryFingerprintMsg = mContext.getString(R.string.keyguard_try_fingerprint);
         mDisclosureWithOrganization = mContext.getString(R.string.do_disclosure_with_name,
                 ORGANIZATION_NAME);
         mDisclosureGeneric = mContext.getString(R.string.do_disclosure_generic);
@@ -195,17 +221,22 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 R.string.do_financed_disclosure_with_name, ORGANIZATION_NAME);
 
         when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
+        when(mScreenLifecycle.getScreenState()).thenReturn(SCREEN_ON);
         when(mKeyguardUpdateMonitor.isUserUnlocked(anyInt())).thenReturn(true);
 
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text_bottom))
                 .thenReturn(mIndicationAreaBottom);
         when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
 
+        when(mDevicePolicyManager.getResources()).thenReturn(mDevicePolicyResourcesManager);
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser())
                 .thenReturn(DEVICE_OWNER_COMPONENT);
         when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
+        when(mDevicePolicyResourcesManager.getString(anyString(), any()))
+                .thenReturn(mDisclosureGeneric);
+        when(mDevicePolicyResourcesManager.getString(anyString(), any(), anyString()))
+                .thenReturn(mDisclosureWithOrganization);
 
         mWakeLock = new WakeLockFake();
         mWakeLockBuilder = new WakeLockFake.Builder(mContext);
@@ -215,6 +246,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @After
     public void tearDown() throws Exception {
         mTextView.setAnimationsEnabled(true);
+        if (mController != null) {
+            mController.destroy();
+            mController = null;
+        }
     }
 
     private void createController() {
@@ -222,11 +257,15 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
             Looper.prepare();
         }
 
-        mController = new KeyguardIndicationController(mContext, mWakeLockBuilder,
+        mController = new KeyguardIndicationController(
+                mContext,
+                mTestableLooper.getLooper(),
+                mWakeLockBuilder,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
-                mUserManager, mExecutor, mFalsingManager, mLockPatternUtils, mIActivityManager,
-                mKeyguardBypassController);
+                mUserManager, mExecutor, mExecutor,  mFalsingManager, mLockPatternUtils,
+                mScreenLifecycle, mKeyguardBypassController, mAccessibilityManager,
+                mFaceHelpMessageDeferral);
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
@@ -240,6 +279,16 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verify(mKeyguardStateController).addCallback(
                 mKeyguardStateControllerCallbackCaptor.capture());
         mKeyguardStateControllerCallback = mKeyguardStateControllerCallbackCaptor.getValue();
+
+        verify(mKeyguardUpdateMonitor).registerCallback(
+                mKeyguardUpdateMonitorCallbackCaptor.capture());
+        mKeyguardUpdateMonitorCallback = mKeyguardUpdateMonitorCallbackCaptor.getValue();
+
+        verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
+        mScreenObserver = mScreenObserverCaptor.getValue();
+
+        mExecutor.runAllReady();
+        reset(mRotateTextViewController);
     }
 
     @Test
@@ -260,7 +309,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
             mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
         });
         mInstrumentation.waitForIdleSync();
-
+        mTestableLooper.processAllMessages();
 
         verifyIndicationMessage(INDICATION_TYPE_ALIGNMENT,
                 mContext.getResources().getString(R.string.dock_alignment_slow_charging));
@@ -278,6 +327,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
             mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
         });
         mInstrumentation.waitForIdleSync();
+        mTestableLooper.processAllMessages();
 
         verifyIndicationMessage(INDICATION_TYPE_ALIGNMENT,
                 mContext.getResources().getString(R.string.dock_alignment_not_charging));
@@ -296,6 +346,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
             mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_POOR);
         });
         mInstrumentation.waitForIdleSync();
+        mTestableLooper.processAllMessages();
 
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(R.string.dock_alignment_slow_charging));
@@ -314,6 +365,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
             mAlignmentListener.getValue().onAlignmentStateChanged(DockManager.ALIGN_STATE_TERRIBLE);
         });
         mInstrumentation.waitForIdleSync();
+        mTestableLooper.processAllMessages();
 
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(R.string.dock_alignment_not_charging));
@@ -324,9 +376,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_unmanaged() {
         createController();
+        mController.setVisible(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
         when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(false);
+        reset(mRotateTextViewController);
+
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyHideIndication(INDICATION_TYPE_DISCLOSURE);
     }
@@ -334,9 +391,12 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_deviceOwner_noOrganizationName() {
         createController();
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
         sendUpdateDisclosureBroadcast();
+        mController.setVisible(true);
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureGeneric);
     }
@@ -344,11 +404,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_orgOwnedDeviceWithManagedProfile_noOrganizationName() {
         createController();
+        mController.setVisible(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(true);
         when(mUserManager.getProfiles(anyInt())).thenReturn(Collections.singletonList(
                 new UserInfo(10, /* name */ null, /* flags */ FLAG_MANAGED_PROFILE)));
         when(mDevicePolicyManager.getOrganizationNameForUser(eq(10))).thenReturn(null);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureGeneric);
     }
@@ -356,9 +419,12 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_deviceOwner_withOrganizationName() {
         createController();
+        mController.setVisible(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureWithOrganization);
     }
@@ -366,23 +432,29 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_orgOwnedDeviceWithManagedProfile_withOrganizationName() {
         createController();
+        mController.setVisible(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(true);
         when(mUserManager.getProfiles(anyInt())).thenReturn(Collections.singletonList(
                 new UserInfo(10, /* name */ null, FLAG_MANAGED_PROFILE)));
         when(mDevicePolicyManager.getOrganizationNameForUser(eq(10))).thenReturn(ORGANIZATION_NAME);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureWithOrganization);
     }
 
     @Test
     public void disclosure_updateOnTheFly() {
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
         createController();
+        mController.setVisible(true);
 
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureGeneric);
         reset(mRotateTextViewController);
@@ -390,12 +462,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureWithOrganization);
         reset(mRotateTextViewController);
 
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyHideIndication(INDICATION_TYPE_DISCLOSURE);
     }
@@ -403,12 +477,15 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_deviceOwner_financedDeviceWithOrganizationName() {
         createController();
-
+        mController.setVisible(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
         when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
+        mController.setVisible(true);
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mFinancedDisclosureWithOrganization);
     }
@@ -446,10 +523,10 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void transientIndication_visibleWhenDozing() {
         createController();
-
         mController.setVisible(true);
-        mController.showTransientIndication(TEST_STRING_RES);
+
         mStatusBarStateListener.onDozingChanged(true);
+        mController.showTransientIndication(TEST_STRING_RES);
 
         assertThat(mTextView.getText()).isEqualTo(
                 mContext.getResources().getString(TEST_STRING_RES));
@@ -464,13 +541,65 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         mController.setVisible(true);
         mController.getKeyguardCallback().onBiometricHelp(
-                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, message,
+                BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, message,
                 BiometricSourceType.FACE);
         verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, message);
         reset(mRotateTextViewController);
         mStatusBarStateListener.onDozingChanged(true);
 
-        verifyHideIndication(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+        assertThat(mTextView.getText()).isNotEqualTo(message);
+    }
+
+    @Test
+    public void transientIndication_visibleWhenWokenUp() {
+        createController();
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        final String message = "helpMsg";
+
+        // GIVEN screen is off
+        when(mScreenLifecycle.getScreenState()).thenReturn(SCREEN_OFF);
+
+        // WHEN fingeprint help message received
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricHelp(BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                message, BiometricSourceType.FINGERPRINT);
+
+        // THEN message isn't shown right away
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+
+        // WHEN the screen turns on
+        mScreenObserver.onScreenTurnedOn();
+        mTestableLooper.processAllMessages();
+
+        // THEN the message is shown
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, message);
+    }
+
+    @Test
+    public void onBiometricHelp_coEx_faceFailure() {
+        createController();
+
+        // GIVEN unlocking with fingerprint is possible
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(anyInt()))
+                .thenReturn(true);
+
+        String message = "A message";
+        mController.setVisible(true);
+
+        // WHEN there's a face not recognized message
+        mController.getKeyguardCallback().onBiometricHelp(
+                BIOMETRIC_HELP_FACE_NOT_RECOGNIZED,
+                message,
+                BiometricSourceType.FACE);
+
+        // THEN show sequential messages such as: 'face not recognized' and
+        // 'try fingerprint instead'
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                mContext.getString(R.string.keyguard_face_failed));
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_suggest_fingerprint));
     }
 
     @Test
@@ -479,7 +608,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         String message = mContext.getString(R.string.keyguard_unlock);
 
         mController.setVisible(true);
-        mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
+        mController.getKeyguardCallback().onBiometricError(FACE_ERROR_TIMEOUT,
                 "A message", BiometricSourceType.FACE);
 
         verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, message);
@@ -506,6 +635,19 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void transientIndication_visibleWhenDozing_ignoresPowerPressed() {
+        createController();
+
+        mController.setVisible(true);
+        reset(mRotateTextViewController);
+        mController.getKeyguardCallback().onBiometricError(
+                FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED, "foo",
+                BiometricSourceType.FINGERPRINT);
+
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+    }
+
+    @Test
     public void transientIndication_swipeUpToRetry() {
         createController();
         String message = mContext.getString(R.string.keyguard_retry);
@@ -513,10 +655,170 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.isFaceEnrolled()).thenReturn(true);
 
         mController.setVisible(true);
-        mController.getKeyguardCallback().onBiometricError(FaceManager.FACE_ERROR_TIMEOUT,
+        mController.getKeyguardCallback().onBiometricError(FACE_ERROR_TIMEOUT,
                 "A message", BiometricSourceType.FACE);
 
-        verify(mStatusBarKeyguardViewManager).showBouncerMessage(eq(message), any());
+        verify(mStatusBarKeyguardViewManager).setKeyguardMessage(eq(message), any());
+    }
+
+    @Test
+    public void faceErrorTimeout_whenFingerprintEnrolled_doesNotShowMessage() {
+        createController();
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(true);
+        String message = "A message";
+
+        mController.setVisible(true);
+        mController.getKeyguardCallback().onBiometricError(
+                FACE_ERROR_TIMEOUT, message, BiometricSourceType.FACE);
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+    }
+
+    @Test
+    public void sendFaceHelpMessages_fingerprintEnrolled() {
+        createController();
+
+        // GIVEN fingerprint enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(true);
+
+        // WHEN help messages received that are allowed to show
+        final String helpString = "helpString";
+        final int[] msgIds = new int[]{
+                BiometricFaceConstants.FACE_ACQUIRED_MOUTH_COVERING_DETECTED,
+                BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED
+        };
+        Set<CharSequence> messages = new HashSet<>();
+        for (int msgId : msgIds) {
+            final String message = helpString + msgId;
+            messages.add(message);
+            mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                    msgId, message, BiometricSourceType.FACE);
+        }
+
+        // THEN FACE_ACQUIRED_MOUTH_COVERING_DETECTED and DARK_GLASSES help messages shown
+        verifyIndicationMessages(INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                messages);
+    }
+
+    @Test
+    public void doNotSendMostFaceHelpMessages_fingerprintEnrolled() {
+        createController();
+
+        // GIVEN fingerprint enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(true);
+
+        // WHEN help messages received that aren't supposed to show
+        final String helpString = "helpString";
+        final int[] msgIds = new int[]{
+                BiometricFaceConstants.FACE_ACQUIRED_FACE_OBSCURED,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_RIGHT,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_LEFT,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_HIGH,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_LOW,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT
+        };
+        for (int msgId : msgIds) {
+            mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                    msgId,  helpString + msgId, BiometricSourceType.FACE);
+        }
+
+        // THEN no messages shown
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+    }
+
+    @Test
+    public void sendAllFaceHelpMessages_fingerprintNotEnrolled() {
+        createController();
+
+        // GIVEN fingerprint NOT enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(false);
+
+        // WHEN help messages received
+        final Set<CharSequence> helpStrings = new HashSet<>();
+        final String helpString = "helpString";
+        final int[] msgIds = new int[]{
+                BiometricFaceConstants.FACE_ACQUIRED_FACE_OBSCURED,
+                BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_RIGHT,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_LEFT,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_HIGH,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_LOW,
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_BRIGHT
+        };
+        for (int msgId : msgIds) {
+            final String numberedHelpString = helpString + msgId;
+            mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                    msgId,  numberedHelpString, BiometricSourceType.FACE);
+            helpStrings.add(numberedHelpString);
+        }
+
+        // THEN message shown for each call
+        verifyIndicationMessages(INDICATION_TYPE_BIOMETRIC_MESSAGE, helpStrings);
+    }
+
+    @Test
+    public void sendTooDarkFaceHelpMessages_onTimeout_noFpEnrolled() {
+        createController();
+
+        // GIVEN fingerprint NOT enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(false);
+
+        // WHEN help message received and deferred message is valid
+        final String helpString = "helpMsg";
+        when(mFaceHelpMessageDeferral.getDeferredMessage()).thenReturn(helpString);
+        when(mFaceHelpMessageDeferral.shouldDefer(FACE_ACQUIRED_TOO_DARK)).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK,
+                helpString,
+                BiometricSourceType.FACE
+        );
+
+        // THEN help message not shown yet
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+
+        // WHEN face timeout error received
+        mKeyguardUpdateMonitorCallback.onBiometricError(FACE_ERROR_TIMEOUT, "face timeout",
+                BiometricSourceType.FACE);
+
+        // THEN the low light message shows with suggestion to swipe up to unlock
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, helpString);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void sendTooDarkFaceHelpMessages_onTimeout_fingerprintEnrolled() {
+        createController();
+
+        // GIVEN fingerprint enrolled
+        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
+                0)).thenReturn(true);
+
+        // WHEN help message received and deferredMessage is valid
+        final String helpString = "helpMsg";
+        when(mFaceHelpMessageDeferral.getDeferredMessage()).thenReturn(helpString);
+        when(mFaceHelpMessageDeferral.shouldDefer(FACE_ACQUIRED_TOO_DARK)).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                BiometricFaceConstants.FACE_ACQUIRED_TOO_DARK,
+                helpString,
+                BiometricSourceType.FACE
+        );
+
+        // THEN help message not shown yet
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+
+        // WHEN face timeout error received
+        mKeyguardUpdateMonitorCallback.onBiometricError(FACE_ERROR_TIMEOUT, "face timeout",
+                BiometricSourceType.FACE);
+
+        // THEN the low light message shows and suggests trying fingerprint
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, helpString);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_suggest_fingerprint));
     }
 
     @Test
@@ -581,10 +883,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void updateMonitor_listener() {
+    public void registersKeyguardStateCallback() {
         createController();
         verify(mKeyguardStateController).addCallback(any());
-        verify(mKeyguardUpdateMonitor, times(2)).registerCallback(any());
     }
 
     @Test
@@ -672,13 +973,13 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void onRefreshBatteryInfo_dozing_dischargingWithOverheat_presentBatteryPercentage() {
         createController();
+        mController.setVisible(true);
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_DISCHARGING,
                 90 /* level */, 0 /* plugged */, BatteryManager.BATTERY_HEALTH_OVERHEAT,
                 0 /* maxChargingWattage */, true /* present */);
 
         mController.getKeyguardCallback().onRefreshBatteryInfo(status);
         mStatusBarStateListener.onDozingChanged(true);
-        mController.setVisible(true);
 
         String percentage = NumberFormat.getPercentInstance().format(90 / 100f);
         assertThat(mTextView.getText()).isEqualTo(percentage);
@@ -687,57 +988,405 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void onRequireUnlockForNfc_showsRequireUnlockForNfcIndication() {
         createController();
+        mController.setVisible(true);
         String message = mContext.getString(R.string.require_unlock_for_nfc);
         mController.getKeyguardCallback().onRequireUnlockForNfc();
-        mController.setVisible(true);
 
         verifyTransientMessage(message);
-    }
-
-    @Test
-    public void faceAuthMessageSuppressed() {
-        createController();
-        String faceHelpMsg = "Face auth help message";
-
-        // GIVEN state of showing message when keyguard screen is on
-        when(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
-        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mKeyguardUpdateMonitor.isScreenOn()).thenReturn(true);
-
-        // GIVEN fingerprint is also running (not udfps)
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
-        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(false);
-
-        mController.setVisible(true);
-
-        // WHEN a face help message comes in
-        mController.getKeyguardCallback().onBiometricHelp(
-                KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED, faceHelpMsg,
-                BiometricSourceType.FACE);
-
-        // THEN no help message appears
-        verify(mRotateTextViewController, never()).showTransient(anyString());
-
-        // THEN the face help message is still announced for a11y
-        verify(mIndicationAreaBottom).announceForAccessibility(eq(faceHelpMsg));
     }
 
     @Test
     public void testEmptyOwnerInfoHidesIndicationArea() {
         createController();
 
-        // GIVEN the owner info is set to an empty string
+        // GIVEN the owner info is set to an empty string & keyguard is showing
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mLockPatternUtils.getDeviceOwnerInfo()).thenReturn("");
 
         // WHEN asked to update the indication area
         mController.setVisible(true);
+        mExecutor.runAllReady();
 
         // THEN the owner info should be hidden
         verifyHideIndication(INDICATION_TYPE_OWNER_INFO);
     }
 
+    @Test
+    public void testOnKeyguardShowingChanged_notShowing_resetsMessages() {
+        createController();
+
+        // GIVEN keyguard isn't showing
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+
+        // WHEN keyguard showing changed called
+        mKeyguardStateControllerCallback.onKeyguardShowingChanged();
+
+        // THEN messages are reset
+        verify(mRotateTextViewController).clearMessages();
+        assertThat(mTextView.getText()).isEqualTo("");
+    }
+
+    @Test
+    public void testOnKeyguardShowingChanged_showing_updatesPersistentMessages() {
+        createController();
+        mController.setVisible(true);
+        mExecutor.runAllReady();
+        reset(mRotateTextViewController);
+
+        // GIVEN keyguard is showing
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+
+        // WHEN keyguard showing changed called
+        mKeyguardStateControllerCallback.onKeyguardShowingChanged();
+        mExecutor.runAllReady();
+
+        // THEN persistent messages are updated (in this case, most messages are hidden since
+        // no info is provided) - verify that this happens
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_DISCLOSURE);
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_OWNER_INFO);
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_BATTERY);
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_TRUST);
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_ALIGNMENT);
+        verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_LOGOUT);
+    }
+
+    @Test
+    public void onTrustGrantedMessageDoesNotShowUntilTrustGranted() {
+        createController();
+        mController.setVisible(true);
+        reset(mRotateTextViewController);
+
+        // GIVEN a trust granted message but trust isn't granted
+        final String trustGrantedMsg = "testing trust granted message";
+        mController.getKeyguardCallback().showTrustGrantedMessage(trustGrantedMsg);
+
+        verifyHideIndication(INDICATION_TYPE_TRUST);
+
+        // WHEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+        mKeyguardUpdateMonitorCallback.onTrustChanged(KeyguardUpdateMonitor.getCurrentUser());
+
+        // THEN verify the trust granted message shows
+        verifyIndicationMessage(
+                INDICATION_TYPE_TRUST,
+                trustGrantedMsg);
+    }
+
+    @Test
+    public void onTrustGrantedMessageShowsOnTrustGranted() {
+        createController();
+        mController.setVisible(true);
+
+        // GIVEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+
+        // WHEN the showTrustGranted method is called
+        final String trustGrantedMsg = "testing trust granted message";
+        mController.getKeyguardCallback().showTrustGrantedMessage(trustGrantedMsg);
+
+        // THEN verify the trust granted message shows
+        verifyIndicationMessage(
+                INDICATION_TYPE_TRUST,
+                trustGrantedMsg);
+    }
+
+    @Test
+    public void onTrustGrantedMessage_nullMessage_showsDefaultMessage() {
+        createController();
+        mController.setVisible(true);
+
+        // GIVEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+
+        // WHEN the showTrustGranted method is called with a null message
+        mController.getKeyguardCallback().showTrustGrantedMessage(null);
+
+        // THEN verify the default trust granted message shows
+        verifyIndicationMessage(
+                INDICATION_TYPE_TRUST,
+                getContext().getString(R.string.keyguard_indication_trust_unlocked));
+    }
+
+    @Test
+    public void onTrustGrantedMessage_emptyString_showsNoMessage() {
+        createController();
+        mController.setVisible(true);
+
+        // GIVEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+
+        // WHEN the showTrustGranted method is called with an EMPTY string
+        mController.getKeyguardCallback().showTrustGrantedMessage("");
+
+        // THEN verify NO trust message is shown
+        verifyNoMessage(INDICATION_TYPE_TRUST);
+    }
+
+    @Test
+    public void coEx_faceSuccess_showsPressToOpen() {
+        // GIVEN bouncer isn't showing, can skip bouncer, udfps is supported, no a11y enabled
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
+        when(mAccessibilityManager.isEnabled()).thenReturn(false);
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
+        createController();
+        mController.setVisible(true);
+
+        // WHEN face auth succeeds
+        when(mKeyguardUpdateMonitor.getIsFaceAuthenticated()).thenReturn(true);
+        mController.getKeyguardCallback().onBiometricAuthenticated(0,
+                BiometricSourceType.FACE, false);
+
+        // THEN 'face unlocked' then 'press unlock icon to open' message show
+        String unlockedByFace = mContext.getString(R.string.keyguard_face_successful_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, unlockedByFace);
+        String pressToOpen = mContext.getString(R.string.keyguard_unlock_press);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP, pressToOpen);
+    }
+
+    @Test
+    public void coEx_faceSuccess_touchExplorationEnabled_showsFaceUnlockedSwipeToOpen() {
+        // GIVEN bouncer isn't showing, can skip bouncer, udfps is supported, a11y enabled
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
+        when(mAccessibilityManager.isEnabled()).thenReturn(true);
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
+        createController();
+        mController.setVisible(true);
+
+        // WHEN face authenticated
+        when(mKeyguardUpdateMonitor.getIsFaceAuthenticated()).thenReturn(true);
+        mController.getKeyguardCallback().onBiometricAuthenticated(0,
+                BiometricSourceType.FACE, false);
+
+        // THEN show 'face unlocked' and 'swipe up to open' messages
+        String unlockedByFace = mContext.getString(R.string.keyguard_face_successful_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, unlockedByFace);
+        String swipeUpToOpen = mContext.getString(R.string.keyguard_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP, swipeUpToOpen);
+    }
+
+    @Test
+    public void coEx_faceSuccess_a11yEnabled_showsFaceUnlockedSwipeToOpen() {
+        // GIVEN bouncer isn't showing, can skip bouncer, udfps is supported, a11y is enabled
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
+        when(mAccessibilityManager.isEnabled()).thenReturn(true);
+        createController();
+        mController.setVisible(true);
+
+        // WHEN face auth is successful
+        when(mKeyguardUpdateMonitor.getIsFaceAuthenticated()).thenReturn(true);
+        mController.getKeyguardCallback().onBiometricAuthenticated(0,
+                BiometricSourceType.FACE, false);
+
+        // THEN show 'face unlocked' and 'swipe up to open' messages
+        String unlockedByFace = mContext.getString(R.string.keyguard_face_successful_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, unlockedByFace);
+        String swipeUpToOpen = mContext.getString(R.string.keyguard_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP, swipeUpToOpen);
+    }
+
+    @Test
+    public void faceOnly_faceSuccess_showsFaceUnlockedSwipeToOpen() {
+        // GIVEN bouncer isn't showing, can skip bouncer, no udfps supported
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(false);
+        createController();
+        mController.setVisible(true);
+
+        // WHEN face auth is successful
+        when(mKeyguardUpdateMonitor.getIsFaceAuthenticated()).thenReturn(true);
+        mController.getKeyguardCallback().onBiometricAuthenticated(0,
+                BiometricSourceType.FACE, false);
+
+        // THEN show 'face unlocked' and 'swipe up to open' messages
+        String unlockedByFace = mContext.getString(R.string.keyguard_face_successful_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, unlockedByFace);
+        String swipeUpToOpen = mContext.getString(R.string.keyguard_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP, swipeUpToOpen);
+    }
+
+    @Test
+    public void udfpsOnly_a11yEnabled_showsSwipeToOpen() {
+        // GIVEN bouncer isn't showing, can skip bouncer, udfps is supported, a11y is enabled
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
+        when(mAccessibilityManager.isEnabled()).thenReturn(true);
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(true);
+        createController();
+        mController.setVisible(true);
+
+        // WHEN showActionToUnlock
+        mController.showActionToUnlock();
+
+        // THEN show 'swipe up to open' message
+        String swipeToOpen = mContext.getString(R.string.keyguard_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, swipeToOpen);
+    }
+
+    @Test
+    public void udfpsOnly_showsPressToOpen() {
+        // GIVEN bouncer isn't showing, udfps is supported, a11y is NOT enabled, can skip bouncer
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(true);
+        when(mAccessibilityManager.isEnabled()).thenReturn(false);
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
+        createController();
+        mController.setVisible(true);
+
+        // WHEN showActionToUnlock
+        mController.showActionToUnlock();
+
+        // THEN show 'press unlock icon to open' message
+        String pressToOpen = mContext.getString(R.string.keyguard_unlock_press);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, pressToOpen);
+    }
+
+    @Test
+    public void canSkipBouncer_noSecurity_showSwipeToUnlockHint() {
+        // GIVEN bouncer isn't showing, can skip bouncer, no security (udfps isn't supported,
+        // face wasn't authenticated)
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(true);
+        when(mKeyguardUpdateMonitor.isUdfpsSupported()).thenReturn(false);
+        createController();
+        mController.setVisible(true);
+
+        // WHEN showActionToUnlock
+        mController.showActionToUnlock();
+
+        // THEN show 'swipe up to open' message
+        String swipeToOpen = mContext.getString(R.string.keyguard_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, swipeToOpen);
+    }
+
+    @Test
+    public void cannotSkipBouncer_showSwipeToUnlockHint() {
+        // GIVEN bouncer isn't showing and cannot skip bouncer
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(KeyguardUpdateMonitor.getCurrentUser()))
+                .thenReturn(false);
+        createController();
+        mController.setVisible(true);
+
+        // WHEN showActionToUnlock
+        mController.showActionToUnlock();
+
+        // THEN show 'swipe up to open' message
+        String swipeToOpen = mContext.getString(R.string.keyguard_unlock);
+        verifyIndicationMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE, swipeToOpen);
+    }
+
+    @Test
+    public void faceOnAcquired_processFrame() {
+        createController();
+
+        // WHEN face sends an acquired message
+        final int acquireInfo = 1;
+        mKeyguardUpdateMonitorCallback.onBiometricAcquired(BiometricSourceType.FACE, acquireInfo);
+
+        // THEN face help message deferral should process the acquired frame
+        verify(mFaceHelpMessageDeferral).processFrame(acquireInfo);
+    }
+
+    @Test
+    public void fingerprintOnAcquired_noProcessFrame() {
+        createController();
+
+        // WHEN fingerprint sends an acquired message
+        mKeyguardUpdateMonitorCallback.onBiometricAcquired(BiometricSourceType.FINGERPRINT, 1);
+
+        // THEN face help message deferral should NOT process any acquired frames
+        verify(mFaceHelpMessageDeferral, never()).processFrame(anyInt());
+    }
+
+    @Test
+    public void onBiometricHelp_fingerprint_faceHelpMessageDeferralDoesNothing() {
+        createController();
+
+        // WHEN fingerprint sends an onBiometricHelp
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                1,
+                "placeholder",
+                BiometricSourceType.FINGERPRINT);
+
+        // THEN face help message deferral is NOT: reset, updated, or checked for shouldDefer
+        verify(mFaceHelpMessageDeferral, never()).reset();
+        verify(mFaceHelpMessageDeferral, never()).updateMessage(anyInt(), anyString());
+        verify(mFaceHelpMessageDeferral, never()).shouldDefer(anyInt());
+    }
+
+    @Test
+    public void onBiometricFailed_resetFaceHelpMessageDeferral() {
+        createController();
+
+        // WHEN face sends an onBiometricHelp BIOMETRIC_HELP_FACE_NOT_RECOGNIZED
+        mKeyguardUpdateMonitorCallback.onBiometricAuthFailed(BiometricSourceType.FACE);
+
+        // THEN face help message deferral is reset
+        verify(mFaceHelpMessageDeferral).reset();
+    }
+
+    @Test
+    public void onBiometricError_resetFaceHelpMessageDeferral() {
+        createController();
+
+        // WHEN face has an error
+        mKeyguardUpdateMonitorCallback.onBiometricError(4, "string",
+                BiometricSourceType.FACE);
+
+        // THEN face help message deferral is reset
+        verify(mFaceHelpMessageDeferral).reset();
+    }
+
+    @Test
+    public void onBiometricHelp_faceAcquiredInfo_faceHelpMessageDeferral() {
+        createController();
+
+        // WHEN face sends an onBiometricHelp BIOMETRIC_HELP_FACE_NOT_RECOGNIZED
+        final int msgId = 1;
+        final String helpString = "test";
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                msgId,
+                "test",
+                BiometricSourceType.FACE);
+
+        // THEN face help message deferral is NOT reset and message IS updated
+        verify(mFaceHelpMessageDeferral, never()).reset();
+        verify(mFaceHelpMessageDeferral).updateMessage(msgId, helpString);
+    }
+
+
+
     private void sendUpdateDisclosureBroadcast() {
         mBroadcastReceiver.onReceive(mContext, new Intent());
+    }
+
+    private void verifyIndicationMessages(int type, Set<CharSequence> messages) {
+        verify(mRotateTextViewController, times(messages.size())).updateIndication(eq(type),
+                mKeyguardIndicationCaptor.capture(), anyBoolean());
+        List<KeyguardIndication> kis = mKeyguardIndicationCaptor.getAllValues();
+
+        for (KeyguardIndication ki : kis) {
+            final CharSequence msg = ki.getMessage();
+            assertTrue(messages.contains(msg)); // check message is shown
+            messages.remove(msg);
+        }
+        assertThat(messages.size()).isEqualTo(0); // check that all messages accounted for (removed)
     }
 
     private void verifyIndicationMessage(int type, String message) {

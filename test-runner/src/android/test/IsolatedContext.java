@@ -17,6 +17,7 @@
 package android.test;
 
 import android.accounts.AccountManager;
+import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Process;
 import android.test.mock.MockAccountManager;
 
 import java.io.File;
@@ -61,6 +63,15 @@ public class IsolatedContext extends ContextWrapper {
         List<Intent> intents = mBroadcastIntents;
         mBroadcastIntents = new ArrayList<>();
         return intents;
+    }
+
+    @Override
+    public AttributionSource getAttributionSource() {
+        AttributionSource attributionSource = super.getAttributionSource();
+        if (attributionSource == null) {
+            return new AttributionSource.Builder(Process.myUid()).build();
+        }
+        return attributionSource;
     }
 
     @Override

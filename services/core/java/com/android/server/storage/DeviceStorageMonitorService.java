@@ -24,6 +24,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileObserver;
@@ -31,12 +32,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.provider.DeviceConfig;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.DataUnit;
@@ -48,6 +49,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.PackageManagerService;
 
@@ -75,10 +77,12 @@ public class DeviceStorageMonitorService extends SystemService {
      */
     public static final String EXTRA_SEQUENCE = "seq";
 
-    private static final int MSG_CHECK = 1;
+    private static final int MSG_CHECK_LOW = 1;
+    private static final int MSG_CHECK_HIGH = 2;
 
     private static final long DEFAULT_LOG_DELTA_BYTES = DataUnit.MEBIBYTES.toBytes(64);
-    private static final long DEFAULT_CHECK_INTERVAL = DateUtils.MINUTE_IN_MILLIS;
+    private static final long LOW_CHECK_INTERVAL = DateUtils.MINUTE_IN_MILLIS;
+    private static final long HIGH_CHECK_INTERVAL = 10 * DateUtils.HOUR_IN_MILLIS;
 
     // com.android.internal.R.string.low_internal_storage_view_text_no_boot
     // hard codes 250MB in the message as the storage space required for the
@@ -165,12 +169,12 @@ public class DeviceStorageMonitorService extends SystemService {
     }
 
     /**
-     * Core logic that checks the storage state of every mounted private volume.
-     * Since this can do heavy I/O, callers should invoke indirectly using
-     * {@link #MSG_CHECK}.
+     * Core logic that checks the storage state of every mounted private volume and clears cache
+     * under low storage state. Since this can do heavy I/O, callers should invoke indirectly using
+     * {@link #MSG_CHECK_LOW}.
      */
     @WorkerThread
-    private void check() {
+    private void checkLow() {
         final StorageManager storage = getContext().getSystemService(StorageManager.class);
         final int seq = mSeq.get();
 
@@ -184,10 +188,10 @@ public class DeviceStorageMonitorService extends SystemService {
             // when it's within 150% of the threshold, we try trimming usage
             // back to 200% of the threshold.
             if (file.getUsableSpace() < (lowBytes * 3) / 2) {
-                final PackageManagerService pms = (PackageManagerService) ServiceManager
-                        .getService("package");
+                final PackageManagerInternal pm =
+                        LocalServices.getService(PackageManagerInternal.class);
                 try {
-                    pms.freeStorage(vol.getFsUuid(), lowBytes * 2, 0);
+                    pm.freeStorage(vol.getFsUuid(), lowBytes * 2, 0);
                 } catch (IOException e) {
                     Slog.w(TAG, e);
                 }
@@ -234,9 +238,48 @@ public class DeviceStorageMonitorService extends SystemService {
 
         // Loop around to check again in future; we don't remove messages since
         // there might be an immediate request pending.
-        if (!mHandler.hasMessages(MSG_CHECK)) {
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CHECK),
-                    DEFAULT_CHECK_INTERVAL);
+        if (!mHandler.hasMessages(MSG_CHECK_LOW)) {
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CHECK_LOW),
+                    LOW_CHECK_INTERVAL);
+        }
+        if (!mHandler.hasMessages(MSG_CHECK_HIGH)) {
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CHECK_HIGH),
+                    HIGH_CHECK_INTERVAL);
+        }
+    }
+
+    /**
+     * Core logic that checks the storage state of every mounted private volume and clears cache if
+     * free space is under 20% of total space. Since this can do heavy I/O, callers should invoke
+     * indirectly using {@link #MSG_CHECK_HIGH}.
+     */
+    @WorkerThread
+    private void checkHigh() {
+        final StorageManager storage = getContext().getSystemService(StorageManager.class);
+        // Check every mounted private volume to see if they're under the high storage threshold
+        // which is storageThresholdPercentHigh of total space
+        final int storageThresholdPercentHigh = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH_KEY,
+                StorageManager.DEFAULT_STORAGE_THRESHOLD_PERCENT_HIGH);
+        for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+            final File file = vol.getPath();
+            if (file.getUsableSpace() < file.getTotalSpace() * storageThresholdPercentHigh / 100) {
+                final PackageManagerInternal pm =
+                        LocalServices.getService(PackageManagerInternal.class);
+                try {
+                    pm.freeAllAppCacheAboveQuota(vol.getFsUuid());
+                } catch (IOException e) {
+                    Slog.w(TAG, e);
+                }
+            }
+        }
+
+        // Loop around to check again in future; we don't remove messages since
+        // there might be an immediate request pending
+        if (!mHandler.hasMessages(MSG_CHECK_HIGH)) {
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CHECK_HIGH),
+                    HIGH_CHECK_INTERVAL);
         }
     }
 
@@ -250,8 +293,11 @@ public class DeviceStorageMonitorService extends SystemService {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case MSG_CHECK:
-                        check();
+                    case MSG_CHECK_LOW:
+                        checkLow();
+                        return;
+                    case MSG_CHECK_HIGH:
+                        checkHigh();
                         return;
                 }
             }
@@ -282,16 +328,16 @@ public class DeviceStorageMonitorService extends SystemService {
         publishLocalService(DeviceStorageMonitorInternal.class, mLocalService);
 
         // Kick off pass to examine storage state
-        mHandler.removeMessages(MSG_CHECK);
-        mHandler.obtainMessage(MSG_CHECK).sendToTarget();
+        mHandler.removeMessages(MSG_CHECK_LOW);
+        mHandler.obtainMessage(MSG_CHECK_LOW).sendToTarget();
     }
 
     private final DeviceStorageMonitorInternal mLocalService = new DeviceStorageMonitorInternal() {
         @Override
         public void checkMemory() {
             // Kick off pass to examine storage state
-            mHandler.removeMessages(MSG_CHECK);
-            mHandler.obtainMessage(MSG_CHECK).sendToTarget();
+            mHandler.removeMessages(MSG_CHECK_LOW);
+            mHandler.obtainMessage(MSG_CHECK_LOW).sendToTarget();
         }
 
         @Override
@@ -360,8 +406,8 @@ public class DeviceStorageMonitorService extends SystemService {
                 mForceLevel = State.LEVEL_LOW;
                 int seq = mSeq.incrementAndGet();
                 if ((opts & OPTION_FORCE_UPDATE) != 0) {
-                    mHandler.removeMessages(MSG_CHECK);
-                    mHandler.obtainMessage(MSG_CHECK).sendToTarget();
+                    mHandler.removeMessages(MSG_CHECK_LOW);
+                    mHandler.obtainMessage(MSG_CHECK_LOW).sendToTarget();
                     pw.println(seq);
                 }
             } break;
@@ -372,8 +418,8 @@ public class DeviceStorageMonitorService extends SystemService {
                 mForceLevel = State.LEVEL_NORMAL;
                 int seq = mSeq.incrementAndGet();
                 if ((opts & OPTION_FORCE_UPDATE) != 0) {
-                    mHandler.removeMessages(MSG_CHECK);
-                    mHandler.obtainMessage(MSG_CHECK).sendToTarget();
+                    mHandler.removeMessages(MSG_CHECK_LOW);
+                    mHandler.obtainMessage(MSG_CHECK_LOW).sendToTarget();
                     pw.println(seq);
                 }
             } break;
@@ -384,8 +430,8 @@ public class DeviceStorageMonitorService extends SystemService {
                 mForceLevel = State.LEVEL_UNKNOWN;
                 int seq = mSeq.incrementAndGet();
                 if ((opts & OPTION_FORCE_UPDATE) != 0) {
-                    mHandler.removeMessages(MSG_CHECK);
-                    mHandler.obtainMessage(MSG_CHECK).sendToTarget();
+                    mHandler.removeMessages(MSG_CHECK_LOW);
+                    mHandler.obtainMessage(MSG_CHECK_LOW).sendToTarget();
                     pw.println(seq);
                 }
             } break;

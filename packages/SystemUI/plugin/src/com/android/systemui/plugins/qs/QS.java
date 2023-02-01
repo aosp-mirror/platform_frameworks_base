@@ -15,7 +15,8 @@
 package com.android.systemui.plugins.qs;
 
 import android.view.View;
-import android.view.View.OnClickListener;
+
+import androidx.annotation.FloatRange;
 
 import com.android.systemui.plugins.FragmentBase;
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -34,7 +35,7 @@ public interface QS extends FragmentBase {
 
     String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    int VERSION = 12;
+    int VERSION = 15;
 
     String TAG = "QS";
 
@@ -51,6 +52,14 @@ public interface QS extends FragmentBase {
     void setOverscrolling(boolean overscrolling);
     void setExpanded(boolean qsExpanded);
     void setListening(boolean listening);
+
+    /**
+     * Set whether QQS/QS is visible or not.
+     *
+     * This is different from setExpanded, as it will be true when QQS is visible. In particular,
+     * it should be false when device is locked and only notifications (in lockscreen) are visible.
+     */
+    void setQsVisible(boolean qsVisible);
     boolean isShowingDetail();
     void closeDetail();
     void animateHeaderSlidingOut();
@@ -68,7 +77,17 @@ public interface QS extends FragmentBase {
     void setHeaderListening(boolean listening);
     void notifyCustomizeChanged();
     void setContainerController(QSContainerController controller);
-    void setExpandClickListener(OnClickListener onClickListener);
+
+    /**
+     * Provide an action to collapse if expanded or expand if collapsed.
+     * @param action
+     */
+    void setCollapseExpandAction(Runnable action);
+
+    /**
+     * Returns the height difference between the QSPanel container and the QuickQSPanel container
+     */
+    int getHeightDiff();
 
     View getHeader();
 
@@ -90,10 +109,24 @@ public interface QS extends FragmentBase {
     void setInSplitShade(boolean shouldTranslate);
 
     /**
-     * Set the amount of pixels we have currently dragged down if we're transitioning to the full
-     * shade. 0.0f means we're not transitioning yet.
+     * Sets the progress of the transition to full shade on the lockscreen.
+     *
+     * @param isTransitioningToFullShade
+     *        whether the transition to full shade is in progress. This might be {@code true}, even
+     *        though {@code qsTransitionFraction} is still 0.
+     *        The reason for that is that on some device configurations, the QS transition has a
+     *        start delay compared to the overall transition.
+     *
+     * @param qsTransitionFraction
+     *        the fraction of the QS transition progress, from 0 to 1.
+     *
+     * @param qsSquishinessFraction
+     *        the fraction of the QS "squish" transition progress, from 0 to 1.
      */
-    default void setTransitionToFullShadeAmount(float pxAmount, float progress) {}
+    default void setTransitionToFullShadeProgress(
+            boolean isTransitioningToFullShade,
+            @FloatRange(from = 0.0, to = 1.0) float qsTransitionFraction,
+            @FloatRange(from = 0.0, to = 1.0) float qsSquishinessFraction) {}
 
     /**
      * A rounded corner clipping that makes QS feel as if it were behind everything.
@@ -116,6 +149,17 @@ public interface QS extends FragmentBase {
      * Set a scroll listener for the QSPanel container
      */
     default void setScrollListener(ScrollListener scrollListener) {}
+
+    /**
+     * Sets the amount of vertical over scroll that should be performed on QS.
+     */
+    default void setOverScrollAmount(int overScrollAmount) {}
+
+    /**
+     * Sets whether the notification panel is using the full width of the screen. Typically true on
+     * small screens and false on large screens.
+     */
+    void setIsNotificationPanelFullWidth(boolean isFullWidth);
 
     /**
      * Callback for when QSPanel container is scrolled

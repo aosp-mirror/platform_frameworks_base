@@ -58,8 +58,8 @@
   </string-array>
   <string-array name="tile_states_flashlight">
     <item msgid="3465257127433353857">"Tidak tersedia"</item>
-    <item msgid="5044688398303285224">"Nonaktif"</item>
-    <item msgid="8527389108867454098">"Aktif"</item>
+    <item msgid="5044688398303285224">"Mati"</item>
+    <item msgid="8527389108867454098">"Nyala"</item>
   </string-array>
   <string-array name="tile_states_rotation">
     <item msgid="4578491772376121579">"Tidak tersedia"</item>
@@ -85,6 +85,11 @@
     <item msgid="3145597331197351214">"Tidak tersedia"</item>
     <item msgid="5715725170633593906">"Nonaktif"</item>
     <item msgid="2075645297847971154">"Aktif"</item>
+  </string-array>
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"Tidak tersedia"</item>
+    <item msgid="1909756493418256167">"Nonaktif"</item>
+    <item msgid="4531508423703413340">"Aktif"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Tidak tersedia"</item>
@@ -151,9 +156,24 @@
     <item msgid="7571394439974244289">"Nonaktif"</item>
     <item msgid="6866424167599381915">"Aktif"</item>
   </string-array>
+  <string-array name="tile_states_qr_code_scanner">
+    <item msgid="7435143266149257618">"Tidak tersedia"</item>
+    <item msgid="3301403109049256043">"Nonaktif"</item>
+    <item msgid="8878684975184010135">"Aktif"</item>
+  </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"Tidak tersedia"</item>
     <item msgid="2710157085538036590">"Nonaktif"</item>
     <item msgid="7809470840976856149">"Aktif"</item>
+  </string-array>
+  <string-array name="tile_states_onehanded">
+    <item msgid="8189342855739930015">"Tidak tersedia"</item>
+    <item msgid="146088982397753810">"Nonaktif"</item>
+    <item msgid="460891964396502657">"Aktif"</item>
+  </string-array>
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"Tidak tersedia"</item>
+    <item msgid="8014986104355098744">"Nonaktif"</item>
+    <item msgid="5966994759929723339">"Aktif"</item>
   </string-array>
 </resources>

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.dagger;
 
+import com.android.systemui.qs.FooterActionsController;
 import com.android.systemui.qs.QSAnimator;
 import com.android.systemui.qs.QSContainerImplController;
 import com.android.systemui.qs.QSFooter;
@@ -61,4 +62,7 @@ public interface QSFragmentComponent {
 
     /** Construct a {@link QSSquishinessController}. */
     QSSquishinessController getQSSquishinessController();
+
+    /** Construct a {@link FooterActionsController}. */
+    FooterActionsController getQSFooterActionController();
 }

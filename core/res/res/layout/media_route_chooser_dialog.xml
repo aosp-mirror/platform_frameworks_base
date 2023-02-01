@@ -28,20 +28,21 @@
 
     <!-- Content to show when list is empty. -->
     <LinearLayout android:id="@android:id/empty"
-              android:layout_width="match_parent"
-              android:layout_height="64dp"
-              android:orientation="horizontal"
-              android:paddingLeft="16dp"
-              android:paddingRight="16dp"
-              android:visibility="gone">
-        <ProgressBar android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_gravity="center" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:visibility="gone">
+        <ProgressBar android:id="@+id/media_route_progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
         <TextView android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_gravity="center"
-                  android:paddingStart="16dp"
-                  android:text="@string/media_route_chooser_searching" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingStart="16dp"
+            android:text="@string/media_route_chooser_searching" />
     </LinearLayout>
 
     <!-- Settings button. -->

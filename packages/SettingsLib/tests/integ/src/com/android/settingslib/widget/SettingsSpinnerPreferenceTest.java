@@ -22,13 +22,11 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 
 import androidx.preference.PreferenceViewHolder;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
-
-import com.android.settingslib.widget.settingsspinner.SettingsSpinner;
-import com.android.settingslib.widget.settingsspinner.SettingsSpinnerAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +40,7 @@ public class SettingsSpinnerPreferenceTest {
 
     private Context mContext;
     private PreferenceViewHolder mViewHolder;
-    private SettingsSpinner mSpinner;
+    private Spinner mSpinner;
     private SettingsSpinnerPreference mSpinnerPreference;
 
     @Before
@@ -53,7 +51,7 @@ public class SettingsSpinnerPreferenceTest {
         final View rootView = inflater.inflate(mSpinnerPreference.getLayoutResource(),
                 new LinearLayout(mContext), false /* attachToRoot */);
         mViewHolder = PreferenceViewHolder.createInstanceForTests(rootView);
-        mSpinner = (SettingsSpinner) mViewHolder.findViewById(R.id.spinner);
+        mSpinner = (Spinner) mViewHolder.findViewById(R.id.spinner);
     }
 
     @Test

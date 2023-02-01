@@ -30,6 +30,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.os.Process.NOBODY_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -691,6 +692,20 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
+    public void testVisibleTasks_excludedFromRecents_nonDefaultDisplayTaskNotVisible() {
+        Task excludedTaskOnVirtualDisplay = createTaskBuilder(".excludedTaskOnVirtualDisplay")
+                .setFlags(FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                .build();
+        excludedTaskOnVirtualDisplay.mUserSetupComplete = true;
+        doReturn(false).when(excludedTaskOnVirtualDisplay).isOnHomeDisplay();
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(excludedTaskOnVirtualDisplay);
+
+        // Expect that the first visible excluded-from-recents task is visible
+        assertGetRecentTasksOrder(0 /* flags */, mTasks.get(0));
+    }
+
+    @Test
     public void testVisibleTasks_excludedFromRecents_withExcluded() {
         // Create some set of tasks, some of which are visible and some are not
         Task t1 = createTaskBuilder("com.android.pkg1", ".Task1").build();
@@ -799,6 +814,17 @@ public class RecentTasksTest extends WindowTestsBase {
         assertThat(mCallbacksRecorder.mAdded).hasSize(1);
         assertFalse("embedded task should not be visible recents",
                 mRecentTasks.isVisibleRecentTask(task));
+    }
+
+    @Test
+    public void testVisibleTask_displayCanNotShowTaskFromRecents_expectNotVisible() {
+        final DisplayContent displayContent = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
+        doReturn(false).when(displayContent).canShowTasksInRecents();
+        final Task task = displayContent.getDefaultTaskDisplayArea().createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        mRecentTasks.add(task);
+
+        assertFalse(mRecentTasks.isVisibleRecentTask(task));
     }
 
     @Test
@@ -1195,44 +1221,55 @@ public class RecentTasksTest extends WindowTestsBase {
 
     @Test
     public void testCreateRecentTaskInfo_detachedTask() {
-        final Task task = createTaskBuilder(".Task").setCreateActivity(true).build();
+        final Task task = createTaskBuilder(".Task").build();
+        new ActivityBuilder(mSupervisor.mService)
+                .setTask(task)
+                .setUid(NOBODY_UID)
+                .setComponent(getUniqueComponentName())
+                .build();
         final TaskDisplayArea tda = task.getDisplayArea();
 
         assertTrue(task.isAttached());
         assertTrue(task.supportsMultiWindow());
 
-        RecentTaskInfo info = mRecentTasks.createRecentTaskInfo(task, true);
+        RecentTaskInfo info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
+
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                false /* getTasksAllowed */);
+
+        assertTrue(info.topActivity == null);
+        assertTrue(info.topActivityInfo == null);
+        assertTrue(info.baseActivity == null);
 
         // The task can be put in split screen even if it is not attached now.
         task.removeImmediately();
 
-        info = mRecentTasks.createRecentTaskInfo(task, true);
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
 
         // Test non-resizable.
         // The non-resizable task cannot be put in split screen because of the config.
         doReturn(false).when(tda).supportsNonResizableMultiWindow();
         doReturn(false).when(task).isResizeable();
 
-        info = mRecentTasks.createRecentTaskInfo(task, true);
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertFalse(info.supportsMultiWindow);
-        assertFalse(info.supportsSplitScreenMultiWindow);
 
         // Even if it is not attached, the non-resizable task can be put in split screen as long as
         // the device supports it.
         doReturn(true).when(tda).supportsNonResizableMultiWindow();
 
-        info = mRecentTasks.createRecentTaskInfo(task, true);
+        info = mRecentTasks.createRecentTaskInfo(task, true /* stripExtras */,
+                true /* getTasksAllowed */);
 
         assertTrue(info.supportsMultiWindow);
-        assertTrue(info.supportsSplitScreenMultiWindow);
-
     }
 
     private TaskSnapshot createSnapshot(Point taskSize, Point bufferSize) {
@@ -1312,7 +1349,7 @@ public class RecentTasksTest extends WindowTestsBase {
         });
         assertSecurityException(expectCallable,
                 () -> mAtm.startActivityFromRecents(0, new Bundle()));
-        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true));
+        assertSecurityException(expectCallable, () -> mAtm.getTaskSnapshot(0, true, false));
         assertSecurityException(expectCallable, () -> mAtm.registerTaskStackListener(null));
         assertSecurityException(expectCallable,
                 () -> mAtm.unregisterTaskStackListener(null));
@@ -1511,10 +1548,10 @@ public class RecentTasksTest extends WindowTestsBase {
         public boolean mLastAllowed;
 
         @Override
-        void getTasks(int maxNum, List<RunningTaskInfo> list, int flags,
-                RootWindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
+        void getTasks(int maxNum, List<RunningTaskInfo> list, int flags, RecentTasks recentTasks,
+                WindowContainer root, int callingUid, ArraySet<Integer> profileIds) {
             mLastAllowed = (flags & FLAG_ALLOWED) == FLAG_ALLOWED;
-            super.getTasks(maxNum, list, flags, root, callingUid, profileIds);
+            super.getTasks(maxNum, list, flags, recentTasks, root, callingUid, profileIds);
         }
     }
 }

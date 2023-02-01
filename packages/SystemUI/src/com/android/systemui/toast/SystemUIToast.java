@@ -30,11 +30,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.UserHandle;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,9 +41,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.launcher3.icons.IconFactory;
-import com.android.settingslib.applications.ApplicationsState;
-import com.android.settingslib.applications.ApplicationsState.AppEntry;
 import com.android.systemui.plugins.ToastPlugin;
 
 /**
@@ -255,43 +251,29 @@ public class SystemUIToast implements ToastPlugin.Toast {
             return null;
         }
 
-        final Context userContext;
         try {
-            userContext = context.createPackageContextAsUser("android",
-                0, new UserHandle(userId));
+            final PackageManager packageManager = context.getPackageManager();
+            final ApplicationInfo appInfo = packageManager.getApplicationInfoAsUser(
+                    packageName,
+                    PackageManager.ApplicationInfoFlags.of(PackageManager.GET_META_DATA),
+                    userId);
+            if (appInfo == null || !showApplicationIcon(appInfo, packageManager)) {
+                return null;
+            }
+
+            IconDrawableFactory iconFactory = IconDrawableFactory.newInstance(context);
+            return iconFactory.getBadgedIcon(appInfo, UserHandle.getUserId(appInfo.uid));
         } catch (NameNotFoundException e) {
-            Log.e(TAG, "Could not create user package context");
+            Log.e(TAG, "Couldn't find application info for packageName=" + packageName
+                    + " userId=" + userId);
             return null;
         }
-
-        final ApplicationsState appState =
-                ApplicationsState.getInstance((Application) context.getApplicationContext());
-        if (!appState.isUserAdded(userId)) {
-            Log.d(TAG, "user hasn't been fully initialized, not showing an app icon for "
-                    + "packageName=" + packageName);
-            return null;
-        }
-
-        final PackageManager packageManager = userContext.getPackageManager();
-        final AppEntry appEntry = appState.getEntry(packageName, userId);
-        if (appEntry == null || appEntry.info == null
-                || !showApplicationIcon(appEntry.info, packageManager)) {
-            return null;
-        }
-
-        final ApplicationInfo appInfo = appEntry.info;
-        UserHandle user = UserHandle.getUserHandleForUid(appInfo.uid);
-        IconFactory iconFactory = IconFactory.obtain(context);
-        Bitmap iconBmp = iconFactory.createBadgedIconBitmap(
-                appInfo.loadUnbadgedIcon(packageManager), user, true).icon;
-        return new BitmapDrawable(context.getResources(), iconBmp);
     }
 
     private static boolean showApplicationIcon(ApplicationInfo appInfo,
             PackageManager packageManager) {
         if (hasFlag(appInfo.flags, FLAG_UPDATED_SYSTEM_APP)) {
-            return packageManager.getLaunchIntentForPackage(appInfo.packageName)
-                != null;
+            return packageManager.getLaunchIntentForPackage(appInfo.packageName) != null;
         }
         return !hasFlag(appInfo.flags, FLAG_SYSTEM);
     }

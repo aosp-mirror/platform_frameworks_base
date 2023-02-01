@@ -735,7 +735,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     protected boolean shouldRecordDetailedData() {
-        return mRandom.nextInt() % mPeriodicSamplingInterval == 0;
+        return mRandom.nextInt(mPeriodicSamplingInterval) == 0;
     }
 
     /**
@@ -1158,6 +1158,17 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 ? result
                 : Integer.compare(a.transactionCode, b.transactionCode);
     }
+
+    /** @hide */
+    public static void startForBluetooth(Context context) {
+        new BinderCallsStats.SettingsObserver(
+                    context,
+                    new BinderCallsStats(
+                            new BinderCallsStats.Injector(),
+                              com.android.internal.os.BinderLatencyProto.Dims.BLUETOOTH));
+
+    }
+
 
 
     /**

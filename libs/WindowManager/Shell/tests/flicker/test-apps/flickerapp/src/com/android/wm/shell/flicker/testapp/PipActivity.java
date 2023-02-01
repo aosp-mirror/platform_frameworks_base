@@ -48,6 +48,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
+import android.widget.RadioButton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -201,6 +202,17 @@ public class PipActivity extends Activity {
         super.onDestroy();
     }
 
+    @Override
+    protected void onUserLeaveHint() {
+        // Only used when auto PiP is disabled. This is to simulate the behavior that an app
+        // supports regular PiP but not auto PiP.
+        final boolean manuallyEnterPip =
+                ((RadioButton) findViewById(R.id.enter_pip_on_leave_manual)).isChecked();
+        if (manuallyEnterPip) {
+            enterPictureInPictureMode();
+        }
+    }
+
     private RemoteAction buildRemoteAction(Icon icon, String label, String action) {
         final Intent intent = new Intent(action);
         final PendingIntent pendingIntent =
@@ -214,6 +226,21 @@ public class PipActivity extends Activity {
         mPipParamsBuilder.setActions(
                 withCustomActions ? mSwitchOnActions : Collections.emptyList());
         enterPictureInPictureMode(mPipParamsBuilder.build());
+    }
+
+    public void onAutoPipSelected(View v) {
+        switch (v.getId()) {
+            case R.id.enter_pip_on_leave_manual:
+                // disable auto enter PiP
+            case R.id.enter_pip_on_leave_disabled:
+                mPipParamsBuilder.setAutoEnterEnabled(false);
+                setPictureInPictureParams(mPipParamsBuilder.build());
+                break;
+            case R.id.enter_pip_on_leave_autoenter:
+                mPipParamsBuilder.setAutoEnterEnabled(true);
+                setPictureInPictureParams(mPipParamsBuilder.build());
+                break;
+        }
     }
 
     public void onRatioSelected(View v) {

@@ -32,11 +32,13 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.InputMethodSession;
 
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodSession;
 
 class IInputMethodSessionWrapper extends IInputMethodSession.Stub
@@ -51,9 +53,9 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     private static final int DO_APP_PRIVATE_COMMAND = 100;
     private static final int DO_FINISH_SESSION = 110;
     private static final int DO_VIEW_CLICKED = 115;
-    private static final int DO_NOTIFY_IME_HIDDEN = 120;
     private static final int DO_REMOVE_IME_SURFACE = 130;
     private static final int DO_FINISH_INPUT = 140;
+    private static final int DO_INVALIDATE_INPUT = 150;
 
 
     @UnsupportedAppUsage
@@ -130,16 +132,22 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
                 mInputMethodSession.viewClicked(msg.arg1 == 1);
                 return;
             }
-            case DO_NOTIFY_IME_HIDDEN: {
-                mInputMethodSession.notifyImeHidden();
-                return;
-            }
             case DO_REMOVE_IME_SURFACE: {
                 mInputMethodSession.removeImeSurface();
                 return;
             }
             case DO_FINISH_INPUT: {
                 mInputMethodSession.finishInput();
+                return;
+            }
+            case DO_INVALIDATE_INPUT: {
+                final SomeArgs args = (SomeArgs) msg.obj;
+                try {
+                    mInputMethodSession.invalidateInputInternal((EditorInfo) args.arg1,
+                            (IInputContext) args.arg2, msg.arg1);
+                } finally {
+                    args.recycle();
+                }
                 return;
             }
         }
@@ -185,11 +193,6 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     }
 
     @Override
-    public void notifyImeHidden() {
-        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_NOTIFY_IME_HIDDEN));
-    }
-
-    @Override
     public void removeImeSurface() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_REMOVE_IME_SURFACE));
     }
@@ -215,6 +218,12 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
     @Override
     public void finishSession() {
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_SESSION));
+    }
+
+    @Override
+    public void invalidateInput(EditorInfo editorInfo, IInputContext inputContext,  int sessionId) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIOO(
+                DO_INVALIDATE_INPUT, sessionId, editorInfo, inputContext));
     }
 
     @Override

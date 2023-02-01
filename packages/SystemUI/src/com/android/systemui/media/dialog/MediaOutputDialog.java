@@ -27,8 +27,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 /**
  * Dialog for media output transferring.
@@ -37,12 +37,11 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 public class MediaOutputDialog extends MediaOutputBaseDialog {
     final UiEventLogger mUiEventLogger;
 
-    MediaOutputDialog(Context context, boolean aboveStatusbar, MediaOutputController
-            mediaOutputController, UiEventLogger uiEventLogger,
-            SystemUIDialogManager dialogManager) {
-        super(context, mediaOutputController, dialogManager);
+    MediaOutputDialog(Context context, boolean aboveStatusbar, BroadcastSender broadcastSender,
+            MediaOutputController mediaOutputController, UiEventLogger uiEventLogger) {
+        super(context, broadcastSender, mediaOutputController);
         mUiEventLogger = uiEventLogger;
-        mAdapter = new MediaOutputAdapter(mMediaOutputController, this);
+        mAdapter = new MediaOutputAdapter(mMediaOutputController);
         if (!aboveStatusbar) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
         }
@@ -81,9 +80,68 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     }
 
     @Override
+    IconCompat getAppSourceIcon() {
+        return mMediaOutputController.getNotificationSmallIcon();
+    }
+
+    @Override
     int getStopButtonVisibility() {
-        return mMediaOutputController.isActiveRemoteDevice(
-                mMediaOutputController.getCurrentConnectedMediaDevice()) ? View.VISIBLE : View.GONE;
+        boolean isActiveRemoteDevice = false;
+        if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
+            isActiveRemoteDevice = mMediaOutputController.isActiveRemoteDevice(
+                    mMediaOutputController.getCurrentConnectedMediaDevice());
+        }
+        boolean showBroadcastButton = isBroadcastSupported() && mMediaOutputController.isPlaying();
+
+        return (isActiveRemoteDevice || showBroadcastButton) ? View.VISIBLE : View.GONE;
+    }
+
+    @Override
+    public boolean isBroadcastSupported() {
+        boolean isBluetoothLeDevice = false;
+        if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
+            isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
+                    mMediaOutputController.getCurrentConnectedMediaDevice());
+        }
+        return mMediaOutputController.isBroadcastSupported() && isBluetoothLeDevice;
+    }
+
+    @Override
+    public CharSequence getStopButtonText() {
+        int resId = R.string.keyboard_key_media_stop;
+        if (isBroadcastSupported() && mMediaOutputController.isPlaying()
+                && !mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
+            resId = R.string.media_output_broadcast;
+        }
+        return mContext.getText(resId);
+    }
+
+    @Override
+    public void onStopButtonClick() {
+        if (isBroadcastSupported() && mMediaOutputController.isPlaying()) {
+            if (!mMediaOutputController.isBluetoothLeBroadcastEnabled()) {
+                if (startLeBroadcastDialogForFirstTime()) {
+                    return;
+                }
+                startLeBroadcast();
+            } else {
+                stopLeBroadcast();
+            }
+        } else {
+            mMediaOutputController.releaseSession();
+            dismiss();
+        }
+    }
+
+    @Override
+    public int getBroadcastIconVisibility() {
+        return (isBroadcastSupported() && mMediaOutputController.isBluetoothLeBroadcastEnabled())
+                ? View.VISIBLE : View.GONE;
+    }
+
+    @Override
+    public void onBroadcastIconClick() {
+        startLeBroadcastDialog();
     }
 
     @VisibleForTesting

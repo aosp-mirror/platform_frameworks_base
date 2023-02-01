@@ -82,8 +82,6 @@ public class ImportanceExtractorTest extends UiServiceTestCase {
         ImportanceExtractor extractor = new ImportanceExtractor();
         extractor.setConfig(mConfig);
 
-        when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
-          NotificationManager.IMPORTANCE_MIN);
         NotificationChannel channel =
                 new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_UNSPECIFIED);
 
@@ -101,8 +99,6 @@ public class ImportanceExtractorTest extends UiServiceTestCase {
         ImportanceExtractor extractor = new ImportanceExtractor();
         extractor.setConfig(mConfig);
 
-        when(mConfig.getImportance(anyString(), anyInt())).thenReturn(
-          NotificationManager.IMPORTANCE_MIN);
         NotificationChannel channel =
                 new NotificationChannel("a", "a", NotificationManager.IMPORTANCE_HIGH);
 

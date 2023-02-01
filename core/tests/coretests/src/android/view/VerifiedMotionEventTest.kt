@@ -23,6 +23,7 @@ import android.view.MotionEvent.FLAG_WINDOW_IS_OBSCURED
 import android.view.MotionEvent.FLAG_WINDOW_IS_PARTIALLY_OBSCURED
 import android.view.MotionEvent.FLAG_TAINTED
 import android.os.Parcel
+import android.platform.test.annotations.Presubmit
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -35,6 +36,7 @@ import org.junit.Test
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
+@Presubmit
 class VerifiedMotionEventTest {
 
     @Test

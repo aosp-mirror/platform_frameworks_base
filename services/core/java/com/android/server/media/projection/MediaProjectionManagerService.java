@@ -45,13 +45,14 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.ContentRecordingSession;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.Watchdog;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -334,8 +335,8 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         public void stopActiveProjection() {
-            if (mContext.checkCallingPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
-                        != PackageManager.PERMISSION_GRANTED) {
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.MANAGE_MEDIA_PROJECTION)
+                    != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Requires MANAGE_MEDIA_PROJECTION in order to add "
                         + "projection callbacks");
             }
@@ -380,6 +381,32 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
+        /**
+         * Updates the current content mirroring session.
+         */
+        @Override
+        public void setContentRecordingSession(@Nullable ContentRecordingSession incomingSession,
+                @NonNull IMediaProjection projection) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    if (!isValidMediaProjection(projection)) {
+                        throw new SecurityException("Invalid media projection");
+                    }
+                    if (!LocalServices.getService(
+                            WindowManagerInternal.class).setContentRecordingSession(
+                            incomingSession)) {
+                        // Unable to start mirroring, so tear down this projection.
+                        if (mProjectionGrant != null) {
+                            mProjectionGrant.stop();
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+
         @Override // Binder call
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -410,6 +437,7 @@ public final class MediaProjectionManagerService extends SystemService
         private IBinder mToken;
         private IBinder.DeathRecipient mDeathEater;
         private boolean mRestoreSystemAlertWindow;
+        private IBinder mLaunchCookie = null;
 
         MediaProjection(int type, int uid, String packageName, int targetSdkVersion,
                 boolean isPrivileged) {
@@ -568,7 +596,7 @@ public final class MediaProjectionManagerService extends SystemService
             }
         }
 
-        @Override
+        @Override // Binder call
         public void registerCallback(IMediaProjectionCallback callback) {
             if (callback == null) {
                 throw new IllegalArgumentException("callback must not be null");
@@ -576,12 +604,22 @@ public final class MediaProjectionManagerService extends SystemService
             mCallbackDelegate.add(callback);
         }
 
-        @Override
+        @Override // Binder call
         public void unregisterCallback(IMediaProjectionCallback callback) {
             if (callback == null) {
                 throw new IllegalArgumentException("callback must not be null");
             }
             mCallbackDelegate.remove(callback);
+        }
+
+        @Override // Binder call
+        public void setLaunchCookie(IBinder launchCookie) {
+            mLaunchCookie = launchCookie;
+        }
+
+        @Override // Binder call
+        public IBinder getLaunchCookie() {
+            return mLaunchCookie;
         }
 
         public MediaProjectionInfo getProjectionInfo() {

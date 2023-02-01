@@ -23,15 +23,17 @@ import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.os.Bundle;
 import android.view.WindowManager;
 
+import com.android.systemui.Dumpable;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface for the biometric dialog UI.
  */
-public interface AuthDialog {
+public interface AuthDialog extends Dumpable {
 
-    String KEY_CONTAINER_STATE = "container_state";
+    String KEY_CONTAINER_GOING_AWAY = "container_going_away";
     String KEY_BIOMETRIC_SHOWING = "biometric_showing";
     String KEY_CREDENTIAL_SHOWING = "credential_showing";
 
@@ -45,6 +47,8 @@ public interface AuthDialog {
 
     String KEY_BIOMETRIC_SENSOR_TYPE = "sensor_type";
     String KEY_BIOMETRIC_SENSOR_PROPS = "sensor_props";
+
+    String KEY_BIOMETRIC_ORIENTATION_CHANGED = "orientation_changed";
 
     int SIZE_UNKNOWN = 0;
     /**
@@ -64,7 +68,7 @@ public interface AuthDialog {
     @interface DialogSize {}
 
     /**
-     * Parameters used when laying out {@link AuthBiometricView}, its sublclasses, and
+     * Parameters used when laying out {@link AuthBiometricView}, its subclasses, and
      * {@link AuthPanelController}.
      */
     class LayoutParams {
@@ -113,7 +117,7 @@ public interface AuthDialog {
     /**
      * Biometric authenticated. May be pending user confirmation, or completed.
      */
-    void onAuthenticationSucceeded();
+    void onAuthenticationSucceeded(@Modality int modality);
 
     /**
      * Authentication failed (reject, timeout). Dialog stays showing.
@@ -136,6 +140,9 @@ public interface AuthDialog {
      */
     void onError(@Modality int modality, String error);
 
+    /** UDFPS pointer down event. */
+    void onPointerDown();
+
     /**
      * Save the current state.
      * @param outState
@@ -146,6 +153,9 @@ public interface AuthDialog {
      * Get the client's package name
      */
     String getOpPackageName();
+
+    /** The requestId of the underlying operation within the framework. */
+    long getRequestId();
 
     /**
      * Animate to credential UI. Typically called after biometric is locked out.

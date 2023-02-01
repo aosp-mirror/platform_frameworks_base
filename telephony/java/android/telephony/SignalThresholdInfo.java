@@ -574,8 +574,8 @@ public final class SignalThresholdInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mRan, mSignalMeasurementType, mHysteresisMs, mHysteresisDb, mThresholds,
-                mIsEnabled);
+        return Objects.hash(mRan, mSignalMeasurementType, mHysteresisMs, mHysteresisDb,
+                Arrays.hashCode(mThresholds), mIsEnabled);
     }
 
     public static final @NonNull Parcelable.Creator<SignalThresholdInfo> CREATOR =

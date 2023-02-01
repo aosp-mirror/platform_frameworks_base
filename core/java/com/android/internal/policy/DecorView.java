@@ -16,20 +16,19 @@
 
 package com.android.internal.policy;
 
-import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.N;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.clearCompatInsets;
+import static android.view.InsetsState.clearsCompatInsets;
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
 import static android.view.View.MeasureSpec.getMode;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.Window.DECOR_CAPTION_SHADE_DARK;
 import static android.view.Window.DECOR_CAPTION_SHADE_LIGHT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
@@ -43,6 +42,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static com.android.internal.policy.PhoneWindow.FEATURE_OPTIONS_PANEL;
 
@@ -121,7 +121,7 @@ import com.android.internal.view.menu.MenuHelper;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.DecorCaptionView;
-import com.android.internal.widget.FloatingToolbar;
+import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -283,6 +283,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Insets mBackgroundInsets = Insets.NONE;
     private Insets mLastBackgroundInsets = Insets.NONE;
     private boolean mDrawLegacyNavigationBarBackground;
+    private boolean mDrawLegacyNavigationBarBackgroundHandled;
 
     private PendingInsetsController mPendingInsetsController = new PendingInsetsController();
 
@@ -309,6 +310,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 R.integer.dock_enter_exit_duration);
         mForceWindowDrawsBarBackgrounds = context.getResources().getBoolean(
                 R.bool.config_forceWindowDrawsStatusBarBackground)
+                && params.type != TYPE_INPUT_METHOD
                 && context.getApplicationInfo().targetSdkVersion >= N;
         mSemiTransparentBarColor = context.getResources().getColor(
                 R.color.system_bar_background_semi_transparent, null /* theme */);
@@ -1030,6 +1032,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public void onSystemBarAppearanceChanged(@WindowInsetsController.Appearance int appearance) {
         updateColorViews(null /* insets */, true /* animate */);
+        if (mWindow != null) {
+            mWindow.dispatchOnSystemBarAppearanceChanged(appearance);
+        }
     }
 
     @Override
@@ -1117,11 +1122,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     : controller.getSystemBarsAppearance();
 
             if (insets != null) {
-                final boolean clearCompatInsets = clearCompatInsets(attrs.type, attrs.flags,
+                final boolean clearsCompatInsets = clearsCompatInsets(attrs.type, attrs.flags,
                         getResources().getConfiguration().windowConfiguration.getWindowingMode());
                 final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
                         WindowInsets.Type.systemBars());
-                final Insets systemInsets = clearCompatInsets
+                final Insets systemInsets = clearsCompatInsets
                         ? Insets.NONE
                         : Insets.min(insets.getInsets(WindowInsets.Type.systemBars()
                                 | WindowInsets.Type.displayCutout()), stableBarInsets);
@@ -1161,9 +1166,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     0 /* sideInset */, animate && !disallowAnimate,
                     mForceWindowDrawsBarBackgrounds, controller);
             boolean oldDrawLegacy = mDrawLegacyNavigationBarBackground;
-            mDrawLegacyNavigationBarBackground = mNavigationColorViewState.visible
-                    && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
+            mDrawLegacyNavigationBarBackground =
+                    (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
             if (oldDrawLegacy != mDrawLegacyNavigationBarBackground) {
+                mDrawLegacyNavigationBarBackgroundHandled =
+                        mWindow.onDrawLegacyNavigationBarBackgroundChanged(
+                                mDrawLegacyNavigationBarBackground);
                 if (viewRoot != null) {
                     viewRoot.requestInvalidateRootRenderNode();
                 }
@@ -1200,7 +1208,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         boolean hideNavigation = (sysUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 || !(controller == null || controller.isRequestedVisible(ITYPE_NAVIGATION_BAR));
         boolean decorFitsSystemWindows = mWindow.mDecorFitsSystemWindows;
-        boolean forceConsumingNavBar = (mForceWindowDrawsBarBackgrounds
+        boolean forceConsumingNavBar =
+                ((mForceWindowDrawsBarBackgrounds || mDrawLegacyNavigationBarBackgroundHandled)
                         && (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
                         && decorFitsSystemWindows
@@ -1256,7 +1265,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
         }
 
-        if (forceConsumingNavBar) {
+        if (forceConsumingNavBar && !hideNavigation && !mDrawLegacyNavigationBarBackgroundHandled) {
             mBackgroundInsets = Insets.of(mLastLeftInset, 0, mLastRightInset, mLastBottomInset);
         } else {
             mBackgroundInsets = Insets.NONE;
@@ -1431,8 +1440,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             int size, boolean verticalBar, boolean seascape, int sideMargin, boolean animate,
             boolean force, WindowInsetsController controller) {
         state.present = state.attributes.isPresent(
-                        controller.isRequestedVisible(state.attributes.insetsType),
-                        mWindow.getAttributes().flags, force);
+                (controller.isRequestedVisible(state.attributes.insetsType)
+                        || mLastShouldAlwaysConsumeSystemBars),
+                mWindow.getAttributes().flags, force);
         boolean show = state.attributes.isVisible(state.present, color,
                 mWindow.getAttributes().flags, force);
         boolean showView = show && !isResizing() && !mHasCaption && size > 0;
@@ -2113,7 +2123,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * corresponding insets change to the InsetsController.
      */
     public void notifyCaptionHeightChanged() {
-        getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
+        if (!CAPTION_ON_SHELL) {
+            getWindowInsetsController().setCaptionInsetsHeight(getCaptionInsetsHeight());
+        }
     }
 
     void setWindow(PhoneWindow phoneWindow) {
@@ -2251,7 +2263,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 attrs.type == TYPE_APPLICATION || attrs.type == TYPE_DRAWN_APPLICATION;
         final WindowConfiguration winConfig = getResources().getConfiguration().windowConfiguration;
         // Only a non floating application window on one of the allowed workspaces can get a caption
-        if (!mWindow.isFloating() && isApplication && winConfig.hasWindowDecorCaption()) {
+        if (!mWindow.isFloating() && isApplication && winConfig.hasWindowDecorCaption()
+                && !CAPTION_ON_SHELL) {
             // Dependent on the brightness of the used title we either use the
             // dark or the light button frame.
             if (decorCaptionView == null) {
@@ -2474,7 +2487,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     private void drawLegacyNavigationBarBackground(RecordingCanvas canvas) {
-        if (!mDrawLegacyNavigationBarBackground) {
+        if (!mDrawLegacyNavigationBarBackground || mDrawLegacyNavigationBarBackgroundHandled) {
             return;
         }
         View v = mNavigationColorViewState.view;
@@ -2538,9 +2551,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
             // Convert the DP elevation into physical pixels.
             elevation = dipToPx(elevation);
-            mElevationAdjustedForStack = true;
-        } else if (windowingMode == WINDOWING_MODE_PINNED) {
-            elevation = dipToPx(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP);
             mElevationAdjustedForStack = true;
         } else {
             mElevationAdjustedForStack = false;

@@ -26,6 +26,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutInfo.ShortcutFlags;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -37,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -50,6 +52,11 @@ import java.util.Objects;
  * Represents a conversation that is provided by the app based on {@link ShortcutInfo}.
  */
 public class ConversationInfo {
+    private static final boolean DEBUG = false;
+
+    // Schema version for the backup payload. Must be incremented whenever fields are added in
+    // backup payload.
+    private static final int VERSION = 1;
 
     private static final String TAG = ConversationInfo.class.getSimpleName();
 
@@ -100,6 +107,8 @@ public class ConversationInfo {
 
     private long mLastEventTimestamp;
 
+    private long mCreationTimestamp;
+
     @ShortcutFlags
     private int mShortcutFlags;
 
@@ -116,6 +125,7 @@ public class ConversationInfo {
         mNotificationChannelId = builder.mNotificationChannelId;
         mParentNotificationChannelId = builder.mParentNotificationChannelId;
         mLastEventTimestamp = builder.mLastEventTimestamp;
+        mCreationTimestamp = builder.mCreationTimestamp;
         mShortcutFlags = builder.mShortcutFlags;
         mConversationFlags = builder.mConversationFlags;
         mCurrStatuses = builder.mCurrStatuses;
@@ -168,6 +178,13 @@ public class ConversationInfo {
      */
     long getLastEventTimestamp() {
         return mLastEventTimestamp;
+    }
+
+    /**
+     * Timestamp of the creation of the conversationInfo.
+     */
+    long getCreationTimestamp() {
+        return mCreationTimestamp;
     }
 
     /** Whether the shortcut for this conversation is set long-lived by the app. */
@@ -241,6 +258,7 @@ public class ConversationInfo {
                 && Objects.equals(mNotificationChannelId, other.mNotificationChannelId)
                 && Objects.equals(mParentNotificationChannelId, other.mParentNotificationChannelId)
                 && Objects.equals(mLastEventTimestamp, other.mLastEventTimestamp)
+                && mCreationTimestamp == other.mCreationTimestamp
                 && mShortcutFlags == other.mShortcutFlags
                 && mConversationFlags == other.mConversationFlags
                 && Objects.equals(mCurrStatuses, other.mCurrStatuses);
@@ -250,7 +268,7 @@ public class ConversationInfo {
     public int hashCode() {
         return Objects.hash(mShortcutId, mLocusId, mContactUri, mContactPhoneNumber,
                 mNotificationChannelId, mParentNotificationChannelId, mLastEventTimestamp,
-                mShortcutFlags, mConversationFlags, mCurrStatuses);
+                mCreationTimestamp, mShortcutFlags, mConversationFlags, mCurrStatuses);
     }
 
     @Override
@@ -264,6 +282,7 @@ public class ConversationInfo {
         sb.append(", notificationChannelId=").append(mNotificationChannelId);
         sb.append(", parentNotificationChannelId=").append(mParentNotificationChannelId);
         sb.append(", lastEventTimestamp=").append(mLastEventTimestamp);
+        sb.append(", creationTimestamp=").append(mCreationTimestamp);
         sb.append(", statuses=").append(mCurrStatuses);
         sb.append(", shortcutFlags=0x").append(Integer.toHexString(mShortcutFlags));
         sb.append(" [");
@@ -329,6 +348,7 @@ public class ConversationInfo {
                     mParentNotificationChannelId);
         }
         protoOutputStream.write(ConversationInfoProto.LAST_EVENT_TIMESTAMP, mLastEventTimestamp);
+        protoOutputStream.write(ConversationInfoProto.CREATION_TIMESTAMP, mCreationTimestamp);
         protoOutputStream.write(ConversationInfoProto.SHORTCUT_FLAGS, mShortcutFlags);
         protoOutputStream.write(ConversationInfoProto.CONVERSATION_FLAGS, mConversationFlags);
         if (mContactPhoneNumber != null) {
@@ -352,6 +372,8 @@ public class ConversationInfo {
             out.writeUTF(mContactPhoneNumber != null ? mContactPhoneNumber : "");
             out.writeUTF(mParentNotificationChannelId != null ? mParentNotificationChannelId : "");
             out.writeLong(mLastEventTimestamp);
+            out.writeInt(VERSION);
+            out.writeLong(mCreationTimestamp);
             // ConversationStatus is a transient object and not persisted
         } catch (IOException e) {
             Slog.e(TAG, "Failed to write fields to backup payload.", e);
@@ -399,6 +421,9 @@ public class ConversationInfo {
                     builder.setLastEventTimestamp(protoInputStream.readLong(
                             ConversationInfoProto.LAST_EVENT_TIMESTAMP));
                     break;
+                case (int) ConversationInfoProto.CREATION_TIMESTAMP:
+                    builder.setCreationTimestamp(protoInputStream.readLong(
+                            ConversationInfoProto.CREATION_TIMESTAMP));
                 case (int) ConversationInfoProto.SHORTCUT_FLAGS:
                     builder.setShortcutFlags(protoInputStream.readInt(
                             ConversationInfoProto.SHORTCUT_FLAGS));
@@ -448,11 +473,25 @@ public class ConversationInfo {
                 builder.setParentNotificationChannelId(parentNotificationChannelId);
             }
             builder.setLastEventTimestamp(in.readLong());
+            int payloadVersion = maybeReadVersion(in);
+            if (payloadVersion == 1) {
+                builder.setCreationTimestamp(in.readLong());
+            }
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read conversation info fields from backup payload.", e);
             return null;
         }
         return builder.build();
+    }
+
+    private static int maybeReadVersion(DataInputStream in) throws IOException {
+        try {
+            return in.readInt();
+        } catch (EOFException eofException) {
+            // EOF is expected if using old backup payload protocol.
+            if (DEBUG) Log.d(TAG, "Eof reached for data stream, missing version number");
+            return 0;
+        }
     }
 
     /**
@@ -479,6 +518,8 @@ public class ConversationInfo {
 
         private long mLastEventTimestamp;
 
+        private long mCreationTimestamp;
+
         @ShortcutFlags
         private int mShortcutFlags;
 
@@ -502,6 +543,7 @@ public class ConversationInfo {
             mNotificationChannelId = conversationInfo.mNotificationChannelId;
             mParentNotificationChannelId = conversationInfo.mParentNotificationChannelId;
             mLastEventTimestamp = conversationInfo.mLastEventTimestamp;
+            mCreationTimestamp = conversationInfo.mCreationTimestamp;
             mShortcutFlags = conversationInfo.mShortcutFlags;
             mConversationFlags = conversationInfo.mConversationFlags;
             mCurrStatuses = conversationInfo.mCurrStatuses;
@@ -539,6 +581,11 @@ public class ConversationInfo {
 
         Builder setLastEventTimestamp(long lastEventTimestamp) {
             mLastEventTimestamp = lastEventTimestamp;
+            return this;
+        }
+
+        Builder setCreationTimestamp(long creationTimestamp) {
+            mCreationTimestamp = creationTimestamp;
             return this;
         }
 

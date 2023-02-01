@@ -65,9 +65,9 @@ public abstract class InputEventSender {
         mInputChannel = inputChannel;
         mMessageQueue = looper.getQueue();
         mSenderPtr = nativeInit(new WeakReference<InputEventSender>(this),
-                inputChannel, mMessageQueue);
+                mInputChannel, mMessageQueue);
 
-        mCloseGuard.open("dispose");
+        mCloseGuard.open("InputEventSender.dispose");
     }
 
     @Override

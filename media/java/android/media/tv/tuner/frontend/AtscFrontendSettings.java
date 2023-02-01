@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.hardware.tv.tuner.V1_0.Constants;
+import android.hardware.tv.tuner.FrontendAtscModulation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,8 +34,7 @@ import java.lang.annotation.RetentionPolicy;
 public class AtscFrontendSettings extends FrontendSettings {
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODULATION_",
+    @IntDef(prefix = "MODULATION_",
             value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_8VSB,
                     MODULATION_MOD_16VSB})
     @Retention(RetentionPolicy.SOURCE)
@@ -44,24 +43,24 @@ public class AtscFrontendSettings extends FrontendSettings {
     /**
      * Modulation undefined.
      */
-    public static final int MODULATION_UNDEFINED = Constants.FrontendAtscModulation.UNDEFINED;
+    public static final int MODULATION_UNDEFINED = FrontendAtscModulation.UNDEFINED;
     /**
      * Hardware is able to detect and set modulation automatically
      */
-    public static final int MODULATION_AUTO = Constants.FrontendAtscModulation.AUTO;
+    public static final int MODULATION_AUTO = FrontendAtscModulation.AUTO;
     /**
      * 8VSB Modulation.
      */
-    public static final int MODULATION_MOD_8VSB = Constants.FrontendAtscModulation.MOD_8VSB;
+    public static final int MODULATION_MOD_8VSB = FrontendAtscModulation.MOD_8VSB;
     /**
      * 16VSB Modulation.
      */
-    public static final int MODULATION_MOD_16VSB = Constants.FrontendAtscModulation.MOD_16VSB;
+    public static final int MODULATION_MOD_16VSB = FrontendAtscModulation.MOD_16VSB;
 
 
     private final int mModulation;
 
-    private AtscFrontendSettings(int frequency, int modulation) {
+    private AtscFrontendSettings(long frequency, int modulation) {
         super(frequency);
         mModulation = modulation;
     }
@@ -86,7 +85,7 @@ public class AtscFrontendSettings extends FrontendSettings {
      * Builder for {@link AtscFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency = 0;
+        private long mFrequency = 0;
         private int mModulation = MODULATION_UNDEFINED;
 
         private Builder() {
@@ -96,10 +95,23 @@ public class AtscFrontendSettings extends FrontendSettings {
          * Sets frequency in Hz.
          *
          * <p>Default value is 0.
+         * @deprecated Use {@link #setFrequencyLong(long)}
          */
         @NonNull
         @IntRange(from = 1)
+        @Deprecated
         public Builder setFrequency(int frequency) {
+            return setFrequencyLong((long) frequency);
+        }
+
+        /**
+         * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequencyLong(long frequency) {
             mFrequency = frequency;
             return this;
         }

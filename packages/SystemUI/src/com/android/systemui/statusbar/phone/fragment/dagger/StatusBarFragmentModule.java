@@ -16,20 +16,44 @@
 
 package com.android.systemui.statusbar.phone.fragment.dagger;
 
+import android.view.View;
+
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
+import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.statusbar.HeadsUpStatusBarView;
+import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
+import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherControllerImpl;
+import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.window.StatusBarWindowController;
 
+import java.util.Optional;
+import java.util.Set;
+
+import javax.inject.Named;
+
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.Multibinds;
 
 /** Dagger module for {@link StatusBarFragmentComponent}. */
 @Module
 public interface StatusBarFragmentModule {
+
+    String LIGHTS_OUT_NOTIF_VIEW = "lights_out_notif_view";
+    String OPERATOR_NAME_VIEW = "operator_name_view";
+    String OPERATOR_NAME_FRAME_VIEW = "operator_name_frame_view";
+    String START_SIDE_CONTENT = "start_side_content";
+    String END_SIDE_CONTENT = "end_side_content";
+
     /** */
     @Provides
     @RootView
@@ -49,6 +73,67 @@ public interface StatusBarFragmentModule {
     /** */
     @Provides
     @StatusBarFragmentScope
+    @Named(START_SIDE_CONTENT)
+    static View startSideContent(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.status_bar_start_side_content);
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    @Named(END_SIDE_CONTENT)
+    static View endSideContent(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.status_bar_end_side_content);
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    @Named(LIGHTS_OUT_NOTIF_VIEW)
+    static View provideLightsOutNotifView(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.notification_lights_out);
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    @Named(OPERATOR_NAME_VIEW)
+    static View provideOperatorNameView(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.operator_name);
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    @Named(OPERATOR_NAME_FRAME_VIEW)
+    static Optional<View> provideOperatorFrameNameView(@RootView PhoneStatusBarView view) {
+        return Optional.ofNullable(view.findViewById(R.id.operator_name_frame));
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    static Clock provideClock(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.clock);
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    static StatusBarUserSwitcherContainer provideStatusBarUserSwitcherContainer(
+            @RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.user_switcher_container);
+    }
+
+    /** */
+    @Binds
+    @StatusBarFragmentScope
+    StatusBarUserSwitcherController bindStatusBarUserSwitcherController(
+            StatusBarUserSwitcherControllerImpl controller);
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
     static PhoneStatusBarViewController providePhoneStatusBarViewController(
             PhoneStatusBarViewController.Factory phoneStatusBarViewControllerFactory,
             @RootView PhoneStatusBarView phoneStatusBarView,
@@ -57,4 +142,25 @@ public interface StatusBarFragmentModule {
                 phoneStatusBarView,
                 notificationPanelViewController.getStatusBarTouchEventHandler());
     }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    static PhoneStatusBarTransitions providePhoneStatusBarTransitions(
+            @RootView PhoneStatusBarView view,
+            StatusBarWindowController statusBarWindowController
+    ) {
+        return new PhoneStatusBarTransitions(view, statusBarWindowController.getBackgroundView());
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    static HeadsUpStatusBarView providesHeasdUpStatusBarView(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.heads_up_status_bar_view);
+    }
+
+    /** */
+    @Multibinds
+    Set<StatusBarBoundsProvider.BoundsChangeListener> boundsChangeListeners();
 }

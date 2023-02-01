@@ -15,8 +15,8 @@
   ~ limitations under the License.
   -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetTop="@dimen/qs_security_footer_background_inset"
-    android:insetBottom="@dimen/qs_security_footer_background_inset"
+    android:insetTop="@dimen/qs_footer_action_inset"
+    android:insetBottom="@dimen/qs_footer_action_inset"
     >
     <ripple
         android:color="?android:attr/colorControlHighlight">

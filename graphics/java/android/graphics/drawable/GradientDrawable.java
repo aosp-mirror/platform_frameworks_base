@@ -723,8 +723,17 @@ public class GradientDrawable extends Drawable {
      */
     @Nullable
     public int[] getColors() {
-        return mGradientState.mGradientColors == null ?
-                null : mGradientState.mGradientColors.clone();
+        if (mGradientState.mGradientColors == null) {
+            return null;
+        } else {
+            int[] colors = new int[mGradientState.mGradientColors.length];
+            for (int i = 0; i < mGradientState.mGradientColors.length; i++) {
+                if (mGradientState.mGradientColors[i] != null) {
+                    colors[i] = mGradientState.mGradientColors[i].getDefaultColor();
+                }
+            }
+            return colors;
+        }
     }
 
     @Override
@@ -1277,7 +1286,15 @@ public class GradientDrawable extends Drawable {
             mRect.set(bounds.left + inset, bounds.top + inset,
                       bounds.right - inset, bounds.bottom - inset);
 
-            final int[] gradientColors = st.mGradientColors;
+            int[] gradientColors = null;
+            if (st.mGradientColors != null) {
+                gradientColors = new int[st.mGradientColors.length];
+                for (int i = 0; i < gradientColors.length; i++) {
+                    if (st.mGradientColors[i] != null) {
+                        gradientColors[i] = st.mGradientColors[i].getDefaultColor();
+                    }
+                }
+            }
             if (gradientColors != null) {
                 final RectF r = mRect;
                 final float x0, x1, y0, y1;
@@ -1437,6 +1454,14 @@ public class GradientDrawable extends Drawable {
 
         if (state.mStrokeColors != null && state.mStrokeColors.canApplyTheme()) {
             state.mStrokeColors = state.mStrokeColors.obtainForTheme(t);
+        }
+
+        if (state.mGradientColors != null) {
+            for (int i = 0; i < state.mGradientColors.length; i++) {
+                if (state.mGradientColors[i] != null && state.mGradientColors[i].canApplyTheme()) {
+                    state.mGradientColors[i] = state.mGradientColors[i].obtainForTheme(t);
+                }
+            }
         }
 
         applyThemeChildElements(t);
@@ -1726,38 +1751,46 @@ public class GradientDrawable extends Drawable {
         st.mGradient = a.getInt(
                 R.styleable.GradientDrawableGradient_type, st.mGradient);
 
+        ColorStateList startCSL = a.getColorStateList(
+                R.styleable.GradientDrawableGradient_startColor);
+        ColorStateList centerCSL = a.getColorStateList(
+                R.styleable.GradientDrawableGradient_centerColor);
+        ColorStateList endCSL = a.getColorStateList(
+                R.styleable.GradientDrawableGradient_endColor);
+
         final boolean hasGradientColors = st.mGradientColors != null;
         final boolean hasGradientCenter = st.hasCenterColor();
-        final int prevStart = hasGradientColors ? st.mGradientColors[0] : 0;
-        final int prevCenter = hasGradientCenter ? st.mGradientColors[1] : 0;
-        final int prevEnd;
 
-        if (st.hasCenterColor()) {
+        int startColor = startCSL != null ? startCSL.getDefaultColor() : 0;
+        int centerColor = centerCSL != null ? centerCSL.getDefaultColor() : 0;
+        int endColor = endCSL != null ? endCSL.getDefaultColor() : 0;
+
+        if (hasGradientColors && st.mGradientColors[0] != null) {
+            startColor = st.mGradientColors[0].getDefaultColor();
+        }
+        if (hasGradientCenter && st.mGradientColors[1] != null) {
+            centerColor = st.mGradientColors[1].getDefaultColor();
+        }
+        if (hasGradientCenter && st.mGradientColors[2] != null) {
             // if there is a center color, the end color is the last of the 3 values
-            prevEnd = st.mGradientColors[2];
-        } else if (hasGradientColors) {
+            endColor = st.mGradientColors[2].getDefaultColor();
+        } else if (hasGradientColors && st.mGradientColors[1] != null) {
             // if there is not a center color but there are already colors configured, then
             // the end color is the 2nd value in the array
-            prevEnd = st.mGradientColors[1];
-        } else {
-            // otherwise, there isn't a previously configured end color
-            prevEnd = 0;
+            endColor = st.mGradientColors[1].getDefaultColor();
         }
 
-        final int startColor = a.getColor(
-                R.styleable.GradientDrawableGradient_startColor, prevStart);
         final boolean hasCenterColor = a.hasValue(
                 R.styleable.GradientDrawableGradient_centerColor) || hasGradientCenter;
-        final int centerColor = a.getColor(
-                R.styleable.GradientDrawableGradient_centerColor, prevCenter);
-        final int endColor = a.getColor(
-                R.styleable.GradientDrawableGradient_endColor, prevEnd);
 
         if (hasCenterColor) {
-            st.mGradientColors = new int[3];
-            st.mGradientColors[0] = startColor;
-            st.mGradientColors[1] = centerColor;
-            st.mGradientColors[2] = endColor;
+            st.mGradientColors = new ColorStateList[3];
+            st.mGradientColors[0] =
+                    startCSL != null ? startCSL : ColorStateList.valueOf(startColor);
+            st.mGradientColors[1] =
+                    centerCSL != null ? centerCSL : ColorStateList.valueOf(centerColor);
+            st.mGradientColors[2] =
+                    endCSL != null ? endCSL : ColorStateList.valueOf(endColor);
 
             st.mPositions = new float[3];
             st.mPositions[0] = 0.0f;
@@ -1765,9 +1798,11 @@ public class GradientDrawable extends Drawable {
             st.mPositions[1] = st.mCenterX != 0.5f ? st.mCenterX : st.mCenterY;
             st.mPositions[2] = 1f;
         } else {
-            st.mGradientColors = new int[2];
-            st.mGradientColors[0] = startColor;
-            st.mGradientColors[1] = endColor;
+            st.mGradientColors = new ColorStateList[2];
+            st.mGradientColors[0] =
+                    startCSL != null ? startCSL : ColorStateList.valueOf(startColor);
+            st.mGradientColors[1] =
+                    endCSL != null ? endCSL : ColorStateList.valueOf(endColor);
         }
 
         int angle = (int) a.getFloat(R.styleable.GradientDrawableGradient_angle, st.mAngle);
@@ -1981,7 +2016,7 @@ public class GradientDrawable extends Drawable {
         public ColorStateList mSolidColors;
         public ColorStateList mStrokeColors;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug =  124050917)
-        public @ColorInt int[] mGradientColors;
+        public ColorStateList[] mGradientColors; // no support for state-based color
         public @ColorInt int[] mTempColors; // no need to copy
         public float[] mTempPositions; // no need to copy
         @UnsupportedAppUsage
@@ -2188,6 +2223,13 @@ public class GradientDrawable extends Drawable {
 
         @Override
         public boolean canApplyTheme() {
+            boolean mGradientColorState = mGradientColors != null;
+            if (mGradientColors != null) {
+                for (int i = 0; i < mGradientColors.length; i++) {
+                    mGradientColorState |= (mGradientColors[i] != null && mGradientColors[i]
+                        .canApplyTheme());
+                }
+            }
             return mThemeAttrs != null
                     || mAttrSize != null || mAttrGradient != null
                     || mAttrSolid != null || mAttrStroke != null
@@ -2195,6 +2237,7 @@ public class GradientDrawable extends Drawable {
                     || (mTint != null && mTint.canApplyTheme())
                     || (mStrokeColors != null && mStrokeColors.canApplyTheme())
                     || (mSolidColors != null && mSolidColors.canApplyTheme())
+                    || mGradientColorState
                     || super.canApplyTheme();
         }
 
@@ -2246,7 +2289,18 @@ public class GradientDrawable extends Drawable {
         }
 
         public void setGradientColors(@Nullable int[] colors) {
-            mGradientColors = colors;
+            if (colors == null) {
+                mGradientColors = null;
+            } else {
+                // allocate new CSL array only if the size of the current array is different
+                // from the size of the given parameter
+                if (mGradientColors == null || mGradientColors.length != colors.length) {
+                    mGradientColors = new ColorStateList[colors.length];
+                }
+                for (int i = 0; i < colors.length; i++) {
+                    mGradientColors[i] = ColorStateList.valueOf(colors[i]);
+                }
+            }
             mSolidColors = null;
             computeOpacity();
         }
@@ -2263,7 +2317,8 @@ public class GradientDrawable extends Drawable {
 
             if (mGradientColors != null) {
                 for (int i = 0; i < mGradientColors.length; i++) {
-                    if (!isOpaque(mGradientColors[i])) {
+                    if (mGradientColors[i] != null
+                            && !isOpaque(mGradientColors[i].getDefaultColor())) {
                         return;
                     }
                 }

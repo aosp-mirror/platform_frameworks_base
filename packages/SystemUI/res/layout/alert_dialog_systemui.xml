@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
-  ~ Copyright (C) 2021 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -15,6 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
 <com.android.internal.widget.AlertDialogLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@*android:id/parentPanel"
@@ -23,7 +23,7 @@
     android:gravity="center_horizontal|top"
     android:orientation="vertical"
     android:paddingTop="@dimen/dialog_top_padding"
-    >
+>
 
     <include layout="@layout/alert_dialog_title_systemui" />
 
@@ -34,7 +34,7 @@
         android:minHeight="48dp"
         android:paddingStart="@dimen/dialog_side_padding"
         android:paddingEnd="@dimen/dialog_side_padding"
-        >
+    >
 
         <ScrollView
             android:id="@*android:id/scrollView"
@@ -75,7 +75,7 @@
         android:minHeight="48dp"
         android:paddingStart="@dimen/dialog_side_padding"
         android:paddingEnd="@dimen/dialog_side_padding"
-        >
+    >
 
         <FrameLayout
             android:id="@*android:id/custom"
@@ -83,9 +83,14 @@
             android:layout_height="wrap_content" />
     </FrameLayout>
 
-    <include
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        layout="@layout/alert_dialog_button_bar_systemui" />
-
+        android:paddingStart="@dimen/dialog_side_padding"
+        android:paddingEnd="@dimen/dialog_side_padding">
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/alert_dialog_button_bar_systemui" />
+    </FrameLayout>
 </com.android.internal.widget.AlertDialogLayout>

@@ -597,7 +597,7 @@ public final class PermissionChecker {
      * which will evaluate the permission access based on the current fg/bg state of the
      * app and leave a record that the data was accessed.
      *
-     * <p>This API assumes the the {@link Binder#getCallingUid()} is the same as
+     * <p>This API assumes the {@link Binder#getCallingUid()} is the same as
      * {@link Process#myUid()}.
      *
      * @param context Context for accessing resources.
@@ -634,7 +634,7 @@ public final class PermissionChecker {
      * listener you should use this method which will evaluate the permission access based
      * on the current fg/bg state of the app and leave a record that the data was accessed.
      *
-     * <p>This API assumes the the {@link Binder#getCallingUid()} is the same as
+     * <p>This API assumes the {@link Binder#getCallingUid()} is the same as
      * {@link Process#myUid()}.
      *
      * @param context Context for accessing resources.

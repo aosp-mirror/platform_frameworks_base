@@ -123,10 +123,10 @@ public class KeyguardSecurityViewFlipperController
 
     private int getLayoutIdFor(SecurityMode securityMode) {
         switch (securityMode) {
-            case Pattern: return com.android.systemui.R.layout.keyguard_pattern_view;
-            case PIN: return com.android.systemui.R.layout.keyguard_pin_view;
-            case Password: return com.android.systemui.R.layout.keyguard_password_view;
-            case SimPin: return com.android.systemui.R.layout.keyguard_sim_pin_view;
+            case Pattern: return R.layout.keyguard_pattern_view;
+            case PIN: return R.layout.keyguard_pin_view;
+            case Password: return R.layout.keyguard_password_view;
+            case SimPin: return R.layout.keyguard_sim_pin_view;
             case SimPuk: return R.layout.keyguard_sim_puk_view;
             default:
                 return 0;
@@ -146,7 +146,8 @@ public class KeyguardSecurityViewFlipperController
         protected NullKeyguardInputViewController(SecurityMode securityMode,
                 KeyguardSecurityCallback keyguardSecurityCallback,
                 EmergencyButtonController emergencyButtonController) {
-            super(null, securityMode, keyguardSecurityCallback, emergencyButtonController);
+            super(null, securityMode, keyguardSecurityCallback, emergencyButtonController,
+                    null);
         }
 
         @Override
@@ -156,7 +157,6 @@ public class KeyguardSecurityViewFlipperController
 
         @Override
         public void onStartingToHide() {
-
         }
     }
 }

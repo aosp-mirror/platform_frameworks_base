@@ -16,36 +16,9 @@
 
 package android.window;
 
-import android.content.res.Configuration;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.window.TaskFragmentInfo;
+import android.window.TaskFragmentTransaction;
 
 /** @hide */
 oneway interface ITaskFragmentOrganizer {
-    void onTaskFragmentAppeared(in TaskFragmentInfo taskFragmentInfo);
-    void onTaskFragmentInfoChanged(in TaskFragmentInfo taskFragmentInfo);
-    void onTaskFragmentVanished(in TaskFragmentInfo taskFragmentInfo);
-
-    /**
-     * Called when the parent leaf Task of organized TaskFragments is changed.
-     * When the leaf Task is changed, the organizer may want to update the TaskFragments in one
-     * transaction.
-     *
-     * For case like screen size change, it will trigger onTaskFragmentParentInfoChanged with new
-     * Task bounds, but may not trigger onTaskFragmentInfoChanged because there can be an override
-     * bounds.
-     */
-    void onTaskFragmentParentInfoChanged(in IBinder fragmentToken, in Configuration parentConfig);
-
-    /**
-     * Called when the {@link WindowContainerTransaction} created with
-     * {@link WindowContainerTransaction#setErrorCallbackToken(IBinder)} failed on the server side.
-     *
-     * @param errorCallbackToken    Token set through {@link
-     *                              WindowContainerTransaction#setErrorCallbackToken(IBinder)}
-     * @param exceptionBundle   Bundle containing the exception. Should be created with
-     *                          {@link TaskFragmentOrganizer#putExceptionInBundle}.
-     */
-    void onTaskFragmentError(in IBinder errorCallbackToken, in Bundle exceptionBundle);
+    void onTransactionReady(in TaskFragmentTransaction transaction);
 }

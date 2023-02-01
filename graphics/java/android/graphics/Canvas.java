@@ -1272,11 +1272,10 @@ public class Canvas extends BaseCanvas {
      * in a way similar to quickReject, in that it tells you that drawing
      * outside of these bounds will be clipped out.
      *
-     * @param bounds Return the clip bounds here. If it is null, ignore it but
-     *               still return true if the current clip is non-empty.
+     * @param bounds Return the clip bounds here.
      * @return true if the current clip is non-empty.
      */
-    public boolean getClipBounds(@Nullable Rect bounds) {
+    public boolean getClipBounds(@NonNull Rect bounds) {
         return nGetClipBounds(mNativeCanvasWrapper, bounds);
     }
 

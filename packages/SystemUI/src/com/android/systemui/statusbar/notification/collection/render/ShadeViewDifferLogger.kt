@@ -28,34 +28,28 @@ class ShadeViewDifferLogger @Inject constructor(
     fun logDetachingChild(
         key: String,
         isTransfer: Boolean,
+        isParentRemoved: Boolean,
         oldParent: String?,
         newParent: String?
     ) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = key
             bool1 = isTransfer
+            bool2 = isParentRemoved
             str2 = oldParent
             str3 = newParent
         }, {
-            "Detach $str1 isTransfer=$bool1 oldParent=$str2 newParent=$str3"
+            "Detach $str1 isTransfer=$bool1 isParentRemoved=$bool2 oldParent=$str2 newParent=$str3"
         })
     }
 
-    fun logSkippingDetach(key: String, parent: String?) {
+    fun logAttachingChild(key: String, parent: String, atIndex: Int) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = key
             str2 = parent
+            int1 = atIndex
         }, {
-            "Skipping detach of $str1 because its parent $str2 is also being detached"
-        })
-    }
-
-    fun logAttachingChild(key: String, parent: String) {
-        buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = key
-            str2 = parent
-        }, {
-            "Attaching view $str1 to $str2"
+            "Attaching view $str1 to $str2 at index $int1"
         })
     }
 

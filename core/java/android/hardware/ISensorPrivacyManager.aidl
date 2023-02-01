@@ -24,34 +24,33 @@ interface ISensorPrivacyManager {
     // the ones in
     //   frameworks/native/libs/sensorprivacy/aidl/android/hardware/ISensorPrivacyManager.aidl
     // =============== Beginning of transactions used on native side as well ======================
-    boolean supportsSensorToggle(int sensor);
+    boolean supportsSensorToggle(int toggleType, int sensor);
 
     void addSensorPrivacyListener(in ISensorPrivacyListener listener);
 
-    void addIndividualSensorPrivacyListener(int userId, int sensor,
-            in ISensorPrivacyListener listener);
+    void addToggleSensorPrivacyListener(in ISensorPrivacyListener listener);
 
     void removeSensorPrivacyListener(in ISensorPrivacyListener listener);
 
-    void removeIndividualSensorPrivacyListener(int sensor, in ISensorPrivacyListener listener);
+    void removeToggleSensorPrivacyListener(in ISensorPrivacyListener listener);
 
     boolean isSensorPrivacyEnabled();
 
-    boolean isIndividualSensorPrivacyEnabled(int userId, int sensor);
+    boolean isCombinedToggleSensorPrivacyEnabled(int sensor);
+
+    boolean isToggleSensorPrivacyEnabled(int toggleType, int sensor);
 
     void setSensorPrivacy(boolean enable);
 
-    void setIndividualSensorPrivacy(int userId, int source, int sensor, boolean enable);
+    void setToggleSensorPrivacy(int userId, int source, int sensor, boolean enable);
 
-    void setIndividualSensorPrivacyForProfileGroup(int userId, int source, int sensor, boolean enable);
+    void setToggleSensorPrivacyForProfileGroup(int userId, int source, int sensor, boolean enable);
     // =============== End of transactions used on native side as well ============================
 
-    void suppressIndividualSensorPrivacyReminders(int userId, int sensor, IBinder token,
+    void suppressToggleSensorPrivacyReminders(int userId, int sensor, IBinder token,
             boolean suppress);
 
-    void addUserGlobalIndividualSensorPrivacyListener(int sensor, in ISensorPrivacyListener listener);
-
-    void removeUserGlobalIndividualSensorPrivacyListener(int sensor, in ISensorPrivacyListener listener);
+    boolean requiresAuthentication();
 
     void showSensorUseDialog(int sensor);
 }

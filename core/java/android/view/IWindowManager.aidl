@@ -18,6 +18,7 @@ package android.view;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
 
 import android.app.IAssistDataReceiver;
@@ -25,7 +26,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
-import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -33,13 +33,13 @@ import android.os.Bundle;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
 import android.view.DisplayCutout;
-import android.view.IApplicationToken;
+import android.view.DisplayInfo;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.ICrossWindowBlurEnabledListener;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowListener;
 import android.view.IDisplayFoldListener;
-import android.view.IDisplayWindowRotationController;
+import android.view.IDisplayChangeWindowController;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedTaskListener;
 import android.view.IScrollCaptureResponseListener;
@@ -66,6 +66,7 @@ import android.view.WindowManager;
 import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
+import android.window.ITaskFpsCallback;
 
 /**
  * System private interface to the window manager.
@@ -144,7 +145,7 @@ interface IWindowManager
      * controller is called after the display has "frozen" for a rotation and display rotation will
      * only continue once the controller has finished calculating associated configurations.
      */
-    void setDisplayWindowRotationController(IDisplayWindowRotationController controller);
+    void setDisplayChangeWindowController(IDisplayChangeWindowController controller);
 
     /**
      * Adds a root container that a client shell can populate with its own windows (usually via
@@ -199,6 +200,14 @@ interface IWindowManager
     boolean isKeyguardSecure(int userId);
     void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
 
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)")
+    void addKeyguardLockedStateListener(in IKeyguardLockedStateListener listener);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE)")
+    void removeKeyguardLockedStateListener(in IKeyguardLockedStateListener listener);
+
     // Requires INTERACT_ACROSS_USERS_FULL permission
     void setSwitchingUser(boolean switching);
 
@@ -239,19 +248,7 @@ interface IWindowManager
      * Set whether screen capture is disabled for all windows of a specific user from
      * the device policy cache.
      */
-    void refreshScreenCaptureDisabled(int userId);
-
-    // These can only be called with the SET_ORIENTATION permission.
-    /**
-     * Update the current screen rotation based on the current state of
-     * the world.
-     * @param alwaysSendConfiguration Flag to force a new configuration to
-     * be evaluated.  This can be used when there are other parameters in
-     * configuration that are changing.
-     * @param forceRelayout If true, the window manager will always do a relayout
-     * of its windows even if the rotation hasn't changed.
-     */
-    void updateRotation(boolean alwaysSendConfiguration, boolean forceRelayout);
+    void refreshScreenCaptureDisabled();
 
     /**
      * Retrieve the current orientation of the primary screen.
@@ -416,11 +413,6 @@ interface IWindowManager
     boolean hasNavigationBar(int displayId);
 
     /**
-     * Get the position of the nav bar
-     */
-    int getNavBarPosition(int displayId);
-
-    /**
      * Lock the device immediately with the specified options (can be null).
      */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
@@ -431,11 +423,6 @@ interface IWindowManager
      */
     @UnsupportedAppUsage
     boolean isSafeModeEnabled();
-
-    /**
-     * Enables the screen if all conditions are met.
-     */
-    void enableScreenIfNeeded();
 
     /**
      * Clears the frame statistics for a given window.
@@ -482,16 +469,6 @@ interface IWindowManager
      */
     @UnsupportedAppUsage
     void getStableInsets(int displayId, out Rect outInsets);
-
-    /**
-     * Set the forwarded insets on the display.
-     * <p>
-     * This is only used in case a virtual display is displayed on another display that has insets,
-     * and the bounds of the virtual display is overlapping with the insets from the host display.
-     * In that case, the contents on the virtual display won't be placed over the forwarded insets.
-     * Only the owner of the display is permitted to set the forwarded insets on it.
-     */
-    void setForwardedInsets(int displayId, in Insets insets);
 
     /**
      * Register shortcut key. Shortcut code is packed as:
@@ -551,19 +528,29 @@ interface IWindowManager
     void stopWindowTrace();
 
     /**
+    * If window tracing is active, saves the window trace to file, otherwise does nothing
+    */
+    void saveWindowTraceToFile();
+
+    /**
      * Returns true if window trace is enabled.
      */
     boolean isWindowTraceEnabled();
 
     /**
-     * Notify WindowManager that it should not override the info in DisplayManager for the specified
-     * display. This can disable letter- or pillar-boxing applied in DisplayManager when the metrics
-     * of the logical display reported from WindowManager do not correspond to the metrics of the
-     * physical display it is based on.
-     *
-     * @param displayId The id of the display.
+     * Starts a transition trace.
      */
-    void dontOverrideDisplayInfo(int displayId);
+    void startTransitionTrace();
+
+    /**
+     * Stops a transition trace.
+     */
+    void stopTransitionTrace();
+
+    /**
+     * Returns true if transition trace is enabled.
+     */
+    boolean isTransitionTraceEnabled();
 
     /**
      * Gets the windowing mode of the display.
@@ -682,17 +669,6 @@ interface IWindowManager
     void setDisplayImePolicy(int displayId, int imePolicy);
 
     /**
-     * Waits for transactions to get applied before injecting input, optionally waiting for
-     * animations to complete. This includes waiting for the input windows to get sent to
-     * InputManager.
-     *
-     * This is needed for testing since the system add windows and injects input
-     * quick enough that the windows don't have time to get sent to InputManager.
-     */
-    boolean injectInputAfterTransactionsApplied(in InputEvent ev, int mode,
-            boolean waitForAnimations);
-
-    /**
      * Waits until input information has been sent from WindowManager to native InputManager,
      * optionally waiting for animations to complete.
      *
@@ -743,6 +719,17 @@ interface IWindowManager
      */
     boolean getWindowInsets(in WindowManager.LayoutParams attrs, int displayId,
             out InsetsState outInsetsState);
+
+    /**
+     * Returns a list of {@link android.view.DisplayInfo} for the logical display. This is not
+     * guaranteed to include all possible device states. The list items are unique.
+     *
+     * If invoked through a package other than a launcher app, returns an empty list.
+     *
+     * @param displayId the id of the logical display
+     * @param packageName the name of the calling package
+     */
+    List<DisplayInfo> getPossibleDisplayInfo(int displayId, String packageName);
 
     /**
      * Called to show global actions.
@@ -904,6 +891,12 @@ interface IWindowManager
     int getImeDisplayId();
 
     /**
+     * Control if we should enable task snapshot features on this device.
+     * @hide
+     */
+    void setTaskSnapshotEnabled(boolean enabled);
+
+    /**
      * Customized the task transition animation with a task transition spec.
      *
      * @param spec the spec that will be used to customize the task animations
@@ -915,4 +908,58 @@ interface IWindowManager
      * reverts to using the default task transition with no spec changes.
      */
     void clearTaskTransitionSpec();
+
+    /**
+     * Registers the frame rate per second count callback for one given task ID.
+     * Each callback can only register for receiving FPS callback for one task id until unregister
+     * is called. If there's no task associated with the given task id,
+     * {@link IllegalArgumentException} will be thrown. If a task id destroyed after a callback is
+     * registered, the registered callback will not be unregistered until
+     * {@link unregisterTaskFpsCallback()} is called
+     * @param taskId task id of the task.
+     * @param callback callback to be registered.
+     *
+     * @hide
+     */
+    void registerTaskFpsCallback(in int taskId, in ITaskFpsCallback callback);
+
+    /**
+     * Unregisters the frame rate per second count callback which was registered with
+     * {@link #registerTaskFpsCallback(int,TaskFpsCallback)}.
+     *
+     * @param callback callback to be unregistered.
+     *
+     * @hide
+     */
+    void unregisterTaskFpsCallback(in ITaskFpsCallback listener);
+
+    /**
+     * Take a snapshot using the same path that's used for Recents. This is used for Testing only.
+     *
+     * @param taskId to take the snapshot of
+     *
+     * Returns a bitmap of the screenshot or {@code null} if it was unable to screenshot.
+     * @hide
+     */
+    Bitmap snapshotTaskForRecents(int taskId);
+
+    /**
+     * Informs the system whether the recents app is currently behind the system bars. If so,
+     * means the recents app can control the SystemUI flags, and vice-versa.
+     */
+    void setRecentsAppBehindSystemBars(boolean behindSystemBars);
+
+    /**
+     * Gets the background color of the letterbox. Considered invalid if the background has
+     * multiple colors {@link #isLetterboxBackgroundMultiColored}. Should be called by SystemUI when
+     * computing the letterbox appearance for status bar treatment.
+     */
+    int getLetterboxBackgroundColorInArgb();
+
+    /**
+     * Whether the outer area of the letterbox has multiple colors (e.g. blurred background).
+     * Should be called by SystemUI when computing the letterbox appearance for status bar
+     * treatment.
+     */
+    boolean isLetterboxBackgroundMultiColored();
 }

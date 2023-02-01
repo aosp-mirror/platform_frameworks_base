@@ -40,10 +40,11 @@ import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.BiometricScheduler;
+import com.android.server.biometrics.sensors.BiometricStateCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
-import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import org.junit.Before;
@@ -70,7 +71,9 @@ public class FingerprintProviderTest {
     @Mock
     private GestureAvailabilityDispatcher mGestureAvailabilityDispatcher;
     @Mock
-    private FingerprintStateCallback mFingerprintStateCallback;
+    private BiometricStateCallback mBiometricStateCallback;
+    @Mock
+    private BiometricContext mBiometricContext;
 
     private SensorProps[] mSensorProps;
     private LockoutResetDispatcher mLockoutResetDispatcher;
@@ -104,8 +107,8 @@ public class FingerprintProviderTest {
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
 
         mFingerprintProvider = new TestableFingerprintProvider(mDaemon, mContext,
-                mFingerprintStateCallback, mSensorProps, TAG, mLockoutResetDispatcher,
-                mGestureAvailabilityDispatcher);
+                mBiometricStateCallback, mSensorProps, TAG, mLockoutResetDispatcher,
+                mGestureAvailabilityDispatcher, mBiometricContext);
     }
 
     @SuppressWarnings("rawtypes")
@@ -153,13 +156,14 @@ public class FingerprintProviderTest {
 
         TestableFingerprintProvider(@NonNull IFingerprint daemon,
                 @NonNull Context context,
-                @NonNull FingerprintStateCallback fingerprintStateCallback,
+                @NonNull BiometricStateCallback biometricStateCallback,
                 @NonNull SensorProps[] props,
                 @NonNull String halInstanceName,
                 @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-                @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
-            super(context, fingerprintStateCallback, props, halInstanceName, lockoutResetDispatcher,
-                    gestureAvailabilityDispatcher);
+                @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+                @NonNull BiometricContext biometricContext) {
+            super(context, biometricStateCallback, props, halInstanceName, lockoutResetDispatcher,
+                    gestureAvailabilityDispatcher, biometricContext);
             mDaemon = daemon;
         }
 

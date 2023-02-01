@@ -22,7 +22,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Process;
+import android.os.InputConfig;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.view.InputApplicationHandle;
@@ -70,19 +70,14 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mWindowHandle.name = name;
         mWindowHandle.token = mClientChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
-        mWindowHandle.layoutParamsFlags = 0;
         mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        mWindowHandle.visible = true;
-        mWindowHandle.focusable = false;
-        mWindowHandle.hasWallpaper = false;
-        mWindowHandle.paused = false;
-        mWindowHandle.ownerPid = Process.myPid();
-        mWindowHandle.ownerUid = Process.myUid();
-        mWindowHandle.inputFeatures = 0;
+        mWindowHandle.ownerPid = WindowManagerService.MY_PID;
+        mWindowHandle.ownerUid = WindowManagerService.MY_UID;
         mWindowHandle.scaleFactor = 1.0f;
-        mWindowHandle.trustedOverlay = true;
+        mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE | InputConfig.TRUSTED_OVERLAY;
 
-        mInputSurface = mService.makeSurfaceBuilder(mService.mRoot.getDisplayContent(displayId).getSession())
+        mInputSurface = mService.makeSurfaceBuilder(
+                        mService.mRoot.getDisplayContent(displayId).getSession())
                 .setContainerLayer()
                 .setName("Input Consumer " + name)
                 .setCallsite("InputConsumerImpl")

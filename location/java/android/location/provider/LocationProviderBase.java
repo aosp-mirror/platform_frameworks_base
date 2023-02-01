@@ -26,7 +26,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -308,9 +310,7 @@ public abstract class LocationProviderBase {
             synchronized (mBinder) {
                 try {
                     manager.onInitialize(mAllowed, mProperties, mAttributionTag);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                     Log.w(mTag, e);
                 }
 
@@ -320,12 +320,28 @@ public abstract class LocationProviderBase {
 
         @Override
         public void setRequest(ProviderRequest request) {
-            onSetRequest(request);
+            try {
+                onSetRequest(request);
+            } catch (RuntimeException e) {
+                // exceptions on one-way binder threads are dropped - move to a different thread
+                Log.w(mTag, e);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    throw new AssertionError(e);
+                });
+            }
         }
 
         @Override
         public void flush() {
-            onFlush(this::onFlushComplete);
+            try {
+                onFlush(this::onFlushComplete);
+            } catch (RuntimeException e) {
+                // exceptions on one-way binder threads are dropped - move to a different thread
+                Log.w(mTag, e);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    throw new AssertionError(e);
+                });
+            }
         }
 
         private void onFlushComplete() {
@@ -333,9 +349,7 @@ public abstract class LocationProviderBase {
             if (manager != null) {
                 try {
                     manager.onFlushComplete();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                } catch (RuntimeException e) {
+                } catch (RemoteException | RuntimeException e) {
                     Log.w(mTag, e);
                 }
             }
@@ -343,7 +357,15 @@ public abstract class LocationProviderBase {
 
         @Override
         public void sendExtraCommand(String command, Bundle extras) {
-            onSendExtraCommand(command, extras);
+            try {
+                onSendExtraCommand(command, extras);
+            } catch (RuntimeException e) {
+                // exceptions on one-way binder threads are dropped - move to a different thread
+                Log.w(mTag, e);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    throw new AssertionError(e);
+                });
+            }
         }
     }
 }

@@ -32,6 +32,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
+import android.util.SparseIntArray;
 
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.Installer;
@@ -119,8 +120,9 @@ public class AppDataRollbackHelperTest {
     }
 
     private static Rollback createRollbackForId(int rollbackId) {
-        return new Rollback(rollbackId, new File("/does/not/exist"), -1,
-                0, "com.xyz");
+        return new Rollback(rollbackId, new File("/does/not/exist"), -1, /* isStaged */ false, 0,
+                "com.xyz", null, new SparseIntArray(0));
+
     }
 
     @Test

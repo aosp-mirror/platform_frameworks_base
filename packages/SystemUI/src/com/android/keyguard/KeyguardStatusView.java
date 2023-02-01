@@ -16,22 +16,15 @@
 
 package com.android.keyguard;
 
-import android.app.ActivityManager;
-import android.app.IActivityManager;
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 
-import androidx.core.graphics.ColorUtils;
-
-import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Set;
 
@@ -44,25 +37,12 @@ public class KeyguardStatusView extends GridLayout {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusView";
 
-    private final LockPatternUtils mLockPatternUtils;
-    private final IActivityManager mIActivityManager;
-
     private ViewGroup mStatusViewContainer;
     private KeyguardClockSwitch mClockView;
     private KeyguardSliceView mKeyguardSlice;
     private View mMediaHostContainer;
 
     private float mDarkAmount = 0;
-    private int mTextColor;
-    private float mChildrenAlphaExcludingSmartSpace = 1f;
-
-    /**
-     * Bottom margin that defines the margin between bottom of smart space and top of notification
-     * icons on AOD.
-     */
-    private int mIconTopMargin;
-    private int mIconTopMarginWithHeader;
-    private boolean mShowingHeader;
 
     public KeyguardStatusView(Context context) {
         this(context, null, 0);
@@ -74,8 +54,6 @@ public class KeyguardStatusView extends GridLayout {
 
     public KeyguardStatusView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mIActivityManager = ActivityManager.getService();
-        mLockPatternUtils = new LockPatternUtils(getContext());
     }
 
     @Override
@@ -89,25 +67,10 @@ public class KeyguardStatusView extends GridLayout {
         }
 
         mKeyguardSlice = findViewById(R.id.keyguard_slice_view);
-        mTextColor = mClockView.getCurrentTextColor();
-
-        mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);
-        onSliceContentChanged();
 
         mMediaHostContainer = findViewById(R.id.status_view_media_container);
 
         updateDark();
-    }
-
-    /**
-     * Moves clock, adjusting margins when slice content changes.
-     */
-    private void onSliceContentChanged() {
-        final boolean hasHeader = mKeyguardSlice.hasHeader();
-        if (mShowingHeader == hasHeader) {
-            return;
-        }
-        mShowingHeader = hasHeader;
     }
 
     void setDarkAmount(float darkAmount) {
@@ -115,53 +78,38 @@ public class KeyguardStatusView extends GridLayout {
             return;
         }
         mDarkAmount = darkAmount;
-        mClockView.setDarkAmount(darkAmount);
         CrossFadeHelper.fadeOut(mMediaHostContainer, darkAmount);
         updateDark();
     }
 
     void updateDark() {
-        final int blendedTextColor = ColorUtils.blendARGB(mTextColor, Color.WHITE, mDarkAmount);
         mKeyguardSlice.setDarkAmount(mDarkAmount);
-        mClockView.setTextColor(blendedTextColor);
     }
 
-    public void setChildrenAlphaExcludingClockView(float alpha) {
-        setChildrenAlphaExcluding(alpha, Set.of(mClockView));
+    /** Sets a translationY value on every child view except for the media view. */
+    public void setChildrenTranslationYExcludingMediaView(float translationY) {
+        setChildrenTranslationYExcluding(translationY, Set.of(mMediaHostContainer));
     }
 
-    /** Sets an alpha value on every view except for the views in the provided set. */
-    public void setChildrenAlphaExcluding(float alpha, Set<View> excludedViews) {
-        mChildrenAlphaExcludingSmartSpace = alpha;
-
+    /** Sets a translationY value on every view except for the views in the provided set. */
+    private void setChildrenTranslationYExcluding(float translationY, Set<View> excludedViews) {
         for (int i = 0; i < mStatusViewContainer.getChildCount(); i++) {
             final View child = mStatusViewContainer.getChildAt(i);
 
             if (!excludedViews.contains(child)) {
-                child.setAlpha(alpha);
+                child.setTranslationY(translationY);
             }
         }
     }
 
-    public float getChildrenAlphaExcludingSmartSpace() {
-        return mChildrenAlphaExcludingSmartSpace;
-    }
-
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardStatusView:");
         pw.println("  mDarkAmount: " + mDarkAmount);
-        pw.println("  mTextColor: " + Integer.toHexString(mTextColor));
         if (mClockView != null) {
-            mClockView.dump(fd, pw, args);
+            mClockView.dump(pw, args);
         }
         if (mKeyguardSlice != null) {
-            mKeyguardSlice.dump(fd, pw, args);
+            mKeyguardSlice.dump(pw, args);
         }
-    }
-
-    private void loadBottomMargin() {
-        mIconTopMargin = getResources().getDimensionPixelSize(R.dimen.widget_vertical_padding);
-        mIconTopMarginWithHeader = getResources().getDimensionPixelSize(
-                R.dimen.widget_vertical_padding_with_header);
     }
 }

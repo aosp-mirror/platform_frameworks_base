@@ -16,9 +16,10 @@
 
 package com.android.wm.shell.splitscreen;
 
-import android.annotation.Nullable;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
+
 import android.content.Context;
-import android.graphics.Rect;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -39,24 +40,19 @@ class MainStage extends StageTaskListener {
 
     MainStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession, IconProvider iconProvider,
-            @Nullable StageTaskUnfoldController stageTaskUnfoldController) {
-        super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession, iconProvider,
-                stageTaskUnfoldController);
+            SurfaceSession surfaceSession, IconProvider iconProvider) {
+        super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession,
+                iconProvider);
     }
 
     boolean isActive() {
         return mIsActive;
     }
 
-    void activate(Rect rootBounds, WindowContainerTransaction wct, boolean includingTopTask) {
+    void activate(WindowContainerTransaction wct, boolean includingTopTask) {
         if (mIsActive) return;
 
         final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.setBounds(rootToken, rootBounds)
-                // Moving the root task to top after the child tasks were re-parented , or the root
-                // task cannot be visible and focused.
-                .reorder(rootToken, true /* onTop */);
         if (includingTopTask) {
             wct.reparentTasks(
                     null /* currentParent */,
@@ -81,13 +77,10 @@ class MainStage extends StageTaskListener {
         if (mRootTaskInfo == null) return;
         final WindowContainerToken rootToken = mRootTaskInfo.token;
         wct.reparentTasks(
-                        rootToken,
-                        null /* newParent */,
-                        CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
-                        CONTROLLED_ACTIVITY_TYPES,
-                        toTop)
-                // We want this re-order to the bottom regardless since we are re-parenting
-                // all its tasks.
-                .reorder(rootToken, false /* onTop */);
+                rootToken,
+                null /* newParent */,
+                null /* windowingModes */,
+                null /* activityTypes */,
+                toTop);
     }
 }

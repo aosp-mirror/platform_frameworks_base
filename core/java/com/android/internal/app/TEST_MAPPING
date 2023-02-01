@@ -3,17 +3,14 @@
     {
       "name": "CtsSuspendAppsTestCases",
       "file_patterns": ["(/|^)SuspendedAppActivity\\.java"]
-    }
-  ],
-  "postsubmit": [
+    },
     {
       "name": "FrameworksCoreTests",
       "options": [
         {
         "include-filter": "com.android.internal.app."
         },
-
-        // Many tests failing - do not enable for continuous execution 
+        // Exclude currently failing tests from presubmit
         {
         "exclude-filter": "com.android.internal.app.IntentForwarderActivityTest"
         },

@@ -27,23 +27,30 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.StartUserClient;
+
+import java.util.function.Supplier;
 
 public class FaceStartUserClient extends StartUserClient<IFace, ISession> {
     private static final String TAG = "FaceStartUserClient";
 
     @NonNull private final ISessionCallback mSessionCallback;
 
-    public FaceStartUserClient(@NonNull Context context, @NonNull LazyDaemon<IFace> lazyDaemon,
+    public FaceStartUserClient(@NonNull Context context,
+            @NonNull Supplier<IFace> lazyDaemon,
             @Nullable IBinder token, int userId, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull ISessionCallback sessionCallback,
             @NonNull UserStartedCallback<ISession> callback) {
-        super(context, lazyDaemon, token, userId, sensorId, callback);
+        super(context, lazyDaemon, token, userId, sensorId, logger, biometricContext, callback);
         mSessionCallback = sessionCallback;
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
         startHalOperation();
     }
@@ -51,10 +58,12 @@ public class FaceStartUserClient extends StartUserClient<IFace, ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            final ISession newSession = getFreshDaemon().createSession(getSensorId(),
+            final IFace hal = getFreshDaemon();
+            final int version = hal.getInterfaceVersion();
+            final ISession newSession = hal.createSession(getSensorId(),
                     getTargetUserId(), mSessionCallback);
             Binder.allowBlocking(newSession.asBinder());
-            mUserStartedCallback.onUserStarted(getTargetUserId(), newSession);
+            mUserStartedCallback.onUserStarted(getTargetUserId(), newSession, version);
             getCallback().onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
@@ -64,6 +73,5 @@ public class FaceStartUserClient extends StartUserClient<IFace, ISession> {
 
     @Override
     public void unableToStart() {
-
     }
 }

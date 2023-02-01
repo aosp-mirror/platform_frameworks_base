@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.onehanded;
 
-import android.content.res.Configuration;
+import android.os.SystemProperties;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
@@ -26,22 +26,15 @@ import com.android.wm.shell.common.annotations.ExternalThread;
 @ExternalThread
 public interface OneHanded {
 
+    boolean sIsSupportOneHandedMode =  SystemProperties.getBoolean(
+            OneHandedController.SUPPORT_ONE_HANDED_MODE, false);
+
     /**
      * Returns a binder that can be passed to an external process to manipulate OneHanded.
      */
     default IOneHanded createExternalInterface() {
         return null;
     }
-
-    /**
-     * Return one handed settings enabled or not.
-     */
-    boolean isOneHandedEnabled();
-
-    /**
-     * Return swipe to notification settings enabled or not.
-     */
-    boolean isSwipeToNotificationEnabled();
 
     /**
      * Enters one handed mode.
@@ -77,19 +70,4 @@ public interface OneHanded {
      * transition start or finish
      */
     void registerTransitionCallback(OneHandedTransitionCallback callback);
-
-    /**
-     * Receive onConfigurationChanged() events
-     */
-    void onConfigChanged(Configuration newConfig);
-
-    /**
-     * Notifies when user switch complete
-     */
-    void onUserSwitch(int userId);
-
-    /**
-     * Notifies when keyguard visibility changed
-     */
-    void onKeyguardVisibilityChanged(boolean showing);
 }

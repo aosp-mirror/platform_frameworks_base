@@ -17,9 +17,10 @@
   -->
 
 <accessibility-shortcut-target xmlns:android="http://schemas.android.com/apk/res/android"
-                        android:description="@string/accessibility_shortcut_description"
-                        android:summary="@string/accessibility_shortcut_summary"
-                        android:animatedImageDrawable="@drawable/bitmap_drawable"
-                        android:htmlDescription="@string/accessibility_shortcut_html_description"
-                        android:settingsActivity="com.example.shortcut.target.SettingsActivity"
-/>
+    android:description="@string/accessibility_shortcut_description"
+    android:summary="@string/accessibility_shortcut_summary"
+    android:animatedImageDrawable="@drawable/bitmap_drawable"
+    android:htmlDescription="@string/accessibility_shortcut_html_description"
+    android:settingsActivity="com.example.shortcut.target.SettingsActivity"
+    android:tileService="com.example.shortcut.target.TileService"
+    android:intro="@string/accessibility_shortcut_intro" />

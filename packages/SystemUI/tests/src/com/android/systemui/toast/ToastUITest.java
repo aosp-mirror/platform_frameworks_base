@@ -44,6 +44,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -122,6 +123,7 @@ public class ToastUITest extends SysuiTestCase {
         mContextSpy = spy(mContext);
         when(mContextSpy.getPackageManager()).thenReturn(mPackageManager);
         doReturn(mContextSpy).when(mContextSpy).createContextAsUser(any(), anyInt());
+        doReturn(mContextSpy).when(mContextSpy).createDisplayContext(any());
         mToastUI = new ToastUI(
                 mContextSpy,
                 mCommandQueue,
@@ -144,7 +146,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testShowToast_addsCorrectViewToWindowManager() {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                null);
+                null, Display.DEFAULT_DISPLAY);
 
         verify(mWindowManager).addView(mViewCaptor.capture(), any());
         View view = mViewCaptor.getValue();
@@ -154,7 +156,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testShowToast_addsViewWithCorrectLayoutParamsToWindowManager() {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                null);
+                null, Display.DEFAULT_DISPLAY);
 
         verify(mWindowManager).addView(any(), mParamsCaptor.capture());
         ViewGroup.LayoutParams params = mParamsCaptor.getValue();
@@ -170,7 +172,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testShowToast_forAndroidPackage_addsAllUserFlag() throws Exception {
         mToastUI.showToast(ANDROID_UID, "android", TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                null);
+                null, Display.DEFAULT_DISPLAY);
 
         verify(mWindowManager).addView(any(), mParamsCaptor.capture());
         ViewGroup.LayoutParams params = mParamsCaptor.getValue();
@@ -183,7 +185,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testShowToast_forSystemUiPackage_addsAllUserFlag() throws Exception {
         mToastUI.showToast(SYSTEMUI_UID, "com.android.systemui", TOKEN_1, TEXT, WINDOW_TOKEN_1,
-                Toast.LENGTH_LONG, null);
+                Toast.LENGTH_LONG, null, Display.DEFAULT_DISPLAY);
 
         verify(mWindowManager).addView(any(), mParamsCaptor.capture());
         ViewGroup.LayoutParams params = mParamsCaptor.getValue();
@@ -196,7 +198,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testShowToast_callsCallback() throws Exception {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
 
         verify(mCallback).onToastShown();
     }
@@ -216,7 +218,7 @@ public class ToastUITest extends SysuiTestCase {
                 mAccessibilityManager).sendAccessibilityEvent(any(), anyInt());
 
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                null);
+                null, Display.DEFAULT_DISPLAY);
 
         eventParcel.setDataPosition(0);
         assertThat(eventParcel.dataSize()).isGreaterThan(0);
@@ -231,14 +233,14 @@ public class ToastUITest extends SysuiTestCase {
     public void testShowToast_accessibilityManagerClientIsRemoved() throws Exception {
         when(mContextSpy.getUserId()).thenReturn(USER_ID);
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                null);
+                null, Display.DEFAULT_DISPLAY);
         verify(mAccessibilityManager).removeClient(any(), eq(USER_ID));
     }
 
     @Test
     public void testHideToast_removesView() throws Exception {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
         final SystemUIToast toast = mToastUI.mToast;
 
         View view = verifyWmAddViewAndAttachToParent();
@@ -254,7 +256,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testHideToast_finishesToken() throws Exception {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
         final SystemUIToast toast = mToastUI.mToast;
 
         verifyWmAddViewAndAttachToParent();
@@ -270,7 +272,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testHideToast_callsCallback() throws RemoteException {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
         final SystemUIToast toast = mToastUI.mToast;
 
         verifyWmAddViewAndAttachToParent();
@@ -286,7 +288,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testHideToast_whenNotCurrentToastToken_doesNotHideToast() throws RemoteException {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
         final SystemUIToast toast = mToastUI.mToast;
 
         verifyWmAddViewAndAttachToParent();
@@ -302,7 +304,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testHideToast_whenNotCurrentToastPackage_doesNotHideToast() throws RemoteException {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
         final SystemUIToast toast = mToastUI.mToast;
 
         verifyWmAddViewAndAttachToParent();
@@ -318,12 +320,12 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testShowToast_afterShowToast_hidesCurrentToast() throws RemoteException {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
         final SystemUIToast toast = mToastUI.mToast;
 
         View view = verifyWmAddViewAndAttachToParent();
         mToastUI.showToast(UID_2, PACKAGE_NAME_2, TOKEN_2, TEXT, WINDOW_TOKEN_2, Toast.LENGTH_LONG,
-                null);
+                null, Display.DEFAULT_DISPLAY);
 
         if (toast.getOutAnimation() != null) {
             assertThat(toast.getOutAnimation().isRunning()).isTrue();
@@ -338,7 +340,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testShowToast_logs() {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
 
         verify(mToastLogger).logOnShowToast(UID_1, PACKAGE_NAME_1, TEXT, TOKEN_1.toString());
     }
@@ -354,7 +356,7 @@ public class ToastUITest extends SysuiTestCase {
 
         // WHEN the package posts a toast
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
 
         // THEN the view can have unlimited lines
         assertThat(((TextView) mToastUI.mToast.getView()
@@ -373,7 +375,7 @@ public class ToastUITest extends SysuiTestCase {
 
         // WHEN the package posts a toast
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
 
         // THEN the view is limited to 2 lines
         assertThat(((TextView) mToastUI.mToast.getView()
@@ -384,7 +386,7 @@ public class ToastUITest extends SysuiTestCase {
     @Test
     public void testHideToast_logs() {
         mToastUI.showToast(UID_1, PACKAGE_NAME_1, TOKEN_1, TEXT, WINDOW_TOKEN_1, Toast.LENGTH_LONG,
-                mCallback);
+                mCallback, Display.DEFAULT_DISPLAY);
         verifyWmAddViewAndAttachToParent();
         mToastUI.hideToast(PACKAGE_NAME_1, TOKEN_1);
         verify(mToastLogger).logOnHideToast(PACKAGE_NAME_1, TOKEN_1.toString());

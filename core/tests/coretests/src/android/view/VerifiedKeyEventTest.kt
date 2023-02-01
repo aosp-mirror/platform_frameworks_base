@@ -19,6 +19,7 @@ package android.view
 import android.view.InputDevice.SOURCE_KEYBOARD
 import android.view.KeyEvent.ACTION_DOWN
 import android.os.Parcel
+import android.platform.test.annotations.Presubmit
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -30,6 +31,7 @@ import org.junit.Test
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
+@Presubmit
 class VerifiedKeyEventTest {
 
     @Test

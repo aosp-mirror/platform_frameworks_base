@@ -56,6 +56,8 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
     OneHandedSettingsUtil mMockSettingsUtil;
     @Mock
     WindowManager mMockWindowManager;
+    @Mock
+    BackgroundWindowManager mMockBackgroundWindowManager;
 
     @Before
     public void setUp() {
@@ -63,10 +65,11 @@ public class OneHandedTutorialHandlerTest extends OneHandedTestCase {
         when(mMockSettingsUtil.getTutorialShownCounts(any(), anyInt())).thenReturn(0);
 
         mDisplay = mContext.getDisplay();
-        mDisplayLayout = new DisplayLayout(mContext, mDisplay);
+        mDisplayLayout = new DisplayLayout(getTestContext().getApplicationContext(), mDisplay);
         mSpiedTransitionState = spy(new OneHandedState());
         mSpiedTutorialHandler = spy(
-                new OneHandedTutorialHandler(mContext, mMockSettingsUtil, mMockWindowManager));
+                new OneHandedTutorialHandler(mContext, mMockSettingsUtil, mMockWindowManager,
+                        mMockBackgroundWindowManager));
         mTimeoutHandler = new OneHandedTimeoutHandler(mMockShellMainExecutor);
     }
 

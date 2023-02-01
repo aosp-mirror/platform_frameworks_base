@@ -15,9 +15,12 @@
  */
 package com.android.server.pm;
 
-import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
-        .assertExpectException;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertExpectException;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -26,9 +29,9 @@ import android.content.pm.LauncherApps.PinItemRequest;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.os.Process;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.platform.test.annotations.Presubmit;
 
-import static org.mockito.Mockito.*;
+import androidx.test.filters.SmallTest;
 
 /**
  * Tests for {@link ShortcutManager#createShortcutResultIntent(ShortcutInfo)} and relevant APIs.
@@ -39,6 +42,7 @@ import static org.mockito.Mockito.*;
  adb shell am instrument -e class com.android.server.pm.ShortcutManagerTest10 \
  -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
+@Presubmit
 @SmallTest
 public class ShortcutManagerTest10 extends BaseShortcutManagerTest {
 

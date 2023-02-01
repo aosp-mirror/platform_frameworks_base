@@ -28,7 +28,7 @@ import java.nio.CharBuffer;
  * provided in the {@link android.view.View} class for {@link android.view.View#setTextDirection
  * setTextDirection()}, such as {@link android.view.View#TEXT_DIRECTION_RTL}.
  * <p>To support versions lower than {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
- * you can use the support library's {@link android.support.v4.text.TextDirectionHeuristicsCompat}
+ * you can use the support library's {@link androidx.core.text.TextDirectionHeuristicsCompat}
  * class.
  *
  */

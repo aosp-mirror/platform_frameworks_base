@@ -16,6 +16,7 @@ per-file *Stats* = file:/BATTERY_STATS_OWNERS
 # Multiuser
 per-file IUser* = file:/MULTIUSER_OWNERS
 per-file User* = file:/MULTIUSER_OWNERS
+per-file NewUser* = file:/MULTIUSER_OWNERS
 
 # Binder
 per-file BadParcelableException.java = file:platform/frameworks/native:/libs/binder/OWNERS
@@ -69,3 +70,9 @@ per-file Vintf* = file:/platform/system/libvintf:/OWNERS
 
 # Tracing
 per-file Trace.java = file:/TRACE_OWNERS
+
+# PatternMatcher
+per-file PatternMatcher* = file:/PACKAGE_MANAGER_OWNERS
+
+# PermissionEnforcer
+per-file PermissionEnforcer.java = tweek@google.com, brufino@google.com

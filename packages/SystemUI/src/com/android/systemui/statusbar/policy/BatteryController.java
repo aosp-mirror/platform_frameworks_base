@@ -17,25 +17,54 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.Nullable;
+import android.view.View;
 
-import com.android.systemui.Dumpable;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 
-public interface BatteryController extends DemoMode, Dumpable,
+/**
+ * Controller for battery related information, including the charge level, power save mode,
+ * and time remaining information
+ */
+public interface BatteryController extends DemoMode,
         CallbackController<BatteryStateChangeCallback> {
     /**
      * Prints the current state of the {@link BatteryController} to the given {@link PrintWriter}.
      */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+    void dump(PrintWriter pw, String[] args);
 
     /**
      * Sets if the current device is in power save mode.
      */
-    void setPowerSaveMode(boolean powerSave);
+    default void setPowerSaveMode(boolean powerSave) {
+        setPowerSaveMode(powerSave, null);
+    }
+
+    /**
+     * Sets if the current device is in power save mode.
+     *
+     * Can pass the view that triggered the request.
+     */
+    void setPowerSaveMode(boolean powerSave, @Nullable View view);
+
+    /**
+     * Gets a reference to the last view used when called {@link #setPowerSaveMode}.
+     */
+    @Nullable
+    default WeakReference<View> getLastPowerSaverStartView() {
+        return null;
+    }
+
+    /**
+     * Clears the last view used when called {@link #setPowerSaveMode}.
+     *
+     * Immediately after calling this, a call to {@link #getLastPowerSaverStartView()} should return
+     * {@code null}.
+     */
+    default void clearLastPowerSaverStartView() {}
 
     /**
      * Returns {@code true} if the device is currently plugged in.
@@ -89,6 +118,17 @@ public interface BatteryController extends DemoMode, Dumpable,
      * Returns {@code true} if extreme battery saver is on.
      */
     default boolean isExtremeSaverOn() {
+        return false;
+    }
+
+    /**
+     * Returns {@code true} if the charging source is
+     * {@link android.os.BatteryManager#BATTERY_PLUGGED_DOCK}.
+     *
+     * <P>Note that charging from dock is not considered as wireless charging. In other words,
+     * {@link BatteryController#isWirelessCharging()} and this are mutually exclusive.
+     */
+    default boolean isChargingSourceDock() {
         return false;
     }
 

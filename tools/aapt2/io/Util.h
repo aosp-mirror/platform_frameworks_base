@@ -131,8 +131,7 @@ class ProtoInputStreamReader {
   template <typename T> bool ReadMessage(T *message) {
     ZeroCopyInputAdaptor adapter(in_);
     google::protobuf::io::CodedInputStream coded_stream(&adapter);
-    coded_stream.SetTotalBytesLimit(std::numeric_limits<int32_t>::max(),
-                                    coded_stream.BytesUntilTotalBytesLimit());
+    coded_stream.SetTotalBytesLimit(std::numeric_limits<int32_t>::max());
     return message->ParseFromCodedStream(&coded_stream);
   }
 

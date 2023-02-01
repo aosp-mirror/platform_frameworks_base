@@ -18,6 +18,7 @@ package com.android.systemui.shared.recents.utilities;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -110,10 +111,15 @@ public class Utilities {
                 hints &= ~NAVIGATION_HINT_BACK_ALT;
                 break;
         }
-        if (showImeSwitcher) {
+        if (imeShown) {
             hints |= NAVIGATION_HINT_IME_SHOWN;
         } else {
             hints &= ~NAVIGATION_HINT_IME_SHOWN;
+        }
+        if (showImeSwitcher) {
+            hints |= NAVIGATION_HINT_IME_SWITCHER_SHOWN;
+        } else {
+            hints &= ~NAVIGATION_HINT_IME_SWITCHER_SHOWN;
         }
 
         return hints;

@@ -26,6 +26,7 @@ import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.app.Service;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -53,13 +54,12 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
-
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -105,9 +105,9 @@ public abstract class TvInputService extends Service {
      * @hide
      */
     @IntDef(prefix = "PRIORITY_HINT_USE_CASE_TYPE_",
-        value = {PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND, PRIORITY_HINT_USE_CASE_TYPE_SCAN,
-            PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK, PRIORITY_HINT_USE_CASE_TYPE_LIVE,
-            PRIORITY_HINT_USE_CASE_TYPE_RECORD})
+            value = {PRIORITY_HINT_USE_CASE_TYPE_BACKGROUND, PRIORITY_HINT_USE_CASE_TYPE_SCAN,
+                    PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK, PRIORITY_HINT_USE_CASE_TYPE_LIVE,
+                    PRIORITY_HINT_USE_CASE_TYPE_RECORD})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PriorityHintUseCaseType {}
 
@@ -170,7 +170,7 @@ public abstract class TvInputService extends Service {
 
             @Override
             public void createSession(InputChannel channel, ITvInputSessionCallback cb,
-                    String inputId, String sessionId) {
+                    String inputId, String sessionId, AttributionSource tvAppAttributionSource) {
                 if (channel == null) {
                     Log.w(TAG, "Creating session without input channel");
                 }
@@ -182,6 +182,7 @@ public abstract class TvInputService extends Service {
                 args.arg2 = cb;
                 args.arg3 = inputId;
                 args.arg4 = sessionId;
+                args.arg5 = tvAppAttributionSource;
                 mServiceHandler.obtainMessage(ServiceHandler.DO_CREATE_SESSION,
                         args).sendToTarget();
             }
@@ -366,6 +367,24 @@ public abstract class TvInputService extends Service {
     @Nullable
     public Session onCreateSession(@NonNull String inputId, @NonNull String sessionId) {
         return onCreateSession(inputId);
+    }
+
+    /**
+     * Returns a concrete implementation of {@link Session}.
+     *
+     * <p>For any apps that needs sessionId to request tuner resources from TunerResourceManager and
+     * needs to specify custom AttributionSource to AudioTrack, it needs to override this method to
+     * get the sessionId and AttrubutionSource passed. When no overriding, this method calls {@link
+     * #onCreateSession(String, String)} defaultly.
+     *
+     * @param inputId The ID of the TV input associated with the session.
+     * @param sessionId the unique sessionId created by TIF when session is created.
+     * @param tvAppAttributionSource The Attribution Source of the TV App.
+     */
+    @Nullable
+    public Session onCreateSession(@NonNull String inputId, @NonNull String sessionId,
+            @NonNull AttributionSource tvAppAttributionSource) {
+        return onCreateSession(inputId, sessionId);
     }
 
     /**
@@ -586,6 +605,28 @@ public abstract class TvInputService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyChannelRetuned", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the application that this session has been tuned to the given channel.
+         *
+         * @param channelUri The URI of the tuned channel.
+         */
+        public void notifyTuned(@NonNull Uri channelUri) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTuned");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTuned(channelUri);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTuned", e);
                     }
                 }
             });
@@ -845,6 +886,51 @@ public abstract class TvInputService extends Service {
             });
         }
 
+        /**
+         * Notifies response for broadcast info.
+         *
+         * @param response broadcast info response.
+         */
+        public void notifyBroadcastInfoResponse(@NonNull final BroadcastInfoResponse response) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyBroadcastInfoResponse");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onBroadcastInfoResponse(response);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyBroadcastInfoResponse", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Notifies response for advertisement.
+         *
+         * @param response advertisement response.
+         * @see android.media.tv.interactive.TvInteractiveAppService.Session#requestAd(AdRequest)
+         */
+        public void notifyAdResponse(@NonNull final AdResponse response) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyAdResponse");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAdResponse(response);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyAdResponse", e);
+                    }
+                }
+            });
+        }
+
         private void notifyTimeShiftStartPositionChanged(final long timeMs) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -874,6 +960,52 @@ public abstract class TvInputService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyTimeShiftCurrentPositionChanged", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the app that the AIT (Application Information Table) is updated.
+         *
+         * <p>This method should also be called when
+         * {@link #onSetInteractiveAppNotificationEnabled(boolean)} is called to send the first AIT
+         * info.
+         *
+         * @see #onSetInteractiveAppNotificationEnabled(boolean)
+         */
+        public void notifyAitInfoUpdated(@NonNull final AitInfo aitInfo) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyAitInfoUpdated");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onAitInfoUpdated(aitInfo);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyAitInfoUpdated", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Notifies signal strength.
+         */
+        public void notifySignalStrength(@TvInputManager.SignalStrength final int strength) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifySignalStrength");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onSignalStrength(strength);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifySignalStrength", e);
                     }
                 }
             });
@@ -993,6 +1125,28 @@ public abstract class TvInputService extends Service {
         public abstract void onSetStreamVolume(@FloatRange(from = 0.0, to = 1.0) float volume);
 
         /**
+         * Called when broadcast info is requested.
+         *
+         * @param request broadcast info request
+         */
+        public void onRequestBroadcastInfo(@NonNull BroadcastInfoRequest request) {
+        }
+
+        /**
+         * Called when broadcast info is removed.
+         */
+        public void onRemoveBroadcastInfo(int requestId) {
+        }
+
+        /**
+         * Called when advertisement request is received.
+         *
+         * @param request advertisement request received
+         */
+        public void onRequestAd(@NonNull AdRequest request) {
+        }
+
+        /**
          * Tunes to a given channel.
          *
          * <p>No video will be displayed until {@link #notifyVideoAvailable()} is called.
@@ -1063,6 +1217,22 @@ public abstract class TvInputService extends Service {
          */
         public boolean onSelectTrack(int type, @Nullable String trackId) {
             return false;
+        }
+
+        /**
+         * Enables or disables interactive app notification.
+         *
+         * <p>This method enables or disables the event detection from the corresponding TV input.
+         * When it's enabled, the TV input service detects events related to interactive app, such
+         * as AIT (Application Information Table) and sends to TvView or the linked TV interactive
+         * app service.
+         *
+         * @param enabled {@code true} to enable, {@code false} to disable.
+         *
+         * @see TvView#setInteractiveAppNotificationEnabled(boolean)
+         * @see Session#notifyAitInfoUpdated(android.media.tv.AitInfo)
+         */
+        public void onSetInteractiveAppNotificationEnabled(boolean enabled) {
         }
 
         /**
@@ -1414,6 +1584,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Calls {@link #onSetInteractiveAppNotificationEnabled}.
+         */
+        void setInteractiveAppNotificationEnabled(boolean enabled) {
+            onSetInteractiveAppNotificationEnabled(enabled);
+        }
+
+        /**
          * Calls {@link #onAppPrivateCommand}.
          */
         void appPrivateCommand(String action, Bundle data) {
@@ -1582,6 +1759,18 @@ public abstract class TvInputService extends Service {
             }
         }
 
+        void requestBroadcastInfo(BroadcastInfoRequest request) {
+            onRequestBroadcastInfo(request);
+        }
+
+        void removeBroadcastInfo(int requestId) {
+            onRemoveBroadcastInfo(requestId);
+        }
+
+        void requestAd(AdRequest request) {
+            onRequestAd(request);
+        }
+
         /**
          * Takes care of dispatching incoming input events and tells whether the event was handled.
          */
@@ -1623,7 +1812,8 @@ public abstract class TvInputService extends Service {
                 return TvInputManager.Session.DISPATCH_NOT_HANDLED;
             }
             if (!mOverlayViewContainer.hasWindowFocus()) {
-                mOverlayViewContainer.getViewRootImpl().windowFocusChanged(true, true);
+                ViewRootImpl viewRoot = mOverlayViewContainer.getViewRootImpl();
+                viewRoot.windowFocusChanged(true);
             }
             if (isNavigationKey && mOverlayViewContainer.hasFocusable()) {
                 // If mOverlayView has focusable views, navigation key events should be always
@@ -2117,43 +2307,43 @@ public abstract class TvInputService extends Service {
 
         private final TvInputManager.SessionCallback mHardwareSessionCallback =
                 new TvInputManager.SessionCallback() {
-            @Override
-            public void onSessionCreated(TvInputManager.Session session) {
-                mHardwareSession = session;
-                SomeArgs args = SomeArgs.obtain();
-                if (session != null) {
-                    args.arg1 = HardwareSession.this;
-                    args.arg2 = mProxySession;
-                    args.arg3 = mProxySessionCallback;
-                    args.arg4 = session.getToken();
-                    session.tune(TvContract.buildChannelUriForPassthroughInput(
-                            getHardwareInputId()));
-                } else {
-                    args.arg1 = null;
-                    args.arg2 = null;
-                    args.arg3 = mProxySessionCallback;
-                    args.arg4 = null;
-                    onRelease();
-                }
-                mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED, args)
-                        .sendToTarget();
-            }
+                    @Override
+                    public void onSessionCreated(TvInputManager.Session session) {
+                        mHardwareSession = session;
+                        SomeArgs args = SomeArgs.obtain();
+                        if (session != null) {
+                            args.arg1 = HardwareSession.this;
+                            args.arg2 = mProxySession;
+                            args.arg3 = mProxySessionCallback;
+                            args.arg4 = session.getToken();
+                            session.tune(TvContract.buildChannelUriForPassthroughInput(
+                                    getHardwareInputId()));
+                        } else {
+                            args.arg1 = null;
+                            args.arg2 = null;
+                            args.arg3 = mProxySessionCallback;
+                            args.arg4 = null;
+                            onRelease();
+                        }
+                        mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED,
+                                        args).sendToTarget();
+                    }
 
-            @Override
-            public void onVideoAvailable(final TvInputManager.Session session) {
-                if (mHardwareSession == session) {
-                    onHardwareVideoAvailable();
-                }
-            }
+                    @Override
+                    public void onVideoAvailable(final TvInputManager.Session session) {
+                        if (mHardwareSession == session) {
+                            onHardwareVideoAvailable();
+                        }
+                    }
 
-            @Override
-            public void onVideoUnavailable(final TvInputManager.Session session,
-                    final int reason) {
-                if (mHardwareSession == session) {
-                    onHardwareVideoUnavailable(reason);
-                }
-            }
-        };
+                    @Override
+                    public void onVideoUnavailable(final TvInputManager.Session session,
+                            final int reason) {
+                        if (mHardwareSession == session) {
+                            onHardwareVideoUnavailable(reason);
+                        }
+                    }
+                };
 
         /**
          * This method will not be called in {@link HardwareSession}. Framework will
@@ -2272,8 +2462,10 @@ public abstract class TvInputService extends Service {
                     ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
                     String inputId = (String) args.arg3;
                     String sessionId = (String) args.arg4;
+                    AttributionSource tvAppAttributionSource = (AttributionSource) args.arg5;
                     args.recycle();
-                    Session sessionImpl = onCreateSession(inputId, sessionId);
+                    Session sessionImpl =
+                            onCreateSession(inputId, sessionId, tvAppAttributionSource);
                     if (sessionImpl == null) {
                         try {
                             // Failed to create a session.
@@ -2309,7 +2501,7 @@ public abstract class TvInputService extends Service {
                         proxySession.mServiceHandler = mServiceHandler;
                         TvInputManager manager = (TvInputManager) getSystemService(
                                 Context.TV_INPUT_SERVICE);
-                        manager.createSession(hardwareInputId,
+                        manager.createSession(hardwareInputId, tvAppAttributionSource,
                                 proxySession.mHardwareSessionCallback, mServiceHandler);
                     } else {
                         SomeArgs someArgs = SomeArgs.obtain();

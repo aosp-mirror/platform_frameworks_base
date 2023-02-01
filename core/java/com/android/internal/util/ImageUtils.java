@@ -137,6 +137,18 @@ public class ImageUtils {
      */
     public static Bitmap buildScaledBitmap(Drawable drawable, int maxWidth,
             int maxHeight) {
+        return buildScaledBitmap(drawable, maxWidth, maxHeight, false);
+    }
+
+    /**
+     * Convert a drawable to a bitmap, scaled to fit within maxWidth and maxHeight.
+     *
+     * @param allowUpscaling if true, the drawable will not only be scaled down, but also scaled up
+     *                       to fit within the maximum size given. This is useful for converting
+     *                       vectorized icons which usually have a very small intrinsic size.
+     */
+    public static Bitmap buildScaledBitmap(Drawable drawable, int maxWidth,
+            int maxHeight, boolean allowUpscaling) {
         if (drawable == null) {
             return null;
         }
@@ -155,7 +167,9 @@ public class ImageUtils {
         // a large notification icon if necessary
         float ratio = Math.min((float) maxWidth / (float) originalWidth,
                 (float) maxHeight / (float) originalHeight);
-        ratio = Math.min(1.0f, ratio);
+        if (!allowUpscaling) {
+            ratio = Math.min(1.0f, ratio);
+        }
         int scaledWidth = (int) (ratio * originalWidth);
         int scaledHeight = (int) (ratio * originalHeight);
         Bitmap result = Bitmap.createBitmap(scaledWidth, scaledHeight, Config.ARGB_8888);

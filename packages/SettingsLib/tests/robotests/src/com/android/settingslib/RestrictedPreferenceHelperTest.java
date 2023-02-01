@@ -16,12 +16,16 @@
 
 package com.android.settingslib;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyResourcesManager;
 import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
@@ -44,6 +48,10 @@ public class RestrictedPreferenceHelperTest {
     @Mock
     private Preference mPreference;
     @Mock
+    private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private DevicePolicyResourcesManager mDevicePolicyResourcesManager;
+    @Mock
     private RestrictedTopLevelPreference mRestrictedTopLevelPreference;
 
     private PreferenceViewHolder mViewHolder;
@@ -52,6 +60,10 @@ public class RestrictedPreferenceHelperTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        doReturn(mDevicePolicyResourcesManager).when(mDevicePolicyManager)
+                .getResources();
+        doReturn(mDevicePolicyManager).when(mContext)
+                .getSystemService(DevicePolicyManager.class);
         mViewHolder = PreferenceViewHolder.createInstanceForTests(mock(View.class));
         mHelper = new RestrictedPreferenceHelper(mContext, mPreference, null);
     }
@@ -63,6 +75,7 @@ public class RestrictedPreferenceHelperTest {
                 .thenReturn(summaryView);
         when(summaryView.getContext().getText(R.string.disabled_by_admin_summary_text))
                 .thenReturn("test");
+        when(mDevicePolicyResourcesManager.getString(any(), any())).thenReturn("test");
 
         mHelper.useAdminDisabledSummary(true);
         mHelper.setDisabledByAdmin(new RestrictedLockUtils.EnforcedAdmin());
@@ -79,6 +92,7 @@ public class RestrictedPreferenceHelperTest {
                 .thenReturn(summaryView);
         when(summaryView.getContext().getText(R.string.disabled_by_admin_summary_text))
                 .thenReturn("test");
+        when(mDevicePolicyResourcesManager.getString(any(), any())).thenReturn("test");
         when(summaryView.getText()).thenReturn("test");
 
         mHelper.useAdminDisabledSummary(true);

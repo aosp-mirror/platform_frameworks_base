@@ -24,11 +24,13 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 
+import java.lang.ref.WeakReference;
+
 class RemoteAccessibilityController {
     private static final String TAG = "RemoteAccessibilityController";
     private int mHostId;
     private RemoteAccessibilityEmbeddedConnection mConnectionWrapper;
-    private Matrix mScreenMatrixForEmbeddedHierarchy = new Matrix();
+    private Matrix mWindowMatrixForEmbeddedHierarchy = new Matrix();
     private final float[] mMatrixValues = new float[9];
     private View mHostView;
 
@@ -80,12 +82,17 @@ class RemoteAccessibilityController {
     /**
      * Wrapper of accessibility embedded connection for embedded view hierarchy.
      */
-    private final class RemoteAccessibilityEmbeddedConnection implements IBinder.DeathRecipient {
+    private static final class RemoteAccessibilityEmbeddedConnection
+            implements IBinder.DeathRecipient {
+        private final WeakReference<RemoteAccessibilityController> mController;
         private final IAccessibilityEmbeddedConnection mConnection;
         private final IBinder mLeashToken;
 
-        RemoteAccessibilityEmbeddedConnection(IAccessibilityEmbeddedConnection connection,
+        RemoteAccessibilityEmbeddedConnection(
+                RemoteAccessibilityController controller,
+                IAccessibilityEmbeddedConnection connection,
                 IBinder leashToken) {
+            mController = new WeakReference<>(controller);
             mConnection = connection;
             mLeashToken = leashToken;
         }
@@ -109,9 +116,13 @@ class RemoteAccessibilityController {
         @Override
         public void binderDied() {
             unlinkToDeath();
-            runOnUiThread(() -> {
-                if (mConnectionWrapper == this) {
-                    mConnectionWrapper = null;
+            RemoteAccessibilityController controller = mController.get();
+            if (controller == null) {
+                return;
+            }
+            controller.runOnUiThread(() -> {
+                if (controller.mConnectionWrapper == this) {
+                    controller.mConnectionWrapper = null;
                 }
             });
         }
@@ -128,7 +139,7 @@ class RemoteAccessibilityController {
             }
             if (connection != null && leashToken != null) {
                 mConnectionWrapper =
-                    new RemoteAccessibilityEmbeddedConnection(connection, leashToken);
+                    new RemoteAccessibilityEmbeddedConnection(this, connection, leashToken);
                 mConnectionWrapper.linkToDeath();
             }
         } catch (RemoteException e) {
@@ -140,9 +151,9 @@ class RemoteAccessibilityController {
         return mConnectionWrapper;
     }
 
-    void setScreenMatrix(Matrix m) {
-        // If the screen matrix is identity or doesn't change, do nothing.
-        if (m.isIdentity() || m.equals(mScreenMatrixForEmbeddedHierarchy)) {
+    void setWindowMatrix(Matrix m, boolean force) {
+        // If the window matrix doesn't change, do nothing.
+        if (!force && m.equals(mWindowMatrixForEmbeddedHierarchy)) {
             return;
         }
 
@@ -153,8 +164,8 @@ class RemoteAccessibilityController {
                 return;
             }
             m.getValues(mMatrixValues);
-            wrapper.getConnection().setScreenMatrix(mMatrixValues);
-            mScreenMatrixForEmbeddedHierarchy.set(m);
+            wrapper.getConnection().setWindowMatrix(mMatrixValues);
+            mWindowMatrixForEmbeddedHierarchy.set(m);
         } catch (RemoteException e) {
             Log.d(TAG, "Error while setScreenMatrix " + e);
         }

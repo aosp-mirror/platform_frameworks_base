@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +38,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
 import android.os.Trace;
+import android.provider.DeviceConfig;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -65,6 +67,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
 import android.view.ViewParent;
+import android.view.ViewStructure;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -73,6 +76,9 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
+import android.view.autofill.AutofillId;
+import android.view.contentcapture.ContentCaptureManager;
+import android.view.contentcapture.ContentCaptureSession;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -457,7 +463,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     AbsPositionScroller mPositionScroller;
 
     /**
-     * The offset in pixels form the top of the AdapterView to the top
+     * The offset in pixels from the top of the AdapterView to the top
      * of the currently selected view. Used to save and restore state.
      */
     int mSelectedTop = 0;
@@ -632,6 +638,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * The last scroll state reported to clients through {@link OnScrollListener}.
      */
     private int mLastScrollState = OnScrollListener.SCROLL_STATE_IDLE;
+
+    /**
+     * Indicates that reporting positions of child views to content capture is enabled via
+     * DeviceConfig.
+     */
+    private static boolean sContentCaptureReportingEnabledByDeviceConfig = false;
+
+    /**
+     * Listens for changes to DeviceConfig properties and updates stored values accordingly.
+     */
+    private static DeviceConfig.OnPropertiesChangedListener sDeviceConfigChangeListener = null;
+
+    /**
+     * Indicates that child positions of views should be reported to Content Capture the next time
+     * that active views are refreshed.
+     */
+    private boolean mReportChildrenToContentCaptureOnNextUpdate = true;
 
     /**
      * Helper object that renders and controls the fast scroll thumb.
@@ -850,8 +873,44 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         public void adjustListItemSelectionBounds(Rect bounds);
     }
 
+    private static class DeviceConfigChangeListener
+            implements DeviceConfig.OnPropertiesChangedListener {
+        @Override
+        public void onPropertiesChanged(
+                @NonNull DeviceConfig.Properties properties) {
+            if (!DeviceConfig.NAMESPACE_CONTENT_CAPTURE.equals(properties.getNamespace())) {
+                return;
+            }
+
+            for (String key : properties.getKeyset()) {
+                if (!ContentCaptureManager.DEVICE_CONFIG_PROPERTY_REPORT_LIST_VIEW_CHILDREN
+                        .equals(key)) {
+                    continue;
+                }
+
+                sContentCaptureReportingEnabledByDeviceConfig = properties.getBoolean(key,
+                        false);
+            }
+        }
+    }
+
+    private static void setupDeviceConfigProperties() {
+        if (sDeviceConfigChangeListener == null) {
+            sContentCaptureReportingEnabledByDeviceConfig = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_REPORT_LIST_VIEW_CHILDREN,
+                    false);
+            sDeviceConfigChangeListener = new DeviceConfigChangeListener();
+            DeviceConfig.addOnPropertiesChangedListener(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                    ActivityThread.currentApplication().getMainExecutor(),
+                    sDeviceConfigChangeListener);
+        }
+    }
+
     public AbsListView(Context context) {
         super(context);
+        setupDeviceConfigProperties();
         mEdgeGlowBottom = new EdgeEffect(context);
         mEdgeGlowTop = new EdgeEffect(context);
         initAbsListView();
@@ -874,6 +933,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     public AbsListView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setupDeviceConfigProperties();
         mEdgeGlowBottom = new EdgeEffect(context, attrs);
         mEdgeGlowTop = new EdgeEffect(context, attrs);
         initAbsListView();
@@ -2543,33 +2603,32 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return;
         }
 
-        boolean isItemEnabled = view.isEnabled() && isEnabled();
+        boolean isItemActionable = isEnabled();
         final ViewGroup.LayoutParams lp = view.getLayoutParams();
         if (lp instanceof AbsListView.LayoutParams) {
-            isItemEnabled &= ((AbsListView.LayoutParams) lp).isEnabled;
+            isItemActionable &= ((AbsListView.LayoutParams) lp).isEnabled;
         }
-
-        info.setEnabled(isItemEnabled);
 
         if (position == getSelectedItemPosition()) {
             info.setSelected(true);
-            addAccessibilityActionIfEnabled(info, isItemEnabled,
+            addAccessibilityActionIfEnabled(info, isItemActionable,
                     AccessibilityAction.ACTION_CLEAR_SELECTION);
         } else  {
-            addAccessibilityActionIfEnabled(info, isItemEnabled,
+            addAccessibilityActionIfEnabled(info, isItemActionable,
                     AccessibilityAction.ACTION_SELECT);
         }
 
         if (isItemClickable(view)) {
-            addAccessibilityActionIfEnabled(info, isItemEnabled, AccessibilityAction.ACTION_CLICK);
+            addAccessibilityActionIfEnabled(info, isItemActionable,
+                    AccessibilityAction.ACTION_CLICK);
             // A disabled item is a separator which should not be clickable.
-            info.setClickable(isItemEnabled);
+            info.setClickable(isItemActionable);
         }
 
         if (isLongClickable()) {
-            addAccessibilityActionIfEnabled(info, isItemEnabled,
+            addAccessibilityActionIfEnabled(info, isItemActionable,
                     AccessibilityAction.ACTION_LONG_CLICK);
-            info.setLongClickable(true);
+            info.setLongClickable(isItemActionable);
         }
     }
 
@@ -2655,6 +2714,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 selector.setHotspot(x, y);
             }
         }
+    }
+
+    /**
+     * Returns whether the selected child view (from the adapter's getView) is enabled.
+     *
+     * @return true if enabled
+     */
+    public boolean isSelectedChildViewEnabled() {
+        return mIsChildViewEnabled;
+    }
+
+    /**
+     * Set whether the selected child view (from the adapter's getView) is enabled.
+     *
+     * When refreshDrawableState is called, AbsListView will control the "enabled" state
+     * of the selector based on this.
+     *
+     * @param selectedChildViewEnabled true if enabled
+     */
+    public void setSelectedChildViewEnabled(boolean selectedChildViewEnabled) {
+        mIsChildViewEnabled = selectedChildViewEnabled;
     }
 
     @Override
@@ -4679,6 +4759,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mOnScrollListener.onScrollStateChanged(this, newState);
             }
         }
+
+        // When scrolling, we want to report changes in the active children to Content Capture,
+        // so set the flag to report on the next update only when scrolling has stopped or a fling
+        // scroll is performed.
+        if (newState == OnScrollListener.SCROLL_STATE_IDLE
+                || newState == OnScrollListener.SCROLL_STATE_FLING) {
+            mReportChildrenToContentCaptureOnNextUpdate = true;
+        }
     }
 
     /**
@@ -5928,36 +6016,37 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         boolean handled = false;
         boolean okToSend = true;
         switch (keyCode) {
-        case KeyEvent.KEYCODE_DPAD_UP:
-        case KeyEvent.KEYCODE_DPAD_DOWN:
-        case KeyEvent.KEYCODE_DPAD_LEFT:
-        case KeyEvent.KEYCODE_DPAD_RIGHT:
-        case KeyEvent.KEYCODE_DPAD_CENTER:
-        case KeyEvent.KEYCODE_ENTER:
-        case KeyEvent.KEYCODE_NUMPAD_ENTER:
-            okToSend = false;
-            break;
-        case KeyEvent.KEYCODE_BACK:
-            if (mFiltered && mPopup != null && mPopup.isShowing()) {
-                if (event.getAction() == KeyEvent.ACTION_DOWN
-                        && event.getRepeatCount() == 0) {
-                    KeyEvent.DispatcherState state = getKeyDispatcherState();
-                    if (state != null) {
-                        state.startTracking(event, this);
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_NUMPAD_ENTER:
+                okToSend = false;
+                break;
+            case KeyEvent.KEYCODE_BACK:
+            case KeyEvent.KEYCODE_ESCAPE:
+                if (mFiltered && mPopup != null && mPopup.isShowing()) {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN
+                            && event.getRepeatCount() == 0) {
+                        KeyEvent.DispatcherState state = getKeyDispatcherState();
+                        if (state != null) {
+                            state.startTracking(event, this);
+                        }
+                        handled = true;
+                    } else if (event.getAction() == KeyEvent.ACTION_UP
+                            && event.isTracking() && !event.isCanceled()) {
+                        handled = true;
+                        mTextFilter.setText("");
                     }
-                    handled = true;
-                } else if (event.getAction() == KeyEvent.ACTION_UP
-                        && event.isTracking() && !event.isCanceled()) {
-                    handled = true;
-                    mTextFilter.setText("");
                 }
-            }
-            okToSend = false;
-            break;
-        case KeyEvent.KEYCODE_SPACE:
-            // Only send spaces once we are filtered
-            okToSend = mFiltered;
-            break;
+                okToSend = false;
+                break;
+            case KeyEvent.KEYCODE_SPACE:
+                // Only send spaces once we are filtered
+                okToSend = mFiltered;
+                break;
         }
 
         if (okToSend) {
@@ -6156,6 +6245,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @Override
         public boolean requestCursorUpdates(int cursorUpdateMode) {
             return getTarget().requestCursorUpdates(cursorUpdateMode);
+        }
+
+        @Override
+        public boolean requestCursorUpdates(int cursorUpdateMode, int cursorUpdateFilter) {
+            return getTarget().requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter);
         }
 
         @Override
@@ -6628,10 +6722,77 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mRecycler.mRecyclerListener = listener;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * This method will initialize the fields of the {@link ViewStructure}
+     * using the base implementation in {@link View}. On API level 33 and higher, it may also
+     * write information about the positions of active views to the extras bundle provided by the
+     * {@link ViewStructure}.
+     *
+     * NOTE: When overriding this method on API level 33, if not calling super() or if changing the
+     * logic for child views, be sure to provide values for the first active child view position and
+     * the list of active child views in the {@link ViewStructure}'s extras {@link Bundle} using the
+     * "android.view.ViewStructure.extra.ACTIVE_CHILDREN_IDS" and
+     * "android.view.ViewStructure.extra.FIRST_ACTIVE_POSITION" keys.
+     *
+     * @param structure {@link ViewStructure} to be filled in with structured view data.
+     * @param flags optional flags.
+     *
+     * @see View#AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
+     */
+    @Override
+    public void onProvideContentCaptureStructure(
+            @NonNull ViewStructure structure, int flags) {
+        super.onProvideContentCaptureStructure(structure, flags);
+        if (!sContentCaptureReportingEnabledByDeviceConfig) {
+            return;
+        }
+
+        Bundle extras = structure.getExtras();
+
+        if (extras == null) {
+            Log.wtf(TAG, "Unexpected null extras Bundle in ViewStructure");
+            return;
+        }
+
+        int childCount = getChildCount();
+        ArrayList<AutofillId> idsList = new ArrayList<>(childCount);
+
+        for (int i = 0; i < childCount; ++i) {
+            View activeView = getChildAt(i);
+            if (activeView == null) {
+                continue;
+            }
+
+            idsList.add(activeView.getAutofillId());
+        }
+
+        extras.putParcelableArrayList(ViewStructure.EXTRA_ACTIVE_CHILDREN_IDS,
+                idsList);
+
+        extras.putInt(ViewStructure.EXTRA_FIRST_ACTIVE_POSITION,
+                getFirstVisiblePosition());
+    }
+
+    private void reportActiveViewsToContentCapture() {
+        if (!sContentCaptureReportingEnabledByDeviceConfig) {
+            return;
+        }
+
+        ContentCaptureSession session = getContentCaptureSession();
+        if (session != null) {
+            ViewStructure structure = session.newViewStructure(this);
+            onProvideContentCaptureStructure(structure, /* flags= */ 0);
+            session.notifyViewAppeared(structure);
+        }
+    }
+
     class AdapterDataSetObserver extends AdapterView<ListAdapter>.AdapterDataSetObserver {
         @Override
         public void onChanged() {
             super.onChanged();
+            mReportChildrenToContentCaptureOnNextUpdate = true;
             if (mFastScroll != null) {
                 mFastScroll.onSectionsChanged();
             }
@@ -6640,6 +6801,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @Override
         public void onInvalidated() {
             super.onInvalidated();
+            mReportChildrenToContentCaptureOnNextUpdate = true;
             if (mFastScroll != null) {
                 mFastScroll.onSectionsChanged();
             }
@@ -6957,6 +7119,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // Remember the position so that setupChild() doesn't reset state.
                     lp.scrappedFromPosition = firstActivePosition + i;
                 }
+            }
+
+            if (mReportChildrenToContentCaptureOnNextUpdate && childCount > 0) {
+                AbsListView.this.reportActiveViewsToContentCapture();
+                mReportChildrenToContentCaptureOnNextUpdate = false;
             }
         }
 

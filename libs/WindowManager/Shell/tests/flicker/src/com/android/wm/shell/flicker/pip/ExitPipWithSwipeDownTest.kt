@@ -25,7 +25,6 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group3
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,36 +54,20 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
 class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransition(testSpec) {
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { args ->
-            super.transition(this, args)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            super.transition(this)
             transitions {
                 val pipRegion = wmHelper.getWindowRegion(pipApp.component).bounds
                 val pipCenterX = pipRegion.centerX()
                 val pipCenterY = pipRegion.centerY()
                 val displayCenterX = device.displayWidth / 2
                 device.swipe(pipCenterX, pipCenterY, displayCenterX, device.displayHeight, 10)
-                wmHelper.waitFor("!hasPipWindow") { !it.wmState.hasPipWindow() }
+                wmHelper.waitPipGone()
                 wmHelper.waitForWindowSurfaceDisappeared(pipApp.component)
                 wmHelper.waitForAppTransitionIdle()
             }
         }
-
-    @Presubmit
-    @Test
-    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
-
-    @Presubmit
-    @Test
-    override fun statusBarLayerIsVisible() = super.statusBarLayerIsVisible()
-
-    @Presubmit
-    @Test
-    override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
-
-    @Presubmit
-    @Test
-    override fun statusBarWindowIsVisible() = super.statusBarWindowIsVisible()
 
     @FlakyTest
     @Test
@@ -94,17 +77,16 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
     @Test
     override fun pipLayerBecomesInvisible() = super.pipLayerBecomesInvisible()
 
+    /**
+     * Checks that the focus doesn't change between windows during the transition
+     */
     @Presubmit
     @Test
-    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
-
-    @Presubmit
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
-
-    @Presubmit
-    @Test
-    override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
+    fun focusDoesNotChange() {
+        testSpec.assertEventLog {
+            this.focusDoesNotChange()
+        }
+    }
 
     companion object {
         /**
@@ -118,7 +100,7 @@ class ExitPipWithSwipeDownTest(testSpec: FlickerTestParameter) : ExitPipTransiti
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                            repetitions = 20)
+                            repetitions = 3)
         }
     }
 }

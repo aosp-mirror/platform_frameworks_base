@@ -22,7 +22,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Person;
-import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
@@ -116,24 +115,20 @@ public class BubbleHelper {
     private Notification.Builder getNotificationBuilder(int id) {
         Person chatBot = new Person.Builder()
                 .setBot(true)
-                .setName("BubbleBot")
+                .setName("BubbleChat")
                 .setImportant(true)
                 .build();
-
-        RemoteInput remoteInput = new RemoteInput.Builder("key")
-                .setLabel("Reply")
-                .build();
-
         String shortcutId = "BubbleChat";
         return new Notification.Builder(mContext, CHANNEL_ID)
                 .setChannelId(CHANNEL_ID)
                 .setShortcutId(shortcutId)
+                .setContentTitle("BubbleChat")
                 .setContentIntent(PendingIntent.getActivity(mContext, 0,
                         new Intent(mContext, LaunchBubbleActivity.class),
                         PendingIntent.FLAG_UPDATE_CURRENT))
                 .setStyle(new Notification.MessagingStyle(chatBot)
-                        .setConversationTitle("Bubble Chat")
-                        .addMessage("Hello? This is bubble: " + id,
+                        .setConversationTitle("BubbleChat")
+                        .addMessage("BubbleChat",
                                 SystemClock.currentThreadTimeMillis() - 300000, chatBot)
                         .addMessage("Is it me, " + id + ", you're looking for?",
                                 SystemClock.currentThreadTimeMillis(), chatBot)

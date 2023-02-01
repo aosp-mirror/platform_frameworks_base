@@ -20,6 +20,7 @@ import static com.android.systemui.biometrics.BiometricDisplayListener.SensorTyp
 import static com.android.systemui.biometrics.BiometricDisplayListener.SensorType.UnderDisplayFingerprint;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -89,7 +90,8 @@ public class BiometricDisplayListenerTest extends SysuiTestCase {
                 mContextSpy, mDisplayManager, mHandler, mUdfpsType, mOnChangedCallback);
 
         listener.enable();
-        verify(mDisplayManager).registerDisplayListener(any(), same(mHandler));
+        verify(mDisplayManager).registerDisplayListener(any(), same(mHandler),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED));
     }
 
     @Test
@@ -113,7 +115,7 @@ public class BiometricDisplayListenerTest extends SysuiTestCase {
         when(mDisplay.getRotation()).thenReturn(Surface.ROTATION_90);
         listener.enable();
         verify(mDisplayManager).registerDisplayListener(mDisplayListenerCaptor.capture(),
-                same(mHandler));
+                same(mHandler), eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED));
 
         // Rotate the device back to portrait and ensure the rotation is detected.
         when(mDisplay.getRotation()).thenReturn(Surface.ROTATION_0);
@@ -150,8 +152,8 @@ public class BiometricDisplayListenerTest extends SysuiTestCase {
 
                 // The listener should record the current rotation and register a display listener.
                 verify(mDisplay).getRotation();
-                verify(mDisplayManager)
-                        .registerDisplayListener(mDisplayListenerCaptor.capture(), same(mHandler));
+                verify(mDisplayManager).registerDisplayListener(mDisplayListenerCaptor.capture(),
+                        same(mHandler), eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED));
 
                 // Test the first rotation since the listener was enabled.
                 mDisplayListenerCaptor.getValue().onDisplayChanged(123);
@@ -182,8 +184,8 @@ public class BiometricDisplayListenerTest extends SysuiTestCase {
         listener.enable();
 
         // The listener should register a display listener.
-        verify(mDisplayManager)
-                .registerDisplayListener(mDisplayListenerCaptor.capture(), same(mHandler));
+        verify(mDisplayManager).registerDisplayListener(mDisplayListenerCaptor.capture(),
+                same(mHandler), eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED));
 
         // mOnChangedCallback should be invoked for all calls to onDisplayChanged.
         mDisplayListenerCaptor.getValue().onDisplayChanged(123);

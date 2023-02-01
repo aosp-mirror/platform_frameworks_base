@@ -17,20 +17,17 @@
 package com.android.server.wm;
 
 import static android.app.AppOpsManager.OP_NONE;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Process.SYSTEM_UID;
+import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.View.VISIBLE;
-import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
@@ -54,7 +51,6 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
@@ -68,15 +64,14 @@ import static org.mockito.Mockito.mock;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.IApplicationThread;
-import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.graphics.Insets;
+import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
@@ -91,8 +86,10 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
 import android.view.IWindow;
+import android.view.InsetsFrameProvider;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -108,6 +105,7 @@ import android.window.TransitionRequestInfo;
 
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
 
 import org.junit.After;
 import org.junit.Before;
@@ -133,6 +131,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     // Default base activity name
     private static final String DEFAULT_COMPONENT_CLASS_NAME = ".BarActivity";
+
+    // An id appended to the end of the component name to make it unique
+    static int sCurrentActivityId = 0;
 
     ActivityTaskManagerService mAtm;
     RootWindowContainer mRootWindowContainer;
@@ -230,14 +231,28 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // {@link com.android.internal.R.dimen.config_fixedOrientationLetterboxAspectRatio}, is set
         // on some device form factors.
         mAtm.mWindowManager.mLetterboxConfiguration.setFixedOrientationLetterboxAspectRatio(0);
-        // Ensure letterbox position multiplier is not overridden on any device target.
+        // Ensure letterbox horizontal position multiplier is not overridden on any device target.
         // {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier},
         // may be set on some device form factors.
         mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(0.5f);
-        // Ensure letterbox reachability treatment isn't overridden on any device target.
-        // {@link com.android.internal.R.bool.config_letterboxIsReachabilityEnabled},
+        // Ensure letterbox vertical position multiplier is not overridden on any device target.
+        // {@link com.android.internal.R.dimen.config_letterboxHorizontalPositionMultiplier},
         // may be set on some device form factors.
-        mAtm.mWindowManager.mLetterboxConfiguration.setIsReachabilityEnabled(false);
+        mAtm.mWindowManager.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(0.0f);
+        // Ensure letterbox horizontal reachability treatment isn't overridden on any device target.
+        // {@link com.android.internal.R.bool.config_letterboxIsHorizontalReachabilityEnabled},
+        // may be set on some device form factors.
+        mAtm.mWindowManager.mLetterboxConfiguration.setIsHorizontalReachabilityEnabled(false);
+        // Ensure letterbox vertical reachability treatment isn't overridden on any device target.
+        // {@link com.android.internal.R.bool.config_letterboxIsVerticalReachabilityEnabled},
+        // may be set on some device form factors.
+        mAtm.mWindowManager.mLetterboxConfiguration.setIsVerticalReachabilityEnabled(false);
+        // Ensure aspect ratio for unresizable apps isn't overridden on any device target.
+        // {@link com.android.internal.R.bool
+        // .config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled}, may be set on some
+        // device form factors.
+        mAtm.mWindowManager.mLetterboxConfiguration
+                .setIsSplitScreenAspectRatioForUnresizableAppsEnabled(false);
 
         checkDeviceSpecificOverridesNotApplied();
     }
@@ -247,7 +262,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // Revert back to device overrides.
         mAtm.mWindowManager.mLetterboxConfiguration.resetFixedOrientationLetterboxAspectRatio();
         mAtm.mWindowManager.mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
-        mAtm.mWindowManager.mLetterboxConfiguration.resetIsReachabilityEnabled();
+        mAtm.mWindowManager.mLetterboxConfiguration.resetLetterboxVerticalPositionMultiplier();
+        mAtm.mWindowManager.mLetterboxConfiguration.resetIsHorizontalReachabilityEnabled();
+        mAtm.mWindowManager.mLetterboxConfiguration.resetIsVerticalReachabilityEnabled();
+        mAtm.mWindowManager.mLetterboxConfiguration
+                .resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
     }
 
     /**
@@ -291,14 +310,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_STATUS_BAR)) {
             mStatusBarWindow = createCommonWindow(null, TYPE_STATUS_BAR, "mStatusBarWindow");
-            if (INSETS_LAYOUT_GENERALIZATION) {
-                mStatusBarWindow.mAttrs.height = STATUS_BAR_HEIGHT;
-                mStatusBarWindow.mAttrs.gravity = Gravity.TOP;
-                mStatusBarWindow.mAttrs.layoutInDisplayCutoutMode =
-                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-                mStatusBarWindow.setRequestedSize(WindowManager.LayoutParams.MATCH_PARENT,
-                        STATUS_BAR_HEIGHT);
-            }
+            mStatusBarWindow.mAttrs.height = STATUS_BAR_HEIGHT;
+            mStatusBarWindow.mAttrs.gravity = Gravity.TOP;
+            mStatusBarWindow.mAttrs.layoutInDisplayCutoutMode =
+                    LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            mStatusBarWindow.mAttrs.setFitInsetsTypes(0);
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NOTIFICATION_SHADE)) {
             mNotificationShadeWindow = createCommonWindow(null, TYPE_NOTIFICATION_SHADE,
@@ -306,14 +322,17 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_NAVIGATION_BAR)) {
             mNavBarWindow = createCommonWindow(null, TYPE_NAVIGATION_BAR, "mNavBarWindow");
-            if (INSETS_LAYOUT_GENERALIZATION) {
-                mNavBarWindow.mAttrs.height = NAV_BAR_HEIGHT;
-                mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
-                mNavBarWindow.mAttrs.paramsForRotation = new WindowManager.LayoutParams[4];
-                for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
-                    mNavBarWindow.mAttrs.paramsForRotation[rot] =
-                            getNavBarLayoutParamsForRotation(rot);
-                }
+            mNavBarWindow.mAttrs.height = NAV_BAR_HEIGHT;
+            mNavBarWindow.mAttrs.gravity = Gravity.BOTTOM;
+            mNavBarWindow.mAttrs.paramsForRotation = new WindowManager.LayoutParams[4];
+            mNavBarWindow.mAttrs.setFitInsetsTypes(0);
+            mNavBarWindow.mAttrs.layoutInDisplayCutoutMode =
+                    LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            mNavBarWindow.mAttrs.privateFlags |=
+                    WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
+            for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+                mNavBarWindow.mAttrs.paramsForRotation[rot] =
+                        getNavBarLayoutParamsForRotation(rot);
             }
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_DOCK_DIVIDER)) {
@@ -346,30 +365,30 @@ class WindowTestsBase extends SystemServiceTestsBase {
         int width = WindowManager.LayoutParams.MATCH_PARENT;
         int height = WindowManager.LayoutParams.MATCH_PARENT;
         int gravity = Gravity.BOTTOM;
-        if (INSETS_LAYOUT_GENERALIZATION) {
-            switch (rotation) {
-                case ROTATION_UNDEFINED:
-                case Surface.ROTATION_0:
-                case Surface.ROTATION_180:
-                    height = NAV_BAR_HEIGHT;
-                    break;
-                case Surface.ROTATION_90:
-                    gravity = Gravity.RIGHT;
-                    width = NAV_BAR_HEIGHT;
-                    break;
-                case Surface.ROTATION_270:
-                    gravity = Gravity.LEFT;
-                    width = NAV_BAR_HEIGHT;
-                    break;
-            }
+        switch (rotation) {
+            case ROTATION_UNDEFINED:
+            case Surface.ROTATION_0:
+            case Surface.ROTATION_180:
+                height = NAV_BAR_HEIGHT;
+                break;
+            case Surface.ROTATION_90:
+                gravity = Gravity.RIGHT;
+                width = NAV_BAR_HEIGHT;
+                break;
+            case Surface.ROTATION_270:
+                gravity = Gravity.LEFT;
+                width = NAV_BAR_HEIGHT;
+                break;
         }
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR);
         lp.width = width;
         lp.height = height;
-        if (INSETS_LAYOUT_GENERALIZATION) {
-            lp.gravity = gravity;
-        }
+        lp.gravity = gravity;
+        lp.setFitInsetsTypes(0);
+        lp.privateFlags |=
+                WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         return lp;
     }
 
@@ -399,6 +418,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
     private WindowToken createWallpaperToken(DisplayContent dc) {
         return new WallpaperWindowToken(mWm, mock(IBinder.class), true /* explicit */, dc,
                 true /* ownerCanManageAppTokens */);
+    }
+
+    WindowState createNavBarWithProvidedInsets(DisplayContent dc) {
+        final WindowState navbar = createWindow(null, TYPE_NAVIGATION_BAR, dc, "navbar");
+        navbar.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(ITYPE_NAVIGATION_BAR, Insets.of(0, 0, 0, NAV_BAR_HEIGHT))
+        };
+        dc.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
+        return navbar;
     }
 
     WindowState createAppWindow(Task task, int type, String name) {
@@ -726,18 +754,21 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
     private DisplayContent createNewDisplayWithImeSupport(@DisplayImePolicy int imePolicy) {
-        return createNewDisplay(mDisplayInfo, imePolicy);
+        return createNewDisplay(mDisplayInfo, imePolicy, /* overrideSettings */ null);
     }
 
     /** Creates a {@link DisplayContent} that supports IME and adds it to the system. */
     DisplayContent createNewDisplay(DisplayInfo info) {
-        return createNewDisplay(info, DISPLAY_IME_POLICY_LOCAL);
+        return createNewDisplay(info, DISPLAY_IME_POLICY_LOCAL, /* overrideSettings */ null);
     }
 
     /** Creates a {@link DisplayContent} and adds it to the system. */
-    private DisplayContent createNewDisplay(DisplayInfo info, @DisplayImePolicy int imePolicy) {
+    private DisplayContent createNewDisplay(DisplayInfo info, @DisplayImePolicy int imePolicy,
+            @Nullable SettingsEntry overrideSettings) {
         final DisplayContent display =
-                new TestDisplayContent.Builder(mAtm, info).build();
+                new TestDisplayContent.Builder(mAtm, info)
+                        .setOverrideSettings(overrideSettings)
+                        .build();
         final DisplayContent dc = display.mDisplayContent;
         // this display can show IME.
         dc.mWmService.mDisplayWindowSettings.setDisplayImePolicy(dc, imePolicy);
@@ -755,7 +786,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.state = displayState;
-        return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_LOCAL);
+        return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_LOCAL, /* overrideSettings */ null);
     }
 
     /** Creates a {@link TestWindowState} */
@@ -767,11 +798,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Creates a {@link DisplayContent} as parts of simulate display info for test. */
     DisplayContent createMockSimulatedDisplay() {
+        return createMockSimulatedDisplay(/* overrideSettings */ null);
+    }
+
+    DisplayContent createMockSimulatedDisplay(@Nullable SettingsEntry overrideSettings) {
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.copyFrom(mDisplayInfo);
         displayInfo.type = Display.TYPE_VIRTUAL;
         displayInfo.ownerUid = SYSTEM_UID;
-        return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_FALLBACK_DISPLAY);
+        return createNewDisplay(displayInfo, DISPLAY_IME_POLICY_FALLBACK_DISPLAY, overrideSettings);
     }
 
     IDisplayWindowInsetsController createDisplayWindowInsetsController() {
@@ -795,7 +830,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             @Override
-            public void topFocusedWindowChanged(String packageName) {
+            public void topFocusedWindowChanged(ComponentName component,
+                    InsetsVisibilities requestedVisibilities) {
             }
         };
     }
@@ -813,7 +849,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     TestTransitionPlayer registerTestTransitionPlayer() {
         final TestTransitionPlayer testPlayer = new TestTransitionPlayer(
                 mAtm.getTransitionController(), mAtm.mWindowOrganizerController);
-        testPlayer.mController.registerTransitionPlayer(testPlayer, null /* appThread */);
+        testPlayer.mController.registerTransitionPlayer(testPlayer, null /* playerProc */);
         return testPlayer;
     }
 
@@ -886,7 +922,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Sets the default minimum task size to 1 so that tests can use small task sizes */
     public void removeGlobalMinSizeRestriction() {
-        mAtm.mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp = 1;
+        mAtm.mRootWindowContainer.forAllDisplays(
+                displayContent -> displayContent.mMinSizeOfResizeableTaskDp = 1);
     }
 
     /** Mocks the behavior of taking a snapshot. */
@@ -904,20 +941,25 @@ class WindowTestsBase extends SystemServiceTestsBase {
         doReturn(100).when(hardwareBuffer).getHeight();
     }
 
+    static ComponentName getUniqueComponentName() {
+        return ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
+                DEFAULT_COMPONENT_CLASS_NAME + sCurrentActivityId++);
+    }
+
     /**
      * Builder for creating new activities.
      */
     protected static class ActivityBuilder {
         static final int DEFAULT_FAKE_UID = 12345;
-        // An id appended to the end of the component name to make it unique
-        private static int sCurrentActivityId = 0;
+        static final String DEFAULT_PROCESS_NAME = "procName";
+        static int sProcNameSeq;
 
         private final ActivityTaskManagerService mService;
 
         private ComponentName mComponent;
         private String mTargetActivity;
         private Task mTask;
-        private String mProcessName = "name";
+        private String mProcessName = DEFAULT_PROCESS_NAME;
         private String mAffinity;
         private int mUid = DEFAULT_FAKE_UID;
         private boolean mCreateTask = false;
@@ -939,6 +981,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private boolean mOnTop = false;
         private ActivityInfo.WindowLayout mWindowLayout;
         private boolean mVisible = true;
+        private ActivityOptions mLaunchIntoPipOpts;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -1074,6 +1117,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        ActivityBuilder setLaunchIntoPipActivityOptions(ActivityOptions opts) {
+            mLaunchIntoPipOpts = opts;
+            return this;
+        }
+
         ActivityRecord build() {
             SystemServicesTestRule.checkHoldsLock(mService.mGlobalLock);
             try {
@@ -1086,9 +1134,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         ActivityRecord buildInner() {
             if (mComponent == null) {
-                final int id = sCurrentActivityId++;
-                mComponent = ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
-                        DEFAULT_COMPONENT_CLASS_NAME + id);
+                mComponent = getUniqueComponentName();
             }
 
             Intent intent = new Intent();
@@ -1101,6 +1147,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             aInfo.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
+            if (DEFAULT_PROCESS_NAME.equals(mProcessName)) {
+                mProcessName += ++sProcNameSeq;
+            }
             aInfo.processName = mProcessName;
             aInfo.packageName = mComponent.getPackageName();
             aInfo.name = mComponent.getClassName();
@@ -1132,7 +1181,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             ActivityOptions options = null;
-            if (mLaunchTaskBehind) {
+            if (mLaunchIntoPipOpts != null) {
+                options = mLaunchIntoPipOpts;
+            } else if (mLaunchTaskBehind) {
                 options = ActivityOptions.makeTaskLaunchBehind();
             }
             final ActivityRecord activity = new ActivityRecord.Builder(mService)
@@ -1146,10 +1197,6 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
             spyOn(activity);
             if (mTask != null) {
-                // fullscreen value is normally read from resources in ctor, so for testing we need
-                // to set it somewhere else since we can't mock resources.
-                doReturn(true).when(activity).occludesParent();
-                doReturn(true).when(activity).fillsParent();
                 mTask.addChild(activity);
                 if (mOnTop) {
                     // Move the task to front after activity is added.
@@ -1167,16 +1214,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             if (mWpc != null) {
                 wpc = mWpc;
             } else {
-                wpc = new WindowProcessController(mService,
-                        aInfo.applicationInfo, mProcessName, mUid,
-                        UserHandle.getUserId(mUid), mock(Object.class),
-                        mock(WindowProcessListener.class));
-                wpc.setThread(mock(IApplicationThread.class));
+                final WindowProcessController p = mService.getProcessController(mProcessName, mUid);
+                wpc = p != null ? p : SystemServicesTestRule.addProcess(
+                        mService, aInfo.applicationInfo, mProcessName, 0 /* pid */);
             }
-            wpc.setThread(mock(IApplicationThread.class));
             activity.setProcess(wpc);
-            doReturn(wpc).when(mService).getProcessController(
-                    activity.processName, activity.info.applicationInfo.uid);
 
             // Resume top activities to make sure all other signals in the system are connected.
             mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
@@ -1193,6 +1235,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         @Nullable
         private TaskFragmentOrganizer mOrganizer;
         private IBinder mFragmentToken;
+        private Rect mBounds;
 
         TaskFragmentBuilder(ActivityTaskManagerService service) {
             mAtm = service;
@@ -1229,6 +1272,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        TaskFragmentBuilder setBounds(@Nullable Rect bounds) {
+            mBounds = bounds;
+            return this;
+        }
+
         TaskFragment build() {
             SystemServicesTestRule.checkHoldsLock(mAtm.mGlobalLock);
 
@@ -1256,6 +1304,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         mOrganizer.getOrganizerToken(), DEFAULT_TASK_FRAGMENT_ORGANIZER_UID,
                         DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
             }
+            if (mBounds != null && !mBounds.isEmpty()) {
+                taskFragment.setBounds(mBounds);
+            }
+            spyOn(taskFragment);
             return taskFragment;
         }
     }
@@ -1283,6 +1335,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         private TaskFragment mParentTaskFragment;
 
         private boolean mCreateActivity = false;
+        private boolean mCreatedByOrganizer = false;
 
         TaskBuilder(ActivityTaskSupervisor supervisor) {
             mSupervisor = supervisor;
@@ -1374,6 +1427,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        TaskBuilder setCreatedByOrganizer(boolean createdByOrganizer) {
+            mCreatedByOrganizer = createdByOrganizer;
+            return this;
+        }
+
         Task build() {
             SystemServicesTestRule.checkHoldsLock(mSupervisor.mService.mGlobalLock);
 
@@ -1397,8 +1455,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             if (mIntent == null) {
                 mIntent = new Intent();
                 if (mComponent == null) {
-                    mComponent = ComponentName.createRelative(DEFAULT_COMPONENT_PACKAGE_NAME,
-                            DEFAULT_COMPONENT_CLASS_NAME);
+                    mComponent = getUniqueComponentName();
                 }
                 mIntent.setComponent(mComponent);
                 mIntent.setFlags(mFlags);
@@ -1410,7 +1467,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     .setActivityInfo(mActivityInfo)
                     .setIntent(mIntent)
                     .setOnTop(mOnTop)
-                    .setVoiceSession(mVoiceSession);
+                    .setVoiceSession(mVoiceSession)
+                    .setCreatedByOrganizer(mCreatedByOrganizer);
             final Task task;
             if (mParentTaskFragment == null) {
                 task = builder.setActivityType(mActivityType)
@@ -1431,10 +1489,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
             doNothing().when(rootTask).startActivityLocked(
                     any(), any(), anyBoolean(), anyBoolean(), any(), any());
 
-            // Create child task with activity.
+            // Create child activity.
             if (mCreateActivity) {
                 new ActivityBuilder(mSupervisor.mService)
                         .setTask(task)
+                        .setComponent(mComponent)
                         .build();
                 if (mOnTop) {
                     // We move the task to front again in order to regain focus after activity
@@ -1464,18 +1523,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mAtm = service;
             mWMService = mAtm.mWindowManager;
             mPowerManagerWrapper = powerManagerWrapper;
-            if (DEBUG_ENABLE_SHELL_DRAWER) {
-                mAtm.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer(Runnable::run);
-                mAtm.mTaskOrganizerController.registerTaskOrganizer(this);
-            }
+            mAtm.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer(Runnable::run);
+            mAtm.mTaskOrganizerController.registerTaskOrganizer(this);
         }
 
         void setRunnableWhenAddingSplashScreen(Runnable r) {
-            if (DEBUG_ENABLE_SHELL_DRAWER) {
-                mRunnableWhenAddingSplashScreen = r;
-            } else {
-                ((TestWindowManagerPolicy) mWMService.mPolicy).setRunnableWhenAddingSplashScreen(r);
-            }
+            mRunnableWhenAddingSplashScreen = r;
         }
 
         @Override
@@ -1518,64 +1571,62 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     static class TestSplitOrganizer extends WindowOrganizerTests.StubOrganizer {
         final ActivityTaskManagerService mService;
+        final TaskDisplayArea mDefaultTDA;
         Task mPrimary;
         Task mSecondary;
-        boolean mInSplit = false;
-        // moves everything to secondary. Most tests expect this since sysui usually does it.
-        boolean mMoveToSecondaryOnEnter = true;
         int mDisplayId;
-        private static final int[] CONTROLLED_ACTIVITY_TYPES = {
-                ACTIVITY_TYPE_STANDARD,
-                ACTIVITY_TYPE_HOME,
-                ACTIVITY_TYPE_RECENTS,
-                ACTIVITY_TYPE_UNDEFINED
-        };
-        private static final int[] CONTROLLED_WINDOWING_MODES = {
-                WINDOWING_MODE_FULLSCREEN,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
-                WINDOWING_MODE_UNDEFINED
-        };
+
         TestSplitOrganizer(ActivityTaskManagerService service, DisplayContent display) {
             mService = service;
+            mDefaultTDA = display.getDefaultTaskDisplayArea();
             mDisplayId = display.mDisplayId;
             mService.mTaskOrganizerController.registerTaskOrganizer(this);
             mPrimary = mService.mTaskOrganizerController.createRootTask(
-                    display, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+                    display, WINDOWING_MODE_MULTI_WINDOW, null);
             mSecondary = mService.mTaskOrganizerController.createRootTask(
-                    display, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, null);;
+                    display, WINDOWING_MODE_MULTI_WINDOW, null);
+
+            mPrimary.setAdjacentTaskFragment(mSecondary);
+            display.getDefaultTaskDisplayArea().setLaunchAdjacentFlagRootTask(mSecondary);
+
+            final Rect primaryBounds = new Rect();
+            final Rect secondaryBounds = new Rect();
+            if (display.getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+                display.getBounds().splitVertically(primaryBounds, secondaryBounds);
+            } else {
+                display.getBounds().splitHorizontally(primaryBounds, secondaryBounds);
+            }
+            mPrimary.setBounds(primaryBounds);
+            mSecondary.setBounds(secondaryBounds);
+
+            spyOn(mPrimary);
+            spyOn(mSecondary);
         }
+
         TestSplitOrganizer(ActivityTaskManagerService service) {
             this(service, service.mTaskSupervisor.mRootWindowContainer.getDefaultDisplay());
         }
-        public void setMoveToSecondaryOnEnter(boolean move) {
-            mMoveToSecondaryOnEnter = move;
+
+        public Task createTaskToPrimary(boolean onTop) {
+            final Task primaryTask = mDefaultTDA.createRootTask(
+                    WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, onTop);
+            putTaskToPrimary(primaryTask, onTop);
+            return primaryTask;
         }
 
-        @Override
-        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
-            if (mInSplit) {
-                return;
-            }
-            if (info.topActivityType == ACTIVITY_TYPE_UNDEFINED) {
-                // Not populated
-                return;
-            }
-            if (info.configuration.windowConfiguration.getWindowingMode()
-                    != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                return;
-            }
-            mInSplit = true;
-            if (!mMoveToSecondaryOnEnter) {
-                return;
-            }
-            DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
-            dc.getDefaultTaskDisplayArea().setLaunchRootTask(
-                    mSecondary, CONTROLLED_WINDOWING_MODES, CONTROLLED_ACTIVITY_TYPES);
-            dc.forAllRootTasks(rootTask -> {
-                if (!WindowConfiguration.isSplitScreenWindowingMode(rootTask.getWindowingMode())) {
-                    rootTask.reparent(mSecondary, POSITION_BOTTOM);
-                }
-            });
+        public Task createTaskToSecondary(boolean onTop) {
+            final Task secondaryTask = mDefaultTDA.createRootTask(
+                    WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, onTop);
+            putTaskToSecondary(secondaryTask, onTop);
+            return secondaryTask;
+        }
+
+        public void putTaskToPrimary(Task task, boolean onTop) {
+            task.reparent(mPrimary, onTop ? POSITION_TOP : POSITION_BOTTOM);
+        }
+
+        public void putTaskToSecondary(Task task, boolean onTop) {
+            task.reparent(mSecondary, onTop ? POSITION_TOP : POSITION_BOTTOM);
         }
     }
 
@@ -1675,10 +1726,17 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mLastRequest = request;
         }
 
-        public void start() {
+        void startTransition() {
             mOrganizer.startTransition(mLastRequest.getType(), mLastTransit, null);
-            mLastTransit.onTransactionReady(mLastTransit.getSyncId(),
-                    mock(SurfaceControl.Transaction.class));
+        }
+
+        void onTransactionReady(SurfaceControl.Transaction t) {
+            mLastTransit.onTransactionReady(mLastTransit.getSyncId(), t);
+        }
+
+        void start() {
+            startTransition();
+            onTransactionReady(mock(SurfaceControl.Transaction.class));
         }
 
         public void finish() {

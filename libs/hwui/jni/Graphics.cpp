@@ -365,6 +365,8 @@ jint GraphicsJNI::colorTypeToLegacyBitmapConfig(SkColorType colorType) {
             return kRGB_565_LegacyBitmapConfig;
         case kAlpha_8_SkColorType:
             return kA8_LegacyBitmapConfig;
+        case kRGBA_1010102_SkColorType:
+            return kRGBA_1010102_LegacyBitmapConfig;
         case kUnknown_SkColorType:
         default:
             break;
@@ -374,14 +376,10 @@ jint GraphicsJNI::colorTypeToLegacyBitmapConfig(SkColorType colorType) {
 
 SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
     const uint8_t gConfig2ColorType[] = {
-        kUnknown_SkColorType,
-        kAlpha_8_SkColorType,
-        kUnknown_SkColorType, // Previously kIndex_8_SkColorType,
-        kRGB_565_SkColorType,
-        kARGB_4444_SkColorType,
-        kN32_SkColorType,
-        kRGBA_F16_SkColorType,
-        kN32_SkColorType
+            kUnknown_SkColorType,  kAlpha_8_SkColorType,
+            kUnknown_SkColorType,  // Previously kIndex_8_SkColorType,
+            kRGB_565_SkColorType,  kARGB_4444_SkColorType, kN32_SkColorType,
+            kRGBA_F16_SkColorType, kN32_SkColorType,       kRGBA_1010102_SkColorType,
     };
 
     if (legacyConfig < 0 || legacyConfig > kLastEnum_LegacyBitmapConfig) {
@@ -399,15 +397,12 @@ AndroidBitmapFormat GraphicsJNI::getFormatFromConfig(JNIEnv* env, jobject jconfi
     jint javaConfigId = env->GetIntField(jconfig, gBitmapConfig_nativeInstanceID);
 
     const AndroidBitmapFormat config2BitmapFormat[] = {
-        ANDROID_BITMAP_FORMAT_NONE,
-        ANDROID_BITMAP_FORMAT_A_8,
-        ANDROID_BITMAP_FORMAT_NONE, // Previously Config.Index_8
-        ANDROID_BITMAP_FORMAT_RGB_565,
-        ANDROID_BITMAP_FORMAT_RGBA_4444,
-        ANDROID_BITMAP_FORMAT_RGBA_8888,
-        ANDROID_BITMAP_FORMAT_RGBA_F16,
-        ANDROID_BITMAP_FORMAT_NONE // Congfig.HARDWARE
-    };
+            ANDROID_BITMAP_FORMAT_NONE,        ANDROID_BITMAP_FORMAT_A_8,
+            ANDROID_BITMAP_FORMAT_NONE,  // Previously Config.Index_8
+            ANDROID_BITMAP_FORMAT_RGB_565,     ANDROID_BITMAP_FORMAT_RGBA_4444,
+            ANDROID_BITMAP_FORMAT_RGBA_8888,   ANDROID_BITMAP_FORMAT_RGBA_F16,
+            ANDROID_BITMAP_FORMAT_NONE,  // Congfig.HARDWARE
+            ANDROID_BITMAP_FORMAT_RGBA_1010102};
     return config2BitmapFormat[javaConfigId];
 }
 
@@ -430,6 +425,9 @@ jobject GraphicsJNI::getConfigFromFormat(JNIEnv* env, AndroidBitmapFormat format
       case ANDROID_BITMAP_FORMAT_RGBA_F16:
         configId = kRGBA_16F_LegacyBitmapConfig;
         break;
+      case ANDROID_BITMAP_FORMAT_RGBA_1010102:
+          configId = kRGBA_1010102_LegacyBitmapConfig;
+          break;
       default:
         break;
     }

@@ -23,11 +23,15 @@ import android.net.Uri;
 import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.util.Pair;
+
+import androidx.annotation.NonNull;
 
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
+import com.android.systemui.util.DumpUtilsKt;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -110,14 +114,17 @@ public class RemoteInputController {
     public void addRemoteInput(NotificationEntry entry, Object token) {
         Objects.requireNonNull(entry);
         Objects.requireNonNull(token);
-
+        boolean isActive = isRemoteInputActive(entry);
         boolean found = pruneWeakThenRemoveAndContains(
                 entry /* contains */, null /* remove */, token /* removeToken */);
         if (!found) {
             mOpen.add(new Pair<>(new WeakReference<>(entry), token));
         }
-
-        apply(entry);
+        // If the remote input focus is being transferred between different notification layouts
+        // (ex: Expanded->Contracted), then we don't want to re-apply.
+        if (!isActive) {
+            apply(entry);
+        }
     }
 
     /**
@@ -291,6 +298,28 @@ public class RemoteInputController {
      */
     public void grantInlineReplyUriPermission(StatusBarNotification sbn, Uri data) {
         mRemoteInputUriController.grantInlineReplyUriPermission(sbn, data);
+    }
+
+    /** dump debug info; called by {@link NotificationRemoteInputManager} */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        pw.print("isRemoteInputActive: ");
+        pw.println(isRemoteInputActive()); // Note that this prunes the mOpen list, printed later.
+        pw.println("mOpen: " + mOpen.size());
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            for (Pair<WeakReference<NotificationEntry>, Object> open : mOpen) {
+                NotificationEntry entry = open.first.get();
+                pw.println(entry == null ? "???" : entry.getKey());
+            }
+        });
+        pw.println("mSpinning: " + mSpinning.size());
+        DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            for (String key : mSpinning.keySet()) {
+                pw.println(key);
+            }
+        });
+        pw.println(mSpinning);
+        pw.print("mDelegate: ");
+        pw.println(mDelegate);
     }
 
     public interface Callback {

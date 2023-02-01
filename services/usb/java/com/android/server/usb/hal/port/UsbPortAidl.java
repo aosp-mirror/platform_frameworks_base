@@ -73,6 +73,42 @@ public final class UsbPortAidl implements UsbPortHal {
     private boolean mSystemReady;
     private long mTransactionId;
 
+    /**
+     * USB data status is not known.
+     */
+    public static final int USB_DATA_STATUS_UNKNOWN = 0;
+
+    /**
+     * USB data is enabled.
+     */
+    public static final int USB_DATA_STATUS_ENABLED = 1;
+
+    /**
+     * USB data is disabled as the port is too hot.
+     */
+    public static final int USB_DATA_STATUS_DISABLED_OVERHEAT = 2;
+
+    /**
+     * USB data is disabled due to contaminated port.
+     */
+    public static final int USB_DATA_STATUS_DISABLED_CONTAMINANT = 3;
+
+    /**
+     * USB data is disabled due to docking event.
+     */
+    public static final int USB_DATA_STATUS_DISABLED_DOCK = 4;
+
+    /**
+     * USB data is disabled by
+     * {@link UsbPort#enableUsbData UsbPort.enableUsbData}.
+     */
+    public static final int USB_DATA_STATUS_DISABLED_FORCE = 5;
+
+    /**
+     * USB data is disabled for debug.
+     */
+    public static final int USB_DATA_STATUS_DISABLED_DEBUG = 6;
+
     public @UsbHalVersion int getUsbHalVersion() throws RemoteException {
         synchronized (mLock) {
             if (mProxy == null) {
@@ -238,6 +274,46 @@ public final class UsbPortAidl implements UsbPortHal {
     }
 
     @Override
+    public void resetUsbPort(String portName, long operationID,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portName);
+        Objects.requireNonNull(callback);
+        long key = operationID;
+        synchronized (mLock) {
+            try {
+                if (mProxy == null) {
+                    logAndPrint(Log.ERROR, mPw,
+                            "resetUsbPort: Proxy is null. Retry !opID:"
+                            + operationID);
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                }
+                while (sCallbacks.get(key) != null) {
+                    key = ThreadLocalRandom.current().nextInt();
+                }
+                if (key != operationID) {
+                    logAndPrint(Log.INFO, mPw, "resetUsbPort: operationID exists ! opID:"
+                            + operationID + " key:" + key);
+                }
+                try {
+                    sCallbacks.put(key, callback);
+                    mProxy.resetUsbPort(portName, key);
+                } catch (RemoteException e) {
+                    logAndPrintException(mPw,
+                            "resetUsbPort: Failed to resetUsbPort: portID="
+                            + portName + "opId:" + operationID, e);
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                    sCallbacks.remove(key);
+                }
+            } catch (RemoteException e) {
+                logAndPrintException(mPw,
+                        "resetUsbPort: Failed to call onOperationComplete portID="
+                        + portName + "opID:" + operationID, e);
+                sCallbacks.remove(key);
+            }
+        }
+    }
+
+    @Override
     public boolean enableUsbData(String portName, boolean enable, long operationID,
             IUsbOperationInternal callback) {
         Objects.requireNonNull(portName);
@@ -278,6 +354,89 @@ public final class UsbPortAidl implements UsbPortHal {
                 return false;
             }
             return true;
+        }
+    }
+
+    @Override
+    public void enableLimitPowerTransfer(String portName, boolean limit, long operationID,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portName);
+        long key = operationID;
+        synchronized (mLock) {
+            try {
+                if (mProxy == null) {
+                    logAndPrint(Log.ERROR, mPw,
+                            "enableLimitPowerTransfer: Proxy is null. Retry !opID:"
+                            + operationID);
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                    return;
+                }
+                while (sCallbacks.get(key) != null) {
+                    key = ThreadLocalRandom.current().nextInt();
+                }
+                if (key != operationID) {
+                    logAndPrint(Log.INFO, mPw, "enableUsbData: operationID exists ! opID:"
+                            + operationID + " key:" + key);
+                }
+                try {
+                    sCallbacks.put(key, callback);
+                    mProxy.limitPowerTransfer(portName, limit, key);
+                } catch (RemoteException e) {
+                    logAndPrintException(mPw,
+                            "enableLimitPowerTransfer: Failed while invoking AIDL HAL"
+                            + " portID=" + portName + " opID:" + operationID, e);
+                    if (callback != null) {
+                        callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                    }
+                    sCallbacks.remove(key);
+                }
+            } catch (RemoteException e) {
+                logAndPrintException(mPw,
+                        "enableLimitPowerTransfer: Failed to call onOperationComplete portID="
+                        + portName + " opID:" + operationID, e);
+            }
+        }
+    }
+
+    @Override
+    public void enableUsbDataWhileDocked(String portName, long operationID,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portName);
+        long key = operationID;
+        synchronized (mLock) {
+            try {
+                if (mProxy == null) {
+                    logAndPrint(Log.ERROR, mPw,
+                            "enableUsbDataWhileDocked: Proxy is null. Retry !opID:"
+                            + operationID);
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                    return;
+                }
+                while (sCallbacks.get(key) != null) {
+                    key = ThreadLocalRandom.current().nextInt();
+                }
+                if (key != operationID) {
+                    logAndPrint(Log.INFO, mPw,
+                            "enableUsbDataWhileDocked: operationID exists ! opID:"
+                            + operationID + " key:" + key);
+                }
+                try {
+                    sCallbacks.put(key, callback);
+                    mProxy.enableUsbDataWhileDocked(portName, key);
+                } catch (RemoteException e) {
+                    logAndPrintException(mPw,
+                            "enableUsbDataWhileDocked: error while invoking hal"
+                            + "portID=" + portName + " opID:" + operationID, e);
+                    if (callback != null) {
+                        callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                    }
+                    sCallbacks.remove(key);
+                }
+            } catch (RemoteException e) {
+                logAndPrintException(mPw,
+                        "enableUsbDataWhileDocked: Failed to call onOperationComplete portID="
+                        + portName + " opID:" + operationID, e);
+            }
         }
     }
 
@@ -362,6 +521,36 @@ public final class UsbPortAidl implements UsbPortHal {
             return supportedContaminantProtectionModes;
         }
 
+        private int toUsbDataStatusInt(byte[] usbDataStatusHal) {
+            int usbDataStatus = UsbPortStatus.DATA_STATUS_UNKNOWN;
+            for (int i = 0; i < usbDataStatusHal.length; i++) {
+                switch (usbDataStatusHal[i]) {
+                    case USB_DATA_STATUS_ENABLED:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_ENABLED;
+                        break;
+                    case USB_DATA_STATUS_DISABLED_OVERHEAT:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_OVERHEAT;
+                        break;
+                    case USB_DATA_STATUS_DISABLED_CONTAMINANT:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_CONTAMINANT;
+                        break;
+                    case USB_DATA_STATUS_DISABLED_DOCK:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DOCK;
+                        break;
+                    case USB_DATA_STATUS_DISABLED_FORCE:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_FORCE;
+                        break;
+                    case USB_DATA_STATUS_DISABLED_DEBUG:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_DISABLED_DEBUG;
+                        break;
+                    default:
+                        usbDataStatus |= UsbPortStatus.DATA_STATUS_UNKNOWN;
+                }
+            }
+            UsbPortManager.logAndPrint(Log.INFO, mPw, "AIDL UsbDataStatus:" + usbDataStatus);
+            return usbDataStatus;
+        }
+
         @Override
         public void notifyPortStatusChange(
                android.hardware.usb.PortStatus[] currentPortStatus, int retval) {
@@ -393,7 +582,9 @@ public final class UsbPortAidl implements UsbPortHal {
                         toContaminantProtectionStatus(current.contaminantProtectionStatus),
                         current.supportsEnableContaminantPresenceDetection,
                         current.contaminantDetectionStatus,
-                        current.usbDataEnabled);
+                        toUsbDataStatusInt(current.usbDataStatus),
+                        current.powerTransferLimited,
+                        current.powerBrickStatus);
                 newPortInfo.add(temp);
                 UsbPortManager.logAndPrint(Log.INFO, mPw, "ClientCallback AIDL V1: "
                         + current.portName);
@@ -460,6 +651,78 @@ public final class UsbPortAidl implements UsbPortHal {
                 UsbPortManager.logAndPrint(Log.ERROR, mPw, portName
                         + "notifyContaminantEnabledStatus: opID:"
                         + operationID + " failed. err:" + retval);
+            }
+        }
+
+        @Override
+        public void notifyLimitPowerTransferStatus(String portName, boolean limit, int retval,
+                long operationID) {
+            if (retval == Status.SUCCESS) {
+                UsbPortManager.logAndPrint(Log.INFO, mPw, portName + ": opID:"
+                        + operationID + " successful");
+            } else {
+                UsbPortManager.logAndPrint(Log.ERROR, mPw, portName
+                        + "notifyLimitPowerTransferStatus: opID:"
+                        + operationID + " failed. err:" + retval);
+            }
+            try {
+                IUsbOperationInternal callback = sCallbacks.get(operationID);
+                if (callback != null) {
+                    sCallbacks.get(operationID).onOperationComplete(retval == Status.SUCCESS
+                            ? USB_OPERATION_SUCCESS
+                            : USB_OPERATION_ERROR_INTERNAL);
+                }
+            } catch (RemoteException e) {
+                logAndPrintException(mPw,
+                        "enableLimitPowerTransfer: Failed to call onOperationComplete",
+                        e);
+            }
+        }
+
+        @Override
+        public void notifyEnableUsbDataWhileDockedStatus(String portName, int retval,
+                long operationID) {
+            if (retval == Status.SUCCESS) {
+                UsbPortManager.logAndPrint(Log.INFO, mPw, portName + ": opID:"
+                        + operationID + " successful");
+            } else {
+                UsbPortManager.logAndPrint(Log.ERROR, mPw, portName
+                        + "notifyEnableUsbDataWhileDockedStatus: opID:"
+                        + operationID + " failed. err:" + retval);
+            }
+            try {
+                IUsbOperationInternal callback = sCallbacks.get(operationID);
+                if (callback != null) {
+                    sCallbacks.get(operationID).onOperationComplete(retval == Status.SUCCESS
+                            ? USB_OPERATION_SUCCESS
+                            : USB_OPERATION_ERROR_INTERNAL);
+                }
+            } catch (RemoteException e) {
+                logAndPrintException(mPw,
+                        "notifyEnableUsbDataWhileDockedStatus: Failed to call onOperationComplete",
+                        e);
+            }
+        }
+
+        @Override
+        public void notifyResetUsbPortStatus(String portName, int retval,
+                long operationID) {
+            if (retval == Status.SUCCESS) {
+                UsbPortManager.logAndPrint(Log.INFO, mPw, "notifyResetUsbPortStatus:"
+                        + portName + ": opID:" + operationID);
+            } else {
+                UsbPortManager.logAndPrint(Log.ERROR, mPw, portName
+                        + "notifyEnableUsbDataStatus: opID:"
+                        + operationID + " failed. err:" + retval);
+            }
+            try {
+                sCallbacks.get(operationID).onOperationComplete(retval == Status.SUCCESS
+                        ? USB_OPERATION_SUCCESS
+                        : USB_OPERATION_ERROR_INTERNAL);
+            } catch (RemoteException e) {
+                logAndPrintException(mPw,
+                        "notifyResetUsbPortStatus: Failed to call onOperationComplete",
+                        e);
             }
         }
 

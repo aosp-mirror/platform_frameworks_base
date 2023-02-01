@@ -17,14 +17,26 @@
 package android.media;
 
 import android.annotation.NonNull;
-import android.hardware.cas.V1_0.*;
+import android.hardware.cas.DestinationBuffer;
+import android.hardware.cas.IDescrambler;
+import android.hardware.cas.ScramblingControl;
+import android.hardware.cas.SharedBuffer;
+import android.hardware.cas.SubSample;
+import android.hardware.cas.V1_0.IDescramblerBase;
+import android.hardware.common.Ashmem;
+import android.hardware.common.NativeHandle;
 import android.media.MediaCasException.UnsupportedCasException;
 import android.os.IHwBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.os.SharedMemory;
+import android.system.ErrnoException;
 import android.util.Log;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 /**
  * MediaDescrambler class can be used in conjunction with {@link android.media.MediaCodec}
@@ -39,7 +51,198 @@ import java.nio.ByteBuffer;
  */
 public final class MediaDescrambler implements AutoCloseable {
     private static final String TAG = "MediaDescrambler";
-    private IDescramblerBase mIDescrambler;
+    private DescramblerWrapper mIDescrambler;
+
+    private interface DescramblerWrapper {
+
+        IHwBinder asBinder();
+
+        int descramble(
+                @NonNull ByteBuffer srcBuf,
+                @NonNull ByteBuffer dstBuf,
+                @NonNull MediaCodec.CryptoInfo cryptoInfo)
+                throws RemoteException;
+
+        boolean requiresSecureDecoderComponent(@NonNull String mime) throws RemoteException;
+
+        void setMediaCasSession(byte[] sessionId) throws RemoteException;
+
+        void release() throws RemoteException;
+    }
+    ;
+
+    private long getSubsampleInfo(
+            int numSubSamples,
+            int[] numBytesOfClearData,
+            int[] numBytesOfEncryptedData,
+            SubSample[] subSamples) {
+        long totalSize = 0;
+
+        for (int i = 0; i < numSubSamples; i++) {
+            totalSize += numBytesOfClearData[i];
+            subSamples[i].numBytesOfClearData = numBytesOfClearData[i];
+            totalSize += numBytesOfEncryptedData[i];
+            subSamples[i].numBytesOfEncryptedData = numBytesOfEncryptedData[i];
+        }
+        return totalSize;
+    }
+
+    private ParcelFileDescriptor createSharedMemory(ByteBuffer buffer, String name)
+            throws RemoteException {
+        byte[] source = buffer.array();
+        if (source.length == 0) {
+            return null;
+        }
+        ParcelFileDescriptor fd = null;
+        try {
+            SharedMemory ashmem = SharedMemory.create(name == null ? "" : name, source.length);
+            ByteBuffer ptr = ashmem.mapReadWrite();
+            ptr.put(buffer);
+            ashmem.unmap(ptr);
+            fd = ashmem.getFdDup();
+            return fd;
+        } catch (ErrnoException | IOException e) {
+            throw new RemoteException(e);
+        }
+    }
+
+    private class AidlDescrambler implements DescramblerWrapper {
+
+        IDescrambler mAidlDescrambler;
+
+        AidlDescrambler(IDescrambler aidlDescrambler) {
+            mAidlDescrambler = aidlDescrambler;
+        }
+
+        @Override
+        public IHwBinder asBinder() {
+            return null;
+        }
+
+        @Override
+        public int descramble(
+                @NonNull ByteBuffer src,
+                @NonNull ByteBuffer dst,
+                @NonNull MediaCodec.CryptoInfo cryptoInfo)
+                throws RemoteException {
+            SubSample[] subSamples = new SubSample[cryptoInfo.numSubSamples];
+            long totalLength =
+                    getSubsampleInfo(
+                            cryptoInfo.numSubSamples,
+                            cryptoInfo.numBytesOfClearData,
+                            cryptoInfo.numBytesOfEncryptedData,
+                            subSamples);
+            SharedBuffer srcBuffer = new SharedBuffer();
+            DestinationBuffer dstBuffer;
+            srcBuffer.heapBase = new Ashmem();
+            srcBuffer.heapBase.fd = createSharedMemory(src, "Descrambler Source Buffer");
+            srcBuffer.heapBase.size = src.array().length;
+            if (dst == null) {
+                dstBuffer = DestinationBuffer.nonsecureMemory(srcBuffer);
+            } else {
+                ParcelFileDescriptor pfd =
+                        createSharedMemory(dst, "Descrambler Destination Buffer");
+                NativeHandle nh = new NativeHandle();
+                nh.fds = new ParcelFileDescriptor[] {pfd};
+                nh.ints = new int[] {1}; // Mark 1 since source buffer also uses it?
+                dstBuffer = DestinationBuffer.secureMemory(nh);
+            }
+            @ScramblingControl int control = cryptoInfo.key[0];
+
+            return mAidlDescrambler.descramble(
+                    (byte) control,
+                    subSamples,
+                    srcBuffer,
+                    src.position(),
+                    dstBuffer,
+                    dst.position());
+        }
+
+        @Override
+        public boolean requiresSecureDecoderComponent(@NonNull String mime) throws RemoteException {
+            return mAidlDescrambler.requiresSecureDecoderComponent(mime);
+        }
+
+        @Override
+        public void setMediaCasSession(byte[] sessionId) throws RemoteException {
+            mAidlDescrambler.setMediaCasSession(sessionId);
+        }
+
+        @Override
+        public void release() throws RemoteException {
+            mAidlDescrambler.release();
+        }
+    }
+
+    private class HidlDescrambler implements DescramblerWrapper {
+
+        IDescramblerBase mHidlDescrambler;
+
+        HidlDescrambler(IDescramblerBase hidlDescrambler) {
+            mHidlDescrambler = hidlDescrambler;
+            native_setup(hidlDescrambler.asBinder());
+        }
+
+        @Override
+        public IHwBinder asBinder() {
+            return mHidlDescrambler.asBinder();
+        }
+
+        @Override
+        public int descramble(
+                @NonNull ByteBuffer srcBuf,
+                @NonNull ByteBuffer dstBuf,
+                @NonNull MediaCodec.CryptoInfo cryptoInfo)
+                throws RemoteException {
+
+            try {
+                return native_descramble(
+                        cryptoInfo.key[0],
+                        cryptoInfo.key[1],
+                        cryptoInfo.numSubSamples,
+                        cryptoInfo.numBytesOfClearData,
+                        cryptoInfo.numBytesOfEncryptedData,
+                        srcBuf,
+                        srcBuf.position(),
+                        srcBuf.limit(),
+                        dstBuf,
+                        dstBuf.position(),
+                        dstBuf.limit());
+            } catch (ServiceSpecificException e) {
+                MediaCasStateException.throwExceptionIfNeeded(e.errorCode, e.getMessage());
+            } catch (RemoteException e) {
+                cleanupAndRethrowIllegalState();
+            }
+            return -1;
+        }
+
+        @Override
+        public boolean requiresSecureDecoderComponent(@NonNull String mime) throws RemoteException {
+            return mHidlDescrambler.requiresSecureDecoderComponent(mime);
+        }
+
+        @Override
+        public void setMediaCasSession(byte[] sessionId) throws RemoteException {
+            ArrayList<Byte> byteArray = new ArrayList<>();
+
+            if (sessionId != null) {
+                int length = sessionId.length;
+                byteArray = new ArrayList<Byte>(length);
+                for (int i = 0; i < length; i++) {
+                    byteArray.add(Byte.valueOf(sessionId[i]));
+                }
+            }
+
+            MediaCasStateException.throwExceptionIfNeeded(
+                    mHidlDescrambler.setMediaCasSession(byteArray));
+        }
+
+        @Override
+        public void release() throws RemoteException {
+            mHidlDescrambler.release();
+            native_release();
+        }
+    }
 
     private final void validateInternalStates() {
         if (mIDescrambler == null) {
@@ -61,7 +264,14 @@ public final class MediaDescrambler implements AutoCloseable {
      */
     public MediaDescrambler(int CA_system_id) throws UnsupportedCasException {
         try {
-            mIDescrambler = MediaCas.getService().createDescrambler(CA_system_id);
+            if (MediaCas.getService() != null) {
+                mIDescrambler =
+                        new AidlDescrambler(MediaCas.getService().createDescrambler(CA_system_id));
+            } else if (MediaCas.getServiceHidl() != null) {
+                mIDescrambler =
+                        new HidlDescrambler(
+                                MediaCas.getServiceHidl().createDescrambler(CA_system_id));
+            }
         } catch(Exception e) {
             Log.e(TAG, "Failed to create descrambler: " + e);
             mIDescrambler = null;
@@ -70,7 +280,6 @@ public final class MediaDescrambler implements AutoCloseable {
                 throw new UnsupportedCasException("Unsupported CA_system_id " + CA_system_id);
             }
         }
-        native_setup(mIDescrambler.asBinder());
     }
 
     IHwBinder getBinder() {
@@ -117,8 +326,7 @@ public final class MediaDescrambler implements AutoCloseable {
         validateInternalStates();
 
         try {
-            MediaCasStateException.throwExceptionIfNeeded(
-                    mIDescrambler.setMediaCasSession(session.mSessionId));
+            mIDescrambler.setMediaCasSession(session.mSessionId);
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -126,27 +334,31 @@ public final class MediaDescrambler implements AutoCloseable {
 
     /**
      * Scramble control value indicating that the samples are not scrambled.
+     *
      * @see #descramble(ByteBuffer, ByteBuffer, android.media.MediaCodec.CryptoInfo)
      */
-    public static final byte SCRAMBLE_CONTROL_UNSCRAMBLED = 0;
+    public static final byte SCRAMBLE_CONTROL_UNSCRAMBLED = (byte) ScramblingControl.UNSCRAMBLED;
 
     /**
      * Scramble control value reserved and shouldn't be used currently.
+     *
      * @see #descramble(ByteBuffer, ByteBuffer, android.media.MediaCodec.CryptoInfo)
      */
-    public static final byte SCRAMBLE_CONTROL_RESERVED    = 1;
+    public static final byte SCRAMBLE_CONTROL_RESERVED = (byte) ScramblingControl.RESERVED;
 
     /**
      * Scramble control value indicating that the even key is used.
+     *
      * @see #descramble(ByteBuffer, ByteBuffer, android.media.MediaCodec.CryptoInfo)
      */
-    public static final byte SCRAMBLE_CONTROL_EVEN_KEY     = 2;
+    public static final byte SCRAMBLE_CONTROL_EVEN_KEY = (byte) ScramblingControl.EVENKEY;
 
     /**
      * Scramble control value indicating that the odd key is used.
+     *
      * @see #descramble(ByteBuffer, ByteBuffer, android.media.MediaCodec.CryptoInfo)
      */
-    public static final byte SCRAMBLE_CONTROL_ODD_KEY      = 3;
+    public static final byte SCRAMBLE_CONTROL_ODD_KEY = (byte) ScramblingControl.ODDKEY;
 
     /**
      * Scramble flag for a hint indicating that the descrambling request is for
@@ -207,14 +419,7 @@ public final class MediaDescrambler implements AutoCloseable {
         }
 
         try {
-            return native_descramble(
-                    cryptoInfo.key[0],
-                    cryptoInfo.key[1],
-                    cryptoInfo.numSubSamples,
-                    cryptoInfo.numBytesOfClearData,
-                    cryptoInfo.numBytesOfEncryptedData,
-                    srcBuf, srcBuf.position(), srcBuf.limit(),
-                    dstBuf, dstBuf.position(), dstBuf.limit());
+            return mIDescrambler.descramble(srcBuf, dstBuf, cryptoInfo);
         } catch (ServiceSpecificException e) {
             MediaCasStateException.throwExceptionIfNeeded(e.errorCode, e.getMessage());
         } catch (RemoteException e) {
@@ -233,7 +438,6 @@ public final class MediaDescrambler implements AutoCloseable {
                 mIDescrambler = null;
             }
         }
-        native_release();
     }
 
     @Override

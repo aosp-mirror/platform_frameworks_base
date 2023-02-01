@@ -199,7 +199,7 @@ public final class CommonFoldingFeature {
             throw new IllegalArgumentException(
                     "Display feature rectangle cannot have zero width and height simultaneously.");
         }
-        this.mRect = rect;
+        this.mRect = new Rect(rect);
     }
 
     /** Returns the type of the feature. */
@@ -208,7 +208,7 @@ public final class CommonFoldingFeature {
         return mType;
     }
 
-    /** Returns the state of the feature, or {@code null} if the feature has no state. */
+    /** Returns the state of the feature.*/
     @State
     public int getState() {
         return mState;
@@ -217,7 +217,7 @@ public final class CommonFoldingFeature {
     /** Returns the bounds of the feature. */
     @NonNull
     public Rect getRect() {
-        return mRect;
+        return new Rect(mRect);
     }
 
     @Override

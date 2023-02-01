@@ -63,23 +63,14 @@ public:
      * If an observer does not want present time, only notify when 'hasPresentTime' is false.
      * Never notify both types of observers from the same callback, because the callback with
      * 'hasPresentTime' is sent at a different time than the one without.
+     *
+     * The 'frameNumber' and 'surfaceControlId' associated to the frame whose's stats are being
+     * reported are used to determine whether or not the stats should be reported. We won't report
+     * stats of frames that are from "old" surfaces (i.e. with surfaceControlIds older than the one
+     * the observer was attached on) nor those that are from "old" frame numbers.
      */
-    void reportFrameMetrics(const int64_t* stats, bool hasPresentTime) {
-        FatVector<sp<FrameMetricsObserver>, 10> copy;
-        {
-            std::lock_guard lock(mObserversLock);
-            copy.reserve(mObservers.size());
-            for (size_t i = 0; i < mObservers.size(); i++) {
-                const bool wantsPresentTime = mObservers[i]->waitForPresentTime();
-                if (hasPresentTime == wantsPresentTime) {
-                    copy.push_back(mObservers[i]);
-                }
-            }
-        }
-        for (size_t i = 0; i < copy.size(); i++) {
-            copy[i]->notify(stats);
-        }
-    }
+    void reportFrameMetrics(const int64_t* stats, bool hasPresentTime, uint64_t frameNumber,
+                            int32_t surfaceControlId);
 
 private:
     FatVector<sp<FrameMetricsObserver>, 10> mObservers GUARDED_BY(mObserversLock);

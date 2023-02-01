@@ -34,7 +34,7 @@ public class UserPackage {
     private final UserInfo mUserInfo;
     private final PackageInfo mPackageInfo;
 
-    public static final int MINIMUM_SUPPORTED_SDK = Build.VERSION_CODES.S;
+    public static final int MINIMUM_SUPPORTED_SDK = Build.VERSION_CODES.TIRAMISU;
 
     public UserPackage(UserInfo user, PackageInfo packageInfo) {
         this.mUserInfo = user;

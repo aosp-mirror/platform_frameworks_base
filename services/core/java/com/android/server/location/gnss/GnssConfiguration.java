@@ -21,6 +21,7 @@ import android.os.PersistableBundle;
 import android.os.SystemProperties;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -70,8 +71,16 @@ public class GnssConfiguration {
             "USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL";
     private static final String CONFIG_GPS_LOCK = "GPS_LOCK";
     private static final String CONFIG_ES_EXTENSION_SEC = "ES_EXTENSION_SEC";
-    public static final String CONFIG_NFW_PROXY_APPS = "NFW_PROXY_APPS";
-
+    static final String CONFIG_NFW_PROXY_APPS = "NFW_PROXY_APPS";
+    private static final String CONFIG_ENABLE_PSDS_PERIODIC_DOWNLOAD =
+            "ENABLE_PSDS_PERIODIC_DOWNLOAD";
+    private static final String CONFIG_ENABLE_ACTIVE_SIM_EMERGENCY_SUPL =
+            "ENABLE_ACTIVE_SIM_EMERGENCY_SUPL";
+    static final String CONFIG_LONGTERM_PSDS_SERVER_1 = "LONGTERM_PSDS_SERVER_1";
+    static final String CONFIG_LONGTERM_PSDS_SERVER_2 = "LONGTERM_PSDS_SERVER_2";
+    static final String CONFIG_LONGTERM_PSDS_SERVER_3 = "LONGTERM_PSDS_SERVER_3";
+    static final String CONFIG_NORMAL_PSDS_SERVER = "NORMAL_PSDS_SERVER";
+    static final String CONFIG_REALTIME_PSDS_SERVER = "REALTIME_PSDS_SERVER";
     // Limit on NI emergency mode time extension after emergency sessions ends
     private static final int MAX_EMERGENCY_MODE_EXTENSION_SECONDS = 300;  // 5 minute maximum
 
@@ -194,6 +203,30 @@ public class GnssConfiguration {
     }
 
     /**
+     * Returns true if PSDS periodic download is enabled, false otherwise.
+     */
+    boolean isPsdsPeriodicDownloadEnabled() {
+        return getBooleanConfig(CONFIG_ENABLE_PSDS_PERIODIC_DOWNLOAD, false);
+    }
+
+    /**
+     * Returns true if during an emergency call, the GnssConfiguration of the activeSubId will be
+     * injected for the emergency SUPL flow; Returns false otherwise. Default false if not set.
+     */
+    boolean isActiveSimEmergencySuplEnabled() {
+        return getBooleanConfig(CONFIG_ENABLE_ACTIVE_SIM_EMERGENCY_SUPL, false);
+    }
+
+    /**
+     * Returns true if a long-term PSDS server is configured.
+     */
+    boolean isLongTermPsdsServerConfigured() {
+        return (mProperties.getProperty(CONFIG_LONGTERM_PSDS_SERVER_1) != null
+                || mProperties.getProperty(CONFIG_LONGTERM_PSDS_SERVER_2) != null
+                || mProperties.getProperty(CONFIG_LONGTERM_PSDS_SERVER_3) != null);
+    }
+
+    /**
      * Updates the GNSS HAL satellite denylist.
      */
     void setSatelliteBlocklist(int[] constellations, int[] svids) {
@@ -210,16 +243,31 @@ public class GnssConfiguration {
 
     /**
      * Loads the GNSS properties from carrier config file followed by the properties from
-     * gps debug config file.
+     * gps debug config file, and injects the GNSS properties into the HAL.
      */
     void reloadGpsProperties() {
-        if (DEBUG) Log.d(TAG, "Reset GPS properties, previous size = " + mProperties.size());
-        loadPropertiesFromCarrierConfig();
+        reloadGpsProperties(/* inEmergency= */ false, /* activeSubId= */ -1);
+    }
 
-        String lpp_prof = SystemProperties.get(LPP_PROFILE);
-        if (!TextUtils.isEmpty(lpp_prof)) {
-            // override default value of this if lpp_prof is not empty
-            mProperties.setProperty(CONFIG_LPP_PROFILE, lpp_prof);
+    /**
+     * Loads the GNSS properties from carrier config file followed by the properties from
+     * gps debug config file, and injects the GNSS properties into the HAL.
+     */
+    void reloadGpsProperties(boolean inEmergency, int activeSubId) {
+        if (DEBUG) {
+            Log.d(TAG,
+                    "Reset GPS properties, previous size = " + mProperties.size() + ", inEmergency:"
+                            + inEmergency + ", activeSubId=" + activeSubId);
+        }
+        loadPropertiesFromCarrierConfig(inEmergency, activeSubId);
+
+        if (isSimAbsent(mContext)) {
+            // Use the default SIM's LPP profile when SIM is absent.
+            String lpp_prof = SystemProperties.get(LPP_PROFILE);
+            if (!TextUtils.isEmpty(lpp_prof)) {
+                // override default value of this if lpp_prof is not empty
+                mProperties.setProperty(CONFIG_LPP_PROFILE, lpp_prof);
+            }
         }
 
         /*
@@ -238,26 +286,24 @@ public class GnssConfiguration {
                 Log.e(TAG, "Unable to set " + CONFIG_ES_EXTENSION_SEC + ": " + mEsExtensionSec);
             }
 
-            Map<String, SetCarrierProperty> map = new HashMap<String, SetCarrierProperty>() {
-                {
-                    put(CONFIG_SUPL_VER, GnssConfiguration::native_set_supl_version);
-                    put(CONFIG_SUPL_MODE, GnssConfiguration::native_set_supl_mode);
+            Map<String, SetCarrierProperty> map = new HashMap<String, SetCarrierProperty>();
 
-                    if (isConfigSuplEsSupported(gnssConfigurationIfaceVersion)) {
-                        put(CONFIG_SUPL_ES, GnssConfiguration::native_set_supl_es);
-                    }
+            map.put(CONFIG_SUPL_VER, GnssConfiguration::native_set_supl_version);
+            map.put(CONFIG_SUPL_MODE, GnssConfiguration::native_set_supl_mode);
 
-                    put(CONFIG_LPP_PROFILE, GnssConfiguration::native_set_lpp_profile);
-                    put(CONFIG_A_GLONASS_POS_PROTOCOL_SELECT,
-                            GnssConfiguration::native_set_gnss_pos_protocol_select);
-                    put(CONFIG_USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL,
-                            GnssConfiguration::native_set_emergency_supl_pdn);
+            if (isConfigSuplEsSupported(gnssConfigurationIfaceVersion)) {
+                map.put(CONFIG_SUPL_ES, GnssConfiguration::native_set_supl_es);
+            }
 
-                    if (isConfigGpsLockSupported(gnssConfigurationIfaceVersion)) {
-                        put(CONFIG_GPS_LOCK, GnssConfiguration::native_set_gps_lock);
-                    }
-                }
-            };
+            map.put(CONFIG_LPP_PROFILE, GnssConfiguration::native_set_lpp_profile);
+            map.put(CONFIG_A_GLONASS_POS_PROTOCOL_SELECT,
+                    GnssConfiguration::native_set_gnss_pos_protocol_select);
+            map.put(CONFIG_USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL,
+                    GnssConfiguration::native_set_emergency_supl_pdn);
+
+            if (isConfigGpsLockSupported(gnssConfigurationIfaceVersion)) {
+                map.put(CONFIG_GPS_LOCK, GnssConfiguration::native_set_gps_lock);
+            }
 
             for (Entry<String, SetCarrierProperty> entry : map.entrySet()) {
                 String propertyName = entry.getKey();
@@ -300,16 +346,19 @@ public class GnssConfiguration {
     /**
      * Loads GNSS properties from carrier config file.
      */
-    void loadPropertiesFromCarrierConfig() {
+    void loadPropertiesFromCarrierConfig(boolean inEmergency, int activeSubId) {
         CarrierConfigManager configManager = (CarrierConfigManager)
                 mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
         if (configManager == null) {
             return;
         }
 
-        int ddSubId = SubscriptionManager.getDefaultDataSubscriptionId();
-        PersistableBundle configs = SubscriptionManager.isValidSubscriptionId(ddSubId)
-                ? configManager.getConfigForSubId(ddSubId) : configManager.getConfig();
+        int subId = SubscriptionManager.getDefaultDataSubscriptionId();
+        if (inEmergency && activeSubId >= 0) {
+            subId = activeSubId;
+        }
+        PersistableBundle configs = SubscriptionManager.isValidSubscriptionId(subId)
+                ? configManager.getConfigForSubId(subId) : configManager.getConfig();
         if (configs == null) {
             if (DEBUG) Log.d(TAG, "SIM not ready, use default carrier config.");
             configs = CarrierConfigManager.getDefaultConfig();
@@ -374,6 +423,14 @@ public class GnssConfiguration {
         }
     }
 
+    private boolean getBooleanConfig(String configParameter, boolean defaultValue) {
+        String valueString = mProperties.getProperty(configParameter);
+        if (TextUtils.isEmpty(valueString)) {
+            return defaultValue;
+        }
+        return Boolean.parseBoolean(valueString);
+    }
+
     private static boolean isConfigEsExtensionSecSupported(
             HalInterfaceVersion gnssConfiguartionIfaceVersion) {
         // ES_EXTENSION_SEC is introduced in @2.0::IGnssConfiguration.hal
@@ -390,6 +447,12 @@ public class GnssConfiguration {
             HalInterfaceVersion gnssConfiguartionIfaceVersion) {
         // GPS_LOCK is deprecated in @2.0::IGnssConfiguration.hal
         return gnssConfiguartionIfaceVersion.mMajor < 2;
+    }
+
+    private static boolean isSimAbsent(Context context) {
+        TelephonyManager phone = (TelephonyManager) context.getSystemService(
+                Context.TELEPHONY_SERVICE);
+        return phone.getSimState() == TelephonyManager.SIM_STATE_ABSENT;
     }
 
     private static native HalInterfaceVersion native_get_gnss_configuration_version();

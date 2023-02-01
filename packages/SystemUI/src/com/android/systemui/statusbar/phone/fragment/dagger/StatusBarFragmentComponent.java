@@ -19,9 +19,15 @@ package com.android.systemui.statusbar.phone.fragment.dagger;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
+import com.android.systemui.statusbar.phone.LightsOutNotifController;
+import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
+import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
+import com.android.systemui.statusbar.phone.StatusBarDemoMode;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
+
+import java.util.Set;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -34,14 +40,14 @@ import dagger.Subcomponent;
  * controllers need access to that view, so those controllers will be re-created whenever the
  * fragment is recreated.
  *
- * Note that this is completely separate from
- * {@link com.android.systemui.statusbar.phone.dagger.StatusBarComponent}. This component gets
- * re-created on each new fragment creation, whereas
- * {@link com.android.systemui.statusbar.phone.dagger.StatusBarComponent} is only created once in
- * {@link com.android.systemui.statusbar.phone.StatusBar} and never re-created.
+ * Anything that depends on {@link CollapsedStatusBarFragment} or {@link PhoneStatusBarView}
+ * should be included here or in {@link StatusBarFragmentModule}.
  */
 
-@Subcomponent(modules = {StatusBarFragmentModule.class})
+@Subcomponent(modules = {
+        StatusBarFragmentModule.class,
+        StatusBarStartablesModule.class
+})
 @StatusBarFragmentScope
 public interface StatusBarFragmentComponent {
     /** Simple factory. */
@@ -52,14 +58,28 @@ public interface StatusBarFragmentComponent {
     }
 
     /**
+     * Performs initialization logic after {@link StatusBarFragmentComponent} has been constructed.
+     */
+    interface Startable {
+        void start();
+        void stop();
+
+        enum State {
+            NONE, STARTING, STARTED, STOPPING, STOPPED
+        }
+    }
+
+    /**
      * Initialize anything extra for the component. Must be called after the component is created.
      */
     default void init() {
-        // No one accesses this controller, so we need to make sure we reference it here so it does
-        // get initialized.
+        // No one accesses these controllers, so we need to make sure we reference them here so they
+        // do get initialized.
         getBatteryMeterViewController().init();
         getHeadsUpAppearanceController().init();
         getPhoneStatusBarViewController().init();
+        getLightsOutNotifController().init();
+        getStatusBarDemoMode().init();
     }
 
     /** */
@@ -78,4 +98,22 @@ public interface StatusBarFragmentComponent {
     /** */
     @StatusBarFragmentScope
     HeadsUpAppearanceController getHeadsUpAppearanceController();
+
+    /** */
+    @StatusBarFragmentScope
+    LightsOutNotifController getLightsOutNotifController();
+
+    /** */
+    @StatusBarFragmentScope
+    StatusBarDemoMode getStatusBarDemoMode();
+
+    /** */
+    @StatusBarFragmentScope
+    PhoneStatusBarTransitions getPhoneStatusBarTransitions();
+
+    /** */
+    Set<Startable> getStartables();
+
+    /** */
+    StatusBarBoundsProvider getBoundsProvider();
 }

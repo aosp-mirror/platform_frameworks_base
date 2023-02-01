@@ -16,12 +16,15 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.STATUS_BAR_WORK_ICON_ACCESSIBILITY;
+
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 import android.app.IActivityManager;
 import android.app.SynchronousUserSwitchObserver;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +33,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -124,7 +128,7 @@ public class PhoneStatusBarPolicy
     private final DateFormatUtil mDateFormatUtil;
     private final TelecomManager mTelecomManager;
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler;
     private final CastController mCast;
     private final HotspotController mHotspot;
     private final NextAlarmController mNextAlarmController;
@@ -132,6 +136,7 @@ public class PhoneStatusBarPolicy
     private final UserInfoController mUserInfoController;
     private final IActivityManager mIActivityManager;
     private final UserManager mUserManager;
+    private final DevicePolicyManager mDevicePolicyManager;
     private final StatusBarIconController mIconController;
     private final CommandQueue mCommandQueue;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -162,7 +167,7 @@ public class PhoneStatusBarPolicy
     @Inject
     public PhoneStatusBarPolicy(StatusBarIconController iconController,
             CommandQueue commandQueue, BroadcastDispatcher broadcastDispatcher,
-            @UiBackground Executor uiBgExecutor, @Main Resources resources,
+            @UiBackground Executor uiBgExecutor, @Main Looper looper, @Main Resources resources,
             CastController castController, HotspotController hotspotController,
             BluetoothController bluetoothController, NextAlarmController nextAlarmController,
             UserInfoController userInfoController, RotationLockController rotationLockController,
@@ -172,7 +177,7 @@ public class PhoneStatusBarPolicy
             LocationController locationController,
             SensorPrivacyController sensorPrivacyController, IActivityManager iActivityManager,
             AlarmManager alarmManager, UserManager userManager,
-            RecordingController recordingController,
+            DevicePolicyManager devicePolicyManager, RecordingController recordingController,
             @Nullable TelecomManager telecomManager, @DisplayId int displayId,
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
             RingerModeTracker ringerModeTracker,
@@ -181,6 +186,7 @@ public class PhoneStatusBarPolicy
         mIconController = iconController;
         mCommandQueue = commandQueue;
         mBroadcastDispatcher = broadcastDispatcher;
+        mHandler = new Handler(looper);
         mResources = resources;
         mCast = castController;
         mHotspot = hotspotController;
@@ -190,6 +196,7 @@ public class PhoneStatusBarPolicy
         mUserInfoController = userInfoController;
         mIActivityManager = iActivityManager;
         mUserManager = userManager;
+        mDevicePolicyManager = devicePolicyManager;
         mRotationLockController = rotationLockController;
         mDataSaver = dataSaverController;
         mZenController = zenModeController;
@@ -287,9 +294,7 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotHotspot, mHotspot.isHotspotEnabled());
 
         // managed profile
-        mIconController.setIcon(mSlotManagedProfile, R.drawable.stat_sys_managed_profile_status,
-                mResources.getString(R.string.accessibility_managed_profile));
-        mIconController.setIconVisibility(mSlotManagedProfile, mManagedProfileIconVisible);
+        updateManagedProfile();
 
         // data saver
         mIconController.setIcon(mSlotDataSaver, R.drawable.stat_sys_data_saver,
@@ -329,6 +334,7 @@ public class PhoneStatusBarPolicy
         mRotationLockController.addCallback(this);
         mBluetooth.addCallback(this);
         mProvisionedController.addCallback(this);
+        mCurrentUserSetup = mProvisionedController.isCurrentUserSetup();
         mZenController.addCallback(this);
         mCast.addCallback(mCastCallback);
         mHotspot.addCallback(mHotspotCallback);
@@ -341,6 +347,12 @@ public class PhoneStatusBarPolicy
         mRecordingController.addCallback(this);
 
         mCommandQueue.addCallback(this);
+    }
+
+    private String getManagedProfileAccessibilityString() {
+        return mDevicePolicyManager.getResources().getString(
+                STATUS_BAR_WORK_ICON_ACCESSIBILITY,
+                () -> mResources.getString(R.string.accessibility_managed_profile));
     }
 
     @Override
@@ -510,7 +522,7 @@ public class PhoneStatusBarPolicy
     }
 
     private void updateManagedProfile() {
-        // getLastResumedActivityUserId needds to acquire the AM lock, which may be contended in
+        // getLastResumedActivityUserId needs to acquire the AM lock, which may be contended in
         // some cases. Since it doesn't really matter here whether it's updated in this frame
         // or in the next one, we call this method from our UI offload thread.
         mUiBgExecutor.execute(() -> {
@@ -518,6 +530,7 @@ public class PhoneStatusBarPolicy
             try {
                 userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
                 boolean isManagedProfile = mUserManager.isManagedProfile(userId);
+                String accessibilityString = getManagedProfileAccessibilityString();
                 mHandler.post(() -> {
                     final boolean showIcon;
                     if (isManagedProfile && (!mKeyguardStateController.isShowing()
@@ -525,7 +538,7 @@ public class PhoneStatusBarPolicy
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
                                 R.drawable.stat_sys_managed_profile_status,
-                                mResources.getString(R.string.accessibility_managed_profile));
+                                accessibilityString);
                     } else {
                         showIcon = false;
                     }
@@ -552,6 +565,7 @@ public class PhoneStatusBarPolicy
                     mHandler.post(() -> {
                         updateAlarm();
                         updateManagedProfile();
+                        onUserSetupChanged();
                     });
                 }
             };
@@ -661,7 +675,7 @@ public class PhoneStatusBarPolicy
             if (item == null /* b/124234367 */) {
                 Log.e(TAG, "updatePrivacyItems - null item found");
                 StringWriter out = new StringWriter();
-                mPrivacyItemController.dump(null, new PrintWriter(out), null);
+                mPrivacyItemController.dump(new PrintWriter(out), null);
                 // Throw so we can look into this
                 throw new NullPointerException(out.toString());
             }

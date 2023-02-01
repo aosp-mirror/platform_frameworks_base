@@ -17,6 +17,7 @@
 package com.android.settingslib.users;
 
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.nullable;
@@ -133,12 +134,12 @@ public class AppRestrictionsHelperTest extends BaseTest {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HIDDEN;
         info.flags |= ApplicationInfo.FLAG_INSTALLED;
-        when(mIpm.getApplicationInfo(eq("app2"), anyInt(), eq(testUserId)))
+        when(mIpm.getApplicationInfo(eq("app2"), anyLong(), eq(testUserId)))
                 .thenReturn(info);
 
         mHelper.setPackageSelected("app3", false);
         info = new ApplicationInfo();
-        when(mIpm.getApplicationInfo(eq("app3"), anyInt(), eq(testUserId)))
+        when(mIpm.getApplicationInfo(eq("app3"), anyLong(), eq(testUserId)))
                 .thenReturn(info);
 
         AppRestrictionsHelper.OnDisableUiForPackageListener mockListener =

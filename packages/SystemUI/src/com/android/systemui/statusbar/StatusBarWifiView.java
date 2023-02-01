@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.plugins.DarkIconDispatcher.getTint;
-import static com.android.systemui.plugins.DarkIconDispatcher.isInArea;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_DOT;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN;
 import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
@@ -29,7 +28,6 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -37,11 +35,12 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
+import java.util.ArrayList;
+
 /**
  * Start small: StatusBarWifiView will be able to layout from a WifiIconState
  */
-public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
-        StatusIconDisplayable {
+public class StatusBarWifiView extends BaseStatusBarWifiView implements DarkReceiver {
     private static final String TAG = "StatusBarWifiView";
 
     /// Used to show etc dots
@@ -56,7 +55,8 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
     private View mAirplaneSpacer;
     private WifiIconState mState;
     private String mSlot;
-    private int mVisibleState = -1;
+    @StatusBarIconView.VisibleState
+    private int mVisibleState = STATE_HIDDEN;
 
     public static StatusBarWifiView fromContext(Context context, String slot) {
         LayoutInflater inflater = LayoutInflater.from(context);
@@ -77,11 +77,6 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
 
     public StatusBarWifiView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
-
-    public StatusBarWifiView(Context context, AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     public void setSlot(String slot) {
@@ -113,7 +108,7 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
     }
 
     @Override
-    public void setVisibleState(int state, boolean animate) {
+    public void setVisibleState(@StatusBarIconView.VisibleState int state, boolean animate) {
         if (state == mVisibleState) {
             return;
         }
@@ -137,6 +132,7 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
     }
 
     @Override
+    @StatusBarIconView.VisibleState
     public int getVisibleState() {
         return mVisibleState;
     }
@@ -235,8 +231,8 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        int areaTint = getTint(area, this, tint);
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        int areaTint = getTint(areas, this, tint);
         ColorStateList color = ColorStateList.valueOf(areaTint);
         mWifiIcon.setImageTintList(color);
         mIn.setImageTintList(color);

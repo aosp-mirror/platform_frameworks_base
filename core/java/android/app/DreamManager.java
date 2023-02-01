@@ -16,7 +16,9 @@
 
 package android.app;
 
-import android.annotation.NonNull;
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
+
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -25,6 +27,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 
@@ -47,16 +51,76 @@ public class DreamManager {
     }
 
     /**
-     * Starts dream service with name "name".
+     * Returns whether Settings.Secure.SCREENSAVER_ENABLED is enabled.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isScreensaverEnabled() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    /**
+     * Sets whether Settings.Secure.SCREENSAVER_ENABLED is enabled.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(WRITE_SECURE_SETTINGS)
+    public void setScreensaverEnabled(boolean enabled) {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, enabled ? 1 : 0, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Returns whether dreams are supported.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean areDreamsSupported() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_dreamsSupported);
+    }
+
+    /**
+     * Starts dreaming.
+     *
+     * This API is equivalent to {@link DreamManager#startDream()} but with a nullable component
+     * name to be compatible with TM CTS tests.
      *
      * <p>This is only used for testing the dream service APIs.
+     *
+     * @see DreamManager#startDream()
      *
      * @hide
      */
     @TestApi
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
-    public void startDream(@NonNull ComponentName name) {
+    public void startDream(@Nullable ComponentName name) {
+        startDream();
+    }
+
+    /**
+     * Starts dreaming.
+     *
+     * The system dream component, if set by {@link DreamManager#setSystemDreamComponent}, will be
+     * started.
+     * Otherwise, starts the active dream set by {@link DreamManager#setActiveDream}.
+     *
+     * <p>This is only used for testing the dream service APIs.
+     *
+     * @see DreamManager#setActiveDream(ComponentName)
+     * @see DreamManager#setSystemDreamComponent(ComponentName)
+     *
+     * @hide
+     */
+    @TestApi
+    @UserHandleAware
+    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    public void startDream() {
         try {
             mService.dream();
         } catch (RemoteException e) {
@@ -91,10 +155,49 @@ public class DreamManager {
     @TestApi
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
-    public void setActiveDream(@NonNull ComponentName dreamComponent) {
+    public void setActiveDream(@Nullable ComponentName dreamComponent) {
         ComponentName[] dreams = {dreamComponent};
+
         try {
-            mService.setDreamComponentsForUser(mContext.getUserId(), dreams);
+            mService.setDreamComponentsForUser(mContext.getUserId(),
+                    dreamComponent != null ? dreams : null);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets or clears the system dream component.
+     *
+     * The system dream component, when set, will be shown instead of the user configured dream
+     * when the system starts dreaming (not dozing). If the system is dreaming at the time the
+     * system dream is set or cleared, it immediately switches dream.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    public void setSystemDreamComponent(@Nullable ComponentName dreamComponent) {
+        try {
+            mService.setSystemDreamComponent(dreamComponent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the active dream on the device to be "dreamComponent".
+     *
+     * <p>This is only used for testing the dream service APIs.
+     *
+     * @hide
+     */
+    @TestApi
+    @UserHandleAware
+    @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE)
+    public void setDreamOverlay(@Nullable ComponentName dreamOverlayComponent) {
+        try {
+            mService.registerDreamOverlayService(dreamOverlayComponent);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

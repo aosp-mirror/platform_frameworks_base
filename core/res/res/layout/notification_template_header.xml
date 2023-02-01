@@ -49,6 +49,8 @@
         android:layout_marginStart="@dimen/notification_icon_circle_start"
         android:background="@drawable/notification_icon_circle"
         android:padding="@dimen/notification_icon_circle_padding"
+        android:maxDrawableWidth="@dimen/notification_icon_circle_size"
+        android:maxDrawableHeight="@dimen/notification_icon_circle_size"
         />
 
     <!-- extends ViewGroup -->

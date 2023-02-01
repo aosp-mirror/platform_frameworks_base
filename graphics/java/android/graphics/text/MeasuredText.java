@@ -17,18 +17,24 @@
 package android.graphics.text;
 
 import android.annotation.FloatRange;
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
 
 import libcore.util.NativeAllocationRegistry;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Result of text shaping of the single paragraph string.
@@ -49,18 +55,24 @@ import libcore.util.NativeAllocationRegistry;
  * </p>
  */
 public class MeasuredText {
-    private long mNativePtr;
-    private boolean mComputeHyphenation;
-    private boolean mComputeLayout;
-    private @NonNull char[] mChars;
+    private static final String TAG = "MeasuredText";
+
+    private final long mNativePtr;
+    private final boolean mComputeHyphenation;
+    private final boolean mComputeLayout;
+    @NonNull private final char[] mChars;
+    private final int mTop;
+    private final int mBottom;
 
     // Use builder instead.
     private MeasuredText(long ptr, @NonNull char[] chars, boolean computeHyphenation,
-            boolean computeLayout) {
+            boolean computeLayout, int top, int bottom) {
         mNativePtr = ptr;
         mChars = chars;
         mComputeHyphenation = computeHyphenation;
         mComputeLayout = computeLayout;
+        mTop = top;
+        mBottom = bottom;
     }
 
     /**
@@ -117,6 +129,30 @@ public class MeasuredText {
     }
 
     /**
+     * Retrieves the font metrics of the given range
+     *
+     * @param start an inclusive start index of the range
+     * @param end an exclusive end index of the range
+     * @param outMetrics an output metrics object
+     */
+    public void getFontMetricsInt(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
+            @NonNull Paint.FontMetricsInt outMetrics) {
+        Preconditions.checkArgument(0 <= start && start <= mChars.length,
+                "start(%d) must be 0 <= start <= %d", start, mChars.length);
+        Preconditions.checkArgument(0 <= end && end <= mChars.length,
+                "end(%d) must be 0 <= end <= %d", end, mChars.length);
+        Preconditions.checkArgument(start <= end,
+                "start(%d) is larger than end(%d)", start, end);
+        Objects.requireNonNull(outMetrics);
+
+        long packed = nGetExtent(mNativePtr, mChars, start, end);
+        outMetrics.ascent = (int) (packed >> 32);
+        outMetrics.descent = (int) (packed & 0xFFFFFFFF);
+        outMetrics.top = Math.min(outMetrics.ascent, mTop);
+        outMetrics.bottom = Math.max(outMetrics.descent, mBottom);
+    }
+
+    /**
      * Returns the width of the character at the given offset.
      *
      * @param offset an offset of the character.
@@ -153,6 +189,8 @@ public class MeasuredText {
     @CriticalNative
     private static native float nGetCharWidthAt(long nativePtr, int offset);
 
+    private static native long nGetExtent(long nativePtr, char[] buf, int start, int end);
+
     /**
      * Helper class for creating a {@link MeasuredText}.
      * <p>
@@ -179,8 +217,12 @@ public class MeasuredText {
         private final @NonNull char[] mText;
         private boolean mComputeHyphenation = false;
         private boolean mComputeLayout = true;
+        private boolean mFastHyphenation = false;
         private int mCurrentOffset = 0;
         private @Nullable MeasuredText mHintMt = null;
+        private int mTop = 0;
+        private int mBottom = 0;
+        private Paint.FontMetricsInt mCachedMetrics = new Paint.FontMetricsInt();
 
         /**
          * Construct a builder.
@@ -231,12 +273,40 @@ public class MeasuredText {
          */
         public @NonNull Builder appendStyleRun(@NonNull Paint paint, @IntRange(from = 0) int length,
                 boolean isRtl) {
+            return appendStyleRun(paint, null, length, isRtl);
+        }
+
+        /**
+         * Apply styles to the given length.
+         *
+         * Keeps an internal offset which increases at every append. The initial value for this
+         * offset is zero. After the style is applied the internal offset is moved to {@code offset
+         * + length}, and next call will start from this new position.
+         *
+         * @param paint a paint
+         * @param lineBreakConfig a line break configuration.
+         * @param length a length to be applied with a given paint, can not exceed the length of the
+         *               text
+         * @param isRtl true if the text is in RTL context, otherwise false.
+         */
+        public @NonNull Builder appendStyleRun(@NonNull Paint paint,
+                @Nullable LineBreakConfig lineBreakConfig, @IntRange(from = 0) int length,
+                boolean isRtl) {
             Preconditions.checkNotNull(paint);
             Preconditions.checkArgument(length > 0, "length can not be negative");
             final int end = mCurrentOffset + length;
             Preconditions.checkArgument(end <= mText.length, "Style exceeds the text length");
-            nAddStyleRun(mNativePtr, paint.getNativeInstance(), mCurrentOffset, end, isRtl);
+            int lbStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakStyle() :
+                    LineBreakConfig.LINE_BREAK_STYLE_NONE;
+            int lbWordStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakWordStyle() :
+                    LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
+            nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, lbWordStyle,
+                    mCurrentOffset, end, isRtl);
             mCurrentOffset = end;
+
+            paint.getFontMetricsInt(mCachedMetrics);
+            mTop = Math.min(mTop, mCachedMetrics.top);
+            mBottom = Math.max(mBottom, mCachedMetrics.bottom);
             return this;
         }
 
@@ -275,10 +345,76 @@ public class MeasuredText {
          * Even if you pass false to this method, you can still enable automatic hyphenation of
          * LineBreaker but line break computation becomes slower.
          *
+         * @deprecated use setComputeHyphenation(int) instead.
+         *
          * @param computeHyphenation true if you want to use automatic hyphenations.
          */
-        public @NonNull Builder setComputeHyphenation(boolean computeHyphenation) {
-            mComputeHyphenation = computeHyphenation;
+        public @NonNull @Deprecated Builder setComputeHyphenation(boolean computeHyphenation) {
+            setComputeHyphenation(
+                    computeHyphenation ? HYPHENATION_MODE_NORMAL : HYPHENATION_MODE_NONE);
+            return this;
+        }
+
+        /** @hide */
+        @IntDef(prefix = { "HYPHENATION_MODE_" }, value = {
+                HYPHENATION_MODE_NONE,
+                HYPHENATION_MODE_NORMAL,
+                HYPHENATION_MODE_FAST
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface HyphenationMode {}
+
+        /**
+         *　A value for hyphenation calculation mode.
+         *
+         * This value indicates that no hyphenation points are calculated.
+         */
+        public static final int HYPHENATION_MODE_NONE = 0;
+
+        /**
+         *　A value for hyphenation calculation mode.
+         *
+         * This value indicates that hyphenation points are calculated.
+         */
+        public static final int HYPHENATION_MODE_NORMAL = 1;
+
+        /**
+         *　A value for hyphenation calculation mode.
+         *
+         * This value indicates that hyphenation points are calculated with faster algorithm. This
+         * algorithm measures text width with ignoring the context of hyphen character shaping, e.g.
+         * kerning.
+         */
+        public static final int HYPHENATION_MODE_FAST = 2;
+
+        /**
+         * By passing true to this method, the build method will calculate hyphenation break
+         * points faster with ignoring some typographic features, e.g. kerning.
+         *
+         * {@link #HYPHENATION_MODE_NONE} is by default.
+         *
+         * @param mode a hyphenation mode.
+         */
+        public @NonNull Builder setComputeHyphenation(@HyphenationMode int mode) {
+            switch (mode) {
+                case HYPHENATION_MODE_NONE:
+                    mComputeHyphenation = false;
+                    mFastHyphenation = false;
+                    break;
+                case HYPHENATION_MODE_NORMAL:
+                    mComputeHyphenation = true;
+                    mFastHyphenation = false;
+                    break;
+                case HYPHENATION_MODE_FAST:
+                    mComputeHyphenation = true;
+                    mFastHyphenation = true;
+                    break;
+                default:
+                    Log.e(TAG, "Unknown hyphenation mode: " + mode);
+                    mComputeHyphenation = false;
+                    mFastHyphenation = false;
+                    break;
+            }
             return this;
         }
 
@@ -319,9 +455,9 @@ public class MeasuredText {
             try {
                 long hintPtr = (mHintMt == null) ? 0 : mHintMt.getNativePtr();
                 long ptr = nBuildMeasuredText(mNativePtr, hintPtr, mText, mComputeHyphenation,
-                        mComputeLayout);
+                        mComputeLayout, mFastHyphenation);
                 final MeasuredText res = new MeasuredText(ptr, mText, mComputeHyphenation,
-                        mComputeLayout);
+                        mComputeLayout, mTop, mBottom);
                 sRegistry.registerNativeAllocation(res, ptr);
                 return res;
             } finally {
@@ -349,12 +485,16 @@ public class MeasuredText {
          *
          * @param nativeBuilderPtr The native MeasuredParagraph builder pointer.
          * @param paintPtr The native paint pointer to be applied.
+         * @param lineBreakStyle The line break style(lb) of the text.
+         * @param lineBreakWordStyle The line break word style(lw) of the text.
          * @param start The start offset in the copied buffer.
          * @param end The end offset in the copied buffer.
          * @param isRtl True if the text is RTL.
          */
         private static native void nAddStyleRun(/* Non Zero */ long nativeBuilderPtr,
                                                 /* Non Zero */ long paintPtr,
+                                                int lineBreakStyle,
+                                                int lineBreakWordStyle,
                                                 @IntRange(from = 0) int start,
                                                 @IntRange(from = 0) int end,
                                                 boolean isRtl);
@@ -378,7 +518,8 @@ public class MeasuredText {
                 long hintMtPtr,
                 @NonNull char[] text,
                 boolean computeHyphenation,
-                boolean computeLayout);
+                boolean computeLayout,
+                boolean fastHyphenationMode);
 
         private static native void nFreeBuilder(/* Non Zero */ long nativeBuilderPtr);
     }

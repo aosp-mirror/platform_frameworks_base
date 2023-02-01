@@ -16,8 +16,6 @@
 
 package com.android.systemui.keyguard;
 
-import static android.app.ActivityManager.TaskDescription;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
@@ -25,14 +23,15 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.ColorInt;
 import android.annotation.UserIdInt;
-import android.app.KeyguardManager;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Looper;
+import android.os.UserHandle;
+import android.os.UserManager;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -53,18 +52,21 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class WorkLockActivityTest extends SysuiTestCase {
     private static final @UserIdInt int USER_ID = 270;
-    private static final String TASK_LABEL = "task label";
+    private static final String CALLING_PACKAGE_NAME = "com.android.test";
 
-    private @Mock DevicePolicyManager mDevicePolicyManager;
-    private @Mock KeyguardManager mKeyguardManager;
+    private @Mock UserManager mUserManager;
+    private @Mock PackageManager mPackageManager;
     private @Mock Context mContext;
     private @Mock BroadcastDispatcher mBroadcastDispatcher;
+    private @Mock Drawable mDrawable;
+    private @Mock Drawable mBadgedDrawable;
 
     private WorkLockActivity mActivity;
 
     private static class WorkLockActivityTestable extends WorkLockActivity {
-        WorkLockActivityTestable(Context baseContext, BroadcastDispatcher broadcastDispatcher) {
-            super(broadcastDispatcher);
+        WorkLockActivityTestable(Context baseContext, BroadcastDispatcher broadcastDispatcher,
+                UserManager userManager, PackageManager packageManager) {
+            super(broadcastDispatcher, userManager, packageManager);
             attachBaseContext(baseContext);
         }
     }
@@ -73,46 +75,26 @@ public class WorkLockActivityTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(mContext.getSystemService(eq(Context.DEVICE_POLICY_SERVICE)))
-                .thenReturn(mDevicePolicyManager);
-        when(mContext.getSystemService(eq(Context.KEYGUARD_SERVICE)))
-                .thenReturn(mKeyguardManager);
-
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-        mActivity = new WorkLockActivityTestable(mContext, mBroadcastDispatcher);
+        mActivity = new WorkLockActivityTestable(mContext, mBroadcastDispatcher, mUserManager,
+                mPackageManager);
     }
 
     @Test
-    public void testBackgroundAlwaysOpaque() throws Exception {
-        final @ColorInt int orgColor = Color.rgb(250, 199, 67);
-        when(mDevicePolicyManager.getOrganizationColorForUser(eq(USER_ID))).thenReturn(orgColor);
-
-        final @ColorInt int opaqueColor= Color.rgb(164, 198, 57);
-        final @ColorInt int transparentColor = Color.argb(0, 0, 0, 0);
-        TaskDescription opaque = new TaskDescription(null, null, opaqueColor);
-        TaskDescription transparent = new TaskDescription(null, null, transparentColor);
-
-        // When a task description is provided with a suitable (opaque) primaryColor, it should be
-        // used as the scrim's background color.
+    public void testGetBadgedIcon() throws Exception {
+        ApplicationInfo info = new ApplicationInfo();
+        when(mPackageManager.getApplicationInfoAsUser(eq(CALLING_PACKAGE_NAME), any(),
+                eq(USER_ID))).thenReturn(info);
+        when(mPackageManager.getApplicationIcon(eq(info))).thenReturn(mDrawable);
+        when(mUserManager.getBadgedIconForUser(any(), eq(UserHandle.of(USER_ID)))).thenReturn(
+                mBadgedDrawable);
         mActivity.setIntent(new Intent()
                 .putExtra(Intent.EXTRA_USER_ID, USER_ID)
-                .putExtra(WorkLockActivity.EXTRA_TASK_DESCRIPTION, opaque));
-        assertEquals(opaqueColor, mActivity.getPrimaryColor());
+                .putExtra(Intent.EXTRA_PACKAGE_NAME, CALLING_PACKAGE_NAME));
 
-        // When a task description is provided but has no primaryColor / the primaryColor is
-        // transparent, the organization color should be used instead.
-        mActivity.setIntent(new Intent()
-                .putExtra(Intent.EXTRA_USER_ID, USER_ID)
-                .putExtra(WorkLockActivity.EXTRA_TASK_DESCRIPTION, transparent));
-        assertEquals(orgColor, mActivity.getPrimaryColor());
-
-        // When no task description is provided at all, it should be treated like a transparent
-        // description and the organization color shown instead.
-        mActivity.setIntent(new Intent()
-                .putExtra(Intent.EXTRA_USER_ID, USER_ID));
-        assertEquals(orgColor, mActivity.getPrimaryColor());
+        assertEquals(mBadgedDrawable, mActivity.getBadgedIcon());
     }
 
     @Test

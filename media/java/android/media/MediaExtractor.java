@@ -36,7 +36,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -250,15 +249,17 @@ public final class MediaExtractor {
             @NonNull FileDescriptor fd, long offset, long length) throws IOException;
 
     /**
-     * Sets the MediaCas instance to use. This should be called after a
-     * successful setDataSource() if at least one track reports mime type
-     * of {@link android.media.MediaFormat#MIMETYPE_AUDIO_SCRAMBLED}
-     * or {@link android.media.MediaFormat#MIMETYPE_VIDEO_SCRAMBLED}.
-     * Stream parsing will not proceed until a valid MediaCas object
-     * is provided.
+     * Sets the MediaCas instance to use. This should be called after a successful setDataSource()
+     * if at least one track reports mime type of
+     * {@link android.media.MediaFormat#MIMETYPE_AUDIO_SCRAMBLED} or
+     * {@link android.media.MediaFormat#MIMETYPE_VIDEO_SCRAMBLED}. Stream parsing will not proceed
+     * until a valid MediaCas object is provided.
      *
      * @param mediaCas the MediaCas object to use.
+     * @deprecated Use the {@code Descrambler} system API instead, or DRM public APIs like
+     *             {@link MediaDrm}.
      */
+    @Deprecated
     public final void setMediaCas(@NonNull MediaCas mediaCas) {
         mMediaCas = mediaCas;
         nativeSetMediaCas(mediaCas.getBinder());
@@ -323,14 +324,6 @@ public final class MediaExtractor {
         }
     }
 
-    private ArrayList<Byte> toByteArray(@NonNull byte[] data) {
-        ArrayList<Byte> byteArray = new ArrayList<Byte>(data.length);
-        for (int i = 0; i < data.length; i++) {
-            byteArray.add(i, Byte.valueOf(data[i]));
-        }
-        return byteArray;
-    }
-
     /**
      * Retrieves the information about the conditional access system used to scramble
      * a track.
@@ -355,7 +348,7 @@ public final class MediaExtractor {
                 buf.rewind();
                 final byte[] sessionId = new byte[buf.remaining()];
                 buf.get(sessionId);
-                session = mMediaCas.createFromSessionId(toByteArray(sessionId));
+                session = mMediaCas.createFromSessionId(sessionId);
             }
             return new CasInfo(systemId, session, privateData);
         }

@@ -34,12 +34,13 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.AnimatableClockController;
-import com.android.keyguard.AnimatableClockView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.clocks.AnimatableClockView;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import org.junit.After;
@@ -52,6 +53,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
+
+import java.util.concurrent.Executor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -69,6 +72,12 @@ public class AnimatableClockControllerTest extends SysuiTestCase {
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
     private Resources mResources;
+    @Mock
+    private Executor mMainExecutor;
+    @Mock
+    private Executor mBgExecutor;
+    @Mock
+    private FeatureFlags mFeatureFlags;
 
     private MockitoSession mStaticMockSession;
     private AnimatableClockController mAnimatableClockController;
@@ -96,7 +105,10 @@ public class AnimatableClockControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher,
                 mBatteryController,
                 mKeyguardUpdateMonitor,
-                mResources
+                mResources,
+                mMainExecutor,
+                mBgExecutor,
+                mFeatureFlags
         );
         mAnimatableClockController.init();
         captureAttachListener();

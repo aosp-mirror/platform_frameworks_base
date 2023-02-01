@@ -25,7 +25,7 @@ enum FrequencyBand {
     AM_LW,
     AM_MW,
     AM_SW,
-};
+}
 
 class Utils {
     private static final String TAG = "BcRadio2Srv.utils";

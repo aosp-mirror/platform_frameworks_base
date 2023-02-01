@@ -68,9 +68,6 @@ public abstract class DisplayHashingService extends Service {
     private DisplayHashingServiceWrapper mWrapper;
     private Handler mHandler;
 
-    public DisplayHashingService() {
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();

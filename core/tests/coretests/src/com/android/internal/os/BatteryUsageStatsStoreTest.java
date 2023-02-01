@@ -44,10 +44,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
+@SuppressWarnings("GuardedBy")
 public class BatteryUsageStatsStoreTest {
     private static final long MAX_BATTERY_STATS_SNAPSHOT_STORAGE_BYTES = 2 * 1024;
 
-    private final MockClocks mMockClocks = new MockClocks();
+    private final MockClock mMockClock = new MockClock();
     private MockBatteryStatsImpl mBatteryStats;
     private BatteryUsageStatsStore mBatteryUsageStatsStore;
     private BatteryUsageStatsProvider mBatteryUsageStatsProvider;
@@ -55,8 +56,8 @@ public class BatteryUsageStatsStoreTest {
 
     @Before
     public void setup() {
-        mMockClocks.currentTime = 123;
-        mBatteryStats = new MockBatteryStatsImpl(mMockClocks);
+        mMockClock.currentTime = 123;
+        mBatteryStats = new MockBatteryStatsImpl(mMockClock);
         mBatteryStats.setNoAutoReset(true);
         mBatteryStats.setPowerProfile(mock(PowerProfile.class));
         mBatteryStats.onSystemReady();
@@ -75,9 +76,14 @@ public class BatteryUsageStatsStoreTest {
 
     @Test
     public void testStoreSnapshot() {
-        mMockClocks.currentTime = 1_600_000;
+        mMockClock.currentTime = 1_600_000;
+        mMockClock.realtime = 1000;
+        mMockClock.uptime = 1000;
 
         prepareBatteryStats();
+
+        mMockClock.realtime = 1_000_000;
+        mMockClock.uptime = 1_000_000;
         mBatteryStats.resetAllStatsCmdLocked();
 
         final long[] timestamps = mBatteryUsageStatsStore.listBatteryUsageStatsTimestamps();
@@ -90,6 +96,7 @@ public class BatteryUsageStatsStoreTest {
         assertThat(batteryUsageStats.getStatsEndTimestamp()).isEqualTo(1_600_000);
         assertThat(batteryUsageStats.getBatteryCapacity()).isEqualTo(4000);
         assertThat(batteryUsageStats.getDischargePercentage()).isEqualTo(5);
+        assertThat(batteryUsageStats.getDischargeDurationMs()).isEqualTo(1_000_000 - 1_000);
         assertThat(batteryUsageStats.getAggregateBatteryConsumer(
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE).getConsumedPower())
                 .isEqualTo(600);  // (3_600_000 - 3_000_000) / 1000
@@ -99,9 +106,9 @@ public class BatteryUsageStatsStoreTest {
     public void testGarbageCollectOldSnapshots() throws Exception {
         prepareBatteryStats();
 
-        mMockClocks.realtime = 10_000_000;
-        mMockClocks.uptime = 10_000_000;
-        mMockClocks.currentTime = 10_000_000;
+        mMockClock.realtime = 10_000_000;
+        mMockClock.uptime = 10_000_000;
+        mMockClock.currentTime = 10_000_000;
 
         final int snapshotFileSize = getSnapshotFileSize();
         final int numberOfSnapshots =
@@ -109,9 +116,9 @@ public class BatteryUsageStatsStoreTest {
         for (int i = 0; i < numberOfSnapshots + 2; i++) {
             mBatteryStats.resetAllStatsCmdLocked();
 
-            mMockClocks.realtime += 10_000_000;
-            mMockClocks.uptime += 10_000_000;
-            mMockClocks.currentTime += 10_000_000;
+            mMockClock.realtime += 10_000_000;
+            mMockClock.uptime += 10_000_000;
+            mMockClock.currentTime += 10_000_000;
             prepareBatteryStats();
         }
 
@@ -122,6 +129,26 @@ public class BatteryUsageStatsStoreTest {
         assertThat(timestamps[0]).isEqualTo(30_000_000);
         assertThat(getDirectorySize(mStoreDirectory))
                 .isAtMost(MAX_BATTERY_STATS_SNAPSHOT_STORAGE_BYTES);
+    }
+
+    @Test
+    public void testRemoveAllSnapshots() throws Exception {
+        prepareBatteryStats();
+
+        for (int i = 0; i < 3; i++) {
+            mMockClock.realtime += 10_000_000;
+            mMockClock.uptime += 10_000_000;
+            mMockClock.currentTime += 10_000_000;
+            prepareBatteryStats();
+
+            mBatteryStats.resetAllStatsCmdLocked();
+        }
+
+        assertThat(getDirectorySize(mStoreDirectory)).isNotEqualTo(0);
+
+        mBatteryUsageStatsStore.removeAllSnapshots();
+
+        assertThat(getDirectorySize(mStoreDirectory)).isEqualTo(0);
     }
 
     @Test
@@ -137,11 +164,11 @@ public class BatteryUsageStatsStoreTest {
     private void prepareBatteryStats() {
         mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
                 /* plugType */ 0, 90, 72, 3700, 3_600_000, 4_000_000, 0,
-                mMockClocks.realtime, mMockClocks.uptime, mMockClocks.currentTime);
+                mMockClock.realtime, mMockClock.uptime, mMockClock.currentTime);
         mBatteryStats.setBatteryStateLocked(BatteryManager.BATTERY_STATUS_DISCHARGING, 100,
                 /* plugType */ 0, 85, 72, 3700, 3_000_000, 4_000_000, 0,
-                mMockClocks.realtime + 500_000, mMockClocks.uptime + 500_000,
-                mMockClocks.currentTime + 500_000);
+                mMockClock.realtime + 500_000, mMockClock.uptime + 500_000,
+                mMockClock.currentTime + 500_000);
     }
 
     private void clearDirectory(File dir) {

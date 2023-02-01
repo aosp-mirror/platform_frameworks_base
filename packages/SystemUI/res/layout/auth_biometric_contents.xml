@@ -21,6 +21,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="@integer/biometric_dialog_text_gravity"
+        android:singleLine="true"
+        android:marqueeRepeatLimit="1"
+        android:ellipsize="marquee"
         style="@style/TextAppearance.AuthCredential.Title"/>
 
     <TextView
@@ -28,13 +31,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="@integer/biometric_dialog_text_gravity"
+        android:singleLine="true"
+        android:marqueeRepeatLimit="1"
+        android:ellipsize="marquee"
         style="@style/TextAppearance.AuthCredential.Subtitle"/>
 
     <TextView
         android:id="@+id/description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="@integer/biometric_dialog_text_gravity"
+        android:scrollbars ="vertical"
         style="@style/TextAppearance.AuthCredential.Description"/>
 
     <Space android:id="@+id/space_above_icon"
@@ -43,18 +49,25 @@
 
     <FrameLayout
         android:id="@+id/biometric_icon_frame"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
+        android:layout_gravity="center">
 
-        <ImageView
+        <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/biometric_icon"
-            android:layout_width="@dimen/biometric_dialog_biometric_icon_size"
-            android:layout_height="@dimen/biometric_dialog_biometric_icon_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:contentDescription="@null"
             android:scaleType="fitXY" />
 
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/biometric_icon_overlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:scaleType="fitXY" />
     </FrameLayout>
 
     <!-- For sensors such as UDFPS, this view is used during custom measurement/layout to add extra

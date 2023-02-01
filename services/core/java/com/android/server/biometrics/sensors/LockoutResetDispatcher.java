@@ -25,7 +25,11 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Allows clients (such as keyguard) to register for notifications on when biometric lockout
@@ -37,7 +41,8 @@ public class LockoutResetDispatcher implements IBinder.DeathRecipient {
     private static final String TAG = "LockoutResetTracker";
 
     private final Context mContext;
-    private final ArrayList<ClientCallback> mClientCallbacks;
+    @VisibleForTesting
+    final List<ClientCallback> mClientCallbacks = new ArrayList<>();
 
     private static class ClientCallback {
         private static final long WAKELOCK_TIMEOUT_MS = 2000;
@@ -81,7 +86,6 @@ public class LockoutResetDispatcher implements IBinder.DeathRecipient {
 
     public LockoutResetDispatcher(Context context) {
         mContext = context;
-        mClientCallbacks = new ArrayList<>();
     }
 
     public void addCallback(IBiometricServiceLockoutResetCallback callback, String opPackageName) {
@@ -106,11 +110,13 @@ public class LockoutResetDispatcher implements IBinder.DeathRecipient {
     @Override
     public void binderDied(IBinder who) {
         Slog.e(TAG, "Callback binder died: " + who);
-        for (ClientCallback callback : mClientCallbacks) {
+        final Iterator<ClientCallback> iterator = mClientCallbacks.iterator();
+        while (iterator.hasNext()) {
+            final ClientCallback callback = iterator.next();
             if (callback.mCallback.asBinder().equals(who)) {
                 Slog.e(TAG, "Removing dead callback for: " + callback.mOpPackageName);
                 callback.releaseWakelock();
-                mClientCallbacks.remove(callback);
+                iterator.remove();
             }
         }
     }

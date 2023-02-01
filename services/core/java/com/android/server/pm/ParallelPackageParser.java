@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
-import android.content.pm.PackageParser;
 import android.os.Process;
 import android.os.Trace;
 
@@ -28,12 +27,13 @@ import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 
 /**
- * Helper class for parallel parsing of packages using {@link PackageParser}.
+ * Helper class for parallel parsing of packages using {@link PackageParser2}.
  * <p>Parsing requests are processed by a thread-pool of {@link #MAX_THREADS}.
  * At any time, at most {@link #QUEUE_CAPACITY} results are kept in RAM</p>
  */
@@ -55,9 +55,17 @@ class ParallelPackageParser {
 
     private final ExecutorService mExecutorService;
 
+    private final List<File> mFrameworkSplits;
+
     ParallelPackageParser(PackageParser2 packageParser, ExecutorService executorService) {
+        this(packageParser, executorService, /* frameworkSplits= */ null);
+    }
+
+    ParallelPackageParser(PackageParser2 packageParser, ExecutorService executorService,
+            List<File> frameworkSplits) {
         mPackageParser = packageParser;
         mExecutorService = executorService;
+        mFrameworkSplits = frameworkSplits;
     }
 
     static class ParseResult {
@@ -125,7 +133,7 @@ class ParallelPackageParser {
 
     @VisibleForTesting
     protected ParsedPackage parsePackage(File scanFile, int parseFlags)
-            throws PackageParser.PackageParserException {
-        return mPackageParser.parsePackage(scanFile, parseFlags, true);
+            throws PackageManagerException {
+        return mPackageParser.parsePackage(scanFile, parseFlags, true, mFrameworkSplits);
     }
 }

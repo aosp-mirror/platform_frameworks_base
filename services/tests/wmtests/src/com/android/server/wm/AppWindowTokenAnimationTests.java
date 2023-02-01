@@ -88,6 +88,11 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
 
         verify(mTransaction).setLayer(eq(mActivity.mAnimationBoundsLayer),
                 intThat(layer -> layer > topActivity.getLastLayer()));
+
+        // The layer should be restored after the animation leash is removed.
+        mActivity.onAnimationLeashLost(mTransaction);
+        assertThat(mActivity.mNeedsZBoost).isFalse();
+        assertThat(topActivity.getLastLayer()).isGreaterThan(mActivity.getLastLayer());
     }
 
     @Test

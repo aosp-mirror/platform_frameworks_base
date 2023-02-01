@@ -74,11 +74,21 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logDozingSuppressed(isDozingSuppressed: Boolean) {
+    fun logPowerSaveChanged(powerSaveActive: Boolean, nextState: DozeMachine.State) {
         buffer.log(TAG, INFO, {
-            bool1 = isDozingSuppressed
+            bool1 = powerSaveActive
+            str1 = nextState.name
         }, {
-            "DozingSuppressed=$bool1"
+            "Power save active=$bool1 nextState=$str1"
+        })
+    }
+
+    fun logAlwaysOnSuppressedChange(isAodSuppressed: Boolean, nextState: DozeMachine.State) {
+        buffer.log(TAG, INFO, {
+            bool1 = isAodSuppressed
+            str1 = nextState.name
+        }, {
+            "Always on (AOD) suppressed changed, suppressed=$bool1 nextState=$str1"
         })
     }
 
@@ -95,7 +105,7 @@ class DozeLogger @Inject constructor(
             bool4 = screenOnFromTouch
         }, {
             "Fling expand=$bool1 aboveThreshold=$bool2 thresholdNeeded=$bool3 " +
-                    "screenOnFromTouch=$bool4"
+                "screenOnFromTouch=$bool4"
         })
     }
 
@@ -141,7 +151,7 @@ class DozeLogger @Inject constructor(
             long2 = triggerAt
         }, {
             "Time tick scheduledAt=${DATE_FORMAT.format(Date(long1))} " +
-                    "triggerAt=${DATE_FORMAT.format(Date(long2))}"
+                "triggerAt=${DATE_FORMAT.format(Date(long2))}"
         })
     }
 
@@ -210,7 +220,7 @@ class DozeLogger @Inject constructor(
             str1 = partUpdated
         }, {
             "Posture changed, posture=${DevicePostureController.devicePostureToString(int1)}" +
-                    " partUpdated=$str1"
+                " partUpdated=$str1"
         })
     }
 
@@ -257,11 +267,20 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logDozeSuppressed(state: DozeMachine.State) {
+    fun logAlwaysOnSuppressed(state: DozeMachine.State, reason: String) {
         buffer.log(TAG, INFO, {
             str1 = state.name
+            str2 = reason
         }, {
-            "Doze state suppressed, state=$str1"
+            "Always-on state suppressed, suppressed state=$str1 reason=$str2"
+        })
+    }
+
+    fun logImmediatelyEndDoze(reason: String) {
+        buffer.log(TAG, INFO, {
+            str1 = reason
+        }, {
+            "Doze immediately ended due to $str1"
         })
     }
 
@@ -278,6 +297,18 @@ class DozeLogger @Inject constructor(
             long1 = scrimOpacity
         }, {
             "Doze aod dimming scrim opacity set, opacity=$long1"
+        })
+    }
+
+    fun logCarModeEnded() {
+        buffer.log(TAG, INFO, {}, {
+            "Doze car mode ended"
+        })
+    }
+
+    fun logCarModeStarted() {
+        buffer.log(TAG, INFO, {}, {
+            "Doze car mode started"
         })
     }
 }

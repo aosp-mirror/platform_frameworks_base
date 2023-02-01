@@ -27,6 +27,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.concurrent.Executor;
@@ -47,7 +48,9 @@ public class DvrRecorder implements AutoCloseable {
     private static int sInstantId = 0;
     private int mSegmentId = 0;
     private int mOverflow;
-    private Boolean mIsStopped = true;
+    private final Object mIsStoppedLock = new Object();
+    @GuardedBy("mIsStoppedLock")
+    private boolean mIsStopped = true;
     private final Object mListenerLock = new Object();
 
     private native int nativeAttachFilter(Filter filter);
@@ -82,7 +85,13 @@ public class DvrRecorder implements AutoCloseable {
         }
         synchronized (mListenerLock) {
             if (mExecutor != null && mListener != null) {
-                mExecutor.execute(() -> mListener.onRecordStatusChanged(status));
+                mExecutor.execute(() -> {
+                    synchronized (mListenerLock) {
+                        if (mListener != null) {
+                            mListener.onRecordStatusChanged(status);
+                        }
+                    }
+                });
             }
         }
     }
@@ -141,7 +150,7 @@ public class DvrRecorder implements AutoCloseable {
                 .write(FrameworkStatsLog.TV_TUNER_DVR_STATUS, mUserId,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__TYPE__RECORD,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__STATE__STARTED, mSegmentId, 0);
-        synchronized (mIsStopped) {
+        synchronized (mIsStoppedLock) {
             int result = nativeStartDvr();
             if (result == Tuner.RESULT_SUCCESS) {
                 mIsStopped = false;
@@ -164,7 +173,7 @@ public class DvrRecorder implements AutoCloseable {
                 .write(FrameworkStatsLog.TV_TUNER_DVR_STATUS, mUserId,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__TYPE__RECORD,
                     FrameworkStatsLog.TV_TUNER_DVR_STATUS__STATE__STOPPED, mSegmentId, mOverflow);
-        synchronized (mIsStopped) {
+        synchronized (mIsStoppedLock) {
             int result = nativeStopDvr();
             if (result == Tuner.RESULT_SUCCESS) {
                 mIsStopped = true;
@@ -182,7 +191,7 @@ public class DvrRecorder implements AutoCloseable {
      */
     @Result
     public int flush() {
-        synchronized (mIsStopped) {
+        synchronized (mIsStoppedLock) {
             if (mIsStopped) {
                 return nativeFlushDvr();
             }
@@ -210,7 +219,6 @@ public class DvrRecorder implements AutoCloseable {
      *
      * @param fd the file descriptor to write data.
      * @see #write(long)
-     * @see #write(byte[], long, long)
      */
     public void setFileDescriptor(@NonNull ParcelFileDescriptor fd) {
         nativeSetFileDescriptor(fd.getFd());
@@ -230,17 +238,17 @@ public class DvrRecorder implements AutoCloseable {
     /**
      * Writes recording data to buffer.
      *
-     * @param bytes the byte array stores the data to be written to DVR.
-     * @param offset the index of the first byte in {@code bytes} to be written to DVR.
+     * @param buffer the byte array stores the data from DVR.
+     * @param offset the index of the first byte in {@code buffer} to write the data from DVR.
      * @param size the maximum number of bytes to write.
      * @return the number of bytes written.
      */
     @BytesLong
-    public long write(@NonNull byte[] bytes, @BytesLong long offset, @BytesLong long size) {
-        if (size + offset > bytes.length) {
+    public long write(@NonNull byte[] buffer, @BytesLong long offset, @BytesLong long size) {
+        if (size + offset > buffer.length) {
             throw new ArrayIndexOutOfBoundsException(
-                    "Array length=" + bytes.length + ", offset=" + offset + ", size=" + size);
+                    "Array length=" + buffer.length + ", offset=" + offset + ", size=" + size);
         }
-        return nativeWrite(bytes, offset, size);
+        return nativeWrite(buffer, offset, size);
     }
 }

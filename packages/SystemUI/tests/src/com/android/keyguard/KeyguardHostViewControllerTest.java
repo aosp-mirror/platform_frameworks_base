@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,6 +32,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -42,6 +44,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -80,8 +83,6 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
         // Explicitly disable one handed keyguard.
         mTestableResources.addOverride(
                 R.bool.can_use_one_handed_bouncer, false);
-        mTestableResources.addOverride(
-                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning, false);
 
         when(mKeyguardSecurityContainerControllerFactory.create(any(
                 KeyguardSecurityContainer.SecurityCallback.class)))
@@ -103,6 +104,17 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
     public void testOnStartingToHide() {
         mKeyguardHostViewController.onStartingToHide();
         verify(mKeyguardSecurityContainerController).onStartingToHide();
+    }
+
+    @Test
+    public void onBouncerVisible_propagatesToKeyguardSecurityContainerController() {
+        mKeyguardHostViewController.onBouncerVisibilityChanged(ViewGroup.VISIBLE);
+        mKeyguardHostViewController.onBouncerVisibilityChanged(ViewGroup.INVISIBLE);
+
+        InOrder order = inOrder(mKeyguardSecurityContainerController);
+        order.verify(mKeyguardSecurityContainerController).onBouncerVisibilityChanged(View.VISIBLE);
+        order.verify(mKeyguardSecurityContainerController).onBouncerVisibilityChanged(
+                View.INVISIBLE);
     }
 
     @Test
@@ -149,8 +161,6 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
         // Start disabled.
         mTestableResources.addOverride(
                 R.bool.can_use_one_handed_bouncer, false);
-        mTestableResources.addOverride(
-                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning, false);
 
         mKeyguardHostViewController.init();
         assertEquals(
@@ -160,8 +170,6 @@ public class KeyguardHostViewControllerTest extends SysuiTestCase {
         // And enable
         mTestableResources.addOverride(
                 R.bool.can_use_one_handed_bouncer, true);
-        mTestableResources.addOverride(
-                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning, true);
 
         mKeyguardHostViewController.updateResources();
         assertEquals(

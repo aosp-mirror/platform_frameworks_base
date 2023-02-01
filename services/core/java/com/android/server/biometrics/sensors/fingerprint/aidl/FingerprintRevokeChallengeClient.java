@@ -19,33 +19,38 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.fingerprint.IFingerprint;
-import android.hardware.biometrics.fingerprint.ISession;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.RevokeChallengeClient;
+
+import java.util.function.Supplier;
 
 /**
  * Fingerprint-specific revokeChallenge client for the {@link IFingerprint} AIDL HAL interface.
  */
-class FingerprintRevokeChallengeClient extends RevokeChallengeClient<ISession> {
+class FingerprintRevokeChallengeClient extends RevokeChallengeClient<AidlSession> {
 
     private static final String TAG = "FingerpirntRevokeChallengeClient";
 
     private final long mChallenge;
 
     FingerprintRevokeChallengeClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token,
-            int userId, @NonNull String owner, int sensorId, long challenge) {
-        super(context, lazyDaemon, token, userId, owner, sensorId);
+            @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token,
+            int userId, @NonNull String owner, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            long challenge) {
+        super(context, lazyDaemon, token, userId, owner, sensorId, logger, biometricContext);
         mChallenge = challenge;
     }
 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().revokeChallenge(mChallenge);
+            getFreshDaemon().getSession().revokeChallenge(mChallenge);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to revokeChallenge", e);
             mCallback.onClientFinished(this, false /* success */);

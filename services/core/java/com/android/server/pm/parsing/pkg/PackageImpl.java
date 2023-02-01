@@ -22,17 +22,12 @@ import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageParser;
-import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageImpl;
-import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedProvider;
-import android.content.pm.parsing.component.ParsedService;
+import com.android.server.pm.pkg.SELinuxUtil;
+import android.content.pm.SigningDetails;
 import android.content.res.TypedArray;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.UserHandle;
-import android.os.storage.StorageManager;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -40,21 +35,28 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.parsing.PackageInfoUtils;
+import com.android.server.pm.pkg.component.ComponentMutateUtils;
+import com.android.server.pm.pkg.component.ParsedActivity;
+import com.android.server.pm.pkg.component.ParsedProvider;
+import com.android.server.pm.pkg.component.ParsedService;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageImpl;
 
 import java.io.File;
-import java.util.UUID;
 
 /**
  * Extensions to {@link ParsingPackageImpl} including fields/state contained in the system server
  * and not exposed to the core SDK.
  *
  * Many of the fields contained here will eventually be moved inside
- * {@link com.android.server.pm.PackageSetting} or {@link android.content.pm.PackageUserState}.
+ * {@link com.android.server.pm.PackageSetting} or {@link android.content.pm.pkg.PackageUserState}.
  *
  * @hide
  */
-public final class PackageImpl extends ParsingPackageImpl implements ParsedPackage, AndroidPackage {
+public class PackageImpl extends ParsingPackageImpl implements ParsedPackage, AndroidPackage,
+        AndroidPackageHidden {
 
+    @NonNull
     public static PackageImpl forParsing(@NonNull String packageName, @NonNull String baseCodePath,
             @NonNull String codePath, @NonNull TypedArray manifestArray, boolean isCoreApp) {
         return new PackageImpl(packageName, baseCodePath, codePath, manifestArray, isCoreApp);
@@ -70,6 +72,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
      * this case only cares about
      * volumeUuid, just fake it rather than having separate method paths.
      */
+    @NonNull
     public static AndroidPackage buildFakeForDeletion(String packageName, String volumeUuid) {
         return ((ParsedPackage) PackageImpl.forTesting(packageName)
                 .setVolumeUuid(volumeUuid)
@@ -77,11 +80,13 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
                 .hideAsFinal();
     }
 
+    @NonNull
     @VisibleForTesting
     public static ParsingPackage forTesting(String packageName) {
         return forTesting(packageName, "");
     }
 
+    @NonNull
     @VisibleForTesting
     public static ParsingPackage forTesting(String packageName, String baseCodePath) {
         return new PackageImpl(packageName, baseCodePath, baseCodePath, null, false);
@@ -112,9 +117,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     protected String seInfo;
-    @Nullable
-    @DataClass.ParcelWith(ForInternedString.class)
-    protected String seInfoUser;
 
     /**
      * This is an appId, the uid if the userId is == USER_SYSTEM
@@ -252,7 +254,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     }
 
     @Override
-    public PackageImpl setSigningDetails(@Nullable PackageParser.SigningDetails value) {
+    public PackageImpl setSigningDetails(@Nullable SigningDetails value) {
         super.setSigningDetails(value);
         return this;
     }
@@ -260,12 +262,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     @Override
     public PackageImpl setRestrictUpdateHash(@Nullable byte... value) {
         super.setRestrictUpdateHash(value);
-        return this;
-    }
-
-    @Override
-    public PackageImpl setRealPackage(@Nullable String realPackage) {
-        super.setRealPackage(realPackage);
         return this;
     }
 
@@ -306,8 +302,8 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     }
 
     @Override
-    public PackageImpl setCodePath(@NonNull String value) {
-        this.mPath = value;
+    public PackageImpl setPath(@NonNull String path) {
+        this.mPath = path;
         return this;
     }
 
@@ -319,37 +315,37 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
 
         int permissionsSize = permissions.size();
         for (int index = 0; index < permissionsSize; index++) {
-            permissions.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(permissions.get(index), this.packageName);
         }
 
         int permissionGroupsSize = permissionGroups.size();
         for (int index = 0; index < permissionGroupsSize; index++) {
-            permissionGroups.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(permissionGroups.get(index), this.packageName);
         }
 
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
-            activities.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(activities.get(index), this.packageName);
         }
 
         int receiversSize = receivers.size();
         for (int index = 0; index < receiversSize; index++) {
-            receivers.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(receivers.get(index), this.packageName);
         }
 
         int providersSize = providers.size();
         for (int index = 0; index < providersSize; index++) {
-            providers.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(providers.get(index), this.packageName);
         }
 
         int servicesSize = services.size();
         for (int index = 0; index < servicesSize; index++) {
-            services.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(services.get(index), this.packageName);
         }
 
         int instrumentationsSize = instrumentations.size();
         for (int index = 0; index < instrumentationsSize; index++) {
-            instrumentations.get(index).setPackageName(this.packageName);
+            ComponentMutateUtils.setPackageName(instrumentations.get(index), this.packageName);
         }
 
         return this;
@@ -359,30 +355,34 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     public PackageImpl setAllComponentsDirectBootAware(boolean allComponentsDirectBootAware) {
         int activitiesSize = activities.size();
         for (int index = 0; index < activitiesSize; index++) {
-            activities.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(activities.get(index),
+                    allComponentsDirectBootAware);
         }
 
         int receiversSize = receivers.size();
         for (int index = 0; index < receiversSize; index++) {
-            receivers.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(receivers.get(index),
+                    allComponentsDirectBootAware);
         }
 
         int providersSize = providers.size();
         for (int index = 0; index < providersSize; index++) {
-            providers.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(providers.get(index),
+                    allComponentsDirectBootAware);
         }
 
         int servicesSize = services.size();
         for (int index = 0; index < servicesSize; index++) {
-            services.get(index).setDirectBootAware(allComponentsDirectBootAware);
+            ComponentMutateUtils.setDirectBootAware(services.get(index),
+                    allComponentsDirectBootAware);
         }
 
         return this;
     }
 
     @Override
-    public PackageImpl setBaseCodePath(@NonNull String baseCodePath) {
-        this.mBaseApkPath = TextUtils.safeIntern(baseCodePath);
+    public PackageImpl setBaseApkPath(@NonNull String baseApkPath) {
+        this.mBaseApkPath = TextUtils.safeIntern(baseApkPath);
         return this;
     }
 
@@ -423,12 +423,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
     }
 
     @Override
-    public PackageImpl setSeInfoUser(@Nullable String seInfoUser) {
-        this.seInfoUser = TextUtils.safeIntern(seInfoUser);
-        return this;
-    }
-
-    @Override
     public PackageImpl setSplitCodePaths(@Nullable String[] splitCodePaths) {
         this.splitCodePaths = splitCodePaths;
         if (splitCodePaths != null) {
@@ -445,7 +439,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         int size = permissionGroups.size();
         for (int index = size - 1; index >= 0; --index) {
             // TODO(b/135203078): Builder/immutability
-            permissionGroups.get(index).setPriority(0);
+            ComponentMutateUtils.setPriority(permissionGroups.get(index), 0);
         }
         return this;
     }
@@ -457,7 +451,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         for (int index = 0; index < receiversSize; index++) {
             ParsedActivity receiver = receivers.get(index);
             if ((receiver.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                receiver.setExported(false);
+                ComponentMutateUtils.setExported(receiver, false);
             }
         }
 
@@ -466,7 +460,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         for (int index = 0; index < servicesSize; index++) {
             ParsedService service = services.get(index);
             if ((service.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                service.setExported(false);
+                ComponentMutateUtils.setExported(service, false);
             }
         }
 
@@ -475,24 +469,11 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         for (int index = 0; index < providersSize; index++) {
             ParsedProvider provider = providers.get(index);
             if ((provider.getFlags() & ActivityInfo.FLAG_SINGLE_USER) != 0) {
-                provider.setExported(false);
+                ComponentMutateUtils.setExported(provider, false);
             }
         }
 
         return this;
-    }
-
-    @Override
-    public UUID getStorageUuid() {
-        return StorageManager.convert(volumeUuid);
-    }
-
-    @Deprecated
-    @Override
-    public String toAppInfoToString() {
-        return "PackageImpl{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + getPackageName() + "}";
     }
 
     @Override
@@ -525,7 +506,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         appInfo.secondaryCpuAbi = secondaryCpuAbi;
         appInfo.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
         appInfo.seInfo = seInfo;
-        appInfo.seInfoUser = seInfoUser;
+        appInfo.seInfoUser = SELinuxUtil.COMPLETE_STR;
         appInfo.uid = uid;
         return appInfo;
     }
@@ -546,7 +527,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         sForInternedString.parcel(this.secondaryCpuAbi, dest, flags);
         dest.writeString(this.secondaryNativeLibraryDir);
         dest.writeString(this.seInfo);
-        dest.writeString(this.seInfoUser);
         dest.writeInt(this.uid);
         dest.writeInt(this.mBooleans);
     }
@@ -561,13 +541,13 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         this.secondaryCpuAbi = sForInternedString.unparcel(in);
         this.secondaryNativeLibraryDir = in.readString();
         this.seInfo = in.readString();
-        this.seInfoUser = in.readString();
         this.uid = in.readInt();
         this.mBooleans = in.readInt();
 
         assignDerivedFields();
     }
 
+    @NonNull
     public static final Creator<PackageImpl> CREATOR = new Creator<PackageImpl>() {
         @Override
         public PackageImpl createFromParcel(Parcel source) {
@@ -631,12 +611,6 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         return seInfo;
     }
 
-    @Nullable
-    @Override
-    public String getSeInfoUser() {
-        return seInfoUser;
-    }
-
     @Override
     public boolean isCoreApp() {
         return getBoolean(Booleans.CORE_APP);
@@ -695,7 +669,7 @@ public final class PackageImpl extends ParsingPackageImpl implements ParsedPacka
         return uid;
     }
 
-    @DataClass.Generated.Member
+    @Override
     public PackageImpl setStub(boolean value) {
         setBoolean(Booleans.STUB, value);
         return this;

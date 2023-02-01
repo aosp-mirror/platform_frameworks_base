@@ -16,26 +16,28 @@
 
 package com.android.wm.shell.dagger;
 
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 
-import android.animation.AnimationHandler;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Trace;
+import android.view.Choreographer;
 
-import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import androidx.annotation.Nullable;
+
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ExternalMainThread;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
+import com.android.wm.shell.common.annotations.ShellBackgroundThread;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.common.annotations.ShellSplashscreenThread;
-import com.android.wm.shell.R;
 
 import dagger.Module;
 import dagger.Provides;
@@ -53,7 +55,7 @@ public abstract class WMShellConcurrencyModule {
     /**
      * Returns whether to enable a separate shell thread for the shell features.
      */
-    private static boolean enableShellMainThread(Context context) {
+    public static boolean enableShellMainThread(Context context) {
         return context.getResources().getBoolean(R.bool.config_enableShellMainThread);
     }
 
@@ -85,23 +87,41 @@ public abstract class WMShellConcurrencyModule {
     }
 
     /**
+     * Creates a shell main thread to be injected into the shell components.  This does not provide
+     * the {@param HandleThread}, but is used to create the thread prior to initializing the
+     * WM component, and is explicitly bound.
+     *
+     * See {@link com.android.systemui.SystemUIFactory#init(Context, boolean)}.
+     */
+    public static HandlerThread createShellMainThread() {
+        HandlerThread mainThread = new HandlerThread("wmshell.main", THREAD_PRIORITY_DISPLAY);
+        return mainThread;
+    }
+
+    /**
      * Shell main-thread Handler, don't use this unless really necessary (ie. need to dedupe
      * multiple types of messages, etc.)
+     *
+     * @param mainThread If non-null, this thread is expected to be started already
      */
     @WMSingleton
     @Provides
     @ShellMainThread
     public static Handler provideShellMainHandler(Context context,
+            @Nullable @ShellMainThread HandlerThread mainThread,
             @ExternalMainThread Handler sysuiMainHandler) {
         if (enableShellMainThread(context)) {
-             HandlerThread mainThread = new HandlerThread("wmshell.main", THREAD_PRIORITY_DISPLAY);
-             mainThread.start();
-             if (Build.IS_DEBUGGABLE) {
-                 mainThread.getLooper().setTraceTag(Trace.TRACE_TAG_WINDOW_MANAGER);
-                 mainThread.getLooper().setSlowLogThresholdMs(MSGQ_SLOW_DISPATCH_THRESHOLD_MS,
-                         MSGQ_SLOW_DELIVERY_THRESHOLD_MS);
-             }
-             return Handler.createAsync(mainThread.getLooper());
+            if (mainThread == null) {
+                // If this thread wasn't pre-emptively started, then create and start it
+                mainThread = createShellMainThread();
+                mainThread.start();
+            }
+            if (Build.IS_DEBUGGABLE) {
+                mainThread.getLooper().setTraceTag(Trace.TRACE_TAG_WINDOW_MANAGER);
+                mainThread.getLooper().setSlowLogThresholdMs(MSGQ_SLOW_DISPATCH_THRESHOLD_MS,
+                        MSGQ_SLOW_DELIVERY_THRESHOLD_MS);
+            }
+            return Handler.createAsync(mainThread.getLooper());
         }
         return sysuiMainHandler;
     }
@@ -119,6 +139,25 @@ public abstract class WMShellConcurrencyModule {
             return new HandlerExecutor(mainHandler);
         }
         return sysuiMainExecutor;
+    }
+
+    /**
+     * Provide a Shell main-thread {@link Choreographer} with the app vsync.
+     *
+     * @param executor the executor of the shell main thread
+     */
+    @WMSingleton
+    @Provides
+    @ShellMainThread
+    public static Choreographer provideShellMainChoreographer(
+            @ShellMainThread ShellExecutor executor) {
+        try {
+            final Choreographer[] choreographer = new Choreographer[1];
+            executor.executeBlocking(() -> choreographer[0] = Choreographer.getInstance());
+            return choreographer[0];
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Failed to obtain main Choreographer.", e);
+        }
     }
 
     /**
@@ -153,26 +192,26 @@ public abstract class WMShellConcurrencyModule {
     }
 
     /**
-     * Provide a Shell main-thread AnimationHandler.  The AnimationHandler can be set on
-     * {@link android.animation.ValueAnimator}s and will ensure that the animation will run on
-     * the Shell main-thread with the SF vsync.
+     * Provides a Shell background thread Handler for low priority background tasks.
      */
     @WMSingleton
     @Provides
-    @ChoreographerSfVsync
-    public static AnimationHandler provideShellMainExecutorSfVsyncAnimationHandler(
-            @ShellMainThread ShellExecutor mainExecutor) {
-        try {
-            AnimationHandler handler = new AnimationHandler();
-            mainExecutor.executeBlocking(() -> {
-                // This is called on the animation thread since it calls
-                // Choreographer.getSfInstance() which returns a thread-local Choreographer instance
-                // that uses the SF vsync
-                handler.setProvider(new SfVsyncFrameCallbackProvider());
-            });
-            return handler;
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Failed to initialize SfVsync animation handler in 1s", e);
-        }
+    @ShellBackgroundThread
+    public static Handler provideSharedBackgroundHandler() {
+        HandlerThread shellBackgroundThread = new HandlerThread("wmshell.background",
+                THREAD_PRIORITY_BACKGROUND);
+        shellBackgroundThread.start();
+        return shellBackgroundThread.getThreadHandler();
+    }
+
+    /**
+     * Provides a Shell background thread Executor for low priority background tasks.
+     */
+    @WMSingleton
+    @Provides
+    @ShellBackgroundThread
+    public static ShellExecutor provideSharedBackgroundExecutor(
+            @ShellBackgroundThread Handler handler) {
+        return new HandlerExecutor(handler);
     }
 }

@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -46,18 +47,6 @@ import android.app.IUidObserver;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.app.admin.DevicePolicyManager;
-import android.app.appsearch.AppSearchBatchResult;
-import android.app.appsearch.AppSearchManager;
-import android.app.appsearch.AppSearchResult;
-import android.app.appsearch.GenericDocument;
-import android.app.appsearch.PackageIdentifier;
-import android.app.appsearch.SearchResultPage;
-import android.app.appsearch.SetSchemaResponse;
-import android.app.appsearch.aidl.AppSearchBatchResultParcel;
-import android.app.appsearch.aidl.AppSearchResultParcel;
-import android.app.appsearch.aidl.IAppSearchBatchResultCallback;
-import android.app.appsearch.aidl.IAppSearchManager;
-import android.app.appsearch.aidl.IAppSearchResultCallback;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -77,12 +66,12 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.Signature;
+import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -92,9 +81,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
-import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -106,6 +93,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.infra.AndroidFuture;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.LauncherAppsService.LauncherAppsImpl;
@@ -168,7 +156,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 case Context.DEVICE_POLICY_SERVICE:
                     return mMockDevicePolicyManager;
                 case Context.APP_SEARCH_SERVICE:
-                    return new AppSearchManager(this, mMockAppSearchManager);
                 case Context.ROLE_SERVICE:
                     // RoleManager is final and cannot be mocked, so we only override the inject
                     // accessor methods in ShortcutService.
@@ -278,6 +265,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         public void sendIntentSender(IntentSender intent) {
             // Placeholder for spying.
+        }
+
+        @Override
+        public String getPackageName() {
+            return SYSTEM_PACKAGE_NAME;
         }
     }
 
@@ -519,6 +511,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
+        void injectPostToHandlerDebounced(@NonNull final Object token, @NonNull final Runnable r) {
+            runOnHandler(r);
+        }
+
+        @Override
         void injectEnforceCallingPermission(String permission, String message) {
             if (!mCallerPermissions.contains(permission)) {
                 throw new SecurityException("Missing permission: " + permission);
@@ -543,6 +540,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         boolean injectHasAccessShortcutsPermission(int callingPid, int callingUid) {
             return mInjectCheckAccessShortcutsPermission;
+        }
+
+        @Override
+        ComponentName injectChooserActivity() {
+            return mInjectedChooserActivity;
         }
 
         @Override
@@ -592,7 +594,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         @Override
-        public void verifyCallingPackage(String callingPackage) {
+        public void verifyCallingPackage(String callingPackage, int callerUid) {
             // SKIP
         }
 
@@ -647,260 +649,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
     }
 
-    protected class MockAppSearchManager implements IAppSearchManager {
-
-        protected Map<String, List<PackageIdentifier>> mSchemasVisibleToPackages =
-                new ArrayMap<>(1);
-        private Map<String, Map<String, GenericDocument>> mDocumentMap = new ArrayMap<>(1);
-
-        private String getKey(UserHandle userHandle, String databaseName) {
-            return userHandle.getIdentifier() + "@" + databaseName;
-        }
-
-        @Override
-        public void setSchema(String packageName, String databaseName, List<Bundle> schemaBundles,
-                List<String> schemasNotDisplayedBySystem,
-                Map<String, List<Bundle>> schemasVisibleToPackagesBundles, boolean forceOverride,
-                int version, UserHandle userHandle, long binderCallStartTimeMillis,
-                IAppSearchResultCallback callback) throws RemoteException {
-            for (Map.Entry<String, List<Bundle>> entry :
-                    schemasVisibleToPackagesBundles.entrySet()) {
-                final String key = entry.getKey();
-                final List<PackageIdentifier> packageIdentifiers;
-                if (!mSchemasVisibleToPackages.containsKey(key)) {
-                    packageIdentifiers = new ArrayList<>(entry.getValue().size());
-                    mSchemasVisibleToPackages.put(key, packageIdentifiers);
-                } else {
-                    packageIdentifiers = mSchemasVisibleToPackages.get(key);
-                }
-                for (int i = 0; i < entry.getValue().size(); i++) {
-                    packageIdentifiers.add(new PackageIdentifier(entry.getValue().get(i)));
-                }
-            }
-            final SetSchemaResponse response = new SetSchemaResponse.Builder().build();
-            callback.onResult(
-                    new AppSearchResultParcel(
-                            AppSearchResult.newSuccessfulResult(response.getBundle())));
-        }
-
-        @Override
-        public void getSchema(String packageName, String databaseName, UserHandle userHandle,
-                IAppSearchResultCallback callback) throws RemoteException {
-            ignore(callback);
-        }
-
-        @Override
-        public void getNamespaces(String packageName, String databaseName, UserHandle userHandle,
-                IAppSearchResultCallback callback) throws RemoteException {
-            ignore(callback);
-        }
-
-        @Override
-        public void putDocuments(String packageName, String databaseName,
-                List<Bundle> documentBundles, UserHandle userHandle, long binderCallStartTimeMillis,
-                IAppSearchBatchResultCallback callback)
-                throws RemoteException {
-            final List<GenericDocument> docs = new ArrayList<>(documentBundles.size());
-            for (Bundle bundle : documentBundles) {
-                docs.add(new GenericDocument(bundle));
-            }
-            final AppSearchBatchResult.Builder<String, Void> builder =
-                    new AppSearchBatchResult.Builder<>();
-            final String key = getKey(userHandle, databaseName);
-            Map<String, GenericDocument> docMap = mDocumentMap.get(key);
-            for (GenericDocument doc : docs) {
-                builder.setSuccess(doc.getId(), null);
-                if (docMap == null) {
-                    docMap = new ArrayMap<>(1);
-                    mDocumentMap.put(key, docMap);
-                }
-                docMap.put(doc.getId(), doc);
-            }
-            callback.onResult(new AppSearchBatchResultParcel<>(builder.build()));
-        }
-
-        @Override
-        public void getDocuments(String packageName, String databaseName, String namespace,
-                List<String> ids, Map<String, List<String>> typePropertyPaths,
-                UserHandle userHandle,  long binderCallStartTimeMillis,
-                IAppSearchBatchResultCallback callback) throws RemoteException {
-            final AppSearchBatchResult.Builder<String, Bundle> builder =
-                    new AppSearchBatchResult.Builder<>();
-            final String key = getKey(userHandle, databaseName);
-            if (!mDocumentMap.containsKey(key)) {
-                for (String id : ids) {
-                    builder.setFailure(id, AppSearchResult.RESULT_NOT_FOUND,
-                            key + " not found when getting: " + id);
-                }
-            } else {
-                final Map<String, GenericDocument> docs = mDocumentMap.get(key);
-                for (String id : ids) {
-                    if (docs.containsKey(id)) {
-                        builder.setSuccess(id, docs.get(id).getBundle());
-                    } else {
-                        builder.setFailure(id, AppSearchResult.RESULT_NOT_FOUND,
-                                "shortcut not found: " + id);
-                    }
-                }
-            }
-            callback.onResult(new AppSearchBatchResultParcel<>(builder.build()));
-        }
-
-        @Override
-        public void query(String packageName, String databaseName, String queryExpression,
-                Bundle searchSpecBundle, UserHandle userHandle, long binderCallStartTimeMillis,
-                IAppSearchResultCallback callback)
-                throws RemoteException {
-            final String key = getKey(userHandle, databaseName);
-            if (!mDocumentMap.containsKey(key)) {
-                final Bundle page = new Bundle();
-                page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 1);
-                page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, new ArrayList<>());
-                callback.onResult(
-                        new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(page)));
-                return;
-            }
-            final List<GenericDocument> documents = new ArrayList<>(mDocumentMap.get(key).values());
-            final Bundle page = new Bundle();
-            page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 0);
-            final ArrayList<Bundle> resultBundles = new ArrayList<>();
-            for (GenericDocument document : documents) {
-                final Bundle resultBundle = new Bundle();
-                resultBundle.putBundle("document", document.getBundle());
-                resultBundle.putString("packageName", packageName);
-                resultBundle.putString("databaseName", databaseName);
-                resultBundle.putParcelableArrayList("matches", new ArrayList<>());
-                resultBundles.add(resultBundle);
-            }
-            page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, resultBundles);
-            callback.onResult(
-                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(page)));
-        }
-
-        @Override
-        public void globalQuery(String packageName, String queryExpression, Bundle searchSpecBundle,
-                UserHandle userHandle, long binderCallStartTimeMillis,
-                IAppSearchResultCallback callback) throws RemoteException {
-            ignore(callback);
-        }
-
-        @Override
-        public void getNextPage(String packageName, long nextPageToken, UserHandle userHandle,
-                IAppSearchResultCallback callback) throws RemoteException {
-            final Bundle page = new Bundle();
-            page.putLong(SearchResultPage.NEXT_PAGE_TOKEN_FIELD, 1);
-            page.putParcelableArrayList(SearchResultPage.RESULTS_FIELD, new ArrayList<>());
-            callback.onResult(
-                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(page)));
-        }
-
-        @Override
-        public void invalidateNextPageToken(String packageName, long nextPageToken,
-                UserHandle userHandle) throws RemoteException {
-        }
-
-        @Override
-        public void writeQueryResultsToFile(String packageName, String databaseName,
-                ParcelFileDescriptor fileDescriptor, String queryExpression,
-                Bundle searchSpecBundle, UserHandle userHandle, IAppSearchResultCallback callback)
-                throws RemoteException {
-            ignore(callback);
-        }
-
-        @Override
-        public void putDocumentsFromFile(String packageName, String databaseName,
-                ParcelFileDescriptor fileDescriptor, UserHandle userHandle,
-                IAppSearchResultCallback callback)
-                throws RemoteException {
-            ignore(callback);
-        }
-
-        @Override
-        public void reportUsage(String packageName, String databaseName, String namespace,
-                String documentId, long usageTimestampMillis, boolean systemUsage,
-                UserHandle userHandle,
-                IAppSearchResultCallback callback)
-                throws RemoteException {
-            ignore(callback);
-        }
-
-        @Override
-        public void removeByDocumentId(String packageName, String databaseName, String namespace,
-                List<String> ids, UserHandle userHandle, long binderCallStartTimeMillis,
-                IAppSearchBatchResultCallback callback)
-                throws RemoteException {
-            final AppSearchBatchResult.Builder<String, Void> builder =
-                    new AppSearchBatchResult.Builder<>();
-            final String key = getKey(userHandle, databaseName);
-            if (!mDocumentMap.containsKey(key)) {
-                for (String id : ids) {
-                    builder.setFailure(id, AppSearchResult.RESULT_NOT_FOUND,
-                            "package " + key + " not found when removing " + id);
-                }
-            } else {
-                final Map<String, GenericDocument> docs = mDocumentMap.get(key);
-                for (String id : ids) {
-                    if (docs.containsKey(id)) {
-                        docs.remove(id);
-                        builder.setSuccess(id, null);
-                    } else {
-                        builder.setFailure(id, AppSearchResult.RESULT_NOT_FOUND,
-                                "shortcut not found when removing " + id);
-                    }
-                }
-            }
-            callback.onResult(new AppSearchBatchResultParcel<>(builder.build()));
-        }
-
-        @Override
-        public void removeByQuery(String packageName, String databaseName, String queryExpression,
-                Bundle searchSpecBundle, UserHandle userHandle, long binderCallStartTimeMillis,
-                IAppSearchResultCallback callback)
-                throws RemoteException {
-            final String key = getKey(userHandle, databaseName);
-            if (!mDocumentMap.containsKey(key)) {
-                callback.onResult(
-                        new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(null)));
-                return;
-            }
-            mDocumentMap.get(key).clear();
-            callback.onResult(
-                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(null)));
-        }
-
-        @Override
-        public void getStorageInfo(String packageName, String databaseName, UserHandle userHandle,
-                IAppSearchResultCallback callback) throws RemoteException {
-            ignore(callback);
-        }
-
-        @Override
-        public void persistToDisk(String packageName, UserHandle userHandle,
-                long binderCallStartTimeMillis) throws RemoteException {
-        }
-
-        @Override
-        public void initialize(String packageName, UserHandle userHandle,
-                long binderCallStartTimeMillis, IAppSearchResultCallback callback)
-                throws RemoteException {
-            ignore(callback);
-        }
-
-        @Override
-        public IBinder asBinder() {
-            return null;
-        }
-
-        private void removeShortcuts() {
-            mDocumentMap.clear();
-        }
-
-        private void ignore(IAppSearchResultCallback callback) throws RemoteException {
-            callback.onResult(
-                    new AppSearchResultParcel<>(AppSearchResult.newSuccessfulResult(null)));
-        }
-    }
-
     public static class ShortcutActivity extends Activity {
     }
 
@@ -940,6 +688,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected int mInjectedCallingUid;
     protected String mInjectedClientPackage;
+    protected ComponentName mInjectedChooserActivity;
 
     protected Map<String, PackageInfo> mInjectedPackages;
 
@@ -952,7 +701,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected PackageManagerInternal mMockPackageManagerInternal;
     protected UserManager mMockUserManager;
     protected DevicePolicyManager mMockDevicePolicyManager;
-    protected MockAppSearchManager mMockAppSearchManager;
     protected UserManagerInternal mMockUserManagerInternal;
     protected UsageStatsManagerInternal mMockUsageStatsManagerInternal;
     protected ActivityManagerInternal mMockActivityManagerInternal;
@@ -961,6 +709,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected UriPermissionOwner mUriPermissionOwner;
 
+    protected static final String SYSTEM_PACKAGE_NAME = "android";
 
     protected static final String CALLING_PACKAGE_1 = "com.android.test.1";
     protected static final int CALLING_UID_1 = 10001;
@@ -985,6 +734,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected static final String LAUNCHER_4 = "com.android.launcher.4";
     protected static final int LAUNCHER_UID_4 = 10014;
+
+    protected static final String CHOOSER_ACTIVITY_PACKAGE = "com.android.intentresolver";
+    protected static final int CHOOSER_ACTIVITY_UID = 10015;
 
     protected static final int USER_0 = UserHandle.USER_SYSTEM;
     protected static final int USER_10 = 10;
@@ -1102,7 +854,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
         mMockUserManager = mock(UserManager.class);
         mMockDevicePolicyManager = mock(DevicePolicyManager.class);
-        mMockAppSearchManager = new MockAppSearchManager();
         mMockUserManagerInternal = mock(UserManagerInternal.class);
         mMockUsageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
         mMockActivityManagerInternal = mock(ActivityManagerInternal.class);
@@ -1314,9 +1065,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         shutdownServices();
 
-        mMockAppSearchManager.removeShortcuts();
-        mMockAppSearchManager = null;
-
         super.tearDown();
     }
 
@@ -1413,9 +1161,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         pi.applicationInfo.setVersionCode(version);
         pi.signatures = null;
         pi.signingInfo = new SigningInfo(
-                new PackageParser.SigningDetails(
+                new SigningDetails(
                         genSignatures(signatures),
-                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
                         null));
         return pi;
@@ -1770,6 +1518,20 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return makeShortcut(
                 id, "Title-" + id, /* activity =*/ null, /* icon =*/ null,
                 makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class), /* rank =*/ 0);
+    }
+
+    /**
+     * Make a hidden shortcut with an ID.
+     */
+    protected ShortcutInfo makeShortcutExcludedFromLauncher(String id) {
+        final ShortcutInfo.Builder  b = new ShortcutInfo.Builder(mClientContext, id)
+                .setActivity(new ComponentName(mClientContext.getPackageName(), "main"))
+                .setShortLabel("Title-" + id)
+                .setIntent(makeIntent(Intent.ACTION_VIEW, ShortcutActivity.class))
+                .setExcludedFromSurfaces(ShortcutInfo.SURFACE_LAUNCHER);
+        final ShortcutInfo s = b.build();
+        s.setTimestamp(mInjectedCurrentTimeMillis);
+        return s;
     }
 
     @Deprecated // Title was renamed to short label.
@@ -2161,6 +1923,18 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         assertEquals("Exception type different", expectedException, thrown.getClass());
     }
 
+    protected void assertThrown(@NonNull final Class<?> expectedException,
+            @NonNull final Runnable fn) {
+        Exception thrown = null;
+        try {
+            fn.run();
+        } catch (Exception e) {
+            thrown = e;
+        }
+        assertNotNull("Exception was not thrown", thrown);
+        assertEquals("Exception type different", expectedException, thrown.getClass());
+    }
+
     protected void assertBitmapDirectories(int userId, String... expectedDirectories) {
         final Set<String> expected = hashSet(set(expectedDirectories));
 
@@ -2235,6 +2009,18 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return p == null ? null : p.getAllShareTargetsForTest();
     }
 
+    protected void resetPersistedShortcuts() {
+        final ShortcutPackage p = mService.getPackageShortcutForTest(
+                getCallingPackage(), getCallingUserId());
+        p.removeAllShortcutsAsync();
+    }
+
+    protected void getPersistedShortcut(AndroidFuture<List<ShortcutInfo>> cb) {
+        final ShortcutPackage p = mService.getPackageShortcutForTest(
+                getCallingPackage(), getCallingUserId());
+        p.getTopShortcutsFromPersistence(cb);
+    }
+
     /**
      * @return the number of shortcuts stored internally for the caller that can be used as a share
      * target in the ShareSheet. Such shortcuts have a matching category with at least one of the
@@ -2282,8 +2068,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected List<ShortcutInfo> getShortcutAsLauncher(int targetUserId) {
         final ShortcutQuery q = new ShortcutQuery();
-        q.setQueryFlags(ShortcutQuery.FLAG_MATCH_DYNAMIC | ShortcutQuery.FLAG_MATCH_DYNAMIC
-                | ShortcutQuery.FLAG_MATCH_PINNED);
+        q.setQueryFlags(ShortcutQuery.FLAG_MATCH_DYNAMIC | ShortcutQuery.FLAG_MATCH_PINNED);
         return mLauncherApps.getShortcuts(q, UserHandle.of(targetUserId));
     }
 
@@ -2424,8 +2209,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         shutdownServices();
 
         deleteAllSavedFiles();
-
-        mMockAppSearchManager.removeShortcuts();
 
         initService();
         mService.applyRestore(payload, USER_0);
@@ -2620,7 +2403,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected void prepareIntentActivities(ComponentName cn) {
         when(mMockPackageManagerInternal.queryIntentActivities(
-                anyOrNull(Intent.class), anyStringOrNull(), anyInt(), anyInt(), anyInt()))
+                anyOrNull(Intent.class), anyStringOrNull(), anyLong(), anyInt(), anyInt()))
                 .thenReturn(Collections.singletonList(
                         ri(cn.getPackageName(), cn.getClassName(), false, 0)));
     }

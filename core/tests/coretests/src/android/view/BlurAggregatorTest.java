@@ -65,7 +65,7 @@ public class BlurAggregatorTest {
         drawable.setBlurRadius(TEST_BLUR_RADIUS);
         final boolean hasUpdates = mAggregator.hasUpdates();
         final BlurRegion[] blurRegions = mAggregator.getBlurRegionsCopyForRT();
-        mAggregator.getBlurRegionsToDispatchToSf(TEST_FRAME_NUMBER, blurRegions, hasUpdates);
+        mAggregator.getBlurRegionsForFrameLocked(TEST_FRAME_NUMBER, blurRegions, hasUpdates);
         return drawable;
     }
 
@@ -154,7 +154,7 @@ public class BlurAggregatorTest {
         assertEquals(1, blurRegions.length);
 
         mDrawable.mPositionUpdateListener.positionChanged(TEST_FRAME_NUMBER, 1, 2, 3, 4);
-        mAggregator.getBlurRegionsToDispatchToSf(TEST_FRAME_NUMBER, blurRegions,
+        mAggregator.getBlurRegionsForFrameLocked(TEST_FRAME_NUMBER, blurRegions,
                 mAggregator.hasUpdates());
         assertEquals(1, blurRegions[0].rect.left);
         assertEquals(2, blurRegions[0].rect.top);
@@ -169,7 +169,7 @@ public class BlurAggregatorTest {
         final BlurRegion[] blurRegions = mAggregator.getBlurRegionsCopyForRT();
         assertEquals(1, blurRegions.length);
 
-        float[][] blurRegionsForSf = mAggregator.getBlurRegionsToDispatchToSf(
+        float[][] blurRegionsForSf = mAggregator.getBlurRegionsForFrameLocked(
                 TEST_FRAME_NUMBER, blurRegions, hasUpdates);
         assertNull(blurRegionsForSf);
     }
@@ -182,7 +182,7 @@ public class BlurAggregatorTest {
         final BlurRegion[] blurRegions = mAggregator.getBlurRegionsCopyForRT();
         assertEquals(1, blurRegions.length);
 
-        float[][] blurRegionsForSf = mAggregator.getBlurRegionsToDispatchToSf(
+        float[][] blurRegionsForSf = mAggregator.getBlurRegionsForFrameLocked(
                 TEST_FRAME_NUMBER, blurRegions, hasUpdates);
         assertNotNull(blurRegionsForSf);
         assertEquals(1, blurRegionsForSf.length);
@@ -197,7 +197,7 @@ public class BlurAggregatorTest {
         assertEquals(1, blurRegions.length);
 
         mDrawable.mPositionUpdateListener.positionChanged(TEST_FRAME_NUMBER, 1, 2, 3, 4);
-        float[][] blurRegionsForSf = mAggregator.getBlurRegionsToDispatchToSf(
+        float[][] blurRegionsForSf = mAggregator.getBlurRegionsForFrameLocked(
                 TEST_FRAME_NUMBER, blurRegions, hasUpdates);
         assertNotNull(blurRegionsForSf);
         assertEquals(1, blurRegionsForSf.length);
@@ -216,7 +216,7 @@ public class BlurAggregatorTest {
         assertEquals(1, blurRegions.length);
 
         mDrawable.mPositionUpdateListener.positionChanged(TEST_FRAME_NUMBER, 1, 2, 3, 4);
-        float[][] blurRegionsForSf = mAggregator.getBlurRegionsToDispatchToSf(
+        float[][] blurRegionsForSf = mAggregator.getBlurRegionsForFrameLocked(
                 TEST_FRAME_NUMBER + 1, blurRegions, hasUpdates);
         assertNotNull(blurRegionsForSf);
         assertEquals(1, blurRegionsForSf.length);
@@ -237,19 +237,19 @@ public class BlurAggregatorTest {
         assertEquals(2, blurRegions.length);
 
         // Check that an update in one of the drawables triggers a dispatch of all blur regions
-        float[][] blurRegionsForSf = mAggregator.getBlurRegionsToDispatchToSf(
+        float[][] blurRegionsForSf = mAggregator.getBlurRegionsForFrameLocked(
                 TEST_FRAME_NUMBER, blurRegions, hasUpdates);
         assertNotNull(blurRegionsForSf);
         assertEquals(2, blurRegionsForSf.length);
 
         // Check that the Aggregator deleted all position updates for frame TEST_FRAME_NUMBER
-        blurRegionsForSf = mAggregator.getBlurRegionsToDispatchToSf(
+        blurRegionsForSf = mAggregator.getBlurRegionsForFrameLocked(
                 TEST_FRAME_NUMBER, blurRegions, /* hasUiUpdates= */ false);
         assertNull(blurRegionsForSf);
 
         // Check that a position update triggers a dispatch of all blur regions
         drawable2.mPositionUpdateListener.positionChanged(TEST_FRAME_NUMBER, 1, 2, 3, 4);
-        blurRegionsForSf = mAggregator.getBlurRegionsToDispatchToSf(
+        blurRegionsForSf = mAggregator.getBlurRegionsForFrameLocked(
                 TEST_FRAME_NUMBER + 1, blurRegions, hasUpdates);
         assertNotNull(blurRegionsForSf);
         assertEquals(2, blurRegionsForSf.length);
@@ -292,7 +292,7 @@ public class BlurAggregatorTest {
         mDrawable.mPositionUpdateListener.positionChanged(TEST_FRAME_NUMBER, 1, 2, 3, 4);
         mDrawable.mPositionUpdateListener.positionChanged(TEST_FRAME_NUMBER + 1, 5, 6, 7, 8);
 
-        final float[][] blurRegionsForSf = mAggregator.getBlurRegionsToDispatchToSf(
+        final float[][] blurRegionsForSf = mAggregator.getBlurRegionsForFrameLocked(
                 TEST_FRAME_NUMBER, blurRegions, /* hasUiUpdates= */ false);
         assertNotNull(blurRegionsForSf);
         assertEquals(1, blurRegionsForSf.length);
@@ -303,7 +303,7 @@ public class BlurAggregatorTest {
         assertEquals(3f, blurRegionsForSf[0][4]);
         assertEquals(4f, blurRegionsForSf[0][5]);
 
-        final float[][] blurRegionsForSfForNextFrame = mAggregator.getBlurRegionsToDispatchToSf(
+        final float[][] blurRegionsForSfForNextFrame = mAggregator.getBlurRegionsForFrameLocked(
                 TEST_FRAME_NUMBER + 1, blurRegions, /* hasUiUpdates= */ false);
         assertNotNull(blurRegionsForSfForNextFrame);
         assertEquals(1, blurRegionsForSfForNextFrame.length);

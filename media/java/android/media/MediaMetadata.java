@@ -429,6 +429,15 @@ public final class MediaMetadata implements Parcelable {
     private MediaMetadata(Parcel in) {
         mBundle = in.readBundle();
         mBitmapDimensionLimit = Math.max(in.readInt(), 1);
+
+        // Proactively read bitmaps from known bitmap keys, to ensure that they're unparceled and
+        // added to mBundle's internal map. This ensures that the GC accounts for the underlying
+        // allocations, which it does not do if the bitmaps remain parceled (see b/215820910).
+        // TODO(b/223225532): Remove this workaround once the underlying allocations are properly
+        // tracked in NativeAllocationsRegistry.
+        getBitmap(METADATA_KEY_ART);
+        getBitmap(METADATA_KEY_ALBUM_ART);
+        getBitmap(METADATA_KEY_DISPLAY_ICON);
     }
 
     /**

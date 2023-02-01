@@ -17,11 +17,10 @@ package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
 
+import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
-import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
-import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.MESSAGE_DEVICE_VENDOR_ID;
 import static com.android.server.hdmi.Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
@@ -40,6 +39,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.tv.cec.V1_0.Result;
 import android.media.AudioManager;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -110,11 +110,6 @@ public class HdmiCecLocalDeviceTest {
         protected List<Integer> getRcFeatures() {
             return Collections.emptyList();
         }
-
-        @Override
-        protected List<Integer> getDeviceFeatures() {
-            return Collections.emptyList();
-        }
     }
 
     private MyHdmiCecLocalDevice mHdmiLocalDevice;
@@ -143,7 +138,8 @@ public class HdmiCecLocalDeviceTest {
         Context context = InstrumentationRegistry.getTargetContext();
 
         mHdmiControlService =
-                new HdmiControlService(context) {
+                new HdmiControlService(context, Collections.emptyList(),
+                        new FakeAudioDeviceVolumeManagerWrapper()) {
                     @Override
                     boolean isControlEnabled() {
                         return isControlEnabled;
@@ -188,14 +184,6 @@ public class HdmiCecLocalDeviceTest {
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiLocalDevice = new MyHdmiCecLocalDevice(mHdmiControlService, DEVICE_TV);
-        mMessageValidator =
-                new HdmiCecMessageValidator(mHdmiControlService) {
-                    @Override
-                    int isValid(HdmiCecMessage message, boolean isMessageReceived) {
-                        return HdmiCecMessageValidator.OK;
-                    }
-                };
-        mHdmiControlService.setMessageValidator(mMessageValidator);
 
         mLocalDevices.add(mHdmiLocalDevice);
         HdmiPortInfo[] hdmiPortInfos = new HdmiPortInfo[1];
@@ -204,9 +192,11 @@ public class HdmiCecLocalDeviceTest {
         mNativeWrapper.setPortInfo(hdmiPortInfos);
         mNativeWrapper.setPortConnectionStatus(1, true);
         mHdmiControlService.initService();
+        mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mNativeWrapper.setPhysicalAddress(0x2000);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
     }
 
     @Test
@@ -230,7 +220,7 @@ public class HdmiCecLocalDeviceTest {
     @Test
     public void dispatchMessage_logicalAddressDoesNotMatch() {
         HdmiCecMessage msg =
-                new HdmiCecMessage(
+                HdmiCecMessage.build(
                         ADDR_TV,
                         ADDR_PLAYBACK_1,
                         Constants.MESSAGE_CEC_VERSION,
@@ -241,37 +231,71 @@ public class HdmiCecLocalDeviceTest {
 
     @Test
     public void handleGivePhysicalAddress_success() {
-        mSrcAddr = ADDR_UNREGISTERED;
-        mDesAddr = ADDR_BROADCAST;
-        param =
-                new byte[] {
-                    (byte) ((mPhysicalAddr >> 8) & 0xFF),
-                    (byte) (mPhysicalAddr & 0xFF),
-                    (byte) (DEVICE_TV & 0xFF)
-                };
-        callbackResult = -1;
-        @Constants.HandleMessageResult int handleResult =
+        mNativeWrapper.setPhysicalAddress(0x0);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(ADDR_TV, 0, DEVICE_TV);
+        @Constants.HandleMessageResult
+        int handleResult =
                 mHdmiLocalDevice.handleGivePhysicalAddress(
-                        (int finalResult) -> callbackResult = finalResult);
+                        HdmiCecMessageBuilder.buildGivePhysicalAddress(
+                                ADDR_PLAYBACK_1, ADDR_TV));
         mTestLooper.dispatchAll();
-        /**
-         * Test if CecMessage is sent successfully SendMessageResult#SUCCESS is defined in HAL as 0
-         */
-        assertEquals(0, callbackResult);
         assertEquals(Constants.HANDLED, handleResult);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void handleGivePhysicalAddress_failure() {
+        mNativeWrapper.setPhysicalAddress(Constants.INVALID_PHYSICAL_ADDRESS);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                        ADDR_TV,
+                        ADDR_PLAYBACK_1,
+                        Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS,
+                        Constants.ABORT_UNABLE_TO_DETERMINE);
+        @Constants.HandleMessageResult
+        int handleResult =
+                mHdmiLocalDevice.handleGivePhysicalAddress(
+                        HdmiCecMessageBuilder.buildGivePhysicalAddress(
+                                ADDR_PLAYBACK_1, ADDR_TV));
+        mTestLooper.dispatchAll();
+        assertEquals(Constants.HANDLED, handleResult);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
     @Test
     public void handleGiveDeviceVendorId_success() {
-        mSrcAddr = ADDR_UNREGISTERED;
-        mDesAddr = ADDR_BROADCAST;
-        /** nativeGetVendorId returns 0 */
-        param = new byte[] {(byte) ((0 >> 8) & 0xFF), (byte) (0 & 0xFF), (byte) (0 & 0xFF)};
-        callbackResult = -1;
-        mHdmiLocalDevice.handleGiveDeviceVendorId(
-                (int finalResult) -> callbackResult = finalResult);
+        /** Set vendor id to 0 */
+        mNativeWrapper.setVendorId(0);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildDeviceVendorIdCommand(ADDR_TV, 0);
+        @Constants.HandleMessageResult
+        int handleResult =
+                mHdmiLocalDevice.handleGiveDeviceVendorId(
+                        HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(
+                                ADDR_PLAYBACK_1, ADDR_TV));
         mTestLooper.dispatchAll();
-        assertEquals(0, callbackResult);
+        assertEquals(Constants.HANDLED, handleResult);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void handleGiveDeviceVendorId_failure() {
+        mNativeWrapper.setVendorId(Result.FAILURE_UNKNOWN);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                        ADDR_TV,
+                        ADDR_PLAYBACK_1,
+                        Constants.MESSAGE_GIVE_DEVICE_VENDOR_ID,
+                        Constants.ABORT_UNABLE_TO_DETERMINE);
+        @Constants.HandleMessageResult
+        int handleResult =
+                mHdmiLocalDevice.handleGiveDeviceVendorId(
+                        HdmiCecMessageBuilder.buildGiveDeviceVendorIdCommand(
+                                ADDR_PLAYBACK_1, ADDR_TV));
+        mTestLooper.dispatchAll();
+        assertEquals(Constants.HANDLED, handleResult);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
     @Test
@@ -352,9 +376,13 @@ public class HdmiCecLocalDeviceTest {
 
     @Test
     public void handleCecVersion_isHandled() {
-        @Constants.HandleMessageResult int result = mHdmiLocalDevice.onMessage(
-                HdmiCecMessageBuilder.buildCecVersion(ADDR_PLAYBACK_1, mHdmiLocalDevice.mAddress,
-                        HdmiControlManager.HDMI_CEC_VERSION_1_4_B));
+        @Constants.HandleMessageResult
+        int result =
+                mHdmiLocalDevice.onMessage(
+                        HdmiCecMessageBuilder.buildCecVersion(
+                                ADDR_PLAYBACK_1,
+                                mHdmiLocalDevice.getDeviceInfo().getLogicalAddress(),
+                                HdmiControlManager.HDMI_CEC_VERSION_1_4_B));
 
         assertEquals(Constants.HANDLED, result);
     }

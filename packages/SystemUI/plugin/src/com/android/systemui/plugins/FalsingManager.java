@@ -22,7 +22,6 @@ import android.view.MotionEvent;
 
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,7 +29,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Interface that decides whether a touch on the phone was accidental. i.e. Pocket Dialing.
  *
- * {@see com.android.systemui.classifier.FalsingManagerImpl}
+ * {@see com.android.systemui.classifier.BrightLineFalsingManager}
  */
 @ProvidesInterface(version = FalsingManager.VERSION)
 public interface FalsingManager {
@@ -103,6 +102,12 @@ public interface FalsingManager {
      */
     boolean isFalseDoubleTap();
 
+    /**
+     * Whether the last proximity event reported NEAR. May be used to short circuit motion events
+     * that require the proximity sensor is not covered.
+     */
+    boolean isProximityNear();
+
     boolean isClassifierEnabled();
 
     boolean shouldEnforceBouncer();
@@ -112,7 +117,7 @@ public interface FalsingManager {
     boolean isReportingEnabled();
 
     /** From com.android.systemui.Dumpable. */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+    void dump(PrintWriter pw, String[] args);
 
     /**
      *  Don't call this. It's meant for internal use to allow switching between implementations.
@@ -142,10 +147,10 @@ public interface FalsingManager {
     }
 
     /**
-     * Listener that is alerted when a double tap is required to confirm a single tap.
+     * Listener that is alerted when an additional tap is required to confirm a single tap.
      **/
     interface FalsingTapListener {
-        void onDoubleTapRequired();
+        void onAdditionalTapRequired();
     }
 
     /** Passed to {@link FalsingManager#onProximityEvent}. */

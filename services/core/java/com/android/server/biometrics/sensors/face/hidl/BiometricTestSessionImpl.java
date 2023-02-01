@@ -32,6 +32,7 @@ import android.util.Slog;
 
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.face.FaceUtils;
 
 import java.util.ArrayList;
@@ -197,7 +198,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     public void cleanupInternalState(int userId) {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mFace10.scheduleInternalCleanup(mSensorId, userId, new BaseClientMonitor.Callback() {
+        mFace10.scheduleInternalCleanup(mSensorId, userId, new ClientMonitorCallback() {
             @Override
             public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                 try {

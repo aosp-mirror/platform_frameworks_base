@@ -94,7 +94,7 @@ public class NetworkPolicyLogger {
     void networkBlocked(int uid, @Nullable UidBlockedState uidBlockedState) {
         synchronized (mLock) {
             if (LOGD || uid == mDebugUid) {
-                Slog.d(TAG, "Blocked state of " + uid + ": " + uidBlockedState.toString());
+                Slog.d(TAG, "Blocked state of " + uid + ": " + uidBlockedState);
             }
             if (uidBlockedState == null) {
                 mNetworkBlockedBuffer.networkBlocked(uid, BLOCKED_REASON_NONE, ALLOWED_REASON_NONE,

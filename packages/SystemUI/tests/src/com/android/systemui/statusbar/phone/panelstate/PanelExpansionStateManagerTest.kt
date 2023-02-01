@@ -39,12 +39,15 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         val fraction = 0.6f
         val expanded = true
         val tracking = true
+        val dragDownAmount = 1234f
 
-        panelExpansionStateManager.onPanelExpansionChanged(fraction, expanded, tracking)
+        panelExpansionStateManager.onPanelExpansionChanged(
+            fraction, expanded, tracking, dragDownAmount)
 
         assertThat(listener.fraction).isEqualTo(fraction)
         assertThat(listener.expanded).isEqualTo(expanded)
         assertThat(listener.tracking).isEqualTo(tracking)
+        assertThat(listener.dragDownAmountPx).isEqualTo(dragDownAmount)
     }
 
     @Test
@@ -52,7 +55,9 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         val fraction = 0.6f
         val expanded = true
         val tracking = true
-        panelExpansionStateManager.onPanelExpansionChanged(fraction, expanded, tracking)
+        val dragDownAmount = 1234f
+        panelExpansionStateManager.onPanelExpansionChanged(
+            fraction, expanded, tracking, dragDownAmount)
         val listener = TestPanelExpansionListener()
 
         panelExpansionStateManager.addExpansionListener(listener)
@@ -60,6 +65,7 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         assertThat(listener.fraction).isEqualTo(fraction)
         assertThat(listener.expanded).isEqualTo(expanded)
         assertThat(listener.tracking).isEqualTo(tracking)
+        assertThat(listener.dragDownAmountPx).isEqualTo(dragDownAmount)
     }
 
     @Test
@@ -82,8 +88,7 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         panelExpansionStateManager.addStateListener(listener)
 
         panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 0.5f, expanded = true, tracking = false
-        )
+            fraction = 0.5f, expanded = true, tracking = false, dragDownPxAmount = 0f)
 
         assertThat(listener.state).isEqualTo(STATE_OPENING)
     }
@@ -94,8 +99,7 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         panelExpansionStateManager.addStateListener(listener)
 
         panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 0.5f, expanded = true, tracking = true
-        )
+            fraction = 0.5f, expanded = true, tracking = true, dragDownPxAmount = 0f)
 
         assertThat(listener.state).isEqualTo(STATE_OPENING)
     }
@@ -108,8 +112,7 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         panelExpansionStateManager.updateState(STATE_OPEN)
 
         panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 0.5f, expanded = false, tracking = false
-        )
+            fraction = 0.5f, expanded = false, tracking = false, dragDownPxAmount = 0f)
 
         assertThat(listener.state).isEqualTo(STATE_CLOSED)
     }
@@ -122,8 +125,7 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         panelExpansionStateManager.updateState(STATE_OPEN)
 
         panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 0.5f, expanded = false, tracking = true
-        )
+            fraction = 0.5f, expanded = false, tracking = true, dragDownPxAmount = 0f)
 
         assertThat(listener.state).isEqualTo(STATE_OPEN)
     }
@@ -136,8 +138,7 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         panelExpansionStateManager.addStateListener(listener)
 
         panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 1f, expanded = true, tracking = false
-        )
+            fraction = 1f, expanded = true, tracking = false, dragDownPxAmount = 0f)
 
         assertThat(listener.previousState).isEqualTo(STATE_OPENING)
         assertThat(listener.state).isEqualTo(STATE_OPEN)
@@ -149,8 +150,7 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         panelExpansionStateManager.addStateListener(listener)
 
         panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 1f, expanded = true, tracking = true
-        )
+            fraction = 1f, expanded = true, tracking = true, dragDownPxAmount = 0f)
 
         assertThat(listener.state).isEqualTo(STATE_OPENING)
     }
@@ -163,8 +163,7 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         panelExpansionStateManager.updateState(STATE_OPEN)
 
         panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 1f, expanded = false, tracking = false
-        )
+            fraction = 1f, expanded = false, tracking = false, dragDownPxAmount = 0f)
 
         assertThat(listener.state).isEqualTo(STATE_CLOSED)
     }
@@ -177,8 +176,7 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         panelExpansionStateManager.updateState(STATE_OPEN)
 
         panelExpansionStateManager.onPanelExpansionChanged(
-            fraction = 1f, expanded = false, tracking = true
-        )
+            fraction = 1f, expanded = false, tracking = true, dragDownPxAmount = 0f)
 
         assertThat(listener.state).isEqualTo(STATE_OPEN)
     }
@@ -189,15 +187,13 @@ class PanelExpansionStateManagerTest : SysuiTestCase() {
         var fraction: Float = 0f
         var expanded: Boolean = false
         var tracking: Boolean = false
+        var dragDownAmountPx: Float = 0f
 
-        override fun onPanelExpansionChanged(
-            fraction: Float,
-            expanded: Boolean,
-            tracking: Boolean
-        ) {
-            this.fraction = fraction
-            this.expanded = expanded
-            this.tracking = tracking
+        override fun onPanelExpansionChanged(event: PanelExpansionChangeEvent) {
+            this.fraction = event.fraction
+            this.expanded = event.expanded
+            this.tracking = event.tracking
+            this.dragDownAmountPx = event.dragDownPxAmount
         }
     }
 

@@ -363,6 +363,11 @@ key 405   LAST_CHANNEL
 # key 413 "KEY_DIGITS"
 # key 414 "KEY_TEEN"
 # key 415 "KEY_TWEN"
+# key 418 "KEY_ZOOM_IN"
+key 418   ZOOM_IN
+# key 419 "KEY_ZOOM_OUT"
+key 419   ZOOM_OUT
+key 528 FOCUS
 
 key 429   CONTACTS
 
@@ -416,6 +421,8 @@ key usage 0x0c0067 WINDOW
 key usage 0x0c006F BRIGHTNESS_UP
 key usage 0x0c0070 BRIGHTNESS_DOWN
 key usage 0x0c0173 MEDIA_AUDIO_TRACK
+key usage 0x0c019C PROFILE_SWITCH
+key usage 0x0c01A2 ALL_APPS
 
 # Joystick and game controller axes.
 # Axes that are not mapped will be assigned generic axis numbers by the input subsystem.

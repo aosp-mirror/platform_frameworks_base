@@ -18,7 +18,7 @@ package com.android.systemui.statusbar
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
 import android.os.PowerManager
@@ -28,6 +28,7 @@ import android.util.IndentingPrintWriter
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
@@ -46,7 +47,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
-import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlin.math.max
@@ -192,7 +192,10 @@ constructor(
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val finishExpanding = (event.action == MotionEvent.ACTION_CANCEL ||
             event.action == MotionEvent.ACTION_UP) && isExpanding
-        if (!canHandleMotionEvent() && !finishExpanding) {
+
+        val isDraggingNotificationOrCanBypass = mStartingChild?.showingPulsing() == true ||
+                bypassController.canBypass()
+        if ((!canHandleMotionEvent() || !isDraggingNotificationOrCanBypass) && !finishExpanding) {
             // We allow cancellations/finishing to still go through here to clean up the state
             return false
         }
@@ -274,15 +277,22 @@ constructor(
         }
     }
 
-    private fun reset(child: ExpandableView) {
+    @VisibleForTesting
+    fun reset(
+            child: ExpandableView,
+            animationDuration: Long = SPRING_BACK_ANIMATION_LENGTH_MS.toLong()
+    ) {
         if (child.actualHeight == child.collapsedHeight) {
             setUserLocked(child, false)
             return
         }
-        val anim = ObjectAnimator.ofInt(child, "actualHeight",
-                child.actualHeight, child.collapsedHeight)
+        val anim = ValueAnimator.ofInt(child.actualHeight, child.collapsedHeight)
         anim.interpolator = Interpolators.FAST_OUT_SLOW_IN
-        anim.duration = SPRING_BACK_ANIMATION_LENGTH_MS.toLong()
+        anim.duration = animationDuration
+        anim.addUpdateListener { animation: ValueAnimator ->
+            // don't use reflection, because the `actualHeight` field may be obfuscated
+            child.actualHeight = animation.animatedValue as Int
+        }
         anim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 setUserLocked(child, false)
@@ -330,7 +340,7 @@ constructor(
         mPulsing = pulsing
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
         IndentingPrintWriter(pw, "  ").let {
             it.println("PulseExpansionHandler:")
             it.increaseIndent()

@@ -16,9 +16,14 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
+import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -26,6 +31,8 @@ import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+
+import java.util.ArrayList;
 
 /**
  * Utility class for collecting WindowContainers that will merge transactions.
@@ -57,8 +64,30 @@ import com.android.internal.protolog.common.ProtoLog;
 class BLASTSyncEngine {
     private static final String TAG = "BLASTSyncEngine";
 
+    /** No specific method. Used by override specifiers. */
+    public static final int METHOD_UNDEFINED = -1;
+
+    /** No sync method. Apps will draw/present internally and just report. */
+    public static final int METHOD_NONE = 0;
+
+    /** Sync with BLAST. Apps will draw and then send the buffer to be applied in sync. */
+    public static final int METHOD_BLAST = 1;
+
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
+    }
+
+    /**
+     * Represents the desire to make a {@link BLASTSyncEngine.SyncGroup} while another is active.
+     *
+     * @see #queueSyncSet
+     */
+    private static class PendingSyncSet {
+        /** Called immediately when the {@link BLASTSyncEngine} is free. */
+        private Runnable mStartSync;
+
+        /** Posted to the main handler after {@link #mStartSync} is called. */
+        private Runnable mApplySync;
     }
 
     /**
@@ -66,14 +95,17 @@ class BLASTSyncEngine {
      */
     class SyncGroup {
         final int mSyncId;
+        final int mSyncMethod;
         final TransactionReadyListener mListener;
         final Runnable mOnTimeout;
         boolean mReady = false;
         final ArraySet<WindowContainer> mRootMembers = new ArraySet<>();
         private SurfaceControl.Transaction mOrphanTransaction = null;
+        private String mTraceName;
 
-        private SyncGroup(TransactionReadyListener listener, int id) {
+        private SyncGroup(TransactionReadyListener listener, int id, String name, int method) {
             mSyncId = id;
+            mSyncMethod = method;
             mListener = listener;
             mOnTimeout = () -> {
                 Slog.w(TAG, "Sync group " + mSyncId + " timeout");
@@ -81,6 +113,10 @@ class BLASTSyncEngine {
                     onTimeout();
                 }
             };
+            if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+                mTraceName = name + "SyncGroupReady";
+                Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, mTraceName, id);
+            }
         }
 
         /**
@@ -113,6 +149,9 @@ class BLASTSyncEngine {
         }
 
         private void finishNow() {
+            if (mTraceName != null) {
+                Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, mTraceName, mSyncId);
+            }
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Finished!", mSyncId);
             SurfaceControl.Transaction merged = mWm.mTransactionFactory.get();
             if (mOrphanTransaction != null) {
@@ -121,9 +160,69 @@ class BLASTSyncEngine {
             for (WindowContainer wc : mRootMembers) {
                 wc.finishSync(merged, false /* cancel */);
             }
+
+            final ArraySet<WindowContainer> wcAwaitingCommit = new ArraySet<>();
+            for (WindowContainer wc : mRootMembers) {
+                wc.waitForSyncTransactionCommit(wcAwaitingCommit);
+            }
+            class CommitCallback implements Runnable {
+                // Can run a second time if the action completes after the timeout.
+                boolean ran = false;
+                public void onCommitted() {
+                    synchronized (mWm.mGlobalLock) {
+                        if (ran) {
+                            return;
+                        }
+                        mWm.mH.removeCallbacks(this);
+                        ran = true;
+                        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                        for (WindowContainer wc : wcAwaitingCommit) {
+                            wc.onSyncTransactionCommitted(t);
+                        }
+                        t.apply();
+                        wcAwaitingCommit.clear();
+                    }
+                }
+
+                // Called in timeout
+                @Override
+                public void run() {
+                    // Sometimes we get a trace, sometimes we get a bugreport without
+                    // a trace. Since these kind of ANRs can trigger such an issue,
+                    // try and ensure we will have some visibility in both cases.
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionCommitTimeout");
+                    Slog.e(TAG, "WM sent Transaction to organized, but never received" +
+                           " commit callback. Application ANR likely to follow.");
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    onCommitted();
+
+                }
+            };
+            CommitCallback callback = new CommitCallback();
+            merged.addTransactionCommittedListener((r) -> { r.run(); }, callback::onCommitted);
+            mWm.mH.postDelayed(callback, BLAST_TIMEOUT_DURATION);
+
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             mActiveSyncs.remove(mSyncId);
             mWm.mH.removeCallbacks(mOnTimeout);
+
+            // Immediately start the next pending sync-transaction if there is one.
+            if (mActiveSyncs.size() == 0 && !mPendingSyncSets.isEmpty()) {
+                ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "PendingStartTransaction found");
+                final PendingSyncSet pt = mPendingSyncSets.remove(0);
+                pt.mStartSync.run();
+                if (mActiveSyncs.size() == 0) {
+                    throw new IllegalStateException("Pending Sync Set didn't start a sync.");
+                }
+                // Post this so that the now-playing transition setup isn't interrupted.
+                mWm.mH.post(() -> {
+                    synchronized (mWm.mGlobalLock) {
+                        pt.mApplySync.run();
+                    }
+                });
+            }
         }
 
         private void setReady(boolean ready) {
@@ -149,11 +248,17 @@ class BLASTSyncEngine {
 
         private void onTimeout() {
             if (!mActiveSyncs.contains(mSyncId)) return;
+            boolean allFinished = true;
             for (int i = mRootMembers.size() - 1; i >= 0; --i) {
                 final WindowContainer<?> wc = mRootMembers.valueAt(i);
                 if (!wc.isSyncFinished()) {
+                    allFinished = false;
                     Slog.i(TAG, "Unfinished container: " + wc);
                 }
+            }
+            if (allFinished && !mReady) {
+                Slog.w(TAG, "Sync group " + mSyncId + " timed-out because not ready. If you see "
+                        + "this, please file a bug.");
             }
             finishNow();
         }
@@ -163,21 +268,56 @@ class BLASTSyncEngine {
     private int mNextSyncId = 0;
     private final SparseArray<SyncGroup> mActiveSyncs = new SparseArray<>();
 
+    /**
+     * A queue of pending sync-sets waiting for their turn to run.
+     *
+     * @see #queueSyncSet
+     */
+    private final ArrayList<PendingSyncSet> mPendingSyncSets = new ArrayList<>();
+
     BLASTSyncEngine(WindowManagerService wms) {
         mWm = wms;
     }
 
-    int startSyncSet(TransactionReadyListener listener) {
-        return startSyncSet(listener, WindowState.BLAST_TIMEOUT_DURATION);
+    /**
+     * Prepares a {@link SyncGroup} that is not active yet. Caller must call {@link #startSyncSet}
+     * before calling {@link #addToSyncSet(int, WindowContainer)} on any {@link WindowContainer}.
+     */
+    SyncGroup prepareSyncSet(TransactionReadyListener listener, String name, int method) {
+        return new SyncGroup(listener, mNextSyncId++, name, method);
     }
 
-    int startSyncSet(TransactionReadyListener listener, long timeoutMs) {
-        final int id = mNextSyncId++;
-        final SyncGroup s = new SyncGroup(listener, id);
-        mActiveSyncs.put(id, s);
-        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s", id, listener);
+    int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name,
+            int method) {
+        final SyncGroup s = prepareSyncSet(listener, name, method);
+        startSyncSet(s, timeoutMs);
+        return s.mSyncId;
+    }
+
+    void startSyncSet(SyncGroup s) {
+        startSyncSet(s, BLAST_TIMEOUT_DURATION);
+    }
+
+    void startSyncSet(SyncGroup s, long timeoutMs) {
+        if (mActiveSyncs.size() != 0) {
+            // We currently only support one sync at a time, so start a new SyncGroup when there is
+            // another may cause issue.
+            ProtoLog.w(WM_DEBUG_SYNC_ENGINE,
+                    "SyncGroup %d: Started when there is other active SyncGroup", s.mSyncId);
+        }
+        mActiveSyncs.put(s.mSyncId, s);
+        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s",
+                s.mSyncId, s.mListener);
         scheduleTimeout(s, timeoutMs);
-        return id;
+    }
+
+    @Nullable
+    SyncGroup getSyncSet(int id) {
+        return mActiveSyncs.get(id);
+    }
+
+    boolean hasActiveSync() {
+        return mActiveSyncs.size() != 0;
     }
 
     @VisibleForTesting
@@ -186,11 +326,11 @@ class BLASTSyncEngine {
     }
 
     void addToSyncSet(int id, WindowContainer wc) {
-        mActiveSyncs.get(id).addToSync(wc);
+        getSyncGroup(id).addToSync(wc);
     }
 
     void setReady(int id, boolean ready) {
-        mActiveSyncs.get(id).setReady(ready);
+        getSyncGroup(id).setReady(ready);
     }
 
     void setReady(int id) {
@@ -198,14 +338,22 @@ class BLASTSyncEngine {
     }
 
     boolean isReady(int id) {
-        return mActiveSyncs.get(id).mReady;
+        return getSyncGroup(id).mReady;
     }
 
     /**
      * Aborts the sync (ie. it doesn't wait for ready or anything to finish)
      */
     void abort(int id) {
-        mActiveSyncs.get(id).finishNow();
+        getSyncGroup(id).finishNow();
+    }
+
+    private SyncGroup getSyncGroup(int id) {
+        final SyncGroup syncGroup = mActiveSyncs.get(id);
+        if (syncGroup == null) {
+            throw new IllegalStateException("SyncGroup is not started yet id=" + id);
+        }
+        return syncGroup;
     }
 
     void onSurfacePlacement() {
@@ -213,5 +361,32 @@ class BLASTSyncEngine {
         for (int i = mActiveSyncs.size() - 1; i >= 0; --i) {
             mActiveSyncs.valueAt(i).onSurfacePlacement();
         }
+    }
+
+    /**
+     * Queues a sync operation onto this engine. It will wait until any current/prior sync-sets
+     * have finished to run. This is needed right now because currently {@link BLASTSyncEngine}
+     * only supports 1 sync at a time.
+     *
+     * Code-paths should avoid using this unless absolutely necessary. Usually, we use this for
+     * difficult edge-cases that we hope to clean-up later.
+     *
+     * @param startSync will be called immediately when the {@link BLASTSyncEngine} is free to
+     *                  "reserve" the {@link BLASTSyncEngine} by calling one of the
+     *                  {@link BLASTSyncEngine#startSyncSet} variants.
+     * @param applySync will be posted to the main handler after {@code startSync} has been
+     *                  called. This is posted so that it doesn't interrupt any clean-up for the
+     *                  prior sync-set.
+     */
+    void queueSyncSet(@NonNull Runnable startSync, @NonNull Runnable applySync) {
+        final PendingSyncSet pt = new PendingSyncSet();
+        pt.mStartSync = startSync;
+        pt.mApplySync = applySync;
+        mPendingSyncSets.add(pt);
+    }
+
+    /** @return {@code true} if there are any sync-sets waiting to start. */
+    boolean hasPendingSyncSets() {
+        return !mPendingSyncSets.isEmpty();
     }
 }

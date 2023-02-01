@@ -16,13 +16,21 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.MODIFY_DAY_NIGHT_MODE;
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
+import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME;
+import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_SCHEDULE;
+import static android.app.UiModeManager.MODE_NIGHT_CUSTOM_TYPE_UNKNOWN;
 import static android.app.UiModeManager.MODE_NIGHT_NO;
 import static android.app.UiModeManager.MODE_NIGHT_YES;
 import static android.app.UiModeManager.PROJECTION_TYPE_ALL;
 import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
 import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
+
+import static com.android.server.UiModeManagerService.SUPPORTED_NIGHT_MODE_CUSTOM_TYPES;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
@@ -37,6 +45,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
@@ -50,30 +59,36 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertThrows;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.IOnProjectionStateChangedListener;
 import android.app.IUiModeManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.service.dreams.DreamManagerInternal;
+import android.test.mock.MockContentResolver;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
@@ -84,6 +99,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 
 import java.time.LocalDateTime;
@@ -98,8 +114,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private static final String PACKAGE_NAME = "Diane Coffee";
     private UiModeManagerService mUiManagerService;
     private IUiModeManager mService;
-    @Mock
-    private ContentResolver mContentResolver;
+    private MockContentResolver mContentResolver;
     @Mock
     private WindowManagerInternal mWindowManager;
     @Mock
@@ -122,16 +137,22 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private PackageManager mPackageManager;
     @Mock
     private IBinder mBinder;
+    @Mock
+    private DreamManagerInternal mDreamManager;
+    @Captor
+    private ArgumentCaptor<Intent> mOrderedBroadcastIntent;
+    @Captor
+    private ArgumentCaptor<BroadcastReceiver> mOrderedBroadcastReceiver;
 
     private BroadcastReceiver mScreenOffCallback;
     private BroadcastReceiver mTimeChangedCallback;
+    private BroadcastReceiver mDockStateChangedCallback;
     private AlarmManager.OnAlarmListener mCustomListener;
     private Consumer<PowerSaveState> mPowerSaveConsumer;
     private TwilightListener mTwilightListener;
 
     @Before
     public void setUp() {
-        initMocks(this);
         when(mContext.checkCallingOrSelfPermission(anyString()))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
         doAnswer(inv -> {
@@ -145,6 +166,10 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         when(mLocalPowerManager.getLowPowerState(anyInt()))
                 .thenReturn(new PowerSaveState.Builder().setBatterySaverEnabled(false).build());
         when(mContext.getResources()).thenReturn(mResources);
+        when(mResources.getString(com.android.internal.R.string.config_somnambulatorComponent))
+                .thenReturn("somnambulator");
+        mContentResolver = new MockContentResolver();
+        mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -158,6 +183,9 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             }
             if (filter.hasAction(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOffCallback = inv.getArgument(0);
+            }
+            if (filter.hasAction(Intent.ACTION_DOCK_EVENT)) {
+                mDockStateChangedCallback = inv.getArgument(0);
             }
             return null;
         });
@@ -173,11 +201,13 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         }).when(mAlarmManager).cancel(eq(mCustomListener));
         when(mContext.getSystemService(eq(Context.POWER_SERVICE)))
                 .thenReturn(mPowerManager);
+        when(mContext.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
         when(mContext.getSystemService(eq(Context.ALARM_SERVICE)))
                 .thenReturn(mAlarmManager);
         addLocalService(WindowManagerInternal.class, mWindowManager);
         addLocalService(PowerManagerInternal.class, mLocalPowerManager);
         addLocalService(TwilightManager.class, mTwilightManager);
+        addLocalService(DreamManagerInternal.class, mDreamManager);
         
         mUiManagerService = new UiModeManagerService(mContext, /* setupWizardComplete= */ true,
                 mTwilightManager, new TestInjector());
@@ -194,7 +224,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
     @Ignore // b/152719290 - Fails on stage-aosp-master
     @Test
-    public void setNightMoveActivated_overridesFunctionCorrectly() throws RemoteException {
+    public void setNightModeActivated_overridesFunctionCorrectly() throws RemoteException {
         // set up
         when(mPowerManager.isInteractive()).thenReturn(false);
         mService.setNightMode(MODE_NIGHT_NO);
@@ -225,6 +255,29 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void setNightModeActivated_true_withCustomModeBedtime_shouldOverrideNightModeCorrectly()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        assertFalse(mUiManagerService.getConfiguration().isNightModeActive());
+
+        mService.setNightModeActivated(true);
+
+        assertThat(mUiManagerService.getConfiguration().isNightModeActive()).isTrue();
+    }
+
+    @Test
+    public void setNightModeActivated_false_withCustomModeBedtime_shouldOverrideNightModeCorrectly()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        assertFalse(mUiManagerService.getConfiguration().isNightModeActive());
+
+        mService.setNightModeActivated(true);
+        mService.setNightModeActivated(false);
+
+        assertThat(mUiManagerService.getConfiguration().isNightModeActive()).isFalse();
+    }
+
+    @Test
     public void setAutoMode_screenOffRegistered() throws RemoteException {
         try {
             mService.setNightMode(MODE_NIGHT_NO);
@@ -247,7 +300,62 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void setNightModeActivated_fromNoToYesAndBAck() throws RemoteException {
+    public void setNightModeCustomType_bedtime_shouldNotActivateNightMode() throws RemoteException {
+        try {
+            mService.setNightMode(MODE_NIGHT_NO);
+        } catch (SecurityException e) { /* we should ignore this update config exception*/ }
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+
+        assertThat(isNightModeActivated()).isFalse();
+    }
+
+    @Test
+    public void setNightModeCustomType_noPermission_shouldThrow() throws RemoteException {
+        when(mContext.checkCallingOrSelfPermission(eq(MODIFY_DAY_NIGHT_MODE)))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        assertThrows(SecurityException.class,
+                () -> mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME));
+    }
+
+    @Test
+    public void setNightModeCustomType_customTypeUnknown_shouldThrow() throws RemoteException {
+        assertThrows(IllegalArgumentException.class,
+                () -> mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_UNKNOWN));
+    }
+
+    @Test
+    public void setNightModeCustomType_customTypeUnsupported_shouldThrow() throws RemoteException {
+        assertThrows(IllegalArgumentException.class,
+                () -> {
+                    int maxSupportedCustomType = 0;
+                    for (Integer supportedType : SUPPORTED_NIGHT_MODE_CUSTOM_TYPES) {
+                        maxSupportedCustomType = Math.max(maxSupportedCustomType, supportedType);
+                    }
+                    mService.setNightModeCustomType(maxSupportedCustomType + 1);
+                });
+    }
+
+    @Test
+    public void setNightModeCustomType_bedtime_shouldHaveNoScreenOffRegistered()
+            throws RemoteException {
+        try {
+            mService.setNightMode(MODE_NIGHT_NO);
+        } catch (SecurityException e) { /* we should ignore this update config exception*/ }
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        ArgumentCaptor<IntentFilter> intentFiltersCaptor = ArgumentCaptor.forClass(
+                IntentFilter.class);
+        verify(mContext, atLeastOnce()).registerReceiver(any(BroadcastReceiver.class),
+                intentFiltersCaptor.capture());
+
+        List<IntentFilter> intentFilters = intentFiltersCaptor.getAllValues();
+        for (IntentFilter intentFilter : intentFilters) {
+            assertThat(intentFilter.hasAction(Intent.ACTION_SCREEN_OFF)).isFalse();
+        }
+    }
+
+    @Test
+    public void setNightModeActivated_fromNoToYesAndBack() throws RemoteException {
         mService.setNightMode(MODE_NIGHT_NO);
         mService.setNightModeActivated(true);
         assertTrue(isNightModeActivated());
@@ -256,7 +364,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void setNightModeActivated_permissiontoChangeOtherUsers() throws RemoteException {
+    public void setNightModeActivated_permissionToChangeOtherUsers() throws RemoteException {
         SystemService.TargetUser user = mock(SystemService.TargetUser.class);
         doReturn(9).when(user).getUserIdentifier();
         mUiManagerService.onUserSwitching(user, user);
@@ -264,6 +372,89 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
                 eq(Manifest.permission.INTERACT_ACROSS_USERS)))
                 .thenReturn(PackageManager.PERMISSION_DENIED);
         assertFalse(mService.setNightModeActivated(true));
+    }
+
+    @Test
+    public void setNightModeActivatedForCustomMode_customTypeBedtime_withParamOnAndBedtime_shouldActivate()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        assertThat(isNightModeActivated()).isTrue();
+    }
+
+    @Test
+    public void setNightModeActivatedForCustomMode_customTypeBedtime_withParamOffAndBedtime_shouldDeactivate()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, false /* active */);
+
+        assertThat(isNightModeActivated()).isFalse();
+    }
+
+    @Test
+    public void setNightModeActivatedForCustomMode_customTypeBedtime_withParamOnAndSchedule_shouldNotActivate()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_SCHEDULE, true /* active */);
+
+        assertThat(isNightModeActivated()).isFalse();
+    }
+
+    @Test
+    public void setNightModeActivatedForCustomMode_customTypeSchedule_withParamOnAndBedtime_shouldNotActivate()
+            throws RemoteException {
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        assertThat(isNightModeActivated()).isFalse();
+    }
+
+    @Test
+    public void setNightModeActivatedForCustomMode_customTypeSchedule_withParamOnAndBedtime_thenCustomTypeBedtime_shouldActivate()
+            throws RemoteException {
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+
+        assertThat(isNightModeActivated()).isTrue();
+    }
+
+    @Test
+    public void setNightModeActivatedForCustomMode_customTypeBedtime_withParamOnAndBedtime_thenCustomTypeSchedule_shouldKeepNightModeActivate()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        LocalTime now = LocalTime.now();
+        mService.setCustomNightModeStart(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.plusHours(2L).toNanoOfDay() / 1000);
+
+        assertThat(isNightModeActivated()).isTrue();
+    }
+
+    @Test
+    public void setNightModeActivatedForCustomMode_customTypeBedtime_withParamOnAndBedtime_thenCustomTypeScheduleAndScreenOff_shouldDeactivateNightMode()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        mService.setNightMode(MODE_NIGHT_CUSTOM);
+        LocalTime now = LocalTime.now();
+        mService.setCustomNightModeStart(now.plusHours(1L).toNanoOfDay() / 1000);
+        mService.setCustomNightModeEnd(now.plusHours(2L).toNanoOfDay() / 1000);
+        mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+
+        assertThat(isNightModeActivated()).isFalse();
     }
 
     @Test
@@ -280,6 +471,191 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
         // night YES
         assertTrue(isNightModeActivated());
+    }
+
+    @Test
+    public void nightModeCustomBedtime_batterySaverOn_notInBedtime_shouldActivateNightMode()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+
+        mPowerSaveConsumer.accept(
+                new PowerSaveState.Builder().setBatterySaverEnabled(true).build());
+
+        assertThat(isNightModeActivated()).isTrue();
+    }
+
+    @Test
+    public void nightModeCustomBedtime_batterySaverOn_afterBedtime_shouldKeepNightModeActivated()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mPowerSaveConsumer.accept(
+                new PowerSaveState.Builder().setBatterySaverEnabled(true).build());
+
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, false /* active */);
+
+        assertThat(isNightModeActivated()).isTrue();
+    }
+
+    @Test
+    public void nightModeBedtime_duringBedtime_batterySaverOnThenOff_shouldKeepNightModeActivated()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        mPowerSaveConsumer.accept(
+                new PowerSaveState.Builder().setBatterySaverEnabled(true).build());
+        mPowerSaveConsumer.accept(
+                new PowerSaveState.Builder().setBatterySaverEnabled(false).build());
+
+        assertThat(isNightModeActivated()).isTrue();
+    }
+
+    @Test
+    public void nightModeCustomBedtime_duringBedtime_batterySaverOnThenOff_finallyAfterBedtime_shouldDeactivateNightMode()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+        mPowerSaveConsumer.accept(
+                new PowerSaveState.Builder().setBatterySaverEnabled(true).build());
+        mPowerSaveConsumer.accept(
+                new PowerSaveState.Builder().setBatterySaverEnabled(false).build());
+
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, false /* active */);
+
+        assertThat(isNightModeActivated()).isFalse();
+    }
+
+    @Test
+    public void nightModeCustomBedtime_duringBedtime_changeModeToNo_shouldDeactivateNightMode()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        mService.setNightMode(MODE_NIGHT_NO);
+
+        assertThat(isNightModeActivated()).isFalse();
+    }
+
+    @Test
+    public void nightModeCustomBedtime_duringBedtime_changeModeToNoAndThenExitBedtime_shouldKeepNightModeDeactivated()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+        mService.setNightMode(MODE_NIGHT_NO);
+
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, false /* active */);
+
+        assertThat(isNightModeActivated()).isFalse();
+    }
+
+    @Test
+    public void nightModeCustomBedtime_duringBedtime_changeModeToYes_shouldKeepNightModeActivated()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        mService.setNightMode(MODE_NIGHT_YES);
+
+        assertThat(isNightModeActivated()).isTrue();
+    }
+
+    @Test
+    public void nightModeCustomBedtime_duringBedtime_changeModeToYesAndThenExitBedtime_shouldKeepNightModeActivated()
+            throws RemoteException {
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        mService.setNightMode(MODE_NIGHT_YES);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, false /* active */);
+
+        assertThat(isNightModeActivated()).isTrue();
+    }
+
+    @Test
+    public void nightModeNo_duringBedtime_shouldKeepNightModeDeactivated()
+            throws RemoteException {
+        mService.setNightMode(MODE_NIGHT_NO);
+
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        assertThat(isNightModeActivated()).isFalse();
+    }
+
+    @Test
+    public void nightModeNo_thenChangeToCustomTypeBedtimeAndActivate_shouldActivateNightMode()
+            throws RemoteException {
+        mService.setNightMode(MODE_NIGHT_NO);
+
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        assertThat(isNightModeActivated()).isTrue();
+    }
+
+    @Test
+    public void nightModeYes_thenChangeToCustomTypeBedtime_shouldDeactivateNightMode()
+            throws RemoteException {
+        mService.setNightMode(MODE_NIGHT_YES);
+
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+
+        assertThat(isNightModeActivated()).isFalse();
+    }
+
+    @Test
+    public void nightModeYes_thenChangeToCustomTypeBedtimeAndActivate_shouldActivateNightMode()
+            throws RemoteException {
+        mService.setNightMode(MODE_NIGHT_YES);
+
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        assertThat(isNightModeActivated()).isTrue();
+    }
+
+    @Test
+    public void nightModeAuto_thenChangeToCustomTypeBedtime_notInBedtime_shouldDeactivateNightMode()
+            throws RemoteException {
+        // set mode to auto
+        mService.setNightMode(MODE_NIGHT_AUTO);
+        mService.setNightModeActivated(true);
+        // now it is night time
+        doReturn(true).when(mTwilightState).isNight();
+        mTwilightListener.onTwilightStateChanged(mTwilightState);
+
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+
+        assertThat(isNightModeActivated()).isFalse();
+    }
+
+    @Test
+    public void nightModeAuto_thenChangeToCustomTypeBedtime_duringBedtime_shouldActivateNightMode()
+            throws RemoteException {
+        // set mode to auto
+        mService.setNightMode(MODE_NIGHT_AUTO);
+        mService.setNightModeActivated(true);
+        // now it is night time
+        doReturn(true).when(mTwilightState).isNight();
+        mTwilightListener.onTwilightStateChanged(mTwilightState);
+
+        mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        mService.setNightModeActivatedForCustomMode(
+                MODE_NIGHT_CUSTOM_TYPE_BEDTIME, true /* active */);
+
+        assertThat(isNightModeActivated()).isTrue();
     }
 
     @Test
@@ -324,6 +700,62 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             mService.setNightModeActivated(true);
         } catch (SecurityException e) { /* we should ignore this update config exception*/ }
         assertEquals(MODE_NIGHT_AUTO, mService.getNightMode());
+    }
+
+    @Test
+    public void getNightModeCustomType_nightModeNo_shouldReturnUnknown() throws RemoteException {
+        try {
+            mService.setNightMode(MODE_NIGHT_NO);
+        } catch (SecurityException e) { /* we should ignore this update config exception*/ }
+
+        assertThat(mService.getNightModeCustomType()).isEqualTo(MODE_NIGHT_CUSTOM_TYPE_UNKNOWN);
+    }
+
+    @Test
+    public void getNightModeCustomType_nightModeYes_shouldReturnUnknown() throws RemoteException {
+        try {
+            mService.setNightMode(MODE_NIGHT_YES);
+        } catch (SecurityException e) { /* we should ignore this update config exception*/ }
+
+        assertThat(mService.getNightModeCustomType()).isEqualTo(MODE_NIGHT_CUSTOM_TYPE_UNKNOWN);
+    }
+
+    @Test
+    public void getNightModeCustomType_nightModeAuto_shouldReturnUnknown() throws RemoteException {
+        try {
+            mService.setNightMode(MODE_NIGHT_AUTO);
+        } catch (SecurityException e) { /* we should ignore this update config exception*/ }
+
+        assertThat(mService.getNightModeCustomType()).isEqualTo(MODE_NIGHT_CUSTOM_TYPE_UNKNOWN);
+    }
+
+    @Test
+    public void getNightModeCustomType_nightModeCustom_shouldReturnSchedule()
+            throws RemoteException {
+        try {
+            mService.setNightMode(MODE_NIGHT_CUSTOM);
+        } catch (SecurityException e) { /* we should ignore this update config exception*/ }
+
+        assertThat(mService.getNightModeCustomType()).isEqualTo(MODE_NIGHT_CUSTOM_TYPE_SCHEDULE);
+    }
+
+    @Test
+    public void getNightModeCustomType_nightModeCustomBedtime_shouldReturnBedtime()
+            throws RemoteException {
+        try {
+            mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+        } catch (SecurityException e) { /* we should ignore this update config exception*/ }
+
+        assertThat(mService.getNightModeCustomType()).isEqualTo(MODE_NIGHT_CUSTOM_TYPE_BEDTIME);
+    }
+
+    @Test
+    public void getNightModeCustomType_permissionNotGranted_shouldThrow()
+            throws RemoteException {
+        when(mContext.checkCallingOrSelfPermission(eq(MODIFY_DAY_NIGHT_MODE)))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        assertThrows(SecurityException.class, () -> mService.getNightModeCustomType());
     }
 
     @Test
@@ -385,7 +817,6 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
         assertFalse(isNightModeActivated());
     }
-
 
 
     @Test
@@ -476,7 +907,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void requestProjection_failsForBogusPackageName() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID + 1);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID + 1);
 
         assertThrows(SecurityException.class, () -> mService.requestProjection(mBinder,
                 PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
@@ -496,7 +927,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void requestProjection_failsIfNoProjectionTypes() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
 
         assertThrows(IllegalArgumentException.class,
                 () -> mService.requestProjection(mBinder, PROJECTION_TYPE_NONE, PACKAGE_NAME));
@@ -509,7 +940,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void requestProjection_failsIfMultipleProjectionTypes() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
 
         // Don't use PROJECTION_TYPE_ALL because that's actually == -1 and will fail the > 0 check.
         int multipleProjectionTypes = PROJECTION_TYPE_AUTOMOTIVE | 0x0002 | 0x0004;
@@ -535,13 +966,13 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void requestProjection_automotive_failsIfAlreadySetByOtherPackage() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
 
         String otherPackage = "Raconteurs";
         when(mPackageManager.getPackageUidAsUser(eq(otherPackage), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         assertFalse(mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, otherPackage));
         assertThat(mService.getProjectingPackages(PROJECTION_TYPE_AUTOMOTIVE),
                 contains(PACKAGE_NAME));
@@ -550,7 +981,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void requestProjection_failsIfCannotLinkToDeath() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         doThrow(new RemoteException()).when(mBinder).linkToDeath(any(), anyInt());
 
         assertFalse(mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
@@ -560,7 +991,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void requestProjection() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         // Should work for all powers of two.
         for (int i = 0; i < Integer.SIZE; ++i) {
             int projectionType = 1 << i;
@@ -576,12 +1007,12 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void releaseProjection_failsForBogusPackageName() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
 
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID + 1);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID + 1);
 
         assertThrows(SecurityException.class, () -> mService.releaseProjection(
                 PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME));
@@ -591,7 +1022,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void releaseProjection_failsIfNameNotFound() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
@@ -605,7 +1036,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void releaseProjection_enforcesToggleAutomotiveProjectionPermission() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
         doThrow(new SecurityException()).when(mContext).enforceCallingPermission(
@@ -624,7 +1055,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void releaseProjection() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         requestAllPossibleProjectionTypes();
         assertEquals(PROJECTION_TYPE_ALL, mService.getActiveProjectionTypes());
 
@@ -644,7 +1075,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     @Test
     public void binderDeath_releasesProjection() throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         requestAllPossibleProjectionTypes();
         assertEquals(PROJECTION_TYPE_ALL, mService.getActiveProjectionTypes());
         ArgumentCaptor<IBinder.DeathRecipient> deathRecipientCaptor = ArgumentCaptor.forClass(
@@ -660,7 +1091,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     public void getActiveProjectionTypes() throws Exception {
         assertEquals(PROJECTION_TYPE_NONE, mService.getActiveProjectionTypes());
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
         mService.releaseProjection(PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
@@ -671,7 +1102,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     public void getProjectingPackages() throws Exception {
         assertTrue(mService.getProjectingPackages(PROJECTION_TYPE_ALL).isEmpty());
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         assertEquals(1, mService.getProjectingPackages(PROJECTION_TYPE_AUTOMOTIVE).size());
         assertEquals(1, mService.getProjectingPackages(PROJECTION_TYPE_ALL).size());
@@ -696,7 +1127,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     public void addOnProjectionStateChangedListener_callsListenerIfProjectionActive()
             throws Exception {
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         assertEquals(PROJECTION_TYPE_AUTOMOTIVE, mService.getActiveProjectionTypes());
 
@@ -726,7 +1157,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         mService.removeOnProjectionStateChangedListener(listener);
         // Now set automotive projection, should not call back.
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         verify(listener, never()).onProjectionStateChanged(anyInt(), any());
     }
@@ -743,7 +1174,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
         // Now set automotive projection, should call back.
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         verify(listener).onProjectionStateChanged(eq(PROJECTION_TYPE_AUTOMOTIVE),
                 eq(List.of(PACKAGE_NAME)));
@@ -770,9 +1201,9 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         int otherFakeProjectionType = 0x0004;
         String otherPackageName = "Internet Arms";
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         when(mPackageManager.getPackageUidAsUser(eq(otherPackageName), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         IOnProjectionStateChangedListener listener = mock(IOnProjectionStateChangedListener.class);
         when(listener.asBinder()).thenReturn(mBinder); // Any binder will do.
         IOnProjectionStateChangedListener listener2 = mock(IOnProjectionStateChangedListener.class);
@@ -825,9 +1256,199 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         // Now kill the binder for the listener. This should remove it from the list of listeners.
         listenerDeathRecipient.getValue().binderDied();
         when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
-                .thenReturn(TestInjector.CALLING_UID);
+                .thenReturn(TestInjector.DEFAULT_CALLING_UID);
         mService.requestProjection(mBinder, PROJECTION_TYPE_AUTOMOTIVE, PACKAGE_NAME);
         verify(listener, never()).onProjectionStateChanged(anyInt(), any());
+    }
+
+    @Test
+    public void enableCarMode_failsForBogusPackageName() throws Exception {
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.DEFAULT_CALLING_UID + 1);
+
+        assertThrows(SecurityException.class, () -> mService.enableCarMode(0, 0, PACKAGE_NAME));
+        assertThat(mService.getCurrentModeType()).isNotEqualTo(Configuration.UI_MODE_TYPE_CAR);
+    }
+
+    @Test
+    public void enableCarMode_shell() throws Exception {
+        mUiManagerService = new UiModeManagerService(mContext, /* setupWizardComplete= */ true,
+                mTwilightManager, new TestInjector(Process.SHELL_UID));
+        try {
+            mUiManagerService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+        } catch (SecurityException e) {/* ignore for permission denial */}
+        mService = mUiManagerService.getService();
+
+        mService.enableCarMode(0, 0, PACKAGE_NAME);
+        assertThat(mService.getCurrentModeType()).isEqualTo(Configuration.UI_MODE_TYPE_CAR);
+    }
+
+    @Test
+    public void disableCarMode_failsForBogusPackageName() throws Exception {
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.DEFAULT_CALLING_UID);
+        mService.enableCarMode(0, 0, PACKAGE_NAME);
+        assertThat(mService.getCurrentModeType()).isEqualTo(Configuration.UI_MODE_TYPE_CAR);
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.DEFAULT_CALLING_UID + 1);
+
+        assertThrows(SecurityException.class,
+            () -> mService.disableCarModeByCallingPackage(0, PACKAGE_NAME));
+        assertThat(mService.getCurrentModeType()).isEqualTo(Configuration.UI_MODE_TYPE_CAR);
+
+        // Clean up
+        when(mPackageManager.getPackageUidAsUser(eq(PACKAGE_NAME), anyInt()))
+            .thenReturn(TestInjector.DEFAULT_CALLING_UID);
+        mService.disableCarModeByCallingPackage(0, PACKAGE_NAME);
+        assertThat(mService.getCurrentModeType()).isNotEqualTo(Configuration.UI_MODE_TYPE_CAR);
+    }
+
+    @Test
+    public void disableCarMode_shell() throws Exception {
+        mUiManagerService = new UiModeManagerService(mContext, /* setupWizardComplete= */ true,
+                mTwilightManager, new TestInjector(Process.SHELL_UID));
+        try {
+            mUiManagerService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
+        } catch (SecurityException e) {/* ignore for permission denial */}
+        mService = mUiManagerService.getService();
+
+        mService.enableCarMode(0, 0, PACKAGE_NAME);
+        assertThat(mService.getCurrentModeType()).isEqualTo(Configuration.UI_MODE_TYPE_CAR);
+
+        mService.disableCarModeByCallingPackage(0, PACKAGE_NAME);
+        assertThat(mService.getCurrentModeType()).isNotEqualTo(Configuration.UI_MODE_TYPE_CAR);
+    }
+
+    @Test
+    public void dreamWhenDocked() {
+        setScreensaverActivateOnDock(true);
+        setScreensaverEnabled(true);
+
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mDreamManager).requestDream();
+    }
+
+    @Test
+    public void noDreamWhenDocked_dreamsDisabled() {
+        setScreensaverActivateOnDock(true);
+        setScreensaverEnabled(false);
+
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mDreamManager, never()).requestDream();
+    }
+
+    @Test
+    public void noDreamWhenDocked_dreamsWhenDockedDisabled() {
+        setScreensaverActivateOnDock(false);
+        setScreensaverEnabled(true);
+
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mDreamManager, never()).requestDream();
+    }
+
+    @Test
+    public void noDreamWhenDocked_keyguardNotShowing_interactive() {
+        setScreensaverActivateOnDock(true);
+        setScreensaverEnabled(true);
+        mUiManagerService.setStartDreamImmediatelyOnDock(false);
+        when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(false);
+        when(mPowerManager.isInteractive()).thenReturn(true);
+
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mDreamManager, never()).requestDream();
+    }
+
+    @Test
+    public void dreamWhenDocked_keyguardShowing_interactive() {
+        setScreensaverActivateOnDock(true);
+        setScreensaverEnabled(true);
+        mUiManagerService.setStartDreamImmediatelyOnDock(false);
+        when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(true);
+        when(mPowerManager.isInteractive()).thenReturn(false);
+
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mDreamManager).requestDream();
+    }
+
+    @Test
+    public void dreamWhenDocked_keyguardNotShowing_notInteractive() {
+        setScreensaverActivateOnDock(true);
+        setScreensaverEnabled(true);
+        mUiManagerService.setStartDreamImmediatelyOnDock(false);
+        when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(false);
+        when(mPowerManager.isInteractive()).thenReturn(false);
+
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mDreamManager).requestDream();
+    }
+
+    @Test
+    public void dreamWhenDocked_keyguardShowing_notInteractive() {
+        setScreensaverActivateOnDock(true);
+        setScreensaverEnabled(true);
+        mUiManagerService.setStartDreamImmediatelyOnDock(false);
+        when(mWindowManager.isKeyguardShowingAndNotOccluded()).thenReturn(true);
+        when(mPowerManager.isInteractive()).thenReturn(false);
+
+        triggerDockIntent();
+        verifyAndSendResultBroadcast();
+        verify(mDreamManager).requestDream();
+    }
+
+    private void triggerDockIntent() {
+        final Intent dockedIntent =
+                new Intent(Intent.ACTION_DOCK_EVENT)
+                        .putExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_DESK);
+        mDockStateChangedCallback.onReceive(mContext, dockedIntent);
+    }
+
+    private void verifyAndSendResultBroadcast() {
+        verify(mContext).sendOrderedBroadcastAsUser(
+                mOrderedBroadcastIntent.capture(),
+                any(UserHandle.class),
+                nullable(String.class),
+                mOrderedBroadcastReceiver.capture(),
+                nullable(Handler.class),
+                anyInt(),
+                nullable(String.class),
+                nullable(Bundle.class));
+
+        mOrderedBroadcastReceiver.getValue().setPendingResult(
+                new BroadcastReceiver.PendingResult(
+                        Activity.RESULT_OK,
+                        /* resultData= */ "",
+                        /* resultExtras= */ null,
+                        /* type= */ 0,
+                        /* ordered= */ true,
+                        /* sticky= */ false,
+                        /* token= */ null,
+                        /* userId= */ 0,
+                        /* flags= */ 0));
+        mOrderedBroadcastReceiver.getValue().onReceive(
+                mContext,
+                mOrderedBroadcastIntent.getValue());
+    }
+
+    private void setScreensaverEnabled(boolean enable) {
+        Settings.Secure.putIntForUser(
+                mContentResolver,
+                Settings.Secure.SCREENSAVER_ENABLED,
+                enable ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    private void setScreensaverActivateOnDock(boolean enable) {
+        Settings.Secure.putIntForUser(
+                mContentResolver,
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                enable ? 1 : 0,
+                UserHandle.USER_CURRENT);
     }
 
     private void requestAllPossibleProjectionTypes() throws RemoteException {
@@ -837,10 +1458,20 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     private static class TestInjector extends UiModeManagerService.Injector {
-        private static final int CALLING_UID = 8675309;
+        private static final int DEFAULT_CALLING_UID = 8675309;
+
+        private final int callingUid;
+
+        public TestInjector() {
+          this(DEFAULT_CALLING_UID);
+        }
+
+        public TestInjector(int callingUid) {
+          this.callingUid = callingUid;
+        }
 
         public int getCallingUid() {
-            return CALLING_UID;
+            return callingUid;
         }
     }
 }

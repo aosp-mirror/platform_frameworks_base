@@ -10,6 +10,12 @@
     },
     {
       "name": "CtsIncrementalInstallHostTestCases"
+    },
+    {
+      "name": "libincfs-test"
+    },
+    {
+      "name": "service.incremental_test"
     }
   ],
   "presubmit-large": [
@@ -29,6 +35,11 @@
           "include-filter": "android.content.pm.cts.ChecksumsTest"
         }
       ]
+    }
+  ],
+  "kernel-presubmit": [
+    {
+      "name": "CtsIncrementalInstallHostTestCases"
     }
   ]
 }

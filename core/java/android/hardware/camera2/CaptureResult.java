@@ -829,6 +829,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * region and output only the intersection rectangle as the metering region in the result
      * metadata.  If the region is entirely outside the crop region, it will be ignored and
      * not reported in the result metadata.</p>
+     * <p>When setting the AE metering regions, the application must consider the additional
+     * crop resulted from the aspect ratio differences between the preview stream and
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}. For example, if the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} is the full
+     * active array size with 4:3 aspect ratio, and the preview stream is 16:9,
+     * the boundary of AE regions will be [0, y_crop] and
+     * [active_width, active_height - 2 * y_crop] rather than [0, 0] and
+     * [active_width, active_height], where y_crop is the additional crop due to aspect ratio
+     * mismatch.</p>
      * <p>Starting from API level 30, the coordinate system of activeArraySize or
      * preCorrectionActiveArraySize is used to represent post-zoomRatio field of view, not
      * pre-zoom field of view. This means that the same aeRegions values at different
@@ -1165,7 +1173,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <td align="center">Any state (excluding LOCKED)</td>
      * <td align="center">{@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} is CANCEL, converged</td>
      * <td align="center">CONVERGED</td>
-     * <td align="center">Converged after a precapture sequenceis canceled, transient states are skipped by camera device.</td>
+     * <td align="center">Converged after a precapture sequences canceled, transient states are skipped by camera device.</td>
      * </tr>
      * <tr>
      * <td align="center">CONVERGED</td>
@@ -1301,6 +1309,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * region and output only the intersection rectangle as the metering region in the result
      * metadata. If the region is entirely outside the crop region, it will be ignored and
      * not reported in the result metadata.</p>
+     * <p>When setting the AF metering regions, the application must consider the additional
+     * crop resulted from the aspect ratio differences between the preview stream and
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}. For example, if the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} is the full
+     * active array size with 4:3 aspect ratio, and the preview stream is 16:9,
+     * the boundary of AF regions will be [0, y_crop] and
+     * [active_width, active_height - 2 * y_crop] rather than [0, 0] and
+     * [active_width, active_height], where y_crop is the additional crop due to aspect ratio
+     * mismatch.</p>
      * <p>Starting from API level 30, the coordinate system of activeArraySize or
      * preCorrectionActiveArraySize is used to represent post-zoomRatio field of view, not
      * pre-zoom field of view. This means that the same afRegions values at different
@@ -1831,7 +1847,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * routine is enabled, overriding the application's selected
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
      * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}. Note that when {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode}
-     * is OFF, the behavior of AWB is device dependent. It is recommened to
+     * is OFF, the behavior of AWB is device dependent. It is recommended to
      * also set AWB mode to OFF or lock AWB by using {@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock} before
      * setting AE mode to OFF.</p>
      * <p>When set to the OFF mode, the camera device's auto-white balance
@@ -1926,6 +1942,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * region and output only the intersection rectangle as the metering region in the result
      * metadata.  If the region is entirely outside the crop region, it will be ignored and
      * not reported in the result metadata.</p>
+     * <p>When setting the AWB metering regions, the application must consider the additional
+     * crop resulted from the aspect ratio differences between the preview stream and
+     * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}. For example, if the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} is the full
+     * active array size with 4:3 aspect ratio, and the preview stream is 16:9,
+     * the boundary of AWB regions will be [0, y_crop] and
+     * [active_width, active_height - 2 * y_crop] rather than [0, 0] and
+     * [active_width, active_height], where y_crop is the additional crop due to aspect ratio
+     * mismatch.</p>
      * <p>Starting from API level 30, the coordinate system of activeArraySize or
      * preCorrectionActiveArraySize is used to represent post-zoomRatio field of view, not
      * pre-zoom field of view. This means that the same awbRegions values at different
@@ -1973,13 +1997,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * strategy.</p>
      * <p>This control (except for MANUAL) is only effective if
      * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code> and any 3A routine is active.</p>
-     * <p>All intents are supported by all devices, except that:
-     *   * ZERO_SHUTTER_LAG will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
-     * PRIVATE_REPROCESSING or YUV_REPROCESSING.
-     *   * MANUAL will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
-     * MANUAL_SENSOR.
-     *   * MOTION_TRACKING will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
-     * MOTION_TRACKING.</p>
+     * <p>All intents are supported by all devices, except that:</p>
+     * <ul>
+     * <li>ZERO_SHUTTER_LAG will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     * PRIVATE_REPROCESSING or YUV_REPROCESSING.</li>
+     * <li>MANUAL will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     * MANUAL_SENSOR.</li>
+     * <li>MOTION_TRACKING will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     * MOTION_TRACKING.</li>
+     * </ul>
      * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #CONTROL_CAPTURE_INTENT_CUSTOM CUSTOM}</li>
@@ -2335,10 +2361,20 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * ({@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode}), turning both modes on may
      * produce undesirable interaction, so it is recommended not to enable
      * both at the same time.</p>
+     * <p>If video stabilization is set to "PREVIEW_STABILIZATION",
+     * {@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode} is overridden. The camera sub-system may choose
+     * to turn on hardware based image stabilization in addition to software based stabilization
+     * if it deems that appropriate.
+     * This key may be a part of the available session keys, which camera clients may
+     * query via
+     * {@link android.hardware.camera2.CameraCharacteristics#getAvailableSessionKeys }.
+     * If this is the case, changing this key over the life-time of a capture session may
+     * cause delays / glitches.</p>
      * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #CONTROL_VIDEO_STABILIZATION_MODE_OFF OFF}</li>
      *   <li>{@link #CONTROL_VIDEO_STABILIZATION_MODE_ON ON}</li>
+     *   <li>{@link #CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION PREVIEW_STABILIZATION}</li>
      * </ul>
      *
      * <p>This key is available on all devices.</p>
@@ -2348,6 +2384,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_OFF
      * @see #CONTROL_VIDEO_STABILIZATION_MODE_ON
+     * @see #CONTROL_VIDEO_STABILIZATION_MODE_PREVIEW_STABILIZATION
      */
     @PublicKey
     @NonNull
@@ -2894,7 +2931,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   and keep jpeg and thumbnail image data unrotated.</li>
      * <li>Rotate the jpeg and thumbnail image data and not set
      *   {@link android.media.ExifInterface#TAG_ORIENTATION EXIF orientation flag}. In this
-     *   case, LIMITED or FULL hardware level devices will report rotated thumnail size in
+     *   case, LIMITED or FULL hardware level devices will report rotated thumbnail size in
      *   capture result, so the width and height will be interchanged if 90 or 270 degree
      *   orientation is requested. LEGACY device will always report unrotated thumbnail
      *   size.</li>
@@ -3072,6 +3109,11 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>If a camera device supports both OIS and digital image stabilization
      * ({@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE android.control.videoStabilizationMode}), turning both modes on may produce undesirable
      * interaction, so it is recommended not to enable both at the same time.</p>
+     * <p>If {@link CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE android.control.videoStabilizationMode} is set to "PREVIEW_STABILIZATION",
+     * {@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode} is overridden. The camera sub-system may choose
+     * to turn on hardware based image stabilization in addition to software based stabilization
+     * if it deems that appropriate. This key's value in the capture result will reflect which
+     * OIS mode was chosen.</p>
      * <p>Not all devices will support OIS; see
      * {@link CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION android.lens.info.availableOpticalStabilization} for
      * available controls.</p>
@@ -3091,6 +3133,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION
+     * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      * @see #LENS_OPTICAL_STABILIZATION_MODE_OFF
      * @see #LENS_OPTICAL_STABILIZATION_MODE_ON
      */
@@ -3108,7 +3151,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>When the state is STATIONARY, the lens parameters are not changing. This could be
      * either because the parameters are all fixed, or because the lens has had enough
      * time to reach the most recently-requested values.
-     * If all these lens parameters are not changable for a camera device, as listed below:</p>
+     * If all these lens parameters are not changeable for a camera device, as listed below:</p>
      * <ul>
      * <li>Fixed focus (<code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} == 0</code>), which means
      * {@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance} parameter will always be 0.</li>
@@ -3222,6 +3265,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * with PRIMARY_CAMERA.</p>
      * <p>When {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is UNDEFINED, this position cannot be accurately
      * represented by the camera device, and will be represented as <code>(0, 0, 0)</code>.</p>
+     * <p>When {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is AUTOMOTIVE, then this position is relative to the
+     * origin of the automotive sensor coordinate system, which is at the center of the rear
+     * axle.</p>
      * <p><b>Units</b>: Meters</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
@@ -3965,7 +4011,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * noise model used here is:</p>
      * <p>N(x) = sqrt(Sx + O)</p>
      * <p>Where x represents the recorded signal of a CFA channel normalized to
-     * the range [0, 1], and S and O are the noise model coeffiecients for
+     * the range [0, 1], and S and O are the noise model coefficients for
      * that channel.</p>
      * <p>A more detailed description of the noise model can be found in the
      * Adobe DNG specification for the NoiseProfile tag.</p>
@@ -4010,7 +4056,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <li>1.20 &lt;= R &gt;= 1.03 will require some software
      * correction to avoid demosaic errors (3-20% divergence).</li>
      * <li>R &gt; 1.20 will require strong software correction to produce
-     * a usuable image (&gt;20% divergence).</li>
+     * a usable image (&gt;20% divergence).</li>
      * </ul>
      * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
      * the camera device has RAW capability.</p>
@@ -4230,7 +4276,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>Whether <code>RAW</code> images requested have their bayer pattern as described by
      * {@link CameraCharacteristics#SENSOR_INFO_BINNING_FACTOR android.sensor.info.binningFactor}.</p>
-     * <p>This key will only be present in devices advertisting the
+     * <p>This key will only be present in devices advertising the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
      * capability which also advertise <code>REMOSAIC_REPROCESSING</code> capability. On all other devices
      * RAW targets will have a regular bayer pattern.</p>
@@ -5084,9 +5130,11 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>Tonemapping curve to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
      * GAMMA_VALUE</p>
-     * <p>The tonemap curve will be defined the following formula:
-     * * OUT = pow(IN, 1.0 / gamma)
-     * where IN and OUT is the input pixel value scaled to range [0.0, 1.0],
+     * <p>The tonemap curve will be defined the following formula:</p>
+     * <ul>
+     * <li>OUT = pow(IN, 1.0 / gamma)</li>
+     * </ul>
+     * <p>where IN and OUT is the input pixel value scaled to range [0.0, 1.0],
      * pow is the power function and gamma is the gamma value specified by this
      * key.</p>
      * <p>The same curve will be applied to all color channels. The camera device

@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import android.os.Parcel;
+import android.view.Display;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -48,7 +49,7 @@ public class AccessibilityEventTest {
     // and assertEqualAccessibilityRecord
 
     /** The number of properties of the {@link AccessibilityRecord} class. */
-    private static final int A11Y_RECORD_NON_STATIC_FIELD_COUNT = 24;
+    private static final int A11Y_RECORD_NON_STATIC_FIELD_COUNT = 23;
 
     @Test
     public void testImportantForAccessibiity_getSetWorkAcrossParceling() {
@@ -66,6 +67,14 @@ public class AccessibilityEventTest {
         AccessibilityEvent event = AccessibilityEvent.obtain();
         event.setSourceNodeId(sourceNodeId);
         assertEquals(sourceNodeId, copyEventViaParcel(event).getSourceNodeId());
+    }
+
+    @Test
+    public void testSourceDisplayId_getSetWorkAcrossParceling() {
+        final int sourceDisplayId = Display.DEFAULT_DISPLAY;
+        AccessibilityEvent event = AccessibilityEvent.obtain();
+        event.setDisplayId(sourceDisplayId);
+        assertEquals(sourceDisplayId, copyEventViaParcel(event).getDisplayId());
     }
 
     @Test

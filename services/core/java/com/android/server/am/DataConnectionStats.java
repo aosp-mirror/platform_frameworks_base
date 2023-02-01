@@ -109,7 +109,7 @@ public class DataConnectionStats extends BroadcastReceiver {
         }
         try {
             mBatteryStats.notePhoneDataConnectionState(networkType, visible,
-                    mServiceState.getState());
+                    mServiceState.getState(), mServiceState.getNrFrequencyRange());
         } catch (RemoteException e) {
             Log.w(TAG, "Error noting data connection state", e);
         }

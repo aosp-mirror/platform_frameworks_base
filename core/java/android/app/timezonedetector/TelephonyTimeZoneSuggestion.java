@@ -165,7 +165,7 @@ public final class TelephonyTimeZoneSuggestion implements Parcelable {
                 .setQuality(in.readInt())
                 .build();
         List<String> debugInfo =
-                in.readArrayList(TelephonyTimeZoneSuggestion.class.getClassLoader());
+                in.readArrayList(TelephonyTimeZoneSuggestion.class.getClassLoader(), java.lang.String.class);
         if (debugInfo != null) {
             suggestion.addDebugInfo(debugInfo);
         }

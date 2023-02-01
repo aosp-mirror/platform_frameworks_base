@@ -29,20 +29,20 @@ import android.apex.CompressedApexInfoList;
 import android.apex.IApexService;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.PackageParser.SigningDetails;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.SigningDetails;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.Trace;
 import android.sysprop.ApexProperties;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.PrintWriterPrinter;
 import android.util.Singleton;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -52,9 +52,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.component.ParsedApexSystemService;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import com.google.android.collect.Lists;
@@ -63,6 +67,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -115,16 +120,20 @@ public abstract class ApexManager {
         @Nullable public final String apexModuleName;
         public final File apexDirectory;
         public final File preInstalledApexPath;
+        public final File apexFile;
+        public final boolean activeApexChanged;
 
-        private ActiveApexInfo(File apexDirectory, File preInstalledApexPath) {
-            this(null, apexDirectory, preInstalledApexPath);
+        private ActiveApexInfo(File apexDirectory, File preInstalledApexPath, File apexFile) {
+            this(null, apexDirectory, preInstalledApexPath, apexFile, false);
         }
 
         private ActiveApexInfo(@Nullable String apexModuleName, File apexDirectory,
-                File preInstalledApexPath) {
+                File preInstalledApexPath, File apexFile, boolean activeApexChanged) {
             this.apexModuleName = apexModuleName;
             this.apexDirectory = apexDirectory;
             this.preInstalledApexPath = preInstalledApexPath;
+            this.apexFile = apexFile;
+            this.activeApexChanged = activeApexChanged;
         }
 
         private ActiveApexInfo(ApexInfo apexInfo) {
@@ -132,7 +141,9 @@ public abstract class ApexManager {
                     apexInfo.moduleName,
                     new File(Environment.getApexDirectory() + File.separator
                             + apexInfo.moduleName),
-                    new File(apexInfo.preinstalledModulePath));
+                    new File(apexInfo.preinstalledModulePath),
+                    new File(apexInfo.modulePath),
+                    apexInfo.activeApexChanged);
         }
     }
 
@@ -417,6 +428,22 @@ public abstract class ApexManager {
             throws PackageManagerException;
 
     /**
+     * Get a list of apex system services implemented in an apex.
+     *
+     * <p>The list is sorted by initOrder for consistency.
+     */
+    public abstract List<ApexSystemServiceInfo> getApexSystemServices();
+
+    /**
+     * Returns an APEX file backing the mount point {@code file} is located on, or {@code null} if
+     * {@code file} doesn't belong to a {@code /apex} mount point.
+     *
+     * <p>Also returns {@code null} if device doesn't support updatable APEX packages.
+     */
+    @Nullable
+    public abstract File getBackingApexFile(@NonNull File file);
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -440,8 +467,15 @@ public abstract class ApexManager {
     protected static class ApexManagerImpl extends ApexManager {
         private final Object mLock = new Object();
 
+        // TODO(ioffe): this should be either List or ArrayMap.
         @GuardedBy("mLock")
         private Set<ActiveApexInfo> mActiveApexInfosCache;
+
+        /**
+         * Map of all apex system services to the jar files they are contained in.
+         */
+        @GuardedBy("mLock")
+        private List<ApexSystemServiceInfo> mApexSystemServices = new ArrayList<>();
 
         /**
          * Contains the list of {@code packageName}s of apks-in-apex for given
@@ -503,7 +537,7 @@ public abstract class ApexManager {
         @Override
         public List<ActiveApexInfo> getActiveApexInfos() {
             final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
-                    Trace.TRACE_TAG_APEX_MANAGER);
+                    Trace.TRACE_TAG_PACKAGE_MANAGER);
             synchronized (mLock) {
                 if (mActiveApexInfosCache == null) {
                     t.traceBegin("getActiveApexInfos_noCache");
@@ -579,6 +613,8 @@ public abstract class ApexManager {
                 ApexInfo ai = parsingApexInfo.get(parseResult.scanFile);
 
                 if (throwable == null) {
+                    // Calling hideAsFinal to assign derived fields for the app info flags.
+                    parseResult.parsedPackage.hideAsFinal();
                     final PackageInfo packageInfo = PackageInfoWithoutStateUtils.generate(
                             parseResult.parsedPackage, ai, flags);
                     if (packageInfo == null) {
@@ -586,6 +622,40 @@ public abstract class ApexManager {
                                 + ai.modulePath);
                     }
                     mAllPackagesCache.add(packageInfo);
+                    for (ParsedApexSystemService service :
+                            parseResult.parsedPackage.getApexSystemServices()) {
+                        String minSdkVersion = service.getMinSdkVersion();
+                        if (minSdkVersion != null && !UnboundedSdkLevel.isAtLeast(minSdkVersion)) {
+                            Slog.d(TAG, String.format(
+                                    "ApexSystemService %s with min_sdk_version=%s is skipped",
+                                    service.getName(), service.getMinSdkVersion()));
+                            continue;
+                        }
+                        String maxSdkVersion = service.getMaxSdkVersion();
+                        if (maxSdkVersion != null && !UnboundedSdkLevel.isAtMost(maxSdkVersion)) {
+                            Slog.d(TAG, String.format(
+                                    "ApexSystemService %s with max_sdk_version=%s is skipped",
+                                    service.getName(), service.getMaxSdkVersion()));
+                            continue;
+                        }
+
+                        if (ai.isActive) {
+                            String name = service.getName();
+                            for (int j = 0; j < mApexSystemServices.size(); j++) {
+                                ApexSystemServiceInfo info = mApexSystemServices.get(j);
+                                if (info.getName().equals(name)) {
+                                    throw new IllegalStateException(TextUtils.formatSimple(
+                                            "Duplicate apex-system-service %s from %s, %s", name,
+                                            info.mJarPath, service.getJarPath()));
+                                }
+                            }
+                            ApexSystemServiceInfo info = new ApexSystemServiceInfo(
+                                    service.getName(), service.getJarPath(),
+                                    service.getInitOrder());
+                            mApexSystemServices.add(info);
+                        }
+                    }
+                    Collections.sort(mApexSystemServices);
                     mPackageNameToApexModuleName.put(packageInfo.packageName, ai.moduleName);
                     if (ai.isActive) {
                         if (activePackagesSet.contains(packageInfo.packageName)) {
@@ -612,8 +682,8 @@ public abstract class ApexManager {
                         }
                         factoryPackagesSet.add(packageInfo.packageName);
                     }
-                } else if (throwable instanceof PackageParserException) {
-                    final PackageParserException e = (PackageParserException) throwable;
+                } else if (throwable instanceof PackageManagerException) {
+                    final PackageManagerException e = (PackageManagerException) throwable;
                     // Skip parsing non-coreApp apex file if system is in minimal boot state.
                     if (e.error == PackageManager.INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED) {
                         Slog.w(TAG, "Scan apex failed, not a coreApp:" + ai.modulePath);
@@ -780,7 +850,7 @@ public abstract class ApexManager {
                 throw new RuntimeException(re);
             } catch (Exception e) {
                 throw new PackageManagerException(
-                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
                         "apexd verification failed : " + e.getMessage());
             }
         }
@@ -807,7 +877,7 @@ public abstract class ApexManager {
                 throw new RuntimeException(re);
             } catch (Exception e) {
                 throw new PackageManagerException(
-                        PackageInstaller.SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
                         "Failed to mark apexd session as ready : " + e.getMessage());
             }
         }
@@ -1040,15 +1110,17 @@ public abstract class ApexManager {
         }
 
         private SigningDetails getSigningDetails(PackageInfo pkg) throws PackageManagerException {
-            int minSignatureScheme =
+            final int minSignatureScheme =
                     ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
                             pkg.applicationInfo.targetSdkVersion);
-            try {
-                return ApkSignatureVerifier.verify(pkg.applicationInfo.sourceDir,
-                        minSignatureScheme);
-            } catch (PackageParserException e) {
-                throw PackageManagerException.from(e);
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final ParseResult<SigningDetails> result = ApkSignatureVerifier.verify(
+                    input, pkg.applicationInfo.sourceDir, minSignatureScheme);
+            if (result.isError()) {
+                throw new PackageManagerException(result.getErrorCode(), result.getErrorMessage(),
+                        result.getException());
             }
+            return result.getResult();
         }
 
         private void checkApexSignature(PackageInfo existingApexPkg, PackageInfo newApexPkg)
@@ -1060,17 +1132,6 @@ public abstract class ApexManager {
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
                           "APK container signature of " + newApexPkg.applicationInfo.sourceDir
                                    + " is not compatible with currently installed on device");
-            }
-        }
-
-        private void checkDowngrade(PackageInfo existingApexPkg, PackageInfo newApexPkg)
-                throws PackageManagerException {
-            final long currentVersionCode = existingApexPkg.applicationInfo.longVersionCode;
-            final long newVersionCode = newApexPkg.applicationInfo.longVersionCode;
-            if (currentVersionCode > newVersionCode) {
-                throw new PackageManagerException(PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE,
-                          "Downgrade of APEX package " + newApexPkg.packageName
-                                  + " is not allowed");
             }
         }
 
@@ -1097,7 +1158,6 @@ public abstract class ApexManager {
                             "It is forbidden to install new APEX packages");
                 }
                 checkApexSignature(existingApexPkg, newApexPkg);
-                checkDowngrade(existingApexPkg, newApexPkg);
                 ApexInfo apexInfo = waitForApexService().installAndActivatePackage(
                         apexFile.getAbsolutePath());
                 final ParsedPackage parsedPackage2 = packageParser.parsePackage(
@@ -1121,11 +1181,43 @@ public abstract class ApexManager {
             } catch (RemoteException e) {
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                         "apexservice not available");
+            } catch (PackageManagerException e) {
+                // Catching it in order not to fall back to Exception which rethrows the
+                // PackageManagerException with a common error code.
+                throw e;
             } catch (Exception e) {
                 // TODO(b/187864524): is INSTALL_FAILED_INTERNAL_ERROR is the right error code here?
                 throw new PackageManagerException(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
                         e.getMessage());
             }
+        }
+
+        @Override
+        public List<ApexSystemServiceInfo> getApexSystemServices() {
+            synchronized (mLock) {
+                Preconditions.checkState(mApexSystemServices != null,
+                        "APEX packages have not been scanned");
+                return mApexSystemServices;
+            }
+        }
+
+        @Override
+        public File getBackingApexFile(File file) {
+            Path path = file.toPath();
+            if (!path.startsWith(Environment.getApexDirectory().toPath())) {
+                return null;
+            }
+            if (path.getNameCount() < 2) {
+                return null;
+            }
+            String moduleName = file.toPath().getName(1).toString();
+            final List<ActiveApexInfo> apexes = getActiveApexInfos();
+            for (int i = 0; i < apexes.size(); i++) {
+                if (apexes.get(i).apexModuleName.equals(moduleName)) {
+                    return apexes.get(i).apexFile;
+                }
+            }
+            return null;
         }
 
         /**
@@ -1152,6 +1244,10 @@ public abstract class ApexManager {
                 ipw.println("Path: " + pi.applicationInfo.sourceDir);
                 ipw.println("IsActive: " + isActive(pi));
                 ipw.println("IsFactory: " + isFactory(pi));
+                ipw.println("ApplicationInfo: ");
+                ipw.increaseIndent();
+                pi.applicationInfo.dump(new PrintWriterPrinter(ipw), "");
+                ipw.decreaseIndent();
                 ipw.decreaseIndent();
             }
             ipw.decreaseIndent();
@@ -1214,7 +1310,8 @@ public abstract class ApexManager {
      * An implementation of {@link ApexManager} that should be used in case device does not support
      * updating APEX packages.
      */
-    private static final class ApexManagerFlattenedApex extends ApexManager {
+    @VisibleForTesting
+    static final class ApexManagerFlattenedApex extends ApexManager {
         @Override
         public List<ActiveApexInfo> getActiveApexInfos() {
             // There is no apexd running in case of flattened apex
@@ -1233,7 +1330,8 @@ public abstract class ApexManager {
                                 // In flattened configuration, init special-cases the art directory
                                 // and bind-mounts com.android.art.debug to com.android.art.
                                 && !file.getName().equals("com.android.art.debug")) {
-                            result.add(new ActiveApexInfo(file, Environment.getRootDirectory()));
+                            result.add(
+                                    new ActiveApexInfo(file, Environment.getRootDirectory(), file));
                         }
                     }
                 }
@@ -1409,6 +1507,18 @@ public abstract class ApexManager {
         @Override
         void installPackage(File apexFile, PackageParser2 packageParser) {
             throw new UnsupportedOperationException("APEX updates are not supported");
+        }
+
+        @Override
+        public List<ApexSystemServiceInfo> getApexSystemServices() {
+            // TODO(satayev): we can't really support flattened apex use case, and need to migrate
+            // the manifest entries into system's manifest asap.
+            return Collections.emptyList();
+        }
+
+        @Override
+        public File getBackingApexFile(File file) {
+            return null;
         }
 
         @Override

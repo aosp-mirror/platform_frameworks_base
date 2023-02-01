@@ -34,6 +34,7 @@
 
 namespace android::gnss {
 
+namespace {
 extern jclass class_gnssMeasurementsEvent;
 extern jclass class_gnssMeasurement;
 extern jclass class_gnssClock;
@@ -42,15 +43,16 @@ extern jmethodID method_gnssMeasurementsEventCtor;
 extern jmethodID method_gnssClockCtor;
 extern jmethodID method_gnssMeasurementCtor;
 extern jmethodID method_reportMeasurementData;
+} // anonymous namespace
 
 void GnssMeasurement_class_init_once(JNIEnv* env, jclass& clazz);
 
 void setMeasurementData(JNIEnv* env, jobject& callbacksObj, jobject clock,
-                        jobjectArray measurementArray);
+                        jobjectArray measurementArray, jobjectArray gnssAgcArray);
 
 class GnssMeasurementCallbackAidl : public hardware::gnss::BnGnssMeasurementCallback {
 public:
-    GnssMeasurementCallbackAidl(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
+    GnssMeasurementCallbackAidl() : mCallbacksObj(getCallbacksObj()) {}
     android::binder::Status gnssMeasurementCb(const hardware::gnss::GnssData& data) override;
 
 private:
@@ -60,6 +62,8 @@ private:
 
     jobjectArray translateAllGnssMeasurements(
             JNIEnv* env, const std::vector<hardware::gnss::GnssMeasurement>& measurements);
+    jobjectArray translateAllGnssAgcs(JNIEnv* env,
+                                      const std::vector<hardware::gnss::GnssData::GnssAgc>& agcs);
 
     void translateAndSetGnssData(const hardware::gnss::GnssData& data);
 
@@ -74,7 +78,7 @@ private:
  */
 class GnssMeasurementCallbackHidl : public hardware::gnss::V2_1::IGnssMeasurementCallback {
 public:
-    GnssMeasurementCallbackHidl(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
+    GnssMeasurementCallbackHidl() : mCallbacksObj(getCallbacksObj()) {}
     hardware::Return<void> gnssMeasurementCb_2_1(
             const hardware::gnss::V2_1::IGnssMeasurementCallback::GnssData& data) override;
     hardware::Return<void> gnssMeasurementCb_2_0(
@@ -105,23 +109,22 @@ private:
 
 class GnssMeasurementCallback {
 public:
-    GnssMeasurementCallback(jobject& callbacksObj) : mCallbacksObj(callbacksObj) {}
+    GnssMeasurementCallback() {}
     sp<GnssMeasurementCallbackAidl> getAidl() {
         if (callbackAidl == nullptr) {
-            callbackAidl = sp<GnssMeasurementCallbackAidl>::make(mCallbacksObj);
+            callbackAidl = sp<GnssMeasurementCallbackAidl>::make();
         }
         return callbackAidl;
     }
 
     sp<GnssMeasurementCallbackHidl> getHidl() {
         if (callbackHidl == nullptr) {
-            callbackHidl = sp<GnssMeasurementCallbackHidl>::make(mCallbacksObj);
+            callbackHidl = sp<GnssMeasurementCallbackHidl>::make();
         }
         return callbackHidl;
     }
 
 private:
-    jobject& mCallbacksObj;
     sp<GnssMeasurementCallbackAidl> callbackAidl;
     sp<GnssMeasurementCallbackHidl> callbackHidl;
 };
@@ -137,7 +140,7 @@ void GnssMeasurementCallbackHidl::translateAndSetGnssData(const T& data) {
     size_t count = getMeasurementCount(data);
     jobjectArray measurementArray =
             translateAllGnssMeasurements(env, data.measurements.data(), count);
-    setMeasurementData(env, mCallbacksObj, clock, measurementArray);
+    setMeasurementData(env, mCallbacksObj, clock, measurementArray, nullptr);
 
     env->DeleteLocalRef(clock);
     env->DeleteLocalRef(measurementArray);

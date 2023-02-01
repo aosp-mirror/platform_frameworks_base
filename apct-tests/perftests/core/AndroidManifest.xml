@@ -15,6 +15,7 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+        <profileable android:shell="true" />
         <activity android:name="android.perftests.utils.PerfTestActivity"
             android:exported="true">
           <intent-filter>

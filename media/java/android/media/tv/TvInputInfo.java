@@ -653,16 +653,16 @@ public final class TvInputInfo implements Parcelable {
         mType = in.readInt();
         mIsHardwareInput = in.readByte() == 1;
         mLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        mIconUri = in.readParcelable(null);
+        mIconUri = in.readParcelable(null, android.net.Uri.class);
         mLabelResId = in.readInt();
-        mIcon = in.readParcelable(null);
-        mIconStandby = in.readParcelable(null);
-        mIconDisconnected = in.readParcelable(null);
+        mIcon = in.readParcelable(null, android.graphics.drawable.Icon.class);
+        mIconStandby = in.readParcelable(null, android.graphics.drawable.Icon.class);
+        mIconDisconnected = in.readParcelable(null, android.graphics.drawable.Icon.class);
         mSetupActivity = in.readString();
         mCanRecord = in.readByte() == 1;
         mCanPauseRecording = in.readByte() == 1;
         mTunerCount = in.readInt();
-        mHdmiDeviceInfo = in.readParcelable(null);
+        mHdmiDeviceInfo = in.readParcelable(null, android.hardware.hdmi.HdmiDeviceInfo.class);
         mIsConnectedToHdmiSwitch = in.readByte() == 1;
         mHdmiConnectionRelativePosition = in.readInt();
         mParentId = in.readString();
@@ -946,6 +946,10 @@ public final class TvInputInfo implements Parcelable {
                 id = generateInputId(componentName, mTvInputHardwareInfo);
                 type = sHardwareTypeToTvInputType.get(mTvInputHardwareInfo.getType(), TYPE_TUNER);
                 isHardwareInput = true;
+                if (mTvInputHardwareInfo.getType() == TvInputHardwareInfo.TV_INPUT_TYPE_HDMI) {
+                    mHdmiDeviceInfo = HdmiDeviceInfo.hardwarePort(
+                            HdmiDeviceInfo.PATH_INVALID, mTvInputHardwareInfo.getHdmiPortId());
+                }
             } else {
                 id = generateInputId(componentName);
                 type = TYPE_TUNER;

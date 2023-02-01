@@ -191,6 +191,16 @@ public class AccessibilityFloatingMenuViewTest extends SysuiTestCase {
     }
 
     @Test
+    public void hideMenuViewWhenStartingAnimation_animatorNotRunning() {
+        mMenuView.show();
+
+        mMenuView.mDragAnimator.start();
+        mMenuView.hide();
+
+        assertThat(mMenuView.mDragAnimator.isRunning()).isFalse();
+    }
+
+    @Test
     public void onTargetsChanged_singleTarget_expectedRadii() {
         final Position alignRightPosition = new Position(1.0f, 0.0f);
         final AccessibilityFloatingMenuView menuView = new AccessibilityFloatingMenuView(mContext,

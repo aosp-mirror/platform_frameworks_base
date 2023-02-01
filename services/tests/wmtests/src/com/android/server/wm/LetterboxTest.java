@@ -56,6 +56,7 @@ public class LetterboxTest {
     private boolean mHasWallpaperBackground = false;
     private int mBlurRadius = 0;
     private float mDarkScrimAlpha = 0.5f;
+    private SurfaceControl mParentSurface = mock(SurfaceControl.class);
 
     @Before
     public void setUp() throws Exception {
@@ -63,7 +64,8 @@ public class LetterboxTest {
         mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
                 () -> mAreCornersRounded, () -> Color.valueOf(mColor),
                 () -> mHasWallpaperBackground, () -> mBlurRadius, () -> mDarkScrimAlpha,
-                /* doubleTapCallback= */ x -> {});
+                /* doubleTapCallbackX= */ x -> {}, /* doubleTapCallbackY= */ y -> {},
+                () -> mParentSurface);
         mTransaction = spy(StubTransaction.class);
     }
 
@@ -202,6 +204,22 @@ public class LetterboxTest {
 
         mLetterbox.applySurfaceChanges(mTransaction);
         verify(mTransaction).setAlpha(mSurfaces.fullWindowSurface, mDarkScrimAlpha);
+    }
+
+    @Test
+    public void testNeedsApplySurfaceChanges_setParentSurface() {
+        mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
+        mLetterbox.applySurfaceChanges(mTransaction);
+
+        verify(mTransaction).reparent(mSurfaces.top, mParentSurface);
+        assertFalse(mLetterbox.needsApplySurfaceChanges());
+
+        mParentSurface = mock(SurfaceControl.class);
+
+        assertTrue(mLetterbox.needsApplySurfaceChanges());
+
+        mLetterbox.applySurfaceChanges(mTransaction);
+        verify(mTransaction).reparent(mSurfaces.top, mParentSurface);
     }
 
     @Test

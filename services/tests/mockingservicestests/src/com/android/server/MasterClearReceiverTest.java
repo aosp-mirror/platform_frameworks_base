@@ -24,7 +24,6 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
@@ -226,7 +225,7 @@ public final class MasterClearReceiverTest {
     }
 
     private void expectWipeNonSystemUser() {
-        when(mUserManager.removeUserOrSetEphemeral(anyInt(), anyBoolean()))
+        when(mUserManager.removeUserWhenPossible(any(), anyBoolean()))
                 .thenReturn(UserManager.REMOVE_RESULT_REMOVED);
     }
 
@@ -266,7 +265,7 @@ public final class MasterClearReceiverTest {
     }
 
     private void verifyWipeNonSystemUser() {
-        verify(mUserManager).removeUserOrSetEphemeral(anyInt(), anyBoolean());
+        verify(mUserManager).removeUserWhenPossible(any(), anyBoolean());
     }
 
     private void setPendingResultForUser(int userId) {

@@ -17,27 +17,27 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.graphics.Region
 import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.region.Region
 
 class AppPairsHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
     component: FlickerComponentName
 ) : BaseAppHelper(instrumentation, activityLabel, component) {
-    fun getPrimaryBounds(dividerBounds: Region): android.graphics.Region {
-        val primaryAppBounds = Region(0, 0, dividerBounds.bounds.right,
+    fun getPrimaryBounds(dividerBounds: Region): Region {
+        val primaryAppBounds = Region.from(0, 0, dividerBounds.bounds.right,
                 dividerBounds.bounds.bottom + WindowUtils.dockedStackDividerInset)
         return primaryAppBounds
     }
 
-    fun getSecondaryBounds(dividerBounds: Region): android.graphics.Region {
+    fun getSecondaryBounds(dividerBounds: Region): Region {
         val displayBounds = WindowUtils.displayBounds
-        val secondaryAppBounds = Region(0,
+        val secondaryAppBounds = Region.from(0,
                 dividerBounds.bounds.bottom - WindowUtils.dockedStackDividerInset,
-                displayBounds.right, displayBounds.bottom - WindowUtils.navigationBarHeight)
+                displayBounds.right, displayBounds.bottom - WindowUtils.navigationBarFrameHeight)
         return secondaryAppBounds
     }
 

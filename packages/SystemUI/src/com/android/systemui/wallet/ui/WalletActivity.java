@@ -32,7 +32,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toolbar;
 
+import androidx.activity.ComponentActivity;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -48,7 +50,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.util.LifecycleActivity;
 
 import java.util.concurrent.Executor;
 
@@ -57,7 +58,7 @@ import javax.inject.Inject;
 /**
  * Displays Wallet carousel screen inside an activity.
  */
-public class WalletActivity extends LifecycleActivity implements
+public class WalletActivity extends ComponentActivity implements
         QuickAccessWalletClient.WalletServiceEventListener {
 
     private static final String TAG = "WalletActivity";
@@ -105,7 +106,7 @@ public class WalletActivity extends LifecycleActivity implements
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -122,7 +123,7 @@ public class WalletActivity extends LifecycleActivity implements
         getActionBar().setHomeActionContentDescription(R.string.accessibility_desc_close);
         WalletView walletView = requireViewById(R.id.wallet_view);
 
-        mWalletClient = QuickAccessWalletClient.create(this);
+        mWalletClient = QuickAccessWalletClient.create(this, mExecutor);
         mWalletScreenController = new WalletScreenController(
                 this,
                 walletView,
@@ -152,8 +153,7 @@ public class WalletActivity extends LifecycleActivity implements
                         Log.w(TAG, "Unable to create wallet app intent.");
                         return;
                     }
-                    if (!mKeyguardStateController.isUnlocked()
-                            && mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                    if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                         return;
                     }
 
@@ -278,7 +278,7 @@ public class WalletActivity extends LifecycleActivity implements
 
     private Drawable getHomeIndicatorDrawable() {
         Drawable drawable = getDrawable(R.drawable.ic_close);
-        drawable.setTint(getColor(com.android.internal.R.color.system_neutral1_300));
+        drawable.setTint(getColor(R.color.material_dynamic_neutral70));
         return drawable;
     }
 }

@@ -17,21 +17,18 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.Nullable;
-import android.media.soundtrigger_middleware.ConfidenceLevel;
-import android.media.soundtrigger_middleware.ModelParameter;
-import android.media.soundtrigger_middleware.Phrase;
-import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
-import android.media.soundtrigger_middleware.PhraseSoundModel;
-import android.media.soundtrigger_middleware.RecognitionConfig;
-import android.media.soundtrigger_middleware.RecognitionMode;
-import android.media.soundtrigger_middleware.SoundModel;
-import android.media.soundtrigger_middleware.SoundModelType;
-
-import com.android.internal.util.Preconditions;
+import android.media.soundtrigger.ConfidenceLevel;
+import android.media.soundtrigger.ModelParameter;
+import android.media.soundtrigger.Phrase;
+import android.media.soundtrigger.PhraseRecognitionExtra;
+import android.media.soundtrigger.PhraseSoundModel;
+import android.media.soundtrigger.RecognitionConfig;
+import android.media.soundtrigger.RecognitionMode;
+import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger.SoundModelType;
 
 import java.util.Objects;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Utilities for asserting the validity of various data types used by this module.

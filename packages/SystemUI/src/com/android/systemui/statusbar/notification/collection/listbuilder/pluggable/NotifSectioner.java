@@ -55,8 +55,22 @@ public abstract class NotifSectioner extends Pluggable<NotifSectioner> {
     public abstract boolean isInSection(ListEntry entry);
 
     /**
+     * Returns an optional {@link NotifComparator} to sort entries only in this section.
+     * {@link ListEntry} instances passed to this comparator are guaranteed to have this section,
+     * and this ordering will take precedence over any global comparators supplied to {@link
+     * com.android.systemui.statusbar.notification.collection.NotifPipeline#setComparators(List)}.
+     *
+     * NOTE: this method is only called once when the Sectioner is attached.
+     */
+    public @Nullable NotifComparator getComparator() {
+        return null;
+    }
+
+    /**
      * Returns an optional {@link NodeSpec} for the section header. If {@code null}, no header will
      * be used for the section.
+     *
+     * NOTE: this method is only called once when the Sectioner is attached.
      */
     public @Nullable NodeController getHeaderNodeController() {
         return null;

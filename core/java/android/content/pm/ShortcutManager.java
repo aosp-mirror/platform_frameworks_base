@@ -145,9 +145,8 @@ public class ShortcutManager {
     @WorkerThread
     public boolean setDynamicShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
         try {
-            return ((boolean) getFutureOrThrow(mService.setDynamicShortcuts(
-                    mContext.getPackageName(), new ParceledListSlice(
-                            shortcutInfoList), injectMyUserId())));
+            return mService.setDynamicShortcuts(mContext.getPackageName(), new ParceledListSlice(
+                    shortcutInfoList), injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -166,8 +165,8 @@ public class ShortcutManager {
     @NonNull
     public List<ShortcutInfo> getDynamicShortcuts() {
         try {
-            return getFutureOrThrow(mService.getShortcuts(mContext.getPackageName(),
-                    FLAG_MATCH_DYNAMIC, injectMyUserId())).getList();
+            return mService.getShortcuts(mContext.getPackageName(),
+                    FLAG_MATCH_DYNAMIC, injectMyUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -186,8 +185,8 @@ public class ShortcutManager {
     @NonNull
     public List<ShortcutInfo> getManifestShortcuts() {
         try {
-            return getFutureOrThrow(mService.getShortcuts(mContext.getPackageName(),
-                    FLAG_MATCH_MANIFEST, injectMyUserId())).getList();
+            return mService.getShortcuts(mContext.getPackageName(),
+                    FLAG_MATCH_MANIFEST, injectMyUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -215,8 +214,8 @@ public class ShortcutManager {
     @NonNull
     public List<ShortcutInfo> getShortcuts(@ShortcutMatchFlags int matchFlags) {
         try {
-            return getFutureOrThrow(mService.getShortcuts(mContext.getPackageName(), matchFlags,
-                    injectMyUserId())).getList();
+            return mService.getShortcuts(mContext.getPackageName(), matchFlags,
+                    injectMyUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -238,9 +237,8 @@ public class ShortcutManager {
     @WorkerThread
     public boolean addDynamicShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
         try {
-            return (boolean) getFutureOrThrow(mService.addDynamicShortcuts(
-                    mContext.getPackageName(), new ParceledListSlice(shortcutInfoList),
-                    injectMyUserId()));
+            return mService.addDynamicShortcuts(mContext.getPackageName(),
+                    new ParceledListSlice(shortcutInfoList), injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -253,8 +251,8 @@ public class ShortcutManager {
      */
     public void removeDynamicShortcuts(@NonNull List<String> shortcutIds) {
         try {
-            getFutureOrThrow(mService.removeDynamicShortcuts(mContext.getPackageName(), shortcutIds,
-                    injectMyUserId()));
+            mService.removeDynamicShortcuts(mContext.getPackageName(), shortcutIds,
+                    injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -267,8 +265,7 @@ public class ShortcutManager {
      */
     public void removeAllDynamicShortcuts() {
         try {
-            getFutureOrThrow(mService.removeAllDynamicShortcuts(mContext.getPackageName(),
-                    injectMyUserId()));
+            mService.removeAllDynamicShortcuts(mContext.getPackageName(), injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -281,8 +278,8 @@ public class ShortcutManager {
      */
     public void removeLongLivedShortcuts(@NonNull List<String> shortcutIds) {
         try {
-            getFutureOrThrow(mService.removeLongLivedShortcuts(mContext.getPackageName(),
-                    shortcutIds, injectMyUserId()));
+            mService.removeLongLivedShortcuts(mContext.getPackageName(), shortcutIds,
+                    injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -301,8 +298,8 @@ public class ShortcutManager {
     @NonNull
     public List<ShortcutInfo> getPinnedShortcuts() {
         try {
-            return getFutureOrThrow(mService.getShortcuts(mContext.getPackageName(),
-                    FLAG_MATCH_PINNED, injectMyUserId())).getList();
+            return mService.getShortcuts(mContext.getPackageName(), FLAG_MATCH_PINNED,
+                    injectMyUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -323,8 +320,8 @@ public class ShortcutManager {
     @WorkerThread
     public boolean updateShortcuts(@NonNull List<ShortcutInfo> shortcutInfoList) {
         try {
-            return (boolean) getFutureOrThrow(mService.updateShortcuts(mContext.getPackageName(),
-                    new ParceledListSlice(shortcutInfoList), injectMyUserId()));
+            return mService.updateShortcuts(mContext.getPackageName(),
+                    new ParceledListSlice(shortcutInfoList), injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -341,9 +338,9 @@ public class ShortcutManager {
      */
     public void disableShortcuts(@NonNull List<String> shortcutIds) {
         try {
-            getFutureOrThrow(mService.disableShortcuts(mContext.getPackageName(), shortcutIds,
+            mService.disableShortcuts(mContext.getPackageName(), shortcutIds,
                     /* disabledMessage =*/ null, /* disabledMessageResId =*/ 0,
-                    injectMyUserId()));
+                    injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -354,9 +351,9 @@ public class ShortcutManager {
      */
     public void disableShortcuts(@NonNull List<String> shortcutIds, int disabledMessageResId) {
         try {
-            getFutureOrThrow(mService.disableShortcuts(mContext.getPackageName(), shortcutIds,
+            mService.disableShortcuts(mContext.getPackageName(), shortcutIds,
                     /* disabledMessage =*/ null, disabledMessageResId,
-                    injectMyUserId()));
+                    injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -382,9 +379,9 @@ public class ShortcutManager {
      */
     public void disableShortcuts(@NonNull List<String> shortcutIds, CharSequence disabledMessage) {
         try {
-            getFutureOrThrow(mService.disableShortcuts(mContext.getPackageName(), shortcutIds,
+            mService.disableShortcuts(mContext.getPackageName(), shortcutIds,
                     disabledMessage, /* disabledMessageResId =*/ 0,
-                    injectMyUserId()));
+                    injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -400,8 +397,7 @@ public class ShortcutManager {
      */
     public void enableShortcuts(@NonNull List<String> shortcutIds) {
         try {
-            getFutureOrThrow(mService.enableShortcuts(
-                    mContext.getPackageName(), shortcutIds, injectMyUserId()));
+            mService.enableShortcuts(mContext.getPackageName(), shortcutIds, injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -522,8 +518,7 @@ public class ShortcutManager {
      */
     public void reportShortcutUsed(String shortcutId) {
         try {
-            getFutureOrThrow(mService.reportShortcutUsed(mContext.getPackageName(), shortcutId,
-                    injectMyUserId()));
+            mService.reportShortcutUsed(mContext.getPackageName(), shortcutId, injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -537,7 +532,7 @@ public class ShortcutManager {
      * app.
      *
      * <p><b>Note:</b> See also the support library counterpart
-     * {@link android.support.v4.content.pm.ShortcutManagerCompat#isRequestPinShortcutSupported(
+     * {@link androidx.core.content.pm.ShortcutManagerCompat#isRequestPinShortcutSupported(
      * Context)}, which supports Android versions lower than {@link VERSION_CODES#O} using the
      * legacy private intent {@code com.android.launcher.action.INSTALL_SHORTCUT}.
      *
@@ -566,7 +561,7 @@ public class ShortcutManager {
      * previous requests.
      *
      * <p><b>Note:</b> See also the support library counterpart
-     * {@link android.support.v4.content.pm.ShortcutManagerCompat#requestPinShortcut(
+     * {@link androidx.core.content.pm.ShortcutManagerCompat#requestPinShortcut(
      * Context, ShortcutInfoCompat, IntentSender)},
      * which supports Android versions lower than {@link VERSION_CODES#O} using the
      * legacy private intent {@code com.android.launcher.action.INSTALL_SHORTCUT}.
@@ -601,8 +596,10 @@ public class ShortcutManager {
     public boolean requestPinShortcut(@NonNull ShortcutInfo shortcut,
             @Nullable IntentSender resultIntent) {
         try {
-            return (boolean) getFutureOrThrow(mService.requestPinShortcut(mContext.getPackageName(),
-                    shortcut, resultIntent, injectMyUserId()));
+            AndroidFuture<String> ret = new AndroidFuture<>();
+            mService.requestPinShortcut(mContext.getPackageName(), shortcut, resultIntent,
+                    injectMyUserId(), ret);
+            return Boolean.parseBoolean(getFutureOrThrow(ret));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -627,9 +624,11 @@ public class ShortcutManager {
      */
     @WorkerThread
     public Intent createShortcutResultIntent(@NonNull ShortcutInfo shortcut) {
+        final AndroidFuture<Intent> ret = new AndroidFuture<>();
         try {
-            return getFutureOrThrow(mService.createShortcutResultIntent(mContext.getPackageName(),
-                    shortcut, injectMyUserId()));
+            mService.createShortcutResultIntent(mContext.getPackageName(),
+                    shortcut, injectMyUserId(), ret);
+            return getFutureOrThrow(ret);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -645,7 +644,7 @@ public class ShortcutManager {
      */
     public void onApplicationActive(@NonNull String packageName, @UserIdInt int userId) {
         try {
-            getFutureOrThrow(mService.onApplicationActive(packageName, userId));
+            mService.onApplicationActive(packageName, userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -671,8 +670,8 @@ public class ShortcutManager {
     @RequiresPermission(Manifest.permission.MANAGE_APP_PREDICTIONS)
     public List<ShareShortcutInfo> getShareTargets(@NonNull IntentFilter filter) {
         try {
-            return getFutureOrThrow(mService.getShareTargets(mContext.getPackageName(), filter,
-                    injectMyUserId())).getList();
+            return mService.getShareTargets(
+                    mContext.getPackageName(), filter, injectMyUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -705,8 +704,8 @@ public class ShortcutManager {
         }
 
         private ShareShortcutInfo(@NonNull Parcel in) {
-            mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader());
-            mTargetComponent = in.readParcelable(ComponentName.class.getClassLoader());
+            mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader(), android.content.pm.ShortcutInfo.class);
+            mTargetComponent = in.readParcelable(ComponentName.class.getClassLoader(), android.content.ComponentName.class);
         }
 
         @NonNull
@@ -768,7 +767,7 @@ public class ShortcutManager {
      * order to make sure shortcuts exist and are up-to-date, without the need to explicitly handle
      * the shortcut count limit.
      * @see android.app.NotificationManager#notify(int, Notification)
-     * @see Notification.Builder#setShortcutId(String)
+     * @see android.app.Notification.Builder#setShortcutId(String)
      *
      * <p>If {@link #getMaxShortcutCountPerActivity()} is already reached, an existing shortcut with
      * the lowest rank will be removed to add space for the new shortcut.
@@ -782,8 +781,7 @@ public class ShortcutManager {
      */
     public void pushDynamicShortcut(@NonNull ShortcutInfo shortcut) {
         try {
-            getFutureOrThrow(mService.pushDynamicShortcut(
-                    mContext.getPackageName(), shortcut, injectMyUserId()));
+            mService.pushDynamicShortcut(mContext.getPackageName(), shortcut, injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

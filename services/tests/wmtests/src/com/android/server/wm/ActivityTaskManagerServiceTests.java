@@ -21,7 +21,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
@@ -35,13 +34,15 @@ import static com.android.server.wm.ActivityRecord.State.STOPPING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
@@ -51,7 +52,6 @@ import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
@@ -59,9 +59,10 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.LocaleList;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.IDisplayWindowListener;
 
 import androidx.test.filters.MediumTest;
@@ -74,6 +75,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -104,12 +106,12 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         assertTrue("Activity must be finished", mAtm.mActivityClientController.finishActivity(
-                activity.appToken, 0 /* resultCode */, null /* resultData */,
+                activity.token, 0 /* resultCode */, null /* resultData */,
                 Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
         assertTrue(activity.finishing);
 
         assertTrue("Duplicate activity finish request must also return 'true'",
-                mAtm.mActivityClientController.finishActivity(activity.appToken, 0 /* resultCode */,
+                mAtm.mActivityClientController.finishActivity(activity.token, 0 /* resultCode */,
                         null /* resultData */, Activity.DONT_FINISH_TASK_WITH_ACTIVITY));
     }
 
@@ -132,7 +134,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         assertNull(transaction.getLifecycleStateRequest());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
@@ -142,11 +144,16 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        // Check enter no transactions with enter pip requests are made.
-        verify(lifecycleManager, times(0)).scheduleTransaction(any());
+        verify(lifecycleManager, atLeast(0))
+                .scheduleTransaction(mClientTransactionCaptor.capture());
+        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
+        // Check that none are enter pip request items.
+        transaction.getCallbacks().forEach(clientTransactionItem -> {
+            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testOnPictureInPictureRequested_alreadyInPIPMode() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
@@ -155,8 +162,13 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        // Check that no transactions with enter pip requests are made.
-        verify(lifecycleManager, times(0)).scheduleTransaction(any());
+        verify(lifecycleManager, atLeast(0))
+                .scheduleTransaction(mClientTransactionCaptor.capture());
+        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
+        // Check that none are enter pip request items.
+        transaction.getCallbacks().forEach(clientTransactionItem -> {
+            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
+        });
     }
 
     @Test
@@ -185,6 +197,10 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
             @Override
             public void onFixedRotationFinished(int displayId) {}
+
+            @Override
+            public void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+                    List<Rect> unrestricted) {}
         };
         int[] displayIds = mAtm.mWindowManager.registerDisplayWindowListener(listener);
         for (int i = 0; i < displayIds.length; i++) {
@@ -204,10 +220,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         // Check that changes are reported
         Configuration c = new Configuration(newDisp1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(new Rect(0, 0, 1000, 1300));
-        newDisp1.onRequestedOverrideConfigurationChanged(c);
-        mAtm.mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                newDisp1.mDisplayId, false /* markFrozenIfConfigChanged */,
-                false /* deferResume */);
+        newDisp1.performDisplayOverrideConfigUpdate(c);
         assertEquals(0, added.size());
         assertEquals(1, changed.size());
         assertEquals(0, removed.size());
@@ -217,6 +230,66 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         assertEquals(0, added.size());
         assertEquals(0, changed.size());
         assertEquals(1, removed.size());
+    }
+
+    @Test
+    public void testSetLockScreenShownWithVirtualDisplay() {
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.copyFrom(mDisplayInfo);
+        displayInfo.type = Display.TYPE_VIRTUAL;
+        DisplayContent virtualDisplay = createNewDisplay(displayInfo);
+
+        // Make sure we're starting out with 2 unlocked displays
+        assertEquals(2, mRootWindowContainer.getChildCount());
+        mRootWindowContainer.forAllDisplays(displayContent -> {
+            assertFalse(displayContent.isKeyguardLocked());
+            assertFalse(displayContent.isAodShowing());
+        });
+
+        // Check that setLockScreenShown locks both displays
+        mAtm.setLockScreenShown(true, true);
+        mRootWindowContainer.forAllDisplays(displayContent -> {
+            assertTrue(displayContent.isKeyguardLocked());
+            assertTrue(displayContent.isAodShowing());
+        });
+
+        // Check setLockScreenShown unlocking both displays
+        mAtm.setLockScreenShown(false, false);
+        mRootWindowContainer.forAllDisplays(displayContent -> {
+            assertFalse(displayContent.isKeyguardLocked());
+            assertFalse(displayContent.isAodShowing());
+        });
+    }
+
+    @Test
+    public void testSetLockScreenShownWithAlwaysUnlockedVirtualDisplay() {
+        assertEquals(Display.DEFAULT_DISPLAY, mRootWindowContainer.getChildAt(0).getDisplayId());
+
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.copyFrom(mDisplayInfo);
+        displayInfo.type = Display.TYPE_VIRTUAL;
+        displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
+        displayInfo.flags = Display.FLAG_OWN_DISPLAY_GROUP | Display.FLAG_ALWAYS_UNLOCKED;
+        DisplayContent newDisplay = createNewDisplay(displayInfo);
+
+        // Make sure we're starting out with 2 unlocked displays
+        assertEquals(2, mRootWindowContainer.getChildCount());
+        mRootWindowContainer.forAllDisplays(displayContent -> {
+            assertFalse(displayContent.isKeyguardLocked());
+            assertFalse(displayContent.isAodShowing());
+        });
+
+        // setLockScreenShown should only lock the default display, not the virtual one
+        mAtm.setLockScreenShown(true, true);
+
+        assertTrue(mDefaultDisplay.isKeyguardLocked());
+        assertTrue(mDefaultDisplay.isAodShowing());
+
+        DisplayContent virtualDisplay = mRootWindowContainer.getDisplayContent(
+                newDisplay.getDisplayId());
+        assertNotEquals(Display.DEFAULT_DISPLAY, virtualDisplay.getDisplayId());
+        assertFalse(virtualDisplay.isKeyguardLocked());
+        assertFalse(virtualDisplay.isAodShowing());
     }
 
     /*
@@ -246,7 +319,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         doReturn(true).when(record)
                 .checkEnterPictureInPictureState("enterPictureInPictureMode", false);
         doReturn(false).when(record).inPinnedWindowingMode();
-        doReturn(false).when(mAtm).isKeyguardLocked();
+        doReturn(false).when(mAtm).isKeyguardLocked(anyInt());
 
         //to simulate NPE
         doReturn(null).when(record).getParent();
@@ -624,7 +697,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 wpcAfterConfigChange1.getConfiguration().getLocales());
         assertTrue(wpcAfterConfigChange1.getConfiguration().isNightModeActive());
 
-        mAtm.mInternal.onPackageUninstalled(DEFAULT_PACKAGE_NAME);
+        mAtm.mInternal.onPackageUninstalled(DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
 
         WindowProcessController wpcAfterConfigChange2 = createWindowProcessController(
                 DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
@@ -840,6 +913,37 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 wpc.getConfiguration().getLocales());
     }
 
+    @Test
+    public void testPackageConfigUpdate_commitConfig_configSuccessfullyApplied() {
+        Configuration config = mAtm.getGlobalConfiguration();
+        config.setLocales(LocaleList.forLanguageTags("en-XC"));
+        mAtm.updateGlobalConfigurationLocked(config, true, true,
+                DEFAULT_USER_ID);
+        WindowProcessController wpc = createWindowProcessController(
+                DEFAULT_PACKAGE_NAME, DEFAULT_USER_ID);
+        mAtm.mProcessMap.put(Binder.getCallingPid(), wpc);
+        mAtm.mInternal.onProcessAdded(wpc);
+
+        ActivityTaskManagerInternal.PackageConfigurationUpdater packageConfigUpdater =
+                mAtm.mInternal.createPackageConfigurationUpdater(DEFAULT_PACKAGE_NAME,
+                        DEFAULT_USER_ID);
+
+        // committing empty locales, when no config is set should return false.
+        assertFalse(packageConfigUpdater.setLocales(LocaleList.getEmptyLocaleList()).commit());
+
+        // committing new configuration returns true;
+        assertTrue(packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .commit());
+        // applying the same configuration returns false.
+        assertFalse(packageConfigUpdater.setLocales(LocaleList.forLanguageTags("en-XA,ar-XB"))
+                .commit());
+
+        // committing empty locales and undefined nightMode should return true (deletes the
+        // pre-existing record) if some config was previously set.
+        assertTrue(packageConfigUpdater.setLocales(LocaleList.getEmptyLocaleList())
+                .setNightMode(Configuration.UI_MODE_NIGHT_UNDEFINED).commit());
+    }
+
     private WindowProcessController createWindowProcessController(String packageName,
             int userId) {
         WindowProcessListener mMockListener = Mockito.mock(WindowProcessListener.class);
@@ -857,7 +961,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public Intent intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -869,7 +973,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public Intent intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -881,7 +985,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public Intent intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -889,7 +993,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public Intent intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                         return null;
                     }
                 });
@@ -903,7 +1007,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
-                    public Intent intercept(ActivityInterceptorInfo info) {
+                    public ActivityInterceptResult intercept(ActivityInterceptorInfo info) {
                         return null;
                     }
                 });

@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
+
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,6 +32,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.settingslib.wifi.WifiEnterpriseRestrictionUtils;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -47,8 +50,6 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTileImpl<BooleanState> {
-
-    private final Icon mEnabledStatic = ResourceIcon.get(R.drawable.ic_hotspot);
 
     private final HotspotController mHotspotController;
     private final DataSaverController mDataSaverController;
@@ -126,9 +127,6 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         final boolean transientEnabling = arg == ARG_SHOW_TRANSIENT_ENABLING;
-        if (state.slash == null) {
-            state.slash = new SlashState();
-        }
 
         final int numConnectedDevices;
         final boolean isTransient = transientEnabling || mHotspotController.isHotspotTransient();
@@ -147,18 +145,21 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
             isDataSaverEnabled = mDataSaverController.isDataSaverEnabled();
         }
 
-        state.icon = mEnabledStatic;
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
         state.isTransient = isTransient;
-        state.slash.isSlashed = !state.value && !state.isTransient;
         if (state.isTransient) {
             state.icon = ResourceIcon.get(
-                    com.android.internal.R.drawable.ic_hotspot_transient_animation);
+                    R.drawable.qs_hotspot_icon_search);
+        } else {
+            state.icon = ResourceIcon.get(state.value
+                    ? R.drawable.qs_hotspot_icon_on : R.drawable.qs_hotspot_icon_off);
         }
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.contentDescription = state.label;
 
-        final boolean isTileUnavailable = isDataSaverEnabled;
+        final boolean isWifiTetheringAllowed =
+                WifiEnterpriseRestrictionUtils.isWifiTetheringAllowed(mHost.getUserContext());
+        final boolean isTileUnavailable = isDataSaverEnabled || !isWifiTetheringAllowed;
         final boolean isTileActive = (state.value || state.isTransient);
 
         if (isTileUnavailable) {
@@ -167,23 +168,24 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
             state.state = isTileActive ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         }
 
-        state.secondaryLabel = getSecondaryLabel(
-                isTileActive, isTransient, isDataSaverEnabled, numConnectedDevices);
+        state.secondaryLabel = getSecondaryLabel(isTileActive, isTransient, isDataSaverEnabled,
+                numConnectedDevices, isWifiTetheringAllowed);
         state.stateDescription = state.secondaryLabel;
     }
 
     @Nullable
     private String getSecondaryLabel(boolean isActive, boolean isTransient,
-            boolean isDataSaverEnabled, int numConnectedDevices) {
-        if (isTransient) {
+            boolean isDataSaverEnabled, int numConnectedDevices, boolean isWifiTetheringAllowed) {
+        if (!isWifiTetheringAllowed) {
+            return mContext.getString(R.string.wifitrackerlib_admin_restricted_network);
+        } else if (isTransient) {
             return mContext.getString(R.string.quick_settings_hotspot_secondary_label_transient);
         } else if (isDataSaverEnabled) {
             return mContext.getString(
                     R.string.quick_settings_hotspot_secondary_label_data_saver_enabled);
         } else if (numConnectedDevices > 0 && isActive) {
-            return mContext.getResources().getQuantityString(
-                    R.plurals.quick_settings_hotspot_secondary_label_num_devices,
-                    numConnectedDevices,
+            return icuMessageFormat(mContext.getResources(),
+                    R.string.quick_settings_hotspot_secondary_label_num_devices,
                     numConnectedDevices);
         }
 
@@ -193,15 +195,6 @@ public class HotspotTile extends QSTileImpl<BooleanState> {
     @Override
     public int getMetricsCategory() {
         return MetricsEvent.QS_HOTSPOT;
-    }
-
-    @Override
-    protected String composeChangeAnnouncement() {
-        if (mState.value) {
-            return mContext.getString(R.string.accessibility_quick_settings_hotspot_changed_on);
-        } else {
-            return mContext.getString(R.string.accessibility_quick_settings_hotspot_changed_off);
-        }
     }
 
     /**

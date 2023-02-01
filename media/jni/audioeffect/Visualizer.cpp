@@ -49,7 +49,7 @@ Visualizer::~Visualizer()
 }
 
 status_t Visualizer::set(int32_t priority,
-                         effect_callback_t cbf,
+                         legacy_callback_t cbf,
                          void* user,
                          audio_session_t sessionId,
                          audio_io_handle_t io,
@@ -60,6 +60,7 @@ status_t Visualizer::set(int32_t priority,
             SL_IID_VISUALIZATION, nullptr, priority, cbf, user, sessionId, io, device, probe);
     if (status == NO_ERROR || status == ALREADY_EXISTS) {
         initCaptureSize();
+        initSampleRate();
     }
     return status;
 }
@@ -141,7 +142,8 @@ status_t Visualizer::setCaptureCallBack(capture_cbk_t cbk, void* user, uint32_t 
     mCaptureRate = rate;
 
     if (cbk != NULL) {
-        mCaptureThread = new CaptureThread(this, rate, ((flags & CAPTURE_CALL_JAVA) != 0));
+        mCaptureThread = sp<CaptureThread>::make(
+                sp<Visualizer>::fromExisting(this), rate, ((flags & CAPTURE_CALL_JAVA) != 0));
     }
     ALOGV("setCaptureCallBack() rate: %d thread %p flags 0x%08x",
             rate, mCaptureThread.get(), mCaptureFlags);
@@ -413,6 +415,16 @@ uint32_t Visualizer::initCaptureSize()
     return size;
 }
 
+void Visualizer::initSampleRate()
+{
+    audio_config_base_t inputConfig, outputConfig;
+    status_t status = getConfigs(&inputConfig, &outputConfig);
+    if (status == NO_ERROR) {
+        mSampleRate = outputConfig.sample_rate * 1000;
+    }
+    ALOGV("%s sample rate %d status %d", __func__, mSampleRate, status);
+}
+
 void Visualizer::controlStatusChanged(bool controlGranted) {
     if (controlGranted) {
         // this Visualizer instance regained control of the effect, reset the scaling mode
@@ -428,7 +440,7 @@ void Visualizer::controlStatusChanged(bool controlGranted) {
 
 //-------------------------------------------------------------------------
 
-Visualizer::CaptureThread::CaptureThread(Visualizer* receiver, uint32_t captureRate,
+Visualizer::CaptureThread::CaptureThread(const sp<Visualizer>& receiver, uint32_t captureRate,
         bool bCanCallJava)
     : Thread(bCanCallJava), mReceiver(receiver)
 {

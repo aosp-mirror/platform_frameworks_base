@@ -16,10 +16,22 @@ java_defaults {
             // "-Xep:AndroidFrameworkBinderIdentity:ERROR",
             "-Xep:AndroidFrameworkCompatChange:ERROR",
             // "-Xep:AndroidFrameworkUid:ERROR",
+            "-Xep:SelfEquals:ERROR",
+            "-Xep:NullTernary:ERROR",
+            "-Xep:TryFailThrowable:ERROR",
+            "-Xep:HashtableContains:ERROR",
+            "-Xep:FormatString:ERROR",
+            "-Xep:ArrayHashCode:ERROR",
+            "-Xep:SelfAssignment:ERROR",
+            "-Xep:ArrayEquals:ERROR",
+            "-Xep:IdentityBinaryExpression:ERROR",
             // NOTE: only enable to generate local patchfiles
             // "-XepPatchChecks:refaster:frameworks/base/errorprone/refaster/EfficientXml.java.refaster",
             // "-XepPatchLocation:/tmp/refaster/",
         ],
+    },
+    lint: {
+        extra_check_modules: ["AndroidFrameworkLintChecker"],
     },
 }
 
@@ -46,6 +58,7 @@ system_optimized_java_defaults {
                 // retracing infra.
                 optimize: false,
                 shrink: true,
+                ignore_warnings: false,
                 proguard_flags_files: ["proguard.flags"],
             },
             // Note: Optimizations are disabled by default if unspecified in
@@ -76,7 +89,6 @@ filegroup {
         ":services.appwidget-sources",
         ":services.autofill-sources",
         ":services.backup-sources",
-        ":services.bluetooth-sources", // TODO(b/214988855) : Remove once apex/service-bluetooth jar is ready
         ":backuplib-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",
@@ -96,8 +108,8 @@ filegroup {
         ":services.texttospeech-sources",
         ":services.usage-sources",
         ":services.usb-sources",
-        ":services.uwb-sources",
         ":services.voiceinteraction-sources",
+        ":services.wallpapereffectsgeneration-sources",
         ":services.wifi-sources",
     ],
     visibility: ["//visibility:private"],
@@ -149,8 +161,8 @@ java_library {
         "services.texttospeech",
         "services.usage",
         "services.usb",
-        "services.uwb",
         "services.voiceinteraction",
+        "services.wallpapereffectsgeneration",
         "services.wifi",
         "service-blobstore",
         "service-jobscheduler",
@@ -161,6 +173,9 @@ java_library {
         "android.hidl.manager-V1.0-java",
         "framework-tethering.stubs.module_lib",
         "service-art.stubs.system_server",
+        "service-permission.stubs.system_server",
+        "service-rkp.stubs.system_server",
+        "service-sdksandbox.stubs.system_server",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)

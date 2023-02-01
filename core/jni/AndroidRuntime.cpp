@@ -19,10 +19,10 @@
 #define LOG_NDEBUG 1
 
 #include <android-base/macros.h>
+#include <android-base/parsebool.h>
 #include <android-base/properties.h>
 #include <android/graphics/jni_runtime.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <android_runtime/vm.h>
 #include <assert.h>
 #include <binder/IBinder.h>
 #include <binder/IPCThreadState.h>
@@ -53,6 +53,8 @@
 using namespace android;
 using android::base::GetBoolProperty;
 using android::base::GetProperty;
+using android::base::ParseBool;
+using android::base::ParseBoolResult;
 
 extern int register_android_os_Binder(JNIEnv* env);
 extern int register_android_os_Process(JNIEnv* env);
@@ -82,6 +84,7 @@ extern int register_android_hardware_display_DisplayManagerGlobal(JNIEnv* env);
 extern int register_android_hardware_HardwareBuffer(JNIEnv *env);
 extern int register_android_hardware_SensorManager(JNIEnv *env);
 extern int register_android_hardware_SerialPort(JNIEnv *env);
+extern int register_android_hardware_SyncFence(JNIEnv* env);
 extern int register_android_hardware_UsbDevice(JNIEnv *env);
 extern int register_android_hardware_UsbDeviceConnection(JNIEnv *env);
 extern int register_android_hardware_UsbRequest(JNIEnv *env);
@@ -98,6 +101,7 @@ extern int register_android_media_AudioVolumeGroups(JNIEnv *env);
 extern int register_android_media_AudioVolumeGroupChangeHandler(JNIEnv *env);
 extern int register_android_media_MicrophoneInfo(JNIEnv *env);
 extern int register_android_media_ToneGenerator(JNIEnv *env);
+extern int register_android_media_audio_common_AidlConversion(JNIEnv* env);
 extern int register_android_media_midi(JNIEnv *env);
 
 namespace android {
@@ -122,7 +126,6 @@ extern int register_android_view_InputApplicationHandle(JNIEnv* env);
 extern int register_android_view_InputWindowHandle(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_SurfaceControl(JNIEnv* env);
-extern int register_android_view_SurfaceControlFpsListener(JNIEnv* env);
 extern int register_android_view_SurfaceControlHdrLayerInfoListener(JNIEnv* env);
 extern int register_android_view_SurfaceSession(JNIEnv* env);
 extern int register_android_view_CompositionSamplingListener(JNIEnv* env);
@@ -193,15 +196,18 @@ extern int register_android_security_Scrypt(JNIEnv *env);
 extern int register_com_android_internal_content_F2fsUtils(JNIEnv* env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
 extern int register_com_android_internal_content_om_OverlayConfig(JNIEnv *env);
+extern int register_com_android_internal_expresslog_Utils(JNIEnv* env);
 extern int register_com_android_internal_net_NetworkUtilsInternal(JNIEnv* env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
-extern int register_com_android_internal_os_DmabufInfoReader(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
+extern int register_com_android_internal_os_KernelAllocationStats(JNIEnv* env);
 extern int register_com_android_internal_os_KernelCpuBpfTracking(JNIEnv* env);
 extern int register_com_android_internal_os_KernelCpuTotalBpfMapReader(JNIEnv* env);
 extern int register_com_android_internal_os_KernelCpuUidBpfMapReader(JNIEnv *env);
 extern int register_com_android_internal_os_KernelSingleProcessCpuThreadReader(JNIEnv* env);
 extern int register_com_android_internal_os_KernelSingleUidTimeReader(JNIEnv *env);
+extern int register_com_android_internal_os_LongArrayMultiStateCounter(JNIEnv* env);
+extern int register_com_android_internal_os_LongMultiStateCounter(JNIEnv* env);
 extern int register_com_android_internal_os_Zygote(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteCommandBuffer(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv *env);
@@ -634,7 +640,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char jitmaxsizeOptsBuf[sizeof("-Xjitmaxsize:")-1 + PROPERTY_VALUE_MAX];
     char jitinitialsizeOptsBuf[sizeof("-Xjitinitialsize:")-1 + PROPERTY_VALUE_MAX];
     char jitthresholdOptsBuf[sizeof("-Xjitthreshold:")-1 + PROPERTY_VALUE_MAX];
-    char useJitProfilesOptsBuf[sizeof("-Xjitsaveprofilinginfo:")-1 + PROPERTY_VALUE_MAX];
     char jitprithreadweightOptBuf[sizeof("-Xjitprithreadweight:")-1 + PROPERTY_VALUE_MAX];
     char jittransitionweightOptBuf[sizeof("-Xjittransitionweight:")-1 + PROPERTY_VALUE_MAX];
     char hotstartupsamplesOptsBuf[sizeof("-Xps-hot-startup-method-samples:")-1 + PROPERTY_VALUE_MAX];
@@ -698,17 +703,24 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
 
     // Read if we are using the profile configuration, do this at the start since the last ART args
     // take precedence.
-    property_get("dalvik.vm.profilebootclasspath", propBuf, "");
-    std::string profile_boot_class_path_flag = propBuf;
-    // Empty means the property is unset and we should default to the phenotype property.
-    // The possible values are {"true", "false", ""}
-    if (profile_boot_class_path_flag.empty()) {
-        profile_boot_class_path_flag = server_configurable_flags::GetServerConfigurableFlag(
-                RUNTIME_NATIVE_BOOT_NAMESPACE,
-                PROFILE_BOOT_CLASS_PATH,
-                /*default_value=*/ "");
+    std::string profile_boot_class_path_flag =
+            server_configurable_flags::GetServerConfigurableFlag(RUNTIME_NATIVE_BOOT_NAMESPACE,
+                                                                 PROFILE_BOOT_CLASS_PATH,
+                                                                 /*default_value=*/"");
+    bool profile_boot_class_path;
+    switch (ParseBool(profile_boot_class_path_flag)) {
+        case ParseBoolResult::kError:
+            // Default to the system property.
+            profile_boot_class_path =
+                    GetBoolProperty("dalvik.vm.profilebootclasspath", /*default_value=*/false);
+            break;
+        case ParseBoolResult::kTrue:
+            profile_boot_class_path = true;
+            break;
+        case ParseBoolResult::kFalse:
+            profile_boot_class_path = false;
+            break;
     }
-    const bool profile_boot_class_path = (profile_boot_class_path_flag == "true");
     if (profile_boot_class_path) {
         addOption("-Xcompiler-option");
         addOption("--count-hotness-in-compiled-code");
@@ -843,10 +855,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     parseRuntimeOption("dalvik.vm.jitpthreadpriority",
                        jitpthreadpriorityOptsBuf,
                        "-Xjitpthreadpriority:");
-    property_get("dalvik.vm.usejitprofiles", useJitProfilesOptsBuf, "");
-    if (strcmp(useJitProfilesOptsBuf, "true") == 0) {
-        addOption("-Xjitsaveprofilinginfo");
-    }
+    addOption("-Xjitsaveprofilinginfo");
 
     parseRuntimeOption("dalvik.vm.jitprithreadweight",
                        jitprithreadweightOptBuf,
@@ -1542,7 +1551,6 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_view_InputWindowHandle),
         REG_JNI(register_android_view_Surface),
         REG_JNI(register_android_view_SurfaceControl),
-        REG_JNI(register_android_view_SurfaceControlFpsListener),
         REG_JNI(register_android_view_SurfaceControlHdrLayerInfoListener),
         REG_JNI(register_android_view_SurfaceSession),
         REG_JNI(register_android_view_CompositionSamplingListener),
@@ -1583,8 +1591,11 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_SharedMemory),
         REG_JNI(register_android_os_incremental_IncrementalManager),
         REG_JNI(register_com_android_internal_content_om_OverlayConfig),
+        REG_JNI(register_com_android_internal_expresslog_Utils),
         REG_JNI(register_com_android_internal_net_NetworkUtilsInternal),
         REG_JNI(register_com_android_internal_os_ClassLoaderFactory),
+        REG_JNI(register_com_android_internal_os_LongArrayMultiStateCounter),
+        REG_JNI(register_com_android_internal_os_LongMultiStateCounter),
         REG_JNI(register_com_android_internal_os_Zygote),
         REG_JNI(register_com_android_internal_os_ZygoteCommandBuffer),
         REG_JNI(register_com_android_internal_os_ZygoteInit),
@@ -1599,6 +1610,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_hardware_HardwareBuffer),
         REG_JNI(register_android_hardware_SensorManager),
         REG_JNI(register_android_hardware_SerialPort),
+        REG_JNI(register_android_hardware_SyncFence),
         REG_JNI(register_android_hardware_UsbDevice),
         REG_JNI(register_android_hardware_UsbDeviceConnection),
         REG_JNI(register_android_hardware_UsbRequest),
@@ -1616,6 +1628,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_media_MicrophoneInfo),
         REG_JNI(register_android_media_RemoteDisplay),
         REG_JNI(register_android_media_ToneGenerator),
+        REG_JNI(register_android_media_audio_common_AidlConversion),
         REG_JNI(register_android_media_midi),
 
         REG_JNI(register_android_opengl_classes),
@@ -1647,8 +1660,8 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_security_Scrypt),
         REG_JNI(register_com_android_internal_content_F2fsUtils),
         REG_JNI(register_com_android_internal_content_NativeLibraryHelper),
-        REG_JNI(register_com_android_internal_os_DmabufInfoReader),
         REG_JNI(register_com_android_internal_os_FuseAppLoop),
+        REG_JNI(register_com_android_internal_os_KernelAllocationStats),
         REG_JNI(register_com_android_internal_os_KernelCpuBpfTracking),
         REG_JNI(register_com_android_internal_os_KernelCpuTotalBpfMapReader),
         REG_JNI(register_com_android_internal_os_KernelCpuUidBpfMapReader),

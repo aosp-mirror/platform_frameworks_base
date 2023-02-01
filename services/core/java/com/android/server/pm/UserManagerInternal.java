@@ -92,21 +92,6 @@ public abstract class UserManagerInternal {
     public abstract void setDevicePolicyUserRestrictions(int originatingUserId,
             @Nullable Bundle global, @Nullable RestrictionsSet local, boolean isDeviceOwner);
 
-    /**
-     * Returns the "base" user restrictions.
-     *
-     * Used by {@link com.android.server.devicepolicy.DevicePolicyManagerService} for upgrading
-     * from MNC.
-     */
-    public abstract Bundle getBaseUserRestrictions(int userId);
-
-    /**
-     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} for upgrading
-     * from MNC.
-     */
-    public abstract void setBaseUserRestrictionsByDpmsForMigration(int userId,
-            Bundle baseRestrictions);
-
     /** Return a user restriction. */
     public abstract boolean getUserRestriction(int userId, String key);
 
@@ -320,4 +305,10 @@ public abstract class UserManagerInternal {
      * for users that already existed on-disk from an older version of Android.
      */
     public abstract boolean shouldIgnorePrepareStorageErrors(int userId);
+
+    /**
+     * Returns the user id of the main user, or {@link android.os.UserHandle#USER_NULL} if there is
+     * no main user.
+     */
+    public abstract @UserIdInt int getMainUserId();
 }

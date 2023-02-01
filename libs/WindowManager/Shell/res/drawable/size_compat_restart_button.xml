@@ -21,7 +21,9 @@
         android:viewportHeight="48">
     <path
         android:fillColor="@color/compat_controls_background"
-        android:pathData="M0,24 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0" />
+        android:strokeAlpha="0.8"
+        android:fillAlpha="0.8"
+        android:pathData="M0,24 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0"/>
     <group
         android:translateX="12"
         android:translateY="12">

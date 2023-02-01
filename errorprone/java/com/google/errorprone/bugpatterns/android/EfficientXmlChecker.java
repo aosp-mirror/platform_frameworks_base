@@ -16,6 +16,7 @@
 
 package com.google.errorprone.bugpatterns.android;
 
+import static com.google.errorprone.BugPattern.LinkType.NONE;
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
 import static com.google.errorprone.matchers.Matchers.anyOf;
 import static com.google.errorprone.matchers.Matchers.instanceMethod;
@@ -61,6 +62,7 @@ import javax.lang.model.element.Name;
 @BugPattern(
     name = "AndroidFrameworkEfficientXml",
     summary = "Verifies efficient XML best-practices",
+    linkType = NONE,
     severity = WARNING)
 public final class EfficientXmlChecker extends BugChecker
         implements MethodInvocationTreeMatcher, NewClassTreeMatcher {
@@ -166,6 +168,7 @@ public final class EfficientXmlChecker extends BugChecker
      */
     private static final Matcher<ExpressionTree> CONVERT_PRIMITIVE_TO_STRING =
             new Matcher<ExpressionTree>() {
+        @SuppressWarnings("TreeToString") //TODO: Fix me
         @Override
         public boolean matches(ExpressionTree tree, VisitorState state) {
             if (PRIMITIVE_TO_STRING.matches(tree, state)) {
@@ -203,6 +206,7 @@ public final class EfficientXmlChecker extends BugChecker
      */
     private static final Matcher<ExpressionTree> CONVERT_STRING_TO_PRIMITIVE =
             new Matcher<ExpressionTree>() {
+        @SuppressWarnings("TreeToString") //TODO: Fix me
         @Override
         public boolean matches(ExpressionTree tree, VisitorState state) {
             if (PRIMITIVE_PARSE.matches(tree, state)) {

@@ -23,5 +23,4 @@ oneway interface IMediaRouterClient {
     void onStateChanged();
     void onRestoreRoute();
     void onGroupRouteSelected(String routeId);
-    void onGlobalA2dpChanged(boolean a2dpOn);
 }

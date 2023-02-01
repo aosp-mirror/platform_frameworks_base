@@ -123,6 +123,7 @@ import static android.telephony.CarrierConfigManager.KEY_DATA_RAPID_NOTIFICATION
 import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_NOTIFICATION_BOOL;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -265,6 +266,8 @@ import com.android.server.connectivity.MultipathPolicyTracker;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import libcore.io.IoUtils;
 
 import java.io.File;
@@ -395,8 +398,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_NETWORK_TYPES = "networkTypes";
     private static final String ATTR_XML_UTILS_NAME = "name";
 
-    private static final String ACTION_ALLOW_BACKGROUND =
-            "com.android.server.net.action.ALLOW_BACKGROUND";
     private static final String ACTION_SNOOZE_WARNING =
             "com.android.server.net.action.SNOOZE_WARNING";
     private static final String ACTION_SNOOZE_RAPID =
@@ -1052,10 +1053,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mNetworkStats.registerUsageCallback(new NetworkTemplate.Builder(MATCH_WIFI).build(),
                     0 /* thresholdBytes */, executor, mStatsCallback);
 
-            // listen for restrict background changes from notifications
-            final IntentFilter allowFilter = new IntentFilter(ACTION_ALLOW_BACKGROUND);
-            mContext.registerReceiver(mAllowReceiver, allowFilter, MANAGE_NETWORK_POLICY, mHandler);
-
             // Listen for snooze from notifications
             mContext.registerReceiver(mSnoozeReceiver,
                     new IntentFilter(ACTION_SNOOZE_WARNING), MANAGE_NETWORK_POLICY, mHandler);
@@ -1150,6 +1147,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
+        }
+
+        @Override public void onUidProcAdjChanged(int uid) {
         }
     };
 
@@ -1287,20 +1287,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // being set to true.
             // TODO : fix threading for this member.
             return mIsAnyCallbackReceived;
-        }
-    };
-
-    /**
-     * Receiver that watches for {@link Notification} control of
-     * {@link #mRestrictBackground}.
-     */
-    final private BroadcastReceiver mAllowReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // on background handler thread, and verified MANAGE_NETWORK_POLICY
-            // permission above.
-
-            setRestrictBackground(false);
         }
     };
 
@@ -3173,7 +3159,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * active merge set [A,B], we'd return a new template that primarily matches
      * A, but also matches B.
      */
-    private static NetworkTemplate normalizeTemplate(@NonNull NetworkTemplate template,
+    @VisibleForTesting(visibility = PRIVATE)
+    static NetworkTemplate normalizeTemplate(@NonNull NetworkTemplate template,
             @NonNull List<String[]> mergedList) {
         // Now there are several types of network which uses Subscriber Id to store network
         // information. For instance:
@@ -3183,6 +3170,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (template.getSubscriberIds().isEmpty()) return template;
 
         for (final String[] merged : mergedList) {
+            // In some rare cases (e.g. b/243015487), merged subscriberId list might contain
+            // duplicated items. Deduplication for better error handling.
+            final ArraySet mergedSet = new ArraySet(merged);
+            if (mergedSet.size() != merged.length) {
+                Log.wtf(TAG, "Duplicated merged list detected: " + Arrays.toString(merged));
+            }
             // TODO: Handle incompatible subscriberIds if that happens in practice.
             for (final String subscriberId : template.getSubscriberIds()) {
                 if (com.android.net.module.util.CollectionUtils.contains(merged, subscriberId)) {
@@ -3190,7 +3183,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     // a template that matches all merged subscribers.
                     return new NetworkTemplate.Builder(template.getMatchRule())
                             .setWifiNetworkKeys(template.getWifiNetworkKeys())
-                            .setSubscriberIds(Set.of(merged))
+                            .setSubscriberIds(mergedSet)
                             .setMeteredness(template.getMeteredness())
                             .build();
                 }
@@ -3838,6 +3831,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return 0;
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
@@ -5880,10 +5874,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private static Intent buildAllowBackgroundDataIntent() {
-        return new Intent(ACTION_ALLOW_BACKGROUND);
-    }
-
     private static Intent buildSnoozeWarningIntent(NetworkTemplate template, String targetPackage) {
         final Intent intent = new Intent(ACTION_SNOOZE_WARNING);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -6390,6 +6380,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             return effectiveBlockedReasons;
+        }
+
+        static int getAllowedReasonsForProcState(int procState) {
+            if (procState > NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE) {
+                return ALLOWED_REASON_NONE;
+            } else if (procState <= NetworkPolicyManager.TOP_THRESHOLD_STATE) {
+                return ALLOWED_REASON_TOP | ALLOWED_REASON_FOREGROUND
+                        | ALLOWED_METERED_REASON_FOREGROUND;
+            } else {
+                return ALLOWED_REASON_FOREGROUND | ALLOWED_METERED_REASON_FOREGROUND;
+            }
         }
 
         @Override

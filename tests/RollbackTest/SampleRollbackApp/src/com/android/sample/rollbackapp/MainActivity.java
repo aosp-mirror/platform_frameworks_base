@@ -75,6 +75,7 @@ public class MainActivity extends Activity {
                         String rollbackStatus = "FAILED";
                         if (rollbackStatusCode == RollbackManager.STATUS_SUCCESS) {
                             rollbackStatus = "SUCCESS";
+                            mTriggerRollbackButton.setClickable(false);
                         }
                         makeToast("Status for rollback ID " + rollbackId + " is " + rollbackStatus);
                     }}, new IntentFilter(ACTION_NAME), Context.RECEIVER_NOT_EXPORTED);

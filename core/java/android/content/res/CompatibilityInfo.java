@@ -420,7 +420,10 @@ public class CompatibilityInfo implements Parcelable {
          * Translate a Rect in screen coordinates into the app window's coordinates.
          */
         @UnsupportedAppUsage
-        public void translateRectInScreenToAppWindow(Rect rect) {
+        public void translateRectInScreenToAppWindow(@Nullable Rect rect) {
+            if (rect == null) {
+                return;
+            }
             rect.scale(applicationInvertedScale);
         }
 
@@ -548,12 +551,7 @@ public class CompatibilityInfo implements Parcelable {
         if (isScalingRequired()) {
             float invertedRatio = applicationInvertedScale;
             inoutConfig.densityDpi = (int)((inoutConfig.densityDpi * invertedRatio) + .5f);
-            inoutConfig.windowConfiguration.getMaxBounds().scale(invertedRatio);
-            inoutConfig.windowConfiguration.getBounds().scale(invertedRatio);
-            final Rect appBounds = inoutConfig.windowConfiguration.getAppBounds();
-            if (appBounds != null) {
-                appBounds.scale(invertedRatio);
-            }
+            inoutConfig.windowConfiguration.scale(invertedRatio);
         }
     }
 

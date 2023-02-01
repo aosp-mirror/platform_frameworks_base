@@ -22,6 +22,7 @@ import static android.view.Display.HdrCapabilities.HdrType;
 import android.Manifest;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +38,8 @@ import android.graphics.Point;
 import android.media.projection.MediaProjection;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.Looper;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -47,6 +50,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -102,6 +106,37 @@ public final class DisplayManager {
      */
     public static final String DISPLAY_CATEGORY_PRESENTATION =
             "android.hardware.display.category.PRESENTATION";
+
+    /**
+     * Display category: All displays, including disabled displays.
+     * <p>
+     * This returns all displays, including currently disabled and inaccessible displays.
+     *
+     * @see #getDisplays(String)
+     * @hide
+     */
+    public static final String DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED =
+            "android.hardware.display.category.ALL_INCLUDING_DISABLED";
+
+    /** @hide **/
+    @IntDef(prefix = "VIRTUAL_DISPLAY_FLAG_", flag = true, value = {
+            VIRTUAL_DISPLAY_FLAG_PUBLIC,
+            VIRTUAL_DISPLAY_FLAG_PRESENTATION,
+            VIRTUAL_DISPLAY_FLAG_SECURE,
+            VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY,
+            VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+            VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD,
+            VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH,
+            VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT,
+            VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL,
+            VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS,
+            VIRTUAL_DISPLAY_FLAG_TRUSTED,
+            VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP,
+            VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED,
+            VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VirtualDisplayFlag {}
 
     /**
      * Virtual display flag: Create a public display.
@@ -332,7 +367,7 @@ public final class DisplayManager {
      * @see #VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      * @hide
      */
-    @TestApi
+    @SystemApi
     public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10;
 
     /**
@@ -344,6 +379,25 @@ public final class DisplayManager {
      */
     public static final int VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP = 1 << 11;
 
+    /**
+     * Virtual display flags: Indicates that the virtual display should always be unlocked and not
+     * have keyguard displayed on it. Only valid for virtual displays that aren't in the default
+     * display group.
+     *
+     * @see #createVirtualDisplay
+     * @see #VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED = 1 << 12;
+
+    /**
+     * Virtual display flags: Indicates that the display should not play sound effects or perform
+     * haptic feedback when the user touches the screen.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 13;
 
     /** @hide */
     @IntDef(prefix = {"MATCH_CONTENT_FRAMERATE_"}, value = {
@@ -508,7 +562,8 @@ public final class DisplayManager {
         final int[] displayIds = mGlobal.getDisplayIds();
         synchronized (mLock) {
             try {
-                if (category == null) {
+                if (category == null
+                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
                     addAllDisplaysLocked(mTempDisplays, displayIds);
                 } else if (category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
@@ -808,7 +863,11 @@ public final class DisplayManager {
      * VirtualDisplay.Callback, Handler)
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            int width, int height, int densityDpi, @Nullable Surface surface, int flags) {
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags) {
         return createVirtualDisplay(name, width, height, densityDpi, surface, flags, null, null);
     }
 
@@ -856,8 +915,13 @@ public final class DisplayManager {
      * a virtual display with the specified flags.
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            int width, int height, int densityDpi, @Nullable Surface surface, int flags,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags,
+            @Nullable VirtualDisplay.Callback callback,
+            @Nullable Handler handler) {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
                 height, densityDpi);
         builder.setFlags(flags);
@@ -870,9 +934,16 @@ public final class DisplayManager {
 
     // TODO : Remove this hidden API after remove all callers. (Refer to MultiDisplayService)
     /** @hide */
-    public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
-            @NonNull String name, int width, int height, int densityDpi, @Nullable Surface surface,
-            int flags, @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
+    public VirtualDisplay createVirtualDisplay(
+            @Nullable MediaProjection projection,
+            @NonNull String name,
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @IntRange(from = 1) int densityDpi,
+            @Nullable Surface surface,
+            @VirtualDisplayFlag int flags,
+            @Nullable VirtualDisplay.Callback callback,
+            @Nullable Handler handler,
             @Nullable String uniqueId) {
         final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
                 height, densityDpi);
@@ -892,8 +963,15 @@ public final class DisplayManager {
             @NonNull VirtualDisplayConfig virtualDisplayConfig,
             @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
             @Nullable Context windowContext) {
+        Executor executor = null;
+        // If callback is null, the executor will not be used. Avoid creating the handler and the
+        // handler executor.
+        if (callback != null) {
+            executor = new HandlerExecutor(
+                    Handler.createAsync(handler != null ? handler.getLooper() : Looper.myLooper()));
+        }
         return mGlobal.createVirtualDisplay(mContext, projection, virtualDisplayConfig, callback,
-                handler, windowContext);
+                executor, windowContext);
     }
 
     /**
@@ -1113,6 +1191,51 @@ public final class DisplayManager {
     }
 
     /**
+     * Sets the global default {@link Display.Mode}.  The display mode includes preference for
+     * resolution and refresh rate. The mode change is applied globally, i.e. to all the connected
+     * displays. If the mode specified is not supported by a connected display, then no mode change
+     * occurs for that display.
+     *
+     * @param mode The {@link Display.Mode} to set, which can include resolution and/or
+     * refresh-rate. It is created using {@link Display.Mode.Builder}.
+     *`
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE)
+    public void setGlobalUserPreferredDisplayMode(@NonNull Display.Mode mode) {
+        // Create a new object containing default values for the unused fields like mode ID and
+        // alternative refresh rates.
+        Display.Mode preferredMode = new Display.Mode(mode.getPhysicalWidth(),
+                mode.getPhysicalHeight(), mode.getRefreshRate());
+        mGlobal.setUserPreferredDisplayMode(Display.INVALID_DISPLAY, preferredMode);
+    }
+
+    /**
+     * Removes the global user preferred display mode.
+     * User preferred display mode is cleared for all the connected displays.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE)
+    public void clearGlobalUserPreferredDisplayMode() {
+        mGlobal.setUserPreferredDisplayMode(Display.INVALID_DISPLAY, null);
+    }
+
+    /**
+     * Returns the global user preferred display mode.
+     * If no user preferred mode has been set, or it has been cleared, this method returns null.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public Display.Mode getGlobalUserPreferredDisplayMode() {
+        return mGlobal.getUserPreferredDisplayMode(Display.INVALID_DISPLAY);
+    }
+
+    /**
      * When enabled the app requested mode is always selected regardless of user settings and
      * policies for low brightness, low battery, etc.
      *
@@ -1325,5 +1448,15 @@ public final class DisplayManager {
          * @hide
          */
         String KEY_HIGH_REFRESH_RATE_BLACKLIST = "high_refresh_rate_blacklist";
+
+        /**
+         * Key for the brightness throttling data as a String formatted:
+         * <displayId>,<no of throttling levels>,[<severity as string>,<brightness cap>]
+         * Where the latter part is repeated for each throttling level, and the entirety is repeated
+         * for each display, separated by a semicolon.
+         * For example:
+         * 123,1,critical,0.8;456,2,moderate,0.9,critical,0.7
+         */
+        String KEY_BRIGHTNESS_THROTTLING_DATA = "brightness_throttling_data";
     }
 }

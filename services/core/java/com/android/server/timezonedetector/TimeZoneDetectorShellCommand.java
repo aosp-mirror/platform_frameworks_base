@@ -15,6 +15,8 @@
  */
 package com.android.server.timezonedetector;
 
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_DUMP_METRICS;
+import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_AUTO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_ENABLED;
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED;
@@ -27,9 +29,12 @@ import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGES
 import static android.app.timezonedetector.TimeZoneDetector.SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE;
 import static android.provider.DeviceConfig.NAMESPACE_SYSTEM_TIME;
 
+import static com.android.server.timedetector.ServerFlags.KEY_ENHANCED_METRICS_COLLECTION_ENABLED;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_FEATURE_SUPPORTED;
+import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT;
 import static com.android.server.timedetector.ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE;
+import static com.android.server.timedetector.ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED;
 
 import android.app.time.LocationTimeZoneManager;
 import android.app.time.TimeZoneConfiguration;
@@ -76,6 +81,10 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
                 return runSuggestManualTimeZone();
             case SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE:
                 return runSuggestTelephonyTimeZone();
+            case SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK:
+                return runEnableTelephonyFallback();
+            case SHELL_COMMAND_DUMP_METRICS:
+                return runDumpMetrics();
             default: {
                 return handleDefaultCommands(cmd);
             }
@@ -164,9 +173,22 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
             pw.println("Suggestion " + suggestion + " injected.");
             return 0;
         } catch (RuntimeException e) {
-            pw.println(e.toString());
+            pw.println(e);
             return 1;
         }
+    }
+
+    private int runEnableTelephonyFallback() {
+        mInterface.enableTelephonyFallback();
+        return 0;
+    }
+
+    private int runDumpMetrics() {
+        final PrintWriter pw = getOutPrintWriter();
+        MetricsTimeZoneDetectorState metricsState = mInterface.generateMetricsState();
+        pw.println("MetricsTimeZoneDetectorState:");
+        pw.println(metricsState.toString());
+        return 0;
     }
 
     @Override
@@ -190,12 +212,19 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
                 + "\n");
         pw.printf("  %s true|false\n", SHELL_COMMAND_SET_GEO_DETECTION_ENABLED);
         pw.printf("    Sets the geolocation time zone detection enabled setting.\n");
+        pw.printf("  %s\n", SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK);
+        pw.printf("    Signals that telephony time zone detection fall back can be used if"
+                + " geolocation detection is supported and enabled. This is a temporary state until"
+                + " geolocation detection becomes \"certain\". To have an effect this requires that"
+                + " the telephony fallback feature is supported on the device, see below for"
+                + " for device_config flags.\n");
+        pw.println();
         pw.printf("  %s <geolocation suggestion opts>\n",
                 SHELL_COMMAND_SUGGEST_GEO_LOCATION_TIME_ZONE);
-        pw.printf("  %s <manual suggestion opts>\n",
-                SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE);
-        pw.printf("  %s <telephony suggestion opts>\n",
-                SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE);
+        pw.printf("  %s <manual suggestion opts>\n", SHELL_COMMAND_SUGGEST_MANUAL_TIME_ZONE);
+        pw.printf("  %s <telephony suggestion opts>\n", SHELL_COMMAND_SUGGEST_TELEPHONY_TIME_ZONE);
+        pw.printf("  %s\n", SHELL_COMMAND_DUMP_METRICS);
+        pw.printf("    Dumps the service metrics to stdout for inspection.\n");
         pw.println();
         GeolocationTimeZoneSuggestion.printCommandLineOpts(pw);
         pw.println();
@@ -209,6 +238,9 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.printf("    Only observed if the geolocation time zone detection feature is enabled in"
                 + " config.\n");
         pw.printf("    Set this to false to disable the feature.\n");
+        pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_RUN_IN_BACKGROUND_ENABLED);
+        pw.printf("    Runs geolocation time zone detection even when it not enabled by the user."
+                + " The result is not used to set the device's time zone [*]\n");
         pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT);
         pw.printf("    Only used if the device does not have an explicit 'geolocation time zone"
                 + " detection enabled' setting stored [*].\n");
@@ -216,6 +248,11 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.printf("  %s\n", KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE);
         pw.printf("    Used to override the device's 'geolocation time zone detection enabled'"
                 + " setting [*].\n");
+        pw.printf("  %s\n", KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED);
+        pw.printf("    Used to enable / disable support for telephony detection fallback. Also see"
+                + " the %s command.\n", SHELL_COMMAND_ENABLE_TELEPHONY_FALLBACK);
+        pw.printf("  %s\n", KEY_ENHANCED_METRICS_COLLECTION_ENABLED);
+        pw.printf("    Used to increase the detail of metrics collected / reported.\n");
         pw.println();
         pw.printf("[*] To be enabled, the user must still have location = on / auto time zone"
                 + " detection = on.\n");

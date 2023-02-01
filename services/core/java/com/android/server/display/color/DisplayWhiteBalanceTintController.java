@@ -61,11 +61,16 @@ final class DisplayWhiteBalanceTintController extends TintController {
     boolean mSetUp = false;
     private float[] mMatrixDisplayWhiteBalance = new float[16];
     private Boolean mIsAvailable;
+    // This feature becomes disallowed if the device is in an unsupported strong/light state.
+    private boolean mIsAllowed = true;
 
     @Override
     public void setUp(Context context, boolean needsLinear) {
         mSetUp = false;
         final Resources res = context.getResources();
+
+        // Initialize with the config value for light mode, so it starts in the right state.
+        setAllowed(res.getBoolean(R.bool.config_displayWhiteBalanceLightModeAllowed));
 
         ColorSpace.Rgb displayColorSpaceRGB = getDisplayColorSpaceFromSurfaceControl();
         if (displayColorSpaceRGB == null) {
@@ -248,7 +253,28 @@ final class DisplayWhiteBalanceTintController extends TintController {
                     + matrixToString(mDisplayColorSpaceRGB.getInverseTransform(), 3));
             pw.println("    mMatrixDisplayWhiteBalance = "
                     + matrixToString(mMatrixDisplayWhiteBalance, 4));
+            pw.println("    mIsAllowed = " + mIsAllowed);
         }
+    }
+
+    public float getLuminance() {
+        synchronized (mLock) {
+            if (mChromaticAdaptationMatrix != null && mChromaticAdaptationMatrix.length == 9) {
+                // Compute only the luminance (y) value of the xyz * [1 1 1] transform.
+                return 1 / (mChromaticAdaptationMatrix[1] + mChromaticAdaptationMatrix[4]
+                        + mChromaticAdaptationMatrix[7]);
+            } else {
+                return -1;
+            }
+        }
+    }
+
+    public void setAllowed(boolean allowed) {
+        mIsAllowed = allowed;
+    }
+
+    public boolean isAllowed() {
+        return mIsAllowed;
     }
 
     private ColorSpace.Rgb makeRgbColorSpaceFromXYZ(float[] redGreenBlueXYZ, float[] whiteXYZ) {

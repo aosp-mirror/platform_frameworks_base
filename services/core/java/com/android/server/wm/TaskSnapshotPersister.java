@@ -407,6 +407,10 @@ class TaskSnapshotPersister {
         }
 
         boolean writeBuffer() {
+            if (TaskSnapshotController.isInvalidHardwareBuffer(mSnapshot.getHardwareBuffer())) {
+                Slog.e(TAG, "Invalid task snapshot hw buffer, taskId=" + mTaskId);
+                return false;
+            }
             final Bitmap bitmap = Bitmap.wrapHardwareBuffer(
                     mSnapshot.getHardwareBuffer(), mSnapshot.getColorSpace());
             if (bitmap == null) {

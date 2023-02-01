@@ -18,6 +18,7 @@ package android.telecom;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -3156,15 +3157,32 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
-     * Create a {@code Connection} for a new unknown call. An unknown call is a call originating
-     * from the ConnectionService that was neither a user-initiated outgoing call, nor an incoming
-     * call created using
-     * {@code TelecomManager#addNewIncomingCall(PhoneAccountHandle, android.os.Bundle)}.
+     * Calls of this type are created using
+     * {@link TelecomManager#addNewUnknownCall(PhoneAccountHandle, Bundle)}.  Unknown calls
+     * are used for representing calls which become known to the {@link ConnectionService}
+     * midway through the call.
      *
+     * For example, a call transferred from one device to answer would surface as an active
+     * call in Telecom instead of going through a typical Ringing to Active transition, or
+     * Dialing to Active transition.
+     *
+     * A {@link ConnectionService} can return {@code null} (the default behavior)
+     * if it is not able to handle a request for the requested unknown connection.
+     *
+     * {@link TelecomManager#addNewIncomingCall(PhoneAccountHandle, android.os.Bundle)}.
+     *
+     * @param connectionManagerPhoneAccount The connection manager account to use for managing
+     *                                      this call
+     * @param request Details about the outgoing call
+     * @return The {@code Connection} object to satisfy this call, or the result of an invocation
+     *         of {@link Connection#createFailedConnection(DisconnectCause)} to not handle the call
      * @hide
      */
-    public Connection onCreateUnknownConnection(PhoneAccountHandle connectionManagerPhoneAccount,
-            ConnectionRequest request) {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public @Nullable Connection onCreateUnknownConnection(
+            @NonNull PhoneAccountHandle connectionManagerPhoneAccount,
+            @NonNull ConnectionRequest request) {
         return null;
     }
 

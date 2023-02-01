@@ -3,8 +3,6 @@ hackbod@google.com
 jsharkey@android.com
 jsharkey@google.com
 narayan@google.com
-svetoslavganov@android.com
-svetoslavganov@google.com
 include /PACKAGE_MANAGER_OWNERS
 
 # apex support
@@ -15,6 +13,7 @@ per-file StagingManager.java = dariofreni@google.com, ioffe@google.com, olilan@g
 per-file AbstractStatsBase.java = file:dex/OWNERS
 per-file BackgroundDexOptService.java = file:dex/OWNERS
 per-file CompilerStats.java = file:dex/OWNERS
+per-file DexOptHelper.java = file:dex/OWNERS
 per-file DynamicCodeLoggingService.java = file:dex/OWNERS
 per-file Installer.java = file:dex/OWNERS
 per-file InstructionSets.java = file:dex/OWNERS
@@ -25,16 +24,10 @@ per-file PackageManagerServiceCompilerMapping.java = file:dex/OWNERS
 per-file PackageUsage.java = file:dex/OWNERS
 
 # multi user / cross profile
-per-file CrossProfileAppsServiceImpl.java = omakoto@google.com, yamasani@google.com
-per-file CrossProfileAppsService.java = omakoto@google.com, yamasani@google.com
-per-file CrossProfileIntentFilter.java = omakoto@google.com, yamasani@google.com
-per-file CrossProfileIntentResolver.java = omakoto@google.com, yamasani@google.com
+per-file CrossProfile* = file:MULTIUSER_AND_ENTERPRISE_OWNERS
 per-file RestrictionsSet.java = file:MULTIUSER_AND_ENTERPRISE_OWNERS
-per-file UserManager* = file:/MULTIUSER_OWNERS
 per-file UserRestriction* = file:MULTIUSER_AND_ENTERPRISE_OWNERS
-per-file UserSystemPackageInstaller* = file:/MULTIUSER_OWNERS
-per-file UserTypeDetails.java = file:/MULTIUSER_OWNERS
-per-file UserTypeFactory.java = file:/MULTIUSER_OWNERS
+per-file User* = file:/MULTIUSER_OWNERS
 
 # security
 per-file KeySetHandle.java = cbrubaker@google.com, nnk@google.com

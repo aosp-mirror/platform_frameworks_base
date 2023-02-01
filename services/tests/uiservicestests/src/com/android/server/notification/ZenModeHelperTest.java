@@ -28,6 +28,7 @@ import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_REPEAT_CA
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_STARRED;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
@@ -1264,6 +1265,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                         | SUPPRESSED_EFFECT_LIGHTS
+                        | SUPPRESSED_EFFECT_AMBIENT
                         | SUPPRESSED_EFFECT_PEEK,
                 mZenModeHelperSpy.mConfig.suppressedVisualEffects);
 
@@ -1297,7 +1299,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.nextTag();
         mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
 
-        assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT | SUPPRESSED_EFFECT_LIGHTS,
+        assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
+                        | SUPPRESSED_EFFECT_LIGHTS
+                        | SUPPRESSED_EFFECT_AMBIENT,
                 mZenModeHelperSpy.mConfig.suppressedVisualEffects);
     }
 
@@ -1618,7 +1622,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     ZenModeConfig.toScheduleConditionId(si),
                     new ZenPolicy.Builder().build(),
                     NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-            String id = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule, "test");
+            // We need the package name to be something that's not "android" so there aren't any
+            // existing rules under that package.
+            String id = mZenModeHelperSpy.addAutomaticZenRule("pkgname", zenRule, "test");
             assertNotNull(id);
         }
         try {
@@ -1628,12 +1634,41 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
                     new ZenPolicy.Builder().build(),
                     NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-            String id = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule, "test");
+            String id = mZenModeHelperSpy.addAutomaticZenRule("pkgname", zenRule, "test");
             fail("allowed too many rules to be created");
         } catch (IllegalArgumentException e) {
             // yay
         }
+    }
 
+    @Test
+    public void testAddAutomaticZenRule_beyondSystemLimit_differentComponents() {
+        // Make sure the system limit is enforced per-package even with different component provider
+        // names.
+        for (int i = 0; i < RULE_LIMIT_PER_PACKAGE; i++) {
+            ScheduleInfo si = new ScheduleInfo();
+            si.startHour = i;
+            AutomaticZenRule zenRule = new AutomaticZenRule("name" + i,
+                    null,
+                    new ComponentName("android", "ScheduleConditionProvider" + i),
+                    ZenModeConfig.toScheduleConditionId(si),
+                    new ZenPolicy.Builder().build(),
+                    NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+            String id = mZenModeHelperSpy.addAutomaticZenRule("pkgname", zenRule, "test");
+            assertNotNull(id);
+        }
+        try {
+            AutomaticZenRule zenRule = new AutomaticZenRule("name",
+                    null,
+                    new ComponentName("android", "ScheduleConditionProviderFinal"),
+                    ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
+                    new ZenPolicy.Builder().build(),
+                    NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
+            String id = mZenModeHelperSpy.addAutomaticZenRule("pkgname", zenRule, "test");
+            fail("allowed too many rules to be created");
+        } catch (IllegalArgumentException e) {
+            // yay
+        }
     }
 
     @Test

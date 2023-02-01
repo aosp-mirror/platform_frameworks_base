@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.common;
 
-import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
@@ -29,7 +28,7 @@ import java.util.function.Consumer;
 public class ScreenshotUtils {
 
     /**
-     * Take a screenshot of the specified SurfaceControl.
+     * Takes a screenshot of the specified SurfaceControl.
      *
      * @param sc the SurfaceControl to take a screenshot of
      * @param crop the crop to use when capturing the screenshot
@@ -50,11 +49,14 @@ public class ScreenshotUtils {
         SurfaceControl mScreenshot = null;
         SurfaceControl.Transaction mTransaction;
         SurfaceControl mSurfaceControl;
+        SurfaceControl mParentSurfaceControl;
         int mLayer;
 
-        BufferConsumer(SurfaceControl.Transaction t, SurfaceControl sc, int layer) {
+        BufferConsumer(SurfaceControl.Transaction t, SurfaceControl sc, SurfaceControl parentSc,
+                int layer) {
             mTransaction = t;
             mSurfaceControl = sc;
+            mParentSurfaceControl = parentSc;
             mLayer = layer;
         }
 
@@ -63,8 +65,6 @@ public class ScreenshotUtils {
             if (buffer == null || buffer.getHardwareBuffer() == null) {
                 return;
             }
-            final GraphicBuffer graphicBuffer = GraphicBuffer.createFromHardwareBuffer(
-                buffer.getHardwareBuffer());
             mScreenshot = new SurfaceControl.Builder()
                 .setName("ScreenshotUtils screenshot")
                 .setFormat(PixelFormat.TRANSLUCENT)
@@ -73,9 +73,9 @@ public class ScreenshotUtils {
                 .setBLASTLayer()
                 .build();
 
-            mTransaction.setBuffer(mScreenshot, graphicBuffer);
+            mTransaction.setBuffer(mScreenshot, buffer.getHardwareBuffer());
             mTransaction.setColorSpace(mScreenshot, buffer.getColorSpace());
-            mTransaction.reparent(mScreenshot, mSurfaceControl);
+            mTransaction.reparent(mScreenshot, mParentSurfaceControl);
             mTransaction.setLayer(mScreenshot, mLayer);
             mTransaction.show(mScreenshot);
             mTransaction.apply();
@@ -83,7 +83,7 @@ public class ScreenshotUtils {
     }
 
     /**
-     * Take a screenshot of the specified SurfaceControl.
+     * Takes a screenshot of the specified SurfaceControl.
      *
      * @param t the transaction used to set changes on the resulting screenshot.
      * @param sc the SurfaceControl to take a screenshot of
@@ -94,7 +94,23 @@ public class ScreenshotUtils {
      */
     public static SurfaceControl takeScreenshot(SurfaceControl.Transaction t, SurfaceControl sc,
             Rect crop, int layer) {
-        BufferConsumer consumer = new BufferConsumer(t, sc, layer);
+        return takeScreenshot(t, sc, sc /* parentSc */, crop, layer);
+    }
+
+    /**
+     * Takes a screenshot of the specified SurfaceControl.
+     *
+     * @param t the transaction used to set changes on the resulting screenshot.
+     * @param sc the SurfaceControl to take a screenshot of
+     * @param parentSc  the SurfaceControl to attach the screenshot to.
+     * @param crop the crop to use when capturing the screenshot
+     * @param layer the layer to place the screenshot
+     *
+     * @return A SurfaceControl where the screenshot will be attached, or null if failed.
+     */
+    public static SurfaceControl takeScreenshot(SurfaceControl.Transaction t, SurfaceControl sc,
+            SurfaceControl parentSc, Rect crop, int layer) {
+        BufferConsumer consumer = new BufferConsumer(t, sc, parentSc, layer);
         captureLayer(sc, crop, consumer);
         return consumer.mScreenshot;
     }

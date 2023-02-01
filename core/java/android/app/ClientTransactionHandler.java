@@ -27,7 +27,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
-import android.view.DisplayAdjustments.FixedRotationAdjustments;
 import android.view.SurfaceControl;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 
@@ -98,8 +97,8 @@ public abstract class ClientTransactionHandler {
 
     /** Pause the activity. */
     public abstract void handlePauseActivity(@NonNull ActivityClientRecord r, boolean finished,
-            boolean userLeaving, int configChanges, PendingTransactionActions pendingActions,
-            String reason);
+            boolean userLeaving, int configChanges, boolean autoEnteringPip,
+            PendingTransactionActions pendingActions, String reason);
 
     /**
      * Resume the activity.
@@ -186,10 +185,6 @@ public abstract class ClientTransactionHandler {
 
     /** Deliver app configuration change notification. */
     public abstract void handleConfigurationChanged(Configuration config);
-
-    /** Apply addition adjustments to override display information. */
-    public abstract void handleFixedRotationAdjustments(IBinder token,
-            FixedRotationAdjustments fixedRotationAdjustments);
 
     /**
      * Get {@link android.app.ActivityThread.ActivityClientRecord} instance that corresponds to the

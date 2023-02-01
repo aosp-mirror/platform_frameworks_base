@@ -24,26 +24,23 @@ import android.test.suitebuilder.annotation.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
-import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tracing.ProtoTracer;
-import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.compatui.CompatUI;
-import com.android.wm.shell.draganddrop.DragAndDrop;
-import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.sysui.ShellInterface;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,35 +61,30 @@ import java.util.Optional;
 public class WMShellTest extends SysuiTestCase {
     WMShell mWMShell;
 
+    @Mock ShellInterface mShellInterface;
     @Mock CommandQueue mCommandQueue;
     @Mock ConfigurationController mConfigurationController;
+    @Mock KeyguardStateController mKeyguardStateController;
     @Mock KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock NavigationModeController mNavigationModeController;
     @Mock ScreenLifecycle mScreenLifecycle;
     @Mock SysUiState mSysUiState;
     @Mock Pip mPip;
-    @Mock LegacySplitScreen mLegacySplitScreen;
     @Mock SplitScreen mSplitScreen;
     @Mock OneHanded mOneHanded;
-    @Mock HideDisplayCutout mHideDisplayCutout;
     @Mock WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock ProtoTracer mProtoTracer;
-    @Mock ShellCommandHandler mShellCommandHandler;
-    @Mock CompatUI mCompatUI;
+    @Mock UserTracker mUserTracker;
     @Mock ShellExecutor mSysUiMainExecutor;
-    @Mock DragAndDrop mDragAndDrop;
+    @Mock FloatingTasks mFloatingTasks;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
-        mWMShell = new WMShell(mContext, Optional.of(mPip), Optional.of(mLegacySplitScreen),
-                Optional.of(mSplitScreen), Optional.of(mOneHanded), Optional.of(mHideDisplayCutout),
-                Optional.of(mShellCommandHandler), Optional.of(mCompatUI),
-                Optional.of(mDragAndDrop),
-                mCommandQueue, mConfigurationController, mKeyguardUpdateMonitor,
-                mNavigationModeController, mScreenLifecycle, mSysUiState, mProtoTracer,
-                mWakefulnessLifecycle, mSysUiMainExecutor);
+        mWMShell = new WMShell(mContext, mShellInterface, Optional.of(mPip),
+                Optional.of(mSplitScreen), Optional.of(mOneHanded), Optional.of(mFloatingTasks),
+                mCommandQueue, mConfigurationController, mKeyguardStateController,
+                mKeyguardUpdateMonitor, mScreenLifecycle, mSysUiState, mProtoTracer,
+                mWakefulnessLifecycle, mUserTracker, mSysUiMainExecutor);
     }
 
     @Test
@@ -103,42 +95,12 @@ public class WMShellTest extends SysuiTestCase {
     }
 
     @Test
-    public void initLegacySplitScreen_registersCallbacks() {
-        mWMShell.initLegacySplitScreen(mLegacySplitScreen);
-
-        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
-    }
-
-    @Test
-    public void initSplitScreen_registersCallbacks() {
-        mWMShell.initSplitScreen(mSplitScreen);
-
-        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
-    }
-
-    @Test
     public void initOneHanded_registersCallbacks() {
         mWMShell.initOneHanded(mOneHanded);
 
-        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
         verify(mCommandQueue).addCallback(any(CommandQueue.Callbacks.class));
         verify(mScreenLifecycle).addObserver(any(ScreenLifecycle.Observer.class));
         verify(mOneHanded).registerTransitionCallback(any(OneHandedTransitionCallback.class));
         verify(mOneHanded).registerEventCallback(any(OneHandedEventCallback.class));
-    }
-
-    @Test
-    public void initHideDisplayCutout_registersCallbacks() {
-        mWMShell.initHideDisplayCutout(mHideDisplayCutout);
-
-        verify(mConfigurationController).addCallback(
-                any(ConfigurationController.ConfigurationListener.class));
-    }
-
-    @Test
-    public void initCompatUI_registersCallbacks() {
-        mWMShell.initCompatUi(mCompatUI);
-
-        verify(mKeyguardUpdateMonitor).registerCallback(any(KeyguardUpdateMonitorCallback.class));
     }
 }

@@ -19,7 +19,6 @@ package com.android.systemui.util;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.widget.TextView;
 
 /**
  * TextView that changes its ellipsize value with its visibility.
@@ -27,7 +26,7 @@ import android.widget.TextView;
  * The View responds to changes in user-visibility to change its ellipsize from MARQUEE to END
  * and back. Useful for TextView that need to marquee forever.
  */
-public class AutoMarqueeTextView extends TextView {
+public class AutoMarqueeTextView extends SafeMarqueeTextView {
 
     private boolean mAggregatedVisible = false;
 

@@ -17,19 +17,22 @@
 package com.android.systemui.statusbar.phone;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
 import javax.inject.Inject;
 
-/** Ties the {@link StatusBar} to {@link com.android.systemui.statusbar.policy.HeadsUpManager}. */
-@StatusBarComponent.StatusBarScope
+/**
+ * Ties the {@link CentralSurfaces} to {@link com.android.systemui.statusbar.policy.HeadsUpManager}.
+ */
+@CentralSurfacesComponent.CentralSurfacesScope
 public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener {
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarWindowController mStatusBarWindowController;
@@ -117,7 +120,6 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
 
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        mNotificationsController.requestNotificationUpdate("onHeadsUpStateChanged");
         if (mStatusBarStateController.isDozing() && isHeadsUp) {
             entry.setPulseSuppressed(false);
             mDozeServiceHost.fireNotificationPulse(entry);

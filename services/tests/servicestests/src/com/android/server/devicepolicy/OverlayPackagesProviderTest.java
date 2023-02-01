@@ -26,6 +26,7 @@ import static android.app.admin.DevicePolicyManager.REQUIRED_APP_MANAGED_USER;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -76,6 +77,7 @@ public class OverlayPackagesProviderTest {
     private static final ComponentName TEST_MDM_COMPONENT_NAME = new ComponentName(
             TEST_DPC_PACKAGE_NAME, "pc.package.name.DeviceAdmin");
     private static final int TEST_USER_ID = 123;
+    private static final String ROLE_HOLDER_PACKAGE_NAME = "test.role.holder.package.name";
 
     private @Mock Resources mResources;
 
@@ -303,6 +305,26 @@ public class OverlayPackagesProviderTest {
 
         verifyAppsAreNonRequired(
                 ACTION_PROVISION_MANAGED_PROFILE, "package1", "package2", "package3");
+    }
+
+    @Test
+    public void testGetNonRequiredApps_managedProfile_roleHolder_works() {
+        when(mInjector.getDevicePolicyManagementRoleHolderPackageName(any()))
+                .thenReturn(ROLE_HOLDER_PACKAGE_NAME);
+        setSystemAppsWithLauncher("package1", "package2", ROLE_HOLDER_PACKAGE_NAME);
+
+        verifyAppsAreNonRequired(
+                ACTION_PROVISION_MANAGED_PROFILE, "package1", "package2");
+    }
+
+    @Test
+    public void testGetNonRequiredApps_managedDevice_roleHolder_works() {
+        when(mInjector.getDevicePolicyManagementRoleHolderPackageName(any()))
+                .thenReturn(ROLE_HOLDER_PACKAGE_NAME);
+        setSystemAppsWithLauncher("package1", "package2", ROLE_HOLDER_PACKAGE_NAME);
+
+        verifyAppsAreNonRequired(
+                ACTION_PROVISION_MANAGED_DEVICE, "package1", "package2");
     }
 
     private void setupRegularModulesWithManagedUser(String... regularModules) {

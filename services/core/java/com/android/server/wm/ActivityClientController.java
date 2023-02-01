@@ -43,12 +43,15 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_N
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
 
+import android.Manifest;
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityClientController;
+import android.app.ICompatCameraControlCallback;
 import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
@@ -83,6 +86,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.pm.KnownPackages;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.vr.VrManagerInternal;
@@ -240,6 +244,18 @@ class ActivityClientController extends IActivityClientController.Stub {
                 Binder.restoreCallingIdentity(origId);
             }
         }
+    }
+
+    @Override
+    public void activityLocalRelaunch(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+            if (r != null) {
+                r.startRelaunching();
+            }
+        }
+        Binder.restoreCallingIdentity(origId);
     }
 
     @Override
@@ -447,8 +463,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
-                    r.finishIfPossible(resultCode, resultData, resultGrants,
-                            "app-request", true /* oomAdj */);
+                    r.finishIfPossible(resultCode, resultData, resultGrants, "app-request",
+                            true /* oomAdj */);
                     res = r.finishing;
                     if (!res) {
                         Slog.i(TAG, "Failed to finish by app-request");
@@ -510,6 +526,23 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
+    public void setForceSendResultForMediaProjection(IBinder token) {
+        // Require that this is invoked only during MediaProjection setup.
+        mService.mAmInternal.enforceCallingPermission(
+                Manifest.permission.MANAGE_MEDIA_PROJECTION,
+                "setForceSendResultForMediaProjection");
+
+        final ActivityRecord r;
+        synchronized (mGlobalLock) {
+            r = ActivityRecord.isInRootTaskLocked(token);
+            if (r == null || !r.isInHistory()) {
+                return;
+            }
+            r.setForceSendResultForMediaProjection();
+        }
+    }
+
+    @Override
     public boolean isTopOfTask(IBinder token) {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
@@ -544,6 +577,21 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    /**
+     * Returns the windowing mode of the task that hosts the activity, or {@code -1} if task is not
+     * found.
+     */
+    @Override
+    public int getTaskWindowingMode(IBinder activityToken) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord ar = ActivityRecord.isInAnyTask(activityToken);
+            if (ar == null) {
+                return -1;
+            }
+            return ar.getTask().getWindowingMode();
+        }
+    }
+
     @Override
     @Nullable
     public IBinder getActivityTokenBelow(IBinder activityToken) {
@@ -558,7 +606,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                 final ActivityRecord below = ar.getTask().getActivity((r) -> !r.finishing,
                         ar, false /*includeBoundary*/, true /*traverseTopToBottom*/);
                 if (below != null && below.getUid() == ar.getUid()) {
-                    return below.appToken.asBinder();
+                    return below.token;
                 }
             }
         } finally {
@@ -625,7 +673,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             return true;
         }
         final String[] installerNames = pm.getKnownPackageNames(
-                PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
+                KnownPackages.PACKAGE_INSTALLER, UserHandle.getUserId(uid));
         return installerNames.length > 0 && callingPkg.getPackageName().equals(installerNames[0]);
     }
 
@@ -722,7 +770,7 @@ class ActivityClientController extends IActivityClientController.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "enterPictureInPictureMode", token, params);
-                return mService.enterPictureInPictureMode(r, params);
+                return mService.enterPictureInPictureMode(r, params, true /* fromClient */);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -736,18 +784,20 @@ class ActivityClientController extends IActivityClientController.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ensureValidPictureInPictureActivityParams(
                         "setPictureInPictureParams", token, params);
-
-                // Only update the saved args from the args that are set.
                 r.setPictureInPictureParams(params);
-                if (r.inPinnedWindowingMode()) {
-                    // If the activity is already in picture-in-picture, update the pinned task now
-                    // if it is not already expanding to fullscreen. Otherwise, the arguments will
-                    // be used the next time the activity enters PiP.
-                    final Task rootTask = r.getRootTask();
-                    rootTask.setPictureInPictureAspectRatio(
-                            r.pictureInPictureArgs.getAspectRatio());
-                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
-                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void setShouldDockBigOverlays(IBinder token, boolean shouldDockBigOverlays) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                r.setShouldDockBigOverlays(shouldDockBigOverlays);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -764,6 +814,22 @@ class ActivityClientController extends IActivityClientController.Stub {
             ActivityRecord.splashScreenAttachedLocked(token);
         }
         Binder.restoreCallingIdentity(origId);
+    }
+
+    @Override
+    public void requestCompatCameraControl(IBinder token, boolean showControl,
+            boolean transformationApplied, ICompatCameraControlCallback callback) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+                if (r != null) {
+                    r.updateCameraCompatState(showControl, transformationApplied, callback);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     /**
@@ -790,15 +856,25 @@ class ActivityClientController extends IActivityClientController.Stub {
                     + ": Current activity does not support picture-in-picture.");
         }
 
+        final float minAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
+        final float maxAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
+
         if (params.hasSetAspectRatio()
                 && !mService.mWindowManager.isValidPictureInPictureAspectRatio(
-                r.mDisplayContent, params.getAspectRatio())) {
-            final float minAspectRatio = mContext.getResources().getFloat(
-                    com.android.internal.R.dimen.config_pictureInPictureMinAspectRatio);
-            final float maxAspectRatio = mContext.getResources().getFloat(
-                    com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
+                r.mDisplayContent, params.getAspectRatioFloat())) {
             throw new IllegalArgumentException(String.format(caller
                             + ": Aspect ratio is too extreme (must be between %f and %f).",
+                    minAspectRatio, maxAspectRatio));
+        }
+
+        if (mService.mSupportsExpandedPictureInPicture && params.hasSetExpandedAspectRatio()
+                && !mService.mWindowManager.isValidExpandedPictureInPictureAspectRatio(
+                r.mDisplayContent, params.getExpandedAspectRatioFloat())) {
+            throw new IllegalArgumentException(String.format(caller
+                            + ": Expanded aspect ratio is not extreme enough (must not be between"
+                            + " %f and %f).",
                     minAspectRatio, maxAspectRatio));
         }
 
@@ -810,22 +886,23 @@ class ActivityClientController extends IActivityClientController.Stub {
     /**
      * Requests that an activity should enter picture-in-picture mode if possible. This method may
      * be used by the implementation of non-phone form factors.
+     *
+     * @return false if the activity cannot enter PIP mode.
      */
-    void requestPictureInPictureMode(@NonNull ActivityRecord r) {
+    boolean requestPictureInPictureMode(@NonNull ActivityRecord r) {
         if (r.inPinnedWindowingMode()) {
-            throw new IllegalStateException("Activity is already in PIP mode");
+            return false;
         }
 
         final boolean canEnterPictureInPicture = r.checkEnterPictureInPictureState(
                 "requestPictureInPictureMode", /* beforeStopping */ false);
         if (!canEnterPictureInPicture) {
-            throw new IllegalStateException(
-                    "Requested PIP on an activity that doesn't support it");
+            return false;
         }
 
         if (r.pictureInPictureArgs.isAutoEnterEnabled()) {
-            mService.enterPictureInPictureMode(r, r.pictureInPictureArgs);
-            return;
+            return mService.enterPictureInPictureMode(r, r.pictureInPictureArgs,
+                    false /* fromClient */);
         }
 
         try {
@@ -833,9 +910,11 @@ class ActivityClientController extends IActivityClientController.Stub {
                     r.app.getThread(), r.token);
             transaction.addCallback(EnterPipRequestedItem.obtain());
             mService.getLifecycleManager().scheduleTransaction(transaction);
+            return true;
         } catch (Exception e) {
             Slog.w(TAG, "Failed to send enter pip requested item: "
                     + r.intent.getComponent(), e);
+            return false;
         }
     }
 
@@ -885,6 +964,7 @@ class ActivityClientController extends IActivityClientController.Stub {
 
                 if (rootTask.inFreeformWindowingMode()) {
                     rootTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                    rootTask.setBounds(null);
                 } else if (!r.supportsFreeform()) {
                     throw new IllegalStateException(
                             "This activity is currently not freeform-enabled");
@@ -1064,17 +1144,17 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public void overridePendingTransition(IBinder token, String packageName,
-            int enterAnim, int exitAnim) {
+            int enterAnim, int exitAnim, @ColorInt int backgroundColor) {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
             if (r != null && r.isState(RESUMED, PAUSING)) {
                 r.mDisplayContent.mAppTransition.overridePendingAppTransition(
-                        packageName, enterAnim, exitAnim, null, null,
+                        packageName, enterAnim, exitAnim, backgroundColor, null, null,
                         r.mOverrideTaskTransition);
                 r.mTransitionController.setOverrideAnimation(
                         TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
-                                enterAnim, exitAnim, r.mOverrideTaskTransition),
+                                enterAnim, exitAnim, backgroundColor, r.mOverrideTaskTransition),
                         null /* startCallback */, null /* finishCallback */);
             }
         }
@@ -1117,13 +1197,13 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    public void setDisablePreviewScreenshots(IBinder token, boolean disable) {
+    public void setRecentsScreenshotEnabled(IBinder token, boolean enabled) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r != null) {
-                    r.setDisablePreviewScreenshots(disable);
+                    r.setRecentsScreenshotEnabled(enabled);
                 }
             }
         } finally {
@@ -1146,10 +1226,29 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    /**
+     * Removes the outdated home task snapshot.
+     *
+     * @param token The token of the home task, or null if you have the
+     *              {@link android.Manifest.permission#MANAGE_ACTIVITY_TASKS}
+     *              permission and want us to find the home task token for you.
+     */
     @Override
     public void invalidateHomeTaskSnapshot(IBinder token) {
+        if (token == null) {
+            ActivityTaskManagerService.enforceTaskPermission("invalidateHomeTaskSnapshot");
+        }
+
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+            final ActivityRecord r;
+            if (token == null) {
+                final Task rootTask =
+                        mService.mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask();
+                r = rootTask != null ? rootTask.topRunningActivity() : null;
+            } else {
+                r = ActivityRecord.isInRootTaskLocked(token);
+            }
+
             if (r != null && r.isActivityTypeHome()) {
                 mService.mWindowManager.mTaskSnapshotController.removeSnapshotCache(
                         r.getTask().mTaskId);

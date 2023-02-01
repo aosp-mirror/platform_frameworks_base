@@ -19,8 +19,10 @@ package com.android.server.wm;
 import static android.app.WallpaperManager.COMMAND_FREEZE;
 import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 
@@ -34,7 +36,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WALLPAPER_DRAW_PENDING_TIMEOUT;
 
+import android.annotation.Nullable;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Debug;
@@ -44,6 +48,8 @@ import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -55,6 +61,7 @@ import com.android.internal.util.ToBooleanFunction;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -97,12 +104,6 @@ class WallpaperController {
     // Time we wait after a timeout before trying to wait again.
     private static final long WALLPAPER_TIMEOUT_RECOVERY = 10000;
 
-    // Set to the wallpaper window we would like to hide once the transition animations are done.
-    // This is useful in cases where we don't want the wallpaper to be hidden when the close app
-    // is a wallpaper target and is done animating out, but the opening app isn't a wallpaper
-    // target and isn't done animating in.
-    WindowState mDeferredHideWallpaper = null;
-
     // We give a wallpaper up to 500ms to finish drawing before playing app transitions.
     private static final long WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION = 500;
     private static final int WALLPAPER_DRAW_NORMAL = 0;
@@ -118,7 +119,11 @@ class WallpaperController {
      */
     private WindowState mTmpTopWallpaper;
 
+    @Nullable private Point mLargestDisplaySize = null;
+
     private final FindWallpaperTargetResult mFindResults = new FindWallpaperTargetResult();
+
+    private boolean mShouldOffsetWallpaperCenter;
 
     private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
         if ((w.mAttrs.type == TYPE_WALLPAPER)) {
@@ -138,7 +143,12 @@ class WallpaperController {
                 return false;
             }
         } else {
-            if (w.mActivityRecord != null && !w.mActivityRecord.isVisibleRequested()) {
+            final ActivityRecord ar = w.mActivityRecord;
+            final TransitionController tc = w.mTransitionController;
+            // The animating window can still be visible on screen if it is in transition, so we
+            // should check whether this window can be wallpaper target even when visibleRequested
+            // is false.
+            if (ar != null && !ar.isVisibleRequested() && !tc.inTransition(ar)) {
                 // An activity that is not going to remain visible shouldn't be the target.
                 return false;
             }
@@ -163,14 +173,17 @@ class WallpaperController {
                 & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
 
         boolean needsShowWhenLockedWallpaper = false;
-        if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
-                && mService.mPolicy.isKeyguardLocked()
-                && (mService.mPolicy.isKeyguardOccluded()
-                || mService.mPolicy.isKeyguardUnoccluding())) {
-            // The lowest show when locked window decides whether we need to put the wallpaper
-            // behind.
-            needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
-                    || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+        if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0 && mService.mPolicy.isKeyguardLocked()) {
+            final TransitionController tc = w.mTransitionController;
+            final boolean isInTransition = tc.isShellTransitionsEnabled()
+                    && tc.inTransition(w);
+            if (mService.mPolicy.isKeyguardOccluded() || mService.mPolicy.isKeyguardUnoccluding()
+                    || isInTransition) {
+                // The lowest show when locked window decides whether we need to put the wallpaper
+                // behind.
+                needsShowWhenLockedWallpaper = !isFullscreen(w.mAttrs)
+                        || (w.mActivityRecord != null && !w.mActivityRecord.fillsParent());
+            }
         }
 
         if (keyguardGoingAwayWithWallpaper || needsShowWhenLockedWallpaper) {
@@ -179,15 +192,11 @@ class WallpaperController {
             mFindResults.setUseTopWallpaperAsTarget(true);
         }
 
-        final RecentsAnimationController recentsAnimationController =
-                mService.getRecentsAnimationController();
         final boolean animationWallpaper = animatingContainer != null
                 && animatingContainer.getAnimation() != null
                 && animatingContainer.getAnimation().getShowWallpaper();
         final boolean hasWallpaper = w.hasWallpaper() || animationWallpaper;
-        final boolean isRecentsTransitionTarget = (recentsAnimationController != null
-                && recentsAnimationController.isWallpaperVisible(w));
-        if (isRecentsTransitionTarget) {
+        if (isRecentsTransitionTarget(w) || isBackAnimationTarget(w)) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found recents animation wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
             return true;
@@ -211,6 +220,29 @@ class WallpaperController {
         return false;
     };
 
+    private boolean isRecentsTransitionTarget(WindowState w) {
+        if (w.mTransitionController.isShellTransitionsEnabled()) {
+            // Because the recents activity is invisible in background while keyguard is occluded
+            // (the activity window is on screen while keyguard is locked) with recents animation,
+            // the task animating by recents needs to be wallpaper target to make wallpaper visible.
+            // While for unlocked case, because recents activity will be moved to top, it can be
+            // the wallpaper target naturally.
+            return w.mActivityRecord != null && w.mAttrs.type == TYPE_BASE_APPLICATION
+                    && mDisplayContent.isKeyguardLocked()
+                    && w.mTransitionController.isTransientHide(w.getTask());
+        }
+        // The window is either the recents activity or is in the task animating by the recents.
+        final RecentsAnimationController controller = mService.getRecentsAnimationController();
+        return controller != null && controller.isWallpaperVisible(w);
+    }
+
+    private boolean isBackAnimationTarget(WindowState w) {
+        // The window is either the back activity or is in the task animating by the back gesture.
+        final BackNaviAnimationController bthController = mService.getBackNaviAnimationController();
+        return bthController != null && bthController.isWallpaperVisible(w);
+    }
+
+
     /**
      * @see #computeLastWallpaperZoomOut()
      */
@@ -226,6 +258,38 @@ class WallpaperController {
         mDisplayContent = displayContent;
         mMaxWallpaperScale = service.mContext.getResources()
                 .getFloat(com.android.internal.R.dimen.config_wallpaperMaxScale);
+        mShouldOffsetWallpaperCenter = service.mContext.getResources()
+                .getBoolean(
+                        com.android.internal.R.bool.config_offsetWallpaperToCenterOfLargestDisplay);
+    }
+
+    void resetLargestDisplay(Display display) {
+        if (display != null && display.getType() == Display.TYPE_INTERNAL) {
+            mLargestDisplaySize = null;
+        }
+    }
+
+    @VisibleForTesting void setShouldOffsetWallpaperCenter(boolean shouldOffset) {
+        mShouldOffsetWallpaperCenter = shouldOffset;
+    }
+
+    @Nullable private Point findLargestDisplaySize() {
+        if (!mShouldOffsetWallpaperCenter) {
+            return null;
+        }
+        Point largestDisplaySize = new Point();
+        List<DisplayInfo> possibleDisplayInfo =
+                mService.getPossibleDisplayInfoLocked(DEFAULT_DISPLAY);
+        for (int i = 0; i < possibleDisplayInfo.size(); i++) {
+            DisplayInfo displayInfo = possibleDisplayInfo.get(i);
+            if (displayInfo.type == Display.TYPE_INTERNAL
+                    && Math.max(displayInfo.logicalWidth, displayInfo.logicalHeight)
+                    > Math.max(largestDisplaySize.x, largestDisplaySize.y)) {
+                largestDisplaySize.set(displayInfo.logicalWidth,
+                        displayInfo.logicalHeight);
+            }
+        }
+        return largestDisplaySize;
     }
 
     WindowState getWallpaperTarget() {
@@ -294,6 +358,11 @@ class WallpaperController {
                 && (mWallpaperTarget != winGoingAway || mPrevWallpaperTarget != null)) {
             return;
         }
+        if (mFindResults.useTopWallpaperAsTarget) {
+            // wallpaper target is going away but there has request to use top wallpaper
+            // Keep wallpaper visible.
+            return;
+        }
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
             token.setVisibility(false);
@@ -307,24 +376,44 @@ class WallpaperController {
     }
 
     boolean updateWallpaperOffset(WindowState wallpaperWin, boolean sync) {
-        final Rect parentFrame = wallpaperWin.getParentFrame();
-        final int dw = parentFrame.width();
-        final int dh = parentFrame.height();
+        // Size of the display the wallpaper is rendered on.
+        final Rect lastWallpaperBounds = wallpaperWin.getLastReportedBounds();
+        // Full size of the wallpaper (usually larger than bounds above to parallax scroll when
+        // swiping through Launcher pages).
+        final Rect wallpaperFrame = wallpaperWin.getFrame();
 
-        int xOffset = 0;
-        int yOffset = 0;
+        int newXOffset = 0;
+        int newYOffset = 0;
         boolean rawChanged = false;
         // Set the default wallpaper x-offset to either edge of the screen (depending on RTL), to
         // match the behavior of most Launchers
         float defaultWallpaperX = wallpaperWin.isRtl() ? 1f : 0f;
+        // "Wallpaper X" is the previous x-offset of the wallpaper (in a 0 to 1 scale).
+        // The 0 to 1 scale is because the "length" varies depending on how many home screens you
+        // have, so 0 is the left of the first home screen, and 1 is the right of the last one (for
+        // LTR, and the opposite for RTL).
         float wpx = mLastWallpaperX >= 0 ? mLastWallpaperX : defaultWallpaperX;
+        // "Wallpaper X step size" is how much of that 0-1 is one "page" of the home screen
+        // when scrolling.
         float wpxs = mLastWallpaperXStep >= 0 ? mLastWallpaperXStep : -1.0f;
-        int availw = wallpaperWin.getFrame().right - wallpaperWin.getFrame().left - dw;
+        // Difference between width of wallpaper image, and the last size of the wallpaper.
+        // This is the horizontal surplus from the prior configuration.
+        int availw = wallpaperFrame.width() - lastWallpaperBounds.width();
+
+        int displayOffset = getDisplayWidthOffset(availw, lastWallpaperBounds,
+                wallpaperWin.isRtl());
+        availw -= displayOffset;
         int offset = availw > 0 ? -(int)(availw * wpx + .5f) : 0;
         if (mLastWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
+            // if device is LTR, then offset wallpaper to the left (the wallpaper is drawn
+            // always starting from the left of the screen).
             offset += mLastWallpaperDisplayOffsetX;
+        } else if (!wallpaperWin.isRtl()) {
+            // In RTL the offset is calculated so that the wallpaper ends up right aligned (see
+            // offset above).
+            offset -= displayOffset;
         }
-        xOffset = offset;
+        newXOffset = offset;
 
         if (wallpaperWin.mWallpaperX != wpx || wallpaperWin.mWallpaperXStep != wpxs) {
             wallpaperWin.mWallpaperX = wpx;
@@ -334,12 +423,13 @@ class WallpaperController {
 
         float wpy = mLastWallpaperY >= 0 ? mLastWallpaperY : 0.5f;
         float wpys = mLastWallpaperYStep >= 0 ? mLastWallpaperYStep : -1.0f;
-        int availh = wallpaperWin.getFrame().bottom - wallpaperWin.getFrame().top - dh;
+        int availh = wallpaperWin.getFrame().bottom - wallpaperWin.getFrame().top
+                - lastWallpaperBounds.height();
         offset = availh > 0 ? -(int)(availh * wpy + .5f) : 0;
         if (mLastWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
             offset += mLastWallpaperDisplayOffsetY;
         }
-        yOffset = offset;
+        newYOffset = offset;
 
         if (wallpaperWin.mWallpaperY != wpy || wallpaperWin.mWallpaperYStep != wpys) {
             wallpaperWin.mWallpaperY = wpy;
@@ -352,7 +442,7 @@ class WallpaperController {
             rawChanged = true;
         }
 
-        boolean changed = wallpaperWin.setWallpaperOffset(xOffset, yOffset,
+        boolean changed = wallpaperWin.setWallpaperOffset(newXOffset, newYOffset,
                 wallpaperWin.mShouldScaleWallpaper
                         ? zoomOutToScale(wallpaperWin.mWallpaperZoomOut) : 1);
 
@@ -397,6 +487,52 @@ class WallpaperController {
         }
 
         return changed;
+    }
+
+    /**
+     * Get an extra offset if needed ({@link #mShouldOffsetWallpaperCenter} = true, typically on
+     * multiple display devices) so that the wallpaper in a smaller display ends up centered at the
+     * same position as in the largest display of the device.
+     *
+     * Note that the wallpaper has already been cropped when set by the user, so these calculations
+     * apply to the image size for the display the wallpaper was set for.
+     *
+     * @param availWidth   width available for the wallpaper offset in the current display
+     * @param displayFrame size of the "display" (parent frame)
+     * @param isRtl        whether we're in an RTL configuration
+     * @return an offset to apply to the width, or 0 if the current configuration doesn't require
+     * any adjustment (either @link #mShouldOffsetWallpaperCenter} is false or we're on the largest
+     * display).
+     */
+    private int getDisplayWidthOffset(int availWidth, Rect displayFrame, boolean isRtl) {
+        if (!mShouldOffsetWallpaperCenter) {
+            return 0;
+        }
+        if (mLargestDisplaySize == null) {
+            mLargestDisplaySize = findLargestDisplaySize();
+        }
+        if (mLargestDisplaySize == null) {
+            return 0;
+        }
+        // Page width is the width of a Launcher "page", for pagination when swiping right.
+        int pageWidth = displayFrame.width();
+        // Only need offset if the current size is different from the largest display, and we're
+        // in a portrait configuration
+        if (mLargestDisplaySize.x != pageWidth && displayFrame.width() < displayFrame.height()) {
+            // The wallpaper will be scaled to fit the height of the wallpaper, so if the height
+            // of the displays are different, we need to account for that scaling when calculating
+            // the offset to the center
+            float sizeRatio = (float) displayFrame.height() / mLargestDisplaySize.y;
+            // Scale the width of the largest display to match the scale of the wallpaper size in
+            // the current display
+            int adjustedLargestWidth = Math.round(mLargestDisplaySize.x * sizeRatio);
+            // Finally, find the difference between the centers, taking into account that the
+            // size of the wallpaper frame could be smaller than the screen
+            return isRtl
+                    ? adjustedLargestWidth - (adjustedLargestWidth + pageWidth) / 2
+                    : Math.min(adjustedLargestWidth - pageWidth, availWidth) / 2;
+        }
+        return 0;
     }
 
     void setWindowWallpaperPosition(
@@ -457,6 +593,13 @@ class WallpaperController {
 
     private void updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
         WindowState target = mWallpaperTarget;
+        if (target == null && changingTarget.mToken.isVisible()
+                && changingTarget.mTransitionController.inTransition()) {
+            // If the wallpaper target was cleared during transition, still allows the visible
+            // window which may have been requested to be invisible to update the offset, e.g.
+            // zoom effect from home.
+            target = changingTarget;
+        }
         if (target != null) {
             if (target.mWallpaperX >= 0) {
                 mLastWallpaperX = target.mWallpaperX;
@@ -620,8 +763,9 @@ class WallpaperController {
     private void updateWallpaperTokens(boolean visible) {
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.updateWallpaperWindows(visible);
-            token.getDisplayContent().assignWindowLayers(false);
+            if (token.updateWallpaperWindows(visible)) {
+                token.mDisplayContent.assignWindowLayers(false /* setLayoutNeeded */);
+            }
         }
     }
 

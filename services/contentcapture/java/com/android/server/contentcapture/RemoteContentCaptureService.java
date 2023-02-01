@@ -31,6 +31,7 @@ import android.service.contentcapture.IContentCaptureService;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.IDataShareCallback;
 import android.service.contentcapture.SnapshotData;
+import android.util.EventLog;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.DataRemovalRequest;
@@ -38,6 +39,7 @@ import android.view.contentcapture.DataShareRequest;
 
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 
 final class RemoteContentCaptureService
@@ -88,6 +90,10 @@ final class RemoteContentCaptureService
                     writeServiceEvent(
                             FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_CONNECTED,
                             mComponentName);
+                    EventLog.writeEvent(EventLogTags.CC_CONNECT_STATE_CHANGED,
+                            mPerUserService.getUserId(),
+                            ContentCapturePerUserService.EVENT_LOG_CONNECT_STATE_CONNECTED,
+                            CollectionUtils.size(mPerUserService.getContentCaptureAllowlist()));
                 } finally {
                     // Update the system-service state, in case the service reconnected after
                     // dying
@@ -98,6 +104,9 @@ final class RemoteContentCaptureService
                 writeServiceEvent(
                         FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_DISCONNECTED,
                         mComponentName);
+                EventLog.writeEvent(EventLogTags.CC_CONNECT_STATE_CHANGED,
+                        mPerUserService.getUserId(),
+                        ContentCapturePerUserService.EVENT_LOG_CONNECT_STATE_DISCONNECTED, 0);
             }
         } catch (Exception e) {
             Slog.w(mTag, "Exception calling onConnectedStateChanged(" + connected + "): " + e);
@@ -119,8 +128,7 @@ final class RemoteContentCaptureService
         // Metrics logging.
         writeSessionEvent(sessionId,
                 FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__ON_SESSION_STARTED,
-                initialState, getComponentName(), context.getActivityComponent(),
-                /* is_child_session= */ false);
+                initialState, getComponentName(), /* is_child_session= */ false);
     }
 
     /**
@@ -132,8 +140,7 @@ final class RemoteContentCaptureService
         // Metrics logging.
         writeSessionEvent(sessionId,
                 FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__ON_SESSION_FINISHED,
-                /* flags= */ 0, getComponentName(), /* app= */ null,
-                /* is_child_session= */ false);
+                /* flags= */ 0, getComponentName(), /* is_child_session= */ false);
     }
 
     /**
@@ -158,7 +165,7 @@ final class RemoteContentCaptureService
         scheduleAsyncRequest((s) -> s.onDataShared(request, dataShareCallback));
         writeServiceEvent(
                 FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_DATA_SHARE_REQUEST,
-                mComponentName, request.getPackageName());
+                mComponentName);
     }
 
     /**

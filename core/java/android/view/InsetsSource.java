@@ -22,6 +22,7 @@ import static android.view.InsetsSourceProto.VISIBLE;
 import static android.view.InsetsSourceProto.VISIBLE_FRAME;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -47,6 +48,7 @@ public class InsetsSource implements Parcelable {
     private final Rect mFrame;
     private @Nullable Rect mVisibleFrame;
     private boolean mVisible;
+    private boolean mInsetsRoundedCornerFrame;
 
     private final Rect mTmpFrame = new Rect();
 
@@ -63,6 +65,7 @@ public class InsetsSource implements Parcelable {
         mVisibleFrame = other.mVisibleFrame != null
                 ? new Rect(other.mVisibleFrame)
                 : null;
+        mInsetsRoundedCornerFrame = other.mInsetsRoundedCornerFrame;
     }
 
     public void set(InsetsSource other) {
@@ -71,6 +74,7 @@ public class InsetsSource implements Parcelable {
         mVisibleFrame = other.mVisibleFrame != null
                 ? new Rect(other.mVisibleFrame)
                 : null;
+        mInsetsRoundedCornerFrame = other.mInsetsRoundedCornerFrame;
     }
 
     public void setFrame(int left, int top, int right, int bottom) {
@@ -110,6 +114,14 @@ public class InsetsSource implements Parcelable {
         return mVisibleFrame == null || !mVisibleFrame.isEmpty();
     }
 
+    public boolean getInsetsRoundedCornerFrame() {
+        return mInsetsRoundedCornerFrame;
+    }
+
+    public void setInsetsRoundedCornerFrame(boolean insetsRoundedCornerFrame) {
+        mInsetsRoundedCornerFrame = insetsRoundedCornerFrame;
+    }
+
     /**
      * Calculates the insets this source will cause to a client window.
      *
@@ -137,7 +149,7 @@ public class InsetsSource implements Parcelable {
         // During drag-move and drag-resizing, the caption insets position may not get updated
         // before the app frame get updated. To layout the app content correctly during drag events,
         // we always return the insets with the corresponding height covering the top.
-        if (getType() == ITYPE_CAPTION_BAR) {
+        if (!CAPTION_ON_SHELL && getType() == ITYPE_CAPTION_BAR) {
             return Insets.of(0, frame.height(), 0, 0);
         }
         // Checks for whether there is shared edge with insets for 0-width/height window.
@@ -225,6 +237,7 @@ public class InsetsSource implements Parcelable {
             pw.print(" visibleFrame="); pw.print(mVisibleFrame.toShortString());
         }
         pw.print(" visible="); pw.print(mVisible);
+        pw.print(" insetsRoundedCornerFrame="); pw.print(mInsetsRoundedCornerFrame);
         pw.println();
     }
 
@@ -247,6 +260,7 @@ public class InsetsSource implements Parcelable {
         if (mVisible != that.mVisible) return false;
         if (excludeInvisibleImeFrames && !mVisible && mType == ITYPE_IME) return true;
         if (!Objects.equals(mVisibleFrame, that.mVisibleFrame)) return false;
+        if (mInsetsRoundedCornerFrame != that.mInsetsRoundedCornerFrame) return false;
         return mFrame.equals(that.mFrame);
     }
 
@@ -256,6 +270,7 @@ public class InsetsSource implements Parcelable {
         result = 31 * result + mFrame.hashCode();
         result = 31 * result + (mVisibleFrame != null ? mVisibleFrame.hashCode() : 0);
         result = 31 * result + (mVisible ? 1 : 0);
+        result = 31 * result + (mInsetsRoundedCornerFrame ? 1 : 0);
         return result;
     }
 
@@ -268,6 +283,7 @@ public class InsetsSource implements Parcelable {
             mVisibleFrame = null;
         }
         mVisible = in.readBoolean();
+        mInsetsRoundedCornerFrame = in.readBoolean();
     }
 
     @Override
@@ -286,6 +302,7 @@ public class InsetsSource implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeBoolean(mVisible);
+        dest.writeBoolean(mInsetsRoundedCornerFrame);
     }
 
     @Override
@@ -294,6 +311,7 @@ public class InsetsSource implements Parcelable {
                 + "mType=" + InsetsState.typeToString(mType)
                 + ", mFrame=" + mFrame.toShortString()
                 + ", mVisible=" + mVisible
+                + ", mInsetsRoundedCornerFrame=" + mInsetsRoundedCornerFrame
                 + "}";
     }
 

@@ -46,5 +46,5 @@ oneway interface IRemoteAnimationRunner {
      * won't have any effect anymore.
      */
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
-    void onAnimationCancelled();
+    void onAnimationCancelled(boolean isKeyguardOccluded);
 }

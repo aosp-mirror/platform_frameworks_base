@@ -1299,7 +1299,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
      * Recycled view pools allow multiple RecyclerViews to share a common pool of scrap views.
      * This can be useful if you have multiple RecyclerViews with adapters that use the same
      * view types, for example if you have several data sets with the same kinds of item views
-     * displayed by a {@link android.support.v4.view.ViewPager ViewPager}.
+     * displayed by a {@link androidx.viewpager.view.ViewPager ViewPager}.
      *
      * @param pool Pool to set. If this parameter is null a new pool will be created and used.
      */
@@ -9764,13 +9764,13 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
          * Some general properties that a LayoutManager may want to use.
          */
         public static class Properties {
-            /** @attr ref android.support.v7.recyclerview.R.styleable#RecyclerView_android_orientation */
+            /** @attr ref androidx.recyclerview.R.styleable#RecyclerView_android_orientation */
             public int orientation;
-            /** @attr ref android.support.v7.recyclerview.R.styleable#RecyclerView_spanCount */
+            /** @attr ref androidx.recyclerview.R.styleable#RecyclerView_spanCount */
             public int spanCount;
-            /** @attr ref android.support.v7.recyclerview.R.styleable#RecyclerView_reverseLayout */
+            /** @attr ref androidx.recyclerview.R.styleable#RecyclerView_reverseLayout */
             public boolean reverseLayout;
-            /** @attr ref android.support.v7.recyclerview.R.styleable#RecyclerView_stackFromEnd */
+            /** @attr ref androidx.recyclerview.R.styleable#RecyclerView_stackFromEnd */
             public boolean stackFromEnd;
         }
     }
@@ -10087,7 +10087,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
         static final int FLAG_IGNORE = 1 << 7;
 
         /**
-         * When the View is detached form the parent, we set this flag so that we can take correct
+         * When the View is detached from the parent, we set this flag so that we can take correct
          * action when we need to remove it or add it back.
          */
         static final int FLAG_TMP_DETACHED = 1 << 8;

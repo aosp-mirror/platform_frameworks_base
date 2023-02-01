@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Handler;
@@ -38,6 +39,8 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
+import com.android.server.LocalServices;
+import com.android.server.pm.Computer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -74,6 +77,9 @@ public class IntentFirewall {
     private final AMSInterface mAms;
 
     private final RuleObserver mObserver;
+
+    @NonNull
+    private PackageManagerInternal mPackageManager;
 
     private FirewallIntentResolver mActivityResolver = new FirewallIntentResolver();
     private FirewallIntentResolver mBroadcastResolver = new FirewallIntentResolver();
@@ -123,6 +129,13 @@ public class IntentFirewall {
         mObserver.startWatching();
     }
 
+    private PackageManagerInternal getPackageManager() {
+        if (mPackageManager == null) {
+            mPackageManager = LocalServices.getService(PackageManagerInternal.class);
+        }
+        return mPackageManager;
+    }
+
     /**
      * This is called from ActivityManager to check if a start activity intent should be allowed.
      * It is assumed the caller is already holding the global ActivityManagerService lock.
@@ -154,7 +167,8 @@ public class IntentFirewall {
         // For the first pass, find all the rules that have at least one intent-filter or
         // component-filter that matches this intent
         List<Rule> candidateRules;
-        candidateRules = resolver.queryIntent(intent, resolvedType, false /*defaultOnly*/, 0);
+        candidateRules = resolver.queryIntent(getPackageManager().snapshot(), intent, resolvedType,
+                false /*defaultOnly*/, 0);
         if (candidateRules == null) {
             candidateRules = new ArrayList<Rule>();
         }
@@ -375,7 +389,7 @@ public class IntentFirewall {
             for (int ruleIndex=0; ruleIndex<rules.size(); ruleIndex++) {
                 Rule rule = rules.get(ruleIndex);
                 for (int i=0; i<rule.getIntentFilterCount(); i++) {
-                    resolver.addFilter(rule.getIntentFilter(i));
+                    resolver.addFilter(null, rule.getIntentFilter(i));
                 }
                 for (int i=0; i<rule.getComponentFilterCount(); i++) {
                     resolver.addComponentFilter(rule.getComponentFilter(i), rule);
@@ -512,7 +526,8 @@ public class IntentFirewall {
         }
 
         @Override
-        protected Rule newResult(FirewallIntentFilter filter, int match, int userId) {
+        protected Rule newResult(@NonNull Computer computer, FirewallIntentFilter filter,
+                int match, int userId, long customFlags) {
             return filter.rule;
         }
 

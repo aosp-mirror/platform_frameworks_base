@@ -42,18 +42,6 @@ interface ISystemUiProxy {
     void onOverviewShown(boolean fromHome) = 6;
 
     /**
-     * Get the secondary split screen app's rectangle when not minimized.
-     */
-    Rect getNonMinimizedSplitScreenSecondaryBounds() = 7;
-
-    /**
-     * Control the {@param alpha} of the option nav bar button (back-button in 2 button mode
-     * and home handle & background in gestural mode).  The {@param animate} is currently only
-     * supported for 2 button mode.
-     */
-    void setNavBarButtonAlpha(float alpha, boolean animate) = 19;
-
-    /**
      * Proxies motion events from the homescreen UI to the status bar. Only called when
      * swipe down is detected on WORKSPACE. The sender guarantees the following order of events on
      * the tracking pointer.
@@ -92,20 +80,6 @@ interface ISystemUiProxy {
      * Ends the system screen pinning.
      */
     void stopScreenPinning() = 17;
-
-    /**
-     * Handle the provided image as if it was a screenshot.
-     *
-     * Deprecated, use handleImageBundleAsScreenshot with image bundle and UserTask
-     * @deprecated
-     */
-    void handleImageAsScreenshot(in Bitmap screenImage, in Rect locationInScreen,
-              in Insets visibleInsets, int taskId) = 21;
-
-    /**
-     * Sets the split-screen divider minimized state
-     */
-    void setSplitScreenMinimized(boolean minimized) = 22;
 
     /*
      * Notifies that the swipe-to-home (recents animation) is finished.
@@ -155,5 +129,10 @@ interface ISystemUiProxy {
      */
     void onImeSwitcherPressed() = 49;
 
-    // Next id = 50
+    /**
+     * Notifies to toggle notification panel.
+     */
+    void toggleNotificationPanel() = 50;
+
+    // Next id = 51
 }

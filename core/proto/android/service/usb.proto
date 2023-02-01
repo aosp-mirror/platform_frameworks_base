@@ -72,6 +72,7 @@ message UsbHandlerProto {
     optional bool adb_enabled = 14;
     optional string kernel_state = 15;
     optional string kernel_function_list = 16;
+    optional string uevent = 17;
 }
 
 message UsbAccessoryProto {
@@ -109,6 +110,7 @@ message UsbHostManagerProto {
     repeated UsbDeviceProto devices = 2;
     optional int32 num_connects = 3;
     repeated UsbConnectionRecordProto connections = 4;
+    repeated UsbDirectMidiDeviceProto midi_devices = 5;
 }
 
 message UsbDeviceProto {
@@ -263,7 +265,9 @@ message UsbPortStatusProto {
     optional DataRole data_role = 4;
     repeated UsbPortStatusRoleCombinationProto role_combinations = 5;
     optional android.service.ContaminantPresenceStatus contaminant_presence_status = 6;
-    optional bool usb_data_enabled = 7;
+    optional string usb_data_status = 7;
+    optional bool is_power_transfer_limited = 8;
+    optional string usb_power_brick_status = 9;
 }
 
 message UsbPortStatusRoleCombinationProto {
@@ -302,6 +306,42 @@ message UsbMidiDeviceProto {
     optional string device_address = 3;
 }
 
+message UsbDirectMidiDeviceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 num_inputs = 1;
+    optional int32 num_outputs = 2;
+    optional bool is_universal = 3;
+    optional string name = 4;
+    optional UsbMidiBlockParserProto block_parser = 5;
+}
+
+message UsbMidiBlockParserProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 length = 1;
+    optional int32 descriptor_type = 2;
+    optional int32 descriptor_subtype = 3;
+    optional int32 total_length = 4;
+    repeated UsbGroupTerminalBlockProto block = 5;
+}
+
+message UsbGroupTerminalBlockProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 length = 1;
+    optional int32 descriptor_type = 2;
+    optional int32 descriptor_subtype = 3;
+    optional int32 group_block_id = 4;
+    optional int32 group_terminal_block_type = 5;
+    optional int32 group_terminal = 6;
+    optional int32 num_group_terminals = 7;
+    optional int32 block_item = 8;
+    optional int32 midi_protocol = 9;
+    optional int32 max_input_bandwidth = 10;
+    optional int32 max_output_bandwidth = 11;
+}
+
 message UsbSettingsManagerProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -326,6 +366,7 @@ message UsbProfileGroupSettingsManagerProto {
     optional int32 parent_user_id = 1;
     repeated UsbSettingsDevicePreferenceProto device_preferences = 2;
     repeated UsbSettingsAccessoryPreferenceProto accessory_preferences = 3;
+    optional string intent = 4;
 }
 
 message UsbSettingsDevicePreferenceProto {

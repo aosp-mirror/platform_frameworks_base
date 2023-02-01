@@ -120,14 +120,13 @@ public final class UiTranslationManager {
      */
     public static final int STATE_UI_TRANSLATION_RESUMED = 2;
     /**
-     * The state the caller requests to disable UI translation when it no longer needs translation.
+     * The state caller requests to disable UI translation when it no longer needs translation.
      *
      * @hide
      */
     public static final int STATE_UI_TRANSLATION_FINISHED = 3;
-    /**
-     * @hide
-     */
+
+    /** @hide */
     @IntDef(prefix = {"STATE__TRANSLATION"}, value = {
             STATE_UI_TRANSLATION_STARTED,
             STATE_UI_TRANSLATION_PAUSED,
@@ -145,6 +144,8 @@ public final class UiTranslationManager {
     public static final String EXTRA_SOURCE_LOCALE = "source_locale";
     /** @hide */
     public static final String EXTRA_TARGET_LOCALE = "target_locale";
+    /** @hide */
+    public static final String EXTRA_PACKAGE_NAME = "package_name";
 
     @NonNull
     private final Context mContext;
@@ -162,7 +163,6 @@ public final class UiTranslationManager {
     /**
      * @removed Use {@link #startTranslation(TranslationSpec, TranslationSpec, List, ActivityId,
      * UiTranslationSpec)} instead.
-     *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
@@ -179,13 +179,13 @@ public final class UiTranslationManager {
     /**
      * Request ui translation for a given Views.
      *
-     * @param sourceSpec {@link TranslationSpec} for the data to be translated.
-     * @param targetSpec {@link TranslationSpec} for the translated data.
-     * @param viewIds A list of the {@link View}'s {@link AutofillId} which needs to be translated
-     * @param activityId the identifier for the Activity which needs ui translation
+     * @param sourceSpec        {@link TranslationSpec} for the data to be translated.
+     * @param targetSpec        {@link TranslationSpec} for the translated data.
+     * @param viewIds           A list of the {@link View}'s {@link AutofillId} which needs to be
+     *                          translated
+     * @param activityId        the identifier for the Activity which needs ui translation
      * @param uiTranslationSpec configuration for translation of the specified views
      * @throws IllegalArgumentException if the no {@link View}'s {@link AutofillId} in the list
-     *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
@@ -215,12 +215,11 @@ public final class UiTranslationManager {
 
     /**
      * Request to disable the ui translation. It will destroy all the {@link Translator}s and no
-     * longer to show to show the translated text.
+     * longer to show the translated text.
      *
      * @param activityId the identifier for the Activity which needs ui translation
      * @throws NullPointerException the activityId or
-     *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
-     *
+     *                              {@link android.app.assist.ActivityId#getToken()} is {@code null}
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
@@ -244,8 +243,7 @@ public final class UiTranslationManager {
      *
      * @param activityId the identifier for the Activity which needs ui translation
      * @throws NullPointerException the activityId or
-     *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
-     *
+     *                              {@link android.app.assist.ActivityId#getToken()} is {@code null}
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
@@ -269,8 +267,7 @@ public final class UiTranslationManager {
      *
      * @param activityId the identifier for the Activity which needs ui translation
      * @throws NullPointerException the activityId or
-     *         {@link android.app.assist.ActivityId#getToken()} is {@code null}
-     *
+     *                              {@link android.app.assist.ActivityId#getToken()} is {@code null}
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION)
@@ -289,20 +286,29 @@ public final class UiTranslationManager {
     }
 
     /**
-     * Register for notifications of UI Translation state changes on the foreground activity. This
+     * Register for notifications of UI Translation state changes on the foreground Activity. This
      * is available to the owning application itself and also the current input method.
      * <p>
      * The application whose UI is being translated can use this to customize the UI Translation
      * behavior in ways that aren't made easy by methods like
      * {@link View#onCreateViewTranslationRequest(int[], Consumer)}.
-     *
      * <p>
      * Input methods can use this to offer complementary features to UI Translation; for example,
      * enabling outgoing message translation when the system is translating incoming messages in a
      * communication app.
+     * <p>
+     * Starting from {@link android.os.Build.VERSION_CODES#TIRAMISU}, if Activities are already
+     * being translated when a callback is registered, methods on the callback will be invoked for
+     * each translated activity, depending on the state of translation:
+     * <ul>
+     *     <li>If translation is <em>not</em> paused,
+     *     {@link UiTranslationStateCallback#onStarted} will be invoked.</li>
+     *     <li>If translation <em>is</em> paused, {@link UiTranslationStateCallback#onStarted}
+     *     will first be invoked, followed by {@link UiTranslationStateCallback#onPaused}.</li>
+     * </ul>
      *
      * @param callback the callback to register for receiving the state change
-     *         notifications
+     *                 notifications
      */
     public void registerUiTranslationStateCallback(
             @NonNull @CallbackExecutor Executor executor,
@@ -354,16 +360,15 @@ public final class UiTranslationManager {
      * called or Activity is destroyed.
      *
      * @param activityDestroyed if the ui translation is finished because of activity destroyed.
-     * @param activityId the identifier for the Activity which needs ui translation
-     * @param componentName the ui translated Activity componentName.
-     *
+     * @param activityId        the identifier for the Activity which needs ui translation
+     * @param componentName     the ui translated Activity componentName.
      * @hide
      */
     public void onTranslationFinished(boolean activityDestroyed, ActivityId activityId,
             ComponentName componentName) {
         try {
-            mService.onTranslationFinished(activityDestroyed,
-                    activityId.getToken(), componentName, mContext.getUserId());
+            mService.onTranslationFinished(activityDestroyed, activityId.getToken(), componentName,
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -392,20 +397,21 @@ public final class UiTranslationManager {
 
         private void onStateChange(Bundle bundle) {
             int state = bundle.getInt(EXTRA_STATE);
+            String packageName = bundle.getString(EXTRA_PACKAGE_NAME);
             switch (state) {
                 case STATE_UI_TRANSLATION_STARTED:
-                    mSourceLocale = (ULocale) bundle.getSerializable(EXTRA_SOURCE_LOCALE);
-                    mTargetLocale = (ULocale) bundle.getSerializable(EXTRA_TARGET_LOCALE);
-                    mCallback.onStarted(mSourceLocale, mTargetLocale);
+                    mSourceLocale = bundle.getSerializable(EXTRA_SOURCE_LOCALE, ULocale.class);
+                    mTargetLocale = bundle.getSerializable(EXTRA_TARGET_LOCALE, ULocale.class);
+                    mCallback.onStarted(mSourceLocale, mTargetLocale, packageName);
                     break;
                 case STATE_UI_TRANSLATION_RESUMED:
-                    mCallback.onResumed(mSourceLocale, mTargetLocale);
+                    mCallback.onResumed(mSourceLocale, mTargetLocale, packageName);
                     break;
                 case STATE_UI_TRANSLATION_PAUSED:
-                    mCallback.onPaused();
+                    mCallback.onPaused(packageName);
                     break;
                 case STATE_UI_TRANSLATION_FINISHED:
-                    mCallback.onFinished();
+                    mCallback.onFinished(packageName);
                     break;
                 default:
                     Log.wtf(TAG, "Unexpected translation state:" + state);

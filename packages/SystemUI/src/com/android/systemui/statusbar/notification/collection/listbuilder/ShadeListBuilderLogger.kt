@@ -21,126 +21,146 @@ import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.StateName
+import com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.getStateName
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
+import com.android.systemui.statusbar.notification.logKey
+import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 class ShadeListBuilderLogger @Inject constructor(
+    notifPipelineFlags: NotifPipelineFlags,
     @NotificationLog private val buffer: LogBuffer
 ) {
-    fun logOnBuildList() {
+    fun logOnBuildList(reason: String?) {
         buffer.log(TAG, INFO, {
+            str1 = reason
         }, {
-            "Request received from NotifCollection"
+            "Request received from NotifCollection for $str1"
         })
     }
 
-    fun logEndBuildList(iterationCount: Int, topLevelEntries: Int, numChildren: Int) {
+    fun logEndBuildList(
+        buildId: Int,
+        topLevelEntries: Int,
+        numChildren: Int,
+        enforcedVisualStability: Boolean
+    ) {
         buffer.log(TAG, INFO, {
-            long1 = iterationCount.toLong()
+            long1 = buildId.toLong()
             int1 = topLevelEntries
             int2 = numChildren
+            bool1 = enforcedVisualStability
         }, {
-            "(Build $long1) Build complete ($int1 top-level entries, $int2 children)"
+            "(Build $long1) Build complete ($int1 top-level entries, $int2 children)" +
+                    " enforcedVisualStability=$bool1"
         })
     }
 
-    fun logPreRenderInvalidated(filterName: String, pipelineState: Int) {
+    private fun logPluggableInvalidated(
+        type: String,
+        pluggable: Pluggable<*>,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) {
         buffer.log(TAG, DEBUG, {
-            str1 = filterName
+            str1 = type
+            str2 = pluggable.name
             int1 = pipelineState
+            str3 = reason
         }, {
-            """Pre-render Invalidator "$str1" invalidated; pipeline state is $int1"""
+            """Invalidated while ${getStateName(int1)} by $str1 "$str2" because $str3"""
         })
     }
 
-    fun logPreGroupFilterInvalidated(filterName: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = filterName
-            int1 = pipelineState
-        }, {
-            """Pre-group NotifFilter "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logPreRenderInvalidated(
+        invalidator: Invalidator,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("Pre-render Invalidator", invalidator, pipelineState, reason)
 
-    fun logReorderingAllowedInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """ReorderingNowAllowed "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logPreGroupFilterInvalidated(
+        filter: NotifFilter,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("Pre-group NotifFilter", filter, pipelineState, reason)
 
-    fun logPromoterInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """NotifPromoter "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logReorderingAllowedInvalidated(
+        stabilityManager: NotifStabilityManager,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("ReorderingNowAllowed", stabilityManager, pipelineState, reason)
 
-    fun logNotifSectionInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """NotifSection "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logPromoterInvalidated(
+        promoter: NotifPromoter,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("NotifPromoter", promoter, pipelineState, reason)
 
-    fun logNotifComparatorInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """NotifComparator "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logNotifSectionInvalidated(
+        sectioner: NotifSectioner,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("NotifSection", sectioner, pipelineState, reason)
 
-    fun logFinalizeFilterInvalidated(name: String, pipelineState: Int) {
-        buffer.log(TAG, DEBUG, {
-            str1 = name
-            int1 = pipelineState
-        }, {
-            """Finalize NotifFilter "$str1" invalidated; pipeline state is $int1"""
-        })
-    }
+    fun logNotifComparatorInvalidated(
+        comparator: NotifComparator,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("NotifComparator", comparator, pipelineState, reason)
 
-    fun logDuplicateSummary(buildId: Int, groupKey: String, existingKey: String, newKey: String) {
+    fun logFinalizeFilterInvalidated(
+        filter: NotifFilter,
+        @StateName pipelineState: Int,
+        reason: String?
+    ) = logPluggableInvalidated("Finalize NotifFilter", filter, pipelineState, reason)
+
+    fun logDuplicateSummary(
+        buildId: Int,
+        group: GroupEntry,
+        existingSummary: NotificationEntry,
+        newSummary: NotificationEntry
+    ) {
         buffer.log(TAG, WARNING, {
-            int1 = buildId
-            str1 = groupKey
-            str2 = existingKey
-            str3 = newKey
+            long1 = buildId.toLong()
+            str1 = group.logKey
+            str2 = existingSummary.logKey
+            str3 = newSummary.logKey
         }, {
-            """(Build $int1) Duplicate summary for group "$str1": "$str2" vs. "$str3""""
+            """(Build $long1) Duplicate summary for group "$str1": "$str2" vs. "$str3""""
         })
     }
 
     fun logDuplicateTopLevelKey(buildId: Int, topLevelKey: String) {
         buffer.log(TAG, WARNING, {
-            int1 = buildId
-            str1 = topLevelKey
+            long1 = buildId.toLong()
+            str1 = logKey(topLevelKey)
         }, {
-            "(Build $int1) Duplicate top-level key: $str1"
+            "(Build $long1) Duplicate top-level key: $str1"
         })
     }
 
     fun logEntryAttachStateChanged(
         buildId: Int,
-        key: String,
+        entry: ListEntry,
         prevParent: GroupEntry?,
         newParent: GroupEntry?
     ) {
         buffer.log(TAG, INFO, {
-            int1 = buildId
-            str1 = key
-            str2 = prevParent?.key
-            str3 = newParent?.key
+            long1 = buildId.toLong()
+            str1 = entry.logKey
+            str2 = prevParent?.logKey
+            str3 = newParent?.logKey
         }, {
 
             val action = if (str2 == null && str3 != null) {
@@ -153,22 +173,22 @@ class ShadeListBuilderLogger @Inject constructor(
                 "MODIFIED (ATTACHED)"
             }
 
-            "(Build $int1) $action {$str1}"
+            "(Build $long1) $action {$str1}"
         })
     }
 
     fun logParentChanged(buildId: Int, prevParent: GroupEntry?, newParent: GroupEntry?) {
         buffer.log(TAG, INFO, {
-            int1 = buildId
-            str1 = prevParent?.key
-            str2 = newParent?.key
+            long1 = buildId.toLong()
+            str1 = prevParent?.logKey
+            str2 = newParent?.logKey
         }, {
             if (str1 == null && str2 != null) {
-                "(Build $int1)     Parent is {$str2}"
+                "(Build $long1)     Parent is {$str2}"
             } else if (str1 != null && str2 == null) {
-                "(Build $int1)     Parent was {$str1}"
+                "(Build $long1)     Parent was {$str1}"
             } else {
-                "(Build $int1)     Reparent: {$str1} -> {$str2}"
+                "(Build $long1)     Reparent: {$str1} -> {$str2}"
             }
         })
     }
@@ -179,9 +199,9 @@ class ShadeListBuilderLogger @Inject constructor(
         keepingParent: GroupEntry?
     ) {
         buffer.log(TAG, INFO, {
-            int1 = buildId
-            str1 = suppressedParent?.key
-            str2 = keepingParent?.key
+            long1 = buildId.toLong()
+            str1 = suppressedParent?.logKey
+            str2 = keepingParent?.logKey
         }, {
             "(Build $long1)     Change of parent to '$str1' suppressed; keeping parent '$str2'"
         })
@@ -192,10 +212,24 @@ class ShadeListBuilderLogger @Inject constructor(
         keepingParent: GroupEntry?
     ) {
         buffer.log(TAG, INFO, {
-            int1 = buildId
-            str1 = keepingParent?.key
+            long1 = buildId.toLong()
+            str1 = keepingParent?.logKey
         }, {
             "(Build $long1)     Group pruning suppressed; keeping parent '$str1'"
+        })
+    }
+
+    fun logPrunedReasonChanged(
+        buildId: Int,
+        prevReason: String?,
+        newReason: String?
+    ) {
+        buffer.log(TAG, INFO, {
+            long1 = buildId.toLong()
+            str1 = prevReason
+            str2 = newReason
+        }, {
+            "(Build $long1)     Pruned reason changed: $str1 -> $str2"
         })
     }
 
@@ -205,11 +239,11 @@ class ShadeListBuilderLogger @Inject constructor(
         newFilter: NotifFilter?
     ) {
         buffer.log(TAG, INFO, {
-            int1 = buildId
+            long1 = buildId.toLong()
             str1 = prevFilter?.name
             str2 = newFilter?.name
         }, {
-            "(Build $int1)     Filter changed: $str1 -> $str2"
+            "(Build $long1)     Filter changed: $str1 -> $str2"
         })
     }
 
@@ -219,11 +253,11 @@ class ShadeListBuilderLogger @Inject constructor(
         newPromoter: NotifPromoter?
     ) {
         buffer.log(TAG, INFO, {
-            int1 = buildId
+            long1 = buildId.toLong()
             str1 = prevPromoter?.name
             str2 = newPromoter?.name
         }, {
-            "(Build $int1)     Promoter changed: $str1 -> $str2"
+            "(Build $long1)     Promoter changed: $str1 -> $str2"
         })
     }
 
@@ -259,6 +293,8 @@ class ShadeListBuilderLogger @Inject constructor(
         })
     }
 
+    val logRankInFinalList = Compile.IS_DEBUG && notifPipelineFlags.isDevLoggingEnabled()
+
     fun logFinalList(entries: List<ListEntry>) {
         if (entries.isEmpty()) {
             buffer.log(TAG, DEBUG, {}, { "(empty list)" })
@@ -267,31 +303,40 @@ class ShadeListBuilderLogger @Inject constructor(
             val entry = entries[i]
             buffer.log(TAG, DEBUG, {
                 int1 = i
-                str1 = entry.key
+                str1 = entry.logKey
+                bool1 = logRankInFinalList
+                int2 = entry.representativeEntry!!.ranking.rank
             }, {
-                "[$int1] $str1"
+                "[$int1] $str1".let { if (bool1) "$it rank=$int2" else it }
             })
 
             if (entry is GroupEntry) {
                 entry.summary?.let {
                     buffer.log(TAG, DEBUG, {
-                        str1 = it.key
+                        str1 = it.logKey
+                        bool1 = logRankInFinalList
+                        int2 = it.ranking.rank
                     }, {
-                        "  [*] $str1 (summary)"
+                        "  [*] $str1 (summary)".let { if (bool1) "$it rank=$int2" else it }
                     })
                 }
                 for (j in entry.children.indices) {
                     val child = entry.children[j]
                     buffer.log(TAG, DEBUG, {
                         int1 = j
-                        str1 = child.key
+                        str1 = child.logKey
+                        bool1 = logRankInFinalList
+                        int2 = child.ranking.rank
                     }, {
-                        "  [$int1] $str1"
+                        "  [$int1] $str1".let { if (bool1) "$it rank=$int2" else it }
                     })
                 }
             }
         }
     }
+
+    fun logPipelineRunSuppressed() =
+        buffer.log(TAG, INFO, {}, { "Suppressing pipeline run during animation." })
 }
 
 private const val TAG = "ShadeListBuilder"

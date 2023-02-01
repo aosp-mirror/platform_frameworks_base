@@ -62,6 +62,7 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
                 0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
                 componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                true /* halControlsIllumination */,
                 true /* resetLockoutRequiresHardwareAuthToken */,
                 List.of(new SensorLocationInternal("" /* displayId */,
                         sensorLocationX, sensorLocationY, sensorRadius)));
@@ -69,7 +70,7 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
         assertEquals(970,
                 UdfpsDialogMeasureAdapter.calculateBottomSpacerHeightForPortrait(
                         props, displayHeightPx, textIndicatorHeightPx, buttonBarHeightPx,
-                        dialogBottomMarginPx, navbarHeightPx
+                        dialogBottomMarginPx, navbarHeightPx, 1.0f /* resolutionScale */
                 ));
     }
 
@@ -127,12 +128,14 @@ public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
                 0 /* sensorId */, SensorProperties.STRENGTH_STRONG, 5 /* maxEnrollmentsPerUser */,
                 componentInfo,
                 FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
+                true /* halControlsIllumination */,
                 true /* resetLockoutRequiresHardwareAuthToken */,
                 List.of(new SensorLocationInternal("" /* displayId */,
                         sensorLocationX, sensorLocationY, sensorRadius)));
 
         assertEquals(1205,
                 UdfpsDialogMeasureAdapter.calculateHorizontalSpacerWidthForLandscape(
-                        props, displayWidthPx, dialogMarginPx, navbarHorizontalInsetPx));
+                        props, displayWidthPx, dialogMarginPx, navbarHorizontalInsetPx,
+                        1.0f /* resolutionScale */));
     }
 }

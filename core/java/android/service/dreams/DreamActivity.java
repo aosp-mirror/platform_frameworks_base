@@ -19,8 +19,7 @@ package android.service.dreams;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.os.Bundle;
-
-import com.android.internal.R;
+import android.text.TextUtils;
 
 /**
  * The Activity used by the {@link DreamService} to draw screensaver content
@@ -44,6 +43,7 @@ import com.android.internal.R;
  */
 public class DreamActivity extends Activity {
     static final String EXTRA_CALLBACK = "binder";
+    static final String EXTRA_DREAM_TITLE = "title";
 
     public DreamActivity() {}
 
@@ -51,24 +51,17 @@ public class DreamActivity extends Activity {
     public void onCreate(@Nullable Bundle bundle) {
         super.onCreate(bundle);
 
-        DreamService.DreamServiceWrapper callback =
-                (DreamService.DreamServiceWrapper) getIntent().getIBinderExtra(EXTRA_CALLBACK);
+        final String title = getIntent().getStringExtra(EXTRA_DREAM_TITLE);
+        if (!TextUtils.isEmpty(title)) {
+            setTitle(title);
+        }
+
+        final Bundle extras = getIntent().getExtras();
+        final DreamService.DreamActivityCallback callback =
+                (DreamService.DreamActivityCallback) extras.getBinder(EXTRA_CALLBACK);
 
         if (callback != null) {
             callback.onActivityCreated(this);
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        overridePendingTransition(R.anim.dream_activity_open_enter,
-                                  R.anim.dream_activity_open_exit);
-    }
-
-    @Override
-    public void finishAndRemoveTask() {
-        super.finishAndRemoveTask();
-        overridePendingTransition(0, R.anim.dream_activity_close_exit);
     }
 }

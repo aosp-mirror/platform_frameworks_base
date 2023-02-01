@@ -23,6 +23,7 @@ import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.toInternalType;
 import static android.view.InsetsState.toPublicType;
+import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.ime;
 
@@ -45,7 +46,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.util.imetracing.ImeTracing;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
@@ -61,6 +61,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import com.android.internal.inputmethod.ImeTracing;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -313,6 +314,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             (int) (startValue.right + fraction * (endValue.right - startValue.right)),
             (int) (startValue.bottom + fraction * (endValue.bottom - startValue.bottom)));
 
+    /** Logging listener. */
+    private WindowInsetsAnimationControlListener mLoggingListener;
+
     /**
      * The default implementation of listener, to be used by InsetsController and InsetsPolicy to
      * animate insets.
@@ -329,6 +333,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         private final long mDurationMs;
         private final boolean mDisable;
         private final int mFloatingImeBottomInset;
+        private final WindowInsetsAnimationControlListener mLoggingListener;
 
         private final ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
                 new ThreadLocal<AnimationHandler>() {
@@ -342,7 +347,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         public InternalAnimationControlListener(boolean show, boolean hasAnimationCallbacks,
                 @InsetsType int requestedTypes, @Behavior int behavior, boolean disable,
-                int floatingImeBottomInset) {
+                int floatingImeBottomInset, WindowInsetsAnimationControlListener loggingListener) {
             mShow = show;
             mHasAnimationCallbacks = hasAnimationCallbacks;
             mRequestedTypes = requestedTypes;
@@ -350,12 +355,16 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             mDurationMs = calculateDurationMs();
             mDisable = disable;
             mFloatingImeBottomInset = floatingImeBottomInset;
+            mLoggingListener = loggingListener;
         }
 
         @Override
         public void onReady(WindowInsetsAnimationController controller, int types) {
             mController = controller;
             if (DEBUG) Log.d(TAG, "default animation onReady types: " + types);
+            if (mLoggingListener != null) {
+                mLoggingListener.onReady(controller, types);
+            }
 
             if (mDisable) {
                 onAnimationFinish();
@@ -409,6 +418,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         public void onFinished(WindowInsetsAnimationController controller) {
             if (DEBUG) Log.d(TAG, "InternalAnimationControlListener onFinished types:"
                     + Type.toString(mRequestedTypes));
+            if (mLoggingListener != null) {
+                mLoggingListener.onFinished(controller);
+            }
         }
 
         @Override
@@ -419,6 +431,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
             if (DEBUG) Log.d(TAG, "InternalAnimationControlListener onCancelled types:"
                     + mRequestedTypes);
+            if (mLoggingListener != null) {
+                mLoggingListener.onCancelled(controller);
+            }
         }
 
         protected Interpolator getInsetsInterpolator() {
@@ -682,9 +697,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public boolean onStateChanged(InsetsState state) {
-        boolean stateChanged = !mState.equals(state, true /* excludingCaptionInsets */,
-                        false /* excludeInvisibleIme */)
-                || !captionInsetsUnchanged();
+        boolean stateChanged = false;
+        if (!CAPTION_ON_SHELL) {
+            stateChanged = !mState.equals(state, true /* excludingCaptionInsets */,
+                    false /* excludeInvisibleIme */)
+                    || captionInsetsUnchanged();
+        } else {
+            stateChanged = !mState.equals(state, false /* excludingCaptionInsets */,
+                    false /* excludeInvisibleIme */);
+        }
         if (!stateChanged && mLastDispatchedState.equals(state)) {
             return false;
         }
@@ -726,7 +747,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
             // Only update the server side insets here.
-            if (type == ITYPE_CAPTION_BAR) continue;
+            if (!CAPTION_ON_SHELL && type == ITYPE_CAPTION_BAR) continue;
             InsetsSource source = mState.peekSource(type);
             if (source == null) continue;
             if (newState.peekSource(type) == null) {
@@ -758,16 +779,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     private boolean captionInsetsUnchanged() {
+        if (CAPTION_ON_SHELL) {
+            return false;
+        }
         if (mState.peekSource(ITYPE_CAPTION_BAR) == null
                 && mCaptionInsetsHeight == 0) {
-            return true;
+            return false;
         }
         if (mState.peekSource(ITYPE_CAPTION_BAR) != null
                 && mCaptionInsetsHeight
                 == mState.peekSource(ITYPE_CAPTION_BAR).getFrame().height()) {
-            return true;
+            return false;
         }
-        return false;
+
+        return true;
     }
 
     private void startResizingAnimationIfNeeded(InsetsState fromState) {
@@ -822,10 +847,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /**
-     * @see InsetsState#calculateVisibleInsets(Rect, int)
+     * @see InsetsState#calculateVisibleInsets(Rect, int, int, int, int)
      */
-    public Insets calculateVisibleInsets(@SoftInputModeFlags int softInputMode) {
-        return mState.calculateVisibleInsets(mFrame, softInputMode);
+    public Insets calculateVisibleInsets(int windowType, int windowingMode,
+            @SoftInputModeFlags int softInputMode, int windowFlags) {
+        return mState.calculateVisibleInsets(mFrame, windowType, windowingMode, softInputMode,
+                windowFlags);
     }
 
     /**
@@ -1134,6 +1161,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         updateRequestedVisibilities();
     }
 
+    // TODO(b/242962223): Make this setter restrictive.
+    @Override
+    public void setSystemDrivenInsetsAnimationLoggingListener(
+            @Nullable WindowInsetsAnimationControlListener listener) {
+        mLoggingListener = listener;
+    }
+
     /**
      * @return Pair of (types ready to animate, IME ready to animate).
      */
@@ -1299,8 +1333,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     private void cancelAnimation(InsetsAnimationControlRunner control, boolean invokeCallback) {
-        if (DEBUG) Log.d(TAG, String.format("cancelAnimation of types: %d, animType: %d",
-                control.getTypes(), control.getAnimationType()));
+        if (DEBUG) Log.d(TAG, String.format("cancelAnimation of types: %d, animType: %d, host: %s",
+                control.getTypes(), control.getAnimationType(), mHost.getRootViewTitle()));
         if (invokeCallback) {
             control.cancel();
         }
@@ -1447,7 +1481,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         boolean hasAnimationCallbacks = mHost.hasAnimationCallbacks();
         final InternalAnimationControlListener listener = new InternalAnimationControlListener(
                 show, hasAnimationCallbacks, types, mHost.getSystemBarsBehavior(),
-                skipAnim || mAnimationsDisabled, mHost.dipToPx(FLOATING_IME_BOTTOM_INSET_DP));
+                skipAnim || mAnimationsDisabled, mHost.dipToPx(FLOATING_IME_BOTTOM_INSET_DP),
+                mLoggingListener);
 
         // We are about to playing the default animation (show/hide). Passing a null frame indicates
         // the controlled types should be animated regardless of the frame.
@@ -1582,11 +1617,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @Override
     public void setCaptionInsetsHeight(int height) {
+        // This method is to be removed once the caption is moved to the shell.
+        if (CAPTION_ON_SHELL) {
+            return;
+        }
         if (mCaptionInsetsHeight != height) {
             mCaptionInsetsHeight = height;
             if (mCaptionInsetsHeight != 0) {
-                mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(mFrame.left, mFrame.top,
-                        mFrame.right, mFrame.top + mCaptionInsetsHeight));
+                mState.getSource(ITYPE_CAPTION_BAR).setFrame(mFrame.left, mFrame.top,
+                        mFrame.right, mFrame.top + mCaptionInsetsHeight);
             } else {
                 mState.removeSource(ITYPE_CAPTION_BAR);
             }

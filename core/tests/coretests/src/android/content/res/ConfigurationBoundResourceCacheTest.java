@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.platform.test.annotations.Presubmit;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.TypedValue;
 
@@ -25,6 +26,7 @@ import com.android.frameworks.coretests.R;
 
 import java.lang.reflect.InvocationTargetException;
 
+@Presubmit
 public class ConfigurationBoundResourceCacheTest
         extends ActivityInstrumentationTestCase2<ResourceCacheActivity> {
 

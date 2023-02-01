@@ -17,9 +17,11 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
@@ -27,21 +29,28 @@ import android.media.IPlaybackConfigDispatcher;
 import android.media.PlayerBase;
 import android.media.VolumeShaper;
 import android.os.Binder;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
 
 /**
  * Class to receive and dispatch updates from AudioSystem about recording configurations.
@@ -54,6 +63,7 @@ public final class PlaybackActivityMonitor
     /*package*/ static final boolean DEBUG = false;
     /*package*/ static final int VOLUME_SHAPER_SYSTEM_DUCK_ID = 1;
     /*package*/ static final int VOLUME_SHAPER_SYSTEM_FADEOUT_ID = 2;
+    /*package*/ static final int VOLUME_SHAPER_SYSTEM_MUTE_AWAIT_CONNECTION_ID = 3;
 
     private static final VolumeShaper.Configuration DUCK_VSHAPE =
             new VolumeShaper.Configuration.Builder()
@@ -73,6 +83,18 @@ public final class PlaybackActivityMonitor
                     .createIfNeeded()
                     .build();
 
+    private static final long UNMUTE_DURATION_MS = 100;
+    private static final VolumeShaper.Configuration MUTE_AWAIT_CONNECTION_VSHAPE =
+            new VolumeShaper.Configuration.Builder()
+                    .setId(VOLUME_SHAPER_SYSTEM_MUTE_AWAIT_CONNECTION_ID)
+                    .setCurve(new float[] { 0.f, 1.f } /* times */,
+                            new float[] { 1.f, 0.f } /* volumes */)
+                    .setOptionFlags(VolumeShaper.Configuration.OPTION_FLAG_CLOCK_TIME)
+                    // even though we specify a duration, it's only used for the unmute,
+                    // for muting this volume shaper is run with PLAY_SKIP_RAMP
+                    .setDuration(UNMUTE_DURATION_MS)
+                    .build();
+
     // TODO support VolumeShaper on those players
     private static final int[] UNDUCKABLE_PLAYER_TYPES = {
             AudioPlaybackConfiguration.PLAYER_TYPE_AAUDIO,
@@ -83,13 +105,10 @@ public final class PlaybackActivityMonitor
     private static final VolumeShaper.Operation PLAY_SKIP_RAMP =
             new VolumeShaper.Operation.Builder(PLAY_CREATE_IF_NEEDED).setXOffset(1.0f).build();
 
-    private final ArrayList<PlayMonitorClient> mClients = new ArrayList<PlayMonitorClient>();
-    // a public client is one that needs an anonymized version of the playback configurations, we
-    // keep track of whether there is at least one to know when we need to create the list of
-    // playback configurations that do not contain uid/pid/package name information.
-    private boolean mHasPublicClients = false;
+    private final ConcurrentLinkedQueue<PlayMonitorClient> mClients = new ConcurrentLinkedQueue<>();
 
     private final Object mPlayerLock = new Object();
+    @GuardedBy("mPlayerLock")
     private final HashMap<Integer, AudioPlaybackConfiguration> mPlayers =
             new HashMap<Integer, AudioPlaybackConfiguration>();
 
@@ -97,12 +116,16 @@ public final class PlaybackActivityMonitor
     private int mSavedAlarmVolume = -1;
     private final int mMaxAlarmVolume;
     private int mPrivilegedAlarmActiveCount = 0;
+    private final Consumer<AudioDeviceAttributes> mMuteAwaitConnectionTimeoutCb;
 
-    PlaybackActivityMonitor(Context context, int maxAlarmVolume) {
+    PlaybackActivityMonitor(Context context, int maxAlarmVolume,
+            Consumer<AudioDeviceAttributes> muteTimeoutCallback) {
         mContext = context;
         mMaxAlarmVolume = maxAlarmVolume;
         PlayMonitorClient.sListenerDeathMonitor = this;
         AudioPlaybackConfiguration.sPlayerDeathMonitor = this;
+        mMuteAwaitConnectionTimeoutCb = muteTimeoutCallback;
+        initEventHandler();
     }
 
     //=================================================================
@@ -170,6 +193,7 @@ public final class PlaybackActivityMonitor
         sEventLogger.log(new NewPlayerEvent(apc));
         synchronized(mPlayerLock) {
             mPlayers.put(newPiid, apc);
+            maybeMutePlayerAwaitingConnection(apc);
         }
         return newPiid;
     }
@@ -326,6 +350,7 @@ public final class PlaybackActivityMonitor
                 mPlayers.remove(new Integer(piid));
                 mDuckingManager.removeReleased(apc);
                 mFadingManager.removeReleased(apc);
+                mMutedPlayersAwaitingConnection.remove(Integer.valueOf(piid));
                 checkVolumeForPrivilegedAlarm(apc, AudioPlaybackConfiguration.PLAYER_STATE_RELEASED);
                 change = apc.handleStateEvent(AudioPlaybackConfiguration.PLAYER_STATE_RELEASED,
                         AudioPlaybackConfiguration.PLAYER_DEVICEID_INVALID);
@@ -430,11 +455,9 @@ public final class PlaybackActivityMonitor
                 + DateFormat.getTimeInstance().format(new Date()));
         synchronized(mPlayerLock) {
             pw.println("\n  playback listeners:");
-            synchronized(mClients) {
-                for (PlayMonitorClient pmc : mClients) {
-                    pw.print(" " + (pmc.mIsPrivileged ? "(S)" : "(P)")
-                            + pmc.toString());
-                }
+            for (PlayMonitorClient pmc : mClients) {
+                pw.print(" " + (pmc.isPrivileged() ? "(S)" : "(P)")
+                        + pmc.toString());
             }
             pw.println("\n");
             // all players
@@ -454,7 +477,7 @@ public final class PlaybackActivityMonitor
             pw.println("\n  faded out players piids:");
             mFadingManager.dump(pw);
             // players muted due to the device ringing or being in a call
-            pw.print("\n  muted player piids:");
+            pw.print("\n  muted player piids due to call/ring:");
             for (int piid : mMutedPlayers) {
                 pw.print(" " + piid);
             }
@@ -463,6 +486,12 @@ public final class PlaybackActivityMonitor
             pw.print("\n  banned uids:");
             for (int uid : mBannedUids) {
                 pw.print(" " + uid);
+            }
+            pw.println("\n");
+            // muted players:
+            pw.print("\n  muted players (piids) awaiting device connection:");
+            for (int piid : mMutedPlayersAwaitingConnection) {
+                pw.print(" " + piid);
             }
             pw.println("\n");
             // log
@@ -500,48 +529,33 @@ public final class PlaybackActivityMonitor
      * @param iplayerReleased indicates if the change was due to a player being released
      */
     private void dispatchPlaybackChange(boolean iplayerReleased) {
-        synchronized (mClients) {
-            // typical use case, nobody is listening, don't do any work
-            if (mClients.isEmpty()) {
-                return;
-            }
-        }
         if (DEBUG) { Log.v(TAG, "dispatchPlaybackChange to " + mClients.size() + " clients"); }
         final List<AudioPlaybackConfiguration> configsSystem;
-        // list of playback configurations for "public consumption". It is only computed if there
+        // list of playback configurations for "public consumption". It is computed lazy if there
         // are non-system playback activity listeners.
-        final List<AudioPlaybackConfiguration> configsPublic;
+        List<AudioPlaybackConfiguration> configsPublic = null;
         synchronized (mPlayerLock) {
             if (mPlayers.isEmpty()) {
                 return;
             }
-            configsSystem = new ArrayList<AudioPlaybackConfiguration>(mPlayers.values());
+            configsSystem = new ArrayList<>(mPlayers.values());
         }
-        synchronized (mClients) {
-            // was done at beginning of method, but could have changed
-            if (mClients.isEmpty()) {
-                return;
-            }
-            configsPublic = mHasPublicClients ? anonymizeForPublicConsumption(configsSystem) : null;
-            final Iterator<PlayMonitorClient> clientIterator = mClients.iterator();
-            while (clientIterator.hasNext()) {
-                final PlayMonitorClient pmc = clientIterator.next();
-                try {
-                    // do not spam the logs if there are problems communicating with this client
-                    if (pmc.mErrorCount < PlayMonitorClient.MAX_ERRORS) {
-                        if (pmc.mIsPrivileged) {
-                            pmc.mDispatcherCb.dispatchPlaybackConfigChange(configsSystem,
-                                    iplayerReleased);
-                        } else {
-                            // non-system clients don't have the control interface IPlayer, so
-                            // they don't need to flush commands when a player was released
-                            pmc.mDispatcherCb.dispatchPlaybackConfigChange(configsPublic, false);
-                        }
+
+        final Iterator<PlayMonitorClient> clientIterator = mClients.iterator();
+        while (clientIterator.hasNext()) {
+            final PlayMonitorClient pmc = clientIterator.next();
+            // do not spam the logs if there are problems communicating with this client
+            if (!pmc.reachedMaxErrorCount()) {
+                if (pmc.isPrivileged()) {
+                    pmc.dispatchPlaybackConfigChange(configsSystem,
+                            iplayerReleased);
+                } else {
+                    if (configsPublic == null) {
+                        configsPublic = anonymizeForPublicConsumption(configsSystem);
                     }
-                } catch (RemoteException e) {
-                    pmc.mErrorCount++;
-                    Log.e(TAG, "Error (" + pmc.mErrorCount +
-                            ") trying to dispatch playback config change to " + pmc, e);
+                    // non-system clients don't have the control interface IPlayer, so
+                    // they don't need to flush commands when a player was released
+                    pmc.dispatchPlaybackConfigChange(configsPublic, false);
                 }
             }
         }
@@ -764,14 +778,9 @@ public final class PlaybackActivityMonitor
         if (pcdb == null) {
             return;
         }
-        synchronized(mClients) {
-            final PlayMonitorClient pmc = new PlayMonitorClient(pcdb, isPrivileged);
-            if (pmc.init()) {
-                if (!isPrivileged) {
-                    mHasPublicClients = true;
-                }
-                mClients.add(pmc);
-            }
+        final PlayMonitorClient pmc = new PlayMonitorClient(pcdb, isPrivileged);
+        if (pmc.init()) {
+            mClients.add(pmc);
         }
     }
 
@@ -779,23 +788,14 @@ public final class PlaybackActivityMonitor
         if (pcdb == null) {
             return;
         }
-        synchronized(mClients) {
-            final Iterator<PlayMonitorClient> clientIterator = mClients.iterator();
-            boolean hasPublicClients = false;
-            // iterate over the clients to remove the dispatcher to remove, and reevaluate at
-            // the same time if we still have a public client.
-            while (clientIterator.hasNext()) {
-                PlayMonitorClient pmc = clientIterator.next();
-                if (pcdb.asBinder().equals(pmc.mDispatcherCb.asBinder())) {
-                    pmc.release();
-                    clientIterator.remove();
-                } else {
-                    if (!pmc.mIsPrivileged) {
-                        hasPublicClients = true;
-                    }
-                }
+        final Iterator<PlayMonitorClient> clientIterator = mClients.iterator();
+        // iterate over the clients to remove the dispatcher
+        while (clientIterator.hasNext()) {
+            PlayMonitorClient pmc = clientIterator.next();
+            if (pmc.equalsDispatcher(pcdb)) {
+                pmc.release();
+                clientIterator.remove();
             }
-            mHasPublicClients = hasPublicClients;
         }
     }
 
@@ -823,24 +823,34 @@ public final class PlaybackActivityMonitor
         // can afford to be static because only one PlaybackActivityMonitor ever instantiated
         static PlaybackActivityMonitor sListenerDeathMonitor;
 
-        final IPlaybackConfigDispatcher mDispatcherCb;
-        final boolean mIsPrivileged;
-
-        int mErrorCount = 0;
         // number of errors after which we don't update this client anymore to not spam the logs
-        static final int MAX_ERRORS = 5;
+        private static final int MAX_ERRORS = 5;
+
+        private final IPlaybackConfigDispatcher mDispatcherCb;
+
+        @GuardedBy("this")
+        private final boolean mIsPrivileged;
+        @GuardedBy("this")
+        private boolean mIsReleased = false;
+        @GuardedBy("this")
+        private int mErrorCount = 0;
 
         PlayMonitorClient(IPlaybackConfigDispatcher pcdb, boolean isPrivileged) {
             mDispatcherCb = pcdb;
             mIsPrivileged = isPrivileged;
         }
 
+        @Override
         public void binderDied() {
             Log.w(TAG, "client died");
             sListenerDeathMonitor.unregisterPlaybackCallback(mDispatcherCb);
         }
 
-        boolean init() {
+        synchronized boolean init() {
+            if (mIsReleased) {
+                // Do not init after release
+                return false;
+            }
             try {
                 mDispatcherCb.asBinder().linkToDeath(this, 0);
                 return true;
@@ -850,8 +860,43 @@ public final class PlaybackActivityMonitor
             }
         }
 
-        void release() {
+        synchronized void release() {
             mDispatcherCb.asBinder().unlinkToDeath(this, 0);
+            mIsReleased = true;
+        }
+
+        void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs,
+                boolean flush) {
+            synchronized (this) {
+                if (mIsReleased) {
+                    // Do not dispatch anything after release
+                    return;
+                }
+            }
+            try {
+                mDispatcherCb.dispatchPlaybackConfigChange(configs, flush);
+            } catch (RemoteException e) {
+                synchronized (this) {
+                    mErrorCount++;
+                    Log.e(TAG, "Error (" + mErrorCount
+                            + ") trying to dispatch playback config change to " + this, e);
+                }
+            }
+        }
+
+        synchronized boolean isPrivileged() {
+            return mIsPrivileged;
+        }
+
+        synchronized boolean reachedMaxErrorCount() {
+            return mErrorCount >= MAX_ERRORS;
+        }
+
+        synchronized boolean equalsDispatcher(IPlaybackConfigDispatcher pcdb) {
+            if (pcdb == null) {
+                return false;
+            }
+            return pcdb.asBinder().equals(mDispatcherCb.asBinder());
         }
     }
 
@@ -1103,6 +1148,155 @@ public final class PlaybackActivityMonitor
         }
     }
 
+    private static final class MuteAwaitConnectionEvent extends AudioEventLogger.Event {
+        private final @NonNull int[] mUsagesToMute;
+
+        MuteAwaitConnectionEvent(@NonNull int[] usagesToMute) {
+            mUsagesToMute = usagesToMute;
+        }
+
+        @Override
+        public String eventToString() {
+            return "muteAwaitConnection muting usages " + Arrays.toString(mUsagesToMute);
+        }
+    }
+
     static final AudioEventLogger sEventLogger = new AudioEventLogger(100,
             "playback activity as reported through PlayerBase");
+
+    //==========================================================================================
+    // Mute conditional on device connection
+    //==========================================================================================
+    void muteAwaitConnection(@NonNull int[] usagesToMute,
+            @NonNull AudioDeviceAttributes dev, long timeOutMs) {
+        sEventLogger.loglogi(
+                "muteAwaitConnection() dev:" + dev + " timeOutMs:" + timeOutMs, TAG);
+        synchronized (mPlayerLock) {
+            mutePlayersExpectingDevice(usagesToMute);
+            // schedule timeout (remove previously scheduled first)
+            mEventHandler.removeMessages(MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION);
+            mEventHandler.sendMessageDelayed(
+                    mEventHandler.obtainMessage(MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION, dev),
+                    timeOutMs);
+        }
+    }
+
+    void cancelMuteAwaitConnection(String source) {
+        sEventLogger.loglogi("cancelMuteAwaitConnection() from:" + source, TAG);
+        synchronized (mPlayerLock) {
+            // cancel scheduled timeout, ignore device, only one expected device at a time
+            mEventHandler.removeMessages(MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION);
+            // unmute immediately
+            unmutePlayersExpectingDevice();
+        }
+    }
+
+    /**
+     * List of the piids of the players that are muted until a specific audio device connects
+     */
+    @GuardedBy("mPlayerLock")
+    private final ArrayList<Integer> mMutedPlayersAwaitingConnection = new ArrayList<Integer>();
+
+    /**
+     * List of AudioAttributes usages to mute until a specific audio device connects
+     */
+    @GuardedBy("mPlayerLock")
+    private @Nullable int[] mMutedUsagesAwaitingConnection = null;
+
+    @GuardedBy("mPlayerLock")
+    private void mutePlayersExpectingDevice(@NonNull int[] usagesToMute) {
+        sEventLogger.log(new MuteAwaitConnectionEvent(usagesToMute));
+        mMutedUsagesAwaitingConnection = usagesToMute;
+        final Set<Integer> piidSet = mPlayers.keySet();
+        final Iterator<Integer> piidIterator = piidSet.iterator();
+        // find which players to mute
+        while (piidIterator.hasNext()) {
+            final Integer piid = piidIterator.next();
+            final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+            if (apc == null) {
+                continue;
+            }
+            maybeMutePlayerAwaitingConnection(apc);
+        }
+    }
+
+    @GuardedBy("mPlayerLock")
+    private void maybeMutePlayerAwaitingConnection(@NonNull AudioPlaybackConfiguration apc) {
+        if (mMutedUsagesAwaitingConnection == null) {
+            return;
+        }
+        for (int usage : mMutedUsagesAwaitingConnection) {
+            if (usage == apc.getAudioAttributes().getUsage()) {
+                try {
+                    sEventLogger.log((new AudioEventLogger.StringEvent(
+                            "awaiting connection: muting piid:"
+                                    + apc.getPlayerInterfaceId()
+                                    + " uid:" + apc.getClientUid())).printLog(TAG));
+                    apc.getPlayerProxy().applyVolumeShaper(
+                            MUTE_AWAIT_CONNECTION_VSHAPE,
+                            PLAY_SKIP_RAMP);
+                    mMutedPlayersAwaitingConnection.add(apc.getPlayerInterfaceId());
+                } catch (Exception e) {
+                    Log.e(TAG, "awaiting connection: error muting player "
+                            + apc.getPlayerInterfaceId(), e);
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mPlayerLock")
+    private void unmutePlayersExpectingDevice() {
+        mMutedUsagesAwaitingConnection = null;
+        for (int piid : mMutedPlayersAwaitingConnection) {
+            final AudioPlaybackConfiguration apc = mPlayers.get(piid);
+            if (apc == null) {
+                continue;
+            }
+            try {
+                sEventLogger.log(new AudioEventLogger.StringEvent(
+                        "unmuting piid:" + piid).printLog(TAG));
+                apc.getPlayerProxy().applyVolumeShaper(MUTE_AWAIT_CONNECTION_VSHAPE,
+                        VolumeShaper.Operation.REVERSE);
+            } catch (Exception e) {
+                Log.e(TAG, "Error unmuting player " + piid + " uid:"
+                        + apc.getClientUid(), e);
+            }
+        }
+        mMutedPlayersAwaitingConnection.clear();
+    }
+
+    //=================================================================
+    // Message handling
+    private Handler mEventHandler;
+    private HandlerThread mEventThread;
+
+    /**
+     * timeout for a mute awaiting a device connection
+     * args:
+     *     msg.obj: the audio device being expected
+     *         type: AudioDeviceAttributes
+     */
+    private static final int MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION = 1;
+
+    private void initEventHandler() {
+        mEventThread = new HandlerThread(TAG);
+        mEventThread.start();
+        mEventHandler = new Handler(mEventThread.getLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_L_TIMEOUT_MUTE_AWAIT_CONNECTION:
+                        sEventLogger.loglogi("Timeout for muting waiting for "
+                                + (AudioDeviceAttributes) msg.obj + ", unmuting", TAG);
+                        synchronized (mPlayerLock) {
+                            unmutePlayersExpectingDevice();
+                        }
+                        mMuteAwaitConnectionTimeoutCb.accept((AudioDeviceAttributes) msg.obj);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+    }
 }

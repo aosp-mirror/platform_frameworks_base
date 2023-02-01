@@ -16,8 +16,13 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.settingslib.activityembedding">
+          package="com.android.settingslib.widget">
 
     <uses-sdk android:minSdkVersion="21" />
+
+    <application>
+        <uses-library android:name="androidx.window.extensions" android:required="false" />
+        <uses-library android:name="androidx.window.sidecar" android:required="false" />
+    </application>
 
 </manifest>

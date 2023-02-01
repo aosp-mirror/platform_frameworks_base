@@ -69,6 +69,8 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.uri.UriGrantsManagerInternal;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -193,6 +195,7 @@ public final class NotificationRecord {
     private boolean mHasSentValidMsg;
     private boolean mAppDemotedFromConvo;
     private boolean mPkgAllowedAsConvo;
+    private boolean mImportanceFixed;
     /**
      * Whether this notification (and its channels) should be considered user locked. Used in
      * conjunction with user sentiment calculation.
@@ -466,6 +469,7 @@ public final class NotificationRecord {
             rv.getPackage(), rv.getLayoutId(), rv.estimateMemoryUsage(), rv.toString());
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     void dump(PrintWriter pw, String prefix, Context baseContext, boolean redact) {
         final Notification notification = getSbn().getNotification();
         pw.println(prefix + this);
@@ -474,6 +478,7 @@ public final class NotificationRecord {
         pw.println(prefix + "opPkg=" + getSbn().getOpPkg());
         pw.println(prefix + "icon=" + notification.getSmallIcon());
         pw.println(prefix + "flags=0x" + Integer.toHexString(notification.flags));
+        pw.println(prefix + "originalFlags=0x" + Integer.toHexString(mOriginalFlags));
         pw.println(prefix + "pri=" + notification.priority);
         pw.println(prefix + "key=" + getSbn().getKey());
         pw.println(prefix + "seen=" + mStats.hasSeen());
@@ -540,6 +545,7 @@ public final class NotificationRecord {
         if (notification == null) {
             pw.println(prefix + "None");
             return;
+
         }
         pw.println(prefix + "fullscreenIntent=" + notification.fullScreenIntent);
         pw.println(prefix + "contentIntent=" + notification.contentIntent);
@@ -593,7 +599,8 @@ public final class NotificationRecord {
                     pw.println("null");
                 } else {
                     pw.print(val.getClass().getSimpleName());
-                    if (redact && (val instanceof CharSequence || val instanceof String)) {
+                    if (redact && (val instanceof CharSequence) && shouldRedactStringExtra(key)) {
+                        pw.print(String.format(" [length=%d]", ((CharSequence) val).length()));
                         // redact contents from bugreports
                     } else if (val instanceof Bitmap) {
                         pw.print(String.format(" (%dx%d)",
@@ -616,6 +623,19 @@ public final class NotificationRecord {
                 }
             }
             pw.println(prefix + "}");
+        }
+    }
+
+    private boolean shouldRedactStringExtra(String key) {
+        if (key == null) return true;
+        switch (key) {
+            // none of these keys contain user-related information; they do not need to be redacted
+            case Notification.EXTRA_SUBSTITUTE_APP_NAME:
+            case Notification.EXTRA_TEMPLATE:
+            case "android.support.v4.app.extra.COMPAT_TEMPLATE":
+                return false;
+            default:
+                return true;
         }
     }
 
@@ -813,6 +833,14 @@ public final class NotificationRecord {
         return mAssistantImportance;
     }
 
+    public void setImportanceFixed(boolean fixed) {
+        mImportanceFixed = fixed;
+    }
+
+    public boolean isImportanceFixed() {
+        return mImportanceFixed;
+    }
+
     /**
      * Recalculates the importance of the record after fields affecting importance have changed,
      * and records an explanation.
@@ -824,8 +852,7 @@ public final class NotificationRecord {
         // Consider Notification Assistant and system overrides to importance. If both, system wins.
         if (!getChannel().hasUserSetImportance()
                 && mAssistantImportance != IMPORTANCE_UNSPECIFIED
-                && !getChannel().isImportanceLockedByOEM()
-                && !getChannel().isImportanceLockedByCriticalDeviceFunction()) {
+                && !mImportanceFixed) {
             mImportance = mAssistantImportance;
             mImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_ASST;
         }
@@ -1062,7 +1089,7 @@ public final class NotificationRecord {
     }
 
     /**
-     * @see PreferencesHelper#getIsAppImportanceLocked(String, int)
+     * @see PermissionHelper#isPermissionUserSet(String, int)
      */
     public boolean getIsAppImportanceLocked() {
         return mIsAppImportanceLocked;
@@ -1321,14 +1348,14 @@ public final class NotificationRecord {
     protected void calculateGrantableUris() {
         final Notification notification = getNotification();
         notification.visitUris((uri) -> {
-            visitGrantableUri(uri, false);
+            visitGrantableUri(uri, false, false);
         });
 
         if (notification.getChannelId() != null) {
             NotificationChannel channel = getChannel();
             if (channel != null) {
                 visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
-                        & NotificationChannel.USER_LOCKED_SOUND) != 0);
+                        & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
             }
         }
     }
@@ -1341,7 +1368,7 @@ public final class NotificationRecord {
      * {@link #mGrantableUris}. Otherwise, this will either log or throw
      * {@link SecurityException} depending on target SDK of enqueuing app.
      */
-    private void visitGrantableUri(Uri uri, boolean userOverriddenUri) {
+    private void visitGrantableUri(Uri uri, boolean userOverriddenUri, boolean isSound) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
         // We can't grant Uri permissions from system
@@ -1362,10 +1389,16 @@ public final class NotificationRecord {
             mGrantableUris.add(uri);
         } catch (SecurityException e) {
             if (!userOverriddenUri) {
-                if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
-                    throw e;
+                if (isSound) {
+                    mSound = Settings.System.DEFAULT_NOTIFICATION_URI;
+                    Log.w(TAG, "Replacing " + uri + " from " + sourceUid + ": " + e.getMessage());
                 } else {
-                    Log.w(TAG, "Ignoring " + uri + " from " + sourceUid + ": " + e.getMessage());
+                    if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
+                        throw e;
+                    } else {
+                        Log.w(TAG,
+                                "Ignoring " + uri + " from " + sourceUid + ": " + e.getMessage());
+                    }
                 }
             }
         } finally {

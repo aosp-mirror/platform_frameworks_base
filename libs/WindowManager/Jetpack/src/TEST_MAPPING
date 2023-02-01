@@ -1,0 +1,37 @@
+{
+  "presubmit": [
+    {
+      "name": "WMJetpackUnitTests",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    },
+    {
+      "name": "CtsWindowManagerJetpackTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
+  ],
+  "imports": [
+    {
+      "path": "vendor/google_testing/integration/tests/scenarios/src/android/platform/test/scenario/sysui"
+    }
+  ]
+}

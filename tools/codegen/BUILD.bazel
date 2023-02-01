@@ -1,0 +1,21 @@
+# TODO(b/245731902): auto-generate these with bp2build.
+load("@rules_kotlin//kotlin:jvm_library.bzl", "kt_jvm_library")
+
+java_binary(
+    name = "codegen_cli",
+    main_class = "com.android.codegen.MainKt",
+    runtime_deps = [
+        ":codegen_cli_kt_lib",
+    ],
+)
+
+kt_jvm_library(
+    name = "codegen_cli_kt_lib",
+    srcs = glob(["src/**/*.kt"]),
+    deps = ["//external/javaparser"],
+)
+
+kt_jvm_library(
+    name = "codegen-version-info",
+    srcs = glob(["src/**/SharedConstants.kt"]),
+)

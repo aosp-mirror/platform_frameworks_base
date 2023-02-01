@@ -16,6 +16,8 @@
 
 package com.android.server.usage;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
@@ -23,6 +25,7 @@ import android.app.usage.UsageStatsManager;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -54,8 +57,11 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides an interface to query for UsageStat data from a Protocol Buffer database.
@@ -788,7 +794,7 @@ public class UsageStatsDatabase {
     public interface StatCombiner<T> {
 
         /**
-         * Implementations should extract interesting from <code>stats</code> and add it
+         * Implementations should extract interesting information from <code>stats</code> and add it
          * to the <code>accumulatedResult</code> list.
          *
          * If the <code>stats</code> object is mutable, <code>mutable</code> will be true,
@@ -798,35 +804,32 @@ public class UsageStatsDatabase {
          * @param stats             The {@link IntervalStats} object selected.
          * @param mutable           Whether or not the data inside the stats object is mutable.
          * @param accumulatedResult The list to which to add extracted data.
+         * @return Whether or not to continue providing new stats to this combiner. If {@code false}
+         * is returned, then combine will no longer be called.
          */
-        void combine(IntervalStats stats, boolean mutable, List<T> accumulatedResult);
+        boolean combine(IntervalStats stats, boolean mutable, List<T> accumulatedResult);
     }
 
     /**
      * Find all {@link IntervalStats} for the given range and interval type.
      */
+    @Nullable
     public <T> List<T> queryUsageStats(int intervalType, long beginTime, long endTime,
             StatCombiner<T> combiner) {
+        // mIntervalDirs is final. Accessing its size without holding the lock should be fine.
+        if (intervalType < 0 || intervalType >= mIntervalDirs.length) {
+            throw new IllegalArgumentException("Bad interval type " + intervalType);
+        }
+
+        if (endTime <= beginTime) {
+            if (DEBUG) {
+                Slog.d(TAG, "endTime(" + endTime + ") <= beginTime(" + beginTime + ")");
+            }
+            return null;
+        }
+
         synchronized (mLock) {
-            if (intervalType < 0 || intervalType >= mIntervalDirs.length) {
-                throw new IllegalArgumentException("Bad interval type " + intervalType);
-            }
-
             final TimeSparseArray<AtomicFile> intervalStats = mSortedStatFiles[intervalType];
-
-            if (endTime <= beginTime) {
-                if (DEBUG) {
-                    Slog.d(TAG, "endTime(" + endTime + ") <= beginTime(" + beginTime + ")");
-                }
-                return null;
-            }
-
-            int startIndex = intervalStats.closestIndexOnOrBefore(beginTime);
-            if (startIndex < 0) {
-                // All the stats available have timestamps after beginTime, which means they all
-                // match.
-                startIndex = 0;
-            }
 
             int endIndex = intervalStats.closestIndexOnOrBefore(endTime);
             if (endIndex < 0) {
@@ -849,6 +852,13 @@ public class UsageStatsDatabase {
                 }
             }
 
+            int startIndex = intervalStats.closestIndexOnOrBefore(beginTime);
+            if (startIndex < 0) {
+                // All the stats available have timestamps after beginTime, which means they all
+                // match.
+                startIndex = 0;
+            }
+
             final ArrayList<T> results = new ArrayList<>();
             for (int i = startIndex; i <= endIndex; i++) {
                 final AtomicFile f = intervalStats.valueAt(i);
@@ -860,8 +870,9 @@ public class UsageStatsDatabase {
 
                 try {
                     readLocked(f, stats);
-                    if (beginTime < stats.endTime) {
-                        combiner.combine(stats, false, results);
+                    if (beginTime < stats.endTime
+                            && !combiner.combine(stats, false, results)) {
+                        break;
                     }
                 } catch (Exception e) {
                     Slog.e(TAG, "Failed to read usage stats file", e);
@@ -984,7 +995,6 @@ public class UsageStatsDatabase {
             }
         }
     }
-
 
     private static long parseBeginTime(AtomicFile file) throws IOException {
         return parseBeginTime(file.getBaseFile());
@@ -1233,7 +1243,6 @@ public class UsageStatsDatabase {
         }
     }
 
-
     /* Backup/Restore Code */
     byte[] getBackupPayload(String key) {
         return getBackupPayload(key, BACKUP_VERSION);
@@ -1246,6 +1255,10 @@ public class UsageStatsDatabase {
     public byte[] getBackupPayload(String key, int version) {
         if (version >= 1 && version <= 3) {
             Slog.wtf(TAG, "Attempting to backup UsageStats as XML with version " + version);
+            return null;
+        }
+        if (version < 1 || version > BACKUP_VERSION) {
+            Slog.wtf(TAG, "Attempting to backup UsageStats with an unknown version: " + version);
             return null;
         }
         synchronized (mLock) {
@@ -1296,14 +1309,26 @@ public class UsageStatsDatabase {
             }
             return baos.toByteArray();
         }
+    }
 
+    /**
+     * Updates the set of packages given to only include those that have been used within the
+     * given timeframe (as defined by {@link UsageStats#getLastTimePackageUsed()}).
+     */
+    private void calculatePackagesUsedWithinTimeframe(
+            IntervalStats stats, Set<String> packagesList, long timeframeMs) {
+        for (UsageStats stat : stats.packageStats.values()) {
+            if (stat.getLastTimePackageUsed() > timeframeMs) {
+                packagesList.add(stat.mPackageName);
+            }
+        }
     }
 
     /**
      * @hide
      */
     @VisibleForTesting
-    public void applyRestoredPayload(String key, byte[] payload) {
+    public @NonNull Set<String> applyRestoredPayload(String key, byte[] payload) {
         synchronized (mLock) {
             if (KEY_USAGE_STATS.equals(key)) {
                 // Read stats files for the current device configs
@@ -1316,12 +1341,15 @@ public class UsageStatsDatabase {
                 IntervalStats yearlyConfigSource =
                         getLatestUsageStats(UsageStatsManager.INTERVAL_YEARLY);
 
+                final Set<String> packagesRestored = new ArraySet<>();
                 try {
                     DataInputStream in = new DataInputStream(new ByteArrayInputStream(payload));
                     int backupDataVersion = in.readInt();
 
                     // Can't handle this backup set
-                    if (backupDataVersion < 1 || backupDataVersion > BACKUP_VERSION) return;
+                    if (backupDataVersion < 1 || backupDataVersion > BACKUP_VERSION) {
+                        return packagesRestored;
+                    }
 
                     // Delete all stats files
                     // Do this after reading version and before actually restoring
@@ -1329,10 +1357,14 @@ public class UsageStatsDatabase {
                         deleteDirectoryContents(mIntervalDirs[i]);
                     }
 
+                    // 90 days before today in epoch
+                    final long timeframe = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(90);
                     int fileCount = in.readInt();
                     for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
                                 backupDataVersion);
+                        calculatePackagesUsedWithinTimeframe(stats, packagesRestored, timeframe);
+                        packagesRestored.addAll(stats.packageStats.keySet());
                         stats = mergeStats(stats, dailyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_DAILY, stats);
                     }
@@ -1341,6 +1373,7 @@ public class UsageStatsDatabase {
                     for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
                                 backupDataVersion);
+                        calculatePackagesUsedWithinTimeframe(stats, packagesRestored, timeframe);
                         stats = mergeStats(stats, weeklyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_WEEKLY, stats);
                     }
@@ -1349,6 +1382,7 @@ public class UsageStatsDatabase {
                     for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
                                 backupDataVersion);
+                        calculatePackagesUsedWithinTimeframe(stats, packagesRestored, timeframe);
                         stats = mergeStats(stats, monthlyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_MONTHLY, stats);
                     }
@@ -1357,6 +1391,7 @@ public class UsageStatsDatabase {
                     for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in),
                                 backupDataVersion);
+                        calculatePackagesUsedWithinTimeframe(stats, packagesRestored, timeframe);
                         stats = mergeStats(stats, yearlyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_YEARLY, stats);
                     }
@@ -1366,7 +1401,9 @@ public class UsageStatsDatabase {
                 } finally {
                     indexFilesLocked();
                 }
+                return packagesRestored;
             }
+            return Collections.EMPTY_SET;
         }
     }
 

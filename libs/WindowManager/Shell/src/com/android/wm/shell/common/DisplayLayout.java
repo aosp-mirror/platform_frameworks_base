@@ -32,6 +32,7 @@ import static android.view.Surface.ROTATION_90;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
@@ -95,7 +96,8 @@ public class DisplayLayout {
 
     /**
      * Different from {@link #equals(Object)}, this method compares the basic geometry properties
-     * of two {@link DisplayLayout} objects including width, height, rotation, density and cutout.
+     * of two {@link DisplayLayout} objects including width, height, rotation, density, cutout and
+     * insets.
      * @return {@code true} if the given {@link DisplayLayout} is identical geometry wise.
      */
     public boolean isSameGeometry(@NonNull DisplayLayout other) {
@@ -103,7 +105,8 @@ public class DisplayLayout {
                 && mHeight == other.mHeight
                 && mRotation == other.mRotation
                 && mDensityDpi == other.mDensityDpi
-                && Objects.equals(mCutout, other.mCutout);
+                && Objects.equals(mCutout, other.mCutout)
+                && Objects.equals(mStableInsets, other.mStableInsets);
     }
 
     @Override
@@ -336,6 +339,12 @@ public class DisplayLayout {
         return navigationBarPosition(res, mWidth, mHeight, mRotation);
     }
 
+    /** @return {@link DisplayCutout} instance. */
+    @Nullable
+    public DisplayCutout getDisplayCutout() {
+        return mCutout;
+    }
+
     /**
      * Calculates the stable insets if we already have the non-decor insets.
      */
@@ -416,8 +425,9 @@ public class DisplayLayout {
         }
         final DisplayCutout.CutoutPathParserInfo info = cutout.getCutoutPathParserInfo();
         final DisplayCutout.CutoutPathParserInfo newInfo = new DisplayCutout.CutoutPathParserInfo(
-                info.getDisplayWidth(), info.getDisplayHeight(), info.getDensity(),
-                info.getCutoutSpec(), rotation, info.getScale());
+                info.getDisplayWidth(), info.getDisplayHeight(), info.getPhysicalDisplayWidth(),
+                info.getPhysicalDisplayHeight(), info.getDensity(), info.getCutoutSpec(), rotation,
+                info.getScale(), info.getPhysicalPixelDisplaySizeRatio());
         return computeSafeInsets(
                 DisplayCutout.constructDisplayCutout(newBounds, waterfallInsets, newInfo),
                 rotated ? displayHeight : displayWidth,

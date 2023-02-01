@@ -34,11 +34,19 @@ open class SystemPropertiesHelper @Inject constructor() {
         return SystemProperties.getBoolean(name, default)
     }
 
+    fun setBoolean(name: String, value: Boolean) {
+        SystemProperties.set(name, if (value) "1" else "0")
+    }
+
     fun set(name: String, value: String) {
         SystemProperties.set(name, value)
     }
 
     fun set(name: String, value: Int) {
         set(name, value.toString())
+    }
+
+    fun erase(name: String) {
+        set(name, "")
     }
 }

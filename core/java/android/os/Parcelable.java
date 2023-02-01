@@ -45,16 +45,13 @@ import java.lang.annotation.RetentionPolicy;
  *         out.writeInt(mData)
  *     }
  *
- *     companion object {
- *         val CREATOR: Parcelable.Creator&lt;MyParcelable?&gt;
- *                 = object : Parcelable.Creator&lt;MyParcelable?&gt; {
- *             override fun createFromParcel(`in`: Parcel): MyParcelable? {
- *                 return MyParcelable(`in`)
- *             }
+ *     companion object CREATOR: Parcelable.Creator&lt;MyParcelable?&gt; {
+ *         override fun createFromParcel(`in`: Parcel): MyParcelable? {
+ *             return MyParcelable(`in`)
+ *         }
  *
- *             override fun newArray(size: Int): Array&lt;MyParcelable?&gt; {
- *                 return arrayOfNulls(size)
- *             }
+ *         override fun newArray(size: Int): Array&lt;MyParcelable?&gt; {
+ *             return arrayOfNulls(size)
  *         }
  *     }
  * }
@@ -191,7 +188,7 @@ public interface Parcelable {
      * @return true if this parcelable is stable.
      * @hide
      */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi(client = SystemApi.Client.PRIVILEGED_APPS)
     default @Stability int getStability() {
         return PARCELABLE_STABILITY_LOCAL;
     }

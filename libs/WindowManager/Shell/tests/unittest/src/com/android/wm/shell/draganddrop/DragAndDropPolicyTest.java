@@ -19,10 +19,11 @@ package com.android.wm.shell.draganddrop;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
+
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -51,6 +52,7 @@ import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -64,6 +66,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.draganddrop.DragAndDropPolicy.Target;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -83,7 +86,7 @@ import java.util.HashSet;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class DragAndDropPolicyTest {
+public class DragAndDropPolicyTest extends ShellTestCase {
 
     @Mock
     private Context mContext;
@@ -111,7 +114,6 @@ public class DragAndDropPolicyTest {
     private ActivityManager.RunningTaskInfo mHomeTask;
     private ActivityManager.RunningTaskInfo mFullscreenAppTask;
     private ActivityManager.RunningTaskInfo mNonResizeableFullscreenAppTask;
-    private ActivityManager.RunningTaskInfo mSplitPrimaryAppTask;
 
     @Before
     public void setUp() throws RemoteException {
@@ -144,8 +146,6 @@ public class DragAndDropPolicyTest {
         mNonResizeableFullscreenAppTask =
                 createTaskInfo(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         mNonResizeableFullscreenAppTask.isResizeable = false;
-        mSplitPrimaryAppTask = createTaskInfo(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY,
-                ACTIVITY_TYPE_STANDARD);
 
         setRunningTask(mFullscreenAppTask);
     }
@@ -181,6 +181,14 @@ public class DragAndDropPolicyTest {
         info.configuration.windowConfiguration.setActivityType(actType);
         info.configuration.windowConfiguration.setWindowingMode(winMode);
         info.isResizeable = true;
+        info.baseActivity = new ComponentName(getInstrumentation().getContext(),
+                ".ActivityWithMode" + winMode);
+        info.baseIntent = new Intent();
+        info.baseIntent.setComponent(info.baseActivity);
+        ActivityInfo activityInfo = new ActivityInfo();
+        activityInfo.packageName = info.baseActivity.getPackageName();
+        activityInfo.name = info.baseActivity.getClassName();
+        info.topActivityInfo = activityInfo;
         return info;
     }
 

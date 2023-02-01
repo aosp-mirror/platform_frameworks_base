@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
@@ -40,10 +41,10 @@ import android.view.WindowInsets;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
-import androidx.annotation.BinderThread;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.view.IInputMethodManager;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
@@ -74,18 +75,24 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     private final ArrayList<ImePositionProcessor> mPositionProcessors = new ArrayList<>();
 
 
-    public DisplayImeController(IWindowManager wmService, DisplayController displayController,
+    public DisplayImeController(IWindowManager wmService,
+            ShellInit shellInit,
+            DisplayController displayController,
             DisplayInsetsController displayInsetsController,
-            Executor mainExecutor, TransactionPool transactionPool) {
+            TransactionPool transactionPool,
+            Executor mainExecutor) {
         mWmService = wmService;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
         mMainExecutor = mainExecutor;
         mTransactionPool = transactionPool;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
-    /** Starts monitor displays changes and set insets controller for each displays. */
-    public void startMonitorDisplays() {
+    /**
+     * Starts monitor displays changes and set insets controller for each displays.
+     */
+    public void onInit() {
         mDisplayController.addDisplayWindowListener(this);
     }
 
@@ -325,7 +332,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
 
         @Override
-        public void topFocusedWindowChanged(String packageName) {
+        public void topFocusedWindowChanged(ComponentName component,
+                InsetsVisibilities requestedVisibilities) {
             // Do nothing
         }
 
@@ -497,6 +505,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 mImeShowing = isShowing;
                 dispatchVisibilityChanged(mDisplayId, isShowing);
             }
+        }
+
+        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+        public InsetsSourceControl getImeSourceControl() {
+            return mImeSourceControl;
         }
     }
 

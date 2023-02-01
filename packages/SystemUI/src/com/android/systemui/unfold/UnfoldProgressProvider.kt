@@ -21,29 +21,23 @@ import com.android.wm.shell.unfold.ShellUnfoldProgressProvider
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider.UnfoldListener
 import java.util.concurrent.Executor
 
-class UnfoldProgressProvider(
-    private val unfoldProgressProvider: UnfoldTransitionProgressProvider
-) : ShellUnfoldProgressProvider {
+class UnfoldProgressProvider(private val unfoldProgressProvider: UnfoldTransitionProgressProvider) :
+    ShellUnfoldProgressProvider {
 
     override fun addListener(executor: Executor, listener: UnfoldListener) {
-        unfoldProgressProvider.addCallback(object : TransitionProgressListener {
-            override fun onTransitionStarted() {
-                executor.execute {
-                    listener.onStateChangeStarted()
+        unfoldProgressProvider.addCallback(
+            object : TransitionProgressListener {
+                override fun onTransitionStarted() {
+                    executor.execute { listener.onStateChangeStarted() }
                 }
-            }
 
-            override fun onTransitionProgress(progress: Float) {
-                executor.execute {
-                    listener.onStateChangeProgress(progress)
+                override fun onTransitionProgress(progress: Float) {
+                    executor.execute { listener.onStateChangeProgress(progress) }
                 }
-            }
 
-            override fun onTransitionFinished() {
-                executor.execute {
-                    listener.onStateChangeFinished()
+                override fun onTransitionFinished() {
+                    executor.execute { listener.onStateChangeFinished() }
                 }
-            }
-        })
+            })
     }
 }

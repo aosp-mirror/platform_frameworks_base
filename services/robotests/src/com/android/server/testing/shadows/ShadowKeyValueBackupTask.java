@@ -19,11 +19,12 @@ package com.android.server.testing.shadows;
 import android.annotation.Nullable;
 
 import com.android.server.backup.DataChangedJournal;
+import com.android.server.backup.OperationStorage;
 import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.keyvalue.KeyValueBackupReporter;
 import com.android.server.backup.keyvalue.KeyValueBackupTask;
-import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportConnection;
 import com.android.server.backup.utils.BackupEligibilityRules;
 
 import org.robolectric.annotation.Implementation;
@@ -56,7 +57,8 @@ public class ShadowKeyValueBackupTask {
     @Implementation
     protected void __constructor__(
             UserBackupManagerService backupManagerService,
-            TransportClient transportClient,
+            OperationStorage operationStorage,
+            TransportConnection transportConnection,
             String transportDirName,
             List<String> queue,
             @Nullable DataChangedJournal dataChangedJournal,

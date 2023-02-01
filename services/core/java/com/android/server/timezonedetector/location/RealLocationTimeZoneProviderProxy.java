@@ -18,19 +18,15 @@ package com.android.server.timezonedetector.location;
 
 import static android.Manifest.permission.BIND_TIME_ZONE_PROVIDER_SERVICE;
 import static android.Manifest.permission.INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE;
-import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_ERROR_KEY;
-import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteCallback;
 import android.service.timezone.ITimeZoneProvider;
 import android.service.timezone.ITimeZoneProviderManager;
-import android.service.timezone.TimeZoneProviderSuggestion;
+import android.service.timezone.TimeZoneProviderEvent;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
@@ -62,19 +58,27 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy im
     RealLocationTimeZoneProviderProxy(
             @NonNull Context context, @NonNull Handler handler,
             @NonNull ThreadingDomain threadingDomain, @NonNull String action,
-            @NonNull String providerPackageName) {
+            @NonNull String providerPackageName, boolean isTestProvider) {
         super(context, threadingDomain);
         mManagerProxy = null;
         mRequest = TimeZoneProviderRequest.createStopUpdatesRequest();
 
         Objects.requireNonNull(providerPackageName);
-        mServiceWatcher = ServiceWatcher.create(context,
-                handler,
-                "RealLocationTimeZoneProviderProxy",
-                new CurrentUserServiceSupplier(context, action,
-                        providerPackageName, BIND_TIME_ZONE_PROVIDER_SERVICE,
-                        INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE),
-                this);
+
+        CurrentUserServiceSupplier serviceSupplier;
+        if (isTestProvider) {
+            // For tests it is possible to bypass the provider service permission checks, since
+            // the tests are expected to install fake providers.
+            serviceSupplier = CurrentUserServiceSupplier.createUnsafeForTestsOnly(
+                    context, action, providerPackageName, BIND_TIME_ZONE_PROVIDER_SERVICE,
+                    /*servicePermission=*/null);
+        } else {
+            serviceSupplier = CurrentUserServiceSupplier.create(context, action,
+                    providerPackageName, BIND_TIME_ZONE_PROVIDER_SERVICE,
+                    INSTALL_LOCATION_TIME_ZONE_PROVIDER_SERVICE);
+        }
+        mServiceWatcher = ServiceWatcher.create(
+                context, handler, "RealLocationTimeZoneProviderProxy", serviceSupplier, this);
     }
 
     @Override
@@ -148,26 +152,13 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy im
         mServiceWatcher.runOnBinder(binder -> {
             ITimeZoneProvider service = ITimeZoneProvider.Stub.asInterface(binder);
             if (request.sendUpdates()) {
-                service.startUpdates(managerProxy, request.getInitializationTimeout().toMillis());
+                service.startUpdates(managerProxy,
+                        request.getInitializationTimeout().toMillis(),
+                        request.getEventFilteringAgeThreshold().toMillis());
             } else {
                 service.stopUpdates();
             }
         });
-    }
-
-    /**
-     * A stubbed implementation.
-     */
-    @Override
-    void handleTestCommand(@NonNull TestCommand testCommand, @Nullable RemoteCallback callback) {
-        mThreadingDomain.assertCurrentThread();
-
-        if (callback != null) {
-            Bundle result = new Bundle();
-            result.putBoolean(TEST_COMMAND_RESULT_SUCCESS_KEY, false);
-            result.putString(TEST_COMMAND_RESULT_ERROR_KEY, "Not implemented");
-            callback.sendResult(result);
-        }
     }
 
     @Override
@@ -188,25 +179,7 @@ class RealLocationTimeZoneProviderProxy extends LocationTimeZoneProviderProxy im
 
         // executed on binder thread
         @Override
-        public void onTimeZoneProviderSuggestion(TimeZoneProviderSuggestion suggestion) {
-            onTimeZoneProviderEvent(TimeZoneProviderEvent.createSuggestionEvent(suggestion));
-        }
-
-        // executed on binder thread
-        @Override
-        public void onTimeZoneProviderUncertain() {
-            onTimeZoneProviderEvent(TimeZoneProviderEvent.createUncertainEvent());
-
-        }
-
-        // executed on binder thread
-        @Override
-        public void onTimeZoneProviderPermanentFailure(String failureReason) {
-            onTimeZoneProviderEvent(
-                    TimeZoneProviderEvent.createPermanentFailureEvent(failureReason));
-        }
-
-        private void onTimeZoneProviderEvent(TimeZoneProviderEvent event) {
+        public void onTimeZoneProviderEvent(TimeZoneProviderEvent event) {
             synchronized (mSharedLock) {
                 if (mManagerProxy != this) {
                     // Ignore incoming calls if this instance is no longer the current

@@ -41,7 +41,7 @@ Files under [`systemui/media/`](/packages/SystemUI/src/com/android/systemui/medi
       * SeekBarViewModel.kt
          * Implements its own `computePosition()` for the seekbar (to avoid continually polling the `PlaybackState`, which involves binder calls)
          * Does some touch falsing (ignore flings, require drags to start near the thumb - otherwise users would often accidentally trigger the seekbar when they meant to move the carousel or shade)
-      * PlayerViewHolder.kt
+      * MediaViewHolder.kt
          * Holds references to the UI elements in the panel
 * Animation support:
    * MediaHierarchyManager.kt

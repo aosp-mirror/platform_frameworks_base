@@ -33,6 +33,7 @@ import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import android.widget.FrameLayout
 import com.android.internal.jank.InteractionJankMonitor
+import java.util.LinkedList
 import kotlin.math.min
 
 private const val TAG = "GhostedViewLaunchAnimatorController"
@@ -48,13 +49,16 @@ private const val TAG = "GhostedViewLaunchAnimatorController"
  * Note: Avoid instantiating this directly and call [ActivityLaunchAnimator.Controller.fromView]
  * whenever possible instead.
  */
-open class GhostedViewLaunchAnimatorController(
+open class GhostedViewLaunchAnimatorController @JvmOverloads constructor(
     /** The view that will be ghosted and from which the background will be extracted. */
     private val ghostedView: View,
 
     /** The [InteractionJankMonitor.CujType] associated to this animation. */
-    private val cujType: Int? = null
+    private val cujType: Int? = null,
+    private var interactionJankMonitor: InteractionJankMonitor =
+        InteractionJankMonitor.getInstance(),
 ) : ActivityLaunchAnimator.Controller {
+
     /** The container to which we will add the ghost view and expanding background. */
     override var launchContainer = ghostedView.rootView as ViewGroup
     private val launchContainerOverlay: ViewGroupOverlay
@@ -77,21 +81,49 @@ open class GhostedViewLaunchAnimatorController(
      * [backgroundView].
      */
     private var backgroundDrawable: WrappedDrawable? = null
-    private val backgroundInsets by lazy { getBackground()?.opticalInsets ?: Insets.NONE }
+    private val backgroundInsets by lazy { background?.opticalInsets ?: Insets.NONE }
     private var startBackgroundAlpha: Int = 0xFF
 
     private val ghostedViewLocation = IntArray(2)
     private val ghostedViewState = LaunchAnimator.State()
 
     /**
-     * Return the background of the [ghostedView]. This background will be used to draw the
-     * background of the background view that is expanding up to the final animation position. This
-     * is called at the start of the animation.
+     * The background of the [ghostedView]. This background will be used to draw the background of
+     * the background view that is expanding up to the final animation position.
      *
      * Note that during the animation, the alpha value value of this background will be set to 0,
      * then set back to its initial value at the end of the animation.
      */
-    protected open fun getBackground(): Drawable? = ghostedView.background
+    private val background: Drawable?
+
+    init {
+        /** Find the first view with a background in [view] and its children. */
+        fun findBackground(view: View): Drawable? {
+            if (view.background != null) {
+                return view.background
+            }
+
+            // Perform a BFS to find the largest View with background.
+            val views = LinkedList<View>().apply { add(view) }
+
+            while (views.isNotEmpty()) {
+                val v = views.removeFirst()
+                if (v.background != null) {
+                    return v.background
+                }
+
+                if (v is ViewGroup) {
+                    for (i in 0 until v.childCount) {
+                        views.add(v.getChildAt(i))
+                    }
+                }
+            }
+
+            return null
+        }
+
+        background = findBackground(ghostedView)
+    }
 
     /**
      * Set the corner radius of [background]. The background is the one that was returned by
@@ -109,7 +141,7 @@ open class GhostedViewLaunchAnimatorController(
 
     /** Return the current top corner radius of the background. */
     protected open fun getCurrentTopCornerRadius(): Float {
-        val drawable = getBackground() ?: return 0f
+        val drawable = background ?: return 0f
         val gradient = findGradientDrawable(drawable) ?: return 0f
 
         // TODO(b/184121838): Support more than symmetric top & bottom radius.
@@ -118,7 +150,7 @@ open class GhostedViewLaunchAnimatorController(
 
     /** Return the current bottom corner radius of the background. */
     protected open fun getCurrentBottomCornerRadius(): Float {
-        val drawable = getBackground() ?: return 0f
+        val drawable = background ?: return 0f
         val gradient = findGradientDrawable(drawable) ?: return 0f
 
         // TODO(b/184121838): Support more than symmetric top & bottom radius.
@@ -126,10 +158,11 @@ open class GhostedViewLaunchAnimatorController(
     }
 
     override fun createAnimatorState(): LaunchAnimator.State {
-        val state = LaunchAnimator.State(
-            topCornerRadius = getCurrentTopCornerRadius(),
-            bottomCornerRadius = getCurrentBottomCornerRadius()
-        )
+        val state =
+            LaunchAnimator.State(
+                topCornerRadius = getCurrentTopCornerRadius(),
+                bottomCornerRadius = getCurrentBottomCornerRadius()
+            )
         fillGhostedViewState(state)
         return state
     }
@@ -158,9 +191,8 @@ open class GhostedViewLaunchAnimatorController(
 
         // We wrap the ghosted view background and use it to draw the expandable background. Its
         // alpha will be set to 0 as soon as we start drawing the expanding background.
-        val drawable = getBackground()
-        startBackgroundAlpha = drawable?.alpha ?: 0xFF
-        backgroundDrawable = WrappedDrawable(drawable)
+        startBackgroundAlpha = background?.alpha ?: 0xFF
+        backgroundDrawable = WrappedDrawable(background)
         backgroundView?.background = backgroundDrawable
 
         // Create a ghost of the view that will be moving and fading out. This allows to fade out
@@ -170,7 +202,7 @@ open class GhostedViewLaunchAnimatorController(
         val matrix = ghostView?.animationMatrix ?: Matrix.IDENTITY_MATRIX
         matrix.getValues(initialGhostViewMatrixValues)
 
-        cujType?.let { InteractionJankMonitor.getInstance().begin(ghostedView, it) }
+        cujType?.let { interactionJankMonitor.begin(ghostedView, it) }
     }
 
     override fun onLaunchAnimationProgress(
@@ -221,13 +253,14 @@ open class GhostedViewLaunchAnimatorController(
 
         launchContainer.getLocationOnScreen(launchContainerLocation)
         ghostViewMatrix.postScale(
-            scale, scale,
+            scale,
+            scale,
             ghostedViewState.centerX - launchContainerLocation[0],
             ghostedViewState.centerY - launchContainerLocation[1]
         )
         ghostViewMatrix.postTranslate(
-                (leftChange + rightChange) / 2f,
-                (topChange + bottomChange) / 2f
+            (leftChange + rightChange) / 2f,
+            (topChange + bottomChange) / 2f
         )
         ghostView.animationMatrix = ghostViewMatrix
 
@@ -255,7 +288,7 @@ open class GhostedViewLaunchAnimatorController(
             return
         }
 
-        cujType?.let { InteractionJankMonitor.getInstance().end(it) }
+        cujType?.let { interactionJankMonitor.end(it) }
 
         backgroundDrawable?.wrapped?.alpha = startBackgroundAlpha
 

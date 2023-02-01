@@ -351,6 +351,54 @@ TEST_F(ManifestFixerTest,
   EXPECT_THAT(attr->value, StrEq("com.android"));
 }
 
+TEST_F(ManifestFixerTest, AddOverlayCategory) {
+  ManifestFixerOptions options;
+  options.rename_overlay_category = std::string("category");
+
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android">
+        <overlay android:targetName="Customization" android:targetPackage="android" />
+      </manifest>)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
+
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
+
+  xml::Element* overlay_el = manifest_el->FindChild({}, "overlay");
+  ASSERT_THAT(overlay_el, NotNull());
+
+  xml::Attribute* attr = overlay_el->FindAttribute(xml::kSchemaAndroid, "category");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("category"));
+}
+
+TEST_F(ManifestFixerTest, OverrideOverlayCategory) {
+  ManifestFixerOptions options;
+  options.rename_overlay_category = std::string("category");
+
+  std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+                package="android">
+        <overlay android:targetName="Customization"
+                 android:targetPackage="android"
+                 android:category="yrogetac"/>
+      </manifest>)EOF",
+                                                            options);
+  ASSERT_THAT(doc, NotNull());
+
+  xml::Element* manifest_el = doc->root.get();
+  ASSERT_THAT(manifest_el, NotNull());
+
+  xml::Element* overlay_el = manifest_el->FindChild({}, "overlay");
+  ASSERT_THAT(overlay_el, NotNull());
+
+  xml::Attribute* attr = overlay_el->FindAttribute(xml::kSchemaAndroid, "category");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, StrEq("category"));
+}
+
 TEST_F(ManifestFixerTest, UseDefaultVersionNameAndCode) {
   ManifestFixerOptions options;
   options.version_name_default = std::string("Beta");

@@ -25,12 +25,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
 import android.util.Log
-import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
@@ -51,6 +49,7 @@ import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.controls.management.ControlAdapter
 import com.android.systemui.controls.management.ControlsEditingActivity
 import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
@@ -60,7 +59,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.phone.ShadeController
+import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
@@ -72,18 +71,18 @@ private data class ControlKey(val componentName: ComponentName, val controlId: S
 
 @SysUISingleton
 class ControlsUiControllerImpl @Inject constructor (
-    val controlsController: Lazy<ControlsController>,
-    val context: Context,
-    @Main val uiExecutor: DelayableExecutor,
-    @Background val bgExecutor: DelayableExecutor,
-    val controlsListingController: Lazy<ControlsListingController>,
-    @Main val sharedPreferences: SharedPreferences,
-    val controlActionCoordinator: ControlActionCoordinator,
-    private val activityStarter: ActivityStarter,
-    private val shadeController: ShadeController,
-    private val iconCache: CustomIconCache,
-    private val controlsMetricsLogger: ControlsMetricsLogger,
-    private val keyguardStateController: KeyguardStateController
+        val controlsController: Lazy<ControlsController>,
+        val context: Context,
+        @Main val uiExecutor: DelayableExecutor,
+        @Background val bgExecutor: DelayableExecutor,
+        val controlsListingController: Lazy<ControlsListingController>,
+        @Main val sharedPreferences: SharedPreferences,
+        val controlActionCoordinator: ControlActionCoordinator,
+        private val activityStarter: ActivityStarter,
+        private val shadeController: ShadeController,
+        private val iconCache: CustomIconCache,
+        private val controlsMetricsLogger: ControlsMetricsLogger,
+        private val keyguardStateController: KeyguardStateController
 ) : ControlsUiController {
 
     companion object {
@@ -147,6 +146,19 @@ class ControlsUiControllerImpl @Inject constructor (
                     }
                 }
             }
+        }
+    }
+
+    override fun resolveActivity(): Class<*> {
+        val allStructures = controlsController.get().getFavorites()
+        val selectedStructure = getPreferredStructure(allStructures)
+
+        return if (controlsController.get().addSeedingFavoritesCallback(onSeedingComplete)) {
+            ControlsActivity::class.java
+        } else if (selectedStructure.controls.isEmpty() && allStructures.size <= 1) {
+            ControlsProviderSelectorActivity::class.java
+        } else {
+            ControlsActivity::class.java
         }
     }
 
@@ -386,7 +398,7 @@ class ControlsUiControllerImpl @Inject constructor (
             visibility = View.VISIBLE
         }
 
-        val maxColumns = findMaxColumns()
+        val maxColumns = ControlAdapter.findMaxColumns(activityContext.resources)
 
         val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
         var lastRow: ViewGroup = createRow(inflater, listView)
@@ -430,32 +442,6 @@ class ControlsUiControllerImpl @Inject constructor (
             lastRow.addView(Space(context), lp)
             spacersToAdd--
         }
-    }
-
-    /**
-     * For low-dp width screens that also employ an increased font scale, adjust the
-     * number of columns. This helps prevent text truncation on these devices.
-     */
-    private fun findMaxColumns(): Int {
-        val res = context.resources
-        var maxColumns = res.getInteger(R.integer.controls_max_columns)
-        val maxColumnsAdjustWidth =
-            res.getInteger(R.integer.controls_max_columns_adjust_below_width_dp)
-
-        val outValue = TypedValue()
-        res.getValue(R.dimen.controls_max_columns_adjust_above_font_scale, outValue, true)
-        val maxColumnsAdjustFontScale = outValue.getFloat()
-
-        val config = res.configuration
-        val isPortrait = config.orientation == Configuration.ORIENTATION_PORTRAIT
-        if (isPortrait &&
-            config.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED &&
-            config.screenWidthDp <= maxColumnsAdjustWidth &&
-            config.fontScale >= maxColumnsAdjustFontScale) {
-            maxColumns--
-        }
-
-        return maxColumns
     }
 
     override fun getPreferredStructure(structures: List<StructureInfo>): StructureInfo {

@@ -158,11 +158,10 @@ public class ExpensiveObjectsPerfTest {
     }
 
     @Test
-    public void timeClonedSimpleDateFormat() {
-        SimpleDateFormat sdf = new SimpleDateFormat();
+    public void timeNewSimpleDateFormat() {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            sdf.clone();
+            new SimpleDateFormat();
         }
     }
 

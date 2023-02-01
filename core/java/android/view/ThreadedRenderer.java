@@ -21,14 +21,15 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.BLASTBufferQueue;
 import android.graphics.FrameInfo;
 import android.graphics.HardwareRenderer;
 import android.graphics.Picture;
-import android.graphics.Point;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.os.Trace;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
@@ -183,6 +184,7 @@ public final class ThreadedRenderer extends HardwareRenderer {
      */
     public static final String DEBUG_FORCE_DARK = "debug.hwui.force_dark";
 
+    public static int EGL_CONTEXT_PRIORITY_REALTIME_NV = 0x3357;
     public static int EGL_CONTEXT_PRIORITY_HIGH_IMG = 0x3101;
     public static int EGL_CONTEXT_PRIORITY_MEDIUM_IMG = 0x3102;
     public static int EGL_CONTEXT_PRIORITY_LOW_IMG = 0x3103;
@@ -256,6 +258,76 @@ public final class ThreadedRenderer extends HardwareRenderer {
 
     private boolean mEnabled;
     private boolean mRequested = true;
+
+    /**
+     * This child class exists to break ownership cycles. ViewRootImpl owns a ThreadedRenderer
+     * which owns a WebViewOverlayProvider. WebViewOverlayProvider will in turn be set as
+     * the listener for HardwareRenderer callbacks. By keeping this a child class, there are
+     * no cycles in the chain. The ThreadedRenderer will remain GC-able if any callbacks are
+     * still outstanding, which will in turn release any JNI references to WebViewOverlayProvider.
+     */
+    private static final class WebViewOverlayProvider implements
+            PrepareSurfaceControlForWebviewCallback, ASurfaceTransactionCallback {
+        private static final boolean sOverlaysAreEnabled =
+                HardwareRenderer.isWebViewOverlaysEnabled();
+        private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+        private boolean mHasWebViewOverlays = false;
+        private BLASTBufferQueue mBLASTBufferQueue;
+        private SurfaceControl mSurfaceControl;
+
+        public boolean setSurfaceControlOpaque(boolean opaque) {
+            synchronized (this) {
+                if (mHasWebViewOverlays) return false;
+                mTransaction.setOpaque(mSurfaceControl, opaque).apply();
+            }
+            return opaque;
+        }
+
+        public boolean shouldEnableOverlaySupport() {
+            return sOverlaysAreEnabled && mSurfaceControl != null && mBLASTBufferQueue != null;
+        }
+
+        public void setSurfaceControl(SurfaceControl surfaceControl) {
+            synchronized (this) {
+                mSurfaceControl = surfaceControl;
+                if (mSurfaceControl != null && mHasWebViewOverlays) {
+                    mTransaction.setOpaque(surfaceControl, false).apply();
+                }
+            }
+        }
+
+        public void setBLASTBufferQueue(BLASTBufferQueue bufferQueue) {
+            synchronized (this) {
+                mBLASTBufferQueue = bufferQueue;
+            }
+        }
+
+        @Override
+        public void prepare() {
+            synchronized (this) {
+                mHasWebViewOverlays = true;
+                if (mSurfaceControl != null) {
+                    mTransaction.setOpaque(mSurfaceControl, false).apply();
+                }
+            }
+        }
+
+        @Override
+        public boolean onMergeTransaction(long nativeTransactionObj,
+                long aSurfaceControlNativeObj, long frameNr) {
+            synchronized (this) {
+                if (mBLASTBufferQueue == null) {
+                    return false;
+                } else {
+                    mBLASTBufferQueue.mergeWithNextTransaction(nativeTransactionObj, frameNr);
+                    return true;
+                }
+            }
+        }
+    }
+
+    private final WebViewOverlayProvider mWebViewOverlayProvider = new WebViewOverlayProvider();
+    private boolean mWebViewOverlaysEnabled = false;
 
     @Nullable
     private ArrayList<FrameDrawingCallback> mNextRtFrameCallbacks;
@@ -407,6 +479,19 @@ public final class ThreadedRenderer extends HardwareRenderer {
     }
 
     /**
+     * Remove a frame drawing callback that was added via
+     * {@link #registerRtFrameCallback(FrameDrawingCallback)}
+     *
+     * @param callback The callback to unregister.
+     */
+    void unregisterRtFrameCallback(@NonNull FrameDrawingCallback callback) {
+        if (mNextRtFrameCallbacks == null) {
+            return;
+        }
+        mNextRtFrameCallbacks.remove(callback);
+    }
+
+    /**
      * Destroys all hardware rendering resources associated with the specified
      * view hierarchy.
      *
@@ -455,17 +540,74 @@ public final class ThreadedRenderer extends HardwareRenderer {
     }
 
     /**
+     * Whether or not the renderer owns the SurfaceControl's opacity. If true, use
+     * {@link #setSurfaceControlOpaque(boolean)} to update the opacity
+     */
+    public boolean rendererOwnsSurfaceControlOpacity() {
+        return mWebViewOverlayProvider.mSurfaceControl != null;
+    }
+
+    /**
+     * Sets the SurfaceControl's opacity that this HardwareRenderer is rendering onto. The renderer
+     * may opt to override the opacity, and will return the value that is ultimately set
+     *
+     * @return true if the surface is opaque, false otherwise
+     *
+     * @hide
+     */
+    public boolean setSurfaceControlOpaque(boolean opaque) {
+        return mWebViewOverlayProvider.setSurfaceControlOpaque(opaque);
+    }
+
+    private void updateWebViewOverlayCallbacks() {
+        boolean shouldEnable = mWebViewOverlayProvider.shouldEnableOverlaySupport();
+        if (shouldEnable != mWebViewOverlaysEnabled) {
+            mWebViewOverlaysEnabled = shouldEnable;
+            if (shouldEnable) {
+                setASurfaceTransactionCallback(mWebViewOverlayProvider);
+                setPrepareSurfaceControlForWebviewCallback(mWebViewOverlayProvider);
+            } else {
+                setASurfaceTransactionCallback(null);
+                setPrepareSurfaceControlForWebviewCallback(null);
+            }
+        }
+    }
+
+    @Override
+    public void setSurfaceControl(@Nullable SurfaceControl surfaceControl) {
+        super.setSurfaceControl(surfaceControl);
+        mWebViewOverlayProvider.setSurfaceControl(surfaceControl);
+        updateWebViewOverlayCallbacks();
+    }
+
+    /**
+     * Sets the BLASTBufferQueue being used for rendering. This is required to be specified
+     * for WebView overlay support
+     */
+    public void setBlastBufferQueue(@Nullable BLASTBufferQueue blastBufferQueue) {
+        mWebViewOverlayProvider.setBLASTBufferQueue(blastBufferQueue);
+        updateWebViewOverlayCallbacks();
+    }
+
+    /**
      * Updates the light position based on the position of the window.
      *
      * @param attachInfo Information about the window.
      */
     void setLightCenter(AttachInfo attachInfo) {
         // Adjust light position for window offsets.
-        final Point displaySize = attachInfo.mPoint;
-        attachInfo.mDisplay.getRealSize(displaySize);
-        final float lightX = displaySize.x / 2f - attachInfo.mWindowLeft;
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        attachInfo.mDisplay.getRealMetrics(displayMetrics);
+        final float lightX = displayMetrics.widthPixels / 2f - attachInfo.mWindowLeft;
         final float lightY = mLightY - attachInfo.mWindowTop;
-        setLightSourceGeometry(lightX, lightY, mLightZ, mLightRadius);
+        // To prevent shadow distortion on larger screens, scale the z position of the light source
+        // relative to the smallest screen dimension.
+        final float zRatio = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels)
+                / (450f * displayMetrics.density);
+        final float zWeightedAdjustment = (zRatio + 2) / 3f;
+        final float lightZ = mLightZ * zWeightedAdjustment;
+
+        setLightSourceGeometry(lightX, lightY, lightZ, mLightRadius);
     }
 
     /**
@@ -488,15 +630,14 @@ public final class ThreadedRenderer extends HardwareRenderer {
         return mHeight;
     }
 
-    /**
-     * Outputs extra debugging information in the specified file descriptor.
-     */
-    void dumpGfxInfo(PrintWriter pw, FileDescriptor fd, String[] args) {
-        pw.flush();
+    private static int dumpArgsToFlags(String[] args) {
         // If there's no arguments, eg 'dumpsys gfxinfo', then dump everything.
         // If there's a targetted package, eg 'dumpsys gfxinfo com.android.systemui', then only
         // dump the summary information
-        int flags = (args == null || args.length == 0) ? FLAG_DUMP_ALL : 0;
+        if (args == null || args.length == 0) {
+            return FLAG_DUMP_ALL;
+        }
+        int flags = 0;
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "framestats":
@@ -510,7 +651,21 @@ public final class ThreadedRenderer extends HardwareRenderer {
                     break;
             }
         }
-        dumpProfileInfo(fd, flags);
+        return flags;
+    }
+
+    /** @hide */
+    public static void handleDumpGfxInfo(FileDescriptor fd, String[] args) {
+        dumpGlobalProfileInfo(fd, dumpArgsToFlags(args));
+        WindowManagerGlobal.getInstance().dumpGfxInfo(fd, args);
+    }
+
+    /**
+     * Outputs extra debugging information in the specified file descriptor.
+     */
+    void dumpGfxInfo(PrintWriter pw, FileDescriptor fd, String[] args) {
+        pw.flush();
+        dumpProfileInfo(fd, dumpArgsToFlags(args));
     }
 
     Picture captureRenderingCommands() {
@@ -545,9 +700,31 @@ public final class ThreadedRenderer extends HardwareRenderer {
         if (mNextRtFrameCallbacks != null) {
             final ArrayList<FrameDrawingCallback> frameCallbacks = mNextRtFrameCallbacks;
             mNextRtFrameCallbacks = null;
-            setFrameCallback(frame -> {
-                for (int i = 0; i < frameCallbacks.size(); ++i) {
-                    frameCallbacks.get(i).onFrameDraw(frame);
+            setFrameCallback(new FrameDrawingCallback() {
+                @Override
+                public void onFrameDraw(long frame) {
+                }
+
+                @Override
+                public FrameCommitCallback onFrameDraw(int syncResult, long frame) {
+                    ArrayList<FrameCommitCallback> frameCommitCallbacks = new ArrayList<>();
+                    for (int i = 0; i < frameCallbacks.size(); ++i) {
+                        FrameCommitCallback frameCommitCallback = frameCallbacks.get(i)
+                                .onFrameDraw(syncResult, frame);
+                        if (frameCommitCallback != null) {
+                            frameCommitCallbacks.add(frameCommitCallback);
+                        }
+                    }
+
+                    if (frameCommitCallbacks.isEmpty()) {
+                        return null;
+                    }
+
+                    return didProduceBuffer -> {
+                        for (int i = 0; i < frameCommitCallbacks.size(); ++i) {
+                            frameCommitCallbacks.get(i).onFrameCommit(didProduceBuffer);
+                        }
+                    };
                 }
             });
         }
@@ -679,12 +856,18 @@ public final class ThreadedRenderer extends HardwareRenderer {
         public void setLightCenter(final Display display,
                 final int windowLeft, final int windowTop) {
             // Adjust light position for window offsets.
-            final Point displaySize = new Point();
-            display.getRealSize(displaySize);
-            final float lightX = displaySize.x / 2f - windowLeft;
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            display.getRealMetrics(displayMetrics);
+            final float lightX = displayMetrics.widthPixels / 2f - windowLeft;
             final float lightY = mLightY - windowTop;
+            // To prevent shadow distortion on larger screens, scale the z position of the light
+            // source relative to the smallest screen dimension.
+            final float zRatio = Math.min(displayMetrics.widthPixels, displayMetrics.heightPixels)
+                    / (450f * displayMetrics.density);
+            final float zWeightedAdjustment = (zRatio + 2) / 3f;
+            final float lightZ = mLightZ * zWeightedAdjustment;
 
-            setLightSourceGeometry(lightX, lightY, mLightZ, mLightRadius);
+            setLightSourceGeometry(lightX, lightY, lightZ, mLightRadius);
         }
 
         public RenderNode getRootNode() {

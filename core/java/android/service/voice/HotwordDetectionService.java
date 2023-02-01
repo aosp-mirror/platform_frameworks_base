@@ -74,7 +74,7 @@ public abstract class HotwordDetectionService extends Service {
     private static final String TAG = "HotwordDetectionService";
     private static final boolean DBG = false;
 
-    private static final long UPDATE_TIMEOUT_MILLIS = 5000;
+    private static final long UPDATE_TIMEOUT_MILLIS = 20000;
 
     /** @hide */
     public static final String KEY_INITIALIZATION_STATUS = "initialization_status";
@@ -85,6 +85,14 @@ public abstract class HotwordDetectionService extends Service {
      * @hide
      */
     public static final int MAXIMUM_NUMBER_OF_INITIALIZATION_STATUS_CUSTOM_ERROR = 2;
+
+    /**
+     * Feature flag for Attention Service.
+     *
+     * TODO(b/247920386): Add TestApi annotation
+     * @hide
+     */
+    public static final boolean ENABLE_PROXIMITY_RESULT = false;
 
     /**
      * Indicates that the updated status is successful.
@@ -140,9 +148,7 @@ public abstract class HotwordDetectionService extends Service {
                 Log.d(TAG, "#detectFromDspSource");
             }
             HotwordDetectionService.this.onDetect(
-                    new AlwaysOnHotwordDetector.EventPayload(
-                            event.triggerInData, event.captureAvailable,
-                            event.captureFormat, event.captureSession, event.data),
+                    new AlwaysOnHotwordDetector.EventPayload.Builder(event).build(),
                     timeoutMillis,
                     new Callback(callback));
         }

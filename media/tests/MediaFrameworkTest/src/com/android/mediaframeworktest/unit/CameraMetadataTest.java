@@ -264,8 +264,14 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 builder.append("**");
             }
 
-            if (elem instanceof Number) {
-                builder.append(String.format("%x", elem));
+            if (elem instanceof Byte) {
+                builder.append(String.format("%x", (Byte) elem));
+            } else if (elem instanceof Short) {
+                builder.append(String.format("%x", (Short) elem));
+            } else if (elem instanceof Integer) {
+                builder.append(String.format("%x", (Integer) elem));
+            } else if (elem instanceof Long) {
+                builder.append(String.format("%x", (Long) elem));
             } else {
                 builder.append(elem);
             }
@@ -927,7 +933,7 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         };
         assertArrayEquals(expectedRaw16Outputs, map.getOutputs(ImageFormat.RAW_SENSOR));
 
-        // Finally, do a round-trip check as a sanity
+        // Finally, do a round-trip check for consistency
         checkKeyMarshal(
                 "android.scaler.availableInputOutputFormatsMap",
                 new ReprocessFormatsMap(contents),

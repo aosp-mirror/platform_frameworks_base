@@ -203,9 +203,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
         final LaunchingState launchingState =
                 mTaskSupervisor.getActivityMetricsLogger().notifyActivityLaunching(mTargetIntent);
 
-        if (mCaller != null) {
-            mCaller.setRunningRecentsAnimation(true);
-        }
+        setProcessAnimating(true);
 
         mService.deferWindowLayout();
         try {
@@ -302,10 +300,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
             // Once the target is shown, prevent spurious background app switches
             if (reorderMode == REORDER_MOVE_TO_TOP) {
                 mService.stopAppSwitches();
-            }
-
-            if (mCaller != null) {
-                mCaller.setRunningRecentsAnimation(false);
             }
 
             mWindowManager.inSurfaceTransaction(() -> {
@@ -413,9 +407,30 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                     if (mWindowManager.mRoot.isLayoutNeeded()) {
                         mWindowManager.mRoot.performSurfacePlacement();
                     }
+                    setProcessAnimating(false);
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 }
             });
+        }
+    }
+
+    /** Gives the owner of recents animation higher priority. */
+    private void setProcessAnimating(boolean animating) {
+        if (mCaller == null) return;
+        // Apply the top-app scheduling group to who runs the animation.
+        mCaller.setRunningRecentsAnimation(animating);
+        int demoteReasons = mService.mDemoteTopAppReasons;
+        if (animating) {
+            demoteReasons |= ActivityTaskManagerService.DEMOTE_TOP_REASON_ANIMATING_RECENTS;
+        } else {
+            demoteReasons &= ~ActivityTaskManagerService.DEMOTE_TOP_REASON_ANIMATING_RECENTS;
+        }
+        mService.mDemoteTopAppReasons = demoteReasons;
+        // Make the demotion of the real top app take effect. No need to restore top app state for
+        // finishing recents because addToStopping -> scheduleIdle -> activityIdleInternal ->
+        // trimApplications will have a full update.
+        if (animating && mService.mTopApp != null) {
+            mService.mTopApp.scheduleUpdateOomAdj();
         }
     }
 
@@ -505,7 +520,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
     }
 
     private boolean matchesTarget(Task task) {
-        return task.mUserId == mUserId
+        return task.getNonFinishingActivityCount() > 0 && task.mUserId == mUserId
                 && task.getBaseIntent().getComponent().equals(mTargetIntent.getComponent());
     }
 }

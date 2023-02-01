@@ -458,7 +458,7 @@ public final class Bitmap implements Parcelable {
          * No color information is stored.
          * With this configuration, each pixel requires 1 byte of memory.
          */
-        ALPHA_8     (1),
+        ALPHA_8(1),
 
         /**
          * Each pixel is stored on 2 bytes and only the RGB channels are
@@ -479,7 +479,7 @@ public final class Bitmap implements Parcelable {
          * short color = (R & 0x1f) << 11 | (G & 0x3f) << 5 | (B & 0x1f);
          * </pre>
          */
-        RGB_565     (3),
+        RGB_565(3),
 
         /**
          * Each pixel is stored on 2 bytes. The three RGB color channels
@@ -501,7 +501,7 @@ public final class Bitmap implements Parcelable {
          *             it is advised to use {@link #ARGB_8888} instead.
          */
         @Deprecated
-        ARGB_4444   (4),
+        ARGB_4444(4),
 
         /**
          * Each pixel is stored on 4 bytes. Each channel (RGB and alpha
@@ -516,7 +516,7 @@ public final class Bitmap implements Parcelable {
          * int color = (A & 0xff) << 24 | (B & 0xff) << 16 | (G & 0xff) << 8 | (R & 0xff);
          * </pre>
          */
-        ARGB_8888   (5),
+        ARGB_8888(5),
 
         /**
          * Each pixel is stored on 8 bytes. Each channel (RGB and alpha
@@ -531,7 +531,7 @@ public final class Bitmap implements Parcelable {
          * long color = (A & 0xffff) << 48 | (B & 0xffff) << 32 | (G & 0xffff) << 16 | (R & 0xffff);
          * </pre>
          */
-        RGBA_F16    (6),
+        RGBA_F16(6),
 
         /**
          * Special configuration, when bitmap is stored only in graphic memory.
@@ -540,13 +540,29 @@ public final class Bitmap implements Parcelable {
          * It is optimal for cases, when the only operation with the bitmap is to draw it on a
          * screen.
          */
-        HARDWARE    (7);
+        HARDWARE(7),
+
+        /**
+         * Each pixel is stored on 4 bytes. Each RGB channel is stored with 10 bits of precision
+         * (1024 possible values). There is an additional alpha channel that is stored with 2 bits
+         * of precision (4 possible values).
+         *
+         * This configuration is suited for wide-gamut and HDR content which does not require alpha
+         * blending, such that the memory cost is the same as ARGB_8888 while enabling higher color
+         * precision.
+         *
+         * <p>Use this formula to pack into 32 bits:</p>
+         * <pre class="prettyprint">
+         * int color = (A & 0x3) << 30 | (B & 0x3ff) << 20 | (G & 0x3ff) << 10 | (R & 0x3ff);
+         * </pre>
+         */
+        RGBA_1010102(8);
 
         @UnsupportedAppUsage
         final int nativeInt;
 
         private static Config sConfigs[] = {
-            null, ALPHA_8, null, RGB_565, ARGB_4444, ARGB_8888, RGBA_F16, HARDWARE
+            null, ALPHA_8, null, RGB_565, ARGB_4444, ARGB_8888, RGBA_F16, HARDWARE, RGBA_1010102
         };
 
         Config(int ni) {
@@ -1000,8 +1016,8 @@ public final class Bitmap implements Parcelable {
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
      * @param config   The bitmap config to create.
-     * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
-     *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
+     * @param hasAlpha If the bitmap is ARGB_8888, RGBA_16F, or RGBA_1010102 this flag can be
+     *                 used to mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
      *
      * @throws IllegalArgumentException if the width or height are <= 0, or if
@@ -1019,8 +1035,8 @@ public final class Bitmap implements Parcelable {
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
      * @param config   The bitmap config to create.
-     * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
-     *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
+     * @param hasAlpha If the bitmap is ARGB_8888, RGBA_16F, or RGBA_1010102 this flag can be
+     *                 used to mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
      * @param colorSpace The color space of the bitmap. If the config is {@link Config#RGBA_F16}
      *                   and {@link ColorSpace.Named#SRGB sRGB} or
@@ -1050,8 +1066,8 @@ public final class Bitmap implements Parcelable {
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
      * @param config   The bitmap config to create.
-     * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
-     *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
+     * @param hasAlpha If the bitmap is ARGB_8888, RGBA_16F, or RGBA_1010102 this flag can be
+     *                 used to mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
      *
      * @throws IllegalArgumentException if the width or height are <= 0, or if
@@ -1074,8 +1090,8 @@ public final class Bitmap implements Parcelable {
      * @param width    The width of the bitmap
      * @param height   The height of the bitmap
      * @param config   The bitmap config to create.
-     * @param hasAlpha If the bitmap is ARGB_8888 or RGBA_16F this flag can be used to
-     *                 mark the bitmap as opaque. Doing so will clear the bitmap in black
+     * @param hasAlpha If the bitmap is ARGB_8888, RGBA_16F, or RGBA_1010102 this flag can be
+     *                 used to mark the bitmap as opaque. Doing so will clear the bitmap in black
      *                 instead of transparent.
      * @param colorSpace The color space of the bitmap. If the config is {@link Config#RGBA_F16}
      *                   and {@link ColorSpace.Named#SRGB sRGB} or

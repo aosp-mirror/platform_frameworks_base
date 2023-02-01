@@ -18,7 +18,6 @@ package android.media;
 
 import android.util.Log;
 
-import android.media.MediaCodecInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
@@ -166,7 +165,8 @@ final public class MediaCodecList {
 
     /**
      * Create a list of media-codecs of a specific kind.
-     * @param kind Either {@code REGULAR_CODECS} or {@code ALL_CODECS}.
+     * @param kind Either {@link MediaCodecList#REGULAR_CODECS} or
+     *             {@link MediaCodecList#ALL_CODECS}.
      */
     public MediaCodecList(int kind) {
         initCodecList();
