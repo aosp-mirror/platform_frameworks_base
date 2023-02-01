@@ -2846,7 +2846,9 @@
     </string>
 
     <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
-    <string name="log_access_confirmation_learn_more" translatable="false">&lt;a href="https://support.google.com/android?p=system_logs#topic=7313011"&gt;Learn more&lt;/a&gt;</string>
+    <string name="log_access_confirmation_learn_more_url" translatable="false">https://support.google.com/android?p=system_logs#topic=7313011</string>
+    <string name="log_access_confirmation_learn_more">Learn more</string>
+    <string name="log_access_confirmation_learn_more_at">Learn more at <xliff:g id="url" example="g.co/android/devicelogs">%s</xliff:g></string>
 
     <!--
     Template for an action that opens a specific app. [CHAR LIMIT=16]
