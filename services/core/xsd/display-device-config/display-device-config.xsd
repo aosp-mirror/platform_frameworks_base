@@ -208,11 +208,7 @@
 
     <xs:complexType name="thermalThrottling">
         <xs:sequence>
-            <xs:element type="brightnessThrottlingMap" name="brightnessThrottlingMap">
-                <xs:annotation name="nonnull"/>
-                <xs:annotation name="final"/>
-            </xs:element>
-            <xs:element type="brightnessThrottlingMap" name="concurrentDisplaysBrightnessThrottlingMap">
+            <xs:element type="brightnessThrottlingMap" name="brightnessThrottlingMap" maxOccurs="unbounded">
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
@@ -225,6 +221,7 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
+        <xs:attribute name="id" type="xs:string"/>
     </xs:complexType>
 
     <xs:complexType name="brightnessThrottlingPoint">

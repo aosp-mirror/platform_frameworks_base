@@ -189,7 +189,7 @@ public final class DisplayDeviceConfigTest {
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.shutdown), 0.025f
         ));
         assertEquals(new DisplayDeviceConfig.BrightnessThrottlingData(throttlingLevels),
-                mDisplayDeviceConfig.getBrightnessThrottlingData());
+                mDisplayDeviceConfig.getBrightnessThrottlingData("default"));
 
         throttlingLevels.clear();
         throttlingLevels.add(new DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel(
@@ -211,7 +211,7 @@ public final class DisplayDeviceConfigTest {
                 DisplayDeviceConfig.convertThermalStatus(ThermalStatus.shutdown), 0.0125f
         ));
         assertEquals(new DisplayDeviceConfig.BrightnessThrottlingData(throttlingLevels),
-                mDisplayDeviceConfig.getConcurrentDisplaysBrightnessThrottlingData());
+                mDisplayDeviceConfig.getBrightnessThrottlingData("concurrent"));
 
         assertNotNull(mDisplayDeviceConfig.getHostUsiVersion());
         assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMajorVersion(), 2);
@@ -509,7 +509,7 @@ public final class DisplayDeviceConfigTest {
                 +               "<brightness>0.025</brightness>\n"
                 +           "</brightnessThrottlingPoint>\n"
                 +       "</brightnessThrottlingMap>\n"
-                +       "<concurrentDisplaysBrightnessThrottlingMap>\n"
+                +       "<brightnessThrottlingMap id=\"concurrent\">\n"
                 +           "<brightnessThrottlingPoint>\n"
                 +               "<thermalStatus>light</thermalStatus>\n"
                 +               "<brightness>0.2</brightness>\n"
@@ -534,7 +534,7 @@ public final class DisplayDeviceConfigTest {
                 +               "<thermalStatus>shutdown</thermalStatus>\n"
                 +               "<brightness>0.0125</brightness>\n"
                 +           "</brightnessThrottlingPoint>\n"
-                +       "</concurrentDisplaysBrightnessThrottlingMap>\n"
+                +       "</brightnessThrottlingMap>\n"
                 +   "</thermalThrottling>\n"
                 +   "<refreshRate>\n"
                 +       "<lowerBlockingZoneConfigs>\n"

@@ -122,7 +122,8 @@ class DeviceStateToLayoutMap {
                             DisplayAddress.fromPhysicalDisplayId(d.getAddress().longValue()),
                             d.isDefaultDisplay(),
                             d.isEnabled(),
-                            mIdProducer);
+                            mIdProducer,
+                            d.getBrightnessThrottlingMapId());
 
                     if (FRONT_STRING.equals(d.getPosition())) {
                         display.setPosition(POSITION_FRONT);
