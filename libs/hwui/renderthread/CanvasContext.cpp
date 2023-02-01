@@ -301,7 +301,8 @@ void CanvasContext::setOpaque(bool opaque) {
 
 float CanvasContext::setColorMode(ColorMode mode) {
     if (mode != mColorMode) {
-        if (mode == ColorMode::Hdr && !mRenderPipeline->supportsExtendedRangeHdr()) {
+        const bool isHdr = mode == ColorMode::Hdr || mode == ColorMode::Hdr10;
+        if (isHdr && !mRenderPipeline->supportsExtendedRangeHdr()) {
             mode = ColorMode::WideColorGamut;
         }
         mColorMode = mode;
@@ -311,13 +312,15 @@ float CanvasContext::setColorMode(ColorMode mode) {
     switch (mColorMode) {
         case ColorMode::Hdr:
             return 3.f;  // TODO: Refine this number
+        case ColorMode::Hdr10:
+            return 10.f;
         default:
             return 1.f;
     }
 }
 
 float CanvasContext::targetSdrHdrRatio() const {
-    if (mColorMode == ColorMode::Hdr) {
+    if (mColorMode == ColorMode::Hdr || mColorMode == ColorMode::Hdr10) {
         return mTargetSdrHdrRatio;
     } else {
         return 1.f;

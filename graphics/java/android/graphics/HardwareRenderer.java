@@ -668,7 +668,7 @@ public class HardwareRenderer {
 
     /** @hide */
     public void setTargetSdrHdrRatio(float ratio) {
-        if (ratio < 1.f || Float.isNaN(ratio) || Float.isInfinite(ratio)) ratio = 1.f;
+        if (ratio < 1.f || !Float.isFinite(ratio)) ratio = 1.f;
         nSetTargetSdrHdrRatio(mNativeProxy, ratio);
     }
 

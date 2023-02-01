@@ -27,6 +27,9 @@ enum class ColorMode {
     WideColorGamut = 1,
     // Extended range Display P3
     Hdr = 2,
+    // Extended range Display P3 10-bit
+    // for test purposes only, not shippable due to insuffient alpha
+    Hdr10 = 3,
     // Alpha 8
     A8 = 4,
 };
