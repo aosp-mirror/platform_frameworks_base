@@ -6990,11 +6990,11 @@ public class CarrierConfigManager {
 
         /**
          * Maximum Retry Count for SMS over IMS on Failure, If the Retry Count exceeds this value,
-         * and if the retry count is less than KEY_SMS_MAX_RETRY_COUNT_INT
+         * and if the retry count is less than {@link #KEY_SMS_MAX_RETRY_COUNT_INT}
          * sending SMS should fallback to CS
          */
-        public static final String KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT =
-                KEY_PREFIX + "sms_max_retry_count_over_ims_int";
+        public static final String KEY_SMS_MAX_RETRY_OVER_IMS_COUNT_INT =
+                KEY_PREFIX + "sms_max_retry_over_ims_count_int";
 
         /**
          * Delay Timer Value in milliseconds
@@ -7062,7 +7062,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_SMS_OVER_IMS_FORMAT_INT, SMS_FORMAT_3GPP);
 
             defaults.putInt(KEY_SMS_MAX_RETRY_COUNT_INT, 3);
-            defaults.putInt(KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT, 3);
+            defaults.putInt(KEY_SMS_MAX_RETRY_OVER_IMS_COUNT_INT, 3);
             defaults.putInt(KEY_SMS_OVER_IMS_SEND_RETRY_DELAY_MILLIS_INT,
                     2000);
             defaults.putInt(KEY_SMS_TR1_TIMER_MILLIS_INT, 130000);
