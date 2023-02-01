@@ -17,7 +17,6 @@
 */
 -->
 <resources>
-    <dimen name="controls_padding_horizontal">205dp</dimen>
     <dimen name="split_shade_notifications_scrim_margin_bottom">24dp</dimen>
     <dimen name="notification_panel_margin_bottom">64dp</dimen>
 

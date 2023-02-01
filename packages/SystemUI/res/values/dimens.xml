@@ -1110,7 +1110,7 @@
 
     <!-- Home Controls -->
     <dimen name="controls_header_menu_size">48dp</dimen>
-    <dimen name="controls_header_bottom_margin">24dp</dimen>
+    <dimen name="controls_header_bottom_margin">16dp</dimen>
     <dimen name="controls_header_app_icon_size">24dp</dimen>
     <dimen name="controls_top_margin">48dp</dimen>
     <dimen name="controls_padding_horizontal">0dp</dimen>
