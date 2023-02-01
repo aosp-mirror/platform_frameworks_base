@@ -247,6 +247,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 @Override
                 public void onThemeChanged() {
                     reloadColors();
+                    reset();
                 }
 
                 @Override
