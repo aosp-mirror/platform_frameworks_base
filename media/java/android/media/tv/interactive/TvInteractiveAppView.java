@@ -598,13 +598,12 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
-     * Sends current time shift mode to related TV interactive app.
+     * Sends the current time shift mode to the TV interactive app bound to this view
      *
      * @param mode The current time shift mode. The value is one of the following:
      * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
      * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
      * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
-     * @hide
      */
     public void sendTimeShiftMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
         if (DEBUG) {
@@ -616,12 +615,15 @@ public class TvInteractiveAppView extends ViewGroup {
     }
 
     /**
-     * Sends available supported speeds to related TV interactive app.
+     * Sends the available supported playback speeds to the TV interactive app bound to this view.
      *
-     * @param speeds An ordered array of playback speeds, expressed as values relative to the normal
-     *               playback speed 1.0.
+     * @param speeds An ordered array of playback speeds, expressed as values relative to the
+     *               normal playback speed (1.0), at which the current content can be played as
+     *               a time-shifted broadcast. This is an empty array if the supported playback
+     *               speeds are unknown or the video/broadcast is not in time shift mode. If
+     *               currently in time shift mode, this array will normally include at least
+     *               the values 1.0 (normal speed) and 0.0 (paused).
      * @see PlaybackParams#getSpeed()
-     * @hide
      */
     public void sendAvailableSpeeds(@NonNull float[] speeds) {
         if (DEBUG) {
@@ -743,7 +745,7 @@ public class TvInteractiveAppView extends ViewGroup {
      * {@link android.media.PlaybackParams} is set or changed.
      *
      * @see TvView#timeShiftSetPlaybackParams(PlaybackParams)
-     * @hide
+     * @param params The new {@link PlaybackParams} that was set or changed.
      */
     public void notifyTimeShiftPlaybackParams(@NonNull PlaybackParams params) {
         if (DEBUG) {
@@ -760,7 +762,15 @@ public class TvInteractiveAppView extends ViewGroup {
      *
      * @see TvView.TvInputCallback#onTimeShiftStatusChanged(String, int)
      * @see android.media.tv.TvInputService.Session#notifyTimeShiftStatusChanged(int)
-     * @hide
+     * @param inputId The ID of the input for which the time shift status has changed.
+     * @param status The status of which the input has changed to. Should be one of the
+     *               following.
+     *               <ul>
+     *                  <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNKNOWN}
+     *                  <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNSUPPORTED}
+     *                  <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNAVAILABLE}
+     *                  <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
+     *               </ul>
      */
     public void notifyTimeShiftStatusChanged(
             @NonNull String inputId, @TvInputManager.TimeShiftStatus int status) {
@@ -778,7 +788,8 @@ public class TvInteractiveAppView extends ViewGroup {
      * start position is changed.
      *
      * @see TvView.TimeShiftPositionCallback#onTimeShiftStartPositionChanged(String, long)
-     * @hide
+     * @param inputId The ID of the input for which the time shift start position has changed.
+     * @param timeMs The start position for time shifting, in milliseconds since the epoch.
      */
     public void notifyTimeShiftStartPositionChanged(@NonNull String inputId, long timeMs) {
         if (DEBUG) {
@@ -795,7 +806,8 @@ public class TvInteractiveAppView extends ViewGroup {
      * current position is changed.
      *
      * @see TvView.TimeShiftPositionCallback#onTimeShiftCurrentPositionChanged(String, long)
-     * @hide
+     * @param inputId The ID of the input for which the time shift current position has changed.
+     * @param timeMs The current position for time shifting, in milliseconds since the epoch.
      */
     public void notifyTimeShiftCurrentPositionChanged(@NonNull String inputId, long timeMs) {
         if (DEBUG) {
@@ -1068,7 +1080,6 @@ public class TvInteractiveAppView extends ViewGroup {
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param cmdType type of the command
          * @param parameters parameters of the command
-         * @hide
          */
         public void onTimeShiftCommandRequest(
                 @NonNull String iAppServiceId,
@@ -1186,7 +1197,6 @@ public class TvInteractiveAppView extends ViewGroup {
          * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @hide
          */
         public void onRequestTimeShiftMode(@NonNull String iAppServiceId) {
         }
@@ -1196,7 +1206,6 @@ public class TvInteractiveAppView extends ViewGroup {
          * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @hide
          */
         public void onRequestAvailableSpeeds(@NonNull String iAppServiceId) {
         }
