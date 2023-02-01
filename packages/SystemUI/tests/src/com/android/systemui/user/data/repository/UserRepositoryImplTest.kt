@@ -17,12 +17,17 @@
 
 package com.android.systemui.user.data.repository
 
+import android.app.IActivityManager
+import android.app.UserSwitchObserver
 import android.content.pm.UserInfo
+import android.os.IRemoteCallback
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.util.settings.FakeSettings
@@ -39,7 +44,14 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.any
+import org.mockito.Mockito.anyString
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
@@ -48,6 +60,8 @@ import org.mockito.MockitoAnnotations
 class UserRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var manager: UserManager
+    @Mock private lateinit var activityManager: IActivityManager
+    @Captor private lateinit var userSwitchObserver: ArgumentCaptor<UserSwitchObserver>
 
     private lateinit var underTest: UserRepositoryImpl
 
@@ -214,6 +228,34 @@ class UserRepositoryImplTest : SysuiTestCase() {
         assertThat(selectedUserInfo?.id).isEqualTo(1)
     }
 
+    @Test
+    fun userSwitchingInProgress_registersOnlyOneUserSwitchObserver() = runSelfCancelingTest {
+        underTest = create(this)
+
+        underTest.userSwitchingInProgress.launchIn(this)
+        underTest.userSwitchingInProgress.launchIn(this)
+        underTest.userSwitchingInProgress.launchIn(this)
+
+        verify(activityManager, times(1)).registerUserSwitchObserver(any(), anyString())
+    }
+
+    @Test
+    fun userSwitchingInProgress_propagatesStateFromActivityManager() = runSelfCancelingTest {
+        underTest = create(this)
+        verify(activityManager)
+            .registerUserSwitchObserver(userSwitchObserver.capture(), anyString())
+
+        userSwitchObserver.value.onUserSwitching(0, mock(IRemoteCallback::class.java))
+
+        var mostRecentSwitchingValue = false
+        underTest.userSwitchingInProgress.onEach { mostRecentSwitchingValue = it }.launchIn(this)
+
+        assertThat(mostRecentSwitchingValue).isTrue()
+
+        userSwitchObserver.value.onUserSwitchComplete(0)
+        assertThat(mostRecentSwitchingValue).isFalse()
+    }
+
     private fun createUserInfo(
         id: Int,
         isGuest: Boolean,
@@ -280,6 +322,8 @@ class UserRepositoryImplTest : SysuiTestCase() {
         }
 
     private fun create(scope: CoroutineScope = TestCoroutineScope()): UserRepositoryImpl {
+        val featureFlags = FakeFeatureFlags()
+        featureFlags.set(FACE_AUTH_REFACTOR, true)
         return UserRepositoryImpl(
             appContext = context,
             manager = manager,
@@ -288,6 +332,8 @@ class UserRepositoryImplTest : SysuiTestCase() {
             backgroundDispatcher = IMMEDIATE,
             globalSettings = globalSettings,
             tracker = tracker,
+            activityManager = activityManager,
+            featureFlags = featureFlags,
         )
     }
 
