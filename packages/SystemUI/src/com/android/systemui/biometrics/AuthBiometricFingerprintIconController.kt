@@ -46,6 +46,8 @@ open class AuthBiometricFingerprintIconController(
 
     private var isDeviceFolded: Boolean = false
     private val isSideFps: Boolean
+    private val isReverseDefaultRotation =
+            context.resources.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)
     private val screenSizeFoldProvider: ScreenSizeFoldProvider = ScreenSizeFoldProvider(context)
     var iconLayoutParamSize: Pair<Int, Int> = Pair(1, 1)
         set(value) {
@@ -76,7 +78,7 @@ open class AuthBiometricFingerprintIconController(
         isSideFps = sideFps
         val displayInfo = DisplayInfo()
         context.display?.getDisplayInfo(displayInfo)
-        if (isSideFps && displayInfo.rotation == Surface.ROTATION_180) {
+        if (isSideFps && getRotationFromDefault(displayInfo.rotation) == Surface.ROTATION_180) {
             iconView.rotation = 180f
         }
         screenSizeFoldProvider.registerCallback(this, context.mainExecutor)
@@ -86,7 +88,7 @@ open class AuthBiometricFingerprintIconController(
     private fun updateIconSideFps(@BiometricState lastState: Int, @BiometricState newState: Int) {
         val displayInfo = DisplayInfo()
         context.display?.getDisplayInfo(displayInfo)
-        val rotation = displayInfo.rotation
+        val rotation = getRotationFromDefault(displayInfo.rotation)
         val iconAnimation = getSideFpsAnimationForTransition(rotation)
         val iconViewOverlayAnimation =
                 getSideFpsOverlayAnimationForTransition(lastState, newState, rotation) ?: return
@@ -216,6 +218,9 @@ open class AuthBiometricFingerprintIconController(
         }
         return if (id != null) return id else null
     }
+
+    private fun getRotationFromDefault(rotation: Int): Int =
+            if (isReverseDefaultRotation) (rotation + 1) % 4 else rotation
 
     @RawRes
     private fun getSideFpsAnimationForTransition(rotation: Int): Int = when (rotation) {
