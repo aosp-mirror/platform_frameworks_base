@@ -41,10 +41,12 @@ data class SmartspaceMediaData(
     val recommendations: List<SmartspaceAction>,
     /** Intent for the user's initiated dismissal. */
     val dismissIntent: Intent?,
-    /** The timestamp in milliseconds that headphone is connected. */
+    /** The timestamp in milliseconds that the card was generated */
     val headphoneConnectionTimeMillis: Long,
     /** Instance ID for [MediaUiEventLogger] */
-    val instanceId: InstanceId
+    val instanceId: InstanceId,
+    /** The timestamp in milliseconds indicating when the card should be removed */
+    val expiryTimeMs: Long,
 ) {
     /**
      * Indicates if all the data is valid.
@@ -85,6 +87,13 @@ data class SmartspaceMediaData(
         }
     }
 }
+
+/** Key for extras [SmartspaceMediaData.cardAction] indicating why the card was sent */
+const val EXTRA_KEY_TRIGGER_SOURCE = "MEDIA_RECOMMENDATION_TRIGGER_SOURCE"
+/** Value for [EXTRA_KEY_TRIGGER_SOURCE] when the card is sent on headphone connection */
+const val EXTRA_VALUE_TRIGGER_HEADPHONE = "HEADPHONE_CONNECTION"
+/** Value for key [EXTRA_KEY_TRIGGER_SOURCE] when the card is sent as a regular update */
+const val EXTRA_VALUE_TRIGGER_PERIODIC = "PERIODIC_TRIGGER"
 
 const val NUM_REQUIRED_RECOMMENDATIONS = 3
 private val TAG = SmartspaceMediaData::class.simpleName!!
