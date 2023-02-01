@@ -165,7 +165,7 @@ package android.app {
     method @Nullable public String getIconResourcePackage();
   }
 
-  public class ActivityOptions {
+  public class ActivityOptions extends android.app.ComponentOptions {
     method public boolean isEligibleForLegacyPermissionPrompt();
     method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS) public static android.app.ActivityOptions makeCustomTaskAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
@@ -269,7 +269,7 @@ package android.app {
     method public default void onOpActiveChanged(@NonNull String, int, @NonNull String, @Nullable String, boolean, int, int);
   }
 
-  public class BroadcastOptions {
+  public class BroadcastOptions extends android.app.ComponentOptions {
     ctor public BroadcastOptions(@NonNull android.os.Bundle);
     method @Deprecated public int getMaxManifestReceiverApiLevel();
     method public long getTemporaryAppAllowlistDuration();
@@ -280,6 +280,12 @@ package android.app {
     method public boolean testRequireCompatChange(int);
     field public static final long CHANGE_ALWAYS_DISABLED = 210856463L; // 0xc916a0fL
     field public static final long CHANGE_ALWAYS_ENABLED = 209888056L; // 0xc82a338L
+  }
+
+  public class ComponentOptions {
+    field public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1; // 0x1
+    field public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2; // 0x2
+    field public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0; // 0x0
   }
 
   public class DownloadManager {

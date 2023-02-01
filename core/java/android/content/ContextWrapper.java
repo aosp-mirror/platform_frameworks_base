@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
@@ -537,10 +538,8 @@ public class ContextWrapper extends Context {
         mBase.sendBroadcastAsUserMultiplePermissions(intent, user, receiverPermissions);
     }
 
-    /** @hide */
-    @SystemApi
     @Override
-    public void sendBroadcast(Intent intent, @Nullable String receiverPermission,
+    public void sendBroadcast(@NonNull Intent intent, @Nullable String receiverPermission,
             @Nullable Bundle options) {
         mBase.sendBroadcast(intent, receiverPermission, options);
     }
@@ -557,6 +556,14 @@ public class ContextWrapper extends Context {
         mBase.sendOrderedBroadcast(intent, receiverPermission);
     }
 
+    @SuppressLint("AndroidFrameworkRequiresPermission")
+    @Override
+    public void sendOrderedBroadcast(@NonNull Intent intent,
+            @Nullable String receiverPermission,
+            @Nullable Bundle options) {
+        mBase.sendOrderedBroadcast(intent, receiverPermission, options);
+    }
+
     @Override
     public void sendOrderedBroadcast(
             Intent intent, @Nullable String receiverPermission,
@@ -567,11 +574,9 @@ public class ContextWrapper extends Context {
                 initialData, initialExtras);
     }
 
-    /** @hide */
-    @SystemApi
     @Override
     public void sendOrderedBroadcast(
-            Intent intent, @Nullable String receiverPermission, @Nullable Bundle options,
+            @NonNull Intent intent, @Nullable String receiverPermission, @Nullable Bundle options,
             @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
             int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission,

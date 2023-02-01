@@ -273,7 +273,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                         performReceiveLocked(oldRecord.resultToApp, oldRecord.resultTo,
                                 oldRecord.intent,
                                 Activity.RESULT_CANCELED, null, null,
-                                false, false, oldRecord.userId, oldRecord.callingUid, r.callingUid,
+                                false, false, r.shareIdentity, oldRecord.userId,
+                                oldRecord.callingUid, r.callingUid, r.callerPackage,
                                 SystemClock.uptimeMillis() - oldRecord.enqueueTime, 0);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failure ["
@@ -402,7 +403,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     prepareReceiverIntent(r.intent, r.curFilteredExtras),
                     r.curReceiver, null /* compatInfo (unused but need to keep method signature) */,
                     r.resultCode, r.resultData, r.resultExtras, r.ordered, assumeDelivered,
-                    r.userId, app.mState.getReportedProcState()));
+                    r.userId, r.shareIdentity ? r.callingUid : Process.INVALID_UID,
+                    r.shareIdentity ? r.callerPackage : null,
+                    app.mState.getReportedProcState()));
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);
             started = true;
@@ -726,9 +729,15 @@ public class BroadcastQueueImpl extends BroadcastQueue {
 
     public void performReceiveLocked(ProcessRecord app, IIntentReceiver receiver,
             Intent intent, int resultCode, String data, Bundle extras,
-            boolean ordered, boolean sticky, int sendingUser,
-            int receiverUid, int callingUid, long dispatchDelay,
-            long receiveDelay) throws RemoteException {
+            boolean ordered, boolean sticky, boolean shareIdentity, int sendingUser,
+            int receiverUid, int callingUid, String callingPackage,
+            long dispatchDelay, long receiveDelay) throws RemoteException {
+        // If the broadcaster opted-in to sharing their identity, then expose package visibility for
+        // the receiver.
+        if (shareIdentity) {
+            mService.mPackageManagerInt.grantImplicitAccess(sendingUser, intent,
+                    UserHandle.getAppId(receiverUid), callingUid, true);
+        }
         // Send the intent to the receiver asynchronously using one-way binder calls.
         if (app != null) {
             final IApplicationThread thread = app.getThread();
@@ -740,6 +749,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     thread.scheduleReceiverList(mReceiverBatch.registeredReceiver(
                             receiver, intent, resultCode,
                             data, extras, ordered, sticky, assumeDelivered, sendingUser,
+                            shareIdentity ? callingUid : Process.INVALID_UID,
+                            shareIdentity ? callingPackage : null,
                             app.mState.getReportedProcState()));
                 } catch (RemoteException ex) {
                     // Failed to call into the process. It's either dying or wedged. Kill it gently.
@@ -845,8 +856,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 maybeReportBroadcastDispatchedEventLocked(r, filter.owningUid);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                         prepareReceiverIntent(r.intent, filteredExtras), r.resultCode, r.resultData,
-                        r.resultExtras, r.ordered, r.initialSticky, r.userId,
-                        filter.receiverList.uid, r.callingUid,
+                        r.resultExtras, r.ordered, r.initialSticky, r.shareIdentity, r.userId,
+                        filter.receiverList.uid, r.callingUid, r.callerPackage,
                         r.dispatchTime - r.enqueueTime,
                         r.receiverTime - r.dispatchTime);
                 // parallel broadcasts are fire-and-forget, not bookended by a call to
@@ -1130,8 +1141,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                             r.mIsReceiverAppRunning = true;
                             performReceiveLocked(r.resultToApp, r.resultTo,
                                     new Intent(r.intent), r.resultCode,
-                                    r.resultData, r.resultExtras, false, false, r.userId,
-                                    r.callingUid, r.callingUid,
+                                    r.resultData, r.resultExtras, false, false, r.shareIdentity,
+                                    r.userId, r.callingUid, r.callingUid, r.callerPackage,
                                     r.dispatchTime - r.enqueueTime,
                                     now - r.dispatchTime);
                             logBootCompletedBroadcastCompletionLatencyIfPossible(r);

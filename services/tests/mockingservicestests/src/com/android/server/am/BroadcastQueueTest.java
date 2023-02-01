@@ -1401,10 +1401,10 @@ public class BroadcastQueueTest {
         // Confirm that we saw no registered receiver traffic
         final IApplicationThread oldThread = oldApp.getThread();
         verify(oldThread, never()).scheduleRegisteredReceiver(any(), any(), anyInt(), any(), any(),
-                anyBoolean(), anyBoolean(), anyBoolean(), anyInt(), anyInt());
+                anyBoolean(), anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyInt(), any());
         final IApplicationThread newThread = newApp.getThread();
         verify(newThread, never()).scheduleRegisteredReceiver(any(), any(), anyInt(), any(), any(),
-                anyBoolean(), anyBoolean(), anyBoolean(), anyInt(), anyInt());
+                anyBoolean(), anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyInt(), any());
 
         // Confirm that we saw final manifest broadcast
         verifyScheduleReceiver(times(1), newApp, airplane,

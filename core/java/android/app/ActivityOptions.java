@@ -88,6 +88,16 @@ public class ActivityOptions extends ComponentOptions {
      */
     public static final String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
 
+    /** No explicit value chosen. The system will decide whether to grant privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED =
+            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+    /** Allow the {@link PendingIntent} to use the background activity start privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED =
+            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
+    /** Deny the {@link PendingIntent} to use the background activity start privileges. */
+    public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED =
+            ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
+
     /**
      * The package name that created the options.
      * @hide
@@ -2428,6 +2438,30 @@ public class ActivityOptions extends ComponentOptions {
      */
     public @BackgroundActivityStartMode int getPendingIntentBackgroundActivityStartMode() {
         return super.getPendingIntentBackgroundActivityStartMode();
+    }
+
+    /**
+     * Set PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     *
+     * @deprecated use #setPendingIntentBackgroundActivityStartMode(int) to set the full range
+     * of states
+     */
+    @Override
+    @Deprecated public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+        super.setPendingIntentBackgroundActivityLaunchAllowed(allowed);
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller can start
+     * background activities.
+     *
+     * @deprecated use {@link #getPendingIntentBackgroundActivityStartMode()} since for apps
+     * targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or higher this value might
+     * not match the actual behavior if the value was not explicitly set.
+     */
+    @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        return super.isPendingIntentBackgroundActivityLaunchAllowed();
     }
 
     /** @hide */
