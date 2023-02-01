@@ -27,6 +27,7 @@ import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
 import com.android.systemui.plugins.ClockProviderPlugin
+import com.android.systemui.plugins.ClockSettings
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.util.mockito.argumentCaptor
@@ -59,7 +60,7 @@ class ClockRegistryTest : SysuiTestCase() {
     private lateinit var pluginListener: PluginListener<ClockProviderPlugin>
     private lateinit var registry: ClockRegistry
 
-    private var settingValue: String = ""
+    private var settingValue: ClockSettings? = null
 
     companion object {
         private fun failFactory(): ClockController {
@@ -79,7 +80,8 @@ class ClockRegistryTest : SysuiTestCase() {
         private val thumbnailCallbacks = mutableMapOf<ClockId, () -> Drawable?>()
 
         override fun getClocks() = metadata
-        override fun createClock(id: ClockId): ClockController = createCallbacks[id]!!()
+        override fun createClock(settings: ClockSettings): ClockController =
+            createCallbacks[settings.clockId!!]!!()
         override fun getClockThumbnail(id: ClockId): Drawable? = thumbnailCallbacks[id]!!()
 
         fun addClock(
@@ -110,7 +112,7 @@ class ClockRegistryTest : SysuiTestCase() {
             userHandle = UserHandle.USER_ALL,
             defaultClockProvider = fakeDefaultProvider
         ) {
-            override var currentClockId: ClockId
+            override var settings: ClockSettings?
                 get() = settingValue
                 set(value) { settingValue = value }
         }
@@ -185,7 +187,7 @@ class ClockRegistryTest : SysuiTestCase() {
             .addClock("clock_1", "clock 1")
             .addClock("clock_2", "clock 2")
 
-        settingValue = "clock_3"
+        settingValue = ClockSettings("clock_3", null, null)
         val plugin2 = FakeClockPlugin()
             .addClock("clock_3", "clock 3", { mockClock })
             .addClock("clock_4", "clock 4")
@@ -203,7 +205,7 @@ class ClockRegistryTest : SysuiTestCase() {
             .addClock("clock_1", "clock 1")
             .addClock("clock_2", "clock 2")
 
-        settingValue = "clock_3"
+        settingValue = ClockSettings("clock_3", null, null)
         val plugin2 = FakeClockPlugin()
             .addClock("clock_3", "clock 3")
             .addClock("clock_4", "clock 4")
@@ -222,7 +224,7 @@ class ClockRegistryTest : SysuiTestCase() {
             .addClock("clock_1", "clock 1")
             .addClock("clock_2", "clock 2")
 
-        settingValue = "clock_3"
+        settingValue = ClockSettings("clock_3", null, null)
         val plugin2 = FakeClockPlugin()
             .addClock("clock_3", "clock 3", { mockClock })
             .addClock("clock_4", "clock 4")
@@ -242,8 +244,8 @@ class ClockRegistryTest : SysuiTestCase() {
 
     @Test
     fun jsonDeserialization_gotExpectedObject() {
-        val expected = ClockRegistry.ClockSetting("ID", 500)
-        val actual = ClockRegistry.ClockSetting.deserialize("""{
+        val expected = ClockSettings("ID", null, 500)
+        val actual = ClockSettings.deserialize("""{
             "clockId":"ID",
             "_applied_timestamp":500
         }""")
@@ -252,15 +254,15 @@ class ClockRegistryTest : SysuiTestCase() {
 
     @Test
     fun jsonDeserialization_noTimestamp_gotExpectedObject() {
-        val expected = ClockRegistry.ClockSetting("ID", null)
-        val actual = ClockRegistry.ClockSetting.deserialize("{\"clockId\":\"ID\"}")
+        val expected = ClockSettings("ID", null, null)
+        val actual = ClockSettings.deserialize("{\"clockId\":\"ID\"}")
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonDeserialization_nullTimestamp_gotExpectedObject() {
-        val expected = ClockRegistry.ClockSetting("ID", null)
-        val actual = ClockRegistry.ClockSetting.deserialize("""{
+        val expected = ClockSettings("ID", null, null)
+        val actual = ClockSettings.deserialize("""{
             "clockId":"ID",
             "_applied_timestamp":null
         }""")
@@ -269,22 +271,22 @@ class ClockRegistryTest : SysuiTestCase() {
 
     @Test(expected = JSONException::class)
     fun jsonDeserialization_noId_threwException() {
-        val expected = ClockRegistry.ClockSetting("ID", 500)
-        val actual = ClockRegistry.ClockSetting.deserialize("{\"_applied_timestamp\":500}")
+        val expected = ClockSettings("ID", null, 500)
+        val actual = ClockSettings.deserialize("{\"_applied_timestamp\":500}")
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonSerialization_gotExpectedString() {
         val expected = "{\"clockId\":\"ID\",\"_applied_timestamp\":500}"
-        val actual = ClockRegistry.ClockSetting.serialize( ClockRegistry.ClockSetting("ID", 500))
+        val actual = ClockSettings.serialize(ClockSettings("ID", null, 500))
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonSerialization_noTimestamp_gotExpectedString() {
         val expected = "{\"clockId\":\"ID\"}"
-        val actual = ClockRegistry.ClockSetting.serialize( ClockRegistry.ClockSetting("ID", null))
+        val actual = ClockSettings.serialize(ClockSettings("ID", null, null))
         assertEquals(expected, actual)
     }
 }
