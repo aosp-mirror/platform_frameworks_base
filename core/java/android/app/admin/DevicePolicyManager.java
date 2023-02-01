@@ -3905,6 +3905,15 @@ public class DevicePolicyManager {
     public static final int EXEMPT_FROM_HIBERNATION =  3;
 
     /**
+     * Exempt an app from the start foreground service from background with while in user permission
+     * restriction.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION =  4;
+
+    /**
      * Exemptions to platform restrictions, given to an application through
      * {@link #setApplicationExemptions(String, Set)}.
      *
@@ -3914,7 +3923,8 @@ public class DevicePolicyManager {
             EXEMPT_FROM_APP_STANDBY,
             EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
             EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
-            EXEMPT_FROM_HIBERNATION
+            EXEMPT_FROM_HIBERNATION,
+            EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationExemptionConstants {}
