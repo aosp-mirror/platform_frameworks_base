@@ -1060,7 +1060,7 @@ public class PackageInstaller {
                             PackageInstaller.EXTRA_INSTALL_CONSTRAINTS_RESULT,
                             InstallConstraintsResult.class);
                     try {
-                        if (result.isAllConstraintsSatisfied()) {
+                        if (result.areAllConstraintsSatisfied()) {
                             session.commit(statusReceiver, false);
                         } else {
                             // timeout
@@ -4116,11 +4116,19 @@ public class PackageInstaller {
      * The callback result of {@link #checkInstallConstraints(List, InstallConstraints, Executor, Consumer)}.
      */
     @DataClass(genParcelable = true, genHiddenConstructor = true)
+    @DataClass.Suppress("isAllConstraintsSatisfied")
     public static final class InstallConstraintsResult implements Parcelable {
         /**
          * True if all constraints are satisfied.
          */
         private boolean mAllConstraintsSatisfied;
+
+        /**
+         * True if all constraints are satisfied.
+         */
+        public boolean areAllConstraintsSatisfied() {
+            return mAllConstraintsSatisfied;
+        }
 
 
 
@@ -4150,14 +4158,6 @@ public class PackageInstaller {
             this.mAllConstraintsSatisfied = allConstraintsSatisfied;
 
             // onConstructed(); // You can define this method to get a callback
-        }
-
-        /**
-         * True if all constraints are satisfied.
-         */
-        @DataClass.Generated.Member
-        public boolean isAllConstraintsSatisfied() {
-            return mAllConstraintsSatisfied;
         }
 
         @Override
@@ -4205,10 +4205,10 @@ public class PackageInstaller {
         };
 
         @DataClass.Generated(
-                time = 1668650523745L,
+                time = 1675135664641L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/content/pm/PackageInstaller.java",
-                inputSignatures = "private  boolean mAllConstraintsSatisfied\nclass InstallConstraintsResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true)")
+                inputSignatures = "private  boolean mAllConstraintsSatisfied\npublic  boolean areAllConstraintsSatisfied()\nclass InstallConstraintsResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true)")
         @Deprecated
         private void __metadata() {}
 
@@ -4247,41 +4247,41 @@ public class PackageInstaller {
          */
         @NonNull
         public static final InstallConstraints GENTLE_UPDATE =
-                new Builder().requireAppNotInteracting().build();
+                new Builder().setAppNotInteractingRequired().build();
 
-        private final boolean mRequireDeviceIdle;
-        private final boolean mRequireAppNotForeground;
-        private final boolean mRequireAppNotInteracting;
-        private final boolean mRequireAppNotTopVisible;
-        private final boolean mRequireNotInCall;
+        private final boolean mDeviceIdleRequired;
+        private final boolean mAppNotForegroundRequired;
+        private final boolean mAppNotInteractingRequired;
+        private final boolean mAppNotTopVisibleRequired;
+        private final boolean mNotInCallRequired;
 
         /**
          * Builder class for constructing {@link InstallConstraints}.
          */
         public static final class Builder {
-            private boolean mRequireDeviceIdle;
-            private boolean mRequireAppNotForeground;
-            private boolean mRequireAppNotInteracting;
-            private boolean mRequireAppNotTopVisible;
-            private boolean mRequireNotInCall;
+            private boolean mDeviceIdleRequired;
+            private boolean mAppNotForegroundRequired;
+            private boolean mAppNotInteractingRequired;
+            private boolean mAppNotTopVisibleRequired;
+            private boolean mNotInCallRequired;
 
             /**
              * This constraint requires the device is idle.
              */
-            @SuppressLint("BuilderSetStyle")
+            @SuppressLint("MissingGetterMatchingBuilder")
             @NonNull
-            public Builder requireDeviceIdle() {
-                mRequireDeviceIdle = true;
+            public Builder setDeviceIdleRequired() {
+                mDeviceIdleRequired = true;
                 return this;
             }
 
             /**
              * This constraint requires the app in question is not in the foreground.
              */
-            @SuppressLint("BuilderSetStyle")
+            @SuppressLint("MissingGetterMatchingBuilder")
             @NonNull
-            public Builder requireAppNotForeground() {
-                mRequireAppNotForeground = true;
+            public Builder setAppNotForegroundRequired() {
+                mAppNotForegroundRequired = true;
                 return this;
             }
 
@@ -4294,10 +4294,10 @@ public class PackageInstaller {
              *     <li>being visible to the user</li>
              * </ul>
              */
-            @SuppressLint("BuilderSetStyle")
+            @SuppressLint("MissingGetterMatchingBuilder")
             @NonNull
-            public Builder requireAppNotInteracting() {
-                mRequireAppNotInteracting = true;
+            public Builder setAppNotInteractingRequired() {
+                mAppNotInteractingRequired = true;
                 return this;
             }
 
@@ -4306,25 +4306,27 @@ public class PackageInstaller {
              * A top-visible app is showing UI at the top of the screen that the user is
              * interacting with.
              *
-             * Note this constraint is a subset of {@link #requireAppNotForeground()}
+             * Note this constraint is a subset of {@link #setAppNotForegroundRequired()}
              * because a top-visible app is also a foreground app. This is also a subset
-             * of {@link #requireAppNotInteracting()} because a top-visible app is interacting
+             * of {@link #setAppNotInteractingRequired()} because a top-visible app is interacting
              * with the user.
+             *
+             * @see ActivityManager.RunningAppProcessInfo#IMPORTANCE_FOREGROUND
              */
-            @SuppressLint("BuilderSetStyle")
+            @SuppressLint("MissingGetterMatchingBuilder")
             @NonNull
-            public Builder requireAppNotTopVisible() {
-                mRequireAppNotTopVisible = true;
+            public Builder setAppNotTopVisibleRequired() {
+                mAppNotTopVisibleRequired = true;
                 return this;
             }
 
             /**
              * This constraint requires there is no ongoing call in the device.
              */
-            @SuppressLint("BuilderSetStyle")
+            @SuppressLint("MissingGetterMatchingBuilder")
             @NonNull
-            public Builder requireNotInCall() {
-                mRequireNotInCall = true;
+            public Builder setNotInCallRequired() {
+                mNotInCallRequired = true;
                 return this;
             }
 
@@ -4333,8 +4335,8 @@ public class PackageInstaller {
              */
             @NonNull
             public InstallConstraints build() {
-                return new InstallConstraints(mRequireDeviceIdle, mRequireAppNotForeground,
-                        mRequireAppNotInteracting, mRequireAppNotTopVisible, mRequireNotInCall);
+                return new InstallConstraints(mDeviceIdleRequired, mAppNotForegroundRequired,
+                        mAppNotInteractingRequired, mAppNotTopVisibleRequired, mNotInCallRequired);
             }
         }
 
@@ -4360,43 +4362,43 @@ public class PackageInstaller {
          */
         @DataClass.Generated.Member
         public InstallConstraints(
-                boolean requireDeviceIdle,
-                boolean requireAppNotForeground,
-                boolean requireAppNotInteracting,
-                boolean requireAppNotTopVisible,
-                boolean requireNotInCall) {
-            this.mRequireDeviceIdle = requireDeviceIdle;
-            this.mRequireAppNotForeground = requireAppNotForeground;
-            this.mRequireAppNotInteracting = requireAppNotInteracting;
-            this.mRequireAppNotTopVisible = requireAppNotTopVisible;
-            this.mRequireNotInCall = requireNotInCall;
+                boolean deviceIdleRequired,
+                boolean appNotForegroundRequired,
+                boolean appNotInteractingRequired,
+                boolean appNotTopVisibleRequired,
+                boolean notInCallRequired) {
+            this.mDeviceIdleRequired = deviceIdleRequired;
+            this.mAppNotForegroundRequired = appNotForegroundRequired;
+            this.mAppNotInteractingRequired = appNotInteractingRequired;
+            this.mAppNotTopVisibleRequired = appNotTopVisibleRequired;
+            this.mNotInCallRequired = notInCallRequired;
 
             // onConstructed(); // You can define this method to get a callback
         }
 
         @DataClass.Generated.Member
-        public boolean isRequireDeviceIdle() {
-            return mRequireDeviceIdle;
+        public boolean isDeviceIdleRequired() {
+            return mDeviceIdleRequired;
         }
 
         @DataClass.Generated.Member
-        public boolean isRequireAppNotForeground() {
-            return mRequireAppNotForeground;
+        public boolean isAppNotForegroundRequired() {
+            return mAppNotForegroundRequired;
         }
 
         @DataClass.Generated.Member
-        public boolean isRequireAppNotInteracting() {
-            return mRequireAppNotInteracting;
+        public boolean isAppNotInteractingRequired() {
+            return mAppNotInteractingRequired;
         }
 
         @DataClass.Generated.Member
-        public boolean isRequireAppNotTopVisible() {
-            return mRequireAppNotTopVisible;
+        public boolean isAppNotTopVisibleRequired() {
+            return mAppNotTopVisibleRequired;
         }
 
         @DataClass.Generated.Member
-        public boolean isRequireNotInCall() {
-            return mRequireNotInCall;
+        public boolean isNotInCallRequired() {
+            return mNotInCallRequired;
         }
 
         @Override
@@ -4412,11 +4414,11 @@ public class PackageInstaller {
             InstallConstraints that = (InstallConstraints) o;
             //noinspection PointlessBooleanExpression
             return true
-                    && mRequireDeviceIdle == that.mRequireDeviceIdle
-                    && mRequireAppNotForeground == that.mRequireAppNotForeground
-                    && mRequireAppNotInteracting == that.mRequireAppNotInteracting
-                    && mRequireAppNotTopVisible == that.mRequireAppNotTopVisible
-                    && mRequireNotInCall == that.mRequireNotInCall;
+                    && mDeviceIdleRequired == that.mDeviceIdleRequired
+                    && mAppNotForegroundRequired == that.mAppNotForegroundRequired
+                    && mAppNotInteractingRequired == that.mAppNotInteractingRequired
+                    && mAppNotTopVisibleRequired == that.mAppNotTopVisibleRequired
+                    && mNotInCallRequired == that.mNotInCallRequired;
         }
 
         @Override
@@ -4426,11 +4428,11 @@ public class PackageInstaller {
             // int fieldNameHashCode() { ... }
 
             int _hash = 1;
-            _hash = 31 * _hash + Boolean.hashCode(mRequireDeviceIdle);
-            _hash = 31 * _hash + Boolean.hashCode(mRequireAppNotForeground);
-            _hash = 31 * _hash + Boolean.hashCode(mRequireAppNotInteracting);
-            _hash = 31 * _hash + Boolean.hashCode(mRequireAppNotTopVisible);
-            _hash = 31 * _hash + Boolean.hashCode(mRequireNotInCall);
+            _hash = 31 * _hash + Boolean.hashCode(mDeviceIdleRequired);
+            _hash = 31 * _hash + Boolean.hashCode(mAppNotForegroundRequired);
+            _hash = 31 * _hash + Boolean.hashCode(mAppNotInteractingRequired);
+            _hash = 31 * _hash + Boolean.hashCode(mAppNotTopVisibleRequired);
+            _hash = 31 * _hash + Boolean.hashCode(mNotInCallRequired);
             return _hash;
         }
 
@@ -4441,11 +4443,11 @@ public class PackageInstaller {
             // void parcelFieldName(Parcel dest, int flags) { ... }
 
             byte flg = 0;
-            if (mRequireDeviceIdle) flg |= 0x1;
-            if (mRequireAppNotForeground) flg |= 0x2;
-            if (mRequireAppNotInteracting) flg |= 0x4;
-            if (mRequireAppNotTopVisible) flg |= 0x8;
-            if (mRequireNotInCall) flg |= 0x10;
+            if (mDeviceIdleRequired) flg |= 0x1;
+            if (mAppNotForegroundRequired) flg |= 0x2;
+            if (mAppNotInteractingRequired) flg |= 0x4;
+            if (mAppNotTopVisibleRequired) flg |= 0x8;
+            if (mNotInCallRequired) flg |= 0x10;
             dest.writeByte(flg);
         }
 
@@ -4461,17 +4463,17 @@ public class PackageInstaller {
             // static FieldType unparcelFieldName(Parcel in) { ... }
 
             byte flg = in.readByte();
-            boolean requireDeviceIdle = (flg & 0x1) != 0;
-            boolean requireAppNotForeground = (flg & 0x2) != 0;
-            boolean requireAppNotInteracting = (flg & 0x4) != 0;
-            boolean requireAppNotTopVisible = (flg & 0x8) != 0;
-            boolean requireNotInCall = (flg & 0x10) != 0;
+            boolean deviceIdleRequired = (flg & 0x1) != 0;
+            boolean appNotForegroundRequired = (flg & 0x2) != 0;
+            boolean appNotInteractingRequired = (flg & 0x4) != 0;
+            boolean appNotTopVisibleRequired = (flg & 0x8) != 0;
+            boolean notInCallRequired = (flg & 0x10) != 0;
 
-            this.mRequireDeviceIdle = requireDeviceIdle;
-            this.mRequireAppNotForeground = requireAppNotForeground;
-            this.mRequireAppNotInteracting = requireAppNotInteracting;
-            this.mRequireAppNotTopVisible = requireAppNotTopVisible;
-            this.mRequireNotInCall = requireNotInCall;
+            this.mDeviceIdleRequired = deviceIdleRequired;
+            this.mAppNotForegroundRequired = appNotForegroundRequired;
+            this.mAppNotInteractingRequired = appNotInteractingRequired;
+            this.mAppNotTopVisibleRequired = appNotTopVisibleRequired;
+            this.mNotInCallRequired = notInCallRequired;
 
             // onConstructed(); // You can define this method to get a callback
         }
@@ -4491,10 +4493,10 @@ public class PackageInstaller {
         };
 
         @DataClass.Generated(
-                time = 1670207178734L,
+                time = 1675135664653L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/content/pm/PackageInstaller.java",
-                inputSignatures = "public static final @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints GENTLE_UPDATE\nprivate final  boolean mRequireDeviceIdle\nprivate final  boolean mRequireAppNotForeground\nprivate final  boolean mRequireAppNotInteracting\nprivate final  boolean mRequireAppNotTopVisible\nprivate final  boolean mRequireNotInCall\nclass InstallConstraints extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mRequireDeviceIdle\nprivate  boolean mRequireAppNotForeground\nprivate  boolean mRequireAppNotInteracting\nprivate  boolean mRequireAppNotTopVisible\nprivate  boolean mRequireNotInCall\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireDeviceIdle()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotForeground()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotInteracting()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotTopVisible()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder requireNotInCall()\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints build()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true, genEqualsHashCode=true)")
+                inputSignatures = "public static final @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints GENTLE_UPDATE\nprivate final  boolean mDeviceIdleRequired\nprivate final  boolean mAppNotForegroundRequired\nprivate final  boolean mAppNotInteractingRequired\nprivate final  boolean mAppNotTopVisibleRequired\nprivate final  boolean mNotInCallRequired\nclass InstallConstraints extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mDeviceIdleRequired\nprivate  boolean mAppNotForegroundRequired\nprivate  boolean mAppNotInteractingRequired\nprivate  boolean mAppNotTopVisibleRequired\nprivate  boolean mNotInCallRequired\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setDeviceIdleRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotForegroundRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotInteractingRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotTopVisibleRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setNotInCallRequired()\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints build()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true, genEqualsHashCode=true)")
         @Deprecated
         private void __metadata() {}
 

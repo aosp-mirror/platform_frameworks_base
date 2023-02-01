@@ -12108,11 +12108,11 @@ package android.content.pm {
 
   public static final class PackageInstaller.InstallConstraints implements android.os.Parcelable {
     method public int describeContents();
-    method public boolean isRequireAppNotForeground();
-    method public boolean isRequireAppNotInteracting();
-    method public boolean isRequireAppNotTopVisible();
-    method public boolean isRequireDeviceIdle();
-    method public boolean isRequireNotInCall();
+    method public boolean isAppNotForegroundRequired();
+    method public boolean isAppNotInteractingRequired();
+    method public boolean isAppNotTopVisibleRequired();
+    method public boolean isDeviceIdleRequired();
+    method public boolean isNotInCallRequired();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.InstallConstraints> CREATOR;
     field @NonNull public static final android.content.pm.PackageInstaller.InstallConstraints GENTLE_UPDATE;
@@ -12121,16 +12121,16 @@ package android.content.pm {
   public static final class PackageInstaller.InstallConstraints.Builder {
     ctor public PackageInstaller.InstallConstraints.Builder();
     method @NonNull public android.content.pm.PackageInstaller.InstallConstraints build();
-    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotForeground();
-    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotInteracting();
-    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireAppNotTopVisible();
-    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireDeviceIdle();
-    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder requireNotInCall();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotForegroundRequired();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotInteractingRequired();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotTopVisibleRequired();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder setDeviceIdleRequired();
+    method @NonNull public android.content.pm.PackageInstaller.InstallConstraints.Builder setNotInCallRequired();
   }
 
   public static final class PackageInstaller.InstallConstraintsResult implements android.os.Parcelable {
+    method public boolean areAllConstraintsSatisfied();
     method public int describeContents();
-    method public boolean isAllConstraintsSatisfied();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.InstallConstraintsResult> CREATOR;
   }
