@@ -20,18 +20,19 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
-import org.junit.Before;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Collection;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class DeepArrayOpsPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
@@ -39,19 +40,14 @@ public class DeepArrayOpsPerfTest {
     private Object[] mArray;
     private Object[] mArray2;
 
-    @Parameterized.Parameter(0)
-    public int mArrayLength;
-
-    @Parameterized.Parameters(name = "mArrayLength({0})")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(new Object[][] {{1}, {4}, {16}, {32}, {2048}});
     }
 
-    @Before
-    public void setUp() throws Exception {
-        mArray = new Object[mArrayLength * 14];
-        mArray2 = new Object[mArrayLength * 14];
-        for (int i = 0; i < mArrayLength; i += 14) {
+    public void setUp(int arrayLength) throws Exception {
+        mArray = new Object[arrayLength * 14];
+        mArray2 = new Object[arrayLength * 14];
+        for (int i = 0; i < arrayLength; i += 14) {
             mArray[i] = new IntWrapper(i);
             mArray2[i] = new IntWrapper(i);
 
@@ -99,7 +95,9 @@ public class DeepArrayOpsPerfTest {
     }
 
     @Test
-    public void deepHashCode() {
+    @Parameters(method = "getData")
+    public void deepHashCode(int arrayLength) throws Exception {
+        setUp(arrayLength);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Arrays.deepHashCode(mArray);
@@ -107,7 +105,9 @@ public class DeepArrayOpsPerfTest {
     }
 
     @Test
-    public void deepEquals() {
+    @Parameters(method = "getData")
+    public void deepEquals(int arrayLength) throws Exception {
+        setUp(arrayLength);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             Arrays.deepEquals(mArray, mArray2);

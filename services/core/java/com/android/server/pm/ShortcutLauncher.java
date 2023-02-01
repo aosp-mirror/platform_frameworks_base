@@ -144,8 +144,8 @@ class ShortcutLauncher extends ShortcutPackageItem {
             final ArraySet<String> prevSet = mPinnedShortcuts.get(pu);
 
             // Actually pin shortcuts.
-            // This logic here is to make sure a launcher cannot pin a shortcut that is floating
-            // (i.e. not dynamic nor manifest but is pinned) and pinned by another launcher.
+            // This logic here is to make sure a launcher cannot pin a shortcut that is not dynamic
+            // nor long-lived nor manifest but is pinned.
             // In this case, technically the shortcut doesn't exist to this launcher, so it can't
             // pin it.
             // (Maybe unnecessarily strict...)
@@ -158,7 +158,7 @@ class ShortcutLauncher extends ShortcutPackageItem {
                 if (si == null) {
                     continue;
                 }
-                if (si.isDynamic()
+                if (si.isDynamic() || si.isLongLived()
                         || si.isManifestShortcut()
                         || (prevSet != null && prevSet.contains(id))
                         || forPinRequest) {
@@ -419,5 +419,15 @@ class ShortcutLauncher extends ShortcutPackageItem {
     @VisibleForTesting
     ArraySet<String> getAllPinnedShortcutsForTest(String packageName, int packageUserId) {
         return new ArraySet<>(mPinnedShortcuts.get(PackageWithUser.of(packageUserId, packageName)));
+    }
+
+    @Override
+    protected File getShortcutPackageItemFile() {
+        final File path = new File(mShortcutUser.mService.injectUserDataPath(
+                mShortcutUser.getUserId()), ShortcutUser.DIRECTORY_LUANCHERS);
+        // Package user id and owner id can have different values for ShortcutLaunchers. Adding
+        // user Id to the file name to create a unique path. Owner id is used in the root path.
+        final String fileName = getPackageName() + getPackageUserId() + ".xml";
+        return new File(path, fileName);
     }
 }

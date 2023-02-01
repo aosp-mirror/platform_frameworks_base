@@ -21,12 +21,12 @@ import android.app.ITransientNotificationCallback;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.InsetsVisibilities;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.server.notification.NotificationDelegate;
 
@@ -133,7 +133,8 @@ public interface StatusBarManagerInternal {
     /** @see com.android.internal.statusbar.IStatusBar#onSystemBarAttributesChanged */
     void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName);
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            LetterboxDetails[] letterboxDetails);
 
     /** @see com.android.internal.statusbar.IStatusBar#showTransient */
     void showTransient(int displayId, @InternalInsetsType int[] types,
@@ -144,11 +145,11 @@ public interface StatusBarManagerInternal {
 
     /**
      * @see com.android.internal.statusbar.IStatusBar#showToast(String, IBinder, CharSequence,
-     * IBinder, int, ITransientNotificationCallback)
+     * IBinder, int, ITransientNotificationCallback, int)
      */
     void showToast(int uid, String packageName, IBinder token, CharSequence text,
             IBinder windowToken, int duration,
-            @Nullable ITransientNotificationCallback textCallback);
+            @Nullable ITransientNotificationCallback textCallback, int displayId);
 
     /** @see com.android.internal.statusbar.IStatusBar#hideToast(String, IBinder)  */
     void hideToast(String packageName, IBinder token);
@@ -157,12 +158,7 @@ public interface StatusBarManagerInternal {
      * @see com.android.internal.statusbar.IStatusBar#requestWindowMagnificationConnection(boolean
      * request)
      */
-    void requestWindowMagnificationConnection(boolean request);
-
-    /**
-     * Handles a logging command from the WM shell command.
-     */
-    void handleWindowManagerLoggingCommand(String[] args, ParcelFileDescriptor outFd);
+    boolean requestWindowMagnificationConnection(boolean request);
 
     /**
      * @see com.android.internal.statusbar.IStatusBar#setNavigationBarLumaSamplingEnabled(int,

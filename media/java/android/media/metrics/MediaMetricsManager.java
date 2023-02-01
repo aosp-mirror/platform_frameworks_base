@@ -19,6 +19,7 @@ package android.media.metrics;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 
 /**
@@ -48,6 +49,17 @@ public final class MediaMetricsManager {
     public void reportPlaybackMetrics(@NonNull String sessionId, PlaybackMetrics metrics) {
         try {
             mService.reportPlaybackMetrics(sessionId, metrics, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+    /**
+     * Reports bundle metrics.
+     * @hide
+     */
+    public void reportBundleMetrics(@NonNull String sessionId, PersistableBundle metrics) {
+        try {
+            mService.reportBundleMetrics(sessionId, metrics, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -111,6 +123,60 @@ public final class MediaMetricsManager {
             String id = mService.getRecordingSessionId(mUserId);
             RecordingSession session = new RecordingSession(id, this);
             return session;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a transcoding session.
+     */
+    @NonNull
+    public TranscodingSession createTranscodingSession() {
+        try {
+            String id = mService.getTranscodingSessionId(mUserId);
+            TranscodingSession session = new TranscodingSession(id, this);
+            return session;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a editing session.
+     */
+    @NonNull
+    public EditingSession createEditingSession() {
+        try {
+            String id = mService.getEditingSessionId(mUserId);
+            EditingSession session = new EditingSession(id, this);
+            return session;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a generic bundle session.
+     */
+    @NonNull
+    public BundleSession createBundleSession() {
+        try {
+            String id = mService.getBundleSessionId(mUserId);
+            BundleSession session = new BundleSession(id, this);
+            return session;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a generic bundle session.
+     */
+    @NonNull
+    public void releaseSessionId(@NonNull String sessionId) {
+        try {
+            mService.releaseSessionId(sessionId, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

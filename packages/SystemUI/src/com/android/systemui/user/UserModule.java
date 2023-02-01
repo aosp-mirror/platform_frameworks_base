@@ -16,21 +16,37 @@
 
 package com.android.systemui.user;
 
-import com.android.settingslib.users.EditUserInfoController;
+import android.app.Activity;
 
+import com.android.settingslib.users.EditUserInfoController;
+import com.android.systemui.user.data.repository.UserRepositoryModule;
+
+import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 /**
  * Dagger module for User related classes.
  */
-@Module
-public class UserModule {
+@Module(
+        includes = {
+                UserRepositoryModule.class,
+        }
+)
+public abstract class UserModule {
 
     private static final String FILE_PROVIDER_AUTHORITY = "com.android.systemui.fileprovider";
 
     @Provides
-    EditUserInfoController provideEditUserInfoController() {
+    public static EditUserInfoController provideEditUserInfoController() {
         return new EditUserInfoController(FILE_PROVIDER_AUTHORITY);
     }
+
+    /** Provides UserSwitcherActivity */
+    @Binds
+    @IntoMap
+    @ClassKey(UserSwitcherActivity.class)
+    public abstract Activity provideUserSwitcherActivity(UserSwitcherActivity activity);
 }

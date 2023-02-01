@@ -31,9 +31,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowSurfaceControllerProto.LAYER;
 import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 
-import android.graphics.Region;
 import android.os.Debug;
 import android.os.Trace;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
@@ -76,8 +76,8 @@ class WindowSurfaceController {
     // Used to track whether we have called detach children on the way to invisibility.
     boolean mChildrenDetached;
 
-    WindowSurfaceController(String name, int w, int h, int format,
-            int flags, WindowStateAnimator animator, int windowType) {
+    WindowSurfaceController(String name, int format, int flags, WindowStateAnimator animator,
+            int windowType) {
         mAnimator = animator;
 
         title = name;
@@ -91,7 +91,6 @@ class WindowSurfaceController {
         final SurfaceControl.Builder b = win.makeSurface()
                 .setParent(win.getSurfaceControl())
                 .setName(name)
-                .setBufferSize(w, h)
                 .setFormat(format)
                 .setFlags(flags)
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)
@@ -126,6 +125,12 @@ class WindowSurfaceController {
         setShown(false);
         try {
             transaction.hide(mSurfaceControl);
+            if (mAnimator.mIsWallpaper) {
+                final DisplayContent dc = mAnimator.mWin.getDisplayContent();
+                EventLog.writeEvent(EventLogTags.WM_WALLPAPER_SURFACE,
+                        dc.mDisplayId, 0 /* request hidden */,
+                        String.valueOf(dc.mWallpaperController.getWallpaperTarget()));
+            }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception hiding surface in " + this);
         }
@@ -136,6 +141,12 @@ class WindowSurfaceController {
                 "Destroying surface %s called by %s", this, Debug.getCallers(8));
         try {
             if (mSurfaceControl != null) {
+                if (mAnimator.mIsWallpaper && !mAnimator.mWin.mWindowRemovalAllowed
+                        && !mAnimator.mWin.mRemoveOnExit) {
+                    // The wallpaper surface should have the same lifetime as its window.
+                    Slog.e(TAG, "Unexpected removing wallpaper surface of " + mAnimator.mWin
+                            + " by " + Debug.getCallers(8));
+                }
                 t.remove(mSurfaceControl);
             }
         } catch (RuntimeException e) {
@@ -214,6 +225,11 @@ class WindowSurfaceController {
         mService.openSurfaceTransaction();
         try {
             getGlobalTransaction().setSecure(mSurfaceControl, isSecure);
+
+            final DisplayContent dc = mAnimator.mWin.mDisplayContent;
+            if (dc != null) {
+                dc.refreshImeSecureFlag(getGlobalTransaction());
+            }
         } finally {
             mService.closeSurfaceTransaction("setSecure");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setSecureLocked");
@@ -251,6 +267,12 @@ class WindowSurfaceController {
 
         setShown(true);
         t.show(mSurfaceControl);
+        if (mAnimator.mIsWallpaper) {
+            final DisplayContent dc = mAnimator.mWin.getDisplayContent();
+            EventLog.writeEvent(EventLogTags.WM_WALLPAPER_SURFACE,
+                    dc.mDisplayId, 1 /* request shown */,
+                    String.valueOf(dc.mWallpaperController.getWallpaperTarget()));
+        }
         return true;
     }
 

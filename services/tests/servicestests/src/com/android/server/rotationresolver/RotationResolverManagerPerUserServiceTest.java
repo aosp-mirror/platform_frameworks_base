@@ -76,7 +76,8 @@ public class RotationResolverManagerPerUserServiceTest {
         // setup a spy for the RotationResolverManagerPerUserService.
         final RotationResolverManagerService mainService = new RotationResolverManagerService(
                 mContext);
-        mService = new RotationResolverManagerPerUserService(mainService, /* Lock */ new Object(),
+        final Object lock = new Object();
+        mService = new RotationResolverManagerPerUserService(mainService, lock,
                 mContext.getUserId());
 
         mCancellationSignal = new CancellationSignal();
@@ -84,15 +85,13 @@ public class RotationResolverManagerPerUserServiceTest {
         mRequest = new RotationResolutionRequest("", Surface.ROTATION_0, Surface.ROTATION_0,
                 true, 1000L);
         this.mService.mCurrentRequest = new RemoteRotationResolverService.RotationRequest(
-                mMockCallbackInternal, mRequest, mCancellationSignal);
+                mMockCallbackInternal, mRequest, mCancellationSignal, lock);
 
         this.mService.getMaster().mIsServiceEnabled = true;
 
         ComponentName componentName = new ComponentName(PACKAGE_NAME, CLASS_NAME);
         this.mService.mRemoteService = new MockRemoteRotationResolverService(mContext,
-                componentName, mContext.getUserId(),
-                /* idleUnbindTimeoutMs */60000L,
-                /* Lock */ new Object());
+                componentName, mContext.getUserId(), /* idleUnbindTimeoutMs */60000L);
     }
 
     @Test
@@ -126,13 +125,13 @@ public class RotationResolverManagerPerUserServiceTest {
     }
 
     static class MockRemoteRotationResolverService extends RemoteRotationResolverService {
-        MockRemoteRotationResolverService(Context context, ComponentName serviceName,
-                int userId, long idleUnbindTimeoutMs, Object lock) {
-            super(context, serviceName, userId, idleUnbindTimeoutMs, lock);
+        MockRemoteRotationResolverService(Context context, ComponentName serviceName, int userId,
+                long idleUnbindTimeoutMs) {
+            super(context, serviceName, userId, idleUnbindTimeoutMs);
         }
 
         @Override
-        public void resolveRotationLocked(RotationRequest request) {
+        public void resolveRotation(RotationRequest request) {
             request.mCallbackInternal.onSuccess(request.mRemoteRequest.getProposedRotation());
         }
     }

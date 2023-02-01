@@ -16,6 +16,8 @@
 
 package com.android.server.location.gnss;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
@@ -46,7 +48,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Handles network connection requests and network state change updates for AGPS data download.
@@ -189,7 +190,7 @@ class GnssNetworkConnectivityHandler {
         mContext = context;
         mGnssNetworkListener = gnssNetworkListener;
 
-    SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
+        SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
         if (subManager != null) {
             subManager.addOnSubscriptionsChangedListener(mOnSubscriptionsChangeListener);
         }
@@ -200,7 +201,7 @@ class GnssNetworkConnectivityHandler {
         mHandler = new Handler(looper);
         mNiHandler = niHandler;
         mConnMgr = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mSuplConnectivityCallback = createSuplConnectivityCallback();
+        mSuplConnectivityCallback = null;
     }
 
     /**
@@ -307,6 +308,13 @@ class GnssNetworkConnectivityHandler {
     boolean isDataNetworkConnected() {
         NetworkInfo activeNetworkInfo = mConnMgr.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    /**
+     * Returns the active Sub ID for emergency SUPL connection.
+     */
+    int getActiveSubId() {
+        return mActiveSubId;
     }
 
     /**
@@ -553,7 +561,7 @@ class GnssNetworkConnectivityHandler {
                 mAGpsDataConnectionIpAddr = InetAddress.getByAddress(suplIpAddr);
                 if (DEBUG) Log.d(TAG, "IP address converted to: " + mAGpsDataConnectionIpAddr);
             } catch (UnknownHostException e) {
-                Log.e(TAG, "Bad IP Address: " + suplIpAddr, e);
+                Log.e(TAG, "Bad IP Address: " + Arrays.toString(suplIpAddr), e);
             }
         }
 
@@ -582,13 +590,25 @@ class GnssNetworkConnectivityHandler {
         if (mNiHandler.getInEmergency() && mActiveSubId >= 0) {
             if (DEBUG) Log.d(TAG, "Adding Network Specifier: " + Integer.toString(mActiveSubId));
             networkRequestBuilder.setNetworkSpecifier(Integer.toString(mActiveSubId));
+            networkRequestBuilder.removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         }
         NetworkRequest networkRequest = networkRequestBuilder.build();
-        mConnMgr.requestNetwork(
-                networkRequest,
-                mSuplConnectivityCallback,
-                mHandler,
-                SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
+        // Make sure we only have a single request.
+        if (mSuplConnectivityCallback != null) {
+            mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
+        }
+        mSuplConnectivityCallback = createSuplConnectivityCallback();
+        try {
+            mConnMgr.requestNetwork(
+                    networkRequest,
+                    mSuplConnectivityCallback,
+                    mHandler,
+                    SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Failed to request network.", e);
+            mSuplConnectivityCallback = null;
+            handleReleaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
+        }
     }
 
     private int getNetworkCapability(int agpsType) {
@@ -619,7 +639,10 @@ class GnssNetworkConnectivityHandler {
         }
 
         mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
-        mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
+        if (mSuplConnectivityCallback != null) {
+            mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
+            mSuplConnectivityCallback = null;
+        }
         switch (agpsDataConnStatus) {
             case GPS_AGPS_DATA_CONN_FAILED:
                 native_agps_data_conn_failed();

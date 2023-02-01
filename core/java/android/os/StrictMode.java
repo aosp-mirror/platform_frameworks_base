@@ -26,6 +26,9 @@ import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -118,20 +121,18 @@ import java.util.function.Consumer;
  *
  * <pre>
  * public void onCreate() {
- *     if (DEVELOPER_MODE) {
- *         StrictMode.setThreadPolicy(new {@link ThreadPolicy.Builder StrictMode.ThreadPolicy.Builder}()
- *                 .detectDiskReads()
- *                 .detectDiskWrites()
- *                 .detectNetwork()   // or .detectAll() for all detectable problems
- *                 .penaltyLog()
- *                 .build());
- *         StrictMode.setVmPolicy(new {@link VmPolicy.Builder StrictMode.VmPolicy.Builder}()
- *                 .detectLeakedSqlLiteObjects()
- *                 .detectLeakedClosableObjects()
- *                 .penaltyLog()
- *                 .penaltyDeath()
- *                 .build());
- *     }
+ *     StrictMode.setThreadPolicy(new {@link ThreadPolicy.Builder StrictMode.ThreadPolicy.Builder}()
+ *             .detectDiskReads()
+ *             .detectDiskWrites()
+ *             .detectNetwork()   // or .detectAll() for all detectable problems
+ *             .penaltyLog()
+ *             .build());
+ *     StrictMode.setVmPolicy(new {@link VmPolicy.Builder StrictMode.VmPolicy.Builder}()
+ *             .detectLeakedSqlLiteObjects()
+ *             .detectLeakedClosableObjects()
+ *             .penaltyLog()
+ *             .penaltyDeath()
+ *             .build());
  *     super.onCreate();
  * }
  * </pre>
@@ -150,9 +151,7 @@ import java.util.function.Consumer;
  * <p class="note">StrictMode is not a security mechanism and is not guaranteed to find all disk or
  * network accesses. While it does propagate its state across process boundaries when doing {@link
  * android.os.Binder} calls, it's still ultimately a best effort mechanism. Notably, disk or network
- * access from JNI calls won't necessarily trigger it. Future versions of Android may catch more (or
- * fewer) operations, so you should never leave StrictMode enabled in applications distributed on
- * Google Play.
+ * access from JNI calls won't necessarily trigger it.
  */
 public final class StrictMode {
     private static final String TAG = "StrictMode";
@@ -348,6 +347,13 @@ public final class StrictMode {
     public static final int NETWORK_POLICY_LOG = 1;
     /** {@hide} */
     public static final int NETWORK_POLICY_REJECT = 2;
+  
+    /**
+     * Detect explicit calls to {@link Runtime#gc()}.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long DETECT_EXPLICIT_GC = 3400644L;
 
     // TODO: wrap in some ImmutableHashMap thing.
     // Note: must be before static initialization of sVmPolicy.
@@ -500,6 +506,7 @@ public final class StrictMode {
              * <p>As of the Gingerbread release this includes network and disk operations but will
              * likely expand in future releases.
              */
+            @SuppressWarnings("AndroidFrameworkCompatChange")
             public @NonNull Builder detectAll() {
                 detectDiskReads();
                 detectDiskWrites();
@@ -514,6 +521,9 @@ public final class StrictMode {
                 }
                 if (targetSdk >= Build.VERSION_CODES.O) {
                     detectUnbufferedIo();
+                }
+                if (CompatChanges.isChangeEnabled(DETECT_EXPLICIT_GC)) {
+                    detectExplicitGc();
                 }
                 return this;
             }
@@ -595,26 +605,16 @@ public final class StrictMode {
             }
 
             /**
-             * Detect explicit GC requests, i.e. calls to Runtime.gc().
-             *
-             * @hide
+             * Detect calls to {@link Runtime#gc()}.
              */
-            @TestApi
             public @NonNull Builder detectExplicitGc() {
-                // TODO(b/3400644): Un-hide this for next API update
-                // TODO(b/3400644): Un-hide ExplicitGcViolation for next API update
-                // TODO(b/3400644): Make DETECT_EXPLICIT_GC a @TestApi for next API update
-                // TODO(b/3400644): Call this from detectAll in next API update
                 return enable(DETECT_THREAD_EXPLICIT_GC);
             }
 
             /**
-             * Disable detection of explicit GC requests, i.e. calls to Runtime.gc().
-             *
-             * @hide
+             * Disable detection of calls to {@link Runtime#gc()}.
              */
             public @NonNull Builder permitExplicitGc() {
-                // TODO(b/3400644): Un-hide this for next API update
                 return disable(DETECT_THREAD_EXPLICIT_GC);
             }
 
@@ -946,7 +946,7 @@ public final class StrictMode {
              * <p>Instead, apps should use {@code content://} Uris so the platform can extend
              * temporary permission for the receiving app to access the resource.
              *
-             * @see android.support.v4.content.FileProvider
+             * @see androidx.core.content.FileProvider
              * @see Intent#FLAG_GRANT_READ_URI_PERMISSION
              */
             public @NonNull Builder detectFileUriExposure() {
@@ -2997,7 +2997,7 @@ public final class StrictMode {
          *     should be removed.
          */
         public ViolationInfo(Parcel in, boolean unsetGatheringBit) {
-            mViolation = (Violation) in.readSerializable();
+            mViolation = (Violation) in.readSerializable(android.os.strictmode.Violation.class.getClassLoader(), android.os.strictmode.Violation.class);
             int binderStackSize = in.readInt();
             for (int i = 0; i < binderStackSize; i++) {
                 StackTraceElement[] traceElements = new StackTraceElement[in.readInt()];

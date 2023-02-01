@@ -26,6 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @RunWith(AndroidJUnit4.class)
@@ -37,6 +38,38 @@ public class ArraySetPerfTest {
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
+
+    @Test
+    public void testForEach_Small() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        Consumer<Integer> consumer = (i) -> {
+        };
+        while (state.keepRunning()) {
+            for (int i = 0; i < NUM_ITERATIONS; ++i) {
+                ArraySet<Integer> set = new ArraySet<>();
+                for (int j = 0; j < SET_SIZE_SMALL; j++) {
+                    set.add(j);
+                }
+                set.forEach(consumer);
+            }
+        }
+    }
+
+    @Test
+    public void testForEach_Large() {
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        Consumer<Integer> consumer = (i) -> {
+        };
+        while (state.keepRunning()) {
+            for (int i = 0; i < NUM_ITERATIONS; ++i) {
+                ArraySet<Integer> set = new ArraySet<>();
+                for (int j = 0; j < SET_SIZE_LARGE; j++) {
+                    set.add(j);
+                }
+                set.forEach(consumer);
+            }
+        }
+    }
 
     @Test
     public void testValueAt_InBounds() {

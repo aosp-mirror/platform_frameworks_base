@@ -133,7 +133,7 @@ public final class ImsConferenceState implements Parcelable {
 
         for (int i = 0; i < size; ++i) {
             String user = in.readString();
-            Bundle state = in.readParcelable(null);
+            Bundle state = in.readParcelable(null, android.os.Bundle.class);
             mParticipants.put(user, state);
         }
     }

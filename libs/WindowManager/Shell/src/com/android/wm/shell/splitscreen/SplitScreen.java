@@ -18,6 +18,7 @@ package com.android.wm.shell.splitscreen;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.graphics.Rect;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
@@ -58,6 +59,7 @@ public interface SplitScreen {
     interface SplitScreenListener {
         default void onStagePositionChanged(@StageType int stage, @SplitPosition int position) {}
         default void onTaskStageChanged(int taskId, @StageType int stage, boolean visible) {}
+        default void onSplitBoundsChanged(Rect rootBounds, Rect mainBounds, Rect sideBounds) {}
         default void onSplitVisibilityChanged(boolean visible) {}
     }
 
@@ -75,23 +77,8 @@ public interface SplitScreen {
         return null;
     }
 
-    /**
-     * Called when the keyguard occluded state changes.
-     * @param occluded Indicates if the keyguard is now occluded.
-     */
-    void onKeyguardOccludedChanged(boolean occluded);
-
-    /**
-     * Called when the visibility of the keyguard changes.
-     * @param showing Indicates if the keyguard is now visible.
-     */
-    void onKeyguardVisibilityChanged(boolean showing);
-
     /** Called when device waking up finished. */
     void onFinishedWakingUp();
-
-    /** Called when device going to sleep finished. */
-    void onFinishedGoingToSleep();
 
     /** Get a string representation of a stage type */
     static String stageTypeToString(@StageType int stage) {

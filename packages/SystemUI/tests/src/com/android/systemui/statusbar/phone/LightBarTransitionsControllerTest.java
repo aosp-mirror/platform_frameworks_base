@@ -45,15 +45,18 @@ public class LightBarTransitionsControllerTest extends SysuiTestCase {
 
     @Mock
     private DarkIntensityApplier mApplier;
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private StatusBarStateController mStatusBarStateController;
+
     private LightBarTransitionsController mLightBarTransitionsController;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectMockDependency(KeyguardStateController.class);
-        mDependency.injectMockDependency(StatusBarStateController.class);
         mLightBarTransitionsController = new LightBarTransitionsController(mContext, mApplier,
-                new CommandQueue(mContext));
+                new CommandQueue(mContext), mKeyguardStateController, mStatusBarStateController);
     }
 
     @Test

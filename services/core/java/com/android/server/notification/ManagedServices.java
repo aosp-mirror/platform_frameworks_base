@@ -1065,7 +1065,7 @@ abstract public class ManagedServices {
         }
     }
 
-    protected void setComponentState(ComponentName component, boolean enabled) {
+    protected void setComponentState(ComponentName component, int userId, boolean enabled) {
         boolean previous = !mSnoozingForCurrentProfiles.contains(component);
         if (previous == enabled) {
             return;
@@ -1082,20 +1082,15 @@ abstract public class ManagedServices {
                 component.flattenToShortString());
 
         synchronized (mMutex) {
-            final IntArray userIds = mUserProfiles.getCurrentProfileIds();
-
-            for (int i = 0; i < userIds.size(); i++) {
-                final int userId = userIds.get(i);
-                if (enabled) {
-                    if (isPackageOrComponentAllowed(component.flattenToString(), userId)
-                            || isPackageOrComponentAllowed(component.getPackageName(), userId)) {
-                        registerServiceLocked(component, userId);
-                    } else {
-                        Slog.d(TAG, component + " no longer has permission to be bound");
-                    }
+            if (enabled) {
+                if (isPackageOrComponentAllowed(component.flattenToString(), userId)
+                        || isPackageOrComponentAllowed(component.getPackageName(), userId)) {
+                    registerServiceLocked(component, userId);
                 } else {
-                    unregisterServiceLocked(component, userId);
+                    Slog.d(TAG, component + " no longer has permission to be bound");
                 }
+            } else {
+                unregisterServiceLocked(component, userId);
             }
         }
     }
@@ -1452,6 +1447,16 @@ abstract public class ManagedServices {
         }
     }
 
+    @VisibleForTesting
+    void reregisterService(final ComponentName cn, final int userId) {
+        // If rebinding a package that died, ensure it still has permission
+        // after the rebind delay
+        if (isPackageOrComponentAllowed(cn.getPackageName(), userId)
+                || isPackageOrComponentAllowed(cn.flattenToString(), userId)) {
+            registerService(cn, userId);
+        }
+    }
+
     /**
      * Inject a system service into the management list.
      */
@@ -1550,12 +1555,9 @@ abstract public class ManagedServices {
                         unbindService(this, name, userid);
                         if (!mServicesRebinding.contains(servicesBindingTag)) {
                             mServicesRebinding.add(servicesBindingTag);
-                            mHandler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        registerService(name, userid);
-                                    }
-                               }, ON_BINDING_DIED_REBIND_DELAY_MS);
+                            mHandler.postDelayed(() ->
+                                    reregisterService(name, userid),
+                                    ON_BINDING_DIED_REBIND_DELAY_MS);
                         } else {
                             Slog.v(TAG, getCaption() + " not rebinding in user " + userid
                                     + " as a previous rebind attempt was made: " + name);
@@ -1784,7 +1786,7 @@ abstract public class ManagedServices {
          * from receiving events from the profile.
          */
         public boolean isPermittedForProfile(int userId) {
-            if (!mUserProfiles.isManagedProfile(userId)) {
+            if (!mUserProfiles.isProfileUser(userId)) {
                 return true;
             }
             DevicePolicyManager dpm =
@@ -1860,10 +1862,16 @@ abstract public class ManagedServices {
             }
         }
 
-        public boolean isManagedProfile(int userId) {
+        public boolean isProfileUser(int userId) {
             synchronized (mCurrentProfiles) {
                 UserInfo user = mCurrentProfiles.get(userId);
-                return user != null && user.isManagedProfile();
+                if (user == null) {
+                    return false;
+                }
+                if (user.isManagedProfile() || user.isCloneProfile()) {
+                    return true;
+                }
+                return false;
             }
         }
     }

@@ -19,9 +19,10 @@ package android.content.pm.dex;
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_DEX_METADATA;
 import static android.content.pm.parsing.ApkLiteParseUtils.APK_FILE_EXTENSION;
 
-import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.JsonReader;
@@ -176,18 +177,16 @@ public class DexMetadataHelper {
      * Validate that the given file is a dex metadata archive.
      * This is just a validation that the file is a zip archive that contains a manifest.json
      * with the package name and version code.
-     *
-     * @throws PackageParserException if the file is not a .dm file.
      */
-    public static void validateDexMetadataFile(String dmaPath, String packageName, long versionCode)
-            throws PackageParserException {
-        validateDexMetadataFile(dmaPath, packageName, versionCode,
+    public static ParseResult validateDexMetadataFile(ParseInput input, String dmaPath,
+            String packageName, long versionCode) {
+        return validateDexMetadataFile(input, dmaPath, packageName, versionCode,
                SystemProperties.getBoolean(PROPERTY_DM_JSON_MANIFEST_REQUIRED, false));
     }
 
     @VisibleForTesting
-    public static void validateDexMetadataFile(String dmaPath, String packageName, long versionCode,
-            boolean requireManifest) throws PackageParserException {
+    public static ParseResult validateDexMetadataFile(ParseInput input, String dmaPath,
+            String packageName, long versionCode, boolean requireManifest) {
         StrictJarFile jarFile = null;
 
         if (DEBUG) {
@@ -197,11 +196,10 @@ public class DexMetadataHelper {
 
         try {
             jarFile = new StrictJarFile(dmaPath, false, false);
-            validateDexMetadataManifest(dmaPath, jarFile, packageName, versionCode,
+            return validateDexMetadataManifest(input, dmaPath, jarFile, packageName, versionCode,
                     requireManifest);
         } catch (IOException e) {
-            throw new PackageParserException(INSTALL_FAILED_BAD_DEX_METADATA,
-                    "Error opening " + dmaPath, e);
+            return input.error(INSTALL_FAILED_BAD_DEX_METADATA, "Error opening " + dmaPath, e);
         } finally {
             if (jarFile != null) {
                 try {
@@ -213,21 +211,21 @@ public class DexMetadataHelper {
     }
 
     /** Ensure that packageName and versionCode match the manifest.json in the .dm file */
-    private static void validateDexMetadataManifest(String dmaPath, StrictJarFile jarFile,
-            String packageName, long versionCode, boolean requireManifest)
-            throws IOException, PackageParserException {
+    private static ParseResult validateDexMetadataManifest(ParseInput input, String dmaPath,
+            StrictJarFile jarFile, String packageName, long versionCode, boolean requireManifest)
+            throws IOException {
         if (!requireManifest) {
             if (DEBUG) {
                 Log.v(TAG, "validateDexMetadataManifest: " + dmaPath
                         + " manifest.json check skipped");
             }
-            return;
+            return input.success(null);
         }
 
         ZipEntry zipEntry = jarFile.findEntry("manifest.json");
         if (zipEntry == null) {
-              throw new PackageParserException(INSTALL_FAILED_BAD_DEX_METADATA,
-                      "Missing manifest.json in " + dmaPath);
+            return input.error(INSTALL_FAILED_BAD_DEX_METADATA,
+                    "Missing manifest.json in " + dmaPath);
         }
         InputStream inputStream = jarFile.getInputStream(zipEntry);
 
@@ -235,7 +233,7 @@ public class DexMetadataHelper {
         try {
           reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            throw new PackageParserException(INSTALL_FAILED_BAD_DEX_METADATA,
+            return input.error(INSTALL_FAILED_BAD_DEX_METADATA,
                     "Error opening manifest.json in " + dmaPath, e);
         }
         String jsonPackageName = null;
@@ -255,19 +253,19 @@ public class DexMetadataHelper {
         reader.endObject();
 
         if (jsonPackageName == null || jsonVersionCode == -1) {
-            throw new PackageParserException(INSTALL_FAILED_BAD_DEX_METADATA,
+            return input.error(INSTALL_FAILED_BAD_DEX_METADATA,
                     "manifest.json in " + dmaPath
                     + " is missing 'packageName' and/or 'versionCode'");
         }
 
         if (!jsonPackageName.equals(packageName)) {
-            throw new PackageParserException(INSTALL_FAILED_BAD_DEX_METADATA,
+            return input.error(INSTALL_FAILED_BAD_DEX_METADATA,
                     "manifest.json in " + dmaPath + " has invalid packageName: " + jsonPackageName
                     + ", expected: " + packageName);
         }
 
         if (versionCode != jsonVersionCode) {
-            throw new PackageParserException(INSTALL_FAILED_BAD_DEX_METADATA,
+            return input.error(INSTALL_FAILED_BAD_DEX_METADATA,
                     "manifest.json in " + dmaPath + " has invalid versionCode: " + jsonVersionCode
                     + ", expected: " + versionCode);
         }
@@ -276,6 +274,7 @@ public class DexMetadataHelper {
             Log.v(TAG, "validateDexMetadataManifest: " + dmaPath + ", " + packageName +
                     ", " + versionCode + ": successful");
         }
+        return input.success(null);
     }
 
     /**

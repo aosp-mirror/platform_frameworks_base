@@ -53,4 +53,11 @@ interface WindowMagnifierCallback {
      * @param displayId The logical display id.
      */
     void onAccessibilityActionPerformed(int displayId);
+
+    /**
+     * Called when the user is performing a move action.
+     *
+     * @param displayId The logical display id.
+     */
+    void onMove(int displayId);
 }

@@ -30,6 +30,7 @@
         <permission name="android.permission.MANAGE_DEBUGGING"/>
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
         <permission name="android.permission.MANAGE_FINGERPRINT"/>
+        <permission name="android.permission.MANAGE_GAME_MODE" />
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.MANAGE_USER_OEM_UNLOCK_STATE" />
@@ -59,5 +60,7 @@
         <permission name="android.permission.READ_DREAM_STATE"/>
         <permission name="android.permission.READ_DREAM_SUPPRESSION"/>
         <permission name="android.permission.RESTART_WIFI_SUBSYSTEM"/>
+        <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
+        <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
     </privapp-permissions>
 </permissions>

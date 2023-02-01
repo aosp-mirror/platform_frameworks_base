@@ -321,6 +321,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * can submit reprocess capture requests. Submitting a reprocess request to a regular capture
      * session will result in an {@link IllegalArgumentException}.</p>
      *
+     * <p>Submitting a request that targets Surfaces with an unsupported dynamic range combination
+     * will result in an {@link IllegalArgumentException}.</p>
+     *
      * @param request the settings for this capture
      * @param listener The callback object to notify once this request has been
      * processed. If null, no metadata will be produced for this capture,
@@ -347,13 +350,15 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                                  a different session; or the capture targets a Surface in
      *                                  the middle of being {@link #prepare prepared}; or the
      *                                  handler is null, the listener is not null, and the calling
-     *                                  thread has no looper.
+     *                                  thread has no looper; or the request targets Surfaces with
+     *                                  an unsupported dynamic range combination
      *
      * @see #captureBurst
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see #abortCaptures
      * @see CameraDevice#createReprocessableCaptureSession
+     * @see android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints
      */
     public abstract int capture(@NonNull CaptureRequest request,
             @Nullable CaptureCallback listener, @Nullable Handler handler)
@@ -389,13 +394,16 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                                  request was created with a {@link TotalCaptureResult} from
      *                                  a different session; or the capture targets a Surface in
      *                                  the middle of being {@link #prepare prepared}; or the
-     *                                  executor is null, or the listener is not null.
+     *                                  executor is null, or the listener is not null;
+     *                                  or the request targets Surfaces with an unsupported dynamic
+     *                                  range combination;
      *
      * @see #captureBurst
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see #abortCaptures
      * @see CameraDevice#createReprocessableCaptureSession
+     * @see android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints
      */
     public int captureSingleRequest(@NonNull CaptureRequest request,
             @NonNull @CallbackExecutor Executor executor, @NonNull CaptureCallback listener)
@@ -427,6 +435,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * can submit reprocess capture requests. Submitting a reprocess request to a regular
      * capture session will result in an {@link IllegalArgumentException}.</p>
      *
+     * <p>Submitting a request that targets Surfaces with an unsupported dynamic range combination
+     * will result in an {@link IllegalArgumentException}.</p>
+     *
      * @param requests the list of settings for this burst capture
      * @param listener The callback object to notify each time one of the
      * requests in the burst has been processed. If null, no metadata will be
@@ -454,12 +465,15 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                                  {@link TotalCaptureResult} from a different session; or one
      *                                  of the captures targets a Surface in the middle of being
      *                                  {@link #prepare prepared}; or if the handler is null, the
-     *                                  listener is not null, and the calling thread has no looper.
+     *                                  listener is not null, and the calling thread has no looper;
+     *                                  or the request targets Surfaces with an unsupported dynamic
+     *                                  range combination.
      *
      * @see #capture
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see #abortCaptures
+     * @see android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints
      */
     public abstract int captureBurst(@NonNull List<CaptureRequest> requests,
             @Nullable CaptureCallback listener, @Nullable Handler handler)
@@ -499,12 +513,15 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                                  {@link TotalCaptureResult} from a different session; or one
      *                                  of the captures targets a Surface in the middle of being
      *                                  {@link #prepare prepared}; or if the executor is null; or if
-     *                                  the listener is null.
+     *                                  the listener is null;
+     *                                  or the request targets Surfaces with an unsupported dynamic
+     *                                  range combination.
      *
      * @see #capture
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      * @see #abortCaptures
+     * @see android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints
      */
     public int captureBurstRequests(@NonNull List<CaptureRequest> requests,
             @NonNull @CallbackExecutor Executor executor, @NonNull CaptureCallback listener)
@@ -545,6 +562,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * single reprocess input image. The request must be capturing images from the camera. If a
      * reprocess capture request is submitted, this method will throw IllegalArgumentException.</p>
      *
+     * <p>Submitting a request that targets Surfaces with an unsupported dynamic range combination
+     * will result in an {@link IllegalArgumentException}.</p>
+     *
      * @param request the request to repeat indefinitely
      * @param listener The callback object to notify every time the
      * request finishes processing. If null, no metadata will be
@@ -567,13 +587,16 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                                  is a reprocess capture request; or the capture targets a
      *                                  Surface in the middle of being {@link #prepare prepared}; or
      *                                  the handler is null, the listener is not null, and the
-     *                                  calling thread has no looper; or no requests were passed in.
+     *                                  calling thread has no looper; or no requests were passed in;
+     *                                  or the request targets Surfaces with an unsupported dynamic
+     *                                  range combination.
      *
      * @see #capture
      * @see #captureBurst
      * @see #setRepeatingBurst
      * @see #stopRepeating
      * @see #abortCaptures
+     * @see android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints
      */
     public abstract int setRepeatingRequest(@NonNull CaptureRequest request,
             @Nullable CaptureCallback listener, @Nullable Handler handler)
@@ -604,13 +627,16 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                                  that are not currently configured as outputs; or the request
      *                                  is a reprocess capture request; or the capture targets a
      *                                  Surface in the middle of being {@link #prepare prepared}; or
-     *                                  the executor is null; or the listener is null.
+     *                                  the executor is null; or the listener is null;
+     *                                  or the request targets Surfaces with an unsupported dynamic
+     *                                  range combination.
      *
      * @see #capture
      * @see #captureBurst
      * @see #setRepeatingBurst
      * @see #stopRepeating
      * @see #abortCaptures
+     * @see android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints
      */
     public int setSingleRepeatingRequest(@NonNull CaptureRequest request,
             @NonNull @CallbackExecutor Executor executor, @NonNull CaptureCallback listener)
@@ -655,6 +681,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * single reprocess input image. The request must be capturing images from the camera. If a
      * reprocess capture request is submitted, this method will throw IllegalArgumentException.</p>
      *
+     * <p>Submitting a request that targets Surfaces with an unsupported dynamic range combination
+     * will result in an {@link IllegalArgumentException}.</p>
+     *
      * @param requests the list of requests to cycle through indefinitely
      * @param listener The callback object to notify each time one of the
      * requests in the repeating bursts has finished processing. If null, no
@@ -678,13 +707,16 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                                  targets a Surface in the middle of being
      *                                  {@link #prepare prepared}; or the handler is null, the
      *                                  listener is not null, and the calling thread has no looper;
-     *                                  or no requests were passed in.
+     *                                  or no requests were passed in;
+     *                                  or the request targets Surfaces with an unsupported dynamic
+     *                                  range combination.
      *
      * @see #capture
      * @see #captureBurst
      * @see #setRepeatingRequest
      * @see #stopRepeating
      * @see #abortCaptures
+     * @see android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints
      */
     public abstract int setRepeatingBurst(@NonNull List<CaptureRequest> requests,
             @Nullable CaptureCallback listener, @Nullable Handler handler)
@@ -717,13 +749,16 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *                                  is a reprocess capture request; or one of the captures
      *                                  targets a Surface in the middle of being
      *                                  {@link #prepare prepared}; or the executor is null; or the
-     *                                  listener is null.
+     *                                  listener is null;
+     *                                  or the request targets Surfaces with an unsupported dynamic
+     *                                  range combination.
      *
      * @see #capture
      * @see #captureBurst
      * @see #setRepeatingRequest
      * @see #stopRepeating
      * @see #abortCaptures
+     * @see android.hardware.camera2.params.DynamicRangeProfiles#getProfileCaptureRequestConstraints
      */
     public int setRepeatingBurstRequests(@NonNull List<CaptureRequest> requests,
             @NonNull @CallbackExecutor Executor executor, @NonNull CaptureCallback listener)
@@ -1194,6 +1229,42 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * @see android.media.MediaActionSound
          */
         public void onCaptureStarted(@NonNull CameraCaptureSession session,
+                @NonNull CaptureRequest request, long timestamp, long frameNumber) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called when the camera device has started reading out the output
+         * image for the request, at the beginning of the sensor image readout.
+         *
+         * <p>For a capture request, this callback is invoked right after
+         * {@link #onCaptureStarted}. Unlike {@link #onCaptureStarted}, instead of passing
+         * a timestamp of start of exposure, this callback passes a timestamp of start of
+         * camera data readout. This is useful because for a camera running at fixed frame
+         * rate, the start of readout is at fixed interval, which is not necessarily true for
+         * the start of exposure, particularly when autoexposure is changing exposure duration
+         * between frames.</p>
+         *
+         * <p>This timestamp may not match {@link CaptureResult#SENSOR_TIMESTAMP the result
+         * timestamp field}. It will, however, match the timestamp of buffers sent to the
+         * output surfaces with {@link OutputConfiguration#TIMESTAMP_BASE_READOUT_SENSOR}
+         * timestamp base.</p>
+         *
+         * <p>This callback will be called only if {@link
+         * CameraCharacteristics#SENSOR_READOUT_TIMESTAMP} is
+         * {@link CameraMetadata#SENSOR_READOUT_TIMESTAMP_HARDWARE}, and it's called
+         * right after {@link #onCaptureStarted}.</p>
+         *
+         * @param session the session returned by {@link CameraDevice#createCaptureSession}
+         * @param request the request for the readout that just began
+         * @param timestamp the timestamp at start of readout for a regular request, or
+         *                  the timestamp at the input image's start of readout for a
+         *                  reprocess request, in nanoseconds.
+         * @param frameNumber the frame number for this capture
+         *
+         * @hide
+         */
+        public void onReadoutStarted(@NonNull CameraCaptureSession session,
                 @NonNull CaptureRequest request, long timestamp, long frameNumber) {
             // default empty implementation
         }

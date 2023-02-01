@@ -4,12 +4,13 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.shade.NotificationShadeWindowViewController
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
-import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController
 import com.android.systemui.statusbar.policy.HeadsUpUtil
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
@@ -18,8 +19,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
@@ -29,6 +30,8 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
     @Mock lateinit var notificationShadeWindowViewController: NotificationShadeWindowViewController
     @Mock lateinit var notificationListContainer: NotificationListContainer
     @Mock lateinit var headsUpManager: HeadsUpManagerPhone
+    @Mock lateinit var jankMonitor: InteractionJankMonitor
+    @Mock lateinit var onFinishAnimationCallback: Runnable
 
     private lateinit var notificationTestHelper: NotificationTestHelper
     private lateinit var notification: ExpandableNotificationRow
@@ -49,7 +52,9 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
                 notificationShadeWindowViewController,
                 notificationListContainer,
                 headsUpManager,
-                notification
+                notification,
+                jankMonitor,
+                onFinishAnimationCallback
         )
     }
 
@@ -58,7 +63,7 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testHunIsRemovedIfWeDontAnimateLaunch() {
+    fun testHunIsRemovedAndCallbackIsInvokedIfWeDontAnimateLaunch() {
         flagNotificationAsHun()
         controller.onIntentStarted(willAnimate = false)
 
@@ -66,10 +71,11 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
         assertFalse(notification.entry.isExpandAnimationRunning)
         verify(headsUpManager).removeNotification(
                 notificationKey, true /* releaseImmediately */, true /* animate */)
+        verify(onFinishAnimationCallback).run()
     }
 
     @Test
-    fun testHunIsRemovedWhenAnimationIsCancelled() {
+    fun testHunIsRemovedAndCallbackIsInvokedWhenAnimationIsCancelled() {
         flagNotificationAsHun()
         controller.onLaunchAnimationCancelled()
 
@@ -77,10 +83,11 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
         assertFalse(notification.entry.isExpandAnimationRunning)
         verify(headsUpManager).removeNotification(
                 notificationKey, true /* releaseImmediately */, true /* animate */)
+        verify(onFinishAnimationCallback).run()
     }
 
     @Test
-    fun testHunIsRemovedWhenAnimationEnds() {
+    fun testHunIsRemovedAndCallbackIsInvokedWhenAnimationEnds() {
         flagNotificationAsHun()
         controller.onLaunchAnimationEnd(isExpandingFullyAbove = true)
 
@@ -88,6 +95,7 @@ class NotificationLaunchAnimatorControllerTest : SysuiTestCase() {
         assertFalse(notification.entry.isExpandAnimationRunning)
         verify(headsUpManager).removeNotification(
                 notificationKey, true /* releaseImmediately */, false /* animate */)
+        verify(onFinishAnimationCallback).run()
     }
 
     @Test

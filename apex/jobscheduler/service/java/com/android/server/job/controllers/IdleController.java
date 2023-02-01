@@ -93,12 +93,14 @@ public final class IdleController extends RestrictingController implements Idlen
     @Override
     public void reportNewIdleState(boolean isIdle) {
         synchronized (mLock) {
+            logDeviceWideConstraintStateToStatsd(JobStatus.CONSTRAINT_IDLE, isIdle);
+
             final long nowElapsed = sElapsedRealtimeClock.millis();
             for (int i = mTrackedTasks.size()-1; i >= 0; i--) {
                 mTrackedTasks.valueAt(i).setIdleConstraintSatisfied(nowElapsed, isIdle);
             }
         }
-        mStateChangedListener.onControllerStateChanged();
+        mStateChangedListener.onControllerStateChanged(mTrackedTasks);
     }
 
     /**

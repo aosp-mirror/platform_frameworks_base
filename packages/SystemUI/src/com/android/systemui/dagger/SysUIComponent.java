@@ -18,33 +18,43 @@ package com.android.systemui.dagger;
 
 import com.android.keyguard.clock.ClockOptionsProvider;
 import com.android.systemui.BootCompleteCacheImpl;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
-import com.android.systemui.SystemUIAppComponentFactory;
+import com.android.systemui.SystemUIAppComponentFactoryBase;
+import com.android.systemui.dagger.qualifiers.PerUser;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
+import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
+import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
+import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
 import com.android.systemui.people.PeopleProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.unfold.FoldStateLogger;
+import com.android.systemui.unfold.FoldStateLoggingProvider;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.unfold.UnfoldLatencyTracker;
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
-import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.TaskViewFactory;
-import com.android.wm.shell.apppairs.AppPairs;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.compatui.CompatUI;
+import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
-import com.android.wm.shell.draganddrop.DragAndDrop;
-import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.floating.FloatingTasks;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.startingsurface.StartingSurface;
-import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelper;
+import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.transition.ShellTransitions;
 
+import java.util.Map;
 import java.util.Optional;
+
+import javax.inject.Provider;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -58,7 +68,8 @@ import dagger.Subcomponent;
         DependencyProvider.class,
         SystemUIBinder.class,
         SystemUIModule.class,
-        SystemUIDefaultModule.class})
+        SystemUICoreStartableModule.class,
+        ReferenceSystemUIModule.class})
 public interface SysUIComponent {
 
     /**
@@ -68,16 +79,13 @@ public interface SysUIComponent {
     @Subcomponent.Builder
     interface Builder {
         @BindsInstance
+        Builder setShell(ShellInterface s);
+
+        @BindsInstance
         Builder setPip(Optional<Pip> p);
 
         @BindsInstance
-        Builder setLegacySplitScreen(Optional<LegacySplitScreen> s);
-
-        @BindsInstance
         Builder setSplitScreen(Optional<SplitScreen> s);
-
-        @BindsInstance
-        Builder setAppPairs(Optional<AppPairs> s);
 
         @BindsInstance
         Builder setOneHanded(Optional<OneHanded> o);
@@ -89,12 +97,6 @@ public interface SysUIComponent {
         Builder setTaskViewFactory(Optional<TaskViewFactory> t);
 
         @BindsInstance
-        Builder setHideDisplayCutout(Optional<HideDisplayCutout> h);
-
-        @BindsInstance
-        Builder setShellCommandHandler(Optional<ShellCommandHandler> shellDump);
-
-        @BindsInstance
         Builder setTransitions(ShellTransitions t);
 
         @BindsInstance
@@ -104,16 +106,16 @@ public interface SysUIComponent {
         Builder setDisplayAreaHelper(Optional<DisplayAreaHelper> h);
 
         @BindsInstance
-        Builder setTaskSurfaceHelper(Optional<TaskSurfaceHelper> t);
-
-        @BindsInstance
         Builder setRecentTasks(Optional<RecentTasks> r);
 
         @BindsInstance
-        Builder setCompatUI(Optional<CompatUI> s);
+        Builder setBackAnimation(Optional<BackAnimation> b);
 
         @BindsInstance
-        Builder setDragAndDrop(Optional<DragAndDrop> d);
+        Builder setFloatingTasks(Optional<FloatingTasks> f);
+
+        @BindsInstance
+        Builder setDesktopMode(Optional<DesktopMode> d);
 
         SysUIComponent build();
     }
@@ -130,6 +132,15 @@ public interface SysUIComponent {
             c.getUnfoldTransitionWallpaperController().init();
         });
         getNaturalRotationUnfoldProgressProvider().ifPresent(o -> o.init());
+        // No init method needed, just needs to be gotten so that it's created.
+        getMediaTttChipControllerSender();
+        getMediaTttChipControllerReceiver();
+        getMediaTttCommandLineHelper();
+        getMediaMuteAwaitConnectionCli();
+        getNearbyMediaDevicesManager();
+        getUnfoldLatencyTracker().init();
+        getFoldStateLoggingProvider().ifPresent(FoldStateLoggingProvider::init);
+        getFoldStateLogger().ifPresent(FoldStateLogger::init);
     }
 
     /**
@@ -149,6 +160,24 @@ public interface SysUIComponent {
      */
     @SysUISingleton
     ContextComponentHelper getContextComponentHelper();
+
+    /**
+     * Creates a UnfoldLatencyTracker.
+     */
+    @SysUISingleton
+    UnfoldLatencyTracker getUnfoldLatencyTracker();
+
+    /**
+     * Creates a FoldStateLoggingProvider.
+     */
+    @SysUISingleton
+    Optional<FoldStateLoggingProvider> getFoldStateLoggingProvider();
+
+    /**
+     * Creates a FoldStateLogger.
+     */
+    @SysUISingleton
+    Optional<FoldStateLogger> getFoldStateLogger();
 
     /**
      * Main dependency providing module.
@@ -176,10 +205,35 @@ public interface SysUIComponent {
      */
     Optional<NaturalRotationUnfoldProgressProvider> getNaturalRotationUnfoldProgressProvider();
 
+    /** */
+    Optional<MediaTttChipControllerSender> getMediaTttChipControllerSender();
+
+    /** */
+    Optional<MediaTttChipControllerReceiver> getMediaTttChipControllerReceiver();
+
+    /** */
+    Optional<MediaTttCommandLineHelper> getMediaTttCommandLineHelper();
+
+    /** */
+    Optional<MediaMuteAwaitConnectionCli> getMediaMuteAwaitConnectionCli();
+
+    /** */
+    Optional<NearbyMediaDevicesManager> getNearbyMediaDevicesManager();
+
+    /**
+     * Returns {@link CoreStartable}s that should be started with the application.
+     */
+    Map<Class<?>, Provider<CoreStartable>> getStartables();
+
+    /**
+     * Returns {@link CoreStartable}s that should be started for every user.
+     */
+    @PerUser Map<Class<?>, Provider<CoreStartable>> getPerUserStartables();
+
     /**
      * Member injection into the supplied argument.
      */
-    void inject(SystemUIAppComponentFactory factory);
+    void inject(SystemUIAppComponentFactoryBase factory);
 
     /**
      * Member injection into the supplied argument.

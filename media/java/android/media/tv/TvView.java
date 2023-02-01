@@ -21,8 +21,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -39,6 +42,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Xml;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -48,7 +52,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.List;
@@ -99,6 +102,7 @@ public class TvView extends ViewGroup {
     private int mSurfaceWidth;
     private int mSurfaceHeight;
     private final AttributeSet mAttrs;
+    private final XmlResourceParser mParser;
     private final int mDefStyleAttr;
     private int mWindowZOrder;
     private boolean mUseRequestedSurfaceLayout;
@@ -107,6 +111,7 @@ public class TvView extends ViewGroup {
     private int mSurfaceViewTop;
     private int mSurfaceViewBottom;
     private TimeShiftPositionCallback mTimeShiftPositionCallback;
+    private AttributionSource mTvAppAttributionSource;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -168,10 +173,20 @@ public class TvView extends ViewGroup {
 
     public TvView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mAttrs = attrs;
+        int sourceResId = Resources.getAttributeSetSourceResId(attrs);
+        if (sourceResId != Resources.ID_NULL) {
+            Log.d(TAG, "Build local AttributeSet");
+            mParser  = context.getResources().getXml(sourceResId);
+            mAttrs = Xml.asAttributeSet(mParser);
+        } else {
+            Log.d(TAG, "Use passed in AttributeSet");
+            mParser = null;
+            mAttrs = attrs;
+        }
         mDefStyleAttr = defStyleAttr;
         resetSurfaceView();
         mTvInputManager = (TvInputManager) getContext().getSystemService(Context.TV_INPUT_SERVICE);
+        mTvAppAttributionSource = getContext().getAttributionSource();
     }
 
     /**
@@ -182,6 +197,11 @@ public class TvView extends ViewGroup {
      */
     public void setCallback(@Nullable TvInputCallback callback) {
         mCallback = callback;
+    }
+
+    /** @hide */
+    public Session getInputSession() {
+        return mSession;
     }
 
     /**
@@ -286,6 +306,22 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Override default attribution source of TV App.
+     *
+     * <p>An attribution source of TV App is used to attribute work to TV Input Service.
+     * The default attribution source is created by {@link Context#getAttributionSource()}.
+     * Call this method before calling {@link #tune(String, Uri, Bundle)} or {@link
+     * #timeShiftPlay(String, Uri)} to override the default attribution source.
+     *
+     * @param tvAppAttributionSource The attribution source of the TV App.
+     */
+    public void overrideTvAppAttributionSource(@NonNull AttributionSource tvAppAttributionSource) {
+        if (tvAppAttributionSource != null) {
+            mTvAppAttributionSource = tvAppAttributionSource;
+        }
+    }
+
+    /**
      * Tunes to a given channel.
      *
      * @param inputId The ID of the TV input for the given channel.
@@ -337,7 +373,8 @@ public class TvView extends ViewGroup {
             // is obsolete and should ignore it.
             mSessionCallback = new MySessionCallback(inputId, channelUri, params);
             if (mTvInputManager != null) {
-                mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+                mTvInputManager.createSession(
+                        inputId, mTvAppAttributionSource, mSessionCallback, mHandler);
             }
         }
     }
@@ -463,6 +500,26 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Enables or disables interactive app notification.
+     *
+     * <p>This method enables or disables the event detection from the corresponding TV input. When
+     * it's enabled, the TV input service detects events related to interactive app, such as
+     * AIT (Application Information Table) and sends to TvView or the linked TV interactive app
+     * service.
+     *
+     * @param enabled {@code true} if you want to enable interactive app notifications.
+     *                {@code false} otherwise.
+     *
+     * @see TvInputService.Session#notifyAitInfoUpdated(android.media.tv.AitInfo)
+     * @see android.media.tv.interactive.TvInteractiveAppView#setTvView(TvView)
+     */
+    public void setInteractiveAppNotificationEnabled(boolean enabled) {
+        if (mSession != null) {
+            mSession.setInteractiveAppNotificationEnabled(enabled);
+        }
+    }
+
+    /**
      * Plays a given recorded TV program.
      *
      * @param inputId The ID of the TV input that created the given recorded program.
@@ -488,7 +545,8 @@ public class TvView extends ViewGroup {
             resetInternal();
             mSessionCallback = new MySessionCallback(inputId, recordedProgramUri);
             if (mTvInputManager != null) {
-                mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
+                mTvInputManager.createSession(
+                        inputId, mTvAppAttributionSource, mSessionCallback, mHandler);
             }
         }
     }
@@ -1030,6 +1088,32 @@ public class TvView extends ViewGroup {
         public void onTimeShiftStatusChanged(
                 String inputId, @TvInputManager.TimeShiftStatus int status) {
         }
+
+        /**
+         * This is called when the AIT (Application Information Table) info has been updated.
+         *
+         * @param aitInfo The current AIT info.
+         */
+        public void onAitInfoUpdated(@NonNull String inputId, @NonNull AitInfo aitInfo) {
+        }
+
+        /**
+         * This is called when signal strength is updated.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param strength The current signal strength.
+         */
+        public void onSignalStrengthUpdated(
+                @NonNull String inputId, @TvInputManager.SignalStrength int strength) {
+        }
+
+        /**
+         * This is called when the session has been tuned to the given channel.
+         *
+         * @param channelUri The URI of a channel.
+         */
+        public void onTuned(@NonNull String inputId, @NonNull Uri channelUri) {
+        }
     }
 
     /**
@@ -1324,6 +1408,48 @@ public class TvView extends ViewGroup {
             }
             if (mTimeShiftPositionCallback != null) {
                 mTimeShiftPositionCallback.onTimeShiftCurrentPositionChanged(mInputId, timeMs);
+            }
+        }
+
+        @Override
+        public void onAitInfoUpdated(Session session, AitInfo aitInfo) {
+            if (DEBUG) {
+                Log.d(TAG, "onAitInfoUpdated(aitInfo=" + aitInfo + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onAitInfoUpdated - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onAitInfoUpdated(mInputId, aitInfo);
+            }
+        }
+
+        @Override
+        public void onSignalStrengthUpdated(Session session, int strength) {
+            if (DEBUG) {
+                Log.d(TAG, "onSignalStrengthUpdated(strength=" + strength + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onSignalStrengthUpdated - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onSignalStrengthUpdated(mInputId, strength);
+            }
+        }
+
+        @Override
+        public void onTuned(Session session, Uri channelUri) {
+            if (DEBUG) {
+                Log.d(TAG, "onTuned(channelUri=" + channelUri + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTuned - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onTuned(mInputId, channelUri);
             }
         }
     }

@@ -70,7 +70,7 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     private Display mSecondaryDisplay;
 
     // This display is in a different group from the default and secondary displays.
-    private Display mDifferentGroupDisplay;
+    private Display mAlwaysUnlockedDisplay;
 
     @Before
     public void setUp() {
@@ -86,12 +86,12 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
                 Display.DEFAULT_DISPLAY + 1,
                 new DisplayInfo(), DEFAULT_DISPLAY_ADJUSTMENTS);
 
-        DisplayInfo differentGroupInfo = new DisplayInfo();
-        differentGroupInfo.displayId = Display.DEFAULT_DISPLAY + 2;
-        differentGroupInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
-        mDifferentGroupDisplay = new Display(DisplayManagerGlobal.getInstance(),
+        DisplayInfo alwaysUnlockedDisplayInfo = new DisplayInfo();
+        alwaysUnlockedDisplayInfo.displayId = Display.DEFAULT_DISPLAY + 2;
+        alwaysUnlockedDisplayInfo.flags = Display.FLAG_ALWAYS_UNLOCKED;
+        mAlwaysUnlockedDisplay = new Display(DisplayManagerGlobal.getInstance(),
                 Display.DEFAULT_DISPLAY,
-                differentGroupInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
+                alwaysUnlockedDisplayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
     }
 
     @Test
@@ -110,18 +110,18 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShow_includeNonDefaultGroupDisplay() {
+    public void testShow_includeAlwaysUnlockedDisplay() {
         when(mDisplayManager.getDisplays()).thenReturn(
-                new Display[]{mDefaultDisplay, mDifferentGroupDisplay});
+                new Display[]{mDefaultDisplay, mAlwaysUnlockedDisplay});
 
         mManager.show();
         verify(mManager, never()).createPresentation(any());
     }
 
     @Test
-    public void testShow_includeSecondaryAndNonDefaultGroupDisplays() {
+    public void testShow_includeSecondaryAndAlwaysUnlockedDisplays() {
         when(mDisplayManager.getDisplays()).thenReturn(
-                new Display[]{mDefaultDisplay, mSecondaryDisplay, mDifferentGroupDisplay});
+                new Display[]{mDefaultDisplay, mSecondaryDisplay, mAlwaysUnlockedDisplay});
 
         mManager.show();
         verify(mManager, times(1)).createPresentation(eq(mSecondaryDisplay));

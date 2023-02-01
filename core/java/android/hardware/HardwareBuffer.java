@@ -25,6 +25,7 @@ import android.graphics.GraphicBuffer;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.SurfaceControl;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -62,6 +63,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             D_FP32,
             DS_FP32UI8,
             S_UI8,
+            YCBCR_P010,
     })
     public @interface Format {
     }
@@ -95,6 +97,14 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final int DS_FP32UI8   = 0x34;
     /** Format: 8 bits stencil */
     public static final int S_UI8        = 0x35;
+    /**
+     * <p>Android YUV P010 format.</p>
+     *
+     * P010 is a 4:2:0 YCbCr semiplanar format comprised of a WxH Y plane
+     * followed by a Wx(H/2) CbCr plane. Each sample is represented by a 16-bit
+     * little-endian value, with the lower 6 bits set to zero.
+     */
+    public static final int YCBCR_P010 = 0x36;
 
     // Note: do not rename, this field is used by native code
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -109,9 +119,9 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     @Retention(RetentionPolicy.SOURCE)
     @LongDef(flag = true, value = {USAGE_CPU_READ_RARELY, USAGE_CPU_READ_OFTEN,
             USAGE_CPU_WRITE_RARELY, USAGE_CPU_WRITE_OFTEN, USAGE_GPU_SAMPLED_IMAGE,
-            USAGE_GPU_COLOR_OUTPUT, USAGE_PROTECTED_CONTENT, USAGE_VIDEO_ENCODE,
-            USAGE_GPU_DATA_BUFFER, USAGE_SENSOR_DIRECT_DATA, USAGE_GPU_CUBE_MAP,
-            USAGE_GPU_MIPMAP_COMPLETE})
+            USAGE_GPU_COLOR_OUTPUT, USAGE_COMPOSER_OVERLAY, USAGE_PROTECTED_CONTENT,
+            USAGE_VIDEO_ENCODE, USAGE_GPU_DATA_BUFFER, USAGE_SENSOR_DIRECT_DATA,
+            USAGE_GPU_CUBE_MAP, USAGE_GPU_MIPMAP_COMPLETE, USAGE_FRONT_BUFFER})
     public @interface Usage {};
 
     @Usage
@@ -129,6 +139,16 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final long USAGE_GPU_SAMPLED_IMAGE      = 1 << 8;
     /** Usage: The buffer will be written to by the GPU */
     public static final long USAGE_GPU_COLOR_OUTPUT       = 1 << 9;
+    /**
+     * The buffer will be used as a hardware composer overlay layer. That is, it will be displayed
+     * using the system compositor via {@link SurfaceControl}
+     *
+     * This flag is currently only needed when using
+     * {@link android.view.SurfaceControl.Transaction#setBuffer(SurfaceControl, HardwareBuffer)}
+     * to set a buffer. In all other cases, the framework adds this flag
+     * internally to buffers that could be presented in a composer overlay.
+     */
+    public static final long USAGE_COMPOSER_OVERLAY = 1 << 11;
     /** Usage: The buffer must not be used outside of a protected hardware path */
     public static final long USAGE_PROTECTED_CONTENT      = 1 << 14;
     /** Usage: The buffer will be read by a hardware video encoder */
@@ -141,6 +161,12 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final long USAGE_GPU_CUBE_MAP           = 1 << 25;
     /** Usage: The buffer contains a complete mipmap hierarchy */
     public static final long USAGE_GPU_MIPMAP_COMPLETE    = 1 << 26;
+    /** Usage: The buffer is used for front-buffer rendering. When front-buffering rendering is
+     * specified, different usages may adjust their behavior as a result. For example, when
+     * used as USAGE_GPU_COLOR_OUTPUT the buffer will behave similar to a single-buffered window.
+     * When used with USAGE_COMPOSER_OVERLAY, the system will try to prioritize the buffer
+     * receiving an overlay plane & avoid caching it in intermediate composition buffers. */
+    public static final long USAGE_FRONT_BUFFER           = 1L << 32;
 
     /**
      * Creates a new <code>HardwareBuffer</code> instance.
@@ -162,9 +188,6 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static HardwareBuffer create(
             @IntRange(from = 1) int width, @IntRange(from = 1) int height,
             @Format int format, @IntRange(from = 1) int layers, @Usage long usage) {
-        if (!HardwareBuffer.isSupportedFormat(format)) {
-            throw new IllegalArgumentException("Invalid pixel format " + format);
-        }
         if (width <= 0) {
             throw new IllegalArgumentException("Invalid width " + width);
         }
@@ -200,9 +223,6 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      */
     public static boolean isSupported(@IntRange(from = 1) int width, @IntRange(from = 1) int height,
             @Format int format, @IntRange(from = 1) int layers, @Usage long usage) {
-        if (!HardwareBuffer.isSupportedFormat(format)) {
-            throw new IllegalArgumentException("Invalid pixel format " + format);
-        }
         if (width <= 0) {
             throw new IllegalArgumentException("Invalid width " + width);
         }
@@ -243,7 +263,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
                 loader, nGetNativeFinalizer(), bufferSize);
         mCleaner = registry.registerNativeAllocation(this, mNativeObject);
-        mCloseGuard.open("close");
+        mCloseGuard.open("HardwareBuffer.close");
     }
 
     @Override
@@ -260,10 +280,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * Returns the width of this buffer in pixels.
      */
     public int getWidth() {
-        if (isClosed()) {
-            throw new IllegalStateException("This HardwareBuffer has been closed and its width "
-                    + "cannot be obtained.");
-        }
+        checkClosed("width");
         return nGetWidth(mNativeObject);
     }
 
@@ -271,10 +288,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * Returns the height of this buffer in pixels.
      */
     public int getHeight() {
-        if (isClosed()) {
-            throw new IllegalStateException("This HardwareBuffer has been closed and its height "
-                    + "cannot be obtained.");
-        }
+        checkClosed("height");
         return nGetHeight(mNativeObject);
     }
 
@@ -283,10 +297,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      */
     @Format
     public int getFormat() {
-        if (isClosed()) {
-            throw new IllegalStateException("This HardwareBuffer has been closed and its format "
-                    + "cannot be obtained.");
-        }
+        checkClosed("format");
         return nGetFormat(mNativeObject);
     }
 
@@ -294,10 +305,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * Returns the number of layers in this buffer.
      */
     public int getLayers() {
-        if (isClosed()) {
-            throw new IllegalStateException("This HardwareBuffer has been closed and its layer "
-                    + "count cannot be obtained.");
-        }
+        checkClosed("layer count");
         return nGetLayers(mNativeObject);
     }
 
@@ -305,11 +313,24 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * Returns the usage flags of the usage hints set on this buffer.
      */
     public long getUsage() {
-        if (isClosed()) {
-            throw new IllegalStateException("This HardwareBuffer has been closed and its usage "
-                    + "cannot be obtained.");
-        }
+        checkClosed("usage");
         return nGetUsage(mNativeObject);
+    }
+
+    /**
+     * Returns the system-wide unique id for this buffer
+     *
+     */
+    public long getId() {
+        checkClosed("id");
+        return nGetId(mNativeObject);
+    }
+
+    private void checkClosed(String name) {
+        if (isClosed()) {
+            throw new IllegalStateException("This HardwareBuffer has been closed and its "
+                    + name + " cannot be obtained.");
+        }
     }
 
     /**
@@ -381,35 +402,6 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
         }
     };
 
-    /**
-     * Validates whether a particular format is supported by HardwareBuffer.
-     *
-     * @param format The format to validate.
-     *
-     * @return True if <code>format</code> is a supported format. false otherwise.
-     * See {@link #create(int, int, int, int, long)}.
-     */
-    private static boolean isSupportedFormat(@Format int format) {
-        switch(format) {
-            case RGBA_8888:
-            case RGBA_FP16:
-            case RGBA_1010102:
-            case RGBX_8888:
-            case RGB_565:
-            case RGB_888:
-            case BLOB:
-            case YCBCR_420_888:
-            case D_16:
-            case D_24:
-            case DS_24UI8:
-            case D_FP32:
-            case DS_FP32UI8:
-            case S_UI8:
-                return true;
-        }
-        return false;
-    }
-
     private static native long nCreateHardwareBuffer(int width, int height, int format, int layers,
             long usage);
     private static native long nCreateFromGraphicBuffer(GraphicBuffer graphicBuffer);
@@ -430,4 +422,6 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             long usage);
     @CriticalNative
     private static native long nEstimateSize(long nativeObject);
+    @CriticalNative
+    private static native long nGetId(long nativeObject);
 }

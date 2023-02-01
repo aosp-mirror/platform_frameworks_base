@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -24,7 +25,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
-import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_LAST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -76,6 +76,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Tests for the {@link DisplayArea} container.
@@ -153,7 +154,7 @@ public class DisplayAreaTest extends WindowTestsBase {
     public void testForAllTaskDisplayAreas_onlyTraversesDisplayAreaOfTypeAny() {
         final RootDisplayArea root =
                 new DisplayAreaPolicyBuilderTest.SurfacelessDisplayAreaRoot(mWm);
-        final Function<TaskDisplayArea, Boolean> callback0 = tda -> false;
+        final Predicate<TaskDisplayArea> callback0 = tda -> false;
         final Consumer<TaskDisplayArea> callback1 = tda -> { };
         final BiFunction<TaskDisplayArea, Integer, Integer> callback2 = (tda, result) -> result;
         final Function<TaskDisplayArea, TaskDisplayArea> callback3 = tda -> null;
@@ -399,9 +400,9 @@ public class DisplayAreaTest extends WindowTestsBase {
                 parentBounds.right / 2, parentBounds.bottom);
         final Rect childBounds2 = new Rect(parentBounds.right / 2, parentBounds.top,
                 parentBounds.right, parentBounds.bottom);
-        TestDisplayArea parentDa = new TestDisplayArea(mWm, parentBounds);
-        TestDisplayArea childDa1 = new TestDisplayArea(mWm, childBounds1);
-        TestDisplayArea childDa2 = new TestDisplayArea(mWm, childBounds2);
+        TestDisplayArea parentDa = new TestDisplayArea(mWm, parentBounds, "Parent");
+        TestDisplayArea childDa1 = new TestDisplayArea(mWm, childBounds1, "Child1");
+        TestDisplayArea childDa2 = new TestDisplayArea(mWm, childBounds2, "Child2");
         parentDa.addChild(childDa1, 0);
         parentDa.addChild(childDa2, 1);
 
@@ -619,9 +620,67 @@ public class DisplayAreaTest extends WindowTestsBase {
         controller.registerOrganizer(mockDisplayAreaOrganizer, FEATURE_VENDOR_FIRST);
     }
 
+    @Test
+    public void testSetAlwaysOnTop_movesDisplayAreaToTop() {
+        final Rect bounds = new Rect(0, 0, 100, 100);
+        DisplayArea<WindowContainer> parent = new TestDisplayArea(mWm, bounds, "Parent");
+        parent.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        DisplayArea<WindowContainer> child1 = new TestDisplayArea(mWm, bounds, "Child1");
+        child1.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        DisplayArea<WindowContainer> child2 = new TestDisplayArea(mWm, bounds, "Child2");
+        child2.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        parent.addChild(child2, 0);
+        parent.addChild(child1, 1);
+
+        child2.setAlwaysOnTop(true);
+
+        assertEquals(parent.getChildAt(1), child2);
+        assertThat(child2.isAlwaysOnTop()).isTrue();
+    }
+
+    @Test
+    public void testDisplayAreaRequestsTopPosition_alwaysOnTopSiblingExists_doesNotMoveToTop() {
+        final Rect bounds = new Rect(0, 0, 100, 100);
+        DisplayArea<WindowContainer> parent = new TestDisplayArea(mWm, bounds, "Parent");
+        parent.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        DisplayArea<WindowContainer> alwaysOnTopChild = new TestDisplayArea(mWm, bounds,
+                "AlwaysOnTopChild");
+        alwaysOnTopChild.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        DisplayArea<WindowContainer> child = new TestDisplayArea(mWm, bounds, "Child");
+        child.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        parent.addChild(alwaysOnTopChild, 0);
+        parent.addChild(child, 1);
+        alwaysOnTopChild.setAlwaysOnTop(true);
+
+        parent.positionChildAt(POSITION_TOP, child, false /* includingParents */);
+
+        assertEquals(parent.getChildAt(1), alwaysOnTopChild);
+        assertEquals(parent.getChildAt(0), child);
+    }
+
+    @Test
+    public void testAlwaysOnTopDisplayArea_requestsNonTopLocation_doesNotMove() {
+        final Rect bounds = new Rect(0, 0, 100, 100);
+        DisplayArea<WindowContainer> parent = new TestDisplayArea(mWm, bounds, "Parent");
+        parent.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        DisplayArea<WindowContainer> alwaysOnTopChild = new TestDisplayArea(mWm, bounds,
+                "AlwaysOnTopChild");
+        alwaysOnTopChild.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        DisplayArea<WindowContainer> child = new TestDisplayArea(mWm, bounds, "Child");
+        child.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        parent.addChild(alwaysOnTopChild, 0);
+        parent.addChild(child, 1);
+        alwaysOnTopChild.setAlwaysOnTop(true);
+
+        parent.positionChildAt(POSITION_BOTTOM, alwaysOnTopChild, false /* includingParents */);
+
+        assertEquals(parent.getChildAt(1), alwaysOnTopChild);
+        assertEquals(parent.getChildAt(0), child);
+    }
+
     private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {
-        private TestDisplayArea(WindowManagerService wms, Rect bounds) {
-            super(wms, ANY, "half display area");
+        private TestDisplayArea(WindowManagerService wms, Rect bounds, String name) {
+            super(wms, ANY, name);
             setBounds(bounds);
         }
 

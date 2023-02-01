@@ -201,6 +201,21 @@ public interface WindowInsetsController {
             @NonNull WindowInsetsAnimationControlListener listener);
 
     /**
+     * Lets the application add non-controllable listener object that can be called back
+     * when animation is invoked by the system by host calling methods such as {@link #show} or
+     * {@link #hide}.
+     *
+     * The listener is supposed to be used for logging only, using the control or
+     * relying on the timing of the callback in any other way is not supported.
+     *
+     * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when
+     *                 the animation is driven by the system and not the host
+     * @hide
+     */
+    void setSystemDrivenInsetsAnimationLoggingListener(
+            @Nullable WindowInsetsAnimationControlListener listener);
+
+    /**
      * Controls the appearance of system bars.
      * <p>
      * For example, the following statement adds {@link #APPEARANCE_LIGHT_STATUS_BARS}:

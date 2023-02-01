@@ -20,22 +20,22 @@ import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.test.suitebuilder.annotation.LargeTest;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-@RunWith(Parameterized.class)
+@RunWith(JUnitParamsRunner.class)
 @LargeTest
 public class CharsetPerfTest {
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameters(name = "mLength({0}), mName({1})")
-    public static Collection<Object[]> data() {
+    public static Collection<Object[]> getData() {
         return Arrays.asList(
                 new Object[][] {
                     {1, "UTF-16"},
@@ -86,24 +86,20 @@ public class CharsetPerfTest {
                 });
     }
 
-    @Parameterized.Parameter(0)
-    public int mLength;
-
-    @Parameterized.Parameter(1)
-    public String mName;
-
     @Test
-    public void time_new_String_BString() throws Exception {
-        byte[] bytes = makeBytes(makeString(mLength));
+    @Parameters(method = "getData")
+    public void time_new_String_BString(int length, String name) throws Exception {
+        byte[] bytes = makeBytes(makeString(length));
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            new String(bytes, mName);
+            new String(bytes, name);
         }
     }
 
     @Test
-    public void time_new_String_BII() throws Exception {
-        byte[] bytes = makeBytes(makeString(mLength));
+    @Parameters(method = "getData")
+    public void time_new_String_BII(int length, String name) throws Exception {
+        byte[] bytes = makeBytes(makeString(length));
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             new String(bytes, 0, bytes.length);
@@ -111,20 +107,22 @@ public class CharsetPerfTest {
     }
 
     @Test
-    public void time_new_String_BIIString() throws Exception {
-        byte[] bytes = makeBytes(makeString(mLength));
+    @Parameters(method = "getData")
+    public void time_new_String_BIIString(int length, String name) throws Exception {
+        byte[] bytes = makeBytes(makeString(length));
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            new String(bytes, 0, bytes.length, mName);
+            new String(bytes, 0, bytes.length, name);
         }
     }
 
     @Test
-    public void time_String_getBytes() throws Exception {
-        String string = makeString(mLength);
+    @Parameters(method = "getData")
+    public void time_String_getBytes(int length, String name) throws Exception {
+        String string = makeString(length);
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            string.getBytes(mName);
+            string.getBytes(name);
         }
     }
 

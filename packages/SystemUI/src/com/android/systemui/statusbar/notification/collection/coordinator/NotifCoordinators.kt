@@ -15,27 +15,24 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import com.android.systemui.Dumpable
-import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
+import com.android.systemui.statusbar.notification.collection.PipelineDumpable
+import com.android.systemui.statusbar.notification.collection.PipelineDumper
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
-import java.io.FileDescriptor
-import java.io.PrintWriter
-import java.util.ArrayList
 import javax.inject.Inject
 
 /**
  * Handles the attachment of [Coordinator]s to the [NotifPipeline] so that the
  * Coordinators can register their respective callbacks.
  */
-interface NotifCoordinators : Coordinator, Dumpable
+interface NotifCoordinators : Coordinator, PipelineDumpable
 
 @CoordinatorScope
 class NotifCoordinatorsImpl @Inject constructor(
-    dumpManager: DumpManager,
-    featureFlags: FeatureFlags,
+    notifPipelineFlags: NotifPipelineFlags,
+    dataStoreCoordinator: DataStoreCoordinator,
     hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
     hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
     keyguardCoordinator: KeyguardCoordinator,
@@ -46,14 +43,18 @@ class NotifCoordinatorsImpl @Inject constructor(
     headsUpCoordinator: HeadsUpCoordinator,
     gutsCoordinator: GutsCoordinator,
     conversationCoordinator: ConversationCoordinator,
-    preparationCoordinator: PreparationCoordinator,
+    debugModeCoordinator: DebugModeCoordinator,
+    groupCountCoordinator: GroupCountCoordinator,
     mediaCoordinator: MediaCoordinator,
+    preparationCoordinator: PreparationCoordinator,
     remoteInputCoordinator: RemoteInputCoordinator,
+    rowAppearanceCoordinator: RowAppearanceCoordinator,
+    stackCoordinator: StackCoordinator,
     shadeEventCoordinator: ShadeEventCoordinator,
     smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
     viewConfigCoordinator: ViewConfigCoordinator,
     visualStabilityCoordinator: VisualStabilityCoordinator,
-    sensitiveContentCoordinator: SensitiveContentCoordinator
+    sensitiveContentCoordinator: SensitiveContentCoordinator,
 ) : NotifCoordinators {
 
     private val mCoordinators: MutableList<Coordinator> = ArrayList()
@@ -63,7 +64,13 @@ class NotifCoordinatorsImpl @Inject constructor(
      * Creates all the coordinators.
      */
     init {
-        dumpManager.registerDumpable(TAG, this)
+        // TODO(b/208866714): formalize the system by which some coordinators may be required by the
+        //  pipeline, such as this DataStoreCoordinator which cannot be removed, as it's a critical
+        //  glue between the pipeline and parts of SystemUI which depend on pipeline output via the
+        //  NotifLiveDataStore.
+        mCoordinators.add(dataStoreCoordinator)
+
+        // Attach normal coordinators.
         mCoordinators.add(hideLocallyDismissedNotifsCoordinator)
         mCoordinators.add(hideNotifsForOtherUsersCoordinator)
         mCoordinators.add(keyguardCoordinator)
@@ -71,31 +78,32 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(appOpsCoordinator)
         mCoordinators.add(deviceProvisionedCoordinator)
         mCoordinators.add(bubbleCoordinator)
+        mCoordinators.add(debugModeCoordinator)
         mCoordinators.add(conversationCoordinator)
+        mCoordinators.add(groupCountCoordinator)
         mCoordinators.add(mediaCoordinator)
+        mCoordinators.add(rowAppearanceCoordinator)
+        mCoordinators.add(stackCoordinator)
         mCoordinators.add(shadeEventCoordinator)
         mCoordinators.add(viewConfigCoordinator)
         mCoordinators.add(visualStabilityCoordinator)
         mCoordinators.add(sensitiveContentCoordinator)
-        if (featureFlags.isSmartspaceDedupingEnabled) {
+        if (notifPipelineFlags.isSmartspaceDedupingEnabled()) {
             mCoordinators.add(smartspaceDedupingCoordinator)
         }
-        if (featureFlags.isNewNotifPipelineRenderingEnabled) {
-            mCoordinators.add(headsUpCoordinator)
-            mCoordinators.add(gutsCoordinator)
-            mCoordinators.add(preparationCoordinator)
-            mCoordinators.add(remoteInputCoordinator)
-        }
+        mCoordinators.add(headsUpCoordinator)
+        mCoordinators.add(gutsCoordinator)
+        mCoordinators.add(preparationCoordinator)
+        mCoordinators.add(remoteInputCoordinator)
 
         // Manually add Ordered Sections
-        // HeadsUp > FGS > People > Alerting > Silent > Unknown/Default
-        if (featureFlags.isNewNotifPipelineRenderingEnabled) {
-            mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
-        }
+        // HeadsUp > FGS > People > Alerting > Silent > Minimized > Unknown/Default
+        mOrderedSections.add(headsUpCoordinator.sectioner)
         mOrderedSections.add(appOpsCoordinator.sectioner) // ForegroundService
         mOrderedSections.add(conversationCoordinator.sectioner) // People
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting
         mOrderedSections.add(rankingCoordinator.silentSectioner) // Silent
+        mOrderedSections.add(rankingCoordinator.minimizedSectioner) // Minimized
     }
 
     /**
@@ -109,15 +117,12 @@ class NotifCoordinatorsImpl @Inject constructor(
         pipeline.setSections(mOrderedSections)
     }
 
-    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
-        pw.println()
-        pw.println("$TAG:")
-        for (c in mCoordinators) {
-            pw.println("\t${c.javaClass}")
-        }
-        for (s in mOrderedSections) {
-            pw.println("\t${s.name}")
-        }
+    /*
+     * As part of the NotifPipeline dumpable, dumps the list of coordinators; sections are omitted
+     * as they are dumped in the RenderStageManager instead.
+     */
+    override fun dumpPipeline(d: PipelineDumper) = with(d) {
+        dump("coordinators", mCoordinators)
     }
 
     companion object {

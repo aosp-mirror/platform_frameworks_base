@@ -29,6 +29,8 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 
+import com.android.internal.infra.AndroidFuture;
+
 import java.util.List;
 
 /**
@@ -50,6 +52,19 @@ public abstract class ShortcutServiceInternal {
             @Nullable List<LocusId> locusIds, @Nullable ComponentName componentName,
             @ShortcutQuery.QueryFlags int flags, int userId, int callingPid, int callingUid);
 
+    /**
+     * Retrieves shortcuts asynchronously. Query will go through persistence layer (thus making the
+     * call async) if querying by shortcutIds in a specific package; otherwise it's effectively the
+     * same as calling {@link #getShortcuts}.
+     */
+    public abstract void
+            getShortcutsAsync(int launcherUserId,
+            @NonNull String callingPackage, long changedSince,
+            @Nullable String packageName, @Nullable List<String> shortcutIds,
+            @Nullable List<LocusId> locusIds, @Nullable ComponentName componentName,
+            @ShortcutQuery.QueryFlags int flags, int userId, int callingPid, int callingUid,
+            AndroidFuture<List<ShortcutInfo>> cb);
+
     public abstract boolean
             isPinnedByCaller(int launcherUserId, @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String id, int userId);
@@ -62,6 +77,14 @@ public abstract class ShortcutServiceInternal {
             int launcherUserId, @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId,
             int callingPid, int callingUid);
+
+    /**
+     * Retrieves the intents from a specified shortcut asynchronously.
+     */
+    public abstract void createShortcutIntentsAsync(
+            int launcherUserId, @NonNull String callingPackage,
+            @NonNull String packageName, @NonNull String shortcutId, int userId,
+            int callingPid, int callingUid, @NonNull AndroidFuture<Intent[]> cb);
 
     public abstract void addListener(@NonNull ShortcutChangeListener listener);
 
@@ -81,6 +104,13 @@ public abstract class ShortcutServiceInternal {
     public abstract ParcelFileDescriptor getShortcutIconFd(int launcherUserId,
             @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId);
+
+    /**
+     * Retrieves a file descriptor from the icon in a specified shortcut asynchronously.
+     */
+    public abstract void getShortcutIconFdAsync(int launcherUserId, @NonNull String callingPackage,
+            @NonNull String packageName, @NonNull String shortcutId, int userId,
+            @NonNull AndroidFuture<ParcelFileDescriptor> cb);
 
     public abstract boolean hasShortcutHostPermission(int launcherUserId,
             @NonNull String callingPackage, int callingPid, int callingUid);
@@ -116,6 +146,14 @@ public abstract class ShortcutServiceInternal {
      */
     public abstract String getShortcutIconUri(int launcherUserId, @NonNull String launcherPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId);
+
+    /**
+     * Retrieves the icon Uri of the shortcut asynchronously, and grants Uri read permission to the
+     * caller.
+     */
+    public abstract void getShortcutIconUriAsync(int launcherUserId,
+            @NonNull String launcherPackage, @NonNull String packageName,
+            @NonNull String shortcutId, int userId, @NonNull AndroidFuture<String> cb);
 
     public abstract boolean isSharingShortcut(int callingUserId, @NonNull String callingPackage,
             @NonNull String packageName, @NonNull String shortcutId, int userId,

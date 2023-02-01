@@ -112,6 +112,8 @@ message PackageProto {
         optional string last_disabled_app_caller = 8;
         repeated string suspending_package = 9;
         optional int32 distraction_flags = 10;
+        // UTC timestamp of first install for the user
+        optional int32 first_install_time_ms = 11;
     }
 
     message InstallSourceProto {
@@ -147,8 +149,7 @@ message PackageProto {
     optional int32 version_code = 3;
     // Package's reported version string (what's displayed to the user).
     optional string version_string = 4;
-    // UTC timestamp of install
-    optional int64 install_time_ms = 5;
+    reserved 5;
     // Millisecond UTC timestamp of latest update adjusted to Google's server clock.
     optional int64 update_time_ms = 6;
     // From "dumpsys package" - name of package which installed this one.

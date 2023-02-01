@@ -111,6 +111,7 @@ public class ConversationLayout extends FrameLayout
     private Icon mLargeIcon;
     private View mExpandButtonContainer;
     private ViewGroup mExpandButtonAndContentContainer;
+    private ViewGroup mExpandButtonContainerA11yContainer;
     private NotificationExpandButton mExpandButton;
     private MessagingLinearLayout mImageMessageContainer;
     private int mBadgeProtrusion;
@@ -234,6 +235,8 @@ public class ConversationLayout extends FrameLayout
         });
         mConversationText = findViewById(R.id.conversation_text);
         mExpandButtonContainer = findViewById(R.id.expand_button_container);
+        mExpandButtonContainerA11yContainer =
+                findViewById(R.id.expand_button_a11y_container);
         mConversationHeader = findViewById(R.id.conversation_header);
         mContentContainer = findViewById(R.id.notification_action_list_margin_target);
         mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
@@ -879,6 +882,10 @@ public class ConversationLayout extends FrameLayout
             if (newGroup == null) {
                 newGroup = MessagingGroup.createGroup(mMessagingLinearLayout);
                 mAddedGroups.add(newGroup);
+            } else if (newGroup.getParent() != mMessagingLinearLayout) {
+                throw new IllegalStateException(
+                        "group parent was " + newGroup.getParent() + " but expected "
+                                + mMessagingLinearLayout);
             }
             newGroup.setImageDisplayLocation(mIsCollapsed
                     ? IMAGE_DISPLAY_LOCATION_EXTERNAL
@@ -920,7 +927,8 @@ public class ConversationLayout extends FrameLayout
                 message = messages.get(i - histSize);
             }
             boolean isNewGroup = currentGroup == null;
-            Person sender = message.getMessage().getSenderPerson();
+            Person sender =
+                    message.getMessage() == null ? null : message.getMessage().getSenderPerson();
             CharSequence key = getKey(sender);
             isNewGroup |= !TextUtils.equals(key, currentSenderKey);
             if (isNewGroup) {
@@ -1087,7 +1095,7 @@ public class ConversationLayout extends FrameLayout
             newContainer = mExpandButtonAndContentContainer;
         } else {
             buttonGravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
-            newContainer = this;
+            newContainer = mExpandButtonContainerA11yContainer;
         }
         mExpandButton.setExpanded(!mIsCollapsed);
 
@@ -1183,7 +1191,8 @@ public class ConversationLayout extends FrameLayout
             return null;
         }
         final MessagingMessage messagingMessage = mMessages.get(mMessages.size() - 1);
-        final CharSequence text = messagingMessage.getMessage().getText();
+        final CharSequence text = messagingMessage.getMessage() == null ? null
+                : messagingMessage.getMessage().getText();
         if (text == null && messagingMessage instanceof MessagingImageMessage) {
             final String unformatted =
                     getResources().getString(R.string.conversation_single_line_image_placeholder);

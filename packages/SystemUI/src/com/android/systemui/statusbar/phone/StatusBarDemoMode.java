@@ -21,45 +21,67 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRAN
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_WARNING;
+import static com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentModule.OPERATOR_NAME_VIEW;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
 import android.view.View;
 
-import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
+import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.navigationbar.NavigationBarController;
-import com.android.systemui.statusbar.NotificationShadeWindowController;
-import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
+import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
+import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
-/** */
-@StatusBarComponent.StatusBarScope
-public class StatusBarDemoMode implements DemoMode {
-    private final StatusBar mStatusBar;
-    private final NotificationShadeWindowController mNotificationShadeWindowController;
-    private final NotificationShadeWindowViewController mNotificationShadeWindowViewController;
+/**
+ * A controller that updates status-bar-related views during demo mode.
+ *
+ * This class extends ViewController not because it controls a specific view, but because we want it
+ * to get torn down and re-created in line with the view's lifecycle.
+ */
+@StatusBarFragmentScope
+public class StatusBarDemoMode extends ViewController<View> implements DemoMode {
+    private final Clock mClockView;
+    private final View mOperatorNameView;
+    private final DemoModeController mDemoModeController;
+    private final PhoneStatusBarTransitions mPhoneStatusBarTransitions;
     private final NavigationBarController mNavigationBarController;
     private final int mDisplayId;
 
     @Inject
     StatusBarDemoMode(
-            StatusBar statusBar,
-            NotificationShadeWindowController notificationShadeWindowController,
-            NotificationShadeWindowViewController notificationShadeWindowViewController,
+            Clock clockView,
+            @Named(OPERATOR_NAME_VIEW) View operatorNameView,
+            DemoModeController demoModeController,
+            PhoneStatusBarTransitions phoneStatusBarTransitions,
             NavigationBarController navigationBarController,
             @DisplayId int displayId) {
-        mStatusBar = statusBar;
-        mNotificationShadeWindowController = notificationShadeWindowController;
-        mNotificationShadeWindowViewController = notificationShadeWindowViewController;
+        super(clockView);
+        mClockView = clockView;
+        mOperatorNameView = operatorNameView;
+        mDemoModeController = demoModeController;
+        mPhoneStatusBarTransitions = phoneStatusBarTransitions;
         mNavigationBarController = navigationBarController;
         mDisplayId = displayId;
+    }
+
+    @Override
+    protected void onViewAttached() {
+        mDemoModeController.addCallback(this);
+    }
+
+    @Override
+    protected void onViewDetached() {
+        mDemoModeController.removeCallback(this);
     }
 
     @Override
@@ -74,21 +96,23 @@ public class StatusBarDemoMode implements DemoMode {
     @Override
     public void onDemoModeStarted() {
         // Must send this message to any view that we delegate to via dispatchDemoCommandToView
-        dispatchDemoModeStartedToView(R.id.clock);
-        dispatchDemoModeStartedToView(R.id.operator_name);
+        dispatchDemoModeStartedToView(mClockView);
+        dispatchDemoModeStartedToView(mOperatorNameView);
     }
 
     @Override
     public void onDemoModeFinished() {
-        dispatchDemoModeFinishedToView(R.id.clock);
-        dispatchDemoModeFinishedToView(R.id.operator_name);
-        mStatusBar.checkBarModes();
+        dispatchDemoModeFinishedToView(mClockView);
+        dispatchDemoModeFinishedToView(mOperatorNameView);
     }
 
     @Override
     public void dispatchDemoCommand(String command, @NonNull Bundle args) {
         if (command.equals(COMMAND_CLOCK)) {
-            dispatchDemoCommandToView(command, args, R.id.clock);
+            dispatchDemoCommandToView(command, args, mClockView);
+        }
+        if (command.equals(COMMAND_OPERATOR)) {
+            dispatchDemoCommandToView(command, args, mOperatorNameView);
         }
         if (command.equals(COMMAND_BARS)) {
             String mode = args.getString("mode");
@@ -100,42 +124,25 @@ public class StatusBarDemoMode implements DemoMode {
                                                     -1;
             if (barMode != -1) {
                 boolean animate = true;
-                if (mNotificationShadeWindowController != null
-                        && mNotificationShadeWindowViewController.getBarTransitions() != null) {
-                    mNotificationShadeWindowViewController.getBarTransitions().transitionTo(
-                            barMode, animate);
-                }
+                mPhoneStatusBarTransitions.transitionTo(barMode, animate);
                 mNavigationBarController.transitionTo(mDisplayId, barMode, animate);
             }
         }
-        if (command.equals(COMMAND_OPERATOR)) {
-            dispatchDemoCommandToView(command, args, R.id.operator_name);
-        }
     }
 
-    private void dispatchDemoModeStartedToView(int id) {
-        View statusBarView = mStatusBar.getStatusBarView();
-        if (statusBarView == null) return;
-        View v = statusBarView.findViewById(id);
+    private void dispatchDemoModeStartedToView(View v) {
         if (v instanceof DemoModeCommandReceiver) {
             ((DemoModeCommandReceiver) v).onDemoModeStarted();
         }
     }
 
-    //TODO: these should have controllers, and this method should be removed
-    private void dispatchDemoCommandToView(String command, Bundle args, int id) {
-        View statusBarView = mStatusBar.getStatusBarView();
-        if (statusBarView == null) return;
-        View v = statusBarView.findViewById(id);
+    private void dispatchDemoCommandToView(String command, Bundle args, View v) {
         if (v instanceof DemoModeCommandReceiver) {
             ((DemoModeCommandReceiver) v).dispatchDemoCommand(command, args);
         }
     }
 
-    private void dispatchDemoModeFinishedToView(int id) {
-        View statusBarView = mStatusBar.getStatusBarView();
-        if (statusBarView == null) return;
-        View v = statusBarView.findViewById(id);
+    private void dispatchDemoModeFinishedToView(View v) {
         if (v instanceof DemoModeCommandReceiver) {
             ((DemoModeCommandReceiver) v).onDemoModeFinished();
         }

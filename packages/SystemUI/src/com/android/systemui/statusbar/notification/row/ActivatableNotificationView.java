@@ -151,6 +151,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 R.color.notification_ripple_tinted_color);
         mNormalRippleColor = mContext.getColor(
                 R.color.notification_ripple_untinted_color);
+        // Reset background color tint and override tint, as they are from an old theme
+        mBgTint = NO_COLOR;
+        mOverrideTint = NO_COLOR;
+        mOverrideAmount = 0.0f;
     }
 
     /**
@@ -160,6 +164,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         updateColors();
         initBackground();
         updateBackgroundTint();
+    }
+
+    /**
+     * @param width The actual width to apply to the background view.
+     */
+    public void setBackgroundWidth(int width) {
+        if (mBackgroundNormal == null) {
+            return;
+        }
+        mBackgroundNormal.setActualWidth(width);
     }
 
     @Override
@@ -424,7 +438,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     @Override
-    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
+    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear,
+            Runnable onFinishRunnable) {
         enableAppearDrawing(true);
         mIsHeadsUpAnimation = isHeadsUpAppear;
         if (mDrawingAppearAnimation) {

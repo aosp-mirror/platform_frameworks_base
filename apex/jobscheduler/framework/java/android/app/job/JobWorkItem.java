@@ -19,6 +19,7 @@ package android.app.job;
 import static android.app.job.JobInfo.NETWORK_BYTES_UNKNOWN;
 
 import android.annotation.BytesLong;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Build;
@@ -33,8 +34,9 @@ import android.os.Parcelable;
 final public class JobWorkItem implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     final Intent mIntent;
-    final long mNetworkDownloadBytes;
-    final long mNetworkUploadBytes;
+    private final long mNetworkDownloadBytes;
+    private final long mNetworkUploadBytes;
+    private final long mMinimumChunkBytes;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     int mDeliveryCount;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -49,9 +51,7 @@ final public class JobWorkItem implements Parcelable {
      * @param intent The general Intent describing this work.
      */
     public JobWorkItem(Intent intent) {
-        mIntent = intent;
-        mNetworkDownloadBytes = NETWORK_BYTES_UNKNOWN;
-        mNetworkUploadBytes = NETWORK_BYTES_UNKNOWN;
+        this(intent, NETWORK_BYTES_UNKNOWN, NETWORK_BYTES_UNKNOWN);
     }
 
     /**
@@ -68,9 +68,45 @@ final public class JobWorkItem implements Parcelable {
      *            uploaded by this job work item, in bytes.
      */
     public JobWorkItem(Intent intent, @BytesLong long downloadBytes, @BytesLong long uploadBytes) {
+        this(intent, downloadBytes, uploadBytes, NETWORK_BYTES_UNKNOWN);
+    }
+
+    /**
+     * Create a new piece of work, which can be submitted to
+     * {@link JobScheduler#enqueue JobScheduler.enqueue}.
+     * <p>
+     * See {@link JobInfo.Builder#setEstimatedNetworkBytes(long, long)} for
+     * details about how to estimate network traffic.
+     *
+     * @param intent            The general Intent describing this work.
+     * @param downloadBytes     The estimated size of network traffic that will be
+     *                          downloaded by this job work item, in bytes.
+     * @param uploadBytes       The estimated size of network traffic that will be
+     *                          uploaded by this job work item, in bytes.
+     * @param minimumChunkBytes The smallest piece of data that cannot be easily paused and
+     *                          resumed, in bytes.
+     */
+    public JobWorkItem(@Nullable Intent intent, @BytesLong long downloadBytes,
+            @BytesLong long uploadBytes, @BytesLong long minimumChunkBytes) {
+        if (minimumChunkBytes != NETWORK_BYTES_UNKNOWN && minimumChunkBytes <= 0) {
+            throw new IllegalArgumentException("Minimum chunk size must be positive");
+        }
+        final long estimatedTransfer;
+        if (uploadBytes == NETWORK_BYTES_UNKNOWN) {
+            estimatedTransfer = downloadBytes;
+        } else {
+            estimatedTransfer = uploadBytes
+                    + (downloadBytes == NETWORK_BYTES_UNKNOWN ? 0 : downloadBytes);
+        }
+        if (minimumChunkBytes != NETWORK_BYTES_UNKNOWN && estimatedTransfer != NETWORK_BYTES_UNKNOWN
+                && minimumChunkBytes > estimatedTransfer) {
+            throw new IllegalArgumentException(
+                    "Minimum chunk size can't be greater than estimated network usage");
+        }
         mIntent = intent;
         mNetworkDownloadBytes = downloadBytes;
         mNetworkUploadBytes = uploadBytes;
+        mMinimumChunkBytes = minimumChunkBytes;
     }
 
     /**
@@ -100,6 +136,16 @@ final public class JobWorkItem implements Parcelable {
      */
     public @BytesLong long getEstimatedNetworkUploadBytes() {
         return mNetworkUploadBytes;
+    }
+
+    /**
+     * Return the smallest piece of data that cannot be easily paused and resumed, in bytes.
+     *
+     * @return Smallest piece of data that cannot be easily paused and resumed, or
+     * {@link JobInfo#NETWORK_BYTES_UNKNOWN} when unknown.
+     */
+    public @BytesLong long getMinimumNetworkChunkBytes() {
+        return mMinimumChunkBytes;
     }
 
     /**
@@ -161,12 +207,38 @@ final public class JobWorkItem implements Parcelable {
             sb.append(" uploadBytes=");
             sb.append(mNetworkUploadBytes);
         }
+        if (mMinimumChunkBytes != NETWORK_BYTES_UNKNOWN) {
+            sb.append(" minimumChunkBytes=");
+            sb.append(mMinimumChunkBytes);
+        }
         if (mDeliveryCount != 0) {
             sb.append(" dcount=");
             sb.append(mDeliveryCount);
         }
         sb.append("}");
         return sb.toString();
+    }
+
+    /**
+     * @hide
+     */
+    public void enforceValidity() {
+        final long estimatedTransfer;
+        if (mNetworkUploadBytes == NETWORK_BYTES_UNKNOWN) {
+            estimatedTransfer = mNetworkDownloadBytes;
+        } else {
+            estimatedTransfer = mNetworkUploadBytes
+                    + (mNetworkDownloadBytes == NETWORK_BYTES_UNKNOWN ? 0 : mNetworkDownloadBytes);
+        }
+        if (mMinimumChunkBytes != NETWORK_BYTES_UNKNOWN
+                && estimatedTransfer != NETWORK_BYTES_UNKNOWN
+                && mMinimumChunkBytes > estimatedTransfer) {
+            throw new IllegalArgumentException(
+                    "Minimum chunk size can't be greater than estimated network usage");
+        }
+        if (mMinimumChunkBytes != NETWORK_BYTES_UNKNOWN && mMinimumChunkBytes <= 0) {
+            throw new IllegalArgumentException("Minimum chunk size must be positive");
+        }
     }
 
     public int describeContents() {
@@ -182,6 +254,7 @@ final public class JobWorkItem implements Parcelable {
         }
         out.writeLong(mNetworkDownloadBytes);
         out.writeLong(mNetworkUploadBytes);
+        out.writeLong(mMinimumChunkBytes);
         out.writeInt(mDeliveryCount);
         out.writeInt(mWorkId);
     }
@@ -206,6 +279,7 @@ final public class JobWorkItem implements Parcelable {
         }
         mNetworkDownloadBytes = in.readLong();
         mNetworkUploadBytes = in.readLong();
+        mMinimumChunkBytes = in.readLong();
         mDeliveryCount = in.readInt();
         mWorkId = in.readInt();
     }

@@ -23,6 +23,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
@@ -59,6 +60,9 @@ import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -336,7 +340,39 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * Additional payload for {@link Callback#onDetected}.
      */
     public static class EventPayload {
-        private final boolean mTriggerAvailable;
+
+        /**
+         * Flags for describing the data format provided in the event payload.
+         *
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = {"DATA_FORMAT_"}, value = {
+                DATA_FORMAT_RAW,
+                DATA_FORMAT_TRIGGER_AUDIO,
+        })
+        public @interface DataFormat {
+        }
+
+        /**
+         * Data format is not strictly defined by the framework, and the
+         * {@link android.hardware.soundtrigger.SoundTriggerModule} voice engine may populate this
+         * field in any format.
+         */
+        public static final int DATA_FORMAT_RAW = 0;
+
+        /**
+         * Data format is defined as trigger audio.
+         *
+         * <p>When this format is used, {@link #getCaptureAudioFormat()} can be used to understand
+         * further the audio format for reading the data.
+         *
+         * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         */
+        public static final int DATA_FORMAT_TRIGGER_AUDIO = 1;
+
+        @DataFormat
+        private final int mDataFormat;
         // Indicates if {@code captureSession} can be used to continue capturing more audio
         // from the DSP hardware.
         private final boolean mCaptureAvailable;
@@ -348,40 +384,24 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         private final byte[] mData;
         private final HotwordDetectedResult mHotwordDetectedResult;
         private final ParcelFileDescriptor mAudioStream;
+        private final List<KeyphraseRecognitionExtra> mKephraseExtras;
 
-        EventPayload(boolean triggerAvailable, boolean captureAvailable,
-                AudioFormat audioFormat, int captureSession, byte[] data) {
-            this(triggerAvailable, captureAvailable, audioFormat, captureSession, data, null,
-                    null);
-        }
-
-        EventPayload(boolean triggerAvailable, boolean captureAvailable,
-                AudioFormat audioFormat, int captureSession, byte[] data,
-                HotwordDetectedResult hotwordDetectedResult) {
-            this(triggerAvailable, captureAvailable, audioFormat, captureSession, data,
-                    hotwordDetectedResult, null);
-        }
-
-        EventPayload(AudioFormat audioFormat, HotwordDetectedResult hotwordDetectedResult) {
-            this(false, false, audioFormat, -1, null, hotwordDetectedResult, null);
-        }
-
-        EventPayload(AudioFormat audioFormat,
-                HotwordDetectedResult hotwordDetectedResult,
-                ParcelFileDescriptor audioStream) {
-            this(false, false, audioFormat, -1, null, hotwordDetectedResult, audioStream);
-        }
-
-        private EventPayload(boolean triggerAvailable, boolean captureAvailable,
-                AudioFormat audioFormat, int captureSession, byte[] data,
-                HotwordDetectedResult hotwordDetectedResult, ParcelFileDescriptor audioStream) {
-            mTriggerAvailable = triggerAvailable;
+        private EventPayload(boolean captureAvailable,
+                @Nullable AudioFormat audioFormat,
+                int captureSession,
+                @DataFormat int dataFormat,
+                @Nullable byte[] data,
+                @Nullable HotwordDetectedResult hotwordDetectedResult,
+                @Nullable ParcelFileDescriptor audioStream,
+                @NonNull List<KeyphraseRecognitionExtra> keyphraseExtras) {
             mCaptureAvailable = captureAvailable;
             mCaptureSession = captureSession;
             mAudioFormat = audioFormat;
+            mDataFormat = dataFormat;
             mData = data;
             mHotwordDetectedResult = hotwordDetectedResult;
             mAudioStream = audioStream;
+            mKephraseExtras = keyphraseExtras;
         }
 
         /**
@@ -400,14 +420,46 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
          * {@link #getCaptureAudioFormat()}.
          *
          * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         * @deprecated Use {@link #getData()} instead.
          */
+        @Deprecated
         @Nullable
         public byte[] getTriggerAudio() {
-            if (mTriggerAvailable) {
+            if (mDataFormat == DATA_FORMAT_TRIGGER_AUDIO) {
                 return mData;
             } else {
                 return null;
             }
+        }
+
+        /**
+         * Conveys the format of the additional data that is triggered with the keyphrase event.
+         *
+         * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         * @see DataFormat
+         */
+        @DataFormat
+        public int getDataFormat() {
+            return mDataFormat;
+        }
+
+        /**
+         * Gets additional raw data that is triggered with the keyphrase event.
+         *
+         * <p>A {@link android.hardware.soundtrigger.SoundTriggerModule} may populate this
+         * field with opaque data for use by system applications who know about voice
+         * engine internals. Data may be null if the field is not populated by the
+         * {@link android.hardware.soundtrigger.SoundTriggerModule}.
+         *
+         * <p>If {@link #getDataFormat()} is {@link #DATA_FORMAT_TRIGGER_AUDIO}, then the
+         * entirety of this buffer is expected to be of the format from
+         * {@link #getCaptureAudioFormat()}.
+         *
+         * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         */
+        @Nullable
+        public byte[] getData() {
+            return mData;
         }
 
         /**
@@ -463,6 +515,166 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         @Nullable
         public ParcelFileDescriptor getAudioStream() {
             return mAudioStream;
+        }
+
+        /**
+         * Returns the keyphrases recognized by the voice engine with additional confidence
+         * information
+         *
+         * @return List of keyphrase extras describing additional data for each keyphrase the voice
+         * engine triggered on for this event. The ordering of the list is preserved based on what
+         * the ordering provided by {@link android.hardware.soundtrigger.SoundTriggerModule}.
+         */
+        @NonNull
+        public List<KeyphraseRecognitionExtra> getKeyphraseRecognitionExtras() {
+            return mKephraseExtras;
+        }
+
+        /**
+         * Builder class for {@link EventPayload} objects
+         *
+         * @hide
+         */
+        @TestApi
+        public static final class Builder {
+            private boolean mCaptureAvailable = false;
+            private int mCaptureSession = -1;
+            private AudioFormat mAudioFormat = null;
+            @DataFormat
+            private int mDataFormat = DATA_FORMAT_RAW;
+            private byte[] mData = null;
+            private HotwordDetectedResult mHotwordDetectedResult = null;
+            private ParcelFileDescriptor mAudioStream = null;
+            private List<KeyphraseRecognitionExtra> mKeyphraseExtras = Collections.emptyList();
+
+            public Builder() {}
+
+            Builder(SoundTrigger.KeyphraseRecognitionEvent keyphraseRecognitionEvent) {
+                setCaptureAvailable(keyphraseRecognitionEvent.isCaptureAvailable());
+                setCaptureSession(keyphraseRecognitionEvent.getCaptureSession());
+                if (keyphraseRecognitionEvent.getCaptureFormat() != null) {
+                    setCaptureAudioFormat(keyphraseRecognitionEvent.getCaptureFormat());
+                }
+                setDataFormat((keyphraseRecognitionEvent.triggerInData) ? DATA_FORMAT_TRIGGER_AUDIO
+                        : DATA_FORMAT_RAW);
+                if (keyphraseRecognitionEvent.getData() != null) {
+                    setData(keyphraseRecognitionEvent.getData());
+                }
+                if (keyphraseRecognitionEvent.keyphraseExtras != null) {
+                    setKeyphraseRecognitionExtras(
+                            Arrays.asList(keyphraseRecognitionEvent.keyphraseExtras));
+                }
+            }
+
+            /**
+             * Indicates if {@code captureSession} can be used to continue capturing more audio from
+             * the DSP hardware.
+             */
+            @SuppressLint("MissingGetterMatchingBuilder")
+            @NonNull
+            public Builder setCaptureAvailable(boolean captureAvailable) {
+                mCaptureAvailable = captureAvailable;
+                return this;
+            }
+
+            /**
+             * Sets the session ID to start a capture from the DSP.
+             */
+            @SuppressLint("MissingGetterMatchingBuilder")
+            @NonNull
+            public Builder setCaptureSession(int captureSession) {
+                mCaptureSession = captureSession;
+                return this;
+            }
+
+            /**
+             * Sets the format of the audio obtained using {@link #getTriggerAudio()}.
+             */
+            @NonNull
+            public Builder setCaptureAudioFormat(@NonNull AudioFormat audioFormat) {
+                mAudioFormat = audioFormat;
+                return this;
+            }
+
+            /**
+             * Conveys the format of the additional data that is triggered with the keyphrase event.
+             *
+             * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+             * @see DataFormat
+             */
+            @NonNull
+            public Builder setDataFormat(@DataFormat int dataFormat) {
+                mDataFormat = dataFormat;
+                return this;
+            }
+
+            /**
+             * Sets additional raw data that is triggered with the keyphrase event.
+             *
+             * <p>A {@link android.hardware.soundtrigger.SoundTriggerModule} may populate this
+             * field with opaque data for use by system applications who know about voice
+             * engine internals. Data may be null if the field is not populated by the
+             * {@link android.hardware.soundtrigger.SoundTriggerModule}.
+             *
+             * <p>If {@link #getDataFormat()} is {@link #DATA_FORMAT_TRIGGER_AUDIO}, then the
+             * entirety of this
+             * buffer is expected to be of the format from {@link #getCaptureAudioFormat()}.
+             *
+             * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+             */
+            @NonNull
+            public Builder setData(@NonNull byte[] data) {
+                mData = data;
+                return this;
+            }
+
+            /**
+             * Sets {@link HotwordDetectedResult} associated with the hotword event, passed from
+             * {@link HotwordDetectionService}.
+             */
+            @NonNull
+            public Builder setHotwordDetectedResult(
+                    @NonNull HotwordDetectedResult hotwordDetectedResult) {
+                mHotwordDetectedResult = hotwordDetectedResult;
+                return this;
+            }
+
+            /**
+             * Sets a stream with bytes corresponding to the open audio stream with hotword data.
+             *
+             * <p>This data represents an audio stream in the format returned by
+             * {@link #getCaptureAudioFormat}.
+             *
+             * <p>Clients are expected to start consuming the stream within 1 second of receiving
+             * the
+             * event.
+             */
+            @NonNull
+            public Builder setAudioStream(@NonNull ParcelFileDescriptor audioStream) {
+                mAudioStream = audioStream;
+                return this;
+            }
+
+            /**
+             * Sets the keyphrases recognized by the voice engine with additional confidence
+             * information
+             */
+            @NonNull
+            public Builder setKeyphraseRecognitionExtras(
+                    @NonNull List<KeyphraseRecognitionExtra> keyphraseRecognitionExtras) {
+                mKeyphraseExtras = keyphraseRecognitionExtras;
+                return this;
+            }
+
+            /**
+             * Builds an {@link EventPayload} instance
+             */
+            @NonNull
+            public EventPayload build() {
+                return new EventPayload(mCaptureAvailable, mAudioFormat, mCaptureSession,
+                        mDataFormat, mData, mHotwordDetectedResult, mAudioStream,
+                        mKeyphraseExtras);
+            }
         }
     }
 
@@ -639,7 +851,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     @RequiresPermission(allOf = {RECORD_AUDIO, CAPTURE_AUDIO_HOTWORD})
     public void triggerHardwareRecognitionEventForTest(int status, int soundModelHandle,
             boolean captureAvailable, int captureSession, int captureDelayMs, int capturePreambleMs,
-            boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data) {
+            boolean triggerInData, @NonNull AudioFormat captureFormat, @Nullable byte[] data,
+            @NonNull List<KeyphraseRecognitionExtra> keyphraseRecognitionExtras) {
         Log.d(TAG, "triggerHardwareRecognitionEventForTest()");
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID || mAvailability == STATE_ERROR) {
@@ -650,7 +863,8 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                 mModelManagementService.triggerHardwareRecognitionEventForTest(
                         new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
                                 captureSession, captureDelayMs, capturePreambleMs, triggerInData,
-                                captureFormat, data, null /* keyphraseExtras */),
+                                captureFormat, data, keyphraseRecognitionExtras.toArray(
+                                new KeyphraseRecognitionExtra[0])),
                         mInternalCallback);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -993,11 +1207,14 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     /**
      * Invalidates this hotword detector so that any future calls to this result
      * in an IllegalStateException.
-     *
-     * @hide
      */
-    void invalidate() {
+    @Override
+    public void destroy() {
         synchronized (mLock) {
+            if (mAvailability == STATE_KEYPHRASE_ENROLLED) {
+                stopRecognition();
+            }
+
             mAvailability = STATE_INVALID;
             notifyStateChangedLocked();
 
@@ -1009,6 +1226,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                 }
             }
         }
+        super.destroy();
     }
 
     /**
@@ -1171,8 +1389,9 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
                 Slog.i(TAG, "onDetected");
             }
             Message.obtain(mHandler, MSG_HOTWORD_DETECTED,
-                    new EventPayload(event.triggerInData, event.captureAvailable,
-                            event.captureFormat, event.captureSession, event.data, result))
+                    new EventPayload.Builder(event)
+                            .setHotwordDetectedResult(result)
+                            .build())
                     .sendToTarget();
         }
         @Override

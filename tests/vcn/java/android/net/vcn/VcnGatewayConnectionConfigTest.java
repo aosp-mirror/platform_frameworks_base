@@ -19,9 +19,11 @@ package android.net.vcn;
 import static android.net.ipsec.ike.IkeSessionParams.IKE_OPTION_MOBIKE;
 import static android.net.vcn.VcnGatewayConnectionConfig.DEFAULT_UNDERLYING_NETWORK_TEMPLATES;
 import static android.net.vcn.VcnGatewayConnectionConfig.UNDERLYING_NETWORK_TEMPLATES_KEY;
+import static android.net.vcn.VcnGatewayConnectionConfig.VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
@@ -42,7 +44,9 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
@@ -79,6 +83,9 @@ public class VcnGatewayConnectionConfigTest {
             };
     public static final int MAX_MTU = 1360;
 
+    private static final Set<Integer> GATEWAY_OPTIONS =
+            Collections.singleton(VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY);
+
     public static final IkeTunnelConnectionParams TUNNEL_CONNECTION_PARAMS =
             TunnelConnectionParamsUtilsTest.buildTestParams();
 
@@ -93,12 +100,18 @@ public class VcnGatewayConnectionConfigTest {
                 EXPOSED_CAPS);
     }
 
-    // Public for use in VcnGatewayConnectionTest
-    public static VcnGatewayConnectionConfig buildTestConfig() {
+    // Public for use in UnderlyingNetworkControllerTest
+    public static VcnGatewayConnectionConfig buildTestConfig(
+            List<VcnUnderlyingNetworkTemplate> nwTemplates) {
         final VcnGatewayConnectionConfig.Builder builder =
-                newBuilder().setVcnUnderlyingNetworkPriorities(UNDERLYING_NETWORK_TEMPLATES);
+                newBuilder().setVcnUnderlyingNetworkPriorities(nwTemplates);
 
         return buildTestConfigWithExposedCaps(builder, EXPOSED_CAPS);
+    }
+
+    // Public for use in VcnGatewayConnectionTest
+    public static VcnGatewayConnectionConfig buildTestConfig() {
+        return buildTestConfig(UNDERLYING_NETWORK_TEMPLATES);
     }
 
     private static VcnGatewayConnectionConfig.Builder newBuilder() {
@@ -109,9 +122,15 @@ public class VcnGatewayConnectionConfigTest {
                 TUNNEL_CONNECTION_PARAMS);
     }
 
-    private static VcnGatewayConnectionConfig buildTestConfigWithExposedCaps(
-            VcnGatewayConnectionConfig.Builder builder, int... exposedCaps) {
+    private static VcnGatewayConnectionConfig buildTestConfigWithExposedCapsAndOptions(
+            VcnGatewayConnectionConfig.Builder builder,
+            Set<Integer> gatewayOptions,
+            int... exposedCaps) {
         builder.setRetryIntervalsMillis(RETRY_INTERVALS_MS).setMaxMtu(MAX_MTU);
+
+        for (int option : gatewayOptions) {
+            builder.addGatewayOption(option);
+        }
 
         for (int caps : exposedCaps) {
             builder.addExposedCapability(caps);
@@ -120,9 +139,26 @@ public class VcnGatewayConnectionConfigTest {
         return builder.build();
     }
 
+    private static VcnGatewayConnectionConfig buildTestConfigWithExposedCaps(
+            VcnGatewayConnectionConfig.Builder builder, int... exposedCaps) {
+        return buildTestConfigWithExposedCapsAndOptions(
+                builder, Collections.emptySet(), exposedCaps);
+    }
+
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfigWithExposedCaps(int... exposedCaps) {
         return buildTestConfigWithExposedCaps(newBuilder(), exposedCaps);
+    }
+
+    private static VcnGatewayConnectionConfig buildTestConfigWithGatewayOptions(
+            VcnGatewayConnectionConfig.Builder builder, Set<Integer> gatewayOptions) {
+        return buildTestConfigWithExposedCapsAndOptions(builder, gatewayOptions, EXPOSED_CAPS);
+    }
+
+    // Public for use in VcnGatewayConnectionTest
+    public static VcnGatewayConnectionConfig buildTestConfigWithGatewayOptions(
+            Set<Integer> gatewayOptions) {
+        return buildTestConfigWithExposedCapsAndOptions(newBuilder(), gatewayOptions, EXPOSED_CAPS);
     }
 
     @Test
@@ -211,6 +247,15 @@ public class VcnGatewayConnectionConfigTest {
     }
 
     @Test
+    public void testBuilderRequiresValidOption() {
+        try {
+            newBuilder().addGatewayOption(-1);
+            fail("Expected exception due to the invalid VCN gateway option");
+        } catch (IllegalArgumentException e) {
+        }
+    }
+
+    @Test
     public void testBuilderAndGetters() {
         final VcnGatewayConnectionConfig config = buildTestConfig();
 
@@ -225,11 +270,33 @@ public class VcnGatewayConnectionConfigTest {
 
         assertArrayEquals(RETRY_INTERVALS_MS, config.getRetryIntervalsMillis());
         assertEquals(MAX_MTU, config.getMaxMtu());
+
+        assertFalse(
+                config.hasGatewayOption(
+                        VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY));
+    }
+
+    @Test
+    public void testBuilderAndGettersWithOptions() {
+        final VcnGatewayConnectionConfig config =
+                buildTestConfigWithGatewayOptions(GATEWAY_OPTIONS);
+
+        for (int option : GATEWAY_OPTIONS) {
+            assertTrue(config.hasGatewayOption(option));
+        }
     }
 
     @Test
     public void testPersistableBundle() {
         final VcnGatewayConnectionConfig config = buildTestConfig();
+
+        assertEquals(config, new VcnGatewayConnectionConfig(config.toPersistableBundle()));
+    }
+
+    @Test
+    public void testPersistableBundleWithOptions() {
+        final VcnGatewayConnectionConfig config =
+                buildTestConfigWithGatewayOptions(GATEWAY_OPTIONS);
 
         assertEquals(config, new VcnGatewayConnectionConfig(config.toPersistableBundle()));
     }
@@ -316,6 +383,29 @@ public class VcnGatewayConnectionConfigTest {
         assertEquals(config, configEqual);
 
         assertNotEquals(UNDERLYING_NETWORK_TEMPLATES, networkTemplatesNotEqual);
+        assertNotEquals(config, configNotEqual);
+    }
+
+    private static VcnGatewayConnectionConfig buildConfigWithGatewayOptionsForEqualityTest(
+            Set<Integer> gatewayOptions) {
+        return buildTestConfigWithGatewayOptions(
+                new VcnGatewayConnectionConfig.Builder(
+                        "buildConfigWithGatewayOptionsForEqualityTest", TUNNEL_CONNECTION_PARAMS),
+                gatewayOptions);
+    }
+
+    @Test
+    public void testVcnGatewayOptionsEquality() throws Exception {
+        final VcnGatewayConnectionConfig config =
+                buildConfigWithGatewayOptionsForEqualityTest(GATEWAY_OPTIONS);
+
+        final VcnGatewayConnectionConfig configEqual =
+                buildConfigWithGatewayOptionsForEqualityTest(GATEWAY_OPTIONS);
+
+        final VcnGatewayConnectionConfig configNotEqual =
+                buildConfigWithGatewayOptionsForEqualityTest(Collections.emptySet());
+
+        assertEquals(config, configEqual);
         assertNotEquals(config, configNotEqual);
     }
 }

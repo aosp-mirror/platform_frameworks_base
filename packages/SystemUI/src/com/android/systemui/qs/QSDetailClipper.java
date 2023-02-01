@@ -23,12 +23,15 @@ import android.graphics.drawable.TransitionDrawable;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 
-/** Helper for quick settings detail panel clip animations. **/
+import androidx.annotation.Nullable;
+
+/** Helper for quick settings detail panel clip animations. Currently used by the customizer **/
 public class QSDetailClipper {
 
     private final View mDetail;
     private final TransitionDrawable mBackground;
 
+    @Nullable
     private Animator mAnimator;
 
     public QSDetailClipper(View detail) {
@@ -36,8 +39,15 @@ public class QSDetailClipper {
         mBackground = (TransitionDrawable) detail.getBackground();
     }
 
-    public void animateCircularClip(int x, int y, boolean in, AnimatorListener listener) {
-        updateCircularClip(true /* animate */, x, y, in, listener);
+    /**
+     * @param x x position where animation should originate
+     * @param y y position where animation should originate
+     * @param in whether animating in or out
+     * @param listener Animation listener. Called whether or not {@code animate} is true.
+     * @return the duration of the circular animator
+     */
+    public long animateCircularClip(int x, int y, boolean in, AnimatorListener listener) {
+        return updateCircularClip(true /* animate */, x, y, in, listener);
     }
 
     /**
@@ -47,8 +57,9 @@ public class QSDetailClipper {
      * @param y y position where animation should originate
      * @param in whether animating in or out
      * @param listener Animation listener. Called whether or not {@code animate} is true.
+     * @return the duration of the circular animator
      */
-    public void updateCircularClip(boolean animate, int x, int y, boolean in,
+    public long updateCircularClip(boolean animate, int x, int y, boolean in,
             AnimatorListener listener) {
         if (mAnimator != null) {
             mAnimator.cancel();
@@ -84,6 +95,7 @@ public class QSDetailClipper {
             mAnimator.addListener(mGoneOnEnd);
         }
         mAnimator.start();
+        return mAnimator.getDuration();
     }
 
     private final Runnable mReverseBackground = new Runnable() {

@@ -227,11 +227,11 @@ final class LogicalDisplay {
                 info.largestNominalAppHeight = mOverrideDisplayInfo.largestNominalAppHeight;
                 info.logicalWidth = mOverrideDisplayInfo.logicalWidth;
                 info.logicalHeight = mOverrideDisplayInfo.logicalHeight;
+                info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
+                info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
                 info.rotation = mOverrideDisplayInfo.rotation;
                 info.displayCutout = mOverrideDisplayInfo.displayCutout;
                 info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
-                info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
-                info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
                 info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
             }
             mInfo.set(info);
@@ -378,6 +378,12 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_OWN_DISPLAY_GROUP;
             }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_ALWAYS_UNLOCKED) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_ALWAYS_UNLOCKED;
+            }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_TOUCH_FEEDBACK_DISABLED) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_TOUCH_FEEDBACK_DISABLED;
+            }
             Rect maskingInsets = getMaskingInsets(deviceInfo);
             int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;
             int maskedHeight = deviceInfo.height - maskingInsets.top - maskingInsets.bottom;
@@ -426,6 +432,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.brightnessMaximum = deviceInfo.brightnessMaximum;
             mBaseDisplayInfo.brightnessDefault = deviceInfo.brightnessDefault;
             mBaseDisplayInfo.roundedCorners = deviceInfo.roundedCorners;
+            mBaseDisplayInfo.installOrientation = deviceInfo.installOrientation;
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
         }
@@ -515,10 +522,12 @@ final class LogicalDisplay {
         // Set the layer stack.
         device.setLayerStackLocked(t, isBlanked ? BLANK_LAYER_STACK : mLayerStack);
         // Also inform whether the device is the same one sent to inputflinger for its layerstack.
+        // Prevent displays that are disabled from receiving input.
         // TODO(b/188914255): Remove once input can dispatch against device vs layerstack.
         device.setDisplayFlagsLocked(t,
-                device.getDisplayDeviceInfoLocked().touch != TOUCH_NONE
-                        ? SurfaceControl.DISPLAY_RECEIVES_INPUT : 0);
+                (isEnabled() && device.getDisplayDeviceInfoLocked().touch != TOUCH_NONE)
+                        ? SurfaceControl.DISPLAY_RECEIVES_INPUT
+                        : 0);
 
         // Set the color mode and allowed display mode.
         if (device == mPrimaryDisplayDevice) {

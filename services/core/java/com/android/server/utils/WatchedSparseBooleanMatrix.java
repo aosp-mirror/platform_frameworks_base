@@ -18,6 +18,7 @@ package com.android.server.utils;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 
@@ -168,12 +169,19 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
      * A copy constructor that can be used for snapshotting.
      */
     private WatchedSparseBooleanMatrix(WatchedSparseBooleanMatrix r) {
-        mOrder = r.mOrder;
-        mSize = r.mSize;
-        mKeys = r.mKeys.clone();
-        mMap = r.mMap.clone();
-        mInUse = r.mInUse.clone();
-        mValues = r.mValues.clone();
+        copyFrom(r);
+    }
+
+    /**
+     * Copy from src to this.
+     */
+    public void copyFrom(@NonNull WatchedSparseBooleanMatrix src) {
+        mOrder = src.mOrder;
+        mSize = src.mSize;
+        mKeys = src.mKeys.clone();
+        mMap = src.mMap.clone();
+        mInUse = src.mInUse.clone();
+        mValues = src.mValues.clone();
     }
 
     /**
@@ -259,6 +267,33 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
         System.arraycopy(mMap, index + 1, mMap, index, mSize - (index + 1));
         mMap[mSize - 1] = 0;
         mSize--;
+        onChanged();
+    }
+
+    /**
+     * Removes all of the mappings whose index is between {@code fromIndex}, inclusive, and
+     * {@code toIndex}, exclusive. The matrix does not shrink.
+     */
+    public void removeRange(int fromIndex, int toIndex) {
+        if (toIndex < fromIndex) {
+            throw new ArrayIndexOutOfBoundsException("toIndex < fromIndex");
+        }
+        final int num = toIndex - fromIndex;
+        if (num == 0) {
+            return;
+        }
+        validateIndex(fromIndex);
+        validateIndex(toIndex - 1);
+        for (int i = fromIndex; i < toIndex; i++) {
+            mInUse[mMap[i]] = false;
+        }
+        System.arraycopy(mKeys, toIndex, mKeys, fromIndex, mSize - toIndex);
+        System.arraycopy(mMap, toIndex, mMap, fromIndex, mSize - toIndex);
+        for (int i = mSize - num; i < mSize; i++) {
+            mKeys[i] = 0;
+            mMap[i] = 0;
+        }
+        mSize -= num;
         onChanged();
     }
 
@@ -371,7 +406,7 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
                 // Preemptively grow the matrix, which also grows the free list.
                 growMatrix();
             }
-            int newIndex = nextFree();
+            int newIndex = nextFree(true /* acquire */);
             mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
             mMap = GrowingArrayUtils.insert(mMap, mSize, i, newIndex);
             mSize++;
@@ -447,12 +482,12 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
     }
 
     /**
-     * Find an unused storage index, mark it in-use, and return it.
+     * Find an unused storage index, and return it. Mark it in-use if the {@code acquire} is true.
      */
-    private int nextFree() {
+    private int nextFree(boolean acquire) {
         for (int i = 0; i < mInUse.length; i++) {
             if (!mInUse[i]) {
-                mInUse[i] = true;
+                mInUse[i] = acquire;
                 return i;
             }
         }
@@ -488,7 +523,8 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
         }
         // dst and src are identify raw (row, col) in mValues.  srcIndex is the index (as
         // in the result of keyAt()) of the key being relocated.
-        for (int dst = nextFree(); dst < mSize; dst = nextFree()) {
+        for (int dst = nextFree(false); dst < mSize; dst = nextFree(false)) {
+            mInUse[dst] = true;
             int srcIndex = lastInuse();
             int src = mMap[srcIndex];
             mInUse[src] = false;
@@ -536,6 +572,20 @@ public class WatchedSparseBooleanMatrix extends WatchableImpl implements Snappab
      */
     public int capacity() {
         return mOrder;
+    }
+
+    /**
+     * Set capacity to enlarge the size of the 2D matrix. Capacity less than the {@link #capacity()}
+     * is not supported.
+     */
+    public void setCapacity(int capacity) {
+        if (capacity <= mOrder) {
+            return;
+        }
+        if (capacity % STEP != 0) {
+            capacity = ((capacity / STEP) + 1) * STEP;
+        }
+        resizeMatrix(capacity);
     }
 
     /**

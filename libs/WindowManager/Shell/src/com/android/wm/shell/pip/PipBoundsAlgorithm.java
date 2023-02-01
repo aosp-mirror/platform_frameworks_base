@@ -32,6 +32,7 @@ import android.util.Size;
 import android.util.TypedValue;
 import android.view.Gravity;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 
 import java.io.PrintWriter;
@@ -46,6 +47,7 @@ public class PipBoundsAlgorithm {
 
     private final @NonNull PipBoundsState mPipBoundsState;
     private final PipSnapAlgorithm mSnapAlgorithm;
+    private final PipKeepClearAlgorithm mPipKeepClearAlgorithm;
 
     private float mDefaultSizePercent;
     private float mMinAspectRatioForMinSize;
@@ -56,12 +58,14 @@ public class PipBoundsAlgorithm {
     private int mDefaultStackGravity;
     private int mDefaultMinSize;
     private int mOverridableMinSize;
-    private Point mScreenEdgeInsets;
+    protected Point mScreenEdgeInsets;
 
     public PipBoundsAlgorithm(Context context, @NonNull PipBoundsState pipBoundsState,
-            @NonNull PipSnapAlgorithm pipSnapAlgorithm) {
+            @NonNull PipSnapAlgorithm pipSnapAlgorithm,
+            @NonNull PipKeepClearAlgorithm pipKeepClearAlgorithm) {
         mPipBoundsState = pipBoundsState;
         mSnapAlgorithm = pipSnapAlgorithm;
+        mPipKeepClearAlgorithm = pipKeepClearAlgorithm;
         reloadResources(context);
         // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
         // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
@@ -76,15 +80,15 @@ public class PipBoundsAlgorithm {
     private void reloadResources(Context context) {
         final Resources res = context.getResources();
         mDefaultAspectRatio = res.getFloat(
-                com.android.internal.R.dimen.config_pictureInPictureDefaultAspectRatio);
+                R.dimen.config_pictureInPictureDefaultAspectRatio);
         mDefaultStackGravity = res.getInteger(
-                com.android.internal.R.integer.config_defaultPictureInPictureGravity);
+                R.integer.config_defaultPictureInPictureGravity);
         mDefaultMinSize = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.default_minimal_size_pip_resizable_task);
+                R.dimen.default_minimal_size_pip_resizable_task);
         mOverridableMinSize = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.overridable_minimal_size_pip_resizable_task);
+                R.dimen.overridable_minimal_size_pip_resizable_task);
         final String screenEdgeInsetsDpString = res.getString(
-                com.android.internal.R.string.config_defaultPictureInPictureScreenEdgeInsets);
+                R.string.config_defaultPictureInPictureScreenEdgeInsets);
         final Size screenEdgeInsetsDp = !screenEdgeInsetsDpString.isEmpty()
                 ? Size.parseSize(screenEdgeInsetsDpString)
                 : null;
@@ -96,9 +100,9 @@ public class PipBoundsAlgorithm {
         mMaxAspectRatio = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureMaxAspectRatio);
         mDefaultSizePercent = res.getFloat(
-                com.android.internal.R.dimen.config_pictureInPictureDefaultSizePercent);
+                R.dimen.config_pictureInPictureDefaultSizePercent);
         mMaxAspectRatioForMinSize = res.getFloat(
-                com.android.internal.R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
+                R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
         mMinAspectRatioForMinSize = 1f / mMaxAspectRatioForMinSize;
     }
 
@@ -128,8 +132,21 @@ public class PipBoundsAlgorithm {
         return getDefaultBounds(INVALID_SNAP_FRACTION, null /* size */);
     }
 
-    /** Returns the destination bounds to place the PIP window on entry. */
+    /**
+     * Returns the destination bounds to place the PIP window on entry.
+     * If there are any keep clear areas registered, the position will try to avoid occluding them.
+     */
     public Rect getEntryDestinationBounds() {
+        Rect entryBounds = getEntryDestinationBoundsIgnoringKeepClearAreas();
+        Rect insets = new Rect();
+        getInsetBounds(insets);
+        return mPipKeepClearAlgorithm.findUnoccludedPosition(entryBounds,
+                mPipBoundsState.getRestrictedKeepClearAreas(),
+                mPipBoundsState.getUnrestrictedKeepClearAreas(), insets);
+    }
+
+    /** Returns the destination bounds to place the PIP window on entry. */
+    public Rect getEntryDestinationBoundsIgnoringKeepClearAreas() {
         final PipBoundsState.PipReentryState reentryState = mPipBoundsState.getReentryState();
 
         final Rect destinationBounds = reentryState != null
@@ -137,9 +154,10 @@ public class PipBoundsAlgorithm {
                 : getDefaultBounds();
 
         final boolean useCurrentSize = reentryState != null && reentryState.getSize() != null;
-        return transformBoundsToAspectRatioIfValid(destinationBounds,
+        Rect aspectRatioBounds = transformBoundsToAspectRatioIfValid(destinationBounds,
                 mPipBoundsState.getAspectRatio(), false /* useCurrentMinEdgeSize */,
                 useCurrentSize);
+        return aspectRatioBounds;
     }
 
     /** Returns the current bounds adjusted to the new aspect ratio, if valid. */
@@ -193,7 +211,7 @@ public class PipBoundsAlgorithm {
     public float getAspectRatioOrDefault(
             @android.annotation.Nullable PictureInPictureParams params) {
         return params != null && params.hasSetAspectRatio()
-                ? params.getAspectRatio()
+                ? params.getAspectRatioFloat()
                 : getDefaultAspectRatio();
     }
 

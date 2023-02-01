@@ -19,6 +19,7 @@ package com.android.wm.shell.pip.phone;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -30,6 +31,7 @@ import com.android.wm.shell.R;
  */
 public class PipMenuActionView extends FrameLayout {
     private ImageView mImageView;
+    private View mCustomCloseBackground;
 
     public PipMenuActionView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -39,10 +41,16 @@ public class PipMenuActionView extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mImageView = findViewById(R.id.image);
+        mCustomCloseBackground = findViewById(R.id.custom_close_bg);
     }
 
     /** pass through to internal {@link #mImageView} */
     public void setImageDrawable(Drawable drawable) {
         mImageView.setImageDrawable(drawable);
+    }
+
+    /** pass through to internal {@link #mCustomCloseBackground} */
+    public void setCustomCloseBackgroundVisibility(@View.Visibility int visibility) {
+        mCustomCloseBackground.setVisibility(visibility);
     }
 }

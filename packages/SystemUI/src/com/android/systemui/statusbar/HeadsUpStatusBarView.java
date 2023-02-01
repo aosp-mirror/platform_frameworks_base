@@ -31,6 +31,8 @@ import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry.OnSensitivityChangedListener;
 
+import java.util.ArrayList;
+
 
 /**
  * The view in the statusBar that contains part of the heads-up information
@@ -161,8 +163,8 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         return mIconDrawingRect;
     }
 
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        mTextView.setTextColor(DarkIconDispatcher.getTint(area, this, tint));
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        mTextView.setTextColor(DarkIconDispatcher.getTint(areas, this, tint));
     }
 
     public void setOnDrawingRectChangedListener(Runnable onDrawingRectChangedListener) {

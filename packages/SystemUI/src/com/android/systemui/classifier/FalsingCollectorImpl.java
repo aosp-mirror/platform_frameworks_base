@@ -47,9 +47,9 @@ import javax.inject.Inject;
 @SysUISingleton
 class FalsingCollectorImpl implements FalsingCollector {
 
-    private static final boolean DEBUG = false;
-    private static final String TAG = "FalsingManager";
-    private static final String PROXIMITY_SENSOR_TAG = "FalsingManager";
+    private static final String TAG = "FalsingCollector";
+    private static final String PROXIMITY_SENSOR_TAG = "FalsingCollector";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final long GESTURE_PROCESSING_DELAY_MS = 100;
 
     private final FalsingDataProvider mFalsingDataProvider;
@@ -77,7 +77,7 @@ class FalsingCollectorImpl implements FalsingCollector {
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onStateChanged(int newState) {
-                    logDebug("StatusBarState=" + StatusBarState.toShortString(newState));
+                    logDebug("StatusBarState=" + StatusBarState.toString(newState));
                     mState = newState;
                     updateSessionActive();
                 }
@@ -303,12 +303,14 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Override
     public void onTouchEvent(MotionEvent ev) {
-        if (!mKeyguardStateController.isShowing()
-                || (mStatusBarStateController.isDozing()
-                    && !mStatusBarStateController.isPulsing())) {
+        if (!mKeyguardStateController.isShowing()) {
             avoidGesture();
             return;
         }
+        if (ev.getActionMasked() == MotionEvent.ACTION_OUTSIDE) {
+            return;
+        }
+
         // We delay processing down events to see if another component wants to process them.
         // If #avoidGesture is called after a MotionEvent.ACTION_DOWN, all following motion events
         // will be ignored by the collector until another MotionEvent.ACTION_DOWN is passed in.

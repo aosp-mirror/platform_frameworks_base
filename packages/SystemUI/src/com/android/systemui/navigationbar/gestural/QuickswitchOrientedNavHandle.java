@@ -44,33 +44,33 @@ public class QuickswitchOrientedNavHandle extends NavigationHandle {
     }
 
     public RectF computeHomeHandleBounds() {
-        int left;
-        int top;
-        int bottom;
-        int right;
-        int radiusOffset = mRadius * 2;
+        float left;
+        float top;
+        float bottom;
+        float right;
+        float radiusOffset = mRadius * 2;
         int topStart = getLocationOnScreen()[1];
 
         switch (mDeltaRotation) {
             default:
             case Surface.ROTATION_0:
             case Surface.ROTATION_180:
-                int height = mRadius * 2;
-                left = getWidth() / 2 - mWidth / 2;
+                float height = mRadius * 2;
+                left = getWidth() / 2f - mWidth / 2f;
                 top = (getHeight() - mBottom - height);
-                right = getWidth() / 2 + mWidth / 2;
+                right = getWidth() / 2f + mWidth / 2f;
                 bottom = top + height;
                 break;
             case Surface.ROTATION_90:
                 left = mBottom;
                 right = left + radiusOffset;
-                top = getHeight() / 2 - (mWidth / 2) - (topStart / 2);
+                top = getHeight() / 2f - (mWidth / 2f) - (topStart / 2f);
                 bottom = top + mWidth;
                 break;
             case Surface.ROTATION_270:
                 right = getWidth() - mBottom;
                 left = right - radiusOffset;
-                top = getHeight() / 2 - (mWidth / 2) - (topStart / 2);
+                top = getHeight() / 2f - (mWidth / 2f) - (topStart / 2f);
                 bottom = top + mWidth;
                 break;
         }

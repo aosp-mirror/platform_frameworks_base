@@ -17,6 +17,7 @@
 package android.accessibilityservice;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.MagnificationConfig;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Bitmap;
 import android.graphics.Region;
@@ -38,6 +39,8 @@ import java.util.List;
 interface IAccessibilityServiceConnection {
 
     void setServiceInfo(in AccessibilityServiceInfo info);
+
+    void setAttributionTag(in String attributionTag);
 
     String[] findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
         long accessibilityNodeId, int interactionId,
@@ -75,6 +78,8 @@ interface IAccessibilityServiceConnection {
 
     oneway void setOnKeyEventResult(boolean handled, int sequence);
 
+    MagnificationConfig getMagnificationConfig(int displayId);
+
     float getMagnificationScale(int displayId);
 
     float getMagnificationCenterX(int displayId);
@@ -83,10 +88,13 @@ interface IAccessibilityServiceConnection {
 
     Region getMagnificationRegion(int displayId);
 
+    Region getCurrentMagnificationRegion(int displayId);
+
     boolean resetMagnification(int displayId, boolean animate);
 
-    boolean setMagnificationScaleAndCenter(int displayId, float scale, float centerX, float centerY,
-        boolean animate);
+    boolean resetCurrentMagnification(int displayId, boolean animate);
+
+    boolean setMagnificationConfig(int displayId, in MagnificationConfig config, boolean animate);
 
     void setMagnificationCallbackEnabled(int displayId, boolean enabled);
 
@@ -97,6 +105,8 @@ interface IAccessibilityServiceConnection {
     void setSoftKeyboardCallbackEnabled(boolean enabled);
 
     boolean switchToInputMethod(String imeId);
+
+    int setInputMethodEnabled(String imeId, boolean enabled);
 
     boolean isAccessibilityButtonAvailable();
 
@@ -118,6 +128,22 @@ interface IAccessibilityServiceConnection {
 
     void setFocusAppearance(int strokeWidth, int color);
 
+    void setCacheEnabled(boolean enabled);
+
     oneway void logTrace(long timestamp, String where, long loggingTypes, String callingParams,
         int processId, long threadId, int callingUid, in Bundle serializedCallingStackInBundle);
+
+    void setServiceDetectsGesturesEnabled(int displayId, boolean mode);
+
+    void requestTouchExploration(int displayId);
+
+    void requestDragging(int displayId, int pointerId);
+
+    void requestDelegating(int displayId);
+
+    void onDoubleTap(int displayId);
+
+    void onDoubleTapAndHold(int displayId);
+
+    void setAnimationScale(float scale);
 }

@@ -85,12 +85,13 @@ bool checkLoop(int32_t *loop)
 } // namespace
 
 SoundPool::SoundPool(
-        int32_t maxStreams, const audio_attributes_t* attributes, const std::string& opPackageName)
+        int32_t maxStreams, const audio_attributes_t& attributes,
+        const std::string& opPackageName)
     : mStreamManager(maxStreams, kStreamManagerThreads, attributes, opPackageName)
 {
     ALOGV("%s(maxStreams=%d, attr={ content_type=%d, usage=%d, flags=0x%x, tags=%s })",
             __func__, maxStreams,
-            attributes->content_type, attributes->usage, attributes->flags, attributes->tags);
+            attributes.content_type, attributes.usage, attributes.flags, attributes.tags);
 }
 
 SoundPool::~SoundPool()

@@ -80,21 +80,21 @@ data_sources {
       atrace_apps: "*"
 
       atrace_categories: "am"
-      atrace_categories: "bionic"
-      atrace_categories: "camera"
-      atrace_categories: "wm"
-      atrace_categories: "dalvik"
-      atrace_categories: "sched"
-      atrace_categories: "freq"
-      atrace_categories: "gfx"
-      atrace_categories: "view"
-      atrace_categories: "webview"
-      atrace_categories: "input"
-      atrace_categories: "hal"
       atrace_categories: "binder_driver"
+      atrace_categories: "bionic"
+      atrace_categories: "dalvik"
+      atrace_categories: "input"
+      atrace_categories: "pm"
+      atrace_categories: "res"
+      atrace_categories: "rro"
+      atrace_categories: "ss"
+      atrace_categories: "view"
+      atrace_categories: "wm"
+
+      atrace_categories: "freq"
+      atrace_categories: "sched"
       atrace_categories: "sync"
       atrace_categories: "workq"
-      atrace_categories: "res"
 
     }
   }

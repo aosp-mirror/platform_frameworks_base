@@ -17,9 +17,19 @@
 package com.android.systemui.navigationbar;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
 
+import static com.android.systemui.accessibility.SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON;
+import static com.android.systemui.accessibility.SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON_CHOOSER;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -31,24 +41,27 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 
+import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
+import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
+import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,14 +82,19 @@ import dagger.Lazy;
  */
 @SysUISingleton
 public final class NavBarHelper implements
+        AccessibilityManager.AccessibilityServicesStateChangeListener,
         AccessibilityButtonModeObserver.ModeChangedListener,
+        AccessibilityButtonTargetsObserver.TargetsChangedListener,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
         Dumpable {
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
-    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
+    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
+    private final KeyguardViewController mKeyguardViewController;
     private final UserTracker mUserTracker;
+    private final SystemActions mSystemActions;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
+    private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
     private final List<NavbarTaskbarStateUpdater> mA11yEventListeners = new ArrayList<>();
     private final Context mContext;
     private ContentResolver mContentResolver;
@@ -84,12 +102,13 @@ public final class NavBarHelper implements
     private boolean mLongPressHomeEnabled;
     private boolean mAssistantTouchGestureEnabled;
     private int mNavBarMode;
+    private int mA11yButtonState;
 
     private final ContentObserver mAssistContentObserver = new ContentObserver(
             new Handler(Looper.getMainLooper())) {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
-            updateAssitantAvailability();
+            updateAssistantAvailability();
         }
     };
 
@@ -100,11 +119,13 @@ public final class NavBarHelper implements
      */
     @Inject
     public NavBarHelper(Context context, AccessibilityManager accessibilityManager,
-            AccessibilityManagerWrapper accessibilityManagerWrapper,
             AccessibilityButtonModeObserver accessibilityButtonModeObserver,
+            AccessibilityButtonTargetsObserver accessibilityButtonTargetsObserver,
+            SystemActions systemActions,
             OverviewProxyService overviewProxyService,
             Lazy<AssistManager> assistManagerLazy,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
+            KeyguardViewController keyguardViewController,
             NavigationModeController navigationModeController,
             UserTracker userTracker,
             DumpManager dumpManager) {
@@ -112,13 +133,16 @@ public final class NavBarHelper implements
         mContentResolver = mContext.getContentResolver();
         mAccessibilityManager = accessibilityManager;
         mAssistManagerLazy = assistManagerLazy;
-        mStatusBarOptionalLazy = statusBarOptionalLazy;
+        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
+        mKeyguardViewController = keyguardViewController;
         mUserTracker = userTracker;
-        accessibilityManagerWrapper.addCallback(
-                accessibilityManager1 -> NavBarHelper.this.dispatchA11yEventUpdate());
+        mSystemActions = systemActions;
+        accessibilityManager.addAccessibilityServicesStateChangeListener(this);
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
+        mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
 
         mAccessibilityButtonModeObserver.addListener(this);
+        mAccessibilityButtonTargetsObserver.addListener(this);
         mNavBarMode = navigationModeController.addListener(this);
         overviewProxyService.addCallback(this);
         dumpManager.registerDumpable(this);
@@ -134,7 +158,8 @@ public final class NavBarHelper implements
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
-        updateAssitantAvailability();
+        updateAssistantAvailability();
+        updateA11yState();
     }
 
     public void destroy() {
@@ -167,44 +192,96 @@ public final class NavBarHelper implements
     }
 
     @Override
+    public void onAccessibilityServicesStateChanged(AccessibilityManager manager) {
+        dispatchA11yEventUpdate();
+        updateA11yState();
+    }
+
+    @Override
     public void onAccessibilityButtonModeChanged(int mode) {
+        updateA11yState();
+        dispatchA11yEventUpdate();
+    }
+
+    @Override
+    public void onAccessibilityButtonTargetsChanged(String targets) {
+        updateA11yState();
         dispatchA11yEventUpdate();
     }
 
     /**
-     * See {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE} and
-     * {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE}
-     *
-     * @return the a11y button clickable and long_clickable states, or 0 if there is no
-     *         a11y button in the navbar
+     * Updates the current accessibility button state. The accessibility button state is only
+     * used for {@link Secure#ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR} and
+     * {@link Secure#ACCESSIBILITY_BUTTON_MODE_GESTURE}, otherwise it is reset to 0.
      */
-    public int getA11yButtonState() {
-        // AccessibilityManagerService resolves services for the current user since the local
-        // AccessibilityManager is created from a Context with the INTERACT_ACROSS_USERS permission
-        final List<String> a11yButtonTargets =
-                mAccessibilityManager.getAccessibilityShortcutTargets(
-                        AccessibilityManager.ACCESSIBILITY_BUTTON);
-        final int requestingServices = a11yButtonTargets.size();
-
-        // If accessibility button is floating menu mode, click and long click state should be
-        // disabled.
+    private void updateA11yState() {
+        final int prevState = mA11yButtonState;
+        final boolean clickable;
+        final boolean longClickable;
         if (mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()
                 == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
-            return 0;
+            // If accessibility button is floating menu mode, click and long click state should be
+            // disabled.
+            clickable = false;
+            longClickable = false;
+            mA11yButtonState = 0;
+        } else {
+            // AccessibilityManagerService resolves services for the current user since the local
+            // AccessibilityManager is created from a Context with the INTERACT_ACROSS_USERS
+            // permission
+            final List<String> a11yButtonTargets =
+                    mAccessibilityManager.getAccessibilityShortcutTargets(
+                            AccessibilityManager.ACCESSIBILITY_BUTTON);
+            final int requestingServices = a11yButtonTargets.size();
+
+            clickable = requestingServices >= 1;
+
+            // `longClickable` is used to determine whether to pop up the accessibility chooser
+            // dialog or not, and it’s also only for multiple services.
+            longClickable = requestingServices >= 2;
+            mA11yButtonState = (clickable ? SYSUI_STATE_A11Y_BUTTON_CLICKABLE : 0)
+                    | (longClickable ? SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE : 0);
         }
 
-        return (requestingServices >= 1 ? SYSUI_STATE_A11Y_BUTTON_CLICKABLE : 0)
-                | (requestingServices >= 2 ? SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE : 0);
+        // Update the system actions if the state has changed
+        if (prevState != mA11yButtonState) {
+            updateSystemAction(clickable, SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON);
+            updateSystemAction(longClickable, SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON_CHOOSER);
+        }
+    }
+
+    /**
+     * Registers/unregisters the given system action id.
+     */
+    private void updateSystemAction(boolean register, int actionId) {
+        if (register) {
+            mSystemActions.register(actionId);
+        } else {
+            mSystemActions.unregister(actionId);
+        }
+    }
+
+    /**
+     * Gets the accessibility button state based on the {@link Secure#ACCESSIBILITY_BUTTON_MODE}.
+     *
+     * @return the accessibility button state:
+     * 0 = disable state
+     * 16 = {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE}
+     * 48 = the combination of {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_CLICKABLE} and
+     * {@link QuickStepContract#SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE}
+     */
+    public int getA11yButtonState() {
+        return mA11yButtonState;
     }
 
     @Override
     public void onConnectionChanged(boolean isConnected) {
         if (isConnected) {
-            updateAssitantAvailability();
+            updateAssistantAvailability();
         }
     }
 
-    private void updateAssitantAvailability() {
+    private void updateAssistantAvailability() {
         boolean assistantAvailableForUser = mAssistManagerLazy.get()
                 .getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
         boolean longPressDefault = mContext.getResources().getBoolean(
@@ -236,7 +313,7 @@ public final class NavBarHelper implements
     @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
-        updateAssitantAvailability();
+        updateAssistantAvailability();
     }
 
     /**
@@ -244,8 +321,12 @@ public final class NavBarHelper implements
      * {@link InputMethodService} and the keyguard states.
      */
     public boolean isImeShown(int vis) {
-        View shadeWindowView = mStatusBarOptionalLazy.get().get().getNotificationShadeWindowView();
-        boolean isKeyguardShowing = mStatusBarOptionalLazy.get().get().isKeyguardShowing();
+        View shadeWindowView = null;
+        if (mCentralSurfacesOptionalLazy.get().isPresent()) {
+            shadeWindowView =
+                    mCentralSurfacesOptionalLazy.get().get().getNotificationShadeWindowView();
+        }
+        boolean isKeyguardShowing = mKeyguardViewController.isShowing();
         boolean imeVisibleOnShade = shadeWindowView != null && shadeWindowView.isAttachedToWindow()
                 && shadeWindowView.getRootWindowInsets().isVisible(WindowInsets.Type.ime());
         return imeVisibleOnShade
@@ -261,8 +342,25 @@ public final class NavBarHelper implements
         void updateAssistantAvailable(boolean available);
     }
 
+    static @TransitionMode int transitionMode(boolean isTransient, int appearance) {
+        final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_NAVIGATION_BARS;
+        if (isTransient) {
+            return MODE_SEMI_TRANSPARENT;
+        } else if ((appearance & lightsOutOpaque) == lightsOutOpaque) {
+            return MODE_LIGHTS_OUT;
+        } else if ((appearance & APPEARANCE_LOW_PROFILE_BARS) != 0) {
+            return MODE_LIGHTS_OUT_TRANSPARENT;
+        } else if ((appearance & APPEARANCE_OPAQUE_NAVIGATION_BARS) != 0) {
+            return MODE_OPAQUE;
+        } else if ((appearance & APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS) != 0) {
+            return MODE_SEMI_TRANSPARENT;
+        } else {
+            return MODE_TRANSPARENT;
+        }
+    }
+
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("NavbarTaskbarFriendster");
         pw.println("  longPressHomeEnabled=" + mLongPressHomeEnabled);
         pw.println("  mAssistantTouchGestureEnabled=" + mAssistantTouchGestureEnabled);

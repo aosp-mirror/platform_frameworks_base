@@ -43,6 +43,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -78,19 +79,25 @@ import org.mockito.MockitoAnnotations;
 
 /**
  * Build/Install/Run:
- *  atest WmTests:RemoteAnimationControllerTest
+ * atest WmTests:RemoteAnimationControllerTest
  */
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class RemoteAnimationControllerTest extends WindowTestsBase {
 
-    @Mock SurfaceControl mMockLeash;
-    @Mock SurfaceControl mMockThumbnailLeash;
-    @Mock Transaction mMockTransaction;
-    @Mock OnAnimationFinishedCallback mFinishedCallback;
-    @Mock OnAnimationFinishedCallback mThumbnailFinishedCallback;
-    @Mock IRemoteAnimationRunner mMockRunner;
+    @Mock
+    SurfaceControl mMockLeash;
+    @Mock
+    SurfaceControl mMockThumbnailLeash;
+    @Mock
+    Transaction mMockTransaction;
+    @Mock
+    OnAnimationFinishedCallback mFinishedCallback;
+    @Mock
+    OnAnimationFinishedCallback mThumbnailFinishedCallback;
+    @Mock
+    IRemoteAnimationRunner mMockRunner;
     private RemoteAnimationAdapter mAdapter;
     private RemoteAnimationController mController;
     private final OffsettableClock mClock = new OffsettableClock.Stopped();
@@ -104,7 +111,8 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         mAdapter = new RemoteAnimationAdapter(mMockRunner, 100, 50, true /* changeNeedsSnapshot */);
         mAdapter.setCallingPidUid(123, 456);
         runWithScissors(mWm.mH, () -> mHandler = new TestHandler(null, mClock), 0);
-        mController = new RemoteAnimationController(mWm, mDisplayContent, mAdapter, mHandler);
+        mController = new RemoteAnimationController(mWm, mDisplayContent, mAdapter,
+                mHandler, false /*isActivityEmbedding*/);
     }
 
     private WindowState createAppOverlayWindow() {
@@ -116,13 +124,47 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testForwardsShowBackdrop() throws Exception {
+        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        mDisplayContent.mOpeningApps.add(win.mActivityRecord);
+        final WindowState overlayWin = createAppOverlayWindow();
+        try {
+            final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                    win.mActivityRecord,
+                    new Point(50, 100), null, new Rect(50, 100, 150, 150), null,
+                    true /* showBackdrop */).mAdapter;
+            adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
+                    mFinishedCallback);
+            mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
+            mWm.mAnimator.executeAfterPrepareSurfacesRunnables();
+            final ArgumentCaptor<RemoteAnimationTarget[]> appsCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<RemoteAnimationTarget[]> wallpapersCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<RemoteAnimationTarget[]> nonAppsCaptor =
+                    ArgumentCaptor.forClass(RemoteAnimationTarget[].class);
+            final ArgumentCaptor<IRemoteAnimationFinishedCallback> finishedCaptor =
+                    ArgumentCaptor.forClass(IRemoteAnimationFinishedCallback.class);
+            verify(mMockRunner).onAnimationStart(eq(TRANSIT_OLD_ACTIVITY_OPEN),
+                    appsCaptor.capture(), wallpapersCaptor.capture(), nonAppsCaptor.capture(),
+                    finishedCaptor.capture());
+            assertEquals(1, appsCaptor.getValue().length);
+            final RemoteAnimationTarget app = appsCaptor.getValue()[0];
+            assertTrue(app.showBackdrop);
+        } finally {
+            mDisplayContent.mOpeningApps.clear();
+        }
+    }
+
+    @Test
     public void testRun() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
         mDisplayContent.mOpeningApps.add(win.mActivityRecord);
         final WindowState overlayWin = createAppOverlayWindow();
         try {
-            final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win.mActivityRecord,
-                    new Point(50, 100), null, new Rect(50, 100, 150, 150), null).mAdapter;
+            final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                    win.mActivityRecord,
+                    new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false).mAdapter;
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
@@ -161,21 +203,23 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testCancel() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
-        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win.mActivityRecord,
-                new Point(50, 100), null, new Rect(50, 100, 150, 150), null).mAdapter;
+        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                win.mActivityRecord,
+                new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false).mAdapter;
         adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                 mFinishedCallback);
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
 
         adapter.onAnimationCancelled(mMockLeash);
-        verify(mMockRunner).onAnimationCancelled();
+        verify(mMockRunner).onAnimationCancelled(anyBoolean());
     }
 
     @Test
     public void testTimeout() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
-        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win.mActivityRecord,
-                new Point(50, 100), null, new Rect(50, 100, 150, 150), null).mAdapter;
+        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                win.mActivityRecord,
+                new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false).mAdapter;
         adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                 mFinishedCallback);
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
@@ -183,7 +227,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         mClock.fastForward(10500);
         mHandler.timeAdvance();
 
-        verify(mMockRunner).onAnimationCancelled();
+        verify(mMockRunner).onAnimationCancelled(anyBoolean());
         verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION),
                 eq(adapter));
     }
@@ -196,7 +240,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
                     "testWin");
             final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
                     win.mActivityRecord, new Point(50, 100), null, new Rect(50, 100, 150, 150),
-                    null).mAdapter;
+                    null, false).mAdapter;
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
@@ -204,12 +248,12 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             mClock.fastForward(10500);
             mHandler.timeAdvance();
 
-            verify(mMockRunner, never()).onAnimationCancelled();
+            verify(mMockRunner, never()).onAnimationCancelled(anyBoolean());
 
             mClock.fastForward(52500);
             mHandler.timeAdvance();
 
-            verify(mMockRunner).onAnimationCancelled();
+            verify(mMockRunner).onAnimationCancelled(anyBoolean());
             verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION),
                     eq(adapter));
         } finally {
@@ -221,17 +265,17 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     public void testZeroAnimations() throws Exception {
         mController.goodToGo(TRANSIT_OLD_NONE);
         verify(mMockRunner, never()).onAnimationStart(anyInt(), any(), any(), any(), any());
-        verify(mMockRunner).onAnimationCancelled();
+        verify(mMockRunner).onAnimationCancelled(anyBoolean());
     }
 
     @Test
     public void testNotReallyStarted() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
         mController.createRemoteAnimationRecord(win.mActivityRecord,
-                new Point(50, 100), null, new Rect(50, 100, 150, 150), null);
+                new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false);
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
         verify(mMockRunner, never()).onAnimationStart(anyInt(), any(), any(), any(), any());
-        verify(mMockRunner).onAnimationCancelled();
+        verify(mMockRunner).onAnimationCancelled(anyBoolean());
     }
 
     @Test
@@ -239,9 +283,10 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         final WindowState win1 = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin1");
         final WindowState win2 = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin2");
         mController.createRemoteAnimationRecord(win1.mActivityRecord,
-                new Point(50, 100), null, new Rect(50, 100, 150, 150), null);
-        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win2.mActivityRecord,
-                new Point(50, 100), null, new Rect(50, 100, 150, 150), null).mAdapter;
+                new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false);
+        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                win2.mActivityRecord,
+                new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false).mAdapter;
         adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                 mFinishedCallback);
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
@@ -264,14 +309,15 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testRemovedBeforeStarted() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
-        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win.mActivityRecord,
-                new Point(50, 100), null, new Rect(50, 100, 150, 150), null).mAdapter;
+        final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                win.mActivityRecord,
+                new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false).mAdapter;
         adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                 mFinishedCallback);
         win.mActivityRecord.removeImmediately();
         mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
         verify(mMockRunner, never()).onAnimationStart(anyInt(), any(), any(), any(), any());
-        verify(mMockRunner).onAnimationCancelled();
+        verify(mMockRunner).onAnimationCancelled(anyBoolean());
         verify(mFinishedCallback).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION),
                 eq(adapter));
     }
@@ -309,7 +355,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         try {
             final RemoteAnimationRecord record = mController.createRemoteAnimationRecord(
                     win.mActivityRecord, new Point(50, 100), null, new Rect(50, 100, 150, 150),
-                    new Rect(0, 0, 200, 200));
+                    new Rect(0, 0, 200, 200), false);
             assertNotNull(record.mThumbnailAdapter);
             ((AnimationAdapter) record.mAdapter)
                     .startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_WINDOW_ANIMATION,
@@ -363,7 +409,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         try {
             final RemoteAnimationRecord record = mController.createRemoteAnimationRecord(
                     win.mActivityRecord, new Point(0, 0), null, new Rect(0, 0, 200, 200),
-                    new Rect(50, 100, 150, 150));
+                    new Rect(50, 100, 150, 150), false);
             assertNotNull(record.mThumbnailAdapter);
             ((AnimationAdapter) record.mAdapter)
                     .startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_WINDOW_ANIMATION,
@@ -417,7 +463,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         try {
             final RemoteAnimationRecord record = mController.createRemoteAnimationRecord(
                     win.mActivityRecord, new Point(100, 100), null, new Rect(150, 150, 400, 400),
-                    new Rect(50, 100, 150, 150));
+                    new Rect(50, 100, 150, 150), false);
             assertNotNull(record.mThumbnailAdapter);
             ((AnimationAdapter) record.mAdapter)
                     .startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_WINDOW_ANIMATION,
@@ -474,8 +520,9 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
         mDisplayContent.mOpeningApps.add(win.mActivityRecord);
         try {
-            final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win.mActivityRecord,
-                    new Point(50, 100), null, new Rect(50, 100, 150, 150), null).mAdapter;
+            final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                    win.mActivityRecord,
+                    new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false).mAdapter;
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
@@ -506,8 +553,9 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
         mDisplayContent.mOpeningApps.add(win.mActivityRecord);
         try {
-            final AnimationAdapter adapter = mController.createRemoteAnimationRecord(win.mActivityRecord,
-                    new Point(50, 100), null, new Rect(50, 100, 150, 150), null).mAdapter;
+            final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
+                    win.mActivityRecord,
+                    new Point(50, 100), null, new Rect(50, 100, 150, 150), null, false).mAdapter;
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_ACTIVITY_OPEN);
@@ -527,7 +575,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
             // Cancel the wallpaper window animator and ensure the runner is not canceled
             wallpaperWindowToken.cancelAnimation();
-            verify(mMockRunner, never()).onAnimationCancelled();
+            verify(mMockRunner, never()).onAnimationCancelled(anyBoolean());
         } finally {
             mDisplayContent.mOpeningApps.clear();
         }
@@ -543,7 +591,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         try {
             final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
                     win.mActivityRecord, new Point(50, 100), null,
-                    new Rect(50, 100, 150, 150), null).mAdapter;
+                    new Rect(50, 100, 150, 150), null, false).mAdapter;
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_KEYGUARD_GOING_AWAY);
@@ -593,7 +641,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         try {
             final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
                     win.mActivityRecord, new Point(50, 100), null,
-                    new Rect(50, 100, 150, 150), null).mAdapter;
+                    new Rect(50, 100, 150, 150), null, false).mAdapter;
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
             mController.goodToGo(TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER);
@@ -665,9 +713,9 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testNonAppTarget_notSendNavBar_controlledByFadeRotation() throws Exception {
-        final FadeRotationAnimationController mockController =
-                mock(FadeRotationAnimationController.class);
-        doReturn(mockController).when(mDisplayContent).getFadeRotationAnimationController();
+        final AsyncRotationController mockController =
+                mock(AsyncRotationController.class);
+        doReturn(mockController).when(mDisplayContent).getAsyncRotationController();
         final int transit = TRANSIT_OLD_TASK_OPEN;
         setupForNonAppTargetNavBar(transit, true);
 
@@ -727,7 +775,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             mDisplayContent.mOpeningApps.add(win2.mActivityRecord);
             final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
                     win2.mActivityRecord, new Point(50, 100), null,
-                    new Rect(50, 100, 150, 150), null).mAdapter;
+                    new Rect(50, 100, 150, 150), null, false).mAdapter;
             adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                     mFinishedCallback);
 
@@ -757,7 +805,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
         final AnimationAdapter adapter = mController.createRemoteAnimationRecord(
                 win.mActivityRecord, new Point(50, 100), null,
-                new Rect(50, 100, 150, 150), null).mAdapter;
+                new Rect(50, 100, 150, 150), null, false).mAdapter;
         adapter.startAnimation(mMockLeash, mMockTransaction, ANIMATION_TYPE_APP_TRANSITION,
                 mFinishedCallback);
         mController.goodToGo(transit);

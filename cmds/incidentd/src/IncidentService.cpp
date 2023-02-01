@@ -43,7 +43,7 @@ enum {
 
 #define DEFAULT_DELAY_NS (1000000000LL)
 
-#define DEFAULT_BYTES_SIZE_LIMIT (96 * 1024 * 1024)        // 96MB
+#define DEFAULT_BYTES_SIZE_LIMIT (400 * 1024 * 1024)        // 400MB
 #define DEFAULT_REFACTORY_PERIOD_MS (24 * 60 * 60 * 1000)  // 1 Day
 
 // Skip these sections (for dumpstate only)
@@ -52,11 +52,7 @@ enum {
 #define SKIPPED_DUMPSTATE_SECTIONS { \
             1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, /* Logs */ \
             1200, 1201, 1202, /* Native, hal, java traces */ \
-            3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3009, 3010, 3011, 3012, 3013, \
-            3014, 3015, 3016, 3017, 3018, 3019, 3020, 3021, 3022, 3023, 3024, 3027, 3028, 3029, \
-            3030, 3031, 3032, 3033, 3034, 3035, 3036, 3037, 3038, 3039, 3040, 3041, 3042, 3043, \
-            3044, 3045, 3046, 3047, 3048, 3049, 3050, 3051, 3052, 3053, 3054, 3055, 3056, 4000, \
-            4001, /* Dumpsys */ }
+            3018, /* dumpsys meminfo*/ }
 
 namespace android {
 namespace os {

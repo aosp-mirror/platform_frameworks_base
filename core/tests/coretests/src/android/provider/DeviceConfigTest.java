@@ -22,6 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.assertThrows;
 
+import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.os.Bundle;
 import android.platform.test.annotations.Presubmit;
@@ -34,6 +35,12 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /** Tests that ensure appropriate settings are backed up. */
 @Presubmit
@@ -701,66 +708,67 @@ public class DeviceConfigTest {
         assertThat(result.getString(KEY4, DEFAULT_VALUE)).isEqualTo(DEFAULT_VALUE);
     }
 
-    // TODO(mpape): resolve b/142727848 and re-enable listener tests
-//    @Test
-//    public void onPropertiesChangedListener_setPropertyCallback() throws InterruptedException {
-//        final CountDownLatch countDownLatch = new CountDownLatch(1);
-//
-//        DeviceConfig.OnPropertiesChangedListener changeListener = (properties) -> {
-//            assertThat(properties.getNamespace()).isEqualTo(NAMESPACE);
-//            assertThat(properties.getKeyset()).contains(KEY);
-//            assertThat(properties.getString(KEY, "default_value")).isEqualTo(VALUE);
-//            countDownLatch.countDown();
-//        };
-//
-//        try {
-//            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE,
-//                    ActivityThread.currentApplication().getMainExecutor(), changeListener);
-//            DeviceConfig.setProperty(NAMESPACE, KEY, VALUE, false);
-//            assertThat(countDownLatch.await(
-//                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
-//        } catch (InterruptedException e) {
-//            Assert.fail(e.getMessage());
-//        } finally {
-//            DeviceConfig.removeOnPropertiesChangedListener(changeListener);
-//        }
-//    }
-//
-//    @Test
-//    public void onPropertiesChangedListener_setPropertiesCallback() throws InterruptedException {
-//        final CountDownLatch countDownLatch = new CountDownLatch(1);
-//        DeviceConfig.setProperty(NAMESPACE, KEY, VALUE, false);
-//        DeviceConfig.setProperty(NAMESPACE, KEY2, VALUE2, false);
-//
-//        Map<String, String> keyValues = new HashMap<>(2);
-//        keyValues.put(KEY, VALUE2);
-//        keyValues.put(KEY3, VALUE3);
-//        Properties setProperties = new Properties(NAMESPACE, keyValues);
-//
-//        DeviceConfig.OnPropertiesChangedListener changeListener = (properties) -> {
-//            assertThat(properties.getNamespace()).isEqualTo(NAMESPACE);
-//            assertThat(properties.getKeyset()).containsExactly(KEY, KEY2, KEY3);
-//            // KEY updated from VALUE to VALUE2
-//            assertThat(properties.getString(KEY, "default_value")).isEqualTo(VALUE2);
-//            // KEY2 deleted (returns default_value)
-//            assertThat(properties.getString(KEY2, "default_value")).isEqualTo("default_value");
-//            //KEY3 added with VALUE3
-//            assertThat(properties.getString(KEY3, "default_value")).isEqualTo(VALUE3);
-//            countDownLatch.countDown();
-//        };
-//
-//        try {
-//            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE,
-//                    ActivityThread.currentApplication().getMainExecutor(), changeListener);
-//            DeviceConfig.setProperties(setProperties);
-//            assertThat(countDownLatch.await(
-//                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
-//        } catch (InterruptedException e) {
-//            Assert.fail(e.getMessage());
-//        } finally {
-//            DeviceConfig.removeOnPropertiesChangedListener(changeListener);
-//        }
-//    }
+    @Test
+    public void onPropertiesChangedListener_setPropertyCallback() throws InterruptedException {
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        DeviceConfig.OnPropertiesChangedListener changeListener = (properties) -> {
+            assertThat(properties.getNamespace()).isEqualTo(NAMESPACE);
+            assertThat(properties.getKeyset()).contains(KEY);
+            assertThat(properties.getString(KEY, "default_value")).isEqualTo(VALUE);
+            countDownLatch.countDown();
+        };
+
+        try {
+            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE,
+                    Objects.requireNonNull(ActivityThread.currentApplication()).getMainExecutor(),
+                    changeListener);
+            DeviceConfig.setProperty(NAMESPACE, KEY, VALUE, false);
+            assertThat(countDownLatch.await(
+                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
+        } catch (InterruptedException e) {
+            Assert.fail(e.getMessage());
+        } finally {
+            DeviceConfig.removeOnPropertiesChangedListener(changeListener);
+        }
+    }
+
+    @Test
+    public void onPropertiesChangedListener_setPropertiesCallback() {
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        DeviceConfig.setProperty(NAMESPACE, KEY, VALUE, false);
+        DeviceConfig.setProperty(NAMESPACE, KEY2, VALUE2, false);
+
+        Map<String, String> keyValues = new HashMap<>(2);
+        keyValues.put(KEY, VALUE2);
+        keyValues.put(KEY3, VALUE3);
+        Properties setProperties = new Properties(NAMESPACE, keyValues);
+
+        DeviceConfig.OnPropertiesChangedListener changeListener = (properties) -> {
+            assertThat(properties.getNamespace()).isEqualTo(NAMESPACE);
+            assertThat(properties.getKeyset()).containsExactly(KEY, KEY2, KEY3);
+            // KEY updated from VALUE to VALUE2
+            assertThat(properties.getString(KEY, "default_value")).isEqualTo(VALUE2);
+            // KEY2 deleted (returns default_value)
+            assertThat(properties.getString(KEY2, "default_value")).isEqualTo("default_value");
+            //KEY3 added with VALUE3
+            assertThat(properties.getString(KEY3, "default_value")).isEqualTo(VALUE3);
+            countDownLatch.countDown();
+        };
+
+        try {
+            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE,
+                    Objects.requireNonNull(ActivityThread.currentApplication()).getMainExecutor(),
+                    changeListener);
+            DeviceConfig.setProperties(setProperties);
+            assertThat(countDownLatch.await(
+                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
+        } catch (InterruptedException | DeviceConfig.BadConfigException e) {
+            Assert.fail(e.getMessage());
+        } finally {
+            DeviceConfig.removeOnPropertiesChangedListener(changeListener);
+        }
+    }
 
     @Test
     public void syncDisabling() throws Exception {
@@ -773,46 +781,51 @@ public class DeviceConfigTest {
 
         try {
             // Ensure the device starts in a known state.
-            DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_NONE);
+            DeviceConfig.setSyncDisabledMode(Settings.Config.SYNC_DISABLED_MODE_NONE);
 
             // Assert starting state.
-            assertThat(DeviceConfig.isSyncDisabled()).isFalse();
+            assertThat(DeviceConfig.getSyncDisabledMode())
+                    .isEqualTo(Settings.Config.SYNC_DISABLED_MODE_NONE);
             assertThat(DeviceConfig.setProperties(properties1)).isTrue();
             assertThat(DeviceConfig.getProperties(NAMESPACE, KEY).getString(KEY, DEFAULT_VALUE))
                     .isEqualTo(VALUE);
 
             // Test disabled (persistent). Persistence is not actually tested, that would require
             // a host test.
-            DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_PERSISTENT);
-            assertThat(DeviceConfig.isSyncDisabled()).isTrue();
+            DeviceConfig.setSyncDisabledMode(Settings.Config.SYNC_DISABLED_MODE_PERSISTENT);
+            assertThat(DeviceConfig.getSyncDisabledMode())
+                    .isEqualTo(Settings.Config.SYNC_DISABLED_MODE_PERSISTENT);
             assertThat(DeviceConfig.setProperties(properties2)).isFalse();
             assertThat(DeviceConfig.getProperties(NAMESPACE, KEY).getString(KEY, DEFAULT_VALUE))
                     .isEqualTo(VALUE);
 
             // Return to not disabled.
-            DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_NONE);
-            assertThat(DeviceConfig.isSyncDisabled()).isFalse();
+            DeviceConfig.setSyncDisabledMode(Settings.Config.SYNC_DISABLED_MODE_NONE);
+            assertThat(DeviceConfig.getSyncDisabledMode())
+                    .isEqualTo(Settings.Config.SYNC_DISABLED_MODE_NONE);
             assertThat(DeviceConfig.setProperties(properties2)).isTrue();
             assertThat(DeviceConfig.getProperties(NAMESPACE, KEY).getString(KEY, DEFAULT_VALUE))
                     .isEqualTo(VALUE2);
 
             // Test disabled (persistent). Absence of persistence is not actually tested, that would
             // require a host test.
-            DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT);
-            assertThat(DeviceConfig.isSyncDisabled()).isTrue();
+            DeviceConfig.setSyncDisabledMode(Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT);
+            assertThat(DeviceConfig.getSyncDisabledMode())
+                    .isEqualTo(Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT);
             assertThat(DeviceConfig.setProperties(properties1)).isFalse();
             assertThat(DeviceConfig.getProperties(NAMESPACE, KEY).getString(KEY, DEFAULT_VALUE))
                     .isEqualTo(VALUE2);
 
             // Return to not disabled.
-            DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_NONE);
-            assertThat(DeviceConfig.isSyncDisabled()).isFalse();
+            DeviceConfig.setSyncDisabledMode(Settings.Config.SYNC_DISABLED_MODE_NONE);
+            assertThat(DeviceConfig.getSyncDisabledMode())
+                    .isEqualTo(Settings.Config.SYNC_DISABLED_MODE_NONE);
             assertThat(DeviceConfig.setProperties(properties1)).isTrue();
             assertThat(DeviceConfig.getProperties(NAMESPACE, KEY).getString(KEY, DEFAULT_VALUE))
                     .isEqualTo(VALUE);
         } finally {
             // Try to return to the default sync disabled state in case of failure.
-            DeviceConfig.setSyncDisabled(Settings.Config.SYNC_DISABLED_MODE_NONE);
+            DeviceConfig.setSyncDisabledMode(Settings.Config.SYNC_DISABLED_MODE_NONE);
 
             // NAMESPACE will be cleared by cleanUp()
         }

@@ -41,6 +41,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -78,6 +79,14 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
                 return getBaseContext();
             }
         };
+    }
+
+    @After
+    public void tearDown() {
+        if (mController != null) {
+            mController.onAccessibilityButtonTargetsChanged("");
+            mController = null;
+        }
     }
 
     @Test

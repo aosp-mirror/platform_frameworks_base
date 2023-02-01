@@ -150,7 +150,10 @@ class DisplayWindowSettings {
         final SettingsProvider.SettingsEntry overrideSettings =
                 mSettingsProvider.getOverrideSettings(displayInfo);
         overrideSettings.mWindowingMode = mode;
-        dc.setWindowingMode(mode);
+        final TaskDisplayArea defaultTda = dc.getDefaultTaskDisplayArea();
+        if (defaultTda != null) {
+            defaultTda.setWindowingMode(mode);
+        }
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
@@ -244,13 +247,19 @@ class DisplayWindowSettings {
     }
 
     void applySettingsToDisplayLocked(DisplayContent dc) {
+        applySettingsToDisplayLocked(dc, /* includeRotationSettings */ true);
+    }
+
+    void applySettingsToDisplayLocked(DisplayContent dc, boolean includeRotationSettings) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
 
         // Setting windowing mode first, because it may override overscan values later.
         final int windowingMode = getWindowingModeLocked(settings, dc);
-        dc.setWindowingMode(windowingMode);
-
+        final TaskDisplayArea defaultTda = dc.getDefaultTaskDisplayArea();
+        if (defaultTda != null) {
+            defaultTda.setWindowingMode(windowingMode);
+        }
         final int userRotationMode = settings.mUserRotationMode != null
                 ? settings.mUserRotationMode : WindowManagerPolicy.USER_ROTATION_FREE;
         final int userRotation = settings.mUserRotation != null
@@ -265,10 +274,6 @@ class DisplayWindowSettings {
         dc.mIsDensityForced = hasDensityOverride;
         dc.mIsSizeForced = hasSizeOverride;
 
-        final boolean ignoreOrientationRequest = settings.mIgnoreOrientationRequest != null
-                ? settings.mIgnoreOrientationRequest : false;
-        dc.setIgnoreOrientationRequest(ignoreOrientationRequest);
-
         final boolean ignoreDisplayCutout = settings.mIgnoreDisplayCutout != null
                 ? settings.mIgnoreDisplayCutout : false;
         dc.mIgnoreDisplayCutout = ignoreDisplayCutout;
@@ -277,7 +282,8 @@ class DisplayWindowSettings {
         final int height = hasSizeOverride ? settings.mForcedHeight : dc.mInitialDisplayHeight;
         final int density = hasDensityOverride ? settings.mForcedDensity
                 : dc.mInitialDisplayDensity;
-        dc.updateBaseDisplayMetrics(width, height, density);
+        dc.updateBaseDisplayMetrics(width, height, density, dc.mBaseDisplayPhysicalXDpi,
+                dc.mBaseDisplayPhysicalYDpi);
 
         final int forcedScalingMode = settings.mForcedScalingMode != null
                 ? settings.mForcedScalingMode : FORCE_SCALING_MODE_AUTO;
@@ -286,6 +292,19 @@ class DisplayWindowSettings {
         boolean dontMoveToTop = settings.mDontMoveToTop != null
                 ? settings.mDontMoveToTop : false;
         dc.mDontMoveToTop = dontMoveToTop;
+
+        if (includeRotationSettings) applyRotationSettingsToDisplayLocked(dc);
+    }
+
+    void applyRotationSettingsToDisplayLocked(DisplayContent dc) {
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
+
+        final boolean ignoreOrientationRequest = settings.mIgnoreOrientationRequest != null
+                ? settings.mIgnoreOrientationRequest : false;
+        dc.setIgnoreOrientationRequest(ignoreOrientationRequest);
+
+        dc.getDisplayRotation().resetAllowAllRotations();
     }
 
     /**
@@ -297,10 +316,11 @@ class DisplayWindowSettings {
      * changed.
      */
     boolean updateSettingsForDisplay(DisplayContent dc) {
-        if (dc.getWindowingMode() != getWindowingModeLocked(dc)) {
+        final TaskDisplayArea defaultTda = dc.getDefaultTaskDisplayArea();
+        if (defaultTda != null && defaultTda.getWindowingMode() != getWindowingModeLocked(dc)) {
             // For the time being the only thing that may change is windowing mode, so just update
             // that.
-            dc.setWindowingMode(getWindowingModeLocked(dc));
+            defaultTda.setWindowingMode(getWindowingModeLocked(dc));
             return true;
         }
         return false;
@@ -422,11 +442,12 @@ class DisplayWindowSettings {
                     mRemoveContentMode = other.mRemoveContentMode;
                     changed = true;
                 }
-                if (other.mShouldShowWithInsecureKeyguard != mShouldShowWithInsecureKeyguard) {
+                if (!Objects.equals(
+                        other.mShouldShowWithInsecureKeyguard, mShouldShowWithInsecureKeyguard)) {
                     mShouldShowWithInsecureKeyguard = other.mShouldShowWithInsecureKeyguard;
                     changed = true;
                 }
-                if (other.mShouldShowSystemDecors != mShouldShowSystemDecors) {
+                if (!Objects.equals(other.mShouldShowSystemDecors, mShouldShowSystemDecors)) {
                     mShouldShowSystemDecors = other.mShouldShowSystemDecors;
                     changed = true;
                 }
@@ -438,15 +459,15 @@ class DisplayWindowSettings {
                     mFixedToUserRotation = other.mFixedToUserRotation;
                     changed = true;
                 }
-                if (other.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
+                if (!Objects.equals(other.mIgnoreOrientationRequest, mIgnoreOrientationRequest)) {
                     mIgnoreOrientationRequest = other.mIgnoreOrientationRequest;
                     changed = true;
                 }
-                if (other.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
+                if (!Objects.equals(other.mIgnoreDisplayCutout, mIgnoreDisplayCutout)) {
                     mIgnoreDisplayCutout = other.mIgnoreDisplayCutout;
                     changed = true;
                 }
-                if (other.mDontMoveToTop != mDontMoveToTop) {
+                if (!Objects.equals(other.mDontMoveToTop, mDontMoveToTop)) {
                     mDontMoveToTop = other.mDontMoveToTop;
                     changed = true;
                 }
@@ -502,14 +523,13 @@ class DisplayWindowSettings {
                     mRemoveContentMode = delta.mRemoveContentMode;
                     changed = true;
                 }
-                if (delta.mShouldShowWithInsecureKeyguard != null
-                        && delta.mShouldShowWithInsecureKeyguard
-                        != mShouldShowWithInsecureKeyguard) {
+                if (delta.mShouldShowWithInsecureKeyguard != null && !Objects.equals(
+                        delta.mShouldShowWithInsecureKeyguard, mShouldShowWithInsecureKeyguard)) {
                     mShouldShowWithInsecureKeyguard = delta.mShouldShowWithInsecureKeyguard;
                     changed = true;
                 }
-                if (delta.mShouldShowSystemDecors != null
-                        && delta.mShouldShowSystemDecors != mShouldShowSystemDecors) {
+                if (delta.mShouldShowSystemDecors != null && !Objects.equals(
+                        delta.mShouldShowSystemDecors, mShouldShowSystemDecors)) {
                     mShouldShowSystemDecors = delta.mShouldShowSystemDecors;
                     changed = true;
                 }
@@ -523,18 +543,18 @@ class DisplayWindowSettings {
                     mFixedToUserRotation = delta.mFixedToUserRotation;
                     changed = true;
                 }
-                if (delta.mIgnoreOrientationRequest != null
-                        && delta.mIgnoreOrientationRequest != mIgnoreOrientationRequest) {
+                if (delta.mIgnoreOrientationRequest != null && !Objects.equals(
+                        delta.mIgnoreOrientationRequest, mIgnoreOrientationRequest)) {
                     mIgnoreOrientationRequest = delta.mIgnoreOrientationRequest;
                     changed = true;
                 }
-                if (delta.mIgnoreDisplayCutout != null
-                        && delta.mIgnoreDisplayCutout != mIgnoreDisplayCutout) {
+                if (delta.mIgnoreDisplayCutout != null && !Objects.equals(
+                        delta.mIgnoreDisplayCutout, mIgnoreDisplayCutout)) {
                     mIgnoreDisplayCutout = delta.mIgnoreDisplayCutout;
                     changed = true;
                 }
-                if (delta.mDontMoveToTop != null
-                        && delta.mDontMoveToTop != mDontMoveToTop) {
+                if (delta.mDontMoveToTop != null && !Objects.equals(
+                        delta.mDontMoveToTop, mDontMoveToTop)) {
                     mDontMoveToTop = delta.mDontMoveToTop;
                     changed = true;
                 }

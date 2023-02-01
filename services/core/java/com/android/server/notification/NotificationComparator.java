@@ -104,6 +104,12 @@ public class NotificationComparator
             return -1 * Boolean.compare(leftPeople, rightPeople);
         }
 
+        boolean leftSystemMax = isSystemMax(left);
+        boolean rightSystemMax = isSystemMax(right);
+        if (leftSystemMax != rightSystemMax) {
+            return -1 * Boolean.compare(leftSystemMax, rightSystemMax);
+        }
+
         if (leftImportance != rightImportance) {
             // by importance, high to low
             return -1 * Integer.compare(leftImportance, rightImportance);
@@ -171,6 +177,20 @@ public class NotificationComparator
 
     protected boolean isImportantMessaging(NotificationRecord record) {
         return mMessagingUtil.isImportantMessaging(record.getSbn(), record.getImportance());
+    }
+
+    protected boolean isSystemMax(NotificationRecord record) {
+        if (record.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
+            return false;
+        }
+        String packageName = record.getSbn().getPackageName();
+        if ("android".equals(packageName)) {
+            return true;
+        }
+        if ("com.android.systemui".equals(packageName)) {
+            return true;
+        }
+        return false;
     }
 
     private boolean isOngoing(NotificationRecord record) {

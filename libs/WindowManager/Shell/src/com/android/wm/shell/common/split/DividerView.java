@@ -24,6 +24,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Property;
 import android.view.GestureDetector;
@@ -37,6 +38,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
@@ -80,7 +83,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private final Rect mTempRect = new Rect();
     private FrameLayout mDividerBar;
 
-
     static final Property<DividerView, Integer> DIVIDER_HEIGHT_PROPERTY =
             new Property<DividerView, Integer>(Integer.class, "height") {
                 @Override
@@ -106,6 +108,74 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         @Override
         public void onAnimationCancel(Animator animation) {
             mSetTouchRegion = true;
+        }
+    };
+
+    private final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
+        @Override
+        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(host, info);
+            final DividerSnapAlgorithm snapAlgorithm = mSplitLayout.mDividerSnapAlgorithm;
+            if (isLandscape()) {
+                info.addAction(new AccessibilityAction(R.id.action_move_tl_full,
+                        mContext.getString(R.string.accessibility_action_divider_left_full)));
+                if (snapAlgorithm.isFirstSplitTargetAvailable()) {
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_70,
+                            mContext.getString(R.string.accessibility_action_divider_left_70)));
+                }
+                if (snapAlgorithm.showMiddleSplitTargetForAccessibility()) {
+                    // Only show the middle target if there are more than 1 split target
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_50,
+                            mContext.getString(R.string.accessibility_action_divider_left_50)));
+                }
+                if (snapAlgorithm.isLastSplitTargetAvailable()) {
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_30,
+                            mContext.getString(R.string.accessibility_action_divider_left_30)));
+                }
+                info.addAction(new AccessibilityAction(R.id.action_move_rb_full,
+                        mContext.getString(R.string.accessibility_action_divider_right_full)));
+            } else {
+                info.addAction(new AccessibilityAction(R.id.action_move_tl_full,
+                        mContext.getString(R.string.accessibility_action_divider_top_full)));
+                if (snapAlgorithm.isFirstSplitTargetAvailable()) {
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_70,
+                            mContext.getString(R.string.accessibility_action_divider_top_70)));
+                }
+                if (snapAlgorithm.showMiddleSplitTargetForAccessibility()) {
+                    // Only show the middle target if there are more than 1 split target
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_50,
+                            mContext.getString(R.string.accessibility_action_divider_top_50)));
+                }
+                if (snapAlgorithm.isLastSplitTargetAvailable()) {
+                    info.addAction(new AccessibilityAction(R.id.action_move_tl_30,
+                            mContext.getString(R.string.accessibility_action_divider_top_30)));
+                }
+                info.addAction(new AccessibilityAction(R.id.action_move_rb_full,
+                        mContext.getString(R.string.accessibility_action_divider_bottom_full)));
+            }
+        }
+
+        @Override
+        public boolean performAccessibilityAction(@NonNull View host, int action,
+                @Nullable Bundle args) {
+            DividerSnapAlgorithm.SnapTarget nextTarget = null;
+            DividerSnapAlgorithm snapAlgorithm = mSplitLayout.mDividerSnapAlgorithm;
+            if (action == R.id.action_move_tl_full) {
+                nextTarget = snapAlgorithm.getDismissEndTarget();
+            } else if (action == R.id.action_move_tl_70) {
+                nextTarget = snapAlgorithm.getLastSplitTarget();
+            } else if (action == R.id.action_move_tl_50) {
+                nextTarget = snapAlgorithm.getMiddleTarget();
+            } else if (action == R.id.action_move_tl_30) {
+                nextTarget = snapAlgorithm.getFirstSplitTarget();
+            } else if (action == R.id.action_move_rb_full) {
+                nextTarget = snapAlgorithm.getDismissStartTarget();
+            }
+            if (nextTarget != null) {
+                mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), nextTarget);
+                return true;
+            }
+            return super.performAccessibilityAction(host, action, args);
         }
     };
 
@@ -136,12 +206,12 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mSplitLayout = layout;
         mSplitWindowManager = splitWindowManager;
         mViewHost = viewHost;
-        mDividerBounds.set(layout.getDividerBounds());
+        layout.getDividerBounds(mDividerBounds);
         onInsetsChanged(insetsState, false /* animate */);
     }
 
     void onInsetsChanged(InsetsState insetsState, boolean animate) {
-        mTempRect.set(mSplitLayout.getDividerBounds());
+        mSplitLayout.getDividerBounds(mTempRect);
         final InsetsSource taskBarInsetsSource =
                 insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
         // Only insets the divider bar with task bar when it's expanded so that the rounded corners
@@ -179,6 +249,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mDoubleTapDetector = new GestureDetector(getContext(), new DoubleTapListener());
         mInteractive = true;
         setOnTouchListener(this);
+        mHandle.setAccessibilityDelegate(mHandleDelegate);
     }
 
     @Override
@@ -215,6 +286,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 setTouching();
                 mStartPos = touchPos;
                 mMoving = false;
+                mSplitLayout.onStartDragging();
                 break;
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
@@ -230,7 +302,10 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 releaseTouching();
-                if (!mMoving) break;
+                if (!mMoving) {
+                    mSplitLayout.onDraggingCancelled();
+                    break;
+                }
 
                 mVelocityTracker.addMovement(event);
                 mVelocityTracker.computeCurrentVelocity(1000 /* units */);

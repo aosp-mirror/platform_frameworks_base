@@ -480,6 +480,17 @@ public interface WebViewProvider {
             return false;
         }
 
+        /**
+         * @see View#onApplyWindowInsets(WindowInsets).
+         *
+         * <p>This is the entry point for the WebView implementation to override. It returns
+         * {@code null} when the WebView implementation hasn't implemented the WindowInsets support
+         * on S yet. In this case, the {@link View#onApplyWindowInsets()} super method will be
+         * called instead.
+         *
+         * @param insets Insets to apply
+         * @return The supplied insets with any applied insets consumed.
+         */
         @SuppressWarnings("unused")
         @Nullable
         default WindowInsets onApplyWindowInsets(@Nullable WindowInsets insets) {

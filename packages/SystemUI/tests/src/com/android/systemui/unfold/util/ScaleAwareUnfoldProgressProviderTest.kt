@@ -21,6 +21,7 @@ import android.database.ContentObserver
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.unfold.TestUnfoldTransitionProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.util.mockito.any
@@ -41,15 +42,11 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
     lateinit var contentResolver: ContentResolver
 
     @Mock
-    lateinit var sourceProvider: UnfoldTransitionProgressProvider
-
-    @Mock
     lateinit var sinkProvider: TransitionProgressListener
 
-    lateinit var progressProvider: ScaleAwareTransitionProgressProvider
+    private val sourceProvider = TestUnfoldTransitionProvider()
 
-    private val sourceProviderListenerCaptor =
-            ArgumentCaptor.forClass(TransitionProgressListener::class.java)
+    lateinit var progressProvider: ScaleAwareTransitionProgressProvider
 
     private val animatorDurationScaleListenerCaptor =
             ArgumentCaptor.forClass(ContentObserver::class.java)
@@ -63,7 +60,6 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
                 contentResolver
         )
 
-        verify(sourceProvider).addCallback(sourceProviderListenerCaptor.capture())
         verify(contentResolver).registerContentObserver(any(), any(),
                 animatorDurationScaleListenerCaptor.capture())
 
@@ -74,7 +70,7 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
     fun onTransitionStarted_animationsEnabled_eventReceived() {
         setAnimationsEnabled(true)
 
-        source.onTransitionStarted()
+        sourceProvider.onTransitionStarted()
 
         verify(sinkProvider).onTransitionStarted()
     }
@@ -83,7 +79,7 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
     fun onTransitionStarted_animationsNotEnabled_eventNotReceived() {
         setAnimationsEnabled(false)
 
-        source.onTransitionStarted()
+        sourceProvider.onTransitionStarted()
 
         verifyNoMoreInteractions(sinkProvider)
     }
@@ -92,7 +88,7 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
     fun onTransitionEnd_animationsEnabled_eventReceived() {
         setAnimationsEnabled(true)
 
-        source.onTransitionFinished()
+        sourceProvider.onTransitionFinished()
 
         verify(sinkProvider).onTransitionFinished()
     }
@@ -101,7 +97,7 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
     fun onTransitionEnd_animationsNotEnabled_eventNotReceived() {
         setAnimationsEnabled(false)
 
-        source.onTransitionFinished()
+        sourceProvider.onTransitionFinished()
 
         verifyNoMoreInteractions(sinkProvider)
     }
@@ -110,7 +106,7 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
     fun onTransitionProgress_animationsEnabled_eventReceived() {
         setAnimationsEnabled(true)
 
-        source.onTransitionProgress(42f)
+        sourceProvider.onTransitionProgress(42f)
 
         verify(sinkProvider).onTransitionProgress(42f)
     }
@@ -119,7 +115,7 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
     fun onTransitionProgress_animationsNotEnabled_eventNotReceived() {
         setAnimationsEnabled(false)
 
-        source.onTransitionProgress(42f)
+        sourceProvider.onTransitionProgress(42f)
 
         verifyNoMoreInteractions(sinkProvider)
     }
@@ -133,7 +129,4 @@ class ScaleAwareUnfoldProgressProviderTest : SysuiTestCase() {
         ValueAnimator.setDurationScale(durationScale)
         animatorDurationScaleListenerCaptor.value.dispatchChange(/* selfChange= */false)
     }
-
-    private val source: TransitionProgressListener
-        get() = sourceProviderListenerCaptor.value
 }

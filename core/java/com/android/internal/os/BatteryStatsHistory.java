@@ -17,11 +17,19 @@
 package com.android.internal.os;
 
 import android.annotation.NonNull;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.BatteryStats;
+import android.os.BatteryStats.BitDescription;
+import android.os.BatteryStats.HistoryItem;
+import android.os.BatteryStats.HistoryTag;
+import android.os.Build;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.StatFs;
 import android.os.SystemClock;
+import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -103,6 +111,49 @@ public class BatteryStatsHistory {
      * such as Settings app or checkin file, to iterate over history parcels.
      */
     private int mParcelIndex = 0;
+
+    /**
+     * A delegate for android.os.Trace to allow testing static calls. Due to
+     * limitations in Android Tracing (b/153319140), the delegate also records
+     * counter values in system properties which allows reading the value at the
+     * start of a tracing session. This overhead is limited to userdebug builds.
+     * On user builds, tracing still occurs but the counter value will be missing
+     * until the first change occurs.
+     */
+    @VisibleForTesting
+    public static class TraceDelegate {
+        // Note: certain tests currently run as platform_app which is not allowed
+        // to set debug system properties. To ensure that system properties are set
+        // only when allowed, we check the current UID.
+        private final boolean mShouldSetProperty =
+                Build.IS_USERDEBUG && (Process.myUid() == Process.SYSTEM_UID);
+
+        /**
+         * Returns true if trace counters should be recorded.
+         */
+        public boolean tracingEnabled() {
+            return Trace.isTagEnabled(Trace.TRACE_TAG_POWER) || mShouldSetProperty;
+        }
+
+        /**
+         * Records the counter value with the given name.
+         */
+        public void traceCounter(@NonNull String name, int value) {
+            Trace.traceCounter(Trace.TRACE_TAG_POWER, name, value);
+            if (mShouldSetProperty) {
+                SystemProperties.set("debug.tracing." + name, Integer.toString(value));
+            }
+        }
+
+        /**
+         * Records an instant event (one with no duration).
+         */
+        public void traceInstantEvent(@NonNull String track, @NonNull String name) {
+            Trace.instantForTrack(Trace.TRACE_TAG_POWER, track, name);
+        }
+    }
+
+    private TraceDelegate mTracer = new TraceDelegate();
 
     /**
      * Constructor
@@ -382,6 +433,7 @@ public class BatteryStatsHistory {
     /**
      * Read all history files and serialize into a big Parcel.
      * Checkin file calls this method.
+     *
      * @param out the output parcel
      */
     public void writeToParcel(Parcel out) {
@@ -389,11 +441,12 @@ public class BatteryStatsHistory {
     }
 
     /**
-     * Read all history files and serialize into a big Parcel. This is to send history files to
-     * Settings app since Settings app can not access /data/system directory.
+     * This is for Settings app, when Settings app receives big history parcel, it call
+     * this method to parse it into list of parcels.
      * @param out the output parcel
      */
     public void writeToBatteryUsageStatsParcel(Parcel out) {
+        out.writeBlob(mHistoryBuffer.marshall());
         writeToParcel(out, true /* useBlobs */);
     }
 
@@ -421,20 +474,27 @@ public class BatteryStatsHistory {
     }
 
     /**
+     * Reads a BatteryStatsHistory from a parcel written with
+     * the {@link #writeToBatteryUsageStatsParcel} method.
+     */
+    public static BatteryStatsHistory createFromBatteryUsageStatsParcel(Parcel in) {
+        final byte[] historyBlob = in.readBlob();
+
+        Parcel historyBuffer = Parcel.obtain();
+        historyBuffer.unmarshall(historyBlob, 0, historyBlob.length);
+
+        BatteryStatsHistory history = new BatteryStatsHistory(historyBuffer);
+        history.readFromParcel(in, true /* useBlobs */);
+        return history;
+    }
+
+    /**
      * This is for the check-in file, which has all history files embedded.
+     *
      * @param in the input parcel.
      */
     public void readFromParcel(Parcel in) {
         readFromParcel(in, false /* useBlobs */);
-    }
-
-    /**
-     * This is for Settings app, when Settings app receives big history parcel, it calls
-     * this method to parse it into list of parcels.
-     * @param in the input parcel.
-     */
-    public void readFromBatteryUsageStatsParcel(Parcel in) {
-        readFromParcel(in, true /* useBlobs */);
     }
 
     private void readFromParcel(Parcel in, boolean useBlobs) {
@@ -487,5 +547,48 @@ public class BatteryStatsHistory {
             }
         }
         return ret;
+    }
+
+    /**
+     * Writes event details into Atrace.
+     */
+    public void recordTraceEvents(int code, HistoryTag tag) {
+        if (code == HistoryItem.EVENT_NONE) return;
+        if (!mTracer.tracingEnabled()) return;
+
+        final int idx = code & HistoryItem.EVENT_TYPE_MASK;
+        final String prefix = (code & HistoryItem.EVENT_FLAG_START) != 0 ? "+" :
+                  (code & HistoryItem.EVENT_FLAG_FINISH) != 0 ? "-" : "";
+
+        final String[] names = BatteryStats.HISTORY_EVENT_NAMES;
+        if (idx < 0 || idx >= BatteryStats.HISTORY_EVENT_NAMES.length) return;
+
+        final String track = "battery_stats." + names[idx];
+        final String name = prefix + names[idx] + "=" + tag.uid + ":\"" + tag.string + "\"";
+        mTracer.traceInstantEvent(track, name);
+    }
+
+    /**
+     * Writes changes to a HistoryItem state bitmap to Atrace.
+     */
+    public void recordTraceCounters(int oldval, int newval, BitDescription[] descriptions) {
+        if (!mTracer.tracingEnabled()) return;
+
+        int diff = oldval ^ newval;
+        if (diff == 0) return;
+
+        for (int i = 0; i < descriptions.length; i++) {
+            BitDescription bd = descriptions[i];
+            if ((diff & bd.mask) == 0) continue;
+
+            int value;
+            if (bd.shift < 0) {
+                value = (newval & bd.mask) != 0 ? 1 : 0;
+            } else {
+                value = (newval & bd.mask) >> bd.shift;
+            }
+
+            mTracer.traceCounter("battery_stats." + bd.name, value);
+        }
     }
 }

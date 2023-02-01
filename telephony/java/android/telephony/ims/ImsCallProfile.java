@@ -843,7 +843,7 @@ public final class ImsCallProfile implements Parcelable {
         mServiceType = in.readInt();
         mCallType = in.readInt();
         mCallExtras = in.readBundle();
-        mMediaProfile = in.readParcelable(ImsStreamMediaProfile.class.getClassLoader());
+        mMediaProfile = in.readParcelable(ImsStreamMediaProfile.class.getClassLoader(), android.telephony.ims.ImsStreamMediaProfile.class);
         mEmergencyServiceCategories = in.readInt();
         mEmergencyUrns = in.createStringArrayList();
         mEmergencyCallRouting = in.readInt();
@@ -851,7 +851,8 @@ public final class ImsCallProfile implements Parcelable {
         mHasKnownUserIntentEmergency = in.readBoolean();
         mRestrictCause = in.readInt();
         mCallerNumberVerificationStatus = in.readInt();
-        Object[] accepted = in.readArray(RtpHeaderExtensionType.class.getClassLoader());
+        Object[] accepted = in.readArray(RtpHeaderExtensionType.class.getClassLoader(),
+                RtpHeaderExtensionType.class);
         mAcceptedRtpHeaderExtensionTypes = Arrays.stream(accepted)
                 .map(o -> (RtpHeaderExtensionType) o).collect(Collectors.toSet());
     }

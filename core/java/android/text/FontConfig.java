@@ -143,9 +143,9 @@ public final class FontConfig implements Parcelable {
         @Override
         public FontConfig createFromParcel(Parcel source) {
             List<FontFamily> families = source.readParcelableList(new ArrayList<>(),
-                    FontFamily.class.getClassLoader());
+                    FontFamily.class.getClassLoader(), android.text.FontConfig.FontFamily.class);
             List<Alias> aliases = source.readParcelableList(new ArrayList<>(),
-                    Alias.class.getClassLoader());
+                    Alias.class.getClassLoader(), android.text.FontConfig.Alias.class);
             long lastModifiedDate = source.readLong();
             int configVersion = source.readInt();
             return new FontConfig(families, aliases, lastModifiedDate, configVersion);
@@ -617,7 +617,7 @@ public final class FontConfig implements Parcelable {
             @Override
             public FontFamily createFromParcel(Parcel source) {
                 List<Font> fonts = source.readParcelableList(
-                        new ArrayList<>(), Font.class.getClassLoader());
+                        new ArrayList<>(), Font.class.getClassLoader(), android.text.FontConfig.Font.class);
                 String name = source.readString8();
                 String langTags = source.readString8();
                 int variant = source.readInt();

@@ -20,7 +20,6 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import android.graphics.Matrix;
-import android.os.IBinder;
 import android.view.DisplayInfo;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
@@ -73,7 +72,7 @@ public class SeamlessRotator {
      * global display rotation.
      */
     public void unrotate(Transaction transaction, WindowContainer win) {
-        transaction.setMatrix(win.getSurfaceControl(), mTransform, mFloat9);
+        applyTransform(transaction, win.getSurfaceControl());
         // WindowState sets the position of the window so transform the position and update it.
         final float[] winSurfacePos = {win.mLastSurfacePosition.x, win.mLastSurfacePosition.y};
         mTransform.mapPoints(winSurfacePos);
@@ -81,6 +80,10 @@ public class SeamlessRotator {
         if (mApplyFixedTransformHint) {
             transaction.setFixedTransformHint(win.mSurfaceControl, mFixedTransformHint);
         }
+    }
+
+    void applyTransform(Transaction t, SurfaceControl sc) {
+        t.setMatrix(sc, mTransform, mFloat9);
     }
 
     /**
@@ -106,12 +109,15 @@ public class SeamlessRotator {
             return;
         }
 
-        mTransform.reset();
-        t.setMatrix(win.mSurfaceControl, mTransform, mFloat9);
+        setIdentityMatrix(t, win.mSurfaceControl);
         t.setPosition(win.mSurfaceControl, win.mLastSurfacePosition.x, win.mLastSurfacePosition.y);
         if (mApplyFixedTransformHint) {
             t.unsetFixedTransformHint(win.mSurfaceControl);
         }
+    }
+
+    void setIdentityMatrix(Transaction t, SurfaceControl sc) {
+        t.setMatrix(sc, Matrix.IDENTITY_MATRIX, mFloat9);
     }
 
     public void dump(PrintWriter pw) {

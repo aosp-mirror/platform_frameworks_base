@@ -29,6 +29,7 @@ import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
 import android.os.IHwBinder.DeathRecipient;
 import android.os.RemoteException;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -132,6 +133,7 @@ public class BroadcastRadioService {
     }
 
     public @NonNull Collection<RadioManager.ModuleProperties> listModules() {
+        Slog.v(TAG, "List HIDL 2.0 modules");
         synchronized (mLock) {
             return mModules.values().stream().map(module -> module.mProperties)
                     .collect(Collectors.toList());
@@ -152,10 +154,11 @@ public class BroadcastRadioService {
 
     public ITuner openSession(int moduleId, @Nullable RadioManager.BandConfig legacyConfig,
         boolean withAudio, @NonNull ITunerCallback callback) throws RemoteException {
+        Slog.v(TAG, "Open HIDL 2.0 session");
         Objects.requireNonNull(callback);
 
         if (!withAudio) {
-            throw new IllegalArgumentException("Non-audio sessions not supported with HAL 2.x");
+            throw new IllegalArgumentException("Non-audio sessions not supported with HAL 2.0");
         }
 
         RadioModule module = null;
@@ -175,6 +178,7 @@ public class BroadcastRadioService {
 
     public ICloseHandle addAnnouncementListener(@NonNull int[] enabledTypes,
             @NonNull IAnnouncementListener listener) {
+        Slog.v(TAG, "Add announcementListener");
         AnnouncementAggregator aggregator = new AnnouncementAggregator(listener, mLock);
         boolean anySupported = false;
         synchronized (mLock) {
@@ -191,5 +195,31 @@ public class BroadcastRadioService {
             Slog.i(TAG, "There are no HAL modules that support announcements");
         }
         return aggregator;
+    }
+
+    /**
+     * Dump state of broadcastradio service for HIDL HAL 2.0.
+     *
+     * @param pw The file to which BroadcastRadioService state is dumped.
+     */
+    public void dumpInfo(IndentingPrintWriter pw) {
+        synchronized (mLock) {
+            pw.printf("Next module id available: %d\n", mNextModuleId);
+            pw.printf("ServiceName to module id map:\n");
+            pw.increaseIndent();
+            for (Map.Entry<String, Integer> entry : mServiceNameToModuleIdMap.entrySet()) {
+                pw.printf("Service name: %s, module id: %d\n", entry.getKey(), entry.getValue());
+            }
+            pw.decreaseIndent();
+            pw.printf("Radio modules:\n");
+            pw.increaseIndent();
+            for (Map.Entry<Integer, RadioModule> moduleEntry : mModules.entrySet()) {
+                pw.printf("Module id=%d:\n", moduleEntry.getKey());
+                pw.increaseIndent();
+                moduleEntry.getValue().dumpInfo(pw);
+                pw.decreaseIndent();
+            }
+            pw.decreaseIndent();
+        }
     }
 }

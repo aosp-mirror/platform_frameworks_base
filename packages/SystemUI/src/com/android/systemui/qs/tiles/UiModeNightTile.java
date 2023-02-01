@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import android.app.UiModeManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Handler;
@@ -60,9 +61,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         ConfigurationController.ConfigurationListener,
         BatteryController.BatteryStateChangeCallback {
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
-    private final Icon mIcon = ResourceIcon.get(
-            com.android.internal.R.drawable.ic_qs_ui_mode_night);
-    private UiModeManager mUiModeManager;
+    private final UiModeManager mUiModeManager;
     private final BatteryController mBatteryController;
     private final LocationController mLocationController;
     @Inject
@@ -129,23 +128,32 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
                     ? R.string.quick_settings_dark_mode_secondary_label_until_sunrise
                     : R.string.quick_settings_dark_mode_secondary_label_on_at_sunset);
         } else if (uiMode == UiModeManager.MODE_NIGHT_CUSTOM) {
-            final boolean use24HourFormat = android.text.format.DateFormat.is24HourFormat(mContext);
-            final LocalTime time;
-            if (nightMode) {
-                time = mUiModeManager.getCustomNightModeEnd();
+            int nightModeCustomType = mUiModeManager.getNightModeCustomType();
+            if (nightModeCustomType == UiModeManager.MODE_NIGHT_CUSTOM_TYPE_SCHEDULE) {
+                final boolean use24HourFormat = android.text.format.DateFormat.is24HourFormat(
+                        mContext);
+                final LocalTime time;
+                if (nightMode) {
+                    time = mUiModeManager.getCustomNightModeEnd();
+                } else {
+                    time = mUiModeManager.getCustomNightModeStart();
+                }
+                state.secondaryLabel = mContext.getResources().getString(nightMode
+                                ? R.string.quick_settings_dark_mode_secondary_label_until
+                                : R.string.quick_settings_dark_mode_secondary_label_on_at,
+                        use24HourFormat ? time.toString() : formatter.format(time));
+            } else if (nightModeCustomType == UiModeManager.MODE_NIGHT_CUSTOM_TYPE_BEDTIME) {
+                state.secondaryLabel = mContext.getResources().getString(nightMode
+                        ? R.string.quick_settings_dark_mode_secondary_label_until_bedtime_ends
+                        : R.string.quick_settings_dark_mode_secondary_label_on_at_bedtime);
             } else {
-                time = mUiModeManager.getCustomNightModeStart();
+                state.secondaryLabel = null;
             }
-            state.secondaryLabel = mContext.getResources().getString(nightMode
-                    ? R.string.quick_settings_dark_mode_secondary_label_until
-                    : R.string.quick_settings_dark_mode_secondary_label_on_at,
-                    use24HourFormat ? time.toString() : formatter.format(time));
         } else {
             state.secondaryLabel = null;
         }
         state.value = nightMode;
         state.label = mContext.getString(R.string.quick_settings_ui_mode_night_label);
-        state.icon = mIcon;
         state.contentDescription = TextUtils.isEmpty(state.secondaryLabel)
                 ? state.label
                 : TextUtils.concat(state.label, ", ", state.secondaryLabel);
@@ -154,6 +162,9 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         } else {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         }
+        state.icon = ResourceIcon.get(state.state == Tile.STATE_ACTIVE
+                ? R.drawable.qs_light_dark_theme_icon_on
+                : R.drawable.qs_light_dark_theme_icon_off);
         state.showRippleEffect = false;
         state.expandedAccessibilityClassName = Switch.class.getName();
     }

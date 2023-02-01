@@ -34,72 +34,47 @@ public final class ContentCaptureMetricsLogger {
     }
 
     /** @hide */
-    public static void writeServiceEvent(int eventType, @NonNull String serviceName,
-            @Nullable String targetPackage) {
+    public static void writeServiceEvent(int eventType, @NonNull String serviceName) {
+        // we should not logging the application package name
         FrameworkStatsLog.write(FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS, eventType,
-                serviceName, targetPackage);
-    }
-
-    /** @hide */
-    public static void writeServiceEvent(int eventType, @NonNull ComponentName service,
-            @Nullable ComponentName target) {
-        writeServiceEvent(eventType, ComponentName.flattenToShortString(service),
-                ComponentName.flattenToShortString(target));
-    }
-
-    /** @hide */
-    public static void writeServiceEvent(int eventType, @NonNull ComponentName service,
-            @Nullable String targetPackage) {
-        writeServiceEvent(eventType, ComponentName.flattenToShortString(service), targetPackage);
+                serviceName, /* componentName= */ null, 0, 0);
     }
 
     /** @hide */
     public static void writeServiceEvent(int eventType, @NonNull ComponentName service) {
-        writeServiceEvent(eventType, ComponentName.flattenToShortString(service), null);
+        writeServiceEvent(eventType, ComponentName.flattenToShortString(service));
     }
 
     /** @hide */
     public static void writeSetWhitelistEvent(@Nullable ComponentName service,
             @Nullable List<String> packages, @Nullable List<ComponentName> activities) {
         final String serviceName = ComponentName.flattenToShortString(service);
-        StringBuilder stringBuilder = new StringBuilder();
-        if (packages != null && packages.size() > 0) {
-            final int size = packages.size();
-            stringBuilder.append(packages.get(0));
-            for (int i = 1; i < size; i++) {
-                stringBuilder.append(" ");
-                stringBuilder.append(packages.get(i));
-            }
-        }
-        if (activities != null && activities.size() > 0) {
-            stringBuilder.append(" ");
-            stringBuilder.append(activities.get(0).flattenToShortString());
-            final int size = activities.size();
-            for (int i = 1; i < size; i++) {
-                stringBuilder.append(" ");
-                stringBuilder.append(activities.get(i).flattenToShortString());
-            }
-        }
+        int packageCount = packages != null ? packages.size() : 0;
+        int activityCount = activities != null ? activities.size() : 0;
+        // we should not logging the application package name
+        // log the allow list package and activity count instead
         FrameworkStatsLog.write(FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS,
                 FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__SET_WHITELIST,
-                serviceName, stringBuilder.toString());
+                serviceName, /* allowListStr= */ null, packageCount, activityCount);
     }
 
     /** @hide */
     public static void writeSessionEvent(int sessionId, int event, int flags,
-            @NonNull ComponentName service, @Nullable ComponentName app, boolean isChildSession) {
+            @NonNull ComponentName service, boolean isChildSession) {
+        // we should not logging the application package name
         FrameworkStatsLog.write(FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS, sessionId, event,
                 flags, ComponentName.flattenToShortString(service),
-                ComponentName.flattenToShortString(app), isChildSession);
+            /* componentName= */ null, isChildSession);
     }
 
     /** @hide */
     public static void writeSessionFlush(int sessionId, @NonNull ComponentName service,
-            @Nullable ComponentName app, @NonNull FlushMetrics fm,
-            @NonNull ContentCaptureOptions options, int flushReason) {
+            @NonNull FlushMetrics fm, @NonNull ContentCaptureOptions options,
+            int flushReason) {
+        // we should not logging the application package name
         FrameworkStatsLog.write(FrameworkStatsLog.CONTENT_CAPTURE_FLUSHED, sessionId,
                 ComponentName.flattenToShortString(service),
-                ComponentName.flattenToShortString(app), fm.sessionStarted, fm.sessionFinished,
+                /* componentName= */ null, fm.sessionStarted, fm.sessionFinished,
                 fm.viewAppearedCount, fm.viewDisappearedCount, fm.viewTextChangedCount,
                 options.maxBufferSize, options.idleFlushingFrequencyMs,
                 options.textChangeFlushingFrequencyMs, flushReason);

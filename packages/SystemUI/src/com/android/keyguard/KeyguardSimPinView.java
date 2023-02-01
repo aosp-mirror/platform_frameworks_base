@@ -19,14 +19,13 @@ package com.android.keyguard;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
-import android.view.View;
 
 import com.android.systemui.R;
 
 /**
  * Displays a PIN pad for unlocking.
  */
-public class KeyguardSimPinView extends KeyguardPinBasedInputView {
+public class KeyguardSimPinView extends KeyguardSimInputView {
     public static final String TAG = "KeyguardSimPinView";
 
     public KeyguardSimPinView(Context context) {
@@ -35,11 +34,6 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
     public KeyguardSimPinView(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    public void setEsimLocked(boolean locked) {
-        KeyguardEsimArea esimButton = findViewById(R.id.keyguard_esim_area);
-        esimButton.setVisibility(locked ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -79,4 +73,3 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                 com.android.internal.R.string.keyguard_accessibility_sim_pin_unlock);
     }
 }
-

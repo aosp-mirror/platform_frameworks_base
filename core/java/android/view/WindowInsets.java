@@ -32,8 +32,6 @@ import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.indexOf;
 import static android.view.WindowInsets.Type.systemBars;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -46,7 +44,6 @@ import android.graphics.Rect;
 import android.util.SparseArray;
 import android.view.View.OnApplyWindowInsetsListener;
 import android.view.WindowInsets.Type.InsetsType;
-import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethod;
 
@@ -517,6 +514,13 @@ public final class WindowInsets {
     /**
      * Returns the {@link Rect} of the maximum bounds of the system privacy indicator, for the
      * current orientation, in relative coordinates, or null if the bounds have not been loaded yet.
+     * <p>
+     * The privacy indicator bounds are determined by SystemUI, and subsequently loaded once the
+     * StatusBar window has been created and attached. The bounds for all rotations are calculated
+     * and loaded at once, and this value is only expected to ever change on display or font scale
+     * changes. As long as there is a StatusBar window, this value should not be expected to be
+     * null.
+     * <p>
      * The privacy indicator shows over apps when an app uses the microphone or camera permissions,
      * while an app is in immersive mode.
      *
@@ -668,7 +672,7 @@ public final class WindowInsets {
     @Deprecated
     @NonNull
     public Insets getStableInsets() {
-        return getInsets(mTypeMaxInsetsMap, mCompatInsetsTypes);
+        return getInsets(mTypeMaxInsetsMap, systemBars());
     }
 
     /**
@@ -902,6 +906,16 @@ public final class WindowInsets {
         result.append("\n    ");
         result.append(mPrivacyIndicatorBounds != null ? "privacyIndicatorBounds="
                 + mPrivacyIndicatorBounds : "");
+        result.append("\n    ");
+        result.append("compatInsetsTypes=" + mCompatInsetsTypes);
+        result.append("\n    ");
+        result.append("compatIgnoreVisibility=" + mCompatIgnoreVisibility);
+        result.append("\n    ");
+        result.append("systemWindowInsetsConsumed=" + mSystemWindowInsetsConsumed);
+        result.append("\n    ");
+        result.append("stableInsetsConsumed=" + mStableInsetsConsumed);
+        result.append("\n    ");
+        result.append("displayCutoutConsumed=" + mDisplayCutoutConsumed);
         result.append("\n    ");
         result.append(isRound() ? "round" : "");
         result.append("}");
@@ -1409,9 +1423,11 @@ public final class WindowInsets {
 
         static final int DISPLAY_CUTOUT = 1 << 7;
 
-        static final int LAST = 1 << 8;
-        static final int SIZE = 9;
-        static final int WINDOW_DECOR = LAST;
+        static final int WINDOW_DECOR = 1 << 8;
+
+        static final int GENERIC_OVERLAYS = 1 << 9;
+        static final int LAST = GENERIC_OVERLAYS;
+        static final int SIZE = 10;
 
         static int indexOf(@InsetsType int type) {
             switch (type) {
@@ -1433,6 +1449,8 @@ public final class WindowInsets {
                     return 7;
                 case WINDOW_DECOR:
                     return 8;
+                case GENERIC_OVERLAYS:
+                    return 9;
                 default:
                     throw new IllegalArgumentException("type needs to be >= FIRST and <= LAST,"
                             + " type=" + type);
@@ -1468,6 +1486,9 @@ public final class WindowInsets {
             if ((types & WINDOW_DECOR) != 0) {
                 result.append("windowDecor |");
             }
+            if ((types & GENERIC_OVERLAYS) != 0) {
+                result.append("genericOverlays |");
+            }
             if (result.length() > 0) {
                 result.delete(result.length() - 2, result.length());
             }
@@ -1480,7 +1501,8 @@ public final class WindowInsets {
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, value = {STATUS_BARS, NAVIGATION_BARS, CAPTION_BAR, IME, WINDOW_DECOR,
-                SYSTEM_GESTURES, MANDATORY_SYSTEM_GESTURES, TAPPABLE_ELEMENT, DISPLAY_CUTOUT})
+                SYSTEM_GESTURES, MANDATORY_SYSTEM_GESTURES, TAPPABLE_ELEMENT, DISPLAY_CUTOUT,
+                GENERIC_OVERLAYS})
         public @interface InsetsType {
         }
 
@@ -1572,7 +1594,7 @@ public final class WindowInsets {
          *         {@link #navigationBars()}, but not {@link #ime()}.
          */
         public static @InsetsType int systemBars() {
-            return STATUS_BARS | NAVIGATION_BARS | CAPTION_BAR;
+            return STATUS_BARS | NAVIGATION_BARS | CAPTION_BAR | GENERIC_OVERLAYS;
         }
 
         /**
@@ -1582,17 +1604,6 @@ public final class WindowInsets {
          */
         public static @InsetsType int all() {
             return 0xFFFFFFFF;
-        }
-
-        /**
-         * Checks whether the specified type is considered to be part of visible insets.
-         * @hide
-         */
-        public static boolean isVisibleInsetsType(int type,
-                @SoftInputModeFlags int softInputModeFlags) {
-            int softInputMode = softInputModeFlags & SOFT_INPUT_MASK_ADJUST;
-            return (type & Type.systemBars()) != 0
-                    || (softInputMode != SOFT_INPUT_ADJUST_NOTHING && (type & Type.ime()) != 0);
         }
     }
 

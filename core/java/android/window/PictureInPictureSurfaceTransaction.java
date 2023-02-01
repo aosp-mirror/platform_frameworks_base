@@ -47,7 +47,11 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
 
     public final float mCornerRadius;
 
+    public final float mShadowRadius;
+
     private final Rect mWindowCrop;
+
+    private boolean mShouldDisableCanAffectSystemUiFlags;
 
     private PictureInPictureSurfaceTransaction(Parcel in) {
         mAlpha = in.readFloat();
@@ -56,11 +60,13 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
         in.readFloatArray(mFloat9);
         mRotation = in.readFloat();
         mCornerRadius = in.readFloat();
+        mShadowRadius = in.readFloat();
         mWindowCrop = in.readTypedObject(Rect.CREATOR);
+        mShouldDisableCanAffectSystemUiFlags = in.readBoolean();
     }
 
     private PictureInPictureSurfaceTransaction(float alpha, @Nullable PointF position,
-            @Nullable float[] float9, float rotation, float cornerRadius,
+            @Nullable float[] float9, float rotation, float cornerRadius, float shadowRadius,
             @Nullable Rect windowCrop) {
         mAlpha = alpha;
         mPosition = position;
@@ -73,12 +79,15 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
             mRotation = rotation;
         }
         mCornerRadius = cornerRadius;
+        mShadowRadius = shadowRadius;
         mWindowCrop = (windowCrop == null) ? null : new Rect(windowCrop);
     }
 
     public PictureInPictureSurfaceTransaction(PictureInPictureSurfaceTransaction other) {
         this(other.mAlpha, other.mPosition,
-                other.mFloat9, other.mRotation, other.mCornerRadius, other.mWindowCrop);
+                other.mFloat9, other.mRotation, other.mCornerRadius, other.mShadowRadius,
+                other.mWindowCrop);
+        mShouldDisableCanAffectSystemUiFlags = other.mShouldDisableCanAffectSystemUiFlags;
     }
 
     /** @return {@link Matrix} from {@link #mFloat9} */
@@ -93,6 +102,21 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
         return mCornerRadius > 0;
     }
 
+    /** @return {@code true} if this transaction contains setting shadow radius. */
+    public boolean hasShadowRadiusSet() {
+        return mShadowRadius > 0;
+    }
+
+    /** Sets the internal {@link #mShouldDisableCanAffectSystemUiFlags}. */
+    public void setShouldDisableCanAffectSystemUiFlags(boolean shouldDisable) {
+        mShouldDisableCanAffectSystemUiFlags = shouldDisable;
+    }
+
+    /** @return {@code true} if we should disable Task#setCanAffectSystemUiFlags. */
+    public boolean getShouldDisableCanAffectSystemUiFlags() {
+        return mShouldDisableCanAffectSystemUiFlags;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -103,13 +127,17 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
                 && Arrays.equals(mFloat9, that.mFloat9)
                 && Objects.equals(mRotation, that.mRotation)
                 && Objects.equals(mCornerRadius, that.mCornerRadius)
-                && Objects.equals(mWindowCrop, that.mWindowCrop);
+                && Objects.equals(mShadowRadius, that.mShadowRadius)
+                && Objects.equals(mWindowCrop, that.mWindowCrop)
+                && mShouldDisableCanAffectSystemUiFlags
+                == that.mShouldDisableCanAffectSystemUiFlags;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mAlpha, mPosition, Arrays.hashCode(mFloat9),
-                mRotation, mCornerRadius, mWindowCrop);
+                mRotation, mCornerRadius, mShadowRadius, mWindowCrop,
+                mShouldDisableCanAffectSystemUiFlags);
     }
 
     @Override
@@ -124,7 +152,9 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
         out.writeFloatArray(mFloat9);
         out.writeFloat(mRotation);
         out.writeFloat(mCornerRadius);
+        out.writeFloat(mShadowRadius);
         out.writeTypedObject(mWindowCrop, 0 /* flags */);
+        out.writeBoolean(mShouldDisableCanAffectSystemUiFlags);
     }
 
     @Override
@@ -136,7 +166,9 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
                 + " matrix=" + matrix.toShortString()
                 + " rotation=" + mRotation
                 + " cornerRadius=" + mCornerRadius
+                + " shadowRadius=" + mShadowRadius
                 + " crop=" + mWindowCrop
+                + " shouldDisableCanAffectSystemUiFlags" + mShouldDisableCanAffectSystemUiFlags
                 + ")";
     }
 
@@ -155,6 +187,9 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
         }
         if (surfaceTransaction.hasCornerRadiusSet()) {
             tx.setCornerRadius(surfaceControl, surfaceTransaction.mCornerRadius);
+        }
+        if (surfaceTransaction.hasShadowRadiusSet()) {
+            tx.setShadowRadius(surfaceControl, surfaceTransaction.mShadowRadius);
         }
         if (surfaceTransaction.mAlpha != NOT_SET) {
             tx.setAlpha(surfaceControl, surfaceTransaction.mAlpha);
@@ -178,6 +213,7 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
         private float[] mFloat9;
         private float mRotation;
         private float mCornerRadius = NOT_SET;
+        private float mShadowRadius = NOT_SET;
         private Rect mWindowCrop;
 
         public Builder setAlpha(float alpha) {
@@ -201,6 +237,11 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
             return this;
         }
 
+        public Builder setShadowRadius(float shadowRadius) {
+            mShadowRadius = shadowRadius;
+            return this;
+        }
+
         public Builder setWindowCrop(@NonNull Rect windowCrop) {
             mWindowCrop = new Rect(windowCrop);
             return this;
@@ -208,7 +249,7 @@ public final class PictureInPictureSurfaceTransaction implements Parcelable {
 
         public PictureInPictureSurfaceTransaction build() {
             return new PictureInPictureSurfaceTransaction(mAlpha, mPosition,
-                    mFloat9, mRotation, mCornerRadius, mWindowCrop);
+                    mFloat9, mRotation, mCornerRadius, mShadowRadius, mWindowCrop);
         }
     }
 }

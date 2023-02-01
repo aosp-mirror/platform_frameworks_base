@@ -38,6 +38,7 @@ public class SimpleFgService extends Service {
     private static final int MSG_DONE = 1;
     private static final int MSG_START_FOREGROUND = 2;
     private static final int MSG_STOP_FOREGROUND = 3;
+    private static final int MSG_STOP_SERVICE = 4;
 
     private static final String ACTION_FGS_STATS_TEST =
             "com.android.servicestests.apps.simpleservicetestapp.ACTION_FGS_STATS_TEST";
@@ -55,6 +56,11 @@ public class SimpleFgService extends Service {
                 case MSG_STOP_FOREGROUND: {
                     Log.i(TAG, "stopForeground");
                     stopForeground(true);
+                    sendRemoteMessage(MSG_DONE, 0, 0, null);
+                } break;
+                case MSG_STOP_SERVICE: {
+                    Log.i(TAG, "stopSelf");
+                    stopSelf();
                     sendRemoteMessage(MSG_DONE, 0, 0, null);
                 } break;
             }

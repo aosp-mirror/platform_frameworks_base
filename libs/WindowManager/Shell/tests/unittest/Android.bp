@@ -28,6 +28,9 @@ android_test {
         "**/*.java",
         "**/*.kt",
     ],
+    resource_dirs: [
+        "res",
+    ],
 
     static_libs: [
         "WindowManager-Shell",
@@ -37,12 +40,14 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.dynamicanimation_dynamicanimation",
         "dagger2",
+        "frameworks-base-testutils",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "mockito-target-extended-minus-junit4",
         "truth-prebuilt",
         "testables",
         "platform-test-annotations",
+        "frameworks-base-testutils",
     ],
 
     libs: [
@@ -63,4 +68,9 @@ android_test {
     optimize: {
         enabled: false,
     },
+
+    aaptflags: [
+        "--extra-packages",
+        "com.android.wm.shell.tests",
+    ],
 }

@@ -97,7 +97,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Insets;
+import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -117,12 +117,15 @@ import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.window.TaskFpsCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -282,10 +285,16 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
 
     /**
-     * Keyguard is being occluded.
+     * Keyguard is being occluded by non-Dream.
      * @hide
      */
     int TRANSIT_OLD_KEYGUARD_OCCLUDE = 22;
+
+    /**
+     * Keyguard is being occluded by Dream.
+     * @hide
+     */
+    int TRANSIT_OLD_KEYGUARD_OCCLUDE_BY_DREAM = 33;
 
     /**
      * Keyguard is being unoccluded.
@@ -337,6 +346,18 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_OLD_TASK_FRAGMENT_CHANGE = 30;
 
     /**
+     * A dream activity is being opened.
+     * @hide
+     */
+    int TRANSIT_OLD_DREAM_ACTIVITY_OPEN = 31;
+
+    /**
+     * A dream activity is being closed.
+     * @hide
+     */
+    int TRANSIT_OLD_DREAM_ACTIVITY_CLOSE = 32;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_OLD_" }, value = {
@@ -364,7 +385,9 @@ public interface WindowManager extends ViewManager {
             TRANSIT_OLD_TASK_CHANGE_WINDOWING_MODE,
             TRANSIT_OLD_TASK_FRAGMENT_OPEN,
             TRANSIT_OLD_TASK_FRAGMENT_CLOSE,
-            TRANSIT_OLD_TASK_FRAGMENT_CHANGE
+            TRANSIT_OLD_TASK_FRAGMENT_CHANGE,
+            TRANSIT_OLD_DREAM_ACTIVITY_OPEN,
+            TRANSIT_OLD_DREAM_ACTIVITY_CLOSE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionOldType {}
@@ -484,6 +507,13 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION = 0x8;
 
     /**
+     * Transition flag: Keyguard is going away to the launcher, and it needs us to clear the task
+     * snapshot of the launcher because it has changed something in the Launcher window.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT = 0x16;
+
+    /**
      * Transition flag: App is crashed.
      * @hide
      */
@@ -523,6 +553,7 @@ public interface WindowManager extends ViewManager {
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
             TRANSIT_FLAG_KEYGUARD_GOING_AWAY_SUBTLE_ANIMATION,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_LAUNCHER_CLEAR_SNAPSHOT,
             TRANSIT_FLAG_APP_CRASHED,
             TRANSIT_FLAG_OPEN_BEHIND,
             TRANSIT_FLAG_KEYGUARD_LOCKED,
@@ -708,6 +739,20 @@ public interface WindowManager extends ViewManager {
      * @see Display#getRealSize(Point)
      */
     default @NonNull WindowMetrics getMaximumWindowMetrics() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Returns a set of {@link WindowMetrics} for the given display. Each WindowMetrics instance
+     * is the maximum WindowMetrics for a device state. This is not guaranteed to include all
+     * possible device states.
+     *
+     * This API can only be used by Launcher.
+     *
+     * @param displayId the id of the logical display
+     * @hide
+     */
+    default @NonNull Set<WindowMetrics> getPossibleMaximumWindowMetrics(int displayId) {
         throw new UnsupportedOperationException();
     }
 
@@ -982,6 +1027,14 @@ public interface WindowManager extends ViewManager {
                 }
                 return "UNKNOWN(" + type + ")";
         }
+    }
+
+    /**
+     * Ensure scales are between 0 and 20.
+     * @hide
+     */
+    static float fixScale(float scale) {
+        return Math.max(Math.min(scale, 20), 0);
     }
 
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
@@ -2125,6 +2178,7 @@ public interface WindowManager extends ViewManager {
          * {@hide}
          */
         @UnsupportedAppUsage
+        @TestApi
         public static final int FLAG_SLIPPERY = 0x20000000;
 
         /**
@@ -2327,6 +2381,14 @@ public interface WindowManager extends ViewManager {
         public static final int SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 0x00000010;
 
         /**
+         * Flag to allow this window to have unrestricted gesture exclusion.
+         *
+         * @see View#setSystemGestureExclusionRects(List)
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION = 0x00000020;
+
+        /**
          * Never animate position changes of the window.
          *
          * {@hide}
@@ -2363,6 +2425,16 @@ public interface WindowManager extends ViewManager {
          * {@hide}
          */
         public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 0x00001000;
+
+        /**
+         * Flag to indicate that the window frame should be the requested frame adding the display
+         * cutout frame. This will only be applied if a specific size smaller than the parent frame
+         * is given, and the window is covering the display cutout. The extended frame will not be
+         * larger than the parent frame.
+         *
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT = 0x00002000;
 
         /**
          * Flag that will make window ignore app visibility and instead depend purely on the decor
@@ -2536,11 +2608,13 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED,
                 PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS,
                 SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
+                PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION,
                 PRIVATE_FLAG_NO_MOVE_ANIMATION,
                 PRIVATE_FLAG_COMPATIBLE_WINDOW,
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                 PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
+                PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
                 PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                 PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
                 PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
@@ -2582,6 +2656,10 @@ public interface WindowManager extends ViewManager {
                         equals = SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
                         name = "SHOW_FOR_ALL_USERS"),
                 @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION,
+                        equals = PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION,
+                        name = "UNRESTRICTED_GESTURE_EXCLUSION"),
+                @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_NO_MOVE_ANIMATION,
                         equals = PRIVATE_FLAG_NO_MOVE_ANIMATION,
                         name = "NO_MOVE_ANIMATION"),
@@ -2601,6 +2679,10 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                         equals = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                         name = "FORCE_STATUS_BAR_VISIBLE"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
+                        equals = PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT,
+                        name = "LAYOUT_SIZE_EXTENDED_BY_CUTOUT"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                         equals = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
@@ -2739,7 +2821,7 @@ public interface WindowManager extends ViewManager {
          *
          * <p>Applications that target {@link android.os.Build.VERSION_CODES#P} and later, this flag
          * is ignored unless there is a focused view that returns {@code true} from
-         * {@link View#isInEditMode()} when the window is focused.</p>
+         * {@link View#onCheckIsTextEditor()} when the window is focused.</p>
          */
         public static final int SOFT_INPUT_STATE_VISIBLE = 4;
 
@@ -2749,7 +2831,7 @@ public interface WindowManager extends ViewManager {
          *
          * <p>Applications that target {@link android.os.Build.VERSION_CODES#P} and later, this flag
          * is ignored unless there is a focused view that returns {@code true} from
-         * {@link View#isInEditMode()} when the window is focused.</p>
+         * {@link View#onCheckIsTextEditor()} when the window is focused.</p>
          */
         public static final int SOFT_INPUT_STATE_ALWAYS_VISIBLE = 5;
 
@@ -3071,16 +3153,18 @@ public interface WindowManager extends ViewManager {
 
         /**
          * The preferred refresh rate for the window.
-         *
+         * <p>
          * This must be one of the supported refresh rates obtained for the display(s) the window
          * is on. The selected refresh rate will be applied to the display's default mode.
-         *
+         * <p>
+         * This should be used in favor of {@link LayoutParams#preferredDisplayModeId} for
+         * applications that want to specify the refresh rate, but do not want to specify a
+         * preference for any other displayMode properties (e.g., resolution).
+         * <p>
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          *
          * @see Display#getSupportedRefreshRates()
-         * @deprecated use {@link #preferredDisplayModeId} instead
          */
-        @Deprecated
         public float preferredRefreshRate;
 
         /**
@@ -3325,21 +3409,12 @@ public interface WindowManager extends ViewManager {
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 3;
 
         /**
-         * When this window has focus, disable touch pad pointer gesture processing.
-         * The window will receive raw position updates from the touch pad instead
-         * of pointer movements and synthetic touch events.
-         *
-         * @hide
-         */
-        public static final int INPUT_FEATURE_DISABLE_POINTER_GESTURES = 0x00000001;
-
-        /**
          * Does not construct an input channel for this window.  The channel will therefore
          * be incapable of receiving input.
          *
          * @hide
          */
-        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL = 0x00000002;
+        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL = 1 << 0;
 
         /**
          * When this window has focus, does not call user activity for all input events so
@@ -3352,28 +3427,43 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 0x00000004;
+        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 1 << 1;
+
+        /**
+         * An input spy window. This window will receive all pointer events within its touchable
+         * area, but will not stop events from being sent to other windows below it in z-order.
+         * An input event will be dispatched to all spy windows above the top non-spy window at the
+         * event's coordinates.
+         *
+         * @hide
+         */
+        @RequiresPermission(permission.MONITOR_INPUT)
+        public static final int INPUT_FEATURE_SPY = 1 << 2;
 
         /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.
          *
+         * NOTE: These are not the same as {@link android.os.InputConfig} flags.
+         *
          * @hide
          */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(flag = true, prefix = { "INPUT_FEATURE_" }, value = {
-            INPUT_FEATURE_DISABLE_POINTER_GESTURES,
-            INPUT_FEATURE_NO_INPUT_CHANNEL,
-            INPUT_FEATURE_DISABLE_USER_ACTIVITY,
+        @IntDef(flag = true, prefix = {"INPUT_FEATURE_"}, value = {
+                INPUT_FEATURE_NO_INPUT_CHANNEL,
+                INPUT_FEATURE_DISABLE_USER_ACTIVITY,
+                INPUT_FEATURE_SPY,
         })
-        public @interface InputFeatureFlags {}
+        public @interface InputFeatureFlags {
+        }
 
         /**
-         * Control special features of the input subsystem.
+         * Control a set of features of the input subsystem that are exposed to the app process.
          *
-         * @see #INPUT_FEATURE_DISABLE_POINTER_GESTURES
-         * @see #INPUT_FEATURE_NO_INPUT_CHANNEL
-         * @see #INPUT_FEATURE_DISABLE_USER_ACTIVITY
+         * WARNING: Do NOT use {@link android.os.InputConfig} flags! This must be set to flag values
+         * included in {@link InputFeatureFlags}.
+         *
          * @hide
+         * @see InputFeatureFlags
          */
         @InputFeatureFlags
         @UnsupportedAppUsage
@@ -3544,32 +3634,28 @@ public interface WindowManager extends ViewManager {
         private boolean mFitInsetsIgnoringVisibility = false;
 
         /**
-         * {@link InsetsState.InternalInsetsType}s to be applied to the window
-         * If {@link #type} has the predefined insets (like {@link #TYPE_STATUS_BAR} or
-         * {@link #TYPE_NAVIGATION_BAR}), this field will be ignored.
+         * If set, the specified insets types will be provided by the window and the insets frame
+         * will be calculated based on the provider's parameters. The insets types and the array
+         * should not be modified after the window is added. If multiple layout parameters are
+         * provided for different rotations in {@link LayoutParams#paramsForRotation}, the types in
+         * the providedInsets array should be the same in all rotations, including the base one.
+         * All other params can be adjusted at runtime.
+         * See {@link InsetsFrameProvider}.
          *
-         * <p>Note: provide only one inset corresponding to the window type (like
-         * {@link InsetsState.InternalInsetsType#ITYPE_STATUS_BAR} or
-         * {@link InsetsState.InternalInsetsType#ITYPE_NAVIGATION_BAR})</p>
          * @hide
          */
-        public @InsetsState.InternalInsetsType int[] providesInsetsTypes;
+        public InsetsFrameProvider[] providedInsets;
 
         /**
-         * If specified, the insets provided by this window will be our window frame minus the
-         * insets specified by providedInternalInsets.
+         * If specified, the frame that used to calculate relative {@link RoundedCorner} will be
+         * the window frame of this window minus the insets that this window provides.
+         *
+         * Task bar will draw fake rounded corners above itself, so we need this insets to calculate
+         * correct rounded corners for this window.
          *
          * @hide
          */
-        public Insets providedInternalInsets = Insets.NONE;
-
-        /**
-         * If specified, the insets provided by this window for the IME will be our window frame
-         * minus the insets specified by providedInternalImeInsets.
-         *
-         * @hide
-         */
-        public Insets providedInternalImeInsets = Insets.NONE;
+        public boolean insetsRoundedCornerFrame = false;
 
         /**
          * {@link LayoutParams} to be applied to the window when layout with a assigned rotation.
@@ -3688,6 +3774,18 @@ public interface WindowManager extends ViewManager {
                             "Params cannot contain params recursively.");
                 }
             }
+        }
+
+        /**
+         * @see #paramsForRotation
+         * @hide
+         */
+        public LayoutParams forRotation(int rotation) {
+            if (paramsForRotation == null || paramsForRotation.length <= rotation
+                    || paramsForRotation[rotation] == null) {
+                return this;
+            }
+            return paramsForRotation[rotation];
         }
 
         public LayoutParams() {
@@ -3938,21 +4036,10 @@ public interface WindowManager extends ViewManager {
             out.writeBoolean(mFitInsetsIgnoringVisibility);
             out.writeBoolean(preferMinimalPostProcessing);
             out.writeInt(mBlurBehindRadius);
-            if (providesInsetsTypes != null) {
-                out.writeInt(providesInsetsTypes.length);
-                out.writeIntArray(providesInsetsTypes);
-            } else {
-                out.writeInt(0);
-            }
-            providedInternalInsets.writeToParcel(out, 0 /* parcelableFlags */);
-            providedInternalImeInsets.writeToParcel(out, 0 /* parcelableFlags */);
-            if (paramsForRotation != null) {
-                checkNonRecursiveParams();
-                out.writeInt(paramsForRotation.length);
-                out.writeTypedArray(paramsForRotation, 0 /* parcelableFlags */);
-            } else {
-                out.writeInt(0);
-            }
+            out.writeBoolean(insetsRoundedCornerFrame);
+            out.writeTypedArray(providedInsets, 0 /* parcelableFlags */);
+            checkNonRecursiveParams();
+            out.writeTypedArray(paramsForRotation, 0 /* parcelableFlags */);
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
@@ -4019,18 +4106,9 @@ public interface WindowManager extends ViewManager {
             mFitInsetsIgnoringVisibility = in.readBoolean();
             preferMinimalPostProcessing = in.readBoolean();
             mBlurBehindRadius = in.readInt();
-            int insetsTypesLength = in.readInt();
-            if (insetsTypesLength > 0) {
-                providesInsetsTypes = new int[insetsTypesLength];
-                in.readIntArray(providesInsetsTypes);
-            }
-            providedInternalInsets = Insets.CREATOR.createFromParcel(in);
-            providedInternalImeInsets = Insets.CREATOR.createFromParcel(in);
-            int paramsForRotationLength = in.readInt();
-            if (paramsForRotationLength > 0) {
-                paramsForRotation = new LayoutParams[paramsForRotationLength];
-                in.readTypedArray(paramsForRotation, LayoutParams.CREATOR);
-            }
+            insetsRoundedCornerFrame = in.readBoolean();
+            providedInsets = in.createTypedArray(InsetsFrameProvider.CREATOR);
+            paramsForRotation = in.createTypedArray(LayoutParams.CREATOR);
         }
 
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -4322,28 +4400,50 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
-            if (!Arrays.equals(providesInsetsTypes, o.providesInsetsTypes)) {
-                providesInsetsTypes = o.providesInsetsTypes;
+            if (!Arrays.equals(providedInsets, o.providedInsets)) {
+                providedInsets = o.providedInsets;
                 changes |= LAYOUT_CHANGED;
             }
 
-            if (!providedInternalInsets.equals(o.providedInternalInsets)) {
-                providedInternalInsets = o.providedInternalInsets;
+            if (insetsRoundedCornerFrame != o.insetsRoundedCornerFrame) {
+                insetsRoundedCornerFrame = o.insetsRoundedCornerFrame;
                 changes |= LAYOUT_CHANGED;
             }
 
-            if (!providedInternalImeInsets.equals(o.providedInternalImeInsets)) {
-                providedInternalImeInsets = o.providedInternalImeInsets;
-                changes |= LAYOUT_CHANGED;
-            }
-
-            if (!Arrays.equals(paramsForRotation, o.paramsForRotation)) {
+            if (paramsForRotation != o.paramsForRotation) {
+                if ((changes & LAYOUT_CHANGED) == 0) {
+                    if (paramsForRotation != null && o.paramsForRotation != null
+                            && paramsForRotation.length == o.paramsForRotation.length) {
+                        for (int i = paramsForRotation.length - 1; i >= 0; i--) {
+                            if (hasLayoutDiff(paramsForRotation[i], o.paramsForRotation[i])) {
+                                changes |= LAYOUT_CHANGED;
+                                break;
+                            }
+                        }
+                    } else {
+                        changes |= LAYOUT_CHANGED;
+                    }
+                }
                 paramsForRotation = o.paramsForRotation;
                 checkNonRecursiveParams();
-                changes |= LAYOUT_CHANGED;
             }
 
             return changes;
+        }
+
+        /**
+         * Returns {@code true} if the 2 params may have difference results of
+         * {@link WindowLayout#computeFrames}.
+         */
+        private static boolean hasLayoutDiff(LayoutParams a, LayoutParams b) {
+            return a.width != b.width || a.height != b.height || a.x != b.x || a.y != b.y
+                    || a.horizontalMargin != b.horizontalMargin
+                    || a.verticalMargin != b.verticalMargin
+                    || a.layoutInDisplayCutoutMode != b.layoutInDisplayCutoutMode
+                    || a.gravity != b.gravity || !Arrays.equals(a.providedInsets, b.providedInsets)
+                    || a.mFitInsetsTypes != b.mFitInsetsTypes
+                    || a.mFitInsetsSides != b.mFitInsetsSides
+                    || a.mFitInsetsIgnoringVisibility != b.mFitInsetsIgnoringVisibility;
         }
 
         @Override
@@ -4458,7 +4558,7 @@ public interface WindowManager extends ViewManager {
                 sb.append(hasSystemUiListeners);
             }
             if (inputFeatures != 0) {
-                sb.append(" if=").append(inputFeatureToString(inputFeatures));
+                sb.append(" if=").append(inputFeaturesToString(inputFeatures));
             }
             if (userActivityTimeout >= 0) {
                 sb.append(" userActivityTimeout=").append(userActivityTimeout);
@@ -4530,21 +4630,17 @@ public interface WindowManager extends ViewManager {
                 sb.append(System.lineSeparator());
                 sb.append(prefix).append("  fitIgnoreVis");
             }
-            if (providesInsetsTypes != null) {
+            if (providedInsets != null) {
                 sb.append(System.lineSeparator());
-                sb.append(prefix).append("  insetsTypes=");
-                for (int i = 0; i < providesInsetsTypes.length; ++i) {
+                sb.append(" providedInsets=");
+                for (int i = 0; i < providedInsets.length; ++i) {
                     if (i > 0) sb.append(' ');
-                    sb.append(InsetsState.typeToString(providesInsetsTypes[i]));
+                    sb.append((providedInsets[i]));
                 }
             }
-            if (!providedInternalInsets.equals(Insets.NONE)) {
-                sb.append(" providedInternalInsets=");
-                sb.append(providedInternalInsets);
-            }
-            if (!providedInternalImeInsets.equals(Insets.NONE)) {
-                sb.append(" providedInternalImeInsets=");
-                sb.append(providedInternalImeInsets);
+            if (insetsRoundedCornerFrame) {
+                sb.append(" insetsRoundedCornerFrame=");
+                sb.append(insetsRoundedCornerFrame);
             }
             if (paramsForRotation != null && paramsForRotation.length != 0) {
                 sb.append(System.lineSeparator());
@@ -4756,17 +4852,24 @@ public interface WindowManager extends ViewManager {
             }
         }
 
-        private static String inputFeatureToString(int inputFeature) {
-            switch (inputFeature) {
-                case INPUT_FEATURE_DISABLE_POINTER_GESTURES:
-                    return "DISABLE_POINTER_GESTURES";
-                case INPUT_FEATURE_NO_INPUT_CHANNEL:
-                    return "NO_INPUT_CHANNEL";
-                case INPUT_FEATURE_DISABLE_USER_ACTIVITY:
-                    return "DISABLE_USER_ACTIVITY";
-                default:
-                    return Integer.toString(inputFeature);
+        private static String inputFeaturesToString(int inputFeatures) {
+            final List<String> features = new ArrayList<>();
+            if ((inputFeatures & INPUT_FEATURE_NO_INPUT_CHANNEL) != 0) {
+                inputFeatures &= ~INPUT_FEATURE_NO_INPUT_CHANNEL;
+                features.add("INPUT_FEATURE_NO_INPUT_CHANNEL");
             }
+            if ((inputFeatures & INPUT_FEATURE_DISABLE_USER_ACTIVITY) != 0) {
+                inputFeatures &= ~INPUT_FEATURE_DISABLE_USER_ACTIVITY;
+                features.add("INPUT_FEATURE_DISABLE_USER_ACTIVITY");
+            }
+            if ((inputFeatures & INPUT_FEATURE_SPY) != 0) {
+                inputFeatures &= ~INPUT_FEATURE_SPY;
+                features.add("INPUT_FEATURE_SPY");
+            }
+            if (inputFeatures != 0) {
+                features.add(Integer.toHexString(inputFeatures));
+            }
+            return String.join(" | ", features);
         }
 
         /**
@@ -4799,5 +4902,52 @@ public interface WindowManager extends ViewManager {
     @TestApi
     default boolean isTaskSnapshotSupported() {
         return false;
+    }
+
+    /**
+     * Registers the frame rate per second count callback for one given task ID.
+     * Each callback can only register for receiving FPS callback for one task id until unregister
+     * is called. If there's no task associated with the given task id,
+     * {@link IllegalArgumentException} will be thrown. Registered callbacks should always be
+     * unregistered via {@link #unregisterTaskFpsCallback(TaskFpsCallback)}
+     * even when the task id has been destroyed.
+     *
+     * @param taskId task id of the task.
+     * @param executor Executor to execute the callback.
+     * @param callback callback to be registered.
+     *
+     * @hide
+     */
+    @SystemApi
+    default void registerTaskFpsCallback(@IntRange(from = 0) int taskId,
+            @NonNull Executor executor,
+            @NonNull TaskFpsCallback callback) {}
+
+    /**
+     * Unregisters the frame rate per second count callback which was registered with
+     * {@link #registerTaskFpsCallback(Executor, int, TaskFpsCallback)}.
+     *
+     * @param callback callback to be unregistered.
+     *
+     * @hide
+     */
+    @SystemApi
+    default void unregisterTaskFpsCallback(@NonNull TaskFpsCallback callback) {}
+
+    /**
+     * Take a snapshot using the same path that's used for Recents. This is used for Testing only.
+     *
+     * @param taskId to take the snapshot of
+     *
+     * @return a bitmap of the screenshot or {@code null} if it was unable to screenshot. The
+     * screenshot can fail if the taskId is invalid or if there's no SurfaceControl associated with
+     * that task.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    default Bitmap snapshotTaskForRecents(@IntRange(from = 0) int taskId) {
+        return null;
     }
 }

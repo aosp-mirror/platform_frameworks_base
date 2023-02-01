@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -45,9 +46,9 @@ import android.util.LongSparseArray;
 import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -58,12 +59,10 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.MessageRouter;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -150,7 +149,7 @@ public class GarbageMonitor implements Dumpable {
         mTrackedGarbage = leakDetector.getTrackedGarbage();
         mLeakReporter = leakReporter;
 
-        mDumpTruck = new DumpTruck(mContext);
+        mDumpTruck = new DumpTruck(mContext, this);
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
@@ -271,7 +270,7 @@ public class GarbageMonitor implements Dumpable {
     }
 
     @Override
-    public void dump(@Nullable FileDescriptor fd, PrintWriter pw, @Nullable String[] args) {
+    public void dump(PrintWriter pw, @Nullable String[] args) {
         pw.println("GarbageMonitor params:");
         pw.println(String.format("   mHeapLimit=%d KB", mHeapLimit));
         pw.println(String.format("   GARBAGE_INSPECTION_INTERVAL=%d (%.1f mins)",
@@ -290,7 +289,7 @@ public class GarbageMonitor implements Dumpable {
         for (long pid : mPids) {
             final ProcessMemInfo pmi = mData.get(pid);
             if (pmi != null) {
-                pmi.dump(fd, pw, args);
+                pmi.dump(pw, args);
             }
         }
     }
@@ -305,7 +304,7 @@ public class GarbageMonitor implements Dumpable {
         MemoryIconDrawable(Context context) {
             baseIcon = context.getDrawable(R.drawable.ic_memory).mutate();
             dp = context.getResources().getDisplayMetrics().density;
-            paint.setColor(QSIconViewImpl.getIconColorForState(context, STATE_ACTIVE));
+            paint.setColor(Color.WHITE);
         }
 
         public void setRss(long rss) {
@@ -545,7 +544,7 @@ public class GarbageMonitor implements Dumpable {
         }
 
         @Override
-        public void dump(@Nullable FileDescriptor fd, PrintWriter pw, @Nullable String[] args) {
+        public void dump(PrintWriter pw, @Nullable String[] args) {
             pw.print("{ \"pid\": ");
             pw.print(pid);
             pw.print(", \"name\": \"");
@@ -565,7 +564,7 @@ public class GarbageMonitor implements Dumpable {
 
     /** */
     @SysUISingleton
-    public static class Service extends SystemUI implements Dumpable {
+    public static class Service extends CoreStartable implements Dumpable {
         private final GarbageMonitor mGarbageMonitor;
 
         @Inject
@@ -589,8 +588,8 @@ public class GarbageMonitor implements Dumpable {
         }
 
         @Override
-        public void dump(@Nullable FileDescriptor fd, PrintWriter pw, @Nullable String[] args) {
-            if (mGarbageMonitor != null) mGarbageMonitor.dump(fd, pw, args);
+        public void dump(PrintWriter pw, @Nullable String[] args) {
+            if (mGarbageMonitor != null) mGarbageMonitor.dump(pw, args);
         }
     }
 

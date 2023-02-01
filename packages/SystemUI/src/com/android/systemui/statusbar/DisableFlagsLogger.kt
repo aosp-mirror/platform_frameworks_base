@@ -74,9 +74,12 @@ class DisableFlagsLogger constructor(
      * Returns a string representing the, old, new, and new-after-modification disable flag states,
      * as well as the differences between each of the states.
      *
-     * Example:
-     *   Old: EnaiHbcRso.qINgr | New: EnaihBcRso.qiNGR (hB.iGR) | New after local modification:
-     *   EnaihBcRso.qInGR (.n)
+     * Example if [old], [new], and [newAfterLocalModification] are all different:
+     *   Old: EnaiHbcRso.qINgr | New: EnaihBcRso.qiNGR (changed: hB.iGR) | New after local
+     *   modification: EnaihBcRso.qInGR (changed: .n)
+     *
+     * Example if [old] and [new] are the same:
+     *   EnaihBcRso.qiNGR (unchanged)
      *
      * A capital character signifies the flag is set and a lowercase character signifies that the
      * flag isn't set. The flag states will be logged in the same order as the passed-in lists.
@@ -96,54 +99,51 @@ class DisableFlagsLogger constructor(
         new: DisableState,
         newAfterLocalModification: DisableState? = null
     ): String {
-        val builder = StringBuilder("Received new disable state. ")
+        val builder = StringBuilder("Received new disable state: ")
 
-        old?.let {
+        // This if/else has slightly repetitive code but is easier to read.
+        if (old != null && old != new) {
             builder.append("Old: ")
             builder.append(getFlagsString(old))
             builder.append(" | ")
-        }
-
-        builder.append("New: ")
-        if (old != null && old != new) {
-            builder.append(getFlagsStringWithDiff(old, new))
-        } else {
+            builder.append("New: ")
             builder.append(getFlagsString(new))
+            builder.append(" ")
+            builder.append(getDiffString(old, new))
+        } else if (old != null && old == new) {
+            // If old and new are the same, we only need to print one of them.
+            builder.append(getFlagsString(new))
+            builder.append(" ")
+            builder.append(getDiffString(old, new))
+        } else { // old == null
+            builder.append(getFlagsString(new))
+            // Don't get a diff string because we have no [old] to compare with.
         }
 
         if (newAfterLocalModification != null && new != newAfterLocalModification) {
             builder.append(" | New after local modification: ")
-            builder.append(getFlagsStringWithDiff(new, newAfterLocalModification))
+            builder.append(getFlagsString(newAfterLocalModification))
+            builder.append(" ")
+            builder.append(getDiffString(new, newAfterLocalModification))
         }
 
         return builder.toString()
     }
 
     /**
-     * Returns a string representing [new] state, as well as the difference from [old] to [new]
-     * (if there is one).
-     */
-    private fun getFlagsStringWithDiff(old: DisableState, new: DisableState): String {
-        val builder = StringBuilder()
-        builder.append(getFlagsString(new))
-        builder.append(" ")
-        builder.append(getDiffString(old, new))
-        return builder.toString()
-    }
-
-    /**
-     * Returns a string representing the difference between [old] and [new], or an empty string if
-     * there is no difference.
+     * Returns a string representing the difference between [old] and [new].
      *
-     * For example, if old was "abc.DE" and new was "aBC.De", the difference returned would be
-     * "(BC.e)".
+     * - If [old] was "abc.DE" and [new] was "aBC.De", the difference returned would be
+     *   "(changed: BC.e)".
+     * - If [old] and [new] are the same, the difference returned would be "(unchanged)".
      */
     private fun getDiffString(old: DisableState, new: DisableState): String {
         if (old == new) {
-            return ""
+            return "(unchanged)"
         }
 
         val builder = StringBuilder("(")
+        builder.append("changed: ")
         disable1FlagsList.forEach {
             val newSymbol = it.getFlagStatus(new.disable1)
             if (it.getFlagStatus(old.disable1) != newSymbol) {

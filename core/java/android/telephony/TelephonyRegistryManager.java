@@ -242,8 +242,10 @@ public class TelephonyRegistryManager {
      * @param events Events
      * @param notifyNow Whether to notify instantly
      */
-    public void listenFromListener(int subId, @NonNull String pkg, @NonNull String featureId,
-            @NonNull PhoneStateListener listener, @NonNull int events, boolean notifyNow) {
+    public void listenFromListener(int subId, @NonNull boolean renounceFineLocationAccess,
+            @NonNull boolean renounceCoarseLocationAccess, @NonNull String pkg,
+            @NonNull String featureId, @NonNull PhoneStateListener listener,
+            @NonNull int events, boolean notifyNow) {
         if (listener == null) {
             throw new IllegalStateException("telephony service is null.");
         }
@@ -260,8 +262,8 @@ public class TelephonyRegistryManager {
             } else if (listener.mSubId != null) {
                 subId = listener.mSubId;
             }
-            sRegistry.listenWithEventList(false, false, subId, pkg, featureId,
-                    listener.callback, eventsList, notifyNow);
+            sRegistry.listenWithEventList(renounceFineLocationAccess, renounceCoarseLocationAccess,
+                    subId, pkg, featureId, listener.callback, eventsList, notifyNow);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -50,6 +50,7 @@ import androidx.dynamicanimation.animation.FloatPropertyCompat;
 import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
+import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -160,7 +161,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     // The amount the arrow is shifted to avoid the finger.
     private int mFingerOffset;
 
-    private final float mSwipeThreshold;
+    private final float mSwipeTriggerThreshold;
+    private final float mSwipeProgressThreshold;
     private final Path mArrowPath = new Path();
     private final Point mDisplaySize = new Point();
 
@@ -173,6 +175,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     private final ValueAnimator mArrowDisappearAnimation;
     private final SpringForce mRegularTranslationSpring;
     private final SpringForce mTriggerBackSpring;
+    private final LatencyTracker mLatencyTracker;
 
     private VelocityTracker mVelocityTracker;
     private boolean mIsDark = false;
@@ -222,6 +225,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     private float mDisappearAmount;
     private long mVibrationTime;
     private int mScreenSize;
+    private boolean mTrackingBackArrowLatency = false;
 
     private final Handler mHandler = new Handler();
     private final Runnable mFailsafeRunnable = this::onFailsafe;
@@ -278,7 +282,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             };
     private BackCallback mBackCallback;
 
-    public NavigationBarEdgePanel(Context context) {
+    public NavigationBarEdgePanel(Context context, LatencyTracker latencyTracker) {
         super(context);
 
         mWindowManager = context.getSystemService(WindowManager.class);
@@ -347,8 +351,11 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         loadColors(context);
         updateArrowDirection();
 
-        mSwipeThreshold = context.getResources()
+        mSwipeTriggerThreshold = context.getResources()
                 .getDimension(R.dimen.navigation_edge_action_drag_threshold);
+        mSwipeProgressThreshold = context.getResources()
+                .getDimension(R.dimen.navigation_edge_action_progress_threshold);
+
         setVisibility(GONE);
 
         Executor backgroundExecutor = Dependency.get(Dependency.BACKGROUND_EXECUTOR);
@@ -372,6 +379,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 }, backgroundExecutor);
         mRegionSamplingHelper.setWindowVisible(true);
         mShowProtection = !isPrimaryDisplay;
+        mLatencyTracker = latencyTracker;
     }
 
     @Override
@@ -473,6 +481,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 updatePosition(event.getY());
                 mRegionSamplingHelper.start(mSamplingRect);
                 mWindowManager.updateViewLayout(this, mLayoutParams);
+                mLatencyTracker.onActionStart(LatencyTracker.ACTION_SHOW_BACK_ARROW);
+                mTrackingBackArrowLatency = true;
                 break;
             case MotionEvent.ACTION_MOVE:
                 handleMoveEvent(event);
@@ -528,6 +538,10 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
 
         canvas.drawPath(arrowPath, mPaint);
         canvas.restore();
+        if (mTrackingBackArrowLatency) {
+            mLatencyTracker.onActionEnd(LatencyTracker.ACTION_SHOW_BACK_ARROW);
+            mTrackingBackArrowLatency = false;
+        }
     }
 
     @Override
@@ -721,7 +735,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         mPreviousTouchTranslation = touchTranslation;
 
         // Apply a haptic on drag slop passed
-        if (!mDragSlopPassed && touchTranslation > mSwipeThreshold) {
+        if (!mDragSlopPassed && touchTranslation > mSwipeTriggerThreshold) {
             mDragSlopPassed = true;
             mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
             mVibrationTime = SystemClock.uptimeMillis();
@@ -866,6 +880,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             // Whenever the trigger back state changes the existing translation animation should be
             // cancelled
             mTranslationAnimation.cancel();
+            mBackCallback.setTriggerBack(mTriggerBack);
         }
     }
 

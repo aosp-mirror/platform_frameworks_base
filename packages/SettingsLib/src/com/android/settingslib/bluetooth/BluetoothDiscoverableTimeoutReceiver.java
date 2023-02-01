@@ -82,4 +82,4 @@ public class BluetoothDiscoverableTimeoutReceiver extends BroadcastReceiver {
             Log.e(TAG, "localBluetoothAdapter is NULL!!");
         }
     }
-};
+}

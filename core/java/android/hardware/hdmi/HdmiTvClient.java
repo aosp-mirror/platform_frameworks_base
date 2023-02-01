@@ -60,7 +60,8 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Callback interface used to get the result of {@link #deviceSelect}.
+     * Callback interface used to get the result of {@link #portSelect} and
+     * {@link #setSystemAudioMode}.
      */
     public interface SelectCallback {
         /**
@@ -77,7 +78,9 @@ public final class HdmiTvClient extends HdmiClient {
      * @param logicalAddress logical address of the device to select
      * @param callback callback to get the result with
      * @throws {@link IllegalArgumentException} if the {@code callback} is null
+     * @deprecated Please use {@link HdmiClient#selectDevice} instead.
      */
+    @Deprecated
     public void deviceSelect(int logicalAddress, @NonNull SelectCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null.");
@@ -158,7 +161,9 @@ public final class HdmiTvClient extends HdmiClient {
      *
      * @return list of {@link HdmiDeviceInfo} for connected CEC devices.
      *         Empty list is returned if there is none.
+     * @deprecated Please use {@link HdmiControlManager#getConnectedDevices()} instead.
      */
+    @Deprecated
     public List<HdmiDeviceInfo> getDeviceList() {
         try {
             return mService.getDeviceList();

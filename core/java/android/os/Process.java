@@ -18,11 +18,15 @@ package android.os;
 
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UptimeMillisLong;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build.VERSION_CODES;
+import android.sysprop.MemoryProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -252,6 +256,14 @@ public class Process {
      * @hide
      */
     public static final int UWB_UID = 1083;
+
+    /**
+     * Defines a virtual UID that is used to aggregate data related to SDK sandbox UIDs.
+     * {@see SdkSandboxManager}
+     * @hide
+     */
+    @TestApi
+    public static final int SDK_SANDBOX_VIRTUAL_UID = 1090;
 
     /**
      * GID that corresponds to the INTERNET permission.
@@ -574,8 +586,25 @@ public class Process {
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
 
+    /**
+     * When the process started and ActivityThread.handleBindApplication() was executed.
+     */
     private static long sStartElapsedRealtime;
+
+    /**
+     * When the process started and ActivityThread.handleBindApplication() was executed.
+     */
     private static long sStartUptimeMillis;
+
+    /**
+     * When the activity manager was about to ask zygote to fork.
+     */
+    private static long sStartRequestedElapsedRealtime;
+
+    /**
+     * When the activity manager was about to ask zygote to fork.
+     */
+    private static long sStartRequestedUptimeMillis;
 
     private static final int PIDFD_UNKNOWN = 0;
     private static final int PIDFD_SUPPORTED = 1;
@@ -625,6 +654,12 @@ public class Process {
      * @hide
      */
     public static final ZygoteProcess ZYGOTE_PROCESS = new ZygoteProcess();
+
+
+    /**
+     * The process name set via {@link #setArgV0(String)}.
+     */
+    private static String sArgV0;
 
     /**
      * Start a new process.
@@ -737,23 +772,56 @@ public class Process {
     public static final native long getElapsedCpuTime();
 
     /**
-     * Return the {@link SystemClock#elapsedRealtime()} at which this process was started.
+     * Return the {@link SystemClock#elapsedRealtime()} at which this process was started,
+     * but before any of the application code was executed.
      */
-    public static final long getStartElapsedRealtime() {
+    @ElapsedRealtimeLong
+    public static long getStartElapsedRealtime() {
         return sStartElapsedRealtime;
     }
 
     /**
-     * Return the {@link SystemClock#uptimeMillis()} at which this process was started.
+     * Return the {@link SystemClock#uptimeMillis()} at which this process was started,
+     * but before any of the application code was executed.
      */
-    public static final long getStartUptimeMillis() {
+    @UptimeMillisLong
+    public static long getStartUptimeMillis() {
         return sStartUptimeMillis;
     }
 
+    /**
+     * Return the {@link SystemClock#elapsedRealtime()} at which the system was about to
+     * start this process. i.e. before a zygote fork.
+     *
+     * <p>More precisely, the system may start app processes before there's a start request,
+     * in order to reduce the process start up latency, in which case this is set when the system
+     * decides to "specialize" the process into a requested app.
+     */
+    @ElapsedRealtimeLong
+    public static long getStartRequestedElapsedRealtime() {
+        return sStartRequestedElapsedRealtime;
+    }
+
+    /**
+     * Return the {@link SystemClock#uptimeMillis()} at which the system was about to
+     * start this process. i.e. before a zygote fork.
+     *
+     * <p>More precisely, the system may start app processes before there's a start request,
+     * in order to reduce the process start up latency, in which case this is set when the system
+     * decides to "specialize" the process into a requested app.
+     */
+    @UptimeMillisLong
+    public static long getStartRequestedUptimeMillis() {
+        return sStartRequestedUptimeMillis;
+    }
+
     /** @hide */
-    public static final void setStartTimes(long elapsedRealtime, long uptimeMillis) {
+    public static final void setStartTimes(long elapsedRealtime, long uptimeMillis,
+            long startRequestedElapsedRealtime, long startRequestedUptime) {
         sStartElapsedRealtime = elapsedRealtime;
         sStartUptimeMillis = uptimeMillis;
+        sStartRequestedElapsedRealtime = startRequestedElapsedRealtime;
+        sStartRequestedUptimeMillis = startRequestedUptime;
     }
 
     /**
@@ -833,9 +901,21 @@ public class Process {
         return isIsolated(myUid());
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
+    /**
+     * @deprecated Use {@link #isIsolatedUid(int)} instead.
+     * {@hide}
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
+            publicAlternatives = "Use {@link #isIsolatedUid(int)} instead.")
     public static final boolean isIsolated(int uid) {
+        return isIsolatedUid(uid);
+    }
+
+    /**
+     * Returns whether the process with the given {@code uid} is an isolated sandbox.
+     */
+    public static final boolean isIsolatedUid(int uid) {
         uid = UserHandle.getAppId(uid);
         return (uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID)
                 || (uid >= FIRST_APP_ZYGOTE_ISOLATED_UID && uid <= LAST_APP_ZYGOTE_ISOLATED_UID);
@@ -1199,8 +1279,27 @@ public class Process {
      *
      * {@hide}
      */
-    @UnsupportedAppUsage
-    public static final native void setArgV0(String text);
+    @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.S, publicAlternatives = "Do not try to "
+            + "change the process name. (If you must, you could use {@code pthread_setname_np(3)}, "
+            + "but this could confuse the system)")
+    public static void setArgV0(@NonNull String text) {
+        sArgV0 = text;
+        setArgV0Native(text);
+    }
+
+    private static native void setArgV0Native(String text);
+
+    /**
+     * Return the name of this process. By default, the process name is the same as the app's
+     * package name, but this can be changed using {@code android:process}.
+     */
+    @NonNull
+    public static String myProcessName() {
+        // Note this could be different from the actual process name if someone changes the
+        // process name using native code (using pthread_setname_np()). But sArgV0
+        // is the name that the system thinks this process has.
+        return sArgV0;
+    }
 
     /**
      * Kill the process with the given PID.
@@ -1249,6 +1348,24 @@ public class Process {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static final native void sendSignalQuiet(int pid, int signal);
+
+    /**
+     * @return The advertised memory of the system, as the end user would encounter in a retail
+     * display environment. If the advertised memory is not defined, it returns
+     * {@code getTotalMemory()} rounded.
+     *
+     * @hide
+     */
+    public static final long getAdvertisedMem() {
+        String formatSize = MemoryProperties.memory_ddr_size().orElse("0KB");
+        long memSize = FileUtils.parseSize(formatSize);
+
+        if (memSize == Long.MIN_VALUE) {
+            return FileUtils.roundStorageSize(getTotalMemory());
+        }
+
+        return memSize;
+    }
 
     /** @hide */
     @UnsupportedAppUsage

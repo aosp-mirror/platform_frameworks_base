@@ -30,10 +30,10 @@ import android.net.NetworkInfo;
 import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.telephony.CellSignalStrength;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.mobile.TelephonyIcons;
 
@@ -56,6 +56,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        allowTestableLooperAsMainThread();
         when(mWifiInfo.makeCopy(anyLong())).thenReturn(mWifiInfo);
         when(mWifiInfo.isPrimary()).thenReturn(true);
     }
@@ -281,44 +282,6 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
 
         setWifiEnabled(false);
         verifyLastMobileDataIndicatorsForVcn(false, 1, 0, false);
-    }
-
-    @Test
-    public void testCallStrengh() {
-        if (true) return;
-        String testSsid = "Test SSID";
-        setWifiEnabled(true);
-        setWifiState(true, testSsid);
-        // Set the ImsType to be IMS_TYPE_WLAN
-        setImsType(2);
-        setWifiLevel(1);
-        for (int testLevel = 0; testLevel < WifiIcons.WIFI_LEVEL_COUNT; testLevel++) {
-            setWifiLevel(testLevel);
-            verifyLastCallStrength(TelephonyIcons.WIFI_CALL_STRENGTH_ICONS[testLevel]);
-        }
-        // Set the ImsType to be IMS_TYPE_WWAN
-        setImsType(1);
-        setupDefaultSignal();
-        for (int testStrength = 0;
-                testStrength < CellSignalStrength.getNumSignalStrengthLevels(); testStrength++) {
-            setLevel(testStrength);
-            verifyLastCallStrength(TelephonyIcons.MOBILE_CALL_STRENGTH_ICONS[testStrength]);
-        }
-    }
-
-    @Test
-    public void testNonPrimaryWiFi() {
-        if (true) return;
-        String testSsid = "Test SSID";
-        setWifiEnabled(true);
-        setWifiState(true, testSsid);
-        // Set the ImsType to be IMS_TYPE_WLAN
-        setImsType(2);
-        setWifiLevel(1);
-        verifyLastCallStrength(TelephonyIcons.WIFI_CALL_STRENGTH_ICONS[1]);
-        when(mWifiInfo.isPrimary()).thenReturn(false);
-        setWifiLevel(3);
-        verifyLastCallStrength(TelephonyIcons.WIFI_CALL_STRENGTH_ICONS[1]);
     }
 
     protected void setWifiActivity(int activity) {

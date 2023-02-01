@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
@@ -50,12 +51,12 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
-import com.android.systemui.statusbar.phone.ShadeController;
 
 import org.junit.After;
 import org.junit.Before;
@@ -119,7 +120,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mReceiver = new BlockingQueueIntentReceiver();
-        mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION));
+        mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION),
+                Context.RECEIVER_EXPORTED_UNAUDITED);
         mKeyguardDismissUtil.setDismissHandler((action, unused, afterKgGone) -> action.onDismiss());
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectMockDependency(ShadeController.class);

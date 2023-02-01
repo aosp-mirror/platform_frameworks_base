@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.provider.Settings;
 import android.view.RemoteAnimationTarget;
+import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -68,16 +69,14 @@ class TaskFragmentAnimationSpec {
 
         // The transition animation should be adjusted based on the developer option.
         final ContentResolver resolver = mContext.getContentResolver();
-        mTransitionAnimationScaleSetting = Settings.Global.getFloat(resolver,
-                Settings.Global.TRANSITION_ANIMATION_SCALE,
-                mContext.getResources().getFloat(
-                        R.dimen.config_appTransitionAnimationDurationScaleDefault));
+        mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
         resolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.TRANSITION_ANIMATION_SCALE), false,
                 new SettingsObserver(handler));
     }
 
     /** For target that doesn't need to be animated. */
+    @NonNull
     static Animation createNoopAnimation(@NonNull RemoteAnimationTarget target) {
         // Noop but just keep the target showing/hiding.
         final float alpha = target.mode == MODE_CLOSING ? 0f : 1f;
@@ -85,6 +84,7 @@ class TaskFragmentAnimationSpec {
     }
 
     /** Animation for target that is opening in a change transition. */
+    @NonNull
     Animation createChangeBoundsOpenAnimation(@NonNull RemoteAnimationTarget target) {
         final Rect bounds = target.localBounds;
         // The target will be animated in from left or right depends on its position.
@@ -101,6 +101,7 @@ class TaskFragmentAnimationSpec {
     }
 
     /** Animation for target that is closing in a change transition. */
+    @NonNull
     Animation createChangeBoundsCloseAnimation(@NonNull RemoteAnimationTarget target) {
         final Rect bounds = target.localBounds;
         // The target will be animated out to left or right depends on its position.
@@ -121,6 +122,7 @@ class TaskFragmentAnimationSpec {
      * @return the return array always has two elements. The first one is for the start leash, and
      *         the second one is for the end leash.
      */
+    @NonNull
     Animation[] createChangeBoundsChangeAnimations(@NonNull RemoteAnimationTarget target) {
         // Both start bounds and end bounds are in screen coordinates. We will post translate
         // to the local coordinates in TaskFragmentAnimationAdapter#onAnimationUpdate
@@ -177,28 +179,58 @@ class TaskFragmentAnimationSpec {
         return new Animation[]{startSet, endSet};
     }
 
+    @NonNull
     Animation loadOpenAnimation(@NonNull RemoteAnimationTarget target,
             @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = target.mode != MODE_CLOSING;
-        final Animation animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
-                ? com.android.internal.R.anim.task_fragment_open_enter
-                : com.android.internal.R.anim.task_fragment_open_exit);
-        animation.initialize(target.localBounds.width(), target.localBounds.height(),
+        final Animation animation;
+        // Background color on TaskDisplayArea has already been set earlier in
+        // WindowContainer#getAnimationAdapter.
+        if (target.showBackdrop) {
+            animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
+                    ? com.android.internal.R.anim.task_fragment_clear_top_open_enter
+                    : com.android.internal.R.anim.task_fragment_clear_top_open_exit);
+        } else {
+            animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
+                    ? com.android.internal.R.anim.task_fragment_open_enter
+                    : com.android.internal.R.anim.task_fragment_open_exit);
+        }
+        // Use the whole animation bounds instead of the change bounds, so that when multiple change
+        // targets are opening at the same time, the animation applied to each will be the same.
+        // Otherwise, we may see gap between the activities that are launching together.
+        animation.initialize(wholeAnimationBounds.width(), wholeAnimationBounds.height(),
                 wholeAnimationBounds.width(), wholeAnimationBounds.height());
         animation.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         return animation;
     }
 
+    @NonNull
     Animation loadCloseAnimation(@NonNull RemoteAnimationTarget target,
             @NonNull Rect wholeAnimationBounds) {
         final boolean isEnter = target.mode != MODE_CLOSING;
-        final Animation animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
-                ? com.android.internal.R.anim.task_fragment_close_enter
-                : com.android.internal.R.anim.task_fragment_close_exit);
-        animation.initialize(target.localBounds.width(), target.localBounds.height(),
+        final Animation animation;
+        if (target.showBackdrop) {
+            animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
+                    ? com.android.internal.R.anim.task_fragment_clear_top_close_enter
+                    : com.android.internal.R.anim.task_fragment_clear_top_close_exit);
+        } else {
+            animation = mTransitionAnimation.loadDefaultAnimationRes(isEnter
+                    ? com.android.internal.R.anim.task_fragment_close_enter
+                    : com.android.internal.R.anim.task_fragment_close_exit);
+        }
+        // Use the whole animation bounds instead of the change bounds, so that when multiple change
+        // targets are closing at the same time, the animation applied to each will be the same.
+        // Otherwise, we may see gap between the activities that are finishing together.
+        animation.initialize(wholeAnimationBounds.width(), wholeAnimationBounds.height(),
                 wholeAnimationBounds.width(), wholeAnimationBounds.height());
         animation.scaleCurrentDuration(mTransitionAnimationScaleSetting);
         return animation;
+    }
+
+    private float getTransitionAnimationScaleSetting() {
+        return WindowManager.fixScale(Settings.Global.getFloat(mContext.getContentResolver(),
+                Settings.Global.TRANSITION_ANIMATION_SCALE, mContext.getResources().getFloat(
+                                R.dimen.config_appTransitionAnimationDurationScaleDefault)));
     }
 
     private class SettingsObserver extends ContentObserver {
@@ -208,9 +240,7 @@ class TaskFragmentAnimationSpec {
 
         @Override
         public void onChange(boolean selfChange) {
-            mTransitionAnimationScaleSetting = Settings.Global.getFloat(
-                    mContext.getContentResolver(), Settings.Global.TRANSITION_ANIMATION_SCALE,
-                    mTransitionAnimationScaleSetting);
+            mTransitionAnimationScaleSetting = getTransitionAnimationScaleSetting();
         }
     }
 }

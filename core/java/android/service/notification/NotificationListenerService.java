@@ -256,6 +256,8 @@ public abstract class NotificationListenerService extends Service {
     public static final int REASON_CHANNEL_REMOVED = 20;
     /** Notification was canceled due to the app's storage being cleared */
     public static final int REASON_CLEAR_DATA = 21;
+    /** Notification was canceled due to an assistant adjustment update. */
+    public static final int REASON_ASSISTANT_CANCEL = 22;
 
     /**
      * @hide
@@ -279,7 +281,10 @@ public abstract class NotificationListenerService extends Service {
             REASON_UNAUTOBUNDLED,
             REASON_CHANNEL_BANNED,
             REASON_SNOOZED,
-            REASON_TIMEOUT
+            REASON_TIMEOUT,
+            REASON_CHANNEL_REMOVED,
+            REASON_CLEAR_DATA,
+            REASON_ASSISTANT_CANCEL,
     })
     public @interface NotificationCancelReason{};
 
@@ -1763,7 +1768,7 @@ public abstract class NotificationListenerService extends Service {
             mImportanceExplanation = in.readCharSequence(); // may be null
             mRankingScore = in.readFloat();
             mOverrideGroupKey = in.readString(); // may be null
-            mChannel = in.readParcelable(cl); // may be null
+            mChannel = in.readParcelable(cl, android.app.NotificationChannel.class); // may be null
             mOverridePeople = in.createStringArrayList();
             mSnoozeCriteria = in.createTypedArrayList(SnoozeCriterion.CREATOR);
             mShowBadge = in.readBoolean();
@@ -1776,7 +1781,7 @@ public abstract class NotificationListenerService extends Service {
             mCanBubble = in.readBoolean();
             mIsTextChanged = in.readBoolean();
             mIsConversation = in.readBoolean();
-            mShortcutInfo = in.readParcelable(cl);
+            mShortcutInfo = in.readParcelable(cl, android.content.pm.ShortcutInfo.class);
             mRankingAdjustment = in.readInt();
             mIsBubble = in.readBoolean();
         }

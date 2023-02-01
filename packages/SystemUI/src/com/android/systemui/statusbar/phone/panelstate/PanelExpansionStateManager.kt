@@ -20,6 +20,7 @@ import android.annotation.IntDef
 import android.util.Log
 import androidx.annotation.FloatRange
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 /**
@@ -37,6 +38,7 @@ class PanelExpansionStateManager @Inject constructor() {
     @FloatRange(from = 0.0, to = 1.0) private var fraction: Float = 0f
     private var expanded: Boolean = false
     private var tracking: Boolean = false
+    private var dragDownPxAmount: Float = 0f
 
     /**
      * Adds a listener that will be notified when the panel expansion fraction has changed.
@@ -45,7 +47,8 @@ class PanelExpansionStateManager @Inject constructor() {
      */
     fun addExpansionListener(listener: PanelExpansionListener) {
         expansionListeners.add(listener)
-        listener.onPanelExpansionChanged(fraction, expanded, tracking)
+        listener.onPanelExpansionChanged(
+            PanelExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount))
     }
 
     /** Removes an expansion listener. */
@@ -77,7 +80,8 @@ class PanelExpansionStateManager @Inject constructor() {
     fun onPanelExpansionChanged(
         @FloatRange(from = 0.0, to = 1.0) fraction: Float,
         expanded: Boolean,
-        tracking: Boolean
+        tracking: Boolean,
+        dragDownPxAmount: Float
     ) {
         require(!fraction.isNaN()) { "fraction cannot be NaN" }
         val oldState = state
@@ -85,6 +89,7 @@ class PanelExpansionStateManager @Inject constructor() {
         this.fraction = fraction
         this.expanded = expanded
         this.tracking = tracking
+        this.dragDownPxAmount = dragDownPxAmount
 
         var fullyClosed = true
         var fullyOpened = false
@@ -105,28 +110,32 @@ class PanelExpansionStateManager @Inject constructor() {
 
         debugLog(
             "panelExpansionChanged:" +
-                    "start state=${oldState.stateToString()} " +
-                    "end state=${state.stateToString()} " +
+                    "start state=${oldState.panelStateToString()} " +
+                    "end state=${state.panelStateToString()} " +
                     "f=$fraction " +
                     "expanded=$expanded " +
-                    "tracking=$tracking" +
+                    "tracking=$tracking " +
+                    "dragDownPxAmount=$dragDownPxAmount " +
                     "${if (fullyOpened) " fullyOpened" else ""} " +
                     if (fullyClosed) " fullyClosed" else ""
         )
 
-        expansionListeners.forEach { it.onPanelExpansionChanged(fraction, expanded, tracking) }
+        val expansionChangeEvent =
+            PanelExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
+        expansionListeners.forEach { it.onPanelExpansionChanged(expansionChangeEvent) }
     }
 
-    /** Updates the panel state if necessary.  */
+    /** Updates the panel state if necessary. */
     fun updateState(@PanelState state: Int) {
-        debugLog("update state: ${this.state.stateToString()} -> ${state.stateToString()}")
+        debugLog(
+            "update state: ${this.state.panelStateToString()} -> ${state.panelStateToString()}")
         if (this.state != state) {
             updateStateInternal(state)
         }
     }
 
     private fun updateStateInternal(@PanelState state: Int) {
-        debugLog("go state: ${this.state.stateToString()} -> ${state.stateToString()}")
+        debugLog("go state: ${this.state.panelStateToString()} -> ${state.panelStateToString()}")
         this.state = state
         stateListeners.forEach { it.onPanelStateChanged(state) }
     }
@@ -137,7 +146,7 @@ class PanelExpansionStateManager @Inject constructor() {
     }
 }
 
-/** Enum for the current state of the panel.  */
+/** Enum for the current state of the panel. */
 @Retention(AnnotationRetention.SOURCE)
 @IntDef(value = [STATE_CLOSED, STATE_OPENING, STATE_OPEN])
 internal annotation class PanelState
@@ -147,7 +156,7 @@ const val STATE_OPENING = 1
 const val STATE_OPEN = 2
 
 @PanelState
-private fun Int.stateToString(): String {
+fun Int.panelStateToString(): String {
     return when (this) {
         STATE_CLOSED -> "CLOSED"
         STATE_OPENING -> "OPENING"
@@ -156,5 +165,5 @@ private fun Int.stateToString(): String {
     }
 }
 
-private const val DEBUG = false
 private val TAG = PanelExpansionStateManager::class.simpleName
+private val DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG)

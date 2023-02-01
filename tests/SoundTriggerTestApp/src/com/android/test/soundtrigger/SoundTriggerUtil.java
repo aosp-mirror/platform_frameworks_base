@@ -18,6 +18,8 @@ package com.android.test.soundtrigger;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
+import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.media.soundtrigger.SoundTriggerDetector;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.os.RemoteException;
@@ -27,6 +29,7 @@ import android.util.Log;
 
 import com.android.internal.app.ISoundTriggerService;
 
+import java.lang.reflect.Method;
 import java.lang.RuntimeException;
 import java.util.UUID;
 
@@ -50,13 +53,31 @@ public class SoundTriggerUtil {
      * The sound model must contain a valid UUID.
      *
      * @param soundModel The sound model to add/update.
+     * @return The true if the model was loaded successfully, false otherwise.
      */
     public boolean addOrUpdateSoundModel(SoundTriggerManager.Model soundModel) {
         if (soundModel == null) {
             throw new RuntimeException("Bad sound model");
         }
         mSoundTriggerManager.updateModel(soundModel);
-        return true;
+        // TODO: call loadSoundModel in the soundtrigger manager updateModel method
+        // instead of here. It is needed to keep soundtrigger manager internal
+        // state consistent.
+        return mSoundTriggerManager
+                .loadSoundModel(getGenericSoundModel(soundModel)) == 0;
+    }
+
+    private GenericSoundModel getGenericSoundModel(
+        SoundTriggerManager.Model soundModel) {
+        try {
+            Method method = SoundTriggerManager.Model.class
+                            .getDeclaredMethod("getGenericSoundModel");
+            method.setAccessible(true);
+            return (GenericSoundModel) method.invoke(soundModel);
+        } catch (ReflectiveOperationException e) {
+            Log.e(TAG, "Failed to getGenericSoundModel: " + soundModel, e);
+            return null;
+        }
     }
 
     /**
@@ -90,6 +111,16 @@ public class SoundTriggerUtil {
     public boolean deleteSoundModel(UUID modelId) {
         mSoundTriggerManager.deleteModel(modelId);
         return true;
+    }
+
+    /**
+     * Get the current model state
+     *
+     * @param modelId The model ID to look-up the sound model for.
+     * @return 0 if the call succeeds, or an error code if it fails.
+     */
+    public int getModelState(UUID modelId) {
+        return mSoundTriggerManager.getModelState(modelId);
     }
 
     public SoundTriggerDetector createSoundTriggerDetector(UUID modelId,

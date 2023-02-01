@@ -145,6 +145,8 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
         }
 
         mDisplayAreasInfo.remove(displayId);
+        mLeashes.get(displayId).release();
+        mLeashes.remove(displayId);
 
         ArrayList<RootTaskDisplayAreaListener> listeners = mListeners.get(displayId);
         if (listeners != null) {
@@ -174,6 +176,14 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
             }
         }
         applyConfigChangesToContext(displayAreaInfo);
+    }
+
+    /**
+     * Returns the {@link DisplayAreaInfo} of the {@link DisplayAreaInfo#displayId}.
+     */
+    @Nullable
+    public DisplayAreaInfo getDisplayAreaInfo(int displayId) {
+        return mDisplayAreasInfo.get(displayId);
     }
 
     /**

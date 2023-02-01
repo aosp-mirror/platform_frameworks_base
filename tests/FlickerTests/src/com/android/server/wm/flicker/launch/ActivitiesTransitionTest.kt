@@ -18,6 +18,7 @@ package com.android.server.wm.flicker.launch
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import android.view.Display
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.entireScreenCovered
@@ -26,12 +27,13 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.LAUNCHER_COMPONENT
-import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.TwoActivitiesAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import com.android.server.wm.traces.parser.toFlickerComponent
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,7 +62,7 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
 class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
-    val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp: TwoActivitiesAppHelper = TwoActivitiesAppHelper(instrumentation)
 
     /**
@@ -70,24 +72,24 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withTestName { testSpec.name }
-            repeat { testSpec.config.repetitions }
             setup {
-                eachRun {
+                test {
                     testApp.launchViaIntent(wmHelper)
                     wmHelper.waitForFullScreenApp(testApp.component)
                 }
             }
             teardown {
                 test {
-                    testApp.exit()
+                    testApp.exit(wmHelper)
                 }
             }
             transitions {
                 testApp.openSecondActivity(device, wmHelper)
                 device.pressBack()
-                wmHelper.waitForAppTransitionIdle()
-                wmHelper.waitForFullScreenApp(testApp.component)
+                val firstActivityVisible = wmHelper.waitFor(
+                    WindowManagerConditionsFactory.isAppTransitionIdle(Display.DEFAULT_DISPLAY),
+                    WindowManagerStateHelper.isAppFullScreen(testApp.component))
+                require(firstActivityVisible) { "Expected ${testApp.component} to be visible" }
             }
         }
     }
@@ -155,7 +157,7 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                    .getConfigNonRotationTests(repetitions = 5)
+                    .getConfigNonRotationTests(repetitions = 3)
         }
     }
 }

@@ -291,6 +291,14 @@ public final class Rect implements Parcelable {
     }
 
     /**
+     * @return {@code true} if the rectangle is valid (left <= right and top <= bottom).
+     * @hide
+     */
+    public boolean isValid() {
+        return left <= right && top <= bottom;
+    }
+
+    /**
      * @return the rectangle's width. This does not check for a valid rectangle
      * (i.e. left <= right) so the result may be negative.
      */

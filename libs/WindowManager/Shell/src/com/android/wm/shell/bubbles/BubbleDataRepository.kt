@@ -22,8 +22,10 @@ import android.content.pm.LauncherApps
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_CACHED
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC
 import android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED_BY_ANY_LAUNCHER
+import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.util.Log
+import com.android.wm.shell.bubbles.Bubbles.BubbleMetadataFlagListener
 import com.android.wm.shell.bubbles.storage.BubbleEntity
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.bubbles.storage.BubbleVolatileRepository
@@ -45,6 +47,13 @@ internal class BubbleDataRepository(
 
     private val ioScope = CoroutineScope(Dispatchers.IO)
     private var job: Job? = null
+
+    // For use in Bubble construction.
+    private lateinit var bubbleMetadataFlagListener: BubbleMetadataFlagListener
+
+    fun setSuppressionChangedListener(listener: BubbleMetadataFlagListener) {
+        bubbleMetadataFlagListener = listener
+    }
 
     /**
      * Adds the bubble in memory, then persists the snapshot after adding the bubble to disk
@@ -71,6 +80,22 @@ internal class BubbleDataRepository(
         val entities = transform(bubbles).also {
             b -> volatileRepository.removeBubbles(userId, b) }
         if (entities.isNotEmpty()) persistToDisk()
+    }
+
+    /**
+     * Removes all the bubbles associated with the provided user from memory. Then persists the
+     * snapshot to disk asynchronously.
+     */
+    fun removeBubblesForUser(@UserIdInt userId: Int, @UserIdInt parentId: Int) {
+        if (volatileRepository.removeBubblesForUser(userId, parentId)) persistToDisk()
+    }
+
+    /**
+     * Remove any bubbles that don't have a user id from the provided list of users.
+     */
+    fun sanitizeBubbles(users: List<UserInfo>) {
+        val userIds = users.map { u -> u.id }
+        if (volatileRepository.sanitizeBubbles(userIds)) persistToDisk()
     }
 
     private fun transform(bubbles: List<Bubble>): List<BubbleEntity> {
@@ -180,7 +205,8 @@ internal class BubbleDataRepository(
                                 entity.title,
                                 entity.taskId,
                                 entity.locus,
-                                mainExecutor
+                                mainExecutor,
+                                bubbleMetadataFlagListener
                         )
                     }
         }

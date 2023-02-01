@@ -16,14 +16,16 @@
 
 package com.android.systemui.statusbar.notification.collection
 
+import android.app.Notification
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
-import com.android.systemui.statusbar.phone.StatusBar
+import com.android.systemui.statusbar.phone.CentralSurfaces
 import javax.inject.Inject
 
 @SysUISingleton
@@ -39,16 +41,27 @@ class TargetSdkResolver @Inject constructor(
     }
 
     private fun resolveNotificationSdk(sbn: StatusBarNotification): Int {
-        val pmUser = StatusBar.getPackageManagerForUser(context, sbn.user.identifier)
-        var targetSdk = 0
-        // Extract target SDK version.
-        try {
-            val info = pmUser.getApplicationInfo(sbn.packageName, 0)
-            targetSdk = info.targetSdkVersion
+        val applicationInfo = getApplicationInfoFromExtras(sbn.notification)
+                ?: getApplicationInfoFromPackageManager(sbn)
+
+        return applicationInfo?.targetSdkVersion ?: 0
+    }
+
+    private fun getApplicationInfoFromExtras(notification: Notification): ApplicationInfo? =
+            notification.extras.getParcelable(
+                    Notification.EXTRA_BUILDER_APPLICATION_INFO,
+                    ApplicationInfo::class.java
+            )
+
+    private fun getApplicationInfoFromPackageManager(sbn: StatusBarNotification): ApplicationInfo? {
+        val pmUser = CentralSurfaces.getPackageManagerForUser(context, sbn.user.identifier)
+
+        return try {
+            pmUser.getApplicationInfo(sbn.packageName, 0)
         } catch (ex: PackageManager.NameNotFoundException) {
             Log.e(TAG, "Failed looking up ApplicationInfo for " + sbn.packageName, ex)
+            null
         }
-        return targetSdk
     }
 
     private val TAG = "TargetSdkResolver"

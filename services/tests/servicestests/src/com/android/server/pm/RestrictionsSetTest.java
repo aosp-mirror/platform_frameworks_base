@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -37,6 +38,7 @@ import org.junit.runner.RunWith;
 import java.util.List;
 
 /** Test for {@link RestrictionsSet}. */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class RestrictionsSetTest {
 

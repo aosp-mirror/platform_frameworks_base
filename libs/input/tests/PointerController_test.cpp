@@ -56,9 +56,11 @@ public:
             std::map<int32_t, PointerAnimation>* outAnimationResources, int32_t displayId) override;
     virtual int32_t getDefaultPointerIconId() override;
     virtual int32_t getCustomPointerIconId() override;
+    virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos) override;
 
     bool allResourcesAreLoaded();
     bool noResourcesAreLoaded();
+    std::optional<int32_t> getLastReportedPointerDisplayId() { return latestPointerDisplayId; }
 
 private:
     void loadPointerIconForType(SpriteIcon* icon, int32_t cursorType);
@@ -66,6 +68,7 @@ private:
     bool pointerIconLoaded{false};
     bool pointerResourcesLoaded{false};
     bool additionalMouseResourcesLoaded{false};
+    std::optional<int32_t /*displayId*/> latestPointerDisplayId;
 };
 
 void MockPointerControllerPolicyInterface::loadPointerIcon(SpriteIcon* icon, int32_t) {
@@ -126,12 +129,19 @@ void MockPointerControllerPolicyInterface::loadPointerIconForType(SpriteIcon* ic
     icon->hotSpotX = hotSpot.first;
     icon->hotSpotY = hotSpot.second;
 }
+
+void MockPointerControllerPolicyInterface::onPointerDisplayIdChanged(int32_t displayId,
+                                                                     float /*xPos*/,
+                                                                     float /*yPos*/) {
+    latestPointerDisplayId = displayId;
+}
+
 class PointerControllerTest : public Test {
 protected:
     PointerControllerTest();
     ~PointerControllerTest();
 
-    void ensureDisplayViewportIsSet();
+    void ensureDisplayViewportIsSet(int32_t displayId = ADISPLAY_ID_DEFAULT);
 
     sp<MockSprite> mPointerSprite;
     sp<MockPointerControllerPolicyInterface> mPolicy;
@@ -168,9 +178,9 @@ PointerControllerTest::~PointerControllerTest() {
     mThread.join();
 }
 
-void PointerControllerTest::ensureDisplayViewportIsSet() {
+void PointerControllerTest::ensureDisplayViewportIsSet(int32_t displayId) {
     DisplayViewport viewport;
-    viewport.displayId = ADISPLAY_ID_DEFAULT;
+    viewport.displayId = displayId;
     viewport.logicalRight = 1600;
     viewport.logicalBottom = 1200;
     viewport.physicalRight = 800;
@@ -253,6 +263,62 @@ TEST_F(PointerControllerTest, doesNotGetResourcesBeforeSettingViewport) {
     EXPECT_TRUE(mPolicy->noResourcesAreLoaded());
 
     ensureDisplayViewportIsSet();
+}
+
+TEST_F(PointerControllerTest, notifiesPolicyWhenPointerDisplayChanges) {
+    EXPECT_FALSE(mPolicy->getLastReportedPointerDisplayId())
+            << "A pointer display change does not occur when PointerController is created.";
+
+    ensureDisplayViewportIsSet(ADISPLAY_ID_DEFAULT);
+
+    const auto lastReportedPointerDisplayId = mPolicy->getLastReportedPointerDisplayId();
+    ASSERT_TRUE(lastReportedPointerDisplayId)
+            << "The policy is notified of a pointer display change when the viewport is first set.";
+    EXPECT_EQ(ADISPLAY_ID_DEFAULT, *lastReportedPointerDisplayId)
+            << "Incorrect pointer display notified.";
+
+    ensureDisplayViewportIsSet(42);
+
+    EXPECT_EQ(42, *mPolicy->getLastReportedPointerDisplayId())
+            << "The policy is notified when the pointer display changes.";
+
+    // Release the PointerController.
+    mPointerController = nullptr;
+
+    EXPECT_EQ(ADISPLAY_ID_NONE, *mPolicy->getLastReportedPointerDisplayId())
+            << "The pointer display changes to invalid when PointerController is destroyed.";
+}
+
+class PointerControllerWindowInfoListenerTest : public Test {};
+
+class TestPointerController : public PointerController {
+public:
+    TestPointerController(sp<android::gui::WindowInfosListener>& registeredListener,
+                          const sp<Looper>& looper)
+          : PointerController(
+                    new MockPointerControllerPolicyInterface(), looper,
+                    new NiceMock<MockSpriteController>(looper),
+                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
+                        // Register listener
+                        registeredListener = listener;
+                    },
+                    [&registeredListener](const sp<android::gui::WindowInfosListener>& listener) {
+                        // Unregister listener
+                        if (registeredListener == listener) registeredListener = nullptr;
+                    }) {}
+};
+
+TEST_F(PointerControllerWindowInfoListenerTest,
+       doesNotCrashIfListenerCalledAfterPointerControllerDestroyed) {
+    sp<android::gui::WindowInfosListener> registeredListener;
+    sp<android::gui::WindowInfosListener> localListenerCopy;
+    {
+        TestPointerController pointerController(registeredListener, new Looper(false));
+        ASSERT_NE(nullptr, registeredListener) << "WindowInfosListener was not registered";
+        localListenerCopy = registeredListener;
+    }
+    EXPECT_EQ(nullptr, registeredListener) << "WindowInfosListener was not unregistered";
+    localListenerCopy->onWindowInfosChanged({}, {});
 }
 
 }  // namespace android

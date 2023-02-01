@@ -23,7 +23,8 @@ data class LogMessageImpl(
     override var level: LogLevel,
     override var tag: String,
     override var timestamp: Long,
-    override var printer: LogMessage.() -> String,
+    override var messagePrinter: MessagePrinter,
+    override var exception: Throwable?,
     override var str1: String?,
     override var str2: String?,
     override var str3: String?,
@@ -35,19 +36,21 @@ data class LogMessageImpl(
     override var bool1: Boolean,
     override var bool2: Boolean,
     override var bool3: Boolean,
-    override var bool4: Boolean
+    override var bool4: Boolean,
 ) : LogMessage {
 
     fun reset(
         tag: String,
         level: LogLevel,
         timestamp: Long,
-        renderer: LogMessage.() -> String
+        renderer: MessagePrinter,
+        exception: Throwable? = null,
     ) {
         this.level = level
         this.tag = tag
         this.timestamp = timestamp
-        this.printer = renderer
+        this.messagePrinter = renderer
+        this.exception = exception
         str1 = null
         str2 = null
         str3 = null
@@ -68,7 +71,8 @@ data class LogMessageImpl(
                     LogLevel.DEBUG,
                     DEFAULT_TAG,
                     0,
-                    DEFAULT_RENDERER,
+                    DEFAULT_PRINTER,
+                    null,
                     null,
                     null,
                     null,
@@ -86,4 +90,4 @@ data class LogMessageImpl(
 }
 
 private const val DEFAULT_TAG = "UnknownTag"
-private val DEFAULT_RENDERER: LogMessage.() -> String = { "Unknown message: $this" }
+private val DEFAULT_PRINTER: MessagePrinter = { "Unknown message: $this" }

@@ -54,7 +54,7 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.util.concurrency.DelayableExecutor
-import kotlin.reflect.KClass
+import java.util.function.Supplier
 
 /**
  * Wraps the widgets that make up the UI representation of a {@link Control}. Updates to the view
@@ -90,20 +90,20 @@ class ControlViewHolder(
             status: Int,
             template: ControlTemplate,
             deviceType: Int
-        ): KClass<out Behavior> {
+        ): Supplier<out Behavior> {
             return when {
-                status != Control.STATUS_OK -> StatusBehavior::class
-                template == ControlTemplate.NO_TEMPLATE -> TouchBehavior::class
-                template is ThumbnailTemplate -> ThumbnailBehavior::class
+                status != Control.STATUS_OK -> Supplier { StatusBehavior() }
+                template == ControlTemplate.NO_TEMPLATE -> Supplier { TouchBehavior() }
+                template is ThumbnailTemplate -> Supplier { ThumbnailBehavior() }
 
                 // Required for legacy support, or where cameras do not use the new template
-                deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
-                template is ToggleTemplate -> ToggleBehavior::class
-                template is StatelessTemplate -> TouchBehavior::class
-                template is ToggleRangeTemplate -> ToggleRangeBehavior::class
-                template is RangeTemplate -> ToggleRangeBehavior::class
-                template is TemperatureControlTemplate -> TemperatureControlBehavior::class
-                else -> DefaultBehavior::class
+                deviceType == DeviceTypes.TYPE_CAMERA -> Supplier { TouchBehavior() }
+                template is ToggleTemplate -> Supplier { ToggleBehavior() }
+                template is StatelessTemplate -> Supplier { TouchBehavior() }
+                template is ToggleRangeTemplate -> Supplier { ToggleRangeBehavior() }
+                template is RangeTemplate -> Supplier { ToggleRangeBehavior() }
+                template is TemperatureControlTemplate -> Supplier { TemperatureControlBehavior() }
+                else -> Supplier { DefaultBehavior() }
             }
         }
     }
@@ -118,6 +118,7 @@ class ControlViewHolder(
     private var nextStatusText: CharSequence = ""
     val title: TextView = layout.requireViewById(R.id.title)
     val subtitle: TextView = layout.requireViewById(R.id.subtitle)
+    val chevronIcon: ImageView = layout.requireViewById(R.id.chevron_icon)
     val context: Context = layout.getContext()
     val clipLayer: ClipDrawable
     lateinit var cws: ControlWithState
@@ -163,6 +164,7 @@ class ControlViewHolder(
             cws.control?.let {
                 title.setText(it.title)
                 subtitle.setText(it.subtitle)
+                chevronIcon.visibility = if (usePanel()) View.VISIBLE else View.INVISIBLE
             }
         }
 
@@ -251,13 +253,14 @@ class ControlViewHolder(
 
     fun bindBehavior(
         existingBehavior: Behavior?,
-        clazz: KClass<out Behavior>,
+        supplier: Supplier<out Behavior>,
         offset: Int = 0
     ): Behavior {
-        val behavior = if (existingBehavior == null || existingBehavior!!::class != clazz) {
+        val newBehavior = supplier.get()
+        val behavior = if (existingBehavior == null ||
+                existingBehavior::class != newBehavior::class) {
             // Behavior changes can signal a change in template from the app or
             // first time setup
-            val newBehavior = clazz.java.newInstance()
             newBehavior.initialize(this)
 
             // let behaviors define their own, if necessary, and clear any existing ones
@@ -491,10 +494,13 @@ class ControlViewHolder(
                 icon.imageTintList = color
             }
         }
+
+        chevronIcon.imageTintList = icon.imageTintList
     }
 
     private fun setEnabled(enabled: Boolean) {
-        status.setEnabled(enabled)
-        icon.setEnabled(enabled)
+        status.isEnabled = enabled
+        icon.isEnabled = enabled
+        chevronIcon.isEnabled = enabled
     }
 }

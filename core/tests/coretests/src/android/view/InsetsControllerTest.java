@@ -30,6 +30,7 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.LAST_TYPE;
+import static android.view.ViewRootImpl.CAPTION_ON_SHELL;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
@@ -213,21 +214,40 @@ public class InsetsControllerTest {
     }
 
     @Test
-    public void testFrameDoesntMatchDisplay() {
-        mController.onFrameChanged(new Rect(0, 0, 100, 100));
-        mController.getState().setDisplayFrame(new Rect(0, 0, 200, 200));
-        InsetsSourceControl control =
-                new InsetsSourceControl(
-                        ITYPE_STATUS_BAR, mLeash, new Point(), Insets.of(0, 10, 0, 0));
-        mController.onControlsChanged(new InsetsSourceControl[] { control });
+    public void testFrameDoesntOverlapWithInsets() {
         WindowInsetsAnimationControlListener controlListener =
                 mock(WindowInsetsAnimationControlListener.class);
-        mController.controlWindowInsetsAnimation(0, 0 /* durationMs */, new LinearInterpolator(),
-                new CancellationSignal(), controlListener);
-        mController.addOnControllableInsetsChangedListener(
-                (controller, typeMask) -> assertEquals(0, typeMask));
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            //  The frame doesn't overlap with status bar.
+            mController.onFrameChanged(new Rect(0, 10, 100, 100));
+
+            InsetsSourceControl control =
+                    new InsetsSourceControl(
+                            ITYPE_STATUS_BAR, mLeash, true, new Point(), Insets.of(0, 10, 0, 0));
+            mController.onControlsChanged(new InsetsSourceControl[]{control});
+            mController.controlWindowInsetsAnimation(0, 0 /* durationMs */,
+                    new LinearInterpolator(),
+                    new CancellationSignal(), controlListener);
+            mController.addOnControllableInsetsChangedListener(
+                    (controller, typeMask) -> assertEquals(0, typeMask));
+        });
         verify(controlListener).onCancelled(null);
         verify(controlListener, never()).onReady(any(), anyInt());
+    }
+
+    @Test
+    public void testSystemDrivenInsetsAnimationLoggingListener_onReady() {
+        prepareControls();
+        // only the original thread that created view hierarchy can touch its views
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            WindowInsetsAnimationControlListener loggingListener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.setSystemDrivenInsetsAnimationLoggingListener(loggingListener);
+            mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained(true);
+            // since there is no focused view, forcefully make IME visible.
+            mController.show(Type.ime(), true /* fromIme */);
+            verify(loggingListener).onReady(notNull(), anyInt());
+        });
     }
 
     @Test
@@ -758,6 +778,11 @@ public class InsetsControllerTest {
 
     @Test
     public void testCaptionInsetsStateAssemble() {
+        if (CAPTION_ON_SHELL) {
+            // For this case, the test is covered by WindowContainerInsetsSourceProviderTest, This
+            // test can be removed after the caption is moved to shell completely.
+            return;
+        }
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.onFrameChanged(new Rect(0, 0, 100, 300));
             final InsetsState state = new InsetsState(mController.getState(), true);
@@ -769,6 +794,7 @@ public class InsetsControllerTest {
             assertEquals(captionFrame, currentState.peekSource(ITYPE_CAPTION_BAR).getFrame());
             assertTrue(currentState.equals(state, true /* excludingCaptionInsets*/,
                     true /* excludeInvisibleIme */));
+            // Test update to remove the caption bar
             mController.setCaptionInsetsHeight(0);
             mController.onStateChanged(state);
             // The caption bar source should not be there at all, because we don't add empty
@@ -779,6 +805,11 @@ public class InsetsControllerTest {
 
     @Test
     public void testNotifyCaptionInsetsOnlyChange() {
+        if (CAPTION_ON_SHELL) {
+            // For this case, the test is covered by WindowContainerInsetsSourceProviderTest, This
+            // test can be removed after the caption is moved to shell completely.
+            return;
+        }
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             final InsetsState state = new InsetsState(mController.getState(), true);
             reset(mTestHost);
@@ -910,7 +941,8 @@ public class InsetsControllerTest {
         // Simulate binder behavior by copying SurfaceControl. Otherwise, InsetsController will
         // attempt to release mLeash directly.
         SurfaceControl copy = new SurfaceControl(mLeash, "InsetsControllerTest.createControl");
-        return new InsetsSourceControl(type, copy, new Point(), Insets.NONE);
+        return new InsetsSourceControl(type, copy, InsetsState.getDefaultVisibility(type),
+                new Point(), Insets.NONE);
     }
 
     private InsetsSourceControl[] createSingletonControl(@InternalInsetsType int type) {

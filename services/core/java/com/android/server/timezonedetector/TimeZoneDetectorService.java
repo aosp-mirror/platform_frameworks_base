@@ -45,6 +45,8 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -59,6 +61,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         implements IBinder.DeathRecipient {
 
     static final String TAG = "time_zone_detector";
+    static final boolean DBG = false;
 
     /**
      * Handles the service lifecycle for {@link TimeZoneDetectorService} and
@@ -77,9 +80,19 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             Handler handler = FgThread.getHandler();
 
             ServiceConfigAccessor serviceConfigAccessor =
-                    ServiceConfigAccessor.getInstance(context);
+                    ServiceConfigAccessorImpl.getInstance(context);
             TimeZoneDetectorStrategy timeZoneDetectorStrategy =
                     TimeZoneDetectorStrategyImpl.create(context, handler, serviceConfigAccessor);
+            DeviceActivityMonitor deviceActivityMonitor =
+                    DeviceActivityMonitorImpl.create(context, handler);
+
+            // Wire up the telephony fallback behavior to activity detection.
+            deviceActivityMonitor.addListener(new DeviceActivityMonitor.Listener() {
+                @Override
+                public void onFlightComplete() {
+                    timeZoneDetectorStrategy.enableTelephonyTimeZoneFallback();
+                }
+            });
 
             // Create and publish the local service for use by internal callers.
             TimeZoneDetectorInternal internal =
@@ -89,7 +102,11 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             // Publish the binder service so it can be accessed from other (appropriately
             // permissioned) processes.
             TimeZoneDetectorService service = TimeZoneDetectorService.create(
-                    context, handler, timeZoneDetectorStrategy);
+                    context, handler, serviceConfigAccessor, timeZoneDetectorStrategy);
+
+            // Dump the device activity monitor when the service is dumped.
+            service.addDumpable(deviceActivityMonitor);
+
             publishBinderService(Context.TIME_ZONE_DETECTOR_SERVICE, service);
         }
     }
@@ -104,6 +121,9 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     private final CallerIdentityInjector mCallerIdentityInjector;
 
     @NonNull
+    private final ServiceConfigAccessor mServiceConfigAccessor;
+
+    @NonNull
     private final TimeZoneDetectorStrategy mTimeZoneDetectorStrategy;
 
     /**
@@ -112,31 +132,40 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
      */
     @GuardedBy("mListeners")
     @NonNull
-    private final ArrayMap<IBinder, ITimeZoneDetectorListener> mListeners =
-            new ArrayMap<>();
+    private final ArrayMap<IBinder, ITimeZoneDetectorListener> mListeners = new ArrayMap<>();
+
+    /**
+     * References to components that should be dumped when {@link
+     * #dump(FileDescriptor, PrintWriter, String[])} is called on the service.
+     */
+    @GuardedBy("mDumpables")
+    private final List<Dumpable> mDumpables = new ArrayList<>();
 
     private static TimeZoneDetectorService create(
             @NonNull Context context, @NonNull Handler handler,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeZoneDetectorStrategy timeZoneDetectorStrategy) {
 
         CallerIdentityInjector callerIdentityInjector = CallerIdentityInjector.REAL;
-        TimeZoneDetectorService service = new TimeZoneDetectorService(
-                context, handler, callerIdentityInjector, timeZoneDetectorStrategy);
-        return service;
+        return new TimeZoneDetectorService(context, handler, callerIdentityInjector,
+                serviceConfigAccessor, timeZoneDetectorStrategy);
     }
 
     @VisibleForTesting
     public TimeZoneDetectorService(@NonNull Context context, @NonNull Handler handler,
             @NonNull CallerIdentityInjector callerIdentityInjector,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeZoneDetectorStrategy timeZoneDetectorStrategy) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
         mCallerIdentityInjector = Objects.requireNonNull(callerIdentityInjector);
+        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeZoneDetectorStrategy = Objects.requireNonNull(timeZoneDetectorStrategy);
 
         // Wire up a change listener so that ITimeZoneDetectorListeners can be notified when
         // the configuration changes for any reason.
-        mTimeZoneDetectorStrategy.addConfigChangeListener(this::handleConfigurationChanged);
+        mServiceConfigAccessor.addConfigurationInternalChangeListener(
+                () -> mHandler.post(this::handleConfigurationInternalChangedOnHandlerThread));
     }
 
     @Override
@@ -152,7 +181,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             ConfigurationInternal configurationInternal =
-                    mTimeZoneDetectorStrategy.getConfigurationInternal(userId);
+                    mServiceConfigAccessor.getConfigurationInternal(userId);
             return configurationInternal.createCapabilitiesAndConfig();
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
@@ -176,7 +205,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            return mTimeZoneDetectorStrategy.updateConfiguration(userId, configuration);
+            return mServiceConfigAccessor.updateConfiguration(userId, configuration);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
@@ -251,12 +280,12 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             if (!removedListener) {
                 Slog.w(TAG, "Notified of binder death for who=" + who
                         + ", but did not remove any listeners."
-                        + " mConfigurationListeners=" + mListeners);
+                        + " mListeners=" + mListeners);
             }
         }
     }
 
-    void handleConfigurationChanged() {
+    void handleConfigurationInternalChangedOnHandlerThread() {
         // Configuration has changed, but each user may have a different view of the configuration.
         // It's possible that this will cause unnecessary notifications but that shouldn't be a
         // problem.
@@ -307,15 +336,39 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     boolean isTelephonyTimeZoneDetectionSupported() {
         enforceManageTimeZoneDetectorPermission();
 
-        return ServiceConfigAccessor.getInstance(mContext)
-                .isTelephonyTimeZoneDetectionFeatureSupported();
+        return mTimeZoneDetectorStrategy.isTelephonyTimeZoneDetectionSupported();
     }
 
     boolean isGeoTimeZoneDetectionSupported() {
         enforceManageTimeZoneDetectorPermission();
 
-        return ServiceConfigAccessor.getInstance(mContext)
-                .isGeoTimeZoneDetectionFeatureSupported();
+        return mTimeZoneDetectorStrategy.isGeoTimeZoneDetectionSupported();
+    }
+
+    /**
+     * Sends a signal to enable telephony fallback. Provided for command-line access for use
+     * during tests. This is not exposed as a binder API.
+     */
+    void enableTelephonyFallback() {
+        enforceManageTimeZoneDetectorPermission();
+        mTimeZoneDetectorStrategy.enableTelephonyTimeZoneFallback();
+    }
+
+    /**
+     * Registers the supplied {@link Dumpable} for dumping. When the service is dumped
+     * {@link Dumpable#dump(IndentingPrintWriter, String[])} will be called on the {@code dumpable}.
+     */
+    void addDumpable(@NonNull Dumpable dumpable) {
+        synchronized (mDumpables) {
+            mDumpables.add(dumpable);
+        }
+    }
+
+    @NonNull
+    MetricsTimeZoneDetectorState generateMetricsState() {
+        enforceManageTimeZoneDetectorPermission();
+
+        return mTimeZoneDetectorStrategy.generateMetricsState();
     }
 
     @Override
@@ -325,6 +378,13 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         mTimeZoneDetectorStrategy.dump(ipw, args);
+
+        synchronized (mDumpables) {
+            for (Dumpable dumpable : mDumpables) {
+                dumpable.dump(ipw, args);
+            }
+        }
+
         ipw.flush();
     }
 

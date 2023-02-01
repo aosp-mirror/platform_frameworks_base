@@ -24,4 +24,5 @@
           android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
           android:textColor="?android:attr/colorAccent"
           android:textStyle="bold"
+          android:id="@+id/language_picker_header"
           tools:text="@string/language_picker_section_all"/>

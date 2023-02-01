@@ -121,6 +121,7 @@ public class ZenModeHelper {
     protected final RingerModeDelegate mRingerModeDelegate = new
             RingerModeDelegate();
     @VisibleForTesting protected final ZenModeConditions mConditions;
+    Object mConfigsLock = new Object();
     @VisibleForTesting final SparseArray<ZenModeConfig> mConfigs = new SparseArray<>();
     private final Metrics mMetrics = new Metrics();
     private final ConditionProviders.Config mServiceConfig;
@@ -153,7 +154,9 @@ public class ZenModeHelper {
         mDefaultConfig = readDefaultConfig(mContext.getResources());
         updateDefaultAutomaticRuleNames();
         mConfig = mDefaultConfig.copy();
-        mConfigs.put(UserHandle.USER_SYSTEM, mConfig);
+        synchronized (mConfigsLock) {
+            mConfigs.put(UserHandle.USER_SYSTEM, mConfig);
+        }
         mConsolidatedPolicy = mConfig.toNotificationPolicy();
 
         mSettingsObserver = new SettingsObserver(mHandler);
@@ -174,10 +177,12 @@ public class ZenModeHelper {
     }
 
     public boolean matchesCallFilter(UserHandle userHandle, Bundle extras,
-            ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity) {
+            ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity,
+            int callingUid) {
         synchronized (mConfig) {
             return ZenModeFiltering.matchesCallFilter(mContext, mZenMode, mConsolidatedPolicy,
-                    userHandle, extras, validator, contactsTimeoutMs, timeoutAffinity);
+                    userHandle, extras, validator, contactsTimeoutMs, timeoutAffinity,
+                    callingUid);
         }
     }
 
@@ -187,6 +192,10 @@ public class ZenModeHelper {
 
     public void recordCaller(NotificationRecord record) {
         mFiltering.recordCall(record);
+    }
+
+    protected void cleanUpCallersAfter(long timeThreshold) {
+        mFiltering.cleanUpCallersAfter(timeThreshold);
     }
 
     public boolean shouldIntercept(NotificationRecord record) {
@@ -229,7 +238,9 @@ public class ZenModeHelper {
     public void onUserRemoved(int user) {
         if (user < UserHandle.USER_SYSTEM) return;
         if (DEBUG) Log.d(TAG, "onUserRemoved u=" + user);
-        mConfigs.remove(user);
+        synchronized (mConfigsLock) {
+            mConfigs.remove(user);
+        }
     }
 
     public void onUserUnlocked(int user) {
@@ -244,7 +255,12 @@ public class ZenModeHelper {
         if (mUser == user || user < UserHandle.USER_SYSTEM) return;
         mUser = user;
         if (DEBUG) Log.d(TAG, reason + " u=" + user);
-        ZenModeConfig config = mConfigs.get(user);
+        ZenModeConfig config = null;
+        synchronized (mConfigsLock) {
+            if (mConfigs.get(user) != null) {
+                config = mConfigs.get(user).copy();
+            }
+        }
         if (config == null) {
             if (DEBUG) Log.d(TAG, reason + " generating default config for user " + user);
             config = mDefaultConfig.copy();
@@ -326,7 +342,8 @@ public class ZenModeHelper {
             int newRuleInstanceCount = getCurrentInstanceCount(automaticZenRule.getOwner())
                     + getCurrentInstanceCount(automaticZenRule.getConfigurationActivity())
                     + 1;
-            if (newRuleInstanceCount > RULE_LIMIT_PER_PACKAGE
+            int newPackageRuleCount = getPackageRuleCount(pkg) + 1;
+            if (newPackageRuleCount > RULE_LIMIT_PER_PACKAGE
                     || (ruleInstanceLimit > 0 && ruleInstanceLimit < newRuleInstanceCount)) {
                 throw new IllegalArgumentException("Rule instance limit exceeded");
             }
@@ -500,6 +517,23 @@ public class ZenModeHelper {
         synchronized (mConfig) {
             for (ZenRule rule : mConfig.automaticRules.values()) {
                 if (cn.equals(rule.component) || cn.equals(rule.configurationActivity)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    // Equivalent method to getCurrentInstanceCount, but for all rules associated with a specific
+    // package rather than a condition provider service or activity.
+    private int getPackageRuleCount(String pkg) {
+        if (pkg == null) {
+            return 0;
+        }
+        int count = 0;
+        synchronized (mConfig) {
+            for (ZenRule rule : mConfig.automaticRules.values()) {
+                if (pkg.equals(rule.getPkg())) {
                     count++;
                 }
             }
@@ -681,9 +715,11 @@ public class ZenModeHelper {
         pw.println(Global.zenModeToString(mZenMode));
         pw.print(prefix);
         pw.println("mConsolidatedPolicy=" + mConsolidatedPolicy.toString());
-        final int N = mConfigs.size();
-        for (int i = 0; i < N; i++) {
-            dump(pw, prefix, "mConfigs[u=" + mConfigs.keyAt(i) + "]", mConfigs.valueAt(i));
+        synchronized(mConfigsLock) {
+            final int N = mConfigs.size();
+            for (int i = 0; i < N; i++) {
+                dump(pw, prefix, "mConfigs[u=" + mConfigs.keyAt(i) + "]", mConfigs.valueAt(i));
+            }
         }
         pw.print(prefix); pw.print("mUser="); pw.println(mUser);
         synchronized (mConfig) {
@@ -783,7 +819,7 @@ public class ZenModeHelper {
 
     public void writeXml(TypedXmlSerializer out, boolean forBackup, Integer version, int userId)
             throws IOException {
-        synchronized (mConfigs) {
+        synchronized (mConfigsLock) {
             final int n = mConfigs.size();
             for (int i = 0; i < n; i++) {
                 if (forBackup && mConfigs.keyAt(i) != userId) {
@@ -879,14 +915,18 @@ public class ZenModeHelper {
             }
             if (config.user != mUser) {
                 // simply store away for background users
-                mConfigs.put(config.user, config);
+                synchronized (mConfigsLock) {
+                    mConfigs.put(config.user, config);
+                }
                 if (DEBUG) Log.d(TAG, "setConfigLocked: store config for user " + config.user);
                 return true;
             }
             // handle CPS backed conditions - danger! may modify config
             mConditions.evaluateConfig(config, null, false /*processSubscriptions*/);
 
-            mConfigs.put(config.user, config);
+            synchronized (mConfigsLock) {
+                mConfigs.put(config.user, config);
+            }
             if (DEBUG) Log.d(TAG, "setConfigLocked reason=" + reason, new Throwable());
             ZenLog.traceConfig(reason, mConfig, config);
 
@@ -1207,7 +1247,7 @@ public class ZenModeHelper {
      * Generate pulled atoms about do not disturb configurations.
      */
     public void pullRules(List<StatsEvent> events) {
-        synchronized (mConfig) {
+        synchronized (mConfigsLock) {
             final int numConfigs = mConfigs.size();
             for (int i = 0; i < numConfigs; i++) {
                 final int user = mConfigs.keyAt(i);

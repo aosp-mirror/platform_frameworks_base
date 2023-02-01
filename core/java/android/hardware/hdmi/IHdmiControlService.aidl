@@ -88,6 +88,8 @@ interface IHdmiControlService {
     void setStandbyMode(boolean isStandbyModeOn);
     void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute);
     void setSystemAudioModeOnForAudioOnlySource();
+    boolean setMessageHistorySize(int newSize);
+    int getMessageHistorySize();
     void addCecSettingChangeListener(String name, IHdmiCecSettingChangeListener listener);
     void removeCecSettingChangeListener(String name, IHdmiCecSettingChangeListener listener);
     List<String> getUserCecSettings();

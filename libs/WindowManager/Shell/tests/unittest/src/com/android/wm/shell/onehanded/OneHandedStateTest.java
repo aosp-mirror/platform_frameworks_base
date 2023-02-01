@@ -29,14 +29,11 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.om.IOverlayManager;
 import android.graphics.Rect;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.util.ArrayMap;
 import android.view.Display;
-import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 
@@ -44,6 +41,9 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
+import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +54,6 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedStateTest extends OneHandedTestCase {
-    private int mCurrentUser = UserHandle.myUserId();
 
     Display mDisplay;
     DisplayLayout mDisplayLayout;
@@ -64,9 +63,13 @@ public class OneHandedStateTest extends OneHandedTestCase {
     OneHandedState mSpiedState;
 
     @Mock
-    DisplayController mMockDisplayController;
+    ShellInit mMockShellInit;
     @Mock
-    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
+    ShellCommandHandler mMockShellCommandHandler;
+    @Mock
+    ShellController mMockShellController;
+    @Mock
+    DisplayController mMockDisplayController;
     @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
     @Mock
@@ -78,13 +81,9 @@ public class OneHandedStateTest extends OneHandedTestCase {
     @Mock
     OneHandedUiEventLogger mMockUiEventLogger;
     @Mock
-    IOverlayManager mMockOverlayManager;
-    @Mock
     TaskStackListenerImpl mMockTaskStackListener;
     @Mock
     ShellExecutor mMockShellMainExecutor;
-    @Mock
-    SurfaceControl mMockLeash;
     @Mock
     Handler mMockShellMainHandler;
 
@@ -102,7 +101,6 @@ public class OneHandedStateTest extends OneHandedTestCase {
 
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
         when(mMockDisplayAreaOrganizer.getDisplayAreaTokenMap()).thenReturn(new ArrayMap<>());
-        when(mMockBackgroundOrganizer.isRegistered()).thenReturn(true);
         when(mMockSettingsUitl.getSettingsOneHandedModeEnabled(any(), anyInt())).thenReturn(
                 mDefaultEnabled);
         when(mMockSettingsUitl.getSettingsOneHandedModeTimeout(any(), anyInt())).thenReturn(
@@ -119,8 +117,10 @@ public class OneHandedStateTest extends OneHandedTestCase {
         mOneHandedAccessibilityUtil = new OneHandedAccessibilityUtil(mContext);
         mSpiedOneHandedController = spy(new OneHandedController(
                 mContext,
+                mMockShellInit,
+                mMockShellCommandHandler,
+                mMockShellController,
                 mMockDisplayController,
-                mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
                 mMockTutorialHandler,
@@ -129,7 +129,6 @@ public class OneHandedStateTest extends OneHandedTestCase {
                 mSpiedTimeoutHandler,
                 mSpiedState,
                 mMockUiEventLogger,
-                mMockOverlayManager,
                 mMockTaskStackListener,
                 mMockShellMainExecutor,
                 mMockShellMainHandler)

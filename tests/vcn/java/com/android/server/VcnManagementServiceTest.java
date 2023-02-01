@@ -17,12 +17,15 @@
 package com.android.server;
 
 import static android.net.ConnectivityManager.NetworkCallback;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.vcn.VcnManager.VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_ACTIVE;
 import static android.net.vcn.VcnManager.VCN_STATUS_CODE_SAFE_MODE;
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS;
 
@@ -94,6 +97,7 @@ import com.android.server.vcn.Vcn;
 import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.VcnNetworkProvider;
 import com.android.server.vcn.util.PersistableBundleUtils;
+import com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -251,6 +255,10 @@ public class VcnManagementServiceTest {
                 .when(mMockContext)
                 .enforceCallingOrSelfPermission(
                         eq(android.Manifest.permission.NETWORK_FACTORY), any());
+
+        doReturn(Collections.singleton(TRANSPORT_WIFI))
+                .when(mMockDeps)
+                .getRestrictedTransports(any(), any(), any());
     }
 
 
@@ -276,7 +284,6 @@ public class VcnManagementServiceTest {
     @Test
     public void testSystemReady() throws Exception {
         mVcnMgmtSvc.systemReady();
-        mTestLooper.dispatchAll();
 
         verify(mConnMgr).registerNetworkProvider(any(VcnNetworkProvider.class));
         verify(mSubscriptionTracker).register();
@@ -494,8 +501,10 @@ public class VcnManagementServiceTest {
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
         triggerSubscriptionTrackerCbAndGetSnapshot(null, Collections.emptySet());
-        mTestLooper.dispatchAll();
 
+        // Verify teardown after delay
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
         verify(vcn).teardownAsynchronously();
         verify(mMockPolicyListener).onPolicyChanged();
     }
@@ -519,6 +528,92 @@ public class VcnManagementServiceTest {
 
         verify(vcn).teardownAsynchronously();
         assertEquals(0, mVcnMgmtSvc.getAllVcns().size());
+    }
+
+    /**
+     * Tests an intermediate state where carrier privileges are marked as lost before active data
+     * subId changes during a SIM ejection.
+     *
+     * <p>The expected outcome is that the VCN is torn down after a delay, as opposed to
+     * immediately.
+     */
+    @Test
+    public void testTelephonyNetworkTrackerCallbackLostCarrierPrivilegesBeforeActiveDataSubChanges()
+            throws Exception {
+        setupActiveSubscription(TEST_UUID_2);
+
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        final Vcn vcn = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Simulate privileges lost
+        triggerSubscriptionTrackerCbAndGetSnapshot(
+                TEST_SUBSCRIPTION_ID,
+                TEST_UUID_2,
+                Collections.emptySet(),
+                Collections.emptyMap(),
+                false /* hasCarrierPrivileges */);
+
+        // Verify teardown after delay
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        verify(vcn).teardownAsynchronously();
+    }
+
+    @Test
+    public void testTelephonyNetworkTrackerCallbackSimSwitchesDoNotKillVcnInstances()
+            throws Exception {
+        setupActiveSubscription(TEST_UUID_2);
+
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        final Vcn vcn = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Simulate SIM unloaded
+        triggerSubscriptionTrackerCbAndGetSnapshot(
+                INVALID_SUBSCRIPTION_ID,
+                null /* activeDataSubscriptionGroup */,
+                Collections.emptySet(),
+                Collections.emptyMap(),
+                false /* hasCarrierPrivileges */);
+
+        // Simulate new SIM loaded right during teardown delay.
+        mTestLooper.moveTimeForward(
+                VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS / 2);
+        mTestLooper.dispatchAll();
+        triggerSubscriptionTrackerCbAndGetSnapshot(TEST_UUID_2, Collections.singleton(TEST_UUID_2));
+
+        // Verify that even after the full timeout duration, the VCN instance is not torn down
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        verify(vcn, never()).teardownAsynchronously();
+    }
+
+    @Test
+    public void testTelephonyNetworkTrackerCallbackDoesNotKillNewVcnInstances() throws Exception {
+        setupActiveSubscription(TEST_UUID_2);
+
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        final Vcn oldInstance = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Simulate SIM unloaded
+        triggerSubscriptionTrackerCbAndGetSnapshot(null, Collections.emptySet());
+
+        // Config cleared, SIM reloaded & config re-added right before teardown delay, staring new
+        // vcnInstance.
+        mTestLooper.moveTimeForward(
+                VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS / 2);
+        mTestLooper.dispatchAll();
+        mVcnMgmtSvc.clearVcnConfig(TEST_UUID_2, TEST_PACKAGE_NAME);
+        triggerSubscriptionTrackerCbAndGetSnapshot(TEST_UUID_2, Collections.singleton(TEST_UUID_2));
+        final Vcn newInstance = startAndGetVcnInstance(TEST_UUID_2);
+
+        // Verify that new instance was different, and the old one was torn down
+        assertTrue(oldInstance != newInstance);
+        verify(oldInstance).teardownAsynchronously();
+
+        // Verify that even after the full timeout duration, the new VCN instance is not torn down
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
+        mTestLooper.dispatchAll();
+        verify(newInstance, never()).teardownAsynchronously();
     }
 
     @Test
@@ -549,8 +644,7 @@ public class VcnManagementServiceTest {
         final BroadcastReceiver receiver = getPackageChangeReceiver();
 
         verify(mMockContext).registerReceiver(any(), argThat(filter -> {
-            return filter.hasAction(Intent.ACTION_PACKAGE_REMOVED)
-                    && filter.hasAction(Intent.ACTION_PACKAGE_REMOVED);
+            return filter.hasAction(Intent.ACTION_PACKAGE_REMOVED);
         }), any(), any());
 
         receiver.onReceive(mMockContext, new Intent(Intent.ACTION_PACKAGE_REMOVED));
@@ -910,8 +1004,6 @@ public class VcnManagementServiceTest {
     private void setupSubscriptionAndStartVcn(
             int subId, ParcelUuid subGrp, boolean isVcnActive, boolean hasCarrierPrivileges) {
         mVcnMgmtSvc.systemReady();
-        mTestLooper.dispatchAll();
-
         triggerSubscriptionTrackerCbAndGetSnapshot(
                 subGrp,
                 Collections.singleton(subGrp),
@@ -946,68 +1038,230 @@ public class VcnManagementServiceTest {
                 new LinkProperties());
     }
 
+    private void checkGetRestrictedTransportsFromCarrierConfig(
+            ParcelUuid subGrp,
+            TelephonySubscriptionSnapshot lastSnapshot,
+            Set<Integer> expectedTransports) {
+        Set<Integer> result =
+                new VcnManagementService.Dependencies()
+                        .getRestrictedTransportsFromCarrierConfig(subGrp, lastSnapshot);
+        assertEquals(expectedTransports, result);
+    }
+
     @Test
-    public void testGetUnderlyingNetworkPolicyCellular() throws Exception {
+    public void testGetRestrictedTransportsFromCarrierConfig() {
+        final Set<Integer> restrictedTransports = new ArraySet<>();
+        restrictedTransports.add(TRANSPORT_CELLULAR);
+        restrictedTransports.add(TRANSPORT_WIFI);
+
+        PersistableBundle carrierConfigBundle = new PersistableBundle();
+        carrierConfigBundle.putIntArray(
+                VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY,
+                restrictedTransports.stream().mapToInt(i -> i).toArray());
+        final PersistableBundleWrapper carrierConfig =
+                new PersistableBundleWrapper(carrierConfigBundle);
+
+        final TelephonySubscriptionSnapshot lastSnapshot =
+                mock(TelephonySubscriptionSnapshot.class);
+        doReturn(carrierConfig).when(lastSnapshot).getCarrierConfigForSubGrp(eq(TEST_UUID_2));
+
+        checkGetRestrictedTransportsFromCarrierConfig(
+                TEST_UUID_2, lastSnapshot, restrictedTransports);
+    }
+
+    @Test
+    public void testGetRestrictedTransportsFromCarrierConfig_noRestrictPolicyConfigured() {
+        final Set<Integer> restrictedTransports = Collections.singleton(TRANSPORT_WIFI);
+
+        final PersistableBundleWrapper carrierConfig =
+                new PersistableBundleWrapper(new PersistableBundle());
+        final TelephonySubscriptionSnapshot lastSnapshot =
+                mock(TelephonySubscriptionSnapshot.class);
+        doReturn(carrierConfig).when(lastSnapshot).getCarrierConfigForSubGrp(eq(TEST_UUID_2));
+
+        checkGetRestrictedTransportsFromCarrierConfig(
+                TEST_UUID_2, lastSnapshot, restrictedTransports);
+    }
+
+    @Test
+    public void testGetRestrictedTransportsFromCarrierConfig_noCarrierConfig() {
+        final Set<Integer> restrictedTransports = Collections.singleton(TRANSPORT_WIFI);
+
+        final TelephonySubscriptionSnapshot lastSnapshot =
+                mock(TelephonySubscriptionSnapshot.class);
+
+        checkGetRestrictedTransportsFromCarrierConfig(
+                TEST_UUID_2, lastSnapshot, restrictedTransports);
+    }
+
+    @Test
+    public void testGetRestrictedTransportsFromCarrierConfigAndVcnConfig() {
+        // Configure restricted transport in CarrierConfig
+        final Set<Integer> restrictedTransportInCarrierConfig =
+                Collections.singleton(TRANSPORT_WIFI);
+
+        PersistableBundle carrierConfigBundle = new PersistableBundle();
+        carrierConfigBundle.putIntArray(
+                VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY,
+                restrictedTransportInCarrierConfig.stream().mapToInt(i -> i).toArray());
+        final PersistableBundleWrapper carrierConfig =
+                new PersistableBundleWrapper(carrierConfigBundle);
+
+        final TelephonySubscriptionSnapshot lastSnapshot =
+                mock(TelephonySubscriptionSnapshot.class);
+        doReturn(carrierConfig).when(lastSnapshot).getCarrierConfigForSubGrp(eq(TEST_UUID_2));
+
+        // Configure restricted transport in VcnConfig
+        final Context mockContext = mock(Context.class);
+        doReturn(TEST_PACKAGE_NAME).when(mockContext).getOpPackageName();
+        final VcnConfig vcnConfig =
+                VcnConfigTest.buildTestConfig(
+                        mockContext, Collections.singleton(TRANSPORT_CELLULAR));
+
+        // Verifications
+        final Set<Integer> expectedTransports = new ArraySet<>();
+        expectedTransports.add(TRANSPORT_CELLULAR);
+        expectedTransports.add(TRANSPORT_WIFI);
+
+        Set<Integer> result =
+                new VcnManagementService.Dependencies()
+                        .getRestrictedTransports(TEST_UUID_2, lastSnapshot, vcnConfig);
+        assertEquals(expectedTransports, result);
+    }
+
+    private void checkGetUnderlyingNetworkPolicy(
+            int transportType,
+            boolean isTransportRestricted,
+            boolean isActive,
+            boolean expectVcnManaged,
+            boolean expectRestricted)
+            throws Exception {
+
+        final Set<Integer> restrictedTransports = new ArraySet();
+        if (isTransportRestricted) {
+            restrictedTransports.add(transportType);
+        }
+        doReturn(restrictedTransports).when(mMockDeps).getRestrictedTransports(any(), any(), any());
+
         final VcnUnderlyingNetworkPolicy policy =
                 startVcnAndGetPolicyForTransport(
-                        TEST_SUBSCRIPTION_ID, TEST_UUID_2, true /* isActive */, TRANSPORT_CELLULAR);
+                        TEST_SUBSCRIPTION_ID, TEST_UUID_2, isActive, transportType);
+
+        assertFalse(policy.isTeardownRequested());
+        verifyMergedNetworkCapabilities(
+                policy.getMergedNetworkCapabilities(),
+                transportType,
+                expectVcnManaged,
+                expectRestricted);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicy_unrestrictCell() throws Exception {
+        checkGetUnderlyingNetworkPolicy(
+                TRANSPORT_CELLULAR,
+                false /* isTransportRestricted */,
+                true /* isActive */,
+                true /* expectVcnManaged */,
+                false /* expectRestricted */);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicy_unrestrictCellSafeMode() throws Exception {
+        checkGetUnderlyingNetworkPolicy(
+                TRANSPORT_CELLULAR,
+                false /* isTransportRestricted */,
+                false /* isActive */,
+                false /* expectVcnManaged */,
+                false /* expectRestricted */);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicy_restrictCell() throws Exception {
+        checkGetUnderlyingNetworkPolicy(
+                TRANSPORT_CELLULAR,
+                true /* isTransportRestricted */,
+                true /* isActive */,
+                true /* expectVcnManaged */,
+                true /* expectRestricted */);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicy_restrictCellSafeMode() throws Exception {
+        checkGetUnderlyingNetworkPolicy(
+                TRANSPORT_CELLULAR,
+                true /* isTransportRestricted */,
+                false /* isActive */,
+                false /* expectVcnManaged */,
+                false /* expectRestricted */);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicy_unrestrictWifi() throws Exception {
+        checkGetUnderlyingNetworkPolicy(
+                TRANSPORT_WIFI,
+                false /* isTransportRestricted */,
+                true /* isActive */,
+                true /* expectVcnManaged */,
+                false /* expectRestricted */);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicy_unrestrictWifiSafeMode() throws Exception {
+        checkGetUnderlyingNetworkPolicy(
+                TRANSPORT_WIFI,
+                false /* isTransportRestricted */,
+                false /* isActive */,
+                false /* expectVcnManaged */,
+                false /* expectRestricted */);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicy_restrictWifi() throws Exception {
+        checkGetUnderlyingNetworkPolicy(
+                TRANSPORT_WIFI,
+                true /* isTransportRestricted */,
+                true /* isActive */,
+                true /* expectVcnManaged */,
+                true /* expectRestricted */);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicy_restrictWifiSafeMode() throws Exception {
+        checkGetUnderlyingNetworkPolicy(
+                TRANSPORT_WIFI,
+                true /* isTransportRestricted */,
+                false /* isActive */,
+                false /* expectVcnManaged */,
+                true /* expectRestricted */);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicyCell_restrictWifi() throws Exception {
+        doReturn(Collections.singleton(TRANSPORT_WIFI))
+                .when(mMockDeps)
+                .getRestrictedTransports(any(), any(), any());
+
+        setupSubscriptionAndStartVcn(TEST_SUBSCRIPTION_ID, TEST_UUID_2, true /* isVcnActive */);
+
+        // Get the policy for a cellular network and expect it won't be affected by the wifi
+        // restriction policy
+        final VcnUnderlyingNetworkPolicy policy =
+                mVcnMgmtSvc.getUnderlyingNetworkPolicy(
+                        getNetworkCapabilitiesBuilderForTransport(
+                                        TEST_SUBSCRIPTION_ID, TRANSPORT_CELLULAR)
+                                .build(),
+                        new LinkProperties());
 
         assertFalse(policy.isTeardownRequested());
         verifyMergedNetworkCapabilities(
                 policy.getMergedNetworkCapabilities(),
                 TRANSPORT_CELLULAR,
-                true /* isVcnManaged */,
-                false /* isRestricted */);
-    }
-
-    @Test
-    public void testGetUnderlyingNetworkPolicyCellular_safeMode() throws Exception {
-        final VcnUnderlyingNetworkPolicy policy =
-                startVcnAndGetPolicyForTransport(
-                        TEST_SUBSCRIPTION_ID,
-                        TEST_UUID_2,
-                        false /* isActive */,
-                        TRANSPORT_CELLULAR);
-
-        assertFalse(policy.isTeardownRequested());
-        verifyMergedNetworkCapabilities(
-                policy.getMergedNetworkCapabilities(),
-                NetworkCapabilities.TRANSPORT_CELLULAR,
-                false /* isVcnManaged */,
-                false /* isRestricted */);
-    }
-
-    @Test
-    public void testGetUnderlyingNetworkPolicyWifi() throws Exception {
-        final VcnUnderlyingNetworkPolicy policy =
-                startVcnAndGetPolicyForTransport(
-                        TEST_SUBSCRIPTION_ID, TEST_UUID_2, true /* isActive */, TRANSPORT_WIFI);
-
-        assertFalse(policy.isTeardownRequested());
-        verifyMergedNetworkCapabilities(
-                policy.getMergedNetworkCapabilities(),
-                NetworkCapabilities.TRANSPORT_WIFI,
-                true /* isVcnManaged */,
-                true /* isRestricted */);
-    }
-
-    @Test
-    public void testGetUnderlyingNetworkPolicyVcnWifi_safeMode() throws Exception {
-        final VcnUnderlyingNetworkPolicy policy =
-                startVcnAndGetPolicyForTransport(
-                        TEST_SUBSCRIPTION_ID, TEST_UUID_2, false /* isActive */, TRANSPORT_WIFI);
-
-        assertFalse(policy.isTeardownRequested());
-        verifyMergedNetworkCapabilities(
-                policy.getMergedNetworkCapabilities(),
-                NetworkCapabilities.TRANSPORT_WIFI,
-                false /* isVcnManaged */,
-                true /* isRestricted */);
+                true /* expectVcnManaged */,
+                false /* expectRestricted */);
     }
 
     private void setupTrackedCarrierWifiNetwork(NetworkCapabilities caps) {
         mVcnMgmtSvc.systemReady();
-        mTestLooper.dispatchAll();
 
         final ArgumentCaptor<NetworkCallback> captor =
                 ArgumentCaptor.forClass(NetworkCallback.class);
@@ -1051,6 +1305,27 @@ public class VcnManagementServiceTest {
                         TEST_SUBSCRIPTION_ID, TEST_UUID_2, false /* isActive */, TRANSPORT_WIFI);
 
         assertTrue(policy.isTeardownRequested());
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicyForRestrictedImsWhenUnrestrictingCell()
+            throws Exception {
+        final NetworkCapabilities existingNetworkCaps =
+                getNetworkCapabilitiesBuilderForTransport(TEST_SUBSCRIPTION_ID, TRANSPORT_CELLULAR)
+                        .addCapability(NET_CAPABILITY_NOT_RESTRICTED)
+                        .removeCapability(NET_CAPABILITY_IMS)
+                        .build();
+        setupTrackedCarrierWifiNetwork(existingNetworkCaps);
+
+        final VcnUnderlyingNetworkPolicy policy =
+                mVcnMgmtSvc.getUnderlyingNetworkPolicy(
+                        getNetworkCapabilitiesBuilderForTransport(
+                                        TEST_SUBSCRIPTION_ID, TRANSPORT_CELLULAR)
+                                .addCapability(NET_CAPABILITY_IMS)
+                                .removeCapability(NET_CAPABILITY_NOT_RESTRICTED)
+                                .build(),
+                        new LinkProperties());
+        assertFalse(policy.isTeardownRequested());
     }
 
     @Test
@@ -1107,6 +1382,23 @@ public class VcnManagementServiceTest {
     }
 
     @Test
+    public void testVcnConfigChangeUpdatesPolicyListener() throws Exception {
+        setupActiveSubscription(TEST_UUID_2);
+
+        mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);
+        mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+
+        final Context mockContext = mock(Context.class);
+        doReturn(TEST_PACKAGE_NAME).when(mockContext).getOpPackageName();
+        final VcnConfig vcnConfig =
+                VcnConfigTest.buildTestConfig(
+                        mockContext, Collections.singleton(TRANSPORT_CELLULAR));
+        mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, vcnConfig, TEST_PACKAGE_NAME);
+
+        verify(mMockPolicyListener).onPolicyChanged();
+    }
+
+    @Test
     public void testRemoveVcnUpdatesPolicyListener() throws Exception {
         setupActiveSubscription(TEST_UUID_2);
 
@@ -1129,6 +1421,30 @@ public class VcnManagementServiceTest {
                 TEST_UUID_2,
                 Collections.singleton(TEST_UUID_2),
                 Collections.singletonMap(TEST_SUBSCRIPTION_ID, TEST_UUID_2));
+
+        verify(mMockPolicyListener).onPolicyChanged();
+    }
+
+    @Test
+    public void testVcnCarrierConfigChangeUpdatesPolicyListener() throws Exception {
+        setupActiveSubscription(TEST_UUID_2);
+
+        mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);
+        mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+
+        final TelephonySubscriptionSnapshot snapshot =
+                buildSubscriptionSnapshot(
+                        TEST_SUBSCRIPTION_ID,
+                        TEST_UUID_2,
+                        Collections.singleton(TEST_UUID_2),
+                        Collections.emptyMap(),
+                        true /* hasCarrierPrivileges */);
+
+        final PersistableBundleWrapper mockCarrierConfig = mock(PersistableBundleWrapper.class);
+        doReturn(mockCarrierConfig).when(snapshot).getCarrierConfigForSubGrp(eq(TEST_UUID_2));
+
+        final TelephonySubscriptionTrackerCallback cb = getTelephonySubscriptionTrackerCallback();
+        cb.onNewSnapshot(snapshot);
 
         verify(mMockPolicyListener).onPolicyChanged();
     }
@@ -1252,14 +1568,15 @@ public class VcnManagementServiceTest {
                 true /* isActive */,
                 true /* hasCarrierPrivileges */);
 
-        // VCN is currently active. Lose carrier privileges for TEST_PACKAGE so the VCN goes
-        // inactive.
+        // VCN is currently active. Lose carrier privileges for TEST_PACKAGE and hit teardown
+        // timeout so the VCN goes inactive.
         final TelephonySubscriptionSnapshot snapshot =
                 triggerSubscriptionTrackerCbAndGetSnapshot(
                         TEST_UUID_1,
                         Collections.singleton(TEST_UUID_1),
                         Collections.singletonMap(TEST_SUBSCRIPTION_ID, TEST_UUID_1),
                         false /* hasCarrierPrivileges */);
+        mTestLooper.moveTimeForward(VcnManagementService.CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
         mTestLooper.dispatchAll();
 
         // Giving TEST_PACKAGE privileges again will restart the VCN (which will indicate ACTIVE

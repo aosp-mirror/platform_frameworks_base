@@ -5,3 +5,6 @@ rule android.hidl.** android.internal.hidl.@1
 # Framework-specific renames.
 rule android.net.wifi.WifiAnnotations* android.internal.wifi.WifiAnnotations@1
 rule com.android.server.vcn.util.** com.android.server.vcn.repackaged.util.@1
+
+# for modules-utils-build dependency
+rule com.android.modules.utils.build.** android.internal.modules.utils.build.@1

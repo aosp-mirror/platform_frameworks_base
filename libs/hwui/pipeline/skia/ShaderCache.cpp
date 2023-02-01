@@ -136,24 +136,59 @@ sk_sp<SkData> ShaderCache::load(const SkData& key) {
         free(valueBuffer);
         return nullptr;
     }
+    mNumShadersCachedInRam++;
+    ATRACE_FORMAT("HWUI RAM cache: %d shaders", mNumShadersCachedInRam);
     return SkData::MakeFromMalloc(valueBuffer, valueSize);
 }
+
+namespace {
+// Helper for BlobCache::set to trace the result.
+void set(BlobCache* cache, const void* key, size_t keySize, const void* value, size_t valueSize) {
+    switch (cache->set(key, keySize, value, valueSize)) {
+        case BlobCache::InsertResult::kInserted:
+            // This is what we expect/hope. It means the cache is large enough.
+            return;
+        case BlobCache::InsertResult::kDidClean: {
+            ATRACE_FORMAT("ShaderCache: evicted an entry to fit {key: %lu value %lu}!", keySize,
+                          valueSize);
+            return;
+        }
+        case BlobCache::InsertResult::kNotEnoughSpace: {
+            ATRACE_FORMAT("ShaderCache: could not fit {key: %lu value %lu}!", keySize, valueSize);
+            return;
+        }
+        case BlobCache::InsertResult::kInvalidValueSize:
+        case BlobCache::InsertResult::kInvalidKeySize: {
+            ATRACE_FORMAT("ShaderCache: invalid size {key: %lu value %lu}!", keySize, valueSize);
+            return;
+        }
+        case BlobCache::InsertResult::kKeyTooBig:
+        case BlobCache::InsertResult::kValueTooBig:
+        case BlobCache::InsertResult::kCombinedTooBig: {
+            ATRACE_FORMAT("ShaderCache: entry too big: {key: %lu value %lu}!", keySize, valueSize);
+            return;
+        }
+    }
+}
+}  // namespace
 
 void ShaderCache::saveToDiskLocked() {
     ATRACE_NAME("ShaderCache::saveToDiskLocked");
     if (mInitialized && mBlobCache && mSavePending) {
         if (mIDHash.size()) {
             auto key = sIDKey;
-            mBlobCache->set(&key, sizeof(key), mIDHash.data(), mIDHash.size());
+            set(mBlobCache.get(), &key, sizeof(key), mIDHash.data(), mIDHash.size());
         }
         mBlobCache->writeToFile();
     }
     mSavePending = false;
 }
 
-void ShaderCache::store(const SkData& key, const SkData& data) {
+void ShaderCache::store(const SkData& key, const SkData& data, const SkString& /*description*/) {
     ATRACE_NAME("ShaderCache::store");
     std::lock_guard<std::mutex> lock(mMutex);
+    mNumShadersCachedInRam++;
+    ATRACE_FORMAT("HWUI RAM cache: %d shaders", mNumShadersCachedInRam);
 
     if (!mInitialized) {
         return;
@@ -187,7 +222,7 @@ void ShaderCache::store(const SkData& key, const SkData& data) {
         mNewPipelineCacheSize = -1;
         mTryToStorePipelineCache = true;
     }
-    bc->set(key.data(), keySize, value, valueSize);
+    set(bc, key.data(), keySize, value, valueSize);
 
     if (!mSavePending && mDeferredSaveDelay > 0) {
         mSavePending = true;

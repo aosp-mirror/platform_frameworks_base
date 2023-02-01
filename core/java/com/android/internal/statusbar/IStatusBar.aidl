@@ -18,15 +18,22 @@ package com.android.internal.statusbar;
 
 import android.app.ITransientNotificationCallback;
 import android.content.ComponentName;
+import android.graphics.drawable.Icon;
 import android.graphics.Rect;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.media.INearbyMediaDevicesProvider;
+import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.service.notification.StatusBarNotification;
 import android.view.InsetsVisibilities;
 
+import com.android.internal.statusbar.IAddTileResultCallback;
+import com.android.internal.statusbar.IUndoMediaTransferCallback;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
 
@@ -44,7 +51,7 @@ oneway interface IStatusBar
     void showWirelessChargingAnimation(int batteryLevel);
 
     void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher, boolean isMultiClientImeEnabled);
+            boolean showImeSwitcher);
     void setWindowState(int display, int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);
@@ -153,7 +160,7 @@ oneway interface IStatusBar
     /**
     * Used to notify the authentication dialog that a biometric has been authenticated.
     */
-    void onBiometricAuthenticated();
+    void onBiometricAuthenticated(int modality);
     /**
     * Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc.
     */
@@ -163,7 +170,9 @@ oneway interface IStatusBar
     /**
     * Used to hide the authentication dialog, e.g. when the application cancels authentication.
     */
-    void hideAuthenticationDialog();
+    void hideAuthenticationDialog(long requestId);
+    /* Used to notify the biometric service of events that occur outside of an operation. */
+    void setBiometicContextListener(in IBiometricContextListener listener);
 
     /**
      * Sets an instance of IUdfpsHbmListener for UdfpsController.
@@ -194,10 +203,12 @@ oneway interface IStatusBar
      * @param behavior the behavior of the focused window.
      * @param requestedVisibilities the collection of the requested visibilities of system insets.
      * @param packageName the package name of the focused app.
+     * @param letterboxDetails a set of letterbox details of apps visible on the screen.
      */
     void onSystemBarAttributesChanged(int displayId, int appearance,
             in AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            int behavior, in InsetsVisibilities requestedVisibilities, String packageName);
+            int behavior, in InsetsVisibilities requestedVisibilities, String packageName,
+            in LetterboxDetails[] letterboxDetails);
 
     /**
      * Notifies System UI to show transient bars. The transient bars are system bars, e.g., status
@@ -234,7 +245,8 @@ oneway interface IStatusBar
      * Displays a text toast.
      */
     void showToast(int uid, String packageName, IBinder token, CharSequence text,
-            IBinder windowToken, int duration, @nullable ITransientNotificationCallback callback);
+            IBinder windowToken, int duration, @nullable ITransientNotificationCallback callback,
+            int displayId);
 
     /**
      * Cancels toast with token {@code token} in {@code packageName}.
@@ -250,11 +262,6 @@ oneway interface IStatusBar
      * Notifies SystemUI to stop tracing.
      */
     void stopTracing();
-
-    /**
-     * Handles a logging command from the WM shell command.
-     */
-    void handleWindowManagerLoggingCommand(in String[] args, in ParcelFileDescriptor outFd);
 
     /**
      * If true, suppresses the ambient display from showing. If false, re-enables the ambient
@@ -288,4 +295,31 @@ oneway interface IStatusBar
      * Triggers a GC in the system and status bar.
      */
     void runGcForTest();
+
+    /**
+     * Send a request to SystemUI to put a given active tile in listening state
+     */
+    void requestTileServiceListeningState(in ComponentName componentName);
+
+    void requestAddTile(in ComponentName componentName, in CharSequence appName, in CharSequence label, in Icon icon, in IAddTileResultCallback callback);
+    void cancelRequestAddTile(in String packageName);
+
+    /** Notifies System UI about an update to the media tap-to-transfer sender state. */
+    void updateMediaTapToTransferSenderDisplay(
+        int displayState,
+        in MediaRoute2Info routeInfo,
+        in IUndoMediaTransferCallback undoCallback);
+
+    /** Notifies System UI about an update to the media tap-to-transfer receiver state. */
+    void updateMediaTapToTransferReceiverDisplay(
+        int displayState,
+        in MediaRoute2Info routeInfo,
+        in Icon appIcon,
+        in CharSequence appName);
+
+    /** Registers a nearby media devices provider. */
+    void registerNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
+
+    /** Unregisters a nearby media devices provider. */
+    void unregisterNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
 }

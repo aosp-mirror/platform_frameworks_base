@@ -15,6 +15,7 @@
  */
 package android.hardware.location;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -30,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A class describing a client of the Context Hub Service.
- *
+ * <p>
  * Clients can send messages to nanoapps at a Context Hub through this object. The APIs supported
  * by this object are thread-safe and can be used without external synchronization.
  *
@@ -60,6 +61,8 @@ public class ContextHubClient implements Closeable {
      */
     private final boolean mPersistent;
 
+    private Integer mId = null;
+
     /* package */ ContextHubClient(ContextHubInfo hubInfo, boolean persistent) {
         mAttachedHub = hubInfo;
         mPersistent = persistent;
@@ -67,7 +70,7 @@ public class ContextHubClient implements Closeable {
             mCloseGuard = null;
         } else {
             mCloseGuard = CloseGuard.get();
-            mCloseGuard.open("close");
+            mCloseGuard.open("ContextHubClient.close");
         }
     }
 
@@ -85,6 +88,11 @@ public class ContextHubClient implements Closeable {
         }
 
         mClientProxy = clientProxy;
+        try {
+            mId = Integer.valueOf(mClientProxy.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -98,12 +106,36 @@ public class ContextHubClient implements Closeable {
     }
 
     /**
+     * Returns the system-wide unique identifier for this ContextHubClient.
+     *
+     * This value can be used as an identifier for the messaging channel between a
+     * ContextHubClient and the Context Hub. This may be used as a routing mechanism
+     * between various ContextHubClient objects within an application.
+     * <p>
+     * The value returned by this method will remain the same if it is associated with
+     * the same client reference at the ContextHubService (for instance, the ID of a
+     * PendingIntent ContextHubClient will remain the same even if the local object
+     * has been regenerated with the equivalent PendingIntent). If the ContextHubClient
+     * is newly generated (e.g. any regeneration of a callback client, or generation
+     * of a non-equal PendingIntent client), the ID will not be the same.
+     *
+     * @return The ID of this ContextHubClient, in the range [0, 65535].
+     */
+    @IntRange(from = 0, to = 65535)
+    public int getId() {
+        if (mId == null) {
+            throw new IllegalStateException("ID was not set");
+        }
+        return (0x0000FFFF & mId);
+    }
+
+    /**
      * Closes the connection for this client and the Context Hub Service.
      *
      * When this function is invoked, the messaging associated with this client is invalidated.
      * All futures messages targeted for this client are dropped at the service, and the
      * ContextHubClient is unregistered from the service.
-     *
+     * <p>
      * If this object has a PendingIntent, i.e. the object was generated via
      * {@link ContextHubManager.createClient(PendingIntent, ContextHubInfo, long)}, then the
      * Intent events corresponding to the PendingIntent will no longer be triggered.
@@ -126,7 +158,7 @@ public class ContextHubClient implements Closeable {
      *
      * This function returns RESULT_SUCCESS if the message has reached the HAL, but
      * does not guarantee delivery of the message to the target nanoapp.
-     *
+     * <p>
      * Before sending the first message to your nanoapp, it's recommended that the following
      * operations should be performed:
      * 1) Invoke {@link ContextHubManager#queryNanoApps(ContextHubInfo)} to verify the nanoapp is
@@ -152,10 +184,7 @@ public class ContextHubClient implements Closeable {
      * @see NanoAppMessage
      * @see ContextHubTransaction.Result
      */
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.LOCATION_HARDWARE,
-            android.Manifest.permission.ACCESS_CONTEXT_HUB
-    })
+    @RequiresPermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
     @ContextHubTransaction.Result
     public int sendMessageToNanoApp(@NonNull NanoAppMessage message) {
         Objects.requireNonNull(message, "NanoAppMessage cannot be null");

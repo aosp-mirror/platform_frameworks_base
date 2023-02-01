@@ -102,13 +102,15 @@ public class BrightnessSetting {
             return;
         }
         synchronized (mSyncRoot) {
-            if (brightness == mBrightness) {
-                return;
+            // If the brightness is the same, we still need to update any listeners as the act of
+            // setting the brightness alone has side effects, like clearing any temporary
+            // brightness. We can skip persisting to disk, however, since it hasn't actually
+            // changed.
+            if (brightness != mBrightness) {
+                mPersistentDataStore.setBrightness(mLogicalDisplay.getPrimaryDisplayDeviceLocked(),
+                        brightness);
             }
-
             mBrightness = brightness;
-            mPersistentDataStore.setBrightness(mLogicalDisplay.getPrimaryDisplayDeviceLocked(),
-                    brightness);
             int toSend = Float.floatToIntBits(mBrightness);
             Message msg = mHandler.obtainMessage(MSG_BRIGHTNESS_CHANGED, toSend, 0);
             mHandler.sendMessage(msg);

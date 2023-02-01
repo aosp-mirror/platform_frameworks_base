@@ -239,7 +239,7 @@ public class DisplayTransformManager {
     /**
      * Return true when the color matrix works in linear space.
      */
-    public static boolean needsLinearColorMatrix() {
+    public boolean needsLinearColorMatrix() {
         return SystemProperties.getInt(PERSISTENT_PROPERTY_DISPLAY_COLOR,
                 DISPLAY_COLOR_UNMANAGED) != DISPLAY_COLOR_UNMANAGED;
     }
@@ -247,7 +247,7 @@ public class DisplayTransformManager {
     /**
      * Return true when the specified colorMode requires the color matrix to work in linear space.
      */
-    public static boolean needsLinearColorMatrix(int colorMode) {
+    public boolean needsLinearColorMatrix(int colorMode) {
         return colorMode != ColorDisplayManager.COLOR_MODE_SATURATED;
     }
 

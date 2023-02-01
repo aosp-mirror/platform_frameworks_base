@@ -1000,7 +1000,7 @@ public class ApplicationExitInfoTest {
             final String dummyPackageName = "com.android.test";
             final String dummyClassName = ".Foo";
             app.setHostingRecord(HostingRecord.byAppZygote(new ComponentName(
-                    dummyPackageName, dummyClassName), "", definingUid));
+                    dummyPackageName, dummyClassName), "", definingUid, ""));
         }
         app.mServices.setConnectionGroup(connectionGroup);
         app.mState.setReportedProcState(procState);

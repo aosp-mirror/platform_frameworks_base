@@ -49,6 +49,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.protolog.common.ProtoLog;
@@ -58,45 +60,89 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
-import java.util.Optional;
+import java.util.ArrayList;
 
 /**
  * Handles the global drag and drop handling for the Shell.
  */
 public class DragAndDropController implements DisplayController.OnDisplaysChangedListener,
-        View.OnDragListener {
+        View.OnDragListener, ConfigurationChangeListener {
 
     private static final String TAG = DragAndDropController.class.getSimpleName();
 
     private final Context mContext;
+    private final ShellController mShellController;
     private final DisplayController mDisplayController;
     private final DragAndDropEventLogger mLogger;
     private final IconProvider mIconProvider;
     private SplitScreenController mSplitScreen;
     private ShellExecutor mMainExecutor;
-    private DragAndDropImpl mImpl;
+    private ArrayList<DragAndDropListener> mListeners = new ArrayList<>();
 
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
-    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
-    public DragAndDropController(Context context, DisplayController displayController,
-            UiEventLogger uiEventLogger, IconProvider iconProvider, ShellExecutor mainExecutor) {
+    /**
+     * Listener called during drag events, currently just onDragStarted.
+     */
+    public interface DragAndDropListener {
+        /** Called when a drag has started. */
+        void onDragStarted();
+    }
+
+    public DragAndDropController(Context context,
+            ShellInit shellInit,
+            ShellController shellController,
+            DisplayController displayController,
+            UiEventLogger uiEventLogger,
+            IconProvider iconProvider,
+            ShellExecutor mainExecutor) {
         mContext = context;
+        mShellController = shellController;
         mDisplayController = displayController;
         mLogger = new DragAndDropEventLogger(uiEventLogger);
         mIconProvider = iconProvider;
         mMainExecutor = mainExecutor;
-        mImpl = new DragAndDropImpl();
+        shellInit.addInitCallback(this::onInit, this);
     }
 
-    public DragAndDrop asDragAndDrop() {
-        return mImpl;
+    /**
+     * Called when the controller is initialized.
+     */
+    public void onInit() {
+        // TODO(b/238217847): The dependency from SplitscreenController on DragAndDropController is
+        // inverted, which leads to SplitscreenController not setting its instance until after
+        // onDisplayAdded.  We can remove this post once we fix that dependency.
+        mMainExecutor.executeDelayed(() -> {
+            mDisplayController.addDisplayWindowListener(this);
+        }, 0);
+        mShellController.addConfigurationChangeListener(this);
     }
 
-    public void initialize(Optional<SplitScreenController> splitscreen) {
-        mSplitScreen = splitscreen.orElse(null);
-        mDisplayController.addDisplayWindowListener(this);
+    /**
+     * Sets the splitscreen controller to use if the feature is available.
+     */
+    public void setSplitScreenController(SplitScreenController splitscreen) {
+        mSplitScreen = splitscreen;
+    }
+
+    /** Adds a listener to be notified of drag and drop events. */
+    public void addListener(DragAndDropListener listener) {
+        mListeners.add(listener);
+    }
+
+    /** Removes a drag and drop listener. */
+    public void removeListener(DragAndDropListener listener) {
+        mListeners.remove(listener);
+    }
+
+    private void notifyListeners() {
+        for (int i = 0; i < mListeners.size(); i++) {
+            mListeners.get(i).onDragStarted();
+        }
     }
 
     @Override
@@ -133,11 +179,17 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         try {
             wm.addView(rootView, layoutParams);
-            mDisplayDropTargets.put(displayId,
-                    new PerDisplay(displayId, context, wm, rootView, dragLayout));
+            addDisplayDropTarget(displayId, context, wm, rootView, dragLayout);
         } catch (WindowManager.InvalidDisplayException e) {
             Slog.w(TAG, "Unable to add view for display id: " + displayId);
         }
+    }
+
+    @VisibleForTesting
+    void addDisplayDropTarget(int displayId, Context context, WindowManager wm,
+            FrameLayout rootView, DragLayout dragLayout) {
+        mDisplayDropTargets.put(displayId,
+                new PerDisplay(displayId, context, wm, rootView, dragLayout));
     }
 
     @Override
@@ -202,6 +254,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 pd.dragLayout.prepare(mDisplayController.getDisplayLayout(displayId),
                         event.getClipData(), loggerSessionId);
                 setDropTargetWindowVisibility(pd, View.VISIBLE);
+                notifyListeners();
                 break;
             case ACTION_DRAG_ENTERED:
                 pd.dragLayout.show();
@@ -210,6 +263,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 pd.dragLayout.update(event);
                 break;
             case ACTION_DROP: {
+                pd.dragLayout.update(event);
                 return handleDrop(event, pd);
             }
             case ACTION_DRAG_EXITED: {
@@ -250,10 +304,6 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 // Hide the window if another drag hasn't been started while animating the drop
                 setDropTargetWindowVisibility(pd, View.INVISIBLE);
             }
-
-            // Clean up the drag surface
-            mTransaction.reparent(dragSurface, null);
-            mTransaction.apply();
         });
     }
 
@@ -278,13 +328,15 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         return mimeTypes;
     }
 
-    private void onThemeChange() {
+    @Override
+    public void onThemeChanged() {
         for (int i = 0; i < mDisplayDropTargets.size(); i++) {
             mDisplayDropTargets.get(i).dragLayout.onThemeChange();
         }
     }
 
-    private void onConfigChanged(Configuration newConfig) {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
         for (int i = 0; i < mDisplayDropTargets.size(); i++) {
             mDisplayDropTargets.get(i).dragLayout.onConfigChanged(newConfig);
         }
@@ -308,23 +360,6 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
             wm = w;
             rootView = rv;
             dragLayout = dl;
-        }
-    }
-
-    private class DragAndDropImpl implements DragAndDrop {
-
-        @Override
-        public void onThemeChanged() {
-            mMainExecutor.execute(() -> {
-                DragAndDropController.this.onThemeChange();
-            });
-        }
-
-        @Override
-        public void onConfigChanged(Configuration newConfig) {
-            mMainExecutor.execute(() -> {
-                DragAndDropController.this.onConfigChanged(newConfig);
-            });
         }
     }
 }

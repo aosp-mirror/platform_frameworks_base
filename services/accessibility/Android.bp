@@ -16,7 +16,15 @@ filegroup {
 
 java_library_static {
     name: "services.accessibility",
-    defaults: ["platform_service_defaults"],
-    srcs: [":services.accessibility-sources"],
-    libs: ["services.core"],
+    defaults: [
+        "platform_service_defaults",
+    ],
+    srcs: [
+        ":services.accessibility-sources",
+        "//frameworks/base/packages/SettingsLib/RestrictedLockUtils:SettingsLibRestrictedLockUtilsSrc",
+    ],
+    libs: [
+        "services.core",
+        "androidx.annotation_annotation",
+    ],
 }

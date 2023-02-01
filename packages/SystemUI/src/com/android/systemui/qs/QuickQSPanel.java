@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.UiEventLogger;
@@ -46,16 +47,16 @@ public class QuickQSPanel extends QSPanel {
     }
 
     @Override
-    void initialize() {
-        super.initialize();
-        if (mHorizontalContentContainer != null) {
-            mHorizontalContentContainer.setClipChildren(false);
-        }
+    protected void setHorizontalContentContainerClipping() {
+        mHorizontalContentContainer.setClipToPadding(false);
+        mHorizontalContentContainer.setClipChildren(false);
     }
 
     @Override
     public TileLayout getOrCreateTileLayout() {
-        return new QQSSideLabelTileLayout(mContext);
+        QQSSideLabelTileLayout layout = new QQSSideLabelTileLayout(mContext);
+        layout.setId(R.id.qqs_tile_layout);
+        return layout;
     }
 
 
@@ -72,7 +73,11 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     protected void updatePadding() {
-        // QS Panel is setting a top padding by default, which we don't need.
+        int bottomPadding = getResources().getDimensionPixelSize(R.dimen.qqs_layout_padding_bottom);
+        setPaddingRelative(getPaddingStart(),
+                getPaddingTop(),
+                getPaddingEnd(),
+                bottomPadding);
     }
 
     @Override
@@ -167,6 +172,14 @@ public class QuickQSPanel extends QSPanel {
     @Override
     protected QSEvent tileVisibleEvent() {
         return QSEvent.QQS_TILE_VISIBLE;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        // Remove the collapse action from QSPanel
+        info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
     }
 
     static class QQSSideLabelTileLayout extends SideLabelTileLayout {

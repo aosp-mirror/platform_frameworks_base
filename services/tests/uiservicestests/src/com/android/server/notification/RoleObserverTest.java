@@ -48,9 +48,11 @@ import android.companion.ICompanionDeviceManager;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -62,6 +64,7 @@ import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.app.IAppOpsService;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.server.LocalServices;
@@ -87,6 +90,7 @@ import java.util.List;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
+// TODO (b/194833441): remove when notification permission is enabled
 public class RoleObserverTest extends UiServiceTestCase {
     private TestableNotificationManagerService mService;
     private NotificationManagerService.RoleObserver mRoleObserver;
@@ -159,10 +163,13 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(UsageStatsManagerInternal.class),
                     mock(DevicePolicyManagerInternal.class), mock(IUriGrantsManager.class),
                     mock(UriGrantsManagerInternal.class),
-                    mock(AppOpsManager.class), mUm, mock(NotificationHistoryManager.class),
+                    mock(AppOpsManager.class), mock(IAppOpsService.class),
+                    mUm, mock(NotificationHistoryManager.class),
                     mock(StatsManager.class), mock(TelephonyManager.class),
                     mock(ActivityManagerInternal.class),
-                    mock(MultiRateLimiter.class));
+                    mock(MultiRateLimiter.class), mock(PermissionHelper.class),
+                    mock(UsageStatsManagerInternal.class), mock (TelecomManager.class),
+                    mock(NotificationChannelLogger.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;

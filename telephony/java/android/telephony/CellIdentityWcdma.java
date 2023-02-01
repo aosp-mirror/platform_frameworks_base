@@ -313,7 +313,7 @@ public final class CellIdentityWcdma extends CellIdentity {
         mPsc = in.readInt();
         mUarfcn = in.readInt();
         mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
-        mCsgInfo = in.readParcelable(null);
+        mCsgInfo = in.readParcelable(null, android.telephony.ClosedSubscriberGroupInfo.class);
 
         updateGlobalCellId();
         if (DBG) log(toString());

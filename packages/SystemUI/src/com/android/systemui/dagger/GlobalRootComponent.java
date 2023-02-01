@@ -18,6 +18,9 @@ package com.android.systemui.dagger;
 
 import android.content.Context;
 
+import com.android.systemui.dagger.qualifiers.InstrumentationTest;
+import com.android.systemui.util.InitializationChecker;
+
 import javax.inject.Singleton;
 
 import dagger.BindsInstance;
@@ -27,10 +30,7 @@ import dagger.Component;
  * Root component for Dagger injection.
  */
 @Singleton
-@Component(modules = {
-        GlobalModule.class,
-        SysUISubcomponentModule.class,
-        WMModule.class})
+@Component(modules = {GlobalModule.class})
 public interface GlobalRootComponent {
 
     /**
@@ -40,17 +40,23 @@ public interface GlobalRootComponent {
     interface Builder {
         @BindsInstance
         Builder context(Context context);
-
+        @BindsInstance
+        Builder instrumentationTest(@InstrumentationTest boolean test);
         GlobalRootComponent build();
     }
 
     /**
-     * Builder for a WMComponent.
+     * Builder for a {@link WMComponent}, which makes it a subcomponent of this class.
      */
     WMComponent.Builder getWMComponentBuilder();
 
     /**
-     * Builder for a SysUIComponent.
+     * Builder for a {@link SysUIComponent}, which makes it a subcomponent of this class.
      */
     SysUIComponent.Builder getSysUIComponent();
+
+    /**
+     * Returns an {@link InitializationChecker}.
+     */
+    InitializationChecker getInitializationChecker();
 }

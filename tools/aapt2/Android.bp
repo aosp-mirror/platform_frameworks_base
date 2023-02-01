@@ -171,16 +171,6 @@ cc_library_host_static {
 }
 
 // ==========================================================
-// Build the host shared library: aapt2_jni
-// ==========================================================
-cc_library_host_shared {
-    name: "libaapt2_jni",
-    srcs: toolSources + ["jni/aapt2_jni.cpp"],
-    static_libs: ["libaapt2"],
-    defaults: ["aapt2_defaults"],
-}
-
-// ==========================================================
 // Build the host tests: aapt2_tests
 // ==========================================================
 cc_test_host {

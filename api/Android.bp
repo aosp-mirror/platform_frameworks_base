@@ -38,23 +38,9 @@ bootstrap_go_package {
     pluginFor: ["soong_build"],
 }
 
-python_defaults {
-    name: "python3_version_defaults",
-    version: {
-        py2: {
-            enabled: false,
-        },
-        py3: {
-            enabled: true,
-            embedded_launcher: false,
-        },
-    },
-}
-
 python_binary_host {
     name: "api_versions_trimmer",
     srcs: ["api_versions_trimmer.py"],
-    defaults: ["python3_version_defaults"],
 }
 
 python_test_host {
@@ -64,7 +50,6 @@ python_test_host {
         "api_versions_trimmer_unittests.py",
         "api_versions_trimmer.py",
     ],
-    defaults: ["python3_version_defaults"],
     test_options: {
         unit_test: true,
     },
@@ -73,7 +58,6 @@ python_test_host {
 python_binary_host {
     name: "merge_annotation_zips",
     srcs: ["merge_annotation_zips.py"],
-    defaults: ["python3_version_defaults"],
 }
 
 python_test_host {
@@ -83,7 +67,6 @@ python_test_host {
         "merge_annotation_zips.py",
         "merge_annotation_zips_test.py",
     ],
-    defaults: ["python3_version_defaults"],
     test_options: {
         unit_test: true,
     },
@@ -109,6 +92,7 @@ combined_apis {
         "android.net.ipsec.ike",
         "art.module.public.api",
         "conscrypt.module.public.api",
+        "framework-adservices",
         "framework-appsearch",
         "framework-bluetooth",
         "framework-connectivity",
@@ -116,18 +100,24 @@ combined_apis {
         "framework-graphics",
         "framework-media",
         "framework-mediaprovider",
+        "framework-ondevicepersonalization",
         "framework-permission",
         "framework-permission-s",
         "framework-scheduling",
         "framework-sdkextensions",
         "framework-statsd",
+        "framework-sdksandbox",
         "framework-tethering",
+        "framework-uwb",
+        "framework-virtualization",
         "framework-wifi",
         "i18n.module.public.api",
     ],
     system_server_classpath: [
         "service-media-s",
         "service-permission",
+        "service-rkp",
+        "service-sdksandbox",
     ],
 }
 
@@ -216,6 +206,24 @@ genrule {
     srcs: [
         ":android-non-updatable-doc-stubs-system{.annotations.zip}",
         ":all-modules-system-annotations",
+    ],
+}
+
+genrule {
+    name: "sdk-annotations-module-lib.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs-module-lib{.annotations.zip}",
+        ":all-modules-module-lib-annotations",
+    ],
+}
+
+genrule {
+    name: "sdk-annotations-system-server.zip",
+    defaults: ["sdk-annotations-defaults"],
+    srcs: [
+        ":android-non-updatable-doc-stubs-system-server{.annotations.zip}",
+        ":all-modules-system-server-annotations",
     ],
 }
 

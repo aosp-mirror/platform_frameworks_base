@@ -18,32 +18,42 @@ package com.android.systemui.statusbar.policy;
 
 import static android.os.BatteryManager.EXTRA_PRESENT;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.inOrder;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.staticMockMarker;
+
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
 
+import com.android.dx.mockito.inline.extended.StaticInOrder;
+import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
+import org.mockito.MockitoSession;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -53,19 +63,34 @@ public class BatteryControllerTest extends SysuiTestCase {
     @Mock private PowerManager mPowerManager;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private DemoModeController mDemoModeController;
+    @Mock private View mView;
     private BatteryControllerImpl mBatteryController;
 
+    private MockitoSession mMockitoSession;
+
     @Before
-    public void setUp() {
+    public void setUp() throws IllegalStateException {
         MockitoAnnotations.initMocks(this);
+        mMockitoSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(BatterySaverUtils.class)
+                .startMocking();
+
         mBatteryController = new BatteryControllerImpl(getContext(),
                 mock(EnhancedEstimates.class),
                 mPowerManager,
                 mBroadcastDispatcher,
                 mDemoModeController,
+                mock(DumpManager.class),
                 new Handler(),
                 new Handler());
+        // Can throw if updateEstimate is called on the main thread
         mBatteryController.init();
+    }
+
+    @After
+    public void tearDown() {
+        mMockitoSession.finishMocking();
     }
 
     @Test
@@ -134,5 +159,66 @@ public class BatteryControllerTest extends SysuiTestCase {
 
         // THEN it is informed about the battery state
         verify(cb, atLeastOnce()).onBatteryUnknownStateChanged(true);
+    }
+
+    @Test
+    public void testBatteryUtilsCalledOnSetPowerSaveMode() {
+        mBatteryController.setPowerSaveMode(true, mView);
+        mBatteryController.setPowerSaveMode(false, mView);
+
+        StaticInOrder inOrder = inOrder(staticMockMarker(BatterySaverUtils.class));
+        inOrder.verify(() -> BatterySaverUtils.setPowerSaveMode(getContext(), true, true));
+        inOrder.verify(() -> BatterySaverUtils.setPowerSaveMode(getContext(), false, true));
+    }
+
+    @Test
+    public void testSaveViewReferenceWhenSettingPowerSaveMode() {
+        mBatteryController.setPowerSaveMode(false, mView);
+
+        Assert.assertNull(mBatteryController.getLastPowerSaverStartView());
+
+        mBatteryController.setPowerSaveMode(true, mView);
+
+        Assert.assertSame(mView, mBatteryController.getLastPowerSaverStartView().get());
+    }
+
+    @Test
+    public void testClearViewReference() {
+        mBatteryController.setPowerSaveMode(true, mView);
+        mBatteryController.clearLastPowerSaverStartView();
+
+        Assert.assertNull(mBatteryController.getLastPowerSaverStartView());
+    }
+
+    @Test
+    public void testBatteryEstimateFetch_doesNotThrow() throws IllegalStateException {
+        mBatteryController.getEstimatedTimeRemainingString(
+                (String estimate) -> {
+                    // don't care about the result
+                });
+        TestableLooper.get(this).processAllMessages();
+        // Should not throw an exception
+    }
+
+    @Test
+    public void batteryStateChanged_withChargingSourceDock_isChargingSourceDockTrue() {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_CHARGING);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_DOCK);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertTrue(mBatteryController.isChargingSourceDock());
+    }
+
+    @Test
+    public void batteryStateChanged_withChargingSourceNotDock_isChargingSourceDockFalse() {
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intent.putExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_DISCHARGING);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_WIRELESS);
+
+        mBatteryController.onReceive(getContext(), intent);
+
+        Assert.assertFalse(mBatteryController.isChargingSourceDock());
     }
 }

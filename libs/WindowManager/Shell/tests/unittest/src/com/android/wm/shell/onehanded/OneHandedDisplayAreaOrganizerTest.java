@@ -50,6 +50,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -94,11 +95,11 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     @Mock
     WindowContainerTransaction mMockWindowContainerTransaction;
     @Mock
-    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
-    @Mock
     ShellExecutor mMockShellMainExecutor;
     @Mock
     OneHandedSettingsUtil mMockSettingsUitl;
+    @Mock
+    InteractionJankMonitor mJankMonitor;
 
     List<DisplayAreaAppearedInfo> mDisplayAreaAppearedInfoList = new ArrayList<>();
 
@@ -140,7 +141,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 mMockSettingsUitl,
                 mMockAnimationController,
                 mTutorialHandler,
-                mMockBackgroundOrganizer,
+                mJankMonitor,
                 mMockShellMainExecutor));
 
         for (int i = 0; i < DISPLAYAREA_INFO_COUNT; i++) {
@@ -427,9 +428,16 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                         mMockSettingsUitl,
                         mMockAnimationController,
                         mTutorialHandler,
-                        mMockBackgroundOrganizer,
+                        mJankMonitor,
                         mMockShellMainExecutor));
 
         assertThat(testSpiedDisplayAreaOrganizer.isReady()).isFalse();
+    }
+
+    @Test
+    public void testDisplayArea_setDisplayLayout_should_updateDisplayBounds() {
+        mSpiedDisplayAreaOrganizer.setDisplayLayout(mDisplayLayout);
+
+        verify(mSpiedDisplayAreaOrganizer).updateDisplayBounds();
     }
 }

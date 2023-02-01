@@ -69,17 +69,14 @@ import java.util.Map;
 
  <h4>Metadata Track</h4>
  <p>
-  Per-frame metadata is useful in carrying extra information that correlated with video or audio to
-  facilitate offline processing, e.g. gyro signals from the sensor could help video stabilization when
-  doing offline processing. Metadata track is only supported in MP4 container. When adding a new
-  metadata track, track's mime format must start with prefix "application/", e.g. "applicaton/gyro".
-  Metadata's format/layout will be defined by the application. Writing metadata is nearly the same as
-  writing video/audio data except that the data will not be from mediacodec. Application just needs
-  to pass the bytebuffer that contains the metadata and also the associated timestamp to the
-  {@link #writeSampleData} api. The timestamp must be in the same time base as video and audio. The
-  generated MP4 file uses TextMetaDataSampleEntry defined in section 12.3.3.2 of the ISOBMFF to signal
-  the metadata's mime format. When using{@link android.media.MediaExtractor} to extract the file with
-  metadata track, the mime format of the metadata will be extracted into {@link android.media.MediaFormat}.
+  Per-frame metadata carries information that correlates with video or audio to facilitate offline
+  processing. For example, gyro signals from the sensor can help video stabilization when doing
+  offline processing. Metadata tracks are only supported when multiplexing to the MP4 container
+  format. When adding a new metadata track, the MIME type format must start with prefix
+  "application/" (for example, "application/gyro"). The format of the metadata is
+  application-defined. Metadata timestamps must be in the same time base as video and audio
+  timestamps. The generated MP4 file uses TextMetaDataSampleEntry (defined in section 12.3.3.2 of
+  the ISOBMFF specification) to signal the metadata's MIME type.
 
  <pre class=prettyprint>
    MediaMuxer muxer = new MediaMuxer("temp.mp4", OutputFormat.MUXER_OUTPUT_MPEG_4);
@@ -338,13 +335,13 @@ final public class MediaMuxer {
     }
 
     /**
-     * Constructor.
      * Creates a media muxer that writes to the specified path.
+     * <p>The caller must not use the file {@code path} before calling {@link #stop}.
      * @param path The path of the output media file.
      * @param format The format of the output media file.
      * @see android.media.MediaMuxer.OutputFormat
      * @throws IllegalArgumentException if path is invalid or format is not supported.
-     * @throws IOException if failed to open the file for write.
+     * @throws IOException if an error occurs while opening or creating the output file.
      */
     public MediaMuxer(@NonNull String path, @Format int format) throws IOException {
         if (path == null) {
@@ -366,16 +363,19 @@ final public class MediaMuxer {
     }
 
     /**
-     * Constructor.
-     * Creates a media muxer that writes to the specified FileDescriptor. File descriptor
-     * must be seekable and writable. Application should not use the file referenced
-     * by this file descriptor until {@link #stop}. It is the application's responsibility
-     * to close the file descriptor. It is safe to do so as soon as this call returns.
-     * @param fd The FileDescriptor of the output media file.
+     * Creates a media muxer that writes to the specified FileDescriptor.
+     * <p>The caller must not use the file referenced by the specified {@code fd} before calling
+     * {@link #stop}.
+     * <p>It is the caller's responsibility to close the file descriptor, which is safe to do so
+     * as soon as this call returns.
+     * @param fd The FileDescriptor of the output media file. If {@code format} is
+     * {@link OutputFormat#MUXER_OUTPUT_WEBM}, {@code fd} must be open in read-write mode.
+     * Otherwise, write mode is sufficient, but read-write is also accepted.
      * @param format The format of the output media file.
      * @see android.media.MediaMuxer.OutputFormat
-     * @throws IllegalArgumentException if fd is invalid or format is not supported.
-     * @throws IOException if failed to open the file for write.
+     * @throws IllegalArgumentException if {@code format} is not supported, or if {@code fd} is
+     * not open in the expected mode.
+     * @throws IOException if an error occurs while performing an IO operation.
      */
     public MediaMuxer(@NonNull FileDescriptor fd, @Format int format) throws IOException {
         setUpMediaMuxer(fd, format);

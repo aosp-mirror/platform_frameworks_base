@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -104,14 +106,6 @@ public class ActivityTaskManager {
      */
     public static final int RESIZE_MODE_USER_FORCED =
             RESIZE_MODE_PRESERVE_WINDOW | RESIZE_MODE_FORCED;
-
-    /**
-     * Extra included on intents that are delegating the call to
-     * ActivityManager#startActivityAsCaller to another app.  This token is necessary for that call
-     * to succeed.  Type is IBinder.
-     * @hide
-     */
-    public static final String EXTRA_PERMISSION_TOKEN = "android.app.extra.PERMISSION_TOKEN";
 
     /**
      * Extra included on intents that contain an EXTRA_INTENT, with options that the contained
@@ -377,7 +371,8 @@ public class ActivityTaskManager {
      * @hide
      */
     public List<ActivityManager.RunningTaskInfo> getTasks(int maxNum) {
-        return getTasks(maxNum, false /* filterForVisibleRecents */);
+        return getTasks(maxNum, false /* filterForVisibleRecents */, false /* keepIntentExtra */,
+                INVALID_DISPLAY);
     }
 
     /**
@@ -386,7 +381,8 @@ public class ActivityTaskManager {
      */
     public List<ActivityManager.RunningTaskInfo> getTasks(
             int maxNum, boolean filterOnlyVisibleRecents) {
-        return getTasks(maxNum, filterOnlyVisibleRecents, false /* keepIntentExtra */);
+        return getTasks(maxNum, filterOnlyVisibleRecents, false /* keepIntentExtra */,
+                INVALID_DISPLAY);
     }
 
     /**
@@ -396,8 +392,20 @@ public class ActivityTaskManager {
      */
     public List<ActivityManager.RunningTaskInfo> getTasks(
             int maxNum, boolean filterOnlyVisibleRecents, boolean keepIntentExtra) {
+        return getTasks(maxNum, filterOnlyVisibleRecents, keepIntentExtra, INVALID_DISPLAY);
+    }
+
+    /**
+     * @return List of running tasks that can be filtered by visibility and displayId in recents
+     * and keep intent extra.
+     * @param displayId the target display id, or {@link INVALID_DISPLAY} not to filter by displayId
+     * @hide
+     */
+    public List<ActivityManager.RunningTaskInfo> getTasks(
+            int maxNum, boolean filterOnlyVisibleRecents, boolean keepIntentExtra, int displayId) {
         try {
-            return getService().getTasks(maxNum, filterOnlyVisibleRecents, keepIntentExtra);
+            return getService().getTasks(maxNum, filterOnlyVisibleRecents, keepIntentExtra,
+                    displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

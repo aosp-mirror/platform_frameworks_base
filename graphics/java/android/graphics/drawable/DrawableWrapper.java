@@ -352,7 +352,7 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
-    protected boolean onStateChange(int[] state) {
+    protected boolean onStateChange(@NonNull int[] state) {
         if (mDrawable != null && mDrawable.isStateful()) {
             final boolean changed = mDrawable.setState(state);
             if (changed) {

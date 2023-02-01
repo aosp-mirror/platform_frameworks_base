@@ -23,28 +23,28 @@ import android.annotation.SystemService;
 import android.annotation.WorkerThread;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Looper;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SynchronousResultReceiver;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.SyncResultReceiver;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeoutException;
@@ -92,7 +92,8 @@ public final class TranslationManager {
     private final Map<Consumer<TranslationCapability>, IRemoteCallback> mCapabilityCallbacks =
             new ArrayMap<>();
 
-    private static final Random ID_GENERATOR = new Random();
+    // TODO(b/158778794): make the session ids truly globally unique across processes
+    private static final SecureRandom ID_GENERATOR = new SecureRandom();
     private final Object mLock = new Object();
 
     @NonNull
@@ -102,12 +103,7 @@ public final class TranslationManager {
 
     @NonNull
     @GuardedBy("mLock")
-    private final SparseArray<Translator> mTranslators = new SparseArray<>();
-
-    @NonNull
-    @GuardedBy("mLock")
-    private final ArrayMap<TranslationContext, Integer> mTranslatorIds =
-            new ArrayMap<>();
+    private final IntArray mTranslatorIds = new IntArray();
 
     @NonNull
     private final Handler mHandler;
@@ -127,6 +123,12 @@ public final class TranslationManager {
     /**
      * Creates an on-device Translator for natural language translation.
      *
+     * <p>In Android 12, this method provided the same cached Translator object when given the
+     * same TranslationContext object. Do not use a Translator destroyed elsewhere as this will
+     * cause an exception on Android 12.
+     *
+     * <p>In later versions, this method never returns a cached Translator.
+     *
      * @param translationContext {@link TranslationContext} containing the specs for creating the
      *                                                     Translator.
      * @param executor Executor to run callback operations
@@ -140,45 +142,25 @@ public final class TranslationManager {
         Objects.requireNonNull(callback, "callback cannot be null");
 
         synchronized (mLock) {
-            // TODO(b/176464808): Disallow multiple Translator now, it will throw
-            //  IllegalStateException. Need to discuss if we can allow multiple Translators.
-            if (mTranslatorIds.containsKey(translationContext)) {
-                executor.execute(() -> callback.accept(
-                        mTranslators.get(mTranslatorIds.get(translationContext))));
-                return;
-            }
-
             int translatorId;
             do {
                 translatorId = Math.abs(ID_GENERATOR.nextInt());
-            } while (translatorId == 0 || mTranslators.indexOfKey(translatorId) >= 0);
+            } while (translatorId == 0 || mTranslatorIds.indexOf(translatorId) >= 0);
             final int tId = translatorId;
 
-            new Translator(mContext, translationContext, translatorId, this, mHandler, mService,
-                    new Consumer<Translator>() {
-                        @Override
-                        public void accept(Translator translator) {
-                            if (translator == null) {
-                                final long token = Binder.clearCallingIdentity();
-                                try {
-                                    executor.execute(() -> callback.accept(null));
-                                } finally {
-                                    Binder.restoreCallingIdentity(token);
-                                }
-                                return;
-                            }
-
-                            synchronized (mLock) {
-                                mTranslators.put(tId, translator);
-                                mTranslatorIds.put(translationContext, tId);
-                            }
-                            final long token = Binder.clearCallingIdentity();
-                            try {
-                                executor.execute(() -> callback.accept(translator));
-                            } finally {
-                                Binder.restoreCallingIdentity(token);
-                            }
+            new Translator(mContext, translationContext, tId, this, mHandler, mService,
+                    translator -> {
+                        if (translator == null) {
+                            Binder.withCleanCallingIdentity(
+                                    () -> executor.execute(() -> callback.accept(null)));
+                            return;
                         }
+
+                        synchronized (mLock) {
+                            mTranslatorIds.add(tId);
+                        }
+                        Binder.withCleanCallingIdentity(
+                                () -> executor.execute(() -> callback.accept(translator)));
                     });
         }
     }
@@ -201,16 +183,10 @@ public final class TranslationManager {
         Objects.requireNonNull(translationContext, "translationContext cannot be null");
 
         synchronized (mLock) {
-            // TODO(b/176464808): Disallow multiple Translator now, it will throw
-            //  IllegalStateException. Need to discuss if we can allow multiple Translators.
-            if (mTranslatorIds.containsKey(translationContext)) {
-                return mTranslators.get(mTranslatorIds.get(translationContext));
-            }
-
             int translatorId;
             do {
                 translatorId = Math.abs(ID_GENERATOR.nextInt());
-            } while (translatorId == 0 || mTranslators.indexOfKey(translatorId) >= 0);
+            } while (translatorId == 0 || mTranslatorIds.indexOf(translatorId) >= 0);
 
             final Translator newTranslator = new Translator(mContext, translationContext,
                     translatorId, this, mHandler, mService);
@@ -220,8 +196,7 @@ public final class TranslationManager {
                 if (!newTranslator.isSessionCreated()) {
                     return null;
                 }
-                mTranslators.put(translatorId, newTranslator);
-                mTranslatorIds.put(translationContext, translatorId);
+                mTranslatorIds.add(translatorId);
                 return newTranslator;
             } catch (Translator.ServiceBinderReceiver.TimeoutException e) {
                 // TODO(b/176464808): maybe make SyncResultReceiver.TimeoutException constructor
@@ -271,13 +246,10 @@ public final class TranslationManager {
             if (result.resultCode != STATUS_SYNC_CALL_SUCCESS) {
                 return Collections.emptySet();
             }
-            Parcelable[] parcelables = result.bundle.getParcelableArray(EXTRA_CAPABILITIES);
-            ArraySet<TranslationCapability> capabilities = new ArraySet();
-            for (Parcelable obj : parcelables) {
-                if (obj instanceof TranslationCapability) {
-                    capabilities.add((TranslationCapability) obj);
-                }
-            }
+            ParceledListSlice<TranslationCapability> listSlice =
+                    result.bundle.getParcelable(EXTRA_CAPABILITIES);
+            ArraySet<TranslationCapability> capabilities =
+                    new ArraySet<>(listSlice == null ? null : listSlice.getList());
             return capabilities;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -463,12 +435,9 @@ public final class TranslationManager {
 
     void removeTranslator(int id) {
         synchronized (mLock) {
-            mTranslators.remove(id);
-            for (int i = 0; i < mTranslatorIds.size(); i++) {
-                if (mTranslatorIds.valueAt(i) == id) {
-                    mTranslatorIds.removeAt(i);
-                    break;
-                }
+            int index = mTranslatorIds.indexOf(id);
+            if (index >= 0) {
+                mTranslatorIds.remove(index);
             }
         }
     }

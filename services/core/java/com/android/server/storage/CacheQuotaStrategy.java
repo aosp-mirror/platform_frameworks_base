@@ -38,6 +38,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.StatFs;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.DateUtils;
@@ -280,7 +281,8 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
         try {
             fileStream = mPreviousValuesFile.startWrite();
             TypedXmlSerializer out = Xml.resolveSerializer(fileStream);
-            saveToXml(out, processedRequests, 0);
+            final StatFs stats = new StatFs(Environment.getDataDirectory().getAbsolutePath());
+            saveToXml(out, processedRequests, stats.getAvailableBytes());
             mPreviousValuesFile.finishWrite(fileStream);
         } catch (Exception e) {
             Slog.e(TAG, "An error occurred while writing the cache quota file.", e);

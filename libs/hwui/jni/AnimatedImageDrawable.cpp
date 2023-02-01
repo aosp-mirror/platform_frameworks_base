@@ -30,7 +30,8 @@
 
 using namespace android;
 
-static jmethodID gAnimatedImageDrawable_onAnimationEndMethodID;
+static jclass gAnimatedImageDrawableClass;
+static jmethodID gAnimatedImageDrawable_callOnAnimationEndMethodID;
 
 // Note: jpostProcess holds a handle to the ImageDecoder.
 static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
@@ -178,26 +179,23 @@ class InvokeListener : public MessageHandler {
 public:
     InvokeListener(JNIEnv* env, jobject javaObject) {
         LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&mJvm) != JNI_OK);
-        // Hold a weak reference to break a cycle that would prevent GC.
-        mWeakRef = env->NewWeakGlobalRef(javaObject);
+        mCallbackRef = env->NewGlobalRef(javaObject);
     }
 
     ~InvokeListener() override {
         auto* env = requireEnv(mJvm);
-        env->DeleteWeakGlobalRef(mWeakRef);
+        env->DeleteGlobalRef(mCallbackRef);
     }
 
     virtual void handleMessage(const Message&) override {
         auto* env = get_env_or_die(mJvm);
-        jobject localRef = env->NewLocalRef(mWeakRef);
-        if (localRef) {
-            env->CallVoidMethod(localRef, gAnimatedImageDrawable_onAnimationEndMethodID);
-        }
+        env->CallStaticVoidMethod(gAnimatedImageDrawableClass,
+                                  gAnimatedImageDrawable_callOnAnimationEndMethodID, mCallbackRef);
     }
 
 private:
     JavaVM* mJvm;
-    jweak mWeakRef;
+    jobject mCallbackRef;
 };
 
 class JniAnimationEndListener : public OnAnimationEndListener {
@@ -253,26 +251,31 @@ static void AnimatedImageDrawable_nSetBounds(JNIEnv* env, jobject /*clazz*/, jlo
 }
 
 static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
-    { "nCreate",             "(JLandroid/graphics/ImageDecoder;IIJZLandroid/graphics/Rect;)J",(void*) AnimatedImageDrawable_nCreate },
-    { "nGetNativeFinalizer", "()J",                                                          (void*) AnimatedImageDrawable_nGetNativeFinalizer },
-    { "nDraw",               "(JJ)J",                                                        (void*) AnimatedImageDrawable_nDraw },
-    { "nSetAlpha",           "(JI)V",                                                        (void*) AnimatedImageDrawable_nSetAlpha },
-    { "nGetAlpha",           "(J)I",                                                         (void*) AnimatedImageDrawable_nGetAlpha },
-    { "nSetColorFilter",     "(JJ)V",                                                        (void*) AnimatedImageDrawable_nSetColorFilter },
-    { "nIsRunning",          "(J)Z",                                                         (void*) AnimatedImageDrawable_nIsRunning },
-    { "nStart",              "(J)Z",                                                         (void*) AnimatedImageDrawable_nStart },
-    { "nStop",               "(J)Z",                                                         (void*) AnimatedImageDrawable_nStop },
-    { "nGetRepeatCount",     "(J)I",                                                         (void*) AnimatedImageDrawable_nGetRepeatCount },
-    { "nSetRepeatCount",     "(JI)V",                                                        (void*) AnimatedImageDrawable_nSetRepeatCount },
-    { "nSetOnAnimationEndListener", "(JLandroid/graphics/drawable/AnimatedImageDrawable;)V", (void*) AnimatedImageDrawable_nSetOnAnimationEndListener },
-    { "nNativeByteSize",     "(J)J",                                                         (void*) AnimatedImageDrawable_nNativeByteSize },
-    { "nSetMirrored",        "(JZ)V",                                                        (void*) AnimatedImageDrawable_nSetMirrored },
-    { "nSetBounds",          "(JLandroid/graphics/Rect;)V",                                  (void*) AnimatedImageDrawable_nSetBounds },
+        {"nCreate", "(JLandroid/graphics/ImageDecoder;IIJZLandroid/graphics/Rect;)J",
+         (void*)AnimatedImageDrawable_nCreate},
+        {"nGetNativeFinalizer", "()J", (void*)AnimatedImageDrawable_nGetNativeFinalizer},
+        {"nDraw", "(JJ)J", (void*)AnimatedImageDrawable_nDraw},
+        {"nSetAlpha", "(JI)V", (void*)AnimatedImageDrawable_nSetAlpha},
+        {"nGetAlpha", "(J)I", (void*)AnimatedImageDrawable_nGetAlpha},
+        {"nSetColorFilter", "(JJ)V", (void*)AnimatedImageDrawable_nSetColorFilter},
+        {"nIsRunning", "(J)Z", (void*)AnimatedImageDrawable_nIsRunning},
+        {"nStart", "(J)Z", (void*)AnimatedImageDrawable_nStart},
+        {"nStop", "(J)Z", (void*)AnimatedImageDrawable_nStop},
+        {"nGetRepeatCount", "(J)I", (void*)AnimatedImageDrawable_nGetRepeatCount},
+        {"nSetRepeatCount", "(JI)V", (void*)AnimatedImageDrawable_nSetRepeatCount},
+        {"nSetOnAnimationEndListener", "(JLjava/lang/ref/WeakReference;)V",
+         (void*)AnimatedImageDrawable_nSetOnAnimationEndListener},
+        {"nNativeByteSize", "(J)J", (void*)AnimatedImageDrawable_nNativeByteSize},
+        {"nSetMirrored", "(JZ)V", (void*)AnimatedImageDrawable_nSetMirrored},
+        {"nSetBounds", "(JLandroid/graphics/Rect;)V", (void*)AnimatedImageDrawable_nSetBounds},
 };
 
 int register_android_graphics_drawable_AnimatedImageDrawable(JNIEnv* env) {
-    jclass animatedImageDrawable_class = FindClassOrDie(env, "android/graphics/drawable/AnimatedImageDrawable");
-    gAnimatedImageDrawable_onAnimationEndMethodID = GetMethodIDOrDie(env, animatedImageDrawable_class, "onAnimationEnd", "()V");
+    gAnimatedImageDrawableClass = reinterpret_cast<jclass>(env->NewGlobalRef(
+            FindClassOrDie(env, "android/graphics/drawable/AnimatedImageDrawable")));
+    gAnimatedImageDrawable_callOnAnimationEndMethodID =
+            GetStaticMethodIDOrDie(env, gAnimatedImageDrawableClass, "callOnAnimationEnd",
+                                   "(Ljava/lang/ref/WeakReference;)V");
 
     return android::RegisterMethodsOrDie(env, "android/graphics/drawable/AnimatedImageDrawable",
             gAnimatedImageDrawableMethods, NELEM(gAnimatedImageDrawableMethods));

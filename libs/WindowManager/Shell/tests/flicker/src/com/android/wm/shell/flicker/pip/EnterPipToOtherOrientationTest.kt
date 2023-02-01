@@ -28,13 +28,12 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
-import com.android.wm.shell.flicker.testapp.Components.PipActivity.ACTION_ENTER_PIP
 import com.android.wm.shell.flicker.testapp.Components.FixedActivity.EXTRA_FIXED_ORIENTATION
+import com.android.wm.shell.flicker.testapp.Components.PipActivity.ACTION_ENTER_PIP
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,7 +43,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip while changing orientation (from app in landscape to pip window in portrait)
  *
- * To run this test: `atest EnterPipToOtherOrientationTest:EnterPipToOtherOrientationTest`
+ * To run this test: `atest WMShellFlickerTests:EnterPipToOtherOrientationTest`
  *
  * Actions:
  *     Launch [testApp] on a fixed portrait orientation
@@ -74,9 +73,9 @@ class EnterPipToOtherOrientationTest(
     /**
      * Defines the transition used to run the test
      */
-    override val transition: FlickerBuilder.(Map<String, Any?>) -> Unit
-        get() = { configuration ->
-            setupAndTeardown(this, configuration)
+    override val transition: FlickerBuilder.() -> Unit
+        get() = {
+            setupAndTeardown(this)
 
             setup {
                 eachRun {
@@ -98,7 +97,7 @@ class EnterPipToOtherOrientationTest(
                 // Enter PiP, and assert that the PiP is within bounds now that the device is back
                 // in portrait
                 broadcastActionTrigger.doAction(ACTION_ENTER_PIP)
-                wmHelper.waitFor { it.wmState.hasPipWindow() }
+                wmHelper.waitPipShown()
                 wmHelper.waitForAppTransitionIdle()
                 // during rotation the status bar becomes invisible and reappears at the end
                 wmHelper.waitForNavBarStatusBarVisible()
@@ -112,14 +111,6 @@ class EnterPipToOtherOrientationTest(
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
-
-    /**
-     * Checks that the [FlickerComponentName.STATUS_BAR] has the correct position at
-     * the start and end of the transition
-     */
-    @Presubmit
-    @Test
-    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
     /**
      * Checks that all parts of the screen are covered at the start and end of the transition
@@ -224,7 +215,7 @@ class EnterPipToOtherOrientationTest(
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                    repetitions = 5)
+                    repetitions = 3)
         }
     }
 }

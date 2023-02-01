@@ -69,7 +69,7 @@ public class UsbDeviceConnection {
             boolean wasOpened = native_open(name, pfd.getFileDescriptor());
 
             if (wasOpened) {
-                mCloseGuard.open("close");
+                mCloseGuard.open("UsbDeviceConnection.close");
             }
 
             return wasOpened;
@@ -104,6 +104,34 @@ public class UsbDeviceConnection {
             }
 
             return request.cancelIfOpen();
+        }
+    }
+
+    /**
+     * This is meant to be called by UsbRequest's queue() in order to synchronize on
+     * UsbDeviceConnection's mLock to prevent the connection being closed while queueing.
+     */
+    /* package */ boolean queueRequest(UsbRequest request, ByteBuffer buffer, int length) {
+        synchronized (mLock) {
+            if (!isOpen()) {
+                return false;
+            }
+
+            return request.queueIfConnectionOpen(buffer, length);
+        }
+    }
+
+    /**
+     * This is meant to be called by UsbRequest's queue() in order to synchronize on
+     * UsbDeviceConnection's mLock to prevent the connection being closed while queueing.
+     */
+    /* package */ boolean queueRequest(UsbRequest request, @Nullable ByteBuffer buffer) {
+        synchronized (mLock) {
+            if (!isOpen()) {
+                return false;
+            }
+
+            return request.queueIfConnectionOpen(buffer);
         }
     }
 

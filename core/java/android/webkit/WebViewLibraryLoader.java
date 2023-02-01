@@ -178,12 +178,23 @@ public class WebViewLibraryLoader {
      */
     static void reserveAddressSpaceInZygote() {
         System.loadLibrary("webviewchromium_loader");
-        boolean is64Bit = VMRuntime.getRuntime().is64Bit();
-        // On 64-bit address space is really cheap and we can reserve 1GB which is plenty.
-        // On 32-bit it's fairly scarce and we should keep it to a realistic number that
-        // permits some future growth but doesn't hog space: we use 130MB which is roughly
-        // what was calculated on older OS versions in practice.
-        long addressSpaceToReserve = is64Bit ? 1 * 1024 * 1024 * 1024 : 130 * 1024 * 1024;
+        long addressSpaceToReserve;
+        if (VMRuntime.getRuntime().is64Bit()) {
+            // On 64-bit address space is really cheap and we can reserve 1GB which is plenty.
+            addressSpaceToReserve = 1 * 1024 * 1024 * 1024;
+        } else if (VMRuntime.getRuntime().vmInstructionSet().equals("arm")) {
+            // On 32-bit the address space is fairly scarce, hence we should keep it to a realistic
+            // number that permits some future growth but doesn't hog space. For ARM we use 130MB
+            // which is roughly what was calculated on older OS versions. The size has been
+            // growing gradually, but a few efforts have offset it back to the size close to the
+            // original.
+            addressSpaceToReserve = 130 * 1024 * 1024;
+        } else {
+            // The number below was obtained for a binary used for x86 emulators, allowing some
+            // natural growth.
+            addressSpaceToReserve = 190 * 1024 * 1024;
+        }
+
         sAddressSpaceReserved = nativeReserveAddressSpace(addressSpaceToReserve);
 
         if (sAddressSpaceReserved) {

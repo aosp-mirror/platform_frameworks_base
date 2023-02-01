@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -207,6 +208,20 @@ public class ConfigurationContainerTests {
         assertEquals(childOverrideConfig2, child2.getRequestedOverrideConfiguration());
         assertEquals(mergedOverrideConfig2, child2.getMergedOverrideConfiguration());
         assertEquals(mergedConfig2, child2.getConfiguration());
+    }
+
+    @Test
+    public void testSetAlwaysOnTop() {
+        final TestConfigurationContainer root = new TestConfigurationContainer();
+        final TestConfigurationContainer child1 = root.addChild();
+        final TestConfigurationContainer child2 = root.addChild();
+        root.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        root.setAlwaysOnTop(true);
+        final TestConfigurationContainer child3 = root.addChild();
+        assertEquals(true, root.isAlwaysOnTop());
+        assertEquals(false, child1.isAlwaysOnTop());
+        assertEquals(false, child2.isAlwaysOnTop());
+        assertEquals(false, child3.isAlwaysOnTop());
     }
 
     @Test

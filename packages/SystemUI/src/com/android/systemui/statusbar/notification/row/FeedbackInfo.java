@@ -46,13 +46,13 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.util.Compile;
 
 public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsContent {
 
     private static final String TAG = "FeedbackInfo";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
 
     private NotificationGuts mGutsContainer;
     private NotificationListenerService.Ranking mRanking;
@@ -61,7 +61,6 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
     private String mPkg;
     private NotificationEntry mEntry;
 
-    private NotificationEntryManager mNotificationEntryManager;
     private IStatusBarService mStatusBarService;
     private AssistantFeedbackController mFeedbackController;
     private NotificationGutsManager mNotificationGutsManager;
@@ -85,7 +84,6 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
         mRanking = entry.getRanking();
         mFeedbackController = controller;
         mAppName = mPkg;
-        mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mStatusBarService = Dependency.get(IStatusBarService.class);
         mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
 
@@ -167,7 +165,7 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
     }
 
     private void positiveFeedback(View v) {
-        mGutsContainer.closeControls(v, false);
+        mGutsContainer.closeControls(v, /* save= */ false);
         handleFeedback(true);
     }
 
@@ -178,7 +176,7 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
             menuItem = mMenuRowPlugin.getLongpressMenuItem(mContext);
         }
 
-        mGutsContainer.closeControls(v, false);
+        mGutsContainer.closeControls(v, /* save= */ false);
         mNotificationGutsManager.openGuts(mExpandableNotificationRow, 0, 0, menuItem);
         handleFeedback(false);
     }
@@ -205,7 +203,7 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
     }
 
     private void closeControls(View v) {
-        mGutsContainer.closeControls(v, false);
+        mGutsContainer.closeControls(v, /* save= */ false);
     }
 
     @Override
@@ -234,7 +232,7 @@ public class FeedbackInfo extends LinearLayout implements NotificationGuts.GutsC
     }
 
     @Override
-    public boolean shouldBeSaved() {
+    public boolean shouldBeSavedOnClose() {
         return false;
     }
 

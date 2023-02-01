@@ -37,6 +37,9 @@
     <!-- When the lock screen is showing and the phone plugged in, and the battery is not fully charged, say that it's wirelessly charging. [CHAR LIMIT=50]  -->
     <string name="keyguard_plugged_in_wireless"><xliff:g id="percentage" example="20%">%s</xliff:g> • Charging wirelessly</string>
 
+    <!-- When the lock screen is showing and the phone plugged in, and the battery is not fully charged, say that it's charging. [CHAR LIMIT=50]  -->
+    <string name="keyguard_plugged_in_dock"><xliff:g id="percentage" example="20%">%s</xliff:g> • Charging</string>
+
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, say that it's charging.  -->
     <string name="keyguard_plugged_in"><xliff:g id="percentage">%s</xliff:g> • Charging</string>
@@ -50,7 +53,7 @@
     <string name="keyguard_plugged_in_charging_slowly"><xliff:g id="percentage">%s</xliff:g> • Charging slowly</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the defend mode is triggered, say that charging is temporarily limited.  -->
-    <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Charging temporarily limited</string>
+    <string name="keyguard_plugged_in_charging_limited"><xliff:g id="percentage">%s</xliff:g> • Charging is paused to protect battery</string>
 
     <!-- On the keyguard screen, when pattern lock is disabled, only tell them to press menu to unlock.  This is shown in small font at the bottom. -->
     <string name="keyguard_instructions_when_pattern_disabled">Press Menu to unlock.</string>
@@ -58,25 +61,25 @@
     <!-- SIM messages --><skip />
     <!-- When the user inserts a sim card from an unsupported network, it becomes network locked -->
     <string name="keyguard_network_locked_message">Network locked</string>
-    <!-- Shown when there is no SIM card. -->
-    <string name="keyguard_missing_sim_message_short">No SIM card</string>
-    <!-- Shown to ask the user to insert a SIM card. -->
-    <string name="keyguard_missing_sim_instructions">Insert a SIM card.</string>
-    <!-- Shown to ask the user to insert a SIM card when sim is missing or not readable. -->
-    <string name="keyguard_missing_sim_instructions_long">The SIM card is missing or not readable. Insert a SIM card.</string>
-    <!-- Shown when SIM card is permanently disabled. -->
-    <string name="keyguard_permanent_disabled_sim_message_short">Unusable SIM card.</string>
-    <!-- Shown to inform the user to SIM card is permanently disabled. -->
-    <string name="keyguard_permanent_disabled_sim_instructions">Your SIM card has been permanently disabled.\n
-    Contact your wireless service provider for another SIM card.</string>
+    <!-- Shown when there is no SIM. -->
+    <string name="keyguard_missing_sim_message_short">No SIM</string>
+    <!-- Shown to ask the user to add a SIM. -->
+    <string name="keyguard_missing_sim_instructions">Add a SIM.</string>
+    <!-- Shown to ask the user to add a SIM when sim is missing or not readable. -->
+    <string name="keyguard_missing_sim_instructions_long">The SIM is missing or not readable. Add a SIM.</string>
+    <!-- Shown when SIM is permanently disabled. -->
+    <string name="keyguard_permanent_disabled_sim_message_short">Unusable SIM.</string>
+    <!-- Shown to inform the user to SIM is permanently deactivated. -->
+    <string name="keyguard_permanent_disabled_sim_instructions">Your SIM has been permanently deactivated.\n
+    Contact your wireless service provider for another SIM.</string>
     <!-- Shown to tell the user that their SIM is locked and they must unlock it. -->
-    <string name="keyguard_sim_locked_message">SIM card is locked.</string>
+    <string name="keyguard_sim_locked_message">SIM is locked.</string>
     <!-- When the user enters a wrong sim pin too many times, it becomes PUK locked (Pin Unlock Kode) -->
-    <string name="keyguard_sim_puk_locked_message">SIM card is PUK-locked.</string>
+    <string name="keyguard_sim_puk_locked_message">SIM is PUK-locked.</string>
     <!-- For the unlock screen, When the user enters a sim unlock code, it takes a little while to check
          whether it is valid, and to unlock the sim if it is valid.  we display a
          progress dialog in the meantime.  this is the emssage. -->
-    <string name="keyguard_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message">Unlocking SIM\u2026</string>
     <!-- Composes together the carrier name and the SIM card locked message. Example: CarrierName (SIM LOCKED) -->
     <string name="keyguard_carrier_name_with_sim_locked_template" translatable="false"><xliff:g id="carrier">%s</xliff:g> (<xliff:g id="message">%s</xliff:g>)</string>
 
@@ -117,10 +120,11 @@
     <!-- Message shown when user enters wrong PIN -->
     <string name="kg_wrong_pin">Wrong PIN</string>
     <!-- Countdown message shown after too many failed unlock attempts -->
-    <plurals name="kg_too_many_failed_attempts_countdown">
-        <item quantity="one">Try again in 1 second.</item>
-        <item quantity="other">Try again in <xliff:g id="number">%d</xliff:g> seconds.</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown">{count, plural,
+        =1 {Try again in # second.}
+        other {Try again in # seconds.}
+    }
+    </string>
     <!-- Instructions for using the SIM PIN unlock screen -->
     <string name="kg_sim_pin_instructions">Enter SIM PIN.</string>
     <!-- Instructions for using the SIM PIN unlock screen when there's more than one SIM -->
@@ -135,8 +139,8 @@
     <string name="kg_puk_enter_pin_hint">Enter desired PIN code</string>
     <!-- Message shown when the user needs to confirm the PIN they just entered in the PUK screen -->
     <string name="kg_enter_confirm_pin_hint">Confirm desired PIN code</string>
-    <!-- Message shown in dialog while the device is unlocking the SIM card -->
-    <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM card\u2026</string>
+    <!-- Message shown in dialog while the device is unlocking the SIM -->
+    <string name="kg_sim_unlock_progress_dialog_message">Unlocking SIM\u2026</string>
     <!-- Message shown when the user enters an invalid SIM pin password in PUK screen -->
     <string name="kg_invalid_sim_pin_hint">Type a PIN that is 4 to 8 numbers.</string>
     <!-- Message shown when the user enters an invalid PUK code in the PUK screen -->
@@ -160,21 +164,21 @@
          Displayed in a dialog box.  -->
     <string name="kg_password_wrong_pin_code_pukked">Incorrect SIM PIN code you must now contact your carrier to unlock your device.</string>
     <!-- Instructions telling the user that they entered the wrong SIM PIN while trying
-         to unlock the keyguard.  Displayed in a dialog box.  -->
-    <plurals name="kg_password_wrong_pin_code">
-        <item quantity="one">Incorrect SIM PIN code, you have <xliff:g id="number">%d</xliff:g> remaining attempt before you must contact your carrier to unlock your device.</item>
-        <item quantity="other">Incorrect SIM PIN code, you have <xliff:g id="number">%d</xliff:g> remaining attempts.</item>
-    </plurals>
+         to unlock the keyguard.  Displayed in a dialog box.  [CHAR LIMIT=NONE] -->
+    <string name="kg_password_wrong_pin_code"> {count, plural,
+        =1 {Incorrect SIM PIN code, you have # remaining attempt before you must contact your carrier to unlock your device.}
+        other {Incorrect SIM PIN code, you have # remaining attempts. }
+    }</string>
 
     <!-- Instructions telling the user that they have exhausted SIM PUK retries and the SIM is now unusable.
          Displayed in a dialog box.  -->
     <string name="kg_password_wrong_puk_code_dead">SIM is unusable. Contact your carrier.</string>
     <!-- Instructions telling the user that they entered the wrong puk while trying
-         to unlock the keyguard.  Displayed in a dialog box.  -->
-    <plurals name="kg_password_wrong_puk_code">
-        <item quantity="one">Incorrect SIM PUK code, you have <xliff:g id="number">%d</xliff:g> remaining attempt before SIM becomes permanently unusable.</item>
-        <item quantity="other">Incorrect SIM PUK code, you have <xliff:g id="number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.</item>
-    </plurals>
+         to unlock the keyguard.  Displayed in a dialog box.  [CHAR LIMIT=NONE] -->
+    <string name="kg_password_wrong_puk_code">{count, plural,
+        =1 {Incorrect SIM PUK code, you have # remaining attempt before SIM becomes permanently unusable.}
+        other {Incorrect SIM PUK code, you have # remaining attempts before SIM becomes permanently unusable.}
+    }</string>
     <!-- Instructions telling the user that the operation to unlock the keyguard
          with SIM PIN failed. Displayed in one line in a large font.  -->
     <string name="kg_password_pin_failed">SIM PIN operation failed!</string>
@@ -213,30 +217,23 @@
      the force lock button. [CHAR LIMIT=80] -->
     <string name="kg_prompt_reason_user_request">Device was locked manually</string>
 
-    <!-- Fingerprint hint message when finger was not recognized.-->
-    <string name="kg_fingerprint_not_recognized">Not recognized</string>
-
-    <!-- Face hint message when finger was not recognized. [CHAR LIMIT=20] -->
+    <!-- Face hint message when face was not recognized. [CHAR LIMIT=20] -->
     <string name="kg_face_not_recognized">Not recognized</string>
 
-     <!-- Error message indicating that the camera privacy sensor has been turned on [CHAR LIMIT=NONE] -->
-    <string name="kg_face_sensor_privacy_enabled">To use Face Unlock, turn on <b>Camera access</b> in Settings > Privacy</string>
+     <!-- Error message indicating that the camera privacy sensor has been turned on [CHAR LIMIT=53] -->
+    <string name="kg_face_sensor_privacy_enabled">To use Face Unlock, turn on camera access in Settings</string>
 
-    <!-- Instructions telling the user remaining times when enter SIM PIN view.  -->
-    <plurals name="kg_password_default_pin_message">
-        <item quantity="one">Enter SIM PIN. You have <xliff:g id="number">%d</xliff:g> remaining
-attempt before you must contact your carrier to unlock your device.</item>
-        <item quantity="other">Enter SIM PIN. You have <xliff:g id="number">%d</xliff:g> remaining
-attempts.</item>
-    </plurals>
+    <!-- Instructions telling the user remaining times when enter SIM PIN view.  [CHAR LIMIT=NONE] -->
+    <string name="kg_password_default_pin_message">{count, plural,
+        =1 {Enter SIM PIN. You have # remaining attempt before you must contact your carrier to unlock your device.}
+        other {Enter SIM PIN. You have # remaining attempts.}
+    }</string>
 
-    <!-- Instructions telling the user remaining times when enter SIM PUK view.  -->
-    <plurals name="kg_password_default_puk_message">
-        <item quantity="one">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="
-number">%d</xliff:g> remaining attempt before SIM becomes permanently unusable. Contact carrier for details.</item>
-        <item quantity="other">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="
-number">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact carrier for details.</item>
-    </plurals>
+    <!-- Instructions telling the user remaining times when enter SIM PUK view. [CHAR LIMIT=NONE] -->
+    <string name="kg_password_default_puk_message">{count, plural,
+        =1 {SIM is now disabled. Enter PUK code to continue. You have # remaining attempt before SIM becomes permanently unusable. Contact carrier for details.}
+        other {SIM is now disabled. Enter PUK code to continue. You have # remaining attempts before SIM becomes permanently unusable. Contact carrier for details.}
+    }</string>
 
     <!-- Name of the "Default" clock face, which is the clock face that will be shown by default. [CHAR LIMIT=15]-->
     <string name="clock_title_default">Default</string>

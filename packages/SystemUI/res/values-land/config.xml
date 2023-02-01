@@ -31,9 +31,15 @@
     <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
     <integer name="navigation_bar_deadzone_orientation">1</integer>
 
-    <!-- Max number of columns for quick controls area -->
-    <integer name="controls_max_columns">4</integer>
-
     <!-- Max number of columns for power menu -->
     <integer name="power_menu_max_columns">4</integer>
+
+    <!-- Max number of columns for power menu lite -->
+    <integer name="power_menu_lite_max_columns">4</integer>
+    <!-- Max number of rows for power menu lite -->
+    <integer name="power_menu_lite_max_rows">2</integer>
+
+    <!-- Whether we use large screen shade header which takes only one row compared to QS header -->
+    <bool name="config_use_large_screen_shade_header">true</bool>
+
 </resources>

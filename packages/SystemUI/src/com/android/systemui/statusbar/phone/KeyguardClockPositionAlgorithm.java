@@ -23,9 +23,11 @@ import static com.android.systemui.statusbar.notification.NotificationUtils.inte
 import android.content.res.Resources;
 import android.util.MathUtils;
 
+import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
 
 /**
@@ -147,7 +149,7 @@ public class KeyguardClockPositionAlgorithm {
         mStatusViewBottomMargin = res.getDimensionPixelSize(
                 R.dimen.keyguard_status_view_bottom_margin);
         mSplitShadeTopNotificationsMargin =
-                res.getDimensionPixelSize(R.dimen.split_shade_header_height);
+                res.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
         mSplitShadeTargetTopMargin =
                 res.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin);
 
@@ -169,7 +171,8 @@ public class KeyguardClockPositionAlgorithm {
             boolean isSplitShade, float udfpsTop, float clockBottom, boolean isClockTopAligned) {
         mMinTopMargin = keyguardStatusBarHeaderHeight + Math.max(mContainerTopPadding,
                 userSwitchHeight);
-        mPanelExpansion = panelExpansion;
+        mPanelExpansion = BouncerPanelExpansionCalculator
+                .getKeyguardClockScaledExpansion(panelExpansion);
         mKeyguardStatusHeight = keyguardStatusHeight + mStatusViewBottomMargin;
         mUserSwitchHeight = userSwitchHeight;
         mUserSwitchPreferredY = userSwitchPreferredY;
@@ -218,7 +221,7 @@ public class KeyguardClockPositionAlgorithm {
         }
     }
 
-    public float getMinStackScrollerPadding() {
+    public float getLockscreenMinStackScrollerPadding() {
         if (mBypassEnabled) {
             return mUnlockedStackScrollerPadding;
         } else if (mIsSplitShade) {
@@ -307,9 +310,12 @@ public class KeyguardClockPositionAlgorithm {
      */
     private float getClockAlpha(int y) {
         float alphaKeyguard = Math.max(0, y / Math.max(1f, getClockY(1f, mDarkAmount)));
-        float qsAlphaFactor = MathUtils.saturate(mQsExpansion / 0.3f);
-        qsAlphaFactor = 1f - qsAlphaFactor;
-        alphaKeyguard *= qsAlphaFactor;
+        if (!mIsSplitShade) {
+            // in split shade QS are always expanded so this factor shouldn't apply
+            float qsAlphaFactor = MathUtils.saturate(mQsExpansion / 0.3f);
+            qsAlphaFactor = 1f - qsAlphaFactor;
+            alphaKeyguard *= qsAlphaFactor;
+        }
         alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
     }

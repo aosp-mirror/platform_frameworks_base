@@ -20,7 +20,12 @@ import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
 
+import java.security.AlgorithmParameters;
+import java.security.NoSuchAlgorithmException;
 import java.security.ProviderException;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.InvalidParameterSpecException;
 
 /**
  * @hide
@@ -120,5 +125,66 @@ public abstract class KeymasterUtils {
                 args.addUnsignedInt(KeymasterDefs.KM_TAG_MIN_MAC_LENGTH, digestOutputSizeBits);
                 break;
         }
+    }
+
+    static String getEcCurveFromKeymaster(int ecCurve) {
+        switch (ecCurve) {
+            case android.hardware.security.keymint.EcCurve.P_224:
+                return "secp224r1";
+            case android.hardware.security.keymint.EcCurve.P_256:
+                return "secp256r1";
+            case android.hardware.security.keymint.EcCurve.P_384:
+                return "secp384r1";
+            case android.hardware.security.keymint.EcCurve.P_521:
+                return "secp521r1";
+        }
+        return "";
+    }
+
+    static int getKeymasterEcCurve(String ecCurveName) {
+        if (ecCurveName.equals("secp224r1")) {
+            return android.hardware.security.keymint.EcCurve.P_224;
+        } else if (ecCurveName.equals("secp256r1")) {
+            return android.hardware.security.keymint.EcCurve.P_256;
+        } else if (ecCurveName.equals("secp384r1")) {
+            return android.hardware.security.keymint.EcCurve.P_384;
+        } else if (ecCurveName.equals("secp521r1")) {
+            return android.hardware.security.keymint.EcCurve.P_521;
+        }
+        return -1;
+    }
+
+    static ECParameterSpec getCurveSpec(String name)
+            throws NoSuchAlgorithmException, InvalidParameterSpecException {
+        AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
+        parameters.init(new ECGenParameterSpec(name));
+        return parameters.getParameterSpec(ECParameterSpec.class);
+    }
+
+    static String getCurveName(ECParameterSpec spec) {
+        if (KeymasterUtils.isECParameterSpecOfCurve(spec, "secp224r1")) {
+            return "secp224r1";
+        } else if (KeymasterUtils.isECParameterSpecOfCurve(spec, "secp256r1")) {
+            return "secp256r1";
+        } else if (KeymasterUtils.isECParameterSpecOfCurve(spec, "secp384r1")) {
+            return "secp384r1";
+        } else if (KeymasterUtils.isECParameterSpecOfCurve(spec, "secp521r1")) {
+            return "secp521r1";
+        }
+        return null;
+    }
+
+    private static boolean isECParameterSpecOfCurve(ECParameterSpec spec, String curveName) {
+        try {
+            ECParameterSpec curveSpec = KeymasterUtils.getCurveSpec(curveName);
+            if (curveSpec.getCurve().equals(spec.getCurve())
+                    && curveSpec.getOrder().equals(spec.getOrder())
+                    && curveSpec.getGenerator().equals(spec.getGenerator())) {
+                return true;
+            }
+        } catch (NoSuchAlgorithmException | InvalidParameterSpecException e) {
+            return false;
+        }
+        return false;
     }
 }

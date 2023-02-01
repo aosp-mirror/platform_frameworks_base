@@ -19,7 +19,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
- * An abstraction of something that presents notifications, e.g. StatusBar. Contains methods
+ * An abstraction of something that presents notifications, e.g. CentralSurfaces. Contains methods
  * for both querying the state of the system (some modularised piece of functionality may
  * want to act differently based on e.g. whether the presenter is visible to the user or not) and
  * for affecting the state of the system (e.g. starting an intent, given that the presenter may
@@ -48,16 +48,6 @@ public interface NotificationPresenter extends ExpandableNotificationRow.OnExpan
      * @return true iff the device is in vr mode
      */
     boolean isDeviceInVrMode();
-
-    /**
-     * Updates the visual representation of the notifications.
-     */
-    void updateNotificationViews(String reason);
-
-    /**
-     * Called when the row states are updated by {@link NotificationViewHierarchyManager}.
-     */
-    void onUpdateRowStates();
 
     /**
      * @return true if the shade is collapsing.

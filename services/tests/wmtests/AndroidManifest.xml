@@ -43,6 +43,8 @@
     <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE" />
     <uses-permission android:name="android.permission.CAPTURE_BLACKOUT_CONTENT"/>
     <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <!-- TODO: Remove largeHeap hack when memory leak is fixed (b/123984854) -->
     <application android:debuggable="true"
@@ -78,6 +80,12 @@
                   android:turnScreenOn="true"
                   android:showWhenLocked="true" />
         <activity android:name="com.android.server.wm.ScreenshotTests$ScreenshotActivity" />
+        <activity android:name="android.view.cts.surfacevalidator.CapturedActivity"/>
+
+        <service android:name="android.view.cts.surfacevalidator.LocalMediaProjectionService"
+            android:foregroundServiceType="mediaProjection"
+            android:enabled="true">
+        </service>
     </application>
 
     <instrumentation

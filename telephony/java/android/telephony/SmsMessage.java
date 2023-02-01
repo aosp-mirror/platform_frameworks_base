@@ -79,7 +79,7 @@ public class SmsMessage {
     public static final int ENCODING_8BIT = 2;
     public static final int ENCODING_16BIT = 3;
     /**
-     * @hide This value is not defined in global standard. Only in Korea, this is used.
+     * This value is not defined in global standard. Only in Korea, this is used.
      */
     public static final int ENCODING_KSC5601 = 4;
 
@@ -1020,6 +1020,26 @@ public class SmsMessage {
     }
 
     /**
+     * Return the encoding type of a received SMS message, which is specified using ENCODING_*
+     * GSM: defined in android.telephony.SmsConstants
+     * CDMA: defined in android.telephony.cdma.UserData
+     *
+     * @hide
+     */
+    public int getReceivedEncodingType() {
+        return mWrappedSmsMessage.getReceivedEncodingType();
+    }
+
+    /**
+     * Check if format of the message is 3GPP.
+     *
+     * @hide
+     */
+    public boolean is3gpp() {
+        return (mWrappedSmsMessage instanceof com.android.internal.telephony.gsm.SmsMessage);
+    }
+
+    /**
      * Determines whether or not to use CDMA format for MO SMS.
      * If SMS over IMS is supported, then format is based on IMS SMS format,
      * otherwise format is based on current phone type.
@@ -1092,6 +1112,11 @@ public class SmsMessage {
 
         if (!TextUtils.isEmpty(simOperator)) {
             for (NoEmsSupportConfig currentConfig : mNoEmsSupportConfigList) {
+                if (currentConfig == null) {
+                    Rlog.w("SmsMessage", "hasEmsSupport currentConfig is null");
+                    continue;
+                }
+
                 if (simOperator.startsWith(currentConfig.mOperatorNumber) &&
                         (TextUtils.isEmpty(currentConfig.mGid1) ||
                                 (!TextUtils.isEmpty(currentConfig.mGid1) &&
@@ -1155,18 +1180,21 @@ public class SmsMessage {
     private static boolean mIsNoEmsSupportConfigListLoaded = false;
 
     private static boolean isNoEmsSupportConfigListExisted() {
-        if (!mIsNoEmsSupportConfigListLoaded) {
-            Resources r = Resources.getSystem();
-            if (r != null) {
-                String[] listArray = r.getStringArray(
-                        com.android.internal.R.array.no_ems_support_sim_operators);
-                if ((listArray != null) && (listArray.length > 0)) {
-                    mNoEmsSupportConfigList = new NoEmsSupportConfig[listArray.length];
-                    for (int i=0; i<listArray.length; i++) {
-                        mNoEmsSupportConfigList[i] = new NoEmsSupportConfig(listArray[i].split(";"));
+        synchronized (SmsMessage.class) {
+            if (!mIsNoEmsSupportConfigListLoaded) {
+                Resources r = Resources.getSystem();
+                if (r != null) {
+                    String[] listArray = r.getStringArray(
+                            com.android.internal.R.array.no_ems_support_sim_operators);
+                    if ((listArray != null) && (listArray.length > 0)) {
+                        mNoEmsSupportConfigList = new NoEmsSupportConfig[listArray.length];
+                        for (int i = 0; i < listArray.length; i++) {
+                            mNoEmsSupportConfigList[i] = new NoEmsSupportConfig(
+                                    listArray[i].split(";"));
+                        }
                     }
+                    mIsNoEmsSupportConfigListLoaded = true;
                 }
-                mIsNoEmsSupportConfigListLoaded = true;
             }
         }
 

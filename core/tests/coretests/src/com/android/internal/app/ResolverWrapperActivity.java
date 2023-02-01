@@ -39,6 +39,10 @@ public class ResolverWrapperActivity extends ResolverActivity {
     static final OverrideData sOverrides = new OverrideData();
     private UsageStatsManager mUsm;
 
+    public ResolverWrapperActivity() {
+        super(/* isIntentPicker= */ true);
+    }
+
     @Override
     public ResolverListAdapter createResolverListAdapter(Context context,
             List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,

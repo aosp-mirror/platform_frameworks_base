@@ -33,8 +33,8 @@
     <!-- no translation found for tile_states_default:2 (9192445505551219506) -->
   <string-array name="tile_states_internet">
     <item msgid="5499482407653291407">"No disponible"</item>
-    <item msgid="3048856902433862868">"Desactivado"</item>
-    <item msgid="6877982264300789870">"Activado"</item>
+    <item msgid="3048856902433862868">"Desactivada"</item>
+    <item msgid="6877982264300789870">"Activada"</item>
   </string-array>
   <string-array name="tile_states_wifi">
     <item msgid="8054147400538405410">"No disponible"</item>
@@ -78,13 +78,18 @@
   </string-array>
   <string-array name="tile_states_location">
     <item msgid="3316542218706374405">"No disponible"</item>
-    <item msgid="4813655083852587017">"Desactivado"</item>
-    <item msgid="6744077414775180687">"Activado"</item>
+    <item msgid="4813655083852587017">"Desactivada"</item>
+    <item msgid="6744077414775180687">"Activada"</item>
   </string-array>
   <string-array name="tile_states_hotspot">
     <item msgid="3145597331197351214">"No disponible"</item>
     <item msgid="5715725170633593906">"Desactivado"</item>
     <item msgid="2075645297847971154">"Activado"</item>
+  </string-array>
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"No disponible"</item>
+    <item msgid="1909756493418256167">"Desactivada"</item>
+    <item msgid="4531508423703413340">"Activada"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"No disponible"</item>
@@ -128,8 +133,8 @@
   </string-array>
   <string-array name="tile_states_reduce_brightness">
     <item msgid="1839836132729571766">"No disponible"</item>
-    <item msgid="4572245614982283078">"Desactivado"</item>
-    <item msgid="6536448410252185664">"Activado"</item>
+    <item msgid="4572245614982283078">"Desactivada"</item>
+    <item msgid="6536448410252185664">"Activada"</item>
   </string-array>
   <string-array name="tile_states_cameratoggle">
     <item msgid="6680671247180519913">"No disponible"</item>
@@ -151,9 +156,24 @@
     <item msgid="7571394439974244289">"Desactivado"</item>
     <item msgid="6866424167599381915">"Activado"</item>
   </string-array>
+  <string-array name="tile_states_qr_code_scanner">
+    <item msgid="7435143266149257618">"No disponible"</item>
+    <item msgid="3301403109049256043">"No"</item>
+    <item msgid="8878684975184010135">"Sí"</item>
+  </string-array>
   <string-array name="tile_states_alarm">
     <item msgid="4936533380177298776">"No disponible"</item>
     <item msgid="2710157085538036590">"Desactivado"</item>
     <item msgid="7809470840976856149">"Activado"</item>
+  </string-array>
+  <string-array name="tile_states_onehanded">
+    <item msgid="8189342855739930015">"No disponible"</item>
+    <item msgid="146088982397753810">"Desactivado"</item>
+    <item msgid="460891964396502657">"Sí"</item>
+  </string-array>
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"No disponible"</item>
+    <item msgid="8014986104355098744">"No"</item>
+    <item msgid="5966994759929723339">"Sí"</item>
   </string-array>
 </resources>

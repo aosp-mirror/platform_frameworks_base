@@ -110,7 +110,7 @@ public class TestableWindowManager implements WindowManager {
     }
 
     /**
-     * Sets the given window insets to the current window metics.
+     * Sets the given window insets to the current window metrics.
      *
      * @param insets the window insets.
      */

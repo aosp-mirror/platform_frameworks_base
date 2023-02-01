@@ -19,15 +19,19 @@ package com.android.systemui.statusbar.notification.stack;
 import android.content.res.Resources;
 import android.util.MathUtils;
 
+import androidx.annotation.NonNull;
+
+import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotificationRoundnessLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
+import java.io.PrintWriter;
 import java.util.HashSet;
 
 import javax.inject.Inject;
@@ -36,20 +40,23 @@ import javax.inject.Inject;
  * A class that manages the roundness for notification views
  */
 @SysUISingleton
-public class NotificationRoundnessManager {
+public class NotificationRoundnessManager implements Dumpable {
+
+    private static final String TAG = "NotificationRoundnessManager";
 
     private final ExpandableView[] mFirstInSectionViews;
     private final ExpandableView[] mLastInSectionViews;
     private final ExpandableView[] mTmpFirstInSectionViews;
     private final ExpandableView[] mTmpLastInSectionViews;
-    private final KeyguardBypassController mBypassController;
-    private final FeatureFlags mFeatureFlags;
+    private final NotificationRoundnessLogger mNotifLogger;
+    private final DumpManager mDumpManager;
     private boolean mExpanded;
     private HashSet<ExpandableView> mAnimatedChildren;
     private Runnable mRoundingChangedCallback;
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
-    private boolean mIsDismissAllInProgress;
+    private boolean mRoundForPulsingViews;
+    private boolean mIsClearAllInProgress;
 
     private ExpandableView mSwipedView = null;
     private ExpandableView mViewBeforeSwipedView = null;
@@ -57,16 +64,31 @@ public class NotificationRoundnessManager {
 
     @Inject
     NotificationRoundnessManager(
-            KeyguardBypassController keyguardBypassController,
             NotificationSectionsFeatureManager sectionsFeatureManager,
-            FeatureFlags featureFlags) {
-        mFeatureFlags = featureFlags;
+            NotificationRoundnessLogger notifLogger,
+            DumpManager dumpManager) {
         int numberOfSections = sectionsFeatureManager.getNumberOfBuckets();
         mFirstInSectionViews = new ExpandableView[numberOfSections];
         mLastInSectionViews = new ExpandableView[numberOfSections];
         mTmpFirstInSectionViews = new ExpandableView[numberOfSections];
         mTmpLastInSectionViews = new ExpandableView[numberOfSections];
-        mBypassController = keyguardBypassController;
+        mNotifLogger = notifLogger;
+        mDumpManager = dumpManager;
+
+        mDumpManager.registerDumpable(TAG, this);
+    }
+
+    @Override
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
+        pw.println("mFirstInSectionViews: length=" + mFirstInSectionViews.length);
+        pw.println(dumpViews(mFirstInSectionViews));
+        pw.println("mLastInSectionViews: length=" + mLastInSectionViews.length);
+        pw.println(dumpViews(mFirstInSectionViews));
+        if (mTrackedHeadsUp != null) {
+            pw.println("trackedHeadsUp=" + mTrackedHeadsUp.getEntry());
+        }
+        pw.println("roundForPulsingViews=" + mRoundForPulsingViews);
+        pw.println("isClearAllInProgress=" + mIsClearAllInProgress);
     }
 
     public void updateView(ExpandableView view, boolean animate) {
@@ -91,8 +113,8 @@ public class NotificationRoundnessManager {
             return false;
         }
 
-        final float topRoundness = getRoundness(view, true /* top */);
-        final float bottomRoundness = getRoundness(view, false /* top */);
+        final float topRoundness = getRoundnessFraction(view, true /* top */);
+        final float bottomRoundness = getRoundnessFraction(view, false /* top */);
 
         final boolean topChanged = view.setTopRoundness(topRoundness, animate);
         final boolean bottomChanged = view.setBottomRoundness(bottomRoundness, animate);
@@ -102,6 +124,9 @@ public class NotificationRoundnessManager {
 
         view.setFirstInSection(isFirstInSection);
         view.setLastInSection(isLastInSection);
+
+        mNotifLogger.onCornersUpdated(view, isFirstInSection,
+                isLastInSection, topChanged, bottomChanged);
 
         return (isFirstInSection || isLastInSection) && (topChanged || bottomChanged);
     }
@@ -128,15 +153,12 @@ public class NotificationRoundnessManager {
             ExpandableView viewBefore,
             ExpandableView viewSwiped,
             ExpandableView viewAfter) {
-        if (!mFeatureFlags.isEnabled(Flags.NOTIFICATION_UPDATES)) {
-            return;
-        }
         final boolean animate = true;
 
         ExpandableView oldViewBefore = mViewBeforeSwipedView;
         mViewBeforeSwipedView = viewBefore;
         if (oldViewBefore != null) {
-            final float bottomRoundness = getRoundness(oldViewBefore, false /* top */);
+            final float bottomRoundness = getRoundnessFraction(oldViewBefore, false /* top */);
             oldViewBefore.setBottomRoundness(bottomRoundness,  animate);
         }
         if (viewBefore != null) {
@@ -146,8 +168,8 @@ public class NotificationRoundnessManager {
         ExpandableView oldSwipedview = mSwipedView;
         mSwipedView = viewSwiped;
         if (oldSwipedview != null) {
-            final float bottomRoundness = getRoundness(oldSwipedview, false /* top */);
-            final float topRoundness = getRoundness(oldSwipedview, true /* top */);
+            final float bottomRoundness = getRoundnessFraction(oldSwipedview, false /* top */);
+            final float topRoundness = getRoundnessFraction(oldSwipedview, true /* top */);
             oldSwipedview.setTopRoundness(topRoundness, animate);
             oldSwipedview.setBottomRoundness(bottomRoundness, animate);
         }
@@ -159,7 +181,7 @@ public class NotificationRoundnessManager {
         ExpandableView oldViewAfter = mViewAfterSwipedView;
         mViewAfterSwipedView = viewAfter;
         if (oldViewAfter != null) {
-            final float topRoundness = getRoundness(oldViewAfter, true /* top */);
+            final float topRoundness = getRoundnessFraction(oldViewAfter, true /* top */);
             oldViewAfter.setTopRoundness(topRoundness, animate);
         }
         if (viewAfter != null) {
@@ -167,11 +189,11 @@ public class NotificationRoundnessManager {
         }
     }
 
-    void setDismissAllInProgress(boolean isClearingAll) {
-        mIsDismissAllInProgress = isClearingAll;
+    void setClearAllInProgress(boolean isClearingAll) {
+        mIsClearAllInProgress = isClearingAll;
     }
 
-    private float getRoundness(ExpandableView view, boolean top) {
+    private float getRoundnessFraction(ExpandableView view, boolean top) {
         if (view == null) {
             return 0f;
         }
@@ -181,8 +203,8 @@ public class NotificationRoundnessManager {
             return 1f;
         }
         if (view instanceof ExpandableNotificationRow
-                && ((ExpandableNotificationRow) view).canViewBeDismissed()
-                && mIsDismissAllInProgress) {
+                && ((ExpandableNotificationRow) view).canViewBeCleared()
+                && mIsClearAllInProgress) {
             return 1.0f;
         }
         if ((view.isPinned()
@@ -195,12 +217,13 @@ public class NotificationRoundnessManager {
         if (isLastInSection(view) && !top) {
             return 1.0f;
         }
+
         if (view == mTrackedHeadsUp) {
             // If we're pushing up on a headsup the appear fraction is < 0 and it needs to still be
             // rounded.
             return MathUtils.saturate(1.0f - mAppearFraction);
         }
-        if (view.showingPulsing() && !mBypassController.getBypassEnabled()) {
+        if (view.showingPulsing() && mRoundForPulsingViews) {
             return 1.0f;
         }
         final Resources resources = view.getResources();
@@ -231,6 +254,8 @@ public class NotificationRoundnessManager {
         if (anyChanged) {
             mRoundingChangedCallback.run();
         }
+
+        mNotifLogger.onSectionCornersUpdated(sections, anyChanged);
     }
 
     private boolean handleRemovedOldViews(NotificationSection[] sections,
@@ -302,5 +327,41 @@ public class NotificationRoundnessManager {
         if (previous != null) {
             updateView(previous, true /* animate */);
         }
+    }
+
+    public void setShouldRoundPulsingViews(boolean shouldRoundPulsingViews) {
+        mRoundForPulsingViews = shouldRoundPulsingViews;
+    }
+
+    private String dumpViews(ExpandableView[] views) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i] == null) continue;
+
+            sb.append("\t")
+                    .append("[").append(i).append("] ")
+                    .append("isPinned=").append(views[i].isPinned()).append(" ")
+                    .append("isFirstInSection=").append(views[i].isFirstInSection()).append(" ")
+                    .append("isLastInSection=").append(views[i].isLastInSection()).append(" ");
+
+            if (views[i] instanceof ExpandableNotificationRow) {
+                sb.append("entry=");
+                dumpEntry(((ExpandableNotificationRow) views[i]).getEntry(), sb);
+            }
+
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    private void dumpEntry(NotificationEntry entry, StringBuilder sb) {
+        sb.append("NotificationEntry{key=").append(entry.getKey()).append(" ");
+
+        if (entry.getSection() != null) {
+            sb.append(" section=")
+                    .append(entry.getSection().getLabel());
+        }
+
+        sb.append("}");
     }
 }

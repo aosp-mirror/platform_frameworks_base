@@ -18,4 +18,6 @@
 <resources>
     <!-- Whether to show the user switcher in quick settings when only a single user is present. -->
     <bool name="qs_show_user_switcher_for_single_user">false</bool>
+    <!-- Whether to show a custom biometric prompt size-->
+    <bool name="use_custom_bp_size">false</bool>
 </resources>

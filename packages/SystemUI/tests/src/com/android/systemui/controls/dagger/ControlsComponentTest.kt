@@ -24,12 +24,14 @@ import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUT
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsController
+import com.android.systemui.controls.controller.ControlsTileResourceConfiguration
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.settings.SecureSettings
 import dagger.Lazy
+import java.util.Optional
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -41,6 +43,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.any
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -61,6 +64,11 @@ class ControlsComponentTest : SysuiTestCase() {
     private lateinit var lockPatternUtils: LockPatternUtils
     @Mock
     private lateinit var secureSettings: SecureSettings
+    @Mock
+    private lateinit var optionalControlsTileResourceConfiguration:
+            Optional<ControlsTileResourceConfiguration>
+    @Mock
+    private lateinit var controlsTileResourceConfiguration: ControlsTileResourceConfiguration
 
     companion object {
         fun <T> eq(value: T): T = Mockito.eq(value) ?: value
@@ -71,6 +79,8 @@ class ControlsComponentTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         `when`(userTracker.userHandle.identifier).thenReturn(0)
+        `when`(optionalControlsTileResourceConfiguration.orElse(any()))
+            .thenReturn(controlsTileResourceConfiguration)
     }
 
     @Test
@@ -127,7 +137,8 @@ class ControlsComponentTest : SysuiTestCase() {
         `when`(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(STRONG_AUTH_NOT_REQUIRED)
         `when`(keyguardStateController.isUnlocked()).thenReturn(false)
-        `when`(secureSettings.getInt(eq(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS), anyInt()))
+        `when`(secureSettings.getIntForUser(eq(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS),
+                anyInt(), anyInt()))
             .thenReturn(1)
         val component = setupComponent(true)
 
@@ -146,6 +157,26 @@ class ControlsComponentTest : SysuiTestCase() {
         assertEquals(ControlsComponent.Visibility.AVAILABLE, component.getVisibility())
     }
 
+    @Test
+    fun testGetTileImageId() {
+        val tileImageId = 0
+
+        `when`(controlsTileResourceConfiguration.getTileImageId())
+            .thenReturn(tileImageId)
+        val component = setupComponent(true)
+        assertEquals(component.getTileImageId(), tileImageId)
+    }
+
+    @Test
+    fun testGetTileTitleId() {
+        val tileTitleId = 0
+
+        `when`(controlsTileResourceConfiguration.getTileTitleId())
+            .thenReturn(tileTitleId)
+        val component = setupComponent(true)
+        assertEquals(component.getTileTitleId(), tileTitleId)
+    }
+
     private fun setupComponent(enabled: Boolean): ControlsComponent {
         return ControlsComponent(
             enabled,
@@ -156,7 +187,8 @@ class ControlsComponentTest : SysuiTestCase() {
             lockPatternUtils,
             keyguardStateController,
             userTracker,
-            secureSettings
+            secureSettings,
+            optionalControlsTileResourceConfiguration
         )
     }
 }

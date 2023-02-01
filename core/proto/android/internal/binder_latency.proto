@@ -35,6 +35,7 @@ message Dims {
     SYSTEM_SERVER = 1;
     TELEPHONY = 2;
     BLUETOOTH = 3;
+    WIFI = 4;
   }
 
   enum ServiceClassName {

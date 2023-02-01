@@ -17,6 +17,7 @@
 package com.android.server.utils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -860,6 +861,54 @@ public class WatcherTest {
         }
     }
 
+    @Test
+    public void testWatchedSparseSetArray() {
+        final String name = "WatchedSparseSetArray";
+        WatchableTester tester;
+
+        // Test WatchedSparseSetArray
+        WatchedSparseSetArray array = new WatchedSparseSetArray();
+        tester = new WatchableTester(array, name);
+        tester.verify(0, "Initial array - no registration");
+        array.add(INDEX_A, 1);
+        tester.verify(0, "Updates with no registration");
+        tester.register();
+        tester.verify(0, "Updates with no registration");
+        array.add(INDEX_B, 2);
+        tester.verify(1, "Updates with registration");
+        array.add(INDEX_B, 4);
+        array.add(INDEX_C, 5);
+        tester.verify(3, "Updates with registration");
+        // Special methods
+        assertTrue(array.remove(INDEX_C, 5));
+        tester.verify(4, "Removed 5 from key 3");
+        array.remove(INDEX_B);
+        tester.verify(5, "Removed everything for key 2");
+
+        // Snapshot
+        {
+            WatchedSparseSetArray arraySnap = (WatchedSparseSetArray) array.snapshot();
+            tester.verify(5, "Generate snapshot");
+            // Verify that the snapshot is a proper copy of the source.
+            assertEquals("WatchedSparseSetArray snap same size",
+                    array.size(), arraySnap.size());
+            for (int i = 0; i < array.size(); i++) {
+                ArraySet set = array.get(array.keyAt(i));
+                ArraySet setSnap = arraySnap.get(arraySnap.keyAt(i));
+                assertNotNull(set);
+                assertTrue(set.equals(setSnap));
+            }
+            array.add(INDEX_D, 9);
+            tester.verify(6, "Tick after snapshot");
+            // Verify that the array is sealed
+            verifySealed(name, ()->arraySnap.add(INDEX_D, 10));
+            assertTrue(!array.isSealed());
+            assertTrue(arraySnap.isSealed());
+        }
+        array.clear();
+        tester.verify(7, "Cleared all entries");
+    }
+
     private static class IndexGenerator {
         private final int mSeed;
         private final Random mRandom;
@@ -911,6 +960,23 @@ public class WatcherTest {
                 int col = indexes[j];
                 boolean want = cellValue(i, j);
                 matrix.put(row, col, want);
+            }
+        }
+    }
+
+    // Fill new cells in the matrix which has enlarged capacity.
+    private void fillNew(WatchedSparseBooleanMatrix matrix, int initialCapacity,
+            int newCapacity, int[] indexes) {
+        final int size = newCapacity;
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (i < initialCapacity && j < initialCapacity) {
+                    // Do not touch old cells
+                    continue;
+                }
+                final int row = indexes[i];
+                final int col = indexes[j];
+                matrix.put(row, col, cellValue(i, j));
             }
         }
     }
@@ -989,6 +1055,24 @@ public class WatcherTest {
         assertTrue("Matrix shrink", finalCapacity - matrix.size() < matrix.STEP);
     }
 
+    private void matrixSetCapacity(WatchedSparseBooleanMatrix matrix, int newCapacity,
+            IndexGenerator indexer) {
+        final int initialCapacity = matrix.capacity();
+        final int[] indexes = indexer.indexes(Math.max(initialCapacity, newCapacity));
+        fill(matrix, initialCapacity, indexes);
+
+        matrix.setCapacity(newCapacity);
+        fillNew(matrix, initialCapacity, newCapacity, indexes);
+
+        assertEquals(matrix.size(), indexes.length);
+        verify(matrix, indexes, null);
+        // Test the keyAt/indexOfKey methods
+        for (int i = 0; i < matrix.size(); i++) {
+            int key = indexes[i];
+            assertEquals(matrix.keyAt(matrix.indexOfKey(key)), key);
+        }
+    }
+
     @Test
     public void testWatchedSparseBooleanMatrix() {
         final String name = "WatchedSparseBooleanMatrix";
@@ -1049,6 +1133,58 @@ public class WatcherTest {
         assertEquals(a.equals(s), true);
         a.put(rowIndex, colIndex, !a.get(rowIndex, colIndex));
         assertEquals(a.equals(s), false);
+
+        // Verify copy-in/out
+        {
+            final String msg = name + " copy";
+            WatchedSparseBooleanMatrix copy = new WatchedSparseBooleanMatrix();
+            copy.copyFrom(matrix);
+            final int end = copy.size();
+            assertTrue(msg + " size mismatch " + end + " " + matrix.size(), end == matrix.size());
+            for (int i = 0; i < end; i++) {
+                assertEquals(copy.keyAt(i), keys[i]);
+            }
+        }
+    }
+
+    @Test
+    public void testWatchedSparseBooleanMatrix_setCapacity() {
+        final IndexGenerator indexer = new IndexGenerator(3);
+        matrixSetCapacity(new WatchedSparseBooleanMatrix(500), 1000, indexer);
+        matrixSetCapacity(new WatchedSparseBooleanMatrix(1000), 500, indexer);
+    }
+
+    @Test
+    public void testWatchedSparseBooleanMatrix_removeRangeAndShrink() {
+        final IndexGenerator indexer = new IndexGenerator(3);
+        final int initialCapacity = 500;
+        final int removeCounts = 33;
+        final WatchedSparseBooleanMatrix matrix = new WatchedSparseBooleanMatrix(initialCapacity);
+        final int[] indexes = indexer.indexes(initialCapacity);
+        final boolean[] absents = new boolean[initialCapacity];
+        fill(matrix, initialCapacity, indexes);
+        assertEquals(matrix.size(), initialCapacity);
+
+        for (int i = 0; i < initialCapacity / removeCounts; i++) {
+            final int size = matrix.size();
+            final int fromIndex = (size / 2 < removeCounts ? 0 : size / 2 - removeCounts);
+            final int toIndex = (fromIndex + removeCounts > size ? size : fromIndex + removeCounts);
+            for (int index = fromIndex; index < toIndex; index++) {
+                final int key = matrix.keyAt(index);
+                for (int j = 0; j < indexes.length; j++) {
+                    if (key == indexes[j]) {
+                        absents[j] = true;
+                        break;
+                    }
+                }
+            }
+            matrix.removeRange(fromIndex, toIndex);
+            assertEquals(matrix.size(), size - (toIndex - fromIndex));
+            verify(matrix, indexes, absents);
+
+            matrix.compact();
+            verify(matrix, indexes, absents);
+        }
     }
 
     @Test

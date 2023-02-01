@@ -33,6 +33,7 @@ import android.widget.RemoteViews;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -127,7 +128,7 @@ public final class ImageTransformation extends InternalTransformation implements
          */
         @Deprecated
         public Builder(@NonNull AutofillId id, @NonNull Pattern regex, @DrawableRes int resId) {
-            mId = Preconditions.checkNotNull(id);
+            mId = Objects.requireNonNull(id);
             addOption(regex, resId);
         }
 
@@ -143,7 +144,7 @@ public final class ImageTransformation extends InternalTransformation implements
          */
         public Builder(@NonNull AutofillId id, @NonNull Pattern regex, @DrawableRes int resId,
                 @NonNull CharSequence contentDescription) {
-            mId = Preconditions.checkNotNull(id);
+            mId = Objects.requireNonNull(id);
             addOption(regex, resId, contentDescription);
         }
 
@@ -177,7 +178,7 @@ public final class ImageTransformation extends InternalTransformation implements
          */
         public Builder addOption(@NonNull Pattern regex, @DrawableRes int resId,
                 @NonNull CharSequence contentDescription) {
-            addOptionInternal(regex, resId, Preconditions.checkNotNull(contentDescription));
+            addOptionInternal(regex, resId, Objects.requireNonNull(contentDescription));
             return this;
         }
 
@@ -185,7 +186,7 @@ public final class ImageTransformation extends InternalTransformation implements
                 @Nullable CharSequence contentDescription) {
             throwIfDestroyed();
 
-            Preconditions.checkNotNull(regex);
+            Objects.requireNonNull(regex);
             Preconditions.checkArgument(resId != 0);
 
             mOptions.add(new Option(regex, resId, contentDescription));
@@ -246,7 +247,7 @@ public final class ImageTransformation extends InternalTransformation implements
             new Parcelable.Creator<ImageTransformation>() {
         @Override
         public ImageTransformation createFromParcel(Parcel parcel) {
-            final AutofillId id = parcel.readParcelable(null);
+            final AutofillId id = parcel.readParcelable(null, android.view.autofill.AutofillId.class);
 
             final Pattern[] regexs = (Pattern[]) parcel.readSerializable();
             final int[] resIds = parcel.createIntArray();

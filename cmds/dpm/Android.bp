@@ -20,5 +20,5 @@ license {
 
 sh_binary {
     name: "dpm",
-    src: "dpm",
+    src: "dpm.sh",
 }

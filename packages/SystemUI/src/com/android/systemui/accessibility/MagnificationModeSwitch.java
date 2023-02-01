@@ -22,13 +22,14 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 
 import android.annotation.NonNull;
 import android.annotation.UiContext;
+import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.MathUtils;
 import android.view.Gravity;
@@ -55,7 +56,8 @@ import java.util.Collections;
  * The button icon is movable by dragging and it would not overlap navigation bar window.
  * And the button UI would automatically be dismissed after displaying for a period of time.
  */
-class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureListener {
+class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureListener,
+        ComponentCallbacks {
 
     @VisibleForTesting
     static final long FADING_ANIMATION_DURATION_MS = 300;
@@ -75,6 +77,8 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private int mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
     private final LayoutParams mParams;
+    private final SwitchListener mSwitchListener;
+    private final Configuration mConfiguration;
     @VisibleForTesting
     final Rect mDraggableWindowBounds = new Rect();
     private boolean mIsVisible = false;
@@ -82,17 +86,30 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
     private boolean mSingleTapDetected = false;
     private boolean mToLeftScreenEdge = false;
 
-    MagnificationModeSwitch(@UiContext Context context) {
-        this(context, createView(context), new SfVsyncFrameCallbackProvider());
+    public interface SwitchListener {
+        /**
+         * Called when the switch is clicked to change the magnification mode.
+         * @param displayId the display id of the display to which the view's window has been
+         *                  attached
+         * @param magnificationMode the magnification mode
+         */
+        void onSwitch(int displayId, int magnificationMode);
+    }
+
+    MagnificationModeSwitch(@UiContext Context context,
+            SwitchListener switchListener) {
+        this(context, createView(context), new SfVsyncFrameCallbackProvider(), switchListener);
     }
 
     @VisibleForTesting
     MagnificationModeSwitch(Context context, @NonNull ImageView imageView,
-            SfVsyncFrameCallbackProvider sfVsyncFrameProvider) {
+            SfVsyncFrameCallbackProvider sfVsyncFrameProvider, SwitchListener switchListener) {
         mContext = context;
+        mConfiguration = new Configuration(context.getResources().getConfiguration());
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
+        mSwitchListener = switchListener;
         mParams = createLayoutParams(context);
         mImageView = imageView;
         mImageView.setOnTouchListener(this::onTouch);
@@ -258,6 +275,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         mIsFadeOutAnimating = false;
         mImageView.setAlpha(0f);
         mWindowManager.removeView(mImageView);
+        mContext.unregisterComponentCallbacks(this);
         mIsVisible = false;
     }
 
@@ -279,6 +297,8 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
             mImageView.setImageResource(getIconResId(mode));
         }
         if (!mIsVisible) {
+            onConfigurationChanged(mContext.getResources().getConfiguration());
+            mContext.registerComponentCallbacks(this);
             if (resetPosition) {
                 mDraggableWindowBounds.set(getDraggableWindowBounds());
                 mParams.x = mDraggableWindowBounds.right;
@@ -309,7 +329,21 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
         }
     }
 
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        final int configDiff = newConfig.diff(mConfiguration);
+        mConfiguration.setTo(newConfig);
+        onConfigurationChanged(configDiff);
+    }
+
+    @Override
+    public void onLowMemory() {
+    }
+
     void onConfigurationChanged(int configDiff) {
+        if (configDiff == 0) {
+            return;
+        }
         if ((configDiff & (ActivityInfo.CONFIG_ORIENTATION | ActivityInfo.CONFIG_SCREEN_SIZE))
                 != 0) {
             final Rect previousDraggableBounds = new Rect(mDraggableWindowBounds);
@@ -364,11 +398,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
                 mMagnificationMode ^ Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
         mMagnificationMode = newMode;
         mImageView.setImageResource(getIconResId(newMode));
-        Settings.Secure.putIntForUser(
-                mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
-                newMode,
-                UserHandle.USER_CURRENT);
+        mSwitchListener.onSwitch(mContext.getDisplayId(), newMode);
     }
 
     private void handleSingleTap() {

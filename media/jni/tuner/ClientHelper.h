@@ -17,22 +17,18 @@
 #ifndef _ANDROID_MEDIA_TV_CLIENT_HELPER_H_
 #define _ANDROID_MEDIA_TV_CLIENT_HELPER_H_
 
+#include <aidl/android/hardware/tv/tuner/Result.h>
 #include <android/binder_parcel_utils.h>
-#include <android/hardware/tv/tuner/1.1/types.h>
 #include <utils/Log.h>
 
+using ::aidl::android::hardware::tv::tuner::Result;
 using Status = ::ndk::ScopedAStatus;
-
-using ::android::hardware::tv::tuner::V1_0::Result;
-
-using namespace std;
 
 namespace android {
 
-struct ClientHelper {
-
+class ClientHelper {
 public:
-	static Result getServiceSpecificErrorCode(Status& s) {
+    static Result getServiceSpecificErrorCode(Status& s) {
         if (s.getExceptionCode() == EX_SERVICE_SPECIFIC) {
             return static_cast<Result>(s.getServiceSpecificError());
         } else if (s.isOk()) {
@@ -42,6 +38,7 @@ public:
         return Result::UNKNOWN_ERROR;
     }
 };
+
 }  // namespace android
 
-#endif  // _ANDROID_MEDIA_TV_CLIENT_HELPER_H_
+#endif // _ANDROID_MEDIA_TV_CLIENT_HELPER_H_

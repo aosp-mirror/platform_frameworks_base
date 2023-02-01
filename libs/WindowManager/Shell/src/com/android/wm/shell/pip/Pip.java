@@ -16,12 +16,10 @@
 
 package com.android.wm.shell.pip;
 
-import android.content.res.Configuration;
 import android.graphics.Rect;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
-import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 /**
@@ -44,41 +42,12 @@ public interface Pip {
     }
 
     /**
-     * Hides the PIP menu.
-     */
-    default void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {}
-
-    /**
-     * Called when configuration is changed.
-     */
-    default void onConfigurationChanged(Configuration newConfig) {
-    }
-
-    /**
-     * Called when display size or font size of settings changed
-     */
-    default void onDensityOrFontScaleChanged() {
-    }
-
-    /**
-     * Called when overlay package change invoked.
-     */
-    default void onOverlayChanged() {
-    }
-
-    /**
      * Called when SysUI state changed.
      *
      * @param isSysUiStateValid Is SysUI state valid or not.
      * @param flag Current SysUI state.
      */
     default void onSystemUiStateChanged(boolean isSysUiStateValid, int flag) {
-    }
-
-    /**
-     * Registers the session listener for the current user.
-     */
-    default void registerSessionListenerForCurrentUser() {
     }
 
     /**
@@ -91,12 +60,12 @@ public interface Pip {
     }
 
     /**
-     * Registers the pinned stack animation listener.
+     * Set the callback when {@link PipTaskOrganizer#isInPip()} state is changed.
      *
-     * @param callback The callback of pinned stack animation.
+     * @param callback The callback accepts the result of {@link PipTaskOrganizer#isInPip()}
+     *                 when it's changed.
      */
-    default void setPinnedStackAnimationListener(Consumer<Boolean> callback) {
-    }
+    default void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {}
 
     /**
      * Set the pinned stack with {@link PipAnimationController.AnimationType}
@@ -123,12 +92,4 @@ public interface Pip {
      * view hierarchy or destroyed.
      */
     default void removePipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
-
-    /**
-     * Dump the current state and information if need.
-     *
-     * @param pw The stream to dump information to.
-     */
-    default void dump(PrintWriter pw) {
-    }
 }

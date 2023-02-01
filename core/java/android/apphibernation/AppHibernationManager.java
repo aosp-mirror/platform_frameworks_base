@@ -24,7 +24,10 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class provides an API surface for system apps to manipulate the app hibernation
@@ -125,6 +128,40 @@ public class AppHibernationManager {
     public @NonNull List<String> getHibernatingPackagesForUser() {
         try {
             return mIAppHibernationService.getHibernatingPackagesForUser(mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the stats from app hibernation for each package provided.
+     *
+     * @param packageNames the set of packages to return stats for
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_APP_HIBERNATION)
+    public @NonNull Map<String, HibernationStats> getHibernationStatsForUser(
+            @NonNull Set<String> packageNames) {
+        try {
+            return mIAppHibernationService.getHibernationStatsForUser(
+                    new ArrayList(packageNames), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the stats from app hibernation for all packages for the user
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_APP_HIBERNATION)
+    public @NonNull Map<String, HibernationStats> getHibernationStatsForUser() {
+        try {
+            return mIAppHibernationService.getHibernationStatsForUser(
+                    null /* packageNames */, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

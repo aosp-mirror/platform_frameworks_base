@@ -146,7 +146,7 @@ public class VcnTransportInfo implements TransportInfo, Parcelable {
             new Creator<VcnTransportInfo>() {
                 public VcnTransportInfo createFromParcel(Parcel in) {
                     final int subId = in.readInt();
-                    final WifiInfo wifiInfo = in.readParcelable(null);
+                    final WifiInfo wifiInfo = in.readParcelable(null, android.net.wifi.WifiInfo.class);
 
                     // If all fields are their null values, return null TransportInfo to avoid
                     // leaking information about this being a VCN Network (instead of macro

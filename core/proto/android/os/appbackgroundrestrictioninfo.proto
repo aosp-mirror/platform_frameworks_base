@@ -1,0 +1,210 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.os;
+
+option java_multiple_files = true;
+
+// This message is used for statsd logging and should be kept in sync with
+// frameworks/proto_logging/stats/atoms.proto
+/**
+ * Logs information about app background restrictions.
+ *
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/AppRestrictionController.java
+ */
+message AppBackgroundRestrictionsInfo {
+    // the uid of the app.
+    optional int32 uid = 1;
+
+    enum RestrictionLevel {
+        LEVEL_UNKNOWN = 0;
+        LEVEL_UNRESTRICTED = 1;
+        LEVEL_EXEMPTED = 2;
+        LEVEL_ADAPTIVE_BUCKET = 3;
+        LEVEL_RESTRICTED_BUCKET = 4;
+        LEVEL_BACKGROUND_RESTRICTED = 5;
+        LEVEL_HIBERNATION = 6;
+    }
+    // indicates the app background restriction level.
+    optional RestrictionLevel restriction_level = 2;
+
+    enum Threshold {
+        THRESHOLD_UNKNOWN = 0;
+        THRESHOLD_RESTRICTED = 1; // app was background restricted by the system.
+        THRESHOLD_USER = 2; // app was background restricted by user action.
+    }
+    // indicates which threshold caused the app to be put into bg restriction.
+    optional Threshold threshold = 3;
+
+    enum StateTracker {
+        UNKNOWN_TRACKER = 0;
+        BATTERY_TRACKER = 1;
+        BATTERY_EXEMPTION_TRACKER = 2;
+        FGS_TRACKER = 3;
+        MEDIA_SESSION_TRACKER = 4;
+        PERMISSION_TRACKER = 5;
+        BROADCAST_EVENTS_TRACKER = 6;
+        BIND_SERVICE_EVENTS_TRACKER = 7;
+    }
+    // indicates the reason/tracker which caused the app to hit the threshold.
+    optional StateTracker tracker = 4;
+
+    message FgsTrackerInfo {
+        // indicates whether an fgs notification was visible for this app or not.
+        optional bool fgs_notification_visible = 1;
+        // total FGS duration for this app.
+        optional int64 fgs_duration = 2;
+    }
+    optional FgsTrackerInfo fgs_tracker_info = 5;
+
+    message BatteryTrackerInfo {
+        // total battery usage within last 24h (1/10000th)
+        optional int32 battery_24h = 1;
+        // background battery usage (1/10000th)
+        optional int32 battery_usage_background = 2;
+        // FGS battery usage (1/10000th)
+        optional int32 battery_usage_fgs = 3;
+        // Foreground battery usage (1/10000th)
+        optional int32 battery_usage_foreground = 4;
+        // Cached battery usage (1/10000th)
+        optional int32 battery_usage_cached = 5;
+
+    }
+    optional BatteryTrackerInfo battery_tracker_info = 6;
+
+    message BroadcastEventsTrackerInfo {
+        // the number of broadcasts sent by this app.
+        optional int32 broadcasts_sent = 1;
+    }
+    optional BroadcastEventsTrackerInfo broadcast_events_tracker_info = 7;
+
+    message BindServiceEventsTrackerInfo {
+        // the number of bind service requests by this app.
+        optional int32 bind_service_requests = 1;
+    }
+    optional BindServiceEventsTrackerInfo bind_service_events_tracker_info =
+        8;
+
+    // The reasons listed below are defined in PowerExemptionManager.java
+    enum ExemptionReason {
+        // range 0-9 is reserved for default reasons
+        REASON_UNKNOWN = 0;
+        REASON_DENIED = 1;
+        REASON_OTHER = 2;
+        // range 10-49 is reserved for BG-FGS-launch allowed proc states
+        REASON_PROC_STATE_PERSISTENT = 10;
+        REASON_PROC_STATE_PERSISTENT_UI = 11;
+        REASON_PROC_STATE_TOP = 12;
+        REASON_PROC_STATE_BTOP = 13;
+        REASON_PROC_STATE_FGS = 14;
+        REASON_PROC_STATE_BFGS = 15;
+        // range 50-99 is reserved for BG-FGS-launch allowed reasons
+        REASON_UID_VISIBLE = 50;
+        REASON_SYSTEM_UID = 51;
+        REASON_ACTIVITY_STARTER = 52;
+        REASON_START_ACTIVITY_FLAG = 53;
+        REASON_FGS_BINDING = 54;
+        REASON_DEVICE_OWNER = 55;
+        REASON_PROFILE_OWNER = 56;
+        REASON_COMPANION_DEVICE_MANAGER = 57;
+        REASON_BACKGROUND_ACTIVITY_PERMISSION = 58;
+        REASON_BACKGROUND_FGS_PERMISSION = 59;
+        REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION = 60;
+        REASON_INSTR_BACKGROUND_FGS_PERMISSION = 61;
+        REASON_SYSTEM_ALERT_WINDOW_PERMISSION = 62;
+        REASON_DEVICE_DEMO_MODE = 63;
+        REASON_ALLOWLISTED_PACKAGE = 65;
+        REASON_APPOP = 66;
+        REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD = 67;
+        REASON_OP_ACTIVATE_VPN = 68;
+        REASON_OP_ACTIVATE_PLATFORM_VPN = 69;
+        REASON_TEMP_ALLOWED_WHILE_IN_USE = 70;
+        REASON_CURRENT_INPUT_METHOD = 71;
+        // range 100-199 is reserved for public reasons
+        REASON_GEOFENCING = 100;
+        REASON_PUSH_MESSAGING = 101;
+        REASON_PUSH_MESSAGING_OVER_QUOTA = 102;
+        REASON_ACTIVITY_RECOGNITION = 103;
+        REASON_ACCOUNT_TRANSFER = 104;
+        // range 200-299 is reserved for broadcast actions
+        REASON_BOOT_COMPLETED = 200;
+        REASON_PRE_BOOT_COMPLETED = 201;
+        REASON_LOCKED_BOOT_COMPLETED = 202;
+        REASON_BLUETOOTH_BROADCAST = 203;
+        REASON_TIMEZONE_CHANGED = 204;
+        REASON_TIME_CHANGED = 205;
+        REASON_LOCALE_CHANGED = 206;
+        REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED = 207;
+        REASON_REFRESH_SAFETY_SOURCES = 208;
+        // range 300-399 is reserved for other internal reasons
+        REASON_SYSTEM_ALLOW_LISTED = 300;
+        REASON_ALARM_MANAGER_ALARM_CLOCK = 301;
+        REASON_ALARM_MANAGER_WHILE_IDLE = 302;
+        REASON_SERVICE_LAUNCH = 303;
+        REASON_KEY_CHAIN = 304;
+        REASON_PACKAGE_VERIFIER = 305;
+        REASON_SYNC_MANAGER = 306;
+        REASON_DOMAIN_VERIFICATION_V1 = 307;
+        REASON_DOMAIN_VERIFICATION_V2 = 308;
+        REASON_VPN = 309;
+        REASON_NOTIFICATION_SERVICE = 310;
+        REASON_PACKAGE_REPLACED = 311;
+        REASON_LOCATION_PROVIDER = 312;
+        REASON_MEDIA_BUTTON = 313;
+        REASON_EVENT_SMS = 314;
+        REASON_EVENT_MMS = 315;
+        REASON_SHELL = 316;
+        REASON_MEDIA_SESSION_CALLBACK = 317;
+        REASON_ROLE_DIALER = 318;
+        REASON_ROLE_EMERGENCY = 319;
+        REASON_SYSTEM_MODULE = 320;
+        REASON_CARRIER_PRIVILEGED_APP = 321;
+        REASON_DPO_PROTECTED_APP = 322;
+        REASON_DISALLOW_APPS_CONTROL = 323;
+        REASON_ACTIVE_DEVICE_ADMIN = 324;
+        // app requested to be exempt
+        REASON_OPT_OUT_REQUESTED = 1000;
+    }
+    // indicates if the app is exempt from background restrictions and the reason if applicable.
+    optional ExemptionReason exemption_reason = 9;
+
+    enum OptimizationLevel {
+        UNKNOWN = 0;
+        OPTIMIZED = 1;
+        BACKGROUND_RESTRICTED = 2;
+        NOT_OPTIMIZED = 3;
+    }
+    // the user choice for the optimization level of the app.
+    optional OptimizationLevel opt_level = 10;
+
+    enum TargetSdk {
+        SDK_UNKNOWN = 0;
+        SDK_PRE_S = 1;
+        SDK_S = 2;
+        SDK_T = 3;
+    }
+    // indicates the target sdk level for this app.
+    optional TargetSdk target_sdk = 11;
+
+    // indicates if the current device is a low ram device.
+    optional bool low_mem_device = 12;
+
+    // indicates previous background restriction level.
+    optional RestrictionLevel previous_restriction_level = 13;
+}
+

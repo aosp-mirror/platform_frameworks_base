@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
@@ -30,10 +31,14 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.policy.PhoneWindow;
 
@@ -115,6 +120,22 @@ public class MediaController extends FrameLayout {
     private CharSequence mPlayDescription;
     private CharSequence mPauseDescription;
     private final AccessibilityManager mAccessibilityManager;
+    private boolean mBackCallbackRegistered;
+    /** Handles back invocation */
+    private final OnBackInvokedCallback mBackCallback = this::hide;
+    /** Handles decor view attach state change */
+    private final OnAttachStateChangeListener mAttachStateListener =
+            new OnAttachStateChangeListener() {
+        @Override
+        public void onViewAttachedToWindow(@NonNull View v) {
+            registerOnBackInvokedCallback();
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(@NonNull View v) {
+            unregisterOnBackInvokedCallback();
+        }
+    };
 
     public MediaController(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -151,6 +172,7 @@ public class MediaController extends FrameLayout {
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         mDecor = mWindow.getDecorView();
         mDecor.setOnTouchListener(mTouchListener);
+        mDecor.addOnAttachStateChangeListener(mAttachStateListener);
         mWindow.setContentView(this);
         mWindow.setBackgroundDrawableResource(android.R.color.transparent);
 
@@ -395,6 +417,7 @@ public class MediaController extends FrameLayout {
             removeCallbacks(mFadeOut);
             postDelayed(mFadeOut, timeout);
         }
+        registerOnBackInvokedCallback();
     }
 
     public boolean isShowing() {
@@ -416,6 +439,7 @@ public class MediaController extends FrameLayout {
                 Log.w("MediaController", "already removed");
             }
             mShowing = false;
+            unregisterOnBackInvokedCallback();
         }
     }
 
@@ -715,6 +739,35 @@ public class MediaController extends FrameLayout {
             if (mPrevButton != null && !mFromXml) {
                 mPrevButton.setVisibility(View.VISIBLE);
             }
+        }
+    }
+
+    private void unregisterOnBackInvokedCallback() {
+        if (!mBackCallbackRegistered) {
+            return;
+        }
+        ViewRootImpl viewRootImpl = mDecor.getViewRootImpl();
+        if (viewRootImpl != null
+                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(
+                viewRootImpl.mContext)) {
+            viewRootImpl.getOnBackInvokedDispatcher()
+                    .unregisterOnBackInvokedCallback(mBackCallback);
+        }
+        mBackCallbackRegistered = false;
+    }
+
+    private void registerOnBackInvokedCallback() {
+        if (mBackCallbackRegistered) {
+            return;
+        }
+
+        ViewRootImpl viewRootImpl = mDecor.getViewRootImpl();
+        if (viewRootImpl != null
+                && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(
+                viewRootImpl.mContext)) {
+            viewRootImpl.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, mBackCallback);
+            mBackCallbackRegistered = true;
         }
     }
 

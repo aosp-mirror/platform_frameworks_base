@@ -45,7 +45,7 @@ import android.os.UserHandle;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.Display;
 
-import com.android.server.accessibility.magnification.FullScreenMagnificationController;
+import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -91,7 +91,7 @@ public class AccessibilityServiceConnectionTest {
     @Mock SystemActionPerformer mMockSystemActionPerformer;
     @Mock KeyEventDispatcher mMockKeyEventDispatcher;
     @Mock
-    FullScreenMagnificationController mMockFullScreenMagnificationController;
+    MagnificationProcessor mMockMagnificationProcessor;
     @Mock IBinder mMockIBinder;
     @Mock IAccessibilityServiceClient mMockServiceClient;
     @Mock MotionEventInjector mMockMotionEventInjector;
@@ -102,8 +102,8 @@ public class AccessibilityServiceConnectionTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mMockSystemSupport.getKeyEventDispatcher()).thenReturn(mMockKeyEventDispatcher);
-        when(mMockSystemSupport.getFullScreenMagnificationController())
-                .thenReturn(mMockFullScreenMagnificationController);
+        when(mMockSystemSupport.getMagnificationProcessor())
+                .thenReturn(mMockMagnificationProcessor);
         when(mMockSystemSupport.getMotionEventInjectorForDisplayLocked(
                 Display.DEFAULT_DISPLAY)).thenReturn(mMockMotionEventInjector);
 
@@ -245,6 +245,23 @@ public class AccessibilityServiceConnectionTest {
         mConnection.dispatchGesture(0, parceledListSlice, Display.INVALID_DISPLAY);
 
         verify(mMockServiceClient).onPerformGestureResult(0, false);
+    }
+
+    @Test
+    public void unbind_resetAllMagnification() {
+        mConnection.unbindLocked();
+        verify(mMockMagnificationProcessor).resetAllIfNeeded(anyInt());
+    }
+
+    @Test
+    public void binderDied_resetAllMagnification() {
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mMockIBinder);
+
+        mConnection.binderDied();
+
+        verify(mMockMagnificationProcessor).resetAllIfNeeded(anyInt());
     }
 
 }

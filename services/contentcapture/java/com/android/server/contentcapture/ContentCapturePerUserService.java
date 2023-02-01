@@ -46,7 +46,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -61,6 +60,7 @@ import android.service.contentcapture.SnapshotData;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -70,13 +70,13 @@ import android.view.contentcapture.DataShareRequest;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.contentcapture.RemoteContentCaptureService.ContentCaptureServiceCallbacks;
 import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.io.PrintWriter;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,9 +90,9 @@ final class ContentCapturePerUserService
 
     private static final String TAG = ContentCapturePerUserService.class.getSimpleName();
 
-    private static final int MAX_REBIND_COUNTS = 5;
-    // 5 minutes
-    private static final long REBIND_DURATION_MS = 5 * 60 * 1_000;
+    private static final int EVENT_LOG_CONNECT_STATE_DIED = 0;
+    static final int EVENT_LOG_CONNECT_STATE_CONNECTED = 1;
+    static final int EVENT_LOG_CONNECT_STATE_DISCONNECTED = 2;
 
     @GuardedBy("mLock")
     private final SparseArray<ContentCaptureServerSession> mSessions = new SparseArray<>();
@@ -127,18 +127,11 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     private ContentCaptureServiceInfo mInfo;
 
-    private Instant mLastRebindTime;
-    private int mRebindCount;
-    private final Handler mHandler;
-
-    private final Runnable mReBindServiceRunnable = new RebindServiceRunnable();
-
     // TODO(b/111276913): add mechanism to prune stale sessions, similar to Autofill's
 
     ContentCapturePerUserService(@NonNull ContentCaptureManagerService master,
-            @NonNull Object lock, boolean disabled, @UserIdInt int userId, Handler handler) {
+            @NonNull Object lock, boolean disabled, @UserIdInt int userId) {
         super(master, lock, userId);
-        mHandler = handler;
         updateRemoteServiceLocked(disabled);
     }
 
@@ -203,43 +196,12 @@ final class ContentCapturePerUserService
         Slog.w(TAG, "remote service died: " + service);
         synchronized (mLock) {
             mZombie = true;
-            // Reset rebindCount if over 12 hours mLastRebindTime
-            if (mLastRebindTime != null && Instant.now().isAfter(
-                    mLastRebindTime.plusMillis(12 * 60 * 60 * 1000))) {
-                if (mMaster.debug) {
-                    Slog.i(TAG, "The current rebind count " + mRebindCount + " is reset.");
-                }
-                mRebindCount = 0;
-            }
-            if (mRebindCount >= MAX_REBIND_COUNTS) {
-                writeServiceEvent(
-                        FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_REMOTE_SERVICE_DIED,
-                        getServiceComponentName());
-            }
-            if (mRebindCount < MAX_REBIND_COUNTS) {
-                mHandler.removeCallbacks(mReBindServiceRunnable);
-                mHandler.postDelayed(mReBindServiceRunnable, REBIND_DURATION_MS);
-            }
-        }
-    }
-
-    private void updateRemoteServiceAndResurrectSessionsLocked() {
-        boolean disabled = !isEnabledLocked();
-        updateRemoteServiceLocked(disabled);
-        resurrectSessionsLocked();
-    }
-
-    private final class RebindServiceRunnable implements Runnable{
-
-        @Override
-        public void run() {
-            synchronized (mLock) {
-                if (mZombie) {
-                    mLastRebindTime = Instant.now();
-                    mRebindCount++;
-                    updateRemoteServiceAndResurrectSessionsLocked();
-                }
-            }
+            ComponentName serviceComponent = getServiceComponentName();
+            writeServiceEvent(
+                    FrameworkStatsLog.CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ON_REMOTE_SERVICE_DIED,
+                    serviceComponent);
+            EventLog.writeEvent(EventLogTags.CC_CONNECT_STATE_CHANGED, mUserId,
+                    EVENT_LOG_CONNECT_STATE_DIED, 0);
         }
     }
 
@@ -287,8 +249,8 @@ final class ContentCapturePerUserService
     }
 
     void onPackageUpdatedLocked() {
-        mRebindCount = 0;
-        updateRemoteServiceAndResurrectSessionsLocked();
+        updateRemoteServiceLocked(!isEnabledLocked());
+        resurrectSessionsLocked();
     }
 
     @GuardedBy("mLock")
@@ -330,7 +292,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
-                    componentName, /* isChildSession= */ false);
+                    /* isChildSession= */ false);
             return;
         }
         if (serviceComponentName == null) {
@@ -354,7 +316,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NOT_WHITELISTED, serviceComponentName,
-                    componentName, /* isChildSession= */ false);
+                    /* isChildSession= */ false);
             return;
         }
 
@@ -368,7 +330,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_DUPLICATED_ID,
-                    serviceComponentName, componentName, /* isChildSession= */ false);
+                    serviceComponentName, /* isChildSession= */ false);
             return;
         }
 
@@ -385,7 +347,7 @@ final class ContentCapturePerUserService
             writeSessionEvent(sessionId,
                     FrameworkStatsLog.CONTENT_CAPTURE_SESSION_EVENTS__EVENT__SESSION_NOT_CREATED,
                     STATE_DISABLED | STATE_NO_SERVICE, serviceComponentName,
-                    componentName, /* isChildSession= */ false);
+                    /* isChildSession= */ false);
             return;
         }
 
@@ -576,6 +538,15 @@ final class ContentCapturePerUserService
         return mConditionsByPkg.get(packageName);
     }
 
+    @Nullable
+    ArraySet<String> getContentCaptureAllowlist() {
+        ArraySet<String> allowPackages;
+        synchronized (mLock) {
+            allowPackages = mMaster.mGlobalContentCaptureOptions.getWhitelistedPackages(mUserId);
+        }
+        return allowPackages;
+    }
+
     @GuardedBy("mLock")
     void onActivityEventLocked(@NonNull ComponentName componentName, @ActivityEventType int type) {
         if (mRemoteService == null) {
@@ -602,8 +573,6 @@ final class ContentCapturePerUserService
             mInfo.dump(prefix2, pw);
         }
         pw.print(prefix); pw.print("Zombie: "); pw.println(mZombie);
-        pw.print(prefix); pw.print("Rebind count: "); pw.println(mRebindCount);
-        pw.print(prefix); pw.print("Last rebind: "); pw.println(mLastRebindTime);
 
         if (mRemoteService != null) {
             pw.print(prefix); pw.println("remote service:");
@@ -666,8 +635,12 @@ final class ContentCapturePerUserService
 
             ArraySet<String> oldList =
                     mMaster.mGlobalContentCaptureOptions.getWhitelistedPackages(mUserId);
+            EventLog.writeEvent(EventLogTags.CC_CURRENT_ALLOWLIST, mUserId,
+                    CollectionUtils.size(oldList));
 
             mMaster.mGlobalContentCaptureOptions.setWhitelist(mUserId, packages, activities);
+            EventLog.writeEvent(EventLogTags.CC_SET_ALLOWLIST, mUserId,
+                    CollectionUtils.size(packages), CollectionUtils.size(activities));
             writeSetWhitelistEvent(getServiceComponentName(), packages, activities);
 
             updateContentCaptureOptions(oldList);
@@ -740,7 +713,7 @@ final class ContentCapturePerUserService
         @Override
         public void writeSessionFlush(int sessionId, ComponentName app, FlushMetrics flushMetrics,
                 ContentCaptureOptions options, int flushReason) {
-            ContentCaptureMetricsLogger.writeSessionFlush(sessionId, getServiceComponentName(), app,
+            ContentCaptureMetricsLogger.writeSessionFlush(sessionId, getServiceComponentName(),
                     flushMetrics, options, flushReason);
         }
 
@@ -748,13 +721,15 @@ final class ContentCapturePerUserService
         private void updateContentCaptureOptions(@Nullable ArraySet<String> oldList) {
             ArraySet<String> adding = mMaster.mGlobalContentCaptureOptions
                     .getWhitelistedPackages(mUserId);
+            int addingCount = CollectionUtils.size(adding);
+            EventLog.writeEvent(EventLogTags.CC_CURRENT_ALLOWLIST, mUserId, addingCount);
 
             if (oldList != null && adding != null) {
                 adding.removeAll(oldList);
             }
 
-            int N = adding != null ? adding.size() : 0;
-            for (int i = 0; i < N; i++) {
+            EventLog.writeEvent(EventLogTags.CC_UPDATE_OPTIONS, mUserId, addingCount);
+            for (int i = 0; i < addingCount; i++) {
                 String packageName = adding.valueAt(i);
                 ContentCaptureOptions options = mMaster.mGlobalContentCaptureOptions
                         .getOptions(mUserId, packageName);

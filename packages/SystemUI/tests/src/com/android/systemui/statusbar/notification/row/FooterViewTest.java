@@ -57,7 +57,7 @@ public class FooterViewTest extends SysuiTestCase {
 
     @Test
     public void setDismissOnClick() {
-        mView.setDismissButtonClickListener(mock(View.OnClickListener.class));
+        mView.setClearAllButtonClickListener(mock(View.OnClickListener.class));
         assertTrue(mView.findSecondaryView().hasOnClickListeners());
     }
 

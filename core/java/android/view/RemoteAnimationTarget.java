@@ -33,6 +33,7 @@ import static android.view.RemoteAnimationTargetProto.TASK_ID;
 import static android.view.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
@@ -44,6 +45,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
+import android.window.TaskSnapshot;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -221,6 +223,24 @@ public class RemoteAnimationTarget implements Parcelable {
      */
     public boolean hasAnimatingParent;
 
+    /**
+     * Whether an activity has enabled {@link android.R.styleable#Animation_showBackdrop} for
+     * transition.
+     */
+    public boolean showBackdrop;
+
+    /**
+     * The background color of animation in case the task info is not available if the transition
+     * is activity level.
+     */
+    public @ColorInt int backgroundColor;
+
+    /**
+     * Whether the activity is going to show IME on the target window after the app transition.
+     * @see TaskSnapshot#hasImeSurface() that used the task snapshot during animating task.
+     */
+    public boolean willShowImeOnTarget;
+
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
             Rect localBounds, Rect screenSpaceBounds,
@@ -279,6 +299,21 @@ public class RemoteAnimationTarget implements Parcelable {
         allowEnterPip = in.readBoolean();
         windowType = in.readInt();
         hasAnimatingParent = in.readBoolean();
+        backgroundColor = in.readInt();
+        showBackdrop = in.readBoolean();
+        willShowImeOnTarget = in.readBoolean();
+    }
+
+    public void setShowBackdrop(boolean shouldShowBackdrop) {
+        showBackdrop = shouldShowBackdrop;
+    }
+
+    public void setWillShowImeOnTarget(boolean showImeOnTarget) {
+        willShowImeOnTarget = showImeOnTarget;
+    }
+
+    public boolean willShowImeOnTarget() {
+        return willShowImeOnTarget;
     }
 
     @Override
@@ -307,6 +342,9 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeBoolean(allowEnterPip);
         dest.writeInt(windowType);
         dest.writeBoolean(hasAnimatingParent);
+        dest.writeInt(backgroundColor);
+        dest.writeBoolean(showBackdrop);
+        dest.writeBoolean(willShowImeOnTarget);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -327,6 +365,9 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(prefix); pw.print("allowEnterPip="); pw.println(allowEnterPip);
         pw.print(prefix); pw.print("windowType="); pw.print(windowType);
         pw.print(prefix); pw.print("hasAnimatingParent="); pw.print(hasAnimatingParent);
+        pw.print(prefix); pw.print("backgroundColor="); pw.print(backgroundColor);
+        pw.print(prefix); pw.print("showBackdrop="); pw.print(showBackdrop);
+        pw.print(prefix); pw.print("willShowImeOnTarget="); pw.print(willShowImeOnTarget);
     }
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {

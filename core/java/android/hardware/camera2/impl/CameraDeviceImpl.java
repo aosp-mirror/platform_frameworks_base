@@ -2025,12 +2025,16 @@ public class CameraDeviceImpl extends CameraDevice
                     resultExtras.getLastCompletedReprocessFrameNumber();
             final long lastCompletedZslFrameNumber =
                     resultExtras.getLastCompletedZslFrameNumber();
+            final boolean hasReadoutTimestamp = resultExtras.hasReadoutTimestamp();
+            final long readoutTimestamp = resultExtras.getReadoutTimestamp();
 
             if (DEBUG) {
                 Log.d(TAG, "Capture started for id " + requestId + " frame number " + frameNumber
                         + ": completedRegularFrameNumber " + lastCompletedRegularFrameNumber
                         + ", completedReprocessFrameNUmber " + lastCompletedReprocessFrameNumber
-                        + ", completedZslFrameNumber " + lastCompletedZslFrameNumber);
+                        + ", completedZslFrameNumber " + lastCompletedZslFrameNumber
+                        + ", hasReadoutTimestamp " + hasReadoutTimestamp
+                        + (hasReadoutTimestamp ? ", readoutTimestamp " + readoutTimestamp : "")) ;
             }
             final CaptureCallbackHolder holder;
 
@@ -2082,14 +2086,26 @@ public class CameraDeviceImpl extends CameraDevice
                                                 CameraDeviceImpl.this,
                                                 holder.getRequest(i),
                                                 timestamp - (subsequenceId - i) *
-                                                NANO_PER_SECOND/fpsRange.getUpper(),
+                                                NANO_PER_SECOND / fpsRange.getUpper(),
                                                 frameNumber - (subsequenceId - i));
+                                            if (hasReadoutTimestamp) {
+                                                holder.getCallback().onReadoutStarted(
+                                                    CameraDeviceImpl.this,
+                                                    holder.getRequest(i),
+                                                    readoutTimestamp - (subsequenceId - i) *
+                                                    NANO_PER_SECOND / fpsRange.getUpper(),
+                                                    frameNumber - (subsequenceId - i));
+                                            }
                                         }
                                     } else {
                                         holder.getCallback().onCaptureStarted(
-                                            CameraDeviceImpl.this,
-                                            holder.getRequest(resultExtras.getSubsequenceId()),
+                                            CameraDeviceImpl.this, request,
                                             timestamp, frameNumber);
+                                        if (hasReadoutTimestamp) {
+                                            holder.getCallback().onReadoutStarted(
+                                                CameraDeviceImpl.this, request,
+                                                readoutTimestamp, frameNumber);
+                                        }
                                     }
                                 }
                             }
@@ -2495,10 +2511,10 @@ public class CameraDeviceImpl extends CameraDevice
             if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported()) {
                 mCurrentAdvancedExtensionSession =
                         CameraAdvancedExtensionSessionImpl.createCameraAdvancedExtensionSession(
-                                this, mContext, extensionConfiguration);
+                                this, mContext, extensionConfiguration, mNextSessionId++);
             } else {
                 mCurrentExtensionSession = CameraExtensionSessionImpl.createCameraExtensionSession(
-                        this, mContext, extensionConfiguration);
+                        this, mContext, extensionConfiguration, mNextSessionId++);
             }
         } catch (RemoteException e) {
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);

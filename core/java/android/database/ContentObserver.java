@@ -18,6 +18,7 @@ package android.database;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
@@ -188,6 +189,27 @@ public abstract class ContentObserver {
         }
     }
 
+    /**
+     * This method is called when a content change occurs. Includes the changed
+     * content Uris when available.
+     * <p>
+     * Subclasses should override this method to handle content changes. To
+     * ensure correct operation on older versions of the framework that did not
+     * provide richer arguments, applications should implement all overloads.
+     *
+     * @param selfChange True if this is a self-change notification.
+     * @param uris The Uris of the changed content.
+     * @param flags Flags indicating details about this change.
+     * @param user The corresponding {@link UserHandle} for the current notification.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void onChange(boolean selfChange, @NonNull Collection<Uri> uris,
+            @NotifyFlags int flags, @NonNull UserHandle user) {
+        onChange(selfChange, uris, user.getIdentifier());
+    }
+
     /** @hide */
     public void onChange(boolean selfChange, @NonNull Collection<Uri> uris,
             @NotifyFlags int flags, @UserIdInt int userId) {
@@ -197,7 +219,7 @@ public abstract class ContentObserver {
         if (!CompatChanges.isChangeEnabled(ADD_CONTENT_OBSERVER_FLAGS)
                 || android.os.Process.myUid() == android.os.Process.SYSTEM_UID) {
             // Deliver userId through argument to preserve hidden API behavior
-            onChange(selfChange, uris, userId);
+            onChange(selfChange, uris, flags, UserHandle.of(userId));
         } else {
             onChange(selfChange, uris, flags);
         }

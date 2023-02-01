@@ -58,7 +58,7 @@ public class RemoteAnimationAdapterCompat {
         mRemoteTransition = buildRemoteTransition(runner, appThread);
     }
 
-    RemoteAnimationAdapter getWrapped() {
+    public RemoteAnimationAdapter getWrapped() {
         return mWrapped;
     }
 
@@ -105,7 +105,7 @@ public class RemoteAnimationAdapterCompat {
             }
 
             @Override
-            public void onAnimationCancelled() {
+            public void onAnimationCancelled(boolean isKeyguardOccluded) {
                 remoteAnimationAdapter.onAnimationCancelled();
             }
         };
@@ -114,18 +114,21 @@ public class RemoteAnimationAdapterCompat {
     private static IRemoteTransition.Stub wrapRemoteTransition(
             final RemoteAnimationRunnerCompat remoteAnimationAdapter) {
         return new IRemoteTransition.Stub() {
+            final ArrayMap<IBinder, Runnable> mFinishRunnables = new ArrayMap<>();
+
             @Override
             public void startAnimation(IBinder token, TransitionInfo info,
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishCallback) {
                 final ArrayMap<SurfaceControl, SurfaceControl> leashMap = new ArrayMap<>();
                 final RemoteAnimationTargetCompat[] appsCompat =
-                        RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */, t, leashMap);
+                        RemoteAnimationTargetCompat.wrapApps(info, t, leashMap);
                 final RemoteAnimationTargetCompat[] wallpapersCompat =
-                        RemoteAnimationTargetCompat.wrap(info, true /* wallpapers */, t, leashMap);
-                // TODO(bc-unlock): Build wrapped object for non-apps target.
+                        RemoteAnimationTargetCompat.wrapNonApps(
+                                info, true /* wallpapers */, t, leashMap);
                 final RemoteAnimationTargetCompat[] nonAppsCompat =
-                        new RemoteAnimationTargetCompat[0];
+                        RemoteAnimationTargetCompat.wrapNonApps(
+                                info, false /* wallpapers */, t, leashMap);
 
                 // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
                 boolean isReturnToHome = false;
@@ -137,6 +140,8 @@ public class RemoteAnimationAdapterCompat {
                 float displayH = 0;
                 for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                     final TransitionInfo.Change change = info.getChanges().get(i);
+                    // skip changes that we didn't wrap
+                    if (!leashMap.containsKey(change.getLeash())) continue;
                     if (change.getTaskInfo() != null
                             && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME) {
                         isReturnToHome = change.getMode() == TRANSIT_OPEN
@@ -173,6 +178,8 @@ public class RemoteAnimationAdapterCompat {
                     for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                         final TransitionInfo.Change change = info.getChanges().get(i);
                         final SurfaceControl leash = leashMap.get(change.getLeash());
+                        // skip changes that we didn't wrap
+                        if (leash == null) continue;
                         final int mode = info.getChanges().get(i).getMode();
                         // Only deal with independent layers
                         if (!TransitionInfo.isIndependent(change, info)) continue;
@@ -183,8 +190,8 @@ public class RemoteAnimationAdapterCompat {
                     }
                     // Make wallpaper visible immediately since launcher apparently won't do this.
                     for (int i = wallpapersCompat.length - 1; i >= 0; --i) {
-                        t.show(wallpapersCompat[i].leash.getSurfaceControl());
-                        t.setAlpha(wallpapersCompat[i].leash.getSurfaceControl(), 1.f);
+                        t.show(wallpapersCompat[i].leash);
+                        t.setAlpha(wallpapersCompat[i].leash, 1.f);
                     }
                 } else {
                     if (launcherTask != null) {
@@ -205,40 +212,52 @@ public class RemoteAnimationAdapterCompat {
                     @Override
                     @SuppressLint("NewApi")
                     public void run() {
+                        final SurfaceControl.Transaction finishTransaction =
+                                new SurfaceControl.Transaction();
+                        counterLauncher.cleanUp(finishTransaction);
+                        counterWallpaper.cleanUp(finishTransaction);
+                        // Release surface references now. This is apparently to free GPU memory
+                        // while doing quick operations (eg. during CTS).
+                        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                            info.getChanges().get(i).getLeash().release();
+                        }
+                        // Don't release here since launcher might still be using them. Instead
+                        // let launcher release them (eg. via RemoteAnimationTargets)
+                        leashMap.clear();
                         try {
-                            counterLauncher.cleanUp(info.getRootLeash());
-                            counterWallpaper.cleanUp(info.getRootLeash());
-                            // Release surface references now. This is apparently to free GPU
-                            // memory while doing quick operations (eg. during CTS).
-                            for (int i = 0; i < info.getChanges().size(); ++i) {
-                                info.getChanges().get(i).getLeash().release();
-                            }
-                            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                            for (int i = 0; i < leashMap.size(); ++i) {
-                                if (leashMap.keyAt(i) == leashMap.valueAt(i)) continue;
-                                t.remove(leashMap.valueAt(i));
-                            }
-                            t.apply();
-                            finishCallback.onTransitionFinished(null /* wct */, null /* sct */);
+                            finishCallback.onTransitionFinished(null /* wct */, finishTransaction);
                         } catch (RemoteException e) {
                             Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"
                                     + " finished callback", e);
                         }
                     }
                 };
+                synchronized (mFinishRunnables) {
+                    mFinishRunnables.put(token, animationFinishedCallback);
+                }
                 // TODO(bc-unlcok): Pass correct transit type.
-                remoteAnimationAdapter.onAnimationStart(
-                        TRANSIT_OLD_NONE,
-                        appsCompat, wallpapersCompat, nonAppsCompat,
-                        animationFinishedCallback);
+                remoteAnimationAdapter.onAnimationStart(TRANSIT_OLD_NONE,
+                        appsCompat, wallpapersCompat, nonAppsCompat, () -> {
+                            synchronized (mFinishRunnables) {
+                                if (mFinishRunnables.remove(token) == null) return;
+                            }
+                            animationFinishedCallback.run();
+                        });
             }
 
             @Override
             public void mergeAnimation(IBinder token, TransitionInfo info,
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishCallback) {
-                // TODO: hook up merge to recents onTaskAppeared if applicable. Until then, ignore
-                //       any incoming merges.
+                // TODO: hook up merge to recents onTaskAppeared if applicable. Until then, adapt
+                //       to legacy cancel.
+                final Runnable finishRunnable;
+                synchronized (mFinishRunnables) {
+                    finishRunnable = mFinishRunnables.remove(mergeTarget);
+                }
+                if (finishRunnable == null) return;
+                remoteAnimationAdapter.onAnimationCancelled();
+                finishRunnable.run();
             }
         };
     }

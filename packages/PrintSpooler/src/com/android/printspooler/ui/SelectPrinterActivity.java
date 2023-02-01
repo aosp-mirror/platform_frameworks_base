@@ -314,16 +314,15 @@ public final class SelectPrinterActivity extends Activity implements
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.string.print_select_printer: {
-                PrinterInfo printer = item.getIntent().getParcelableExtra(EXTRA_PRINTER);
-                onPrinterSelected(printer);
-            } return true;
-
-            case R.string.print_forget_printer: {
-                PrinterId printerId = item.getIntent().getParcelableExtra(EXTRA_PRINTER_ID);
-                mPrinterRegistry.forgetFavoritePrinter(printerId);
-            } return true;
+        final int itemId = item.getItemId();
+        if (itemId == R.string.print_select_printer) {
+            PrinterInfo printer = item.getIntent().getParcelableExtra(EXTRA_PRINTER);
+            onPrinterSelected(printer);
+            return true;
+        } else if (itemId == R.string.print_forget_printer) {
+            PrinterId printerId = item.getIntent().getParcelableExtra(EXTRA_PRINTER_ID);
+            mPrinterRegistry.forgetFavoritePrinter(printerId);
+            return true;
         }
         return false;
     }

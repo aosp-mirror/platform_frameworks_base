@@ -79,18 +79,23 @@ stubs_defaults {
         ":conscrypt.module.public.api{.public.stubs.source}",
         ":i18n.module.public.api{.public.stubs.source}",
 
+        ":framework-adservices-sources",
         ":framework-appsearch-sources",
         ":framework-connectivity-sources",
         ":framework-bluetooth-sources",
         ":framework-connectivity-tiramisu-updatable-sources",
         ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
+        ":framework-nearby-sources",
+        ":framework-ondevicepersonalization-sources",
         ":framework-permission-sources",
         ":framework-permission-s-sources",
         ":framework-scheduling-sources",
         ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
+        ":framework-sdksandbox-sources",
         ":framework-tethering-srcs",
+        ":framework-uwb-updatable-sources",
         ":framework-wifi-updatable-sources",
         ":ike-srcs",
         ":updatable-media-srcs",
@@ -117,16 +122,30 @@ droidstubs {
 }
 
 droidstubs {
-    name: "framework-doc-system-stubs",
-    defaults: ["framework-doc-stubs-sources-default"],
-    args: metalava_framework_docs_args +
-        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
+    name: "android-non-updatable-doc-stubs-module-lib",
+    defaults: [
+        "android-non-updatable-doc-stubs-defaults",
+        "module-classpath-stubs-defaults",
     ],
-    api_levels_sdk_type: "system",
+    args: metalava_framework_docs_args +
+        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) " +
+        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES\\) ",
+    generate_stubs: false, // We're only using this module for the annotations.zip output, disable doc-stubs.
+    write_sdk_values: false,
+}
+
+droidstubs {
+    name: "android-non-updatable-doc-stubs-system-server",
+    defaults: [
+        "android-non-updatable-doc-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
+    args: metalava_framework_docs_args +
+        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) " +
+        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES\\) " +
+        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\) ",
+    generate_stubs: false, // We're only using this module for the annotations.zip output, disable doc-stubs.
+    write_sdk_values: false,
 }
 
 droidstubs {
@@ -141,6 +160,21 @@ droidstubs {
             "packages/modules/Media/apex/aidl/stable",
         ],
     },
+    extensions_info_file: ":sdk-extensions-info",
+}
+
+droidstubs {
+    name: "framework-doc-system-stubs",
+    defaults: ["framework-doc-stubs-sources-default"],
+    args: metalava_framework_docs_args +
+        " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
+    api_levels_sdk_type: "system",
+    extensions_info_file: ":sdk-extensions-info",
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -149,6 +183,7 @@ droidstubs {
 /////////////////////////////////////////////////////////////////////
 
 framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
+    "-metalavaApiSince " +
     "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
     "-overview $(location core/java/overview.html) " +
     // Federate Support Library references against local API file.
@@ -340,7 +375,7 @@ droiddoc {
     ],
     proofread_file: "ds-docs-proofread.txt",
     args: framework_docs_only_args +
-        " -toroot / -yamlV2 -metalavaApiSince -samplegroup Admin " +
+        " -toroot / -yamlV2 -samplegroup Admin " +
         " -samplegroup Background " +
         " -samplegroup Connectivity " +
         " -samplegroup Content " +

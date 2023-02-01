@@ -15,10 +15,6 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="true"
-          android:state_pressed="true"
-          android:alpha="@dimen/hint_pressed_alpha_material_dark"
-          android:color="@color/foreground_material_dark" />
-    <item android:alpha="@dimen/hint_alpha_material_dark"
+    <item android:alpha="@dimen/secondary_content_alpha_material_dark"
           android:color="@color/foreground_material_dark" />
 </selector>

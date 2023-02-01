@@ -104,7 +104,7 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun imeWindowBecomesInvisible() = testSpec.imeWindowBecomesInvisible()
 
-    @FlakyTest
+    @Presubmit
     @Test
     fun imeAppWindowBecomesInvisible() {
         testSpec.assertWm {
@@ -144,7 +144,7 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
     @Test
     fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
-    @Presubmit
+    @FlakyTest(bugId = 206753786)
     @Test
     fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
 
@@ -164,7 +164,7 @@ class CloseImeWindowToHomeTest(private val testSpec: FlickerTestParameter) {
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 5,
+                    repetitions = 3,
                     supportedRotations = listOf(Surface.ROTATION_0),
                     supportedNavigationModes = listOf(
                         WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,

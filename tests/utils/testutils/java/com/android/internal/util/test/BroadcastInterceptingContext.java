@@ -147,12 +147,39 @@ public class BroadcastInterceptingContext extends ContextWrapper {
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
-        return registerReceiver(receiver, filter, null, null);
+        return registerReceiver(receiver, filter, null, null, 0);
+    }
+
+    /**
+     * Registers the specified {@code receiver} to listen for broadcasts that match the {@code
+     * filter} in the current process.
+     *
+     * <p>Since this method only listens for broadcasts in the current process, the provided {@code
+     * flags} are ignored; this method is primarily intended to allow receivers that register with
+     * flags to register in the current process during tests.
+     */
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter, int flags) {
+        return registerReceiver(receiver, filter, null, null, flags);
     }
 
     @Override
     public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
             String broadcastPermission, Handler scheduler) {
+        return registerReceiver(receiver, filter, broadcastPermission, scheduler, 0);
+    }
+
+    /**
+     * Registers the specified {@code receiver} to listen for broadcasts that match the {@code
+     * filter} to run in the context of the specified {@code scheduler} in the current process.
+     *
+     * <p>Since this method only listens for broadcasts in the current process, the provided {@code
+     * flags} are ignored; this method is primarily intended to allow receivers that register with
+     * flags to register in the current process during tests.
+     */
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
+            String broadcastPermission, Handler scheduler, int flags) {
         synchronized (mInterceptors) {
             mInterceptors.add(new BroadcastInterceptor(receiver, filter, scheduler));
         }
@@ -215,6 +242,12 @@ public class BroadcastInterceptingContext extends ContextWrapper {
     @Override
     public void sendBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission) {
+        sendBroadcast(intent);
+    }
+
+    @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, Bundle options) {
         sendBroadcast(intent);
     }
 

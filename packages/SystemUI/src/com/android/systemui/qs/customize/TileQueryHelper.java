@@ -31,10 +31,11 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.widget.Button;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.QSTileHost;
@@ -63,7 +64,6 @@ public class TileQueryHelper {
     private final Executor mBgExecutor;
     private final Context mContext;
     private final UserTracker mUserTracker;
-    private final FeatureFlags mFeatureFlags;
     private TileStateListener mListener;
 
     private boolean mFinished;
@@ -73,17 +73,15 @@ public class TileQueryHelper {
             Context context,
             UserTracker userTracker,
             @Main Executor mainExecutor,
-            @Background Executor bgExecutor,
-            FeatureFlags featureFlags
+            @Background Executor bgExecutor
     ) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
         mUserTracker = userTracker;
-        mFeatureFlags = featureFlags;
     }
 
-    public void setListener(TileStateListener listener) {
+    public void setListener(@Nullable TileStateListener listener) {
         mListener = listener;
     }
 
@@ -121,10 +119,8 @@ public class TileQueryHelper {
         }
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
-        if (mFeatureFlags.isProviderModelSettingEnabled()) {
-            possibleTiles.remove("cell");
-            possibleTiles.remove("wifi");
-        }
+        possibleTiles.remove("cell");
+        possibleTiles.remove("wifi");
 
         for (String spec : possibleTiles) {
             // Only add current and stock tiles that can be created from QSFactoryImpl.
@@ -146,6 +142,10 @@ public class TileQueryHelper {
     }
 
     private static class TilePair {
+        private TilePair(QSTile tile) {
+            mTile = tile;
+        }
+
         QSTile mTile;
         boolean mReady = false;
     }
@@ -157,8 +157,7 @@ public class TileQueryHelper {
 
         TileCollector(List<QSTile> tilesToAdd, QSTileHost host) {
             for (QSTile tile: tilesToAdd) {
-                TilePair pair = new TilePair();
-                pair.mTile = tile;
+                TilePair pair = new TilePair(tile);
                 mQSTileList.add(pair);
             }
             mQSTileHost = host;
@@ -206,18 +205,6 @@ public class TileQueryHelper {
                 finished();
             }
         }
-
-        @Override
-        public void onShowDetail(boolean show) {}
-
-        @Override
-        public void onToggleStateChanged(boolean state) {}
-
-        @Override
-        public void onScanStateChanged(boolean state) {}
-
-        @Override
-        public void onAnnouncementRequested(CharSequence announcement) {}
     }
 
     private void addPackageTiles(final QSTileHost host) {
@@ -275,6 +262,7 @@ public class TileQueryHelper {
         });
     }
 
+    @Nullable
     private State getState(Collection<QSTile> tiles, String spec) {
         for (QSTile tile : tiles) {
             if (spec.equals(tile.getTileSpec())) {
@@ -284,19 +272,16 @@ public class TileQueryHelper {
         return null;
     }
 
-    private void addTile(String spec, CharSequence appLabel, State state, boolean isSystem) {
+    private void addTile(
+            String spec, @Nullable CharSequence appLabel, State state, boolean isSystem) {
         if (mSpecs.contains(spec)) {
             return;
         }
-        TileInfo info = new TileInfo();
-        info.state = state;
-        info.state.dualTarget = false; // No dual targets in edit.
-        info.state.expandedAccessibilityClassName =
-                Button.class.getName();
-        info.spec = spec;
-        info.state.secondaryLabel = (isSystem || TextUtils.equals(state.label, appLabel))
+        state.dualTarget = false; // No dual targets in edit.
+        state.expandedAccessibilityClassName = Button.class.getName();
+        state.secondaryLabel = (isSystem || TextUtils.equals(state.label, appLabel))
                 ? null : appLabel;
-        info.isSystem = isSystem;
+        TileInfo info = new TileInfo(spec, state, isSystem);
         mTiles.add(info);
         mSpecs.add(spec);
     }
@@ -312,6 +297,12 @@ public class TileQueryHelper {
     }
 
     public static class TileInfo {
+        public TileInfo(String spec, QSTile.State state, boolean isSystem) {
+            this.spec = spec;
+            this.state = state;
+            this.isSystem = isSystem;
+        }
+
         public String spec;
         public QSTile.State state;
         public boolean isSystem;

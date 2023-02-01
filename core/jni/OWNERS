@@ -22,14 +22,14 @@ per-file android_view_PointerIcon.* = file:/services/core/java/com/android/serve
 # WindowManager
 per-file android_graphics_BLASTBufferQueue.cpp = file:/services/core/java/com/android/server/wm/OWNERS
 per-file android_view_Surface* = file:/services/core/java/com/android/server/wm/OWNERS
-per-file android_window_WindowInfosListener.cpp = file:/services/core/java/com/android/server/wm/OWNERS
+per-file android_window_* = file:/services/core/java/com/android/server/wm/OWNERS
 
 # Resources
 per-file android_content_res_* = file:/core/java/android/content/res/OWNERS
 per-file android_util_AssetManager* = file:/core/java/android/content/res/OWNERS
 per-file android_util_StringBlock* = file:/core/java/android/content/res/OWNERS
 per-file android_util_XmlBlock* = file:/core/java/android/content/res/OWNERS
-per-file com_android_internal_content_om_OverlayConfig* = file:/core/java/android/content/res/OWNERS
+per-file com_android_internal_content_om_Overlay* = file:/core/java/android/content/res/OWNERS
 
 # Binder related things
 per-file android_os_Parcel* = file:platform/frameworks/native:/libs/binder/OWNERS
@@ -43,10 +43,13 @@ per-file android_os_HwParcel* = file:platform/system/libhwbinder:/OWNERS
 per-file android_os_HwRemoteBinder* = file:platform/system/libhwbinder:/OWNERS
 per-file EphemeralStorage* = file:platform/system/libhwbinder:/OWNERS
 
+# Sensor
+per-file android_hardware_SensorManager* = arthuri@google.com, bduddie@google.com, stange@google.com
+
 per-file *Zygote* = file:/ZYGOTE_OWNERS
 per-file core_jni_helpers.* = file:/ZYGOTE_OWNERS
 per-file fd_utils.* = file:/ZYGOTE_OWNERS
-per-file Android.bp = file:platform/build/soong:/OWNERS
+per-file Android.bp = file:platform/build/soong:/OWNERS #{LAST_RESORT_SUGGESTION}
 per-file android_animation_* = file:/core/java/android/animation/OWNERS
 per-file android_app_admin_* = file:/core/java/android/app/admin/OWNERS
 per-file android_hardware_Usb* = file:/services/usb/OWNERS
@@ -65,8 +68,9 @@ per-file com_android_internal_net_* = file:/services/core/java/com/android/serve
 
 ### Graphics ###
 per-file android_graphics_* = file:/graphics/java/android/graphics/OWNERS
-per-file android_hardware_HardwareBuffer.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file *HardwareBuffer* = file:/graphics/java/android/graphics/OWNERS
 per-file android_hardware_SyncFence.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file android_hardware_OverlayProperties.cpp = file:/graphics/java/android/graphics/OWNERS
 per-file android_os_GraphicsEnvironment.cpp = file:platform/frameworks/native:/opengl/OWNERS
 
 ### Text ###
@@ -92,3 +96,9 @@ per-file android_os_VintfRuntimeInfo* = file:platform/system/libvintf:/OWNERS
 # Battery
 per-file com_android_internal_os_Kernel* = file:/BATTERY_STATS_OWNERS
 per-file com_android_internal_os_*MultiStateCounter* = file:/BATTERY_STATS_OWNERS
+
+# PM
+per-file com_android_internal_content_* = file:/PACKAGE_MANAGER_OWNERS
+
+# Stats/expresslog
+per-file *expresslog* = file:/services/core/java/com/android/server/stats/OWNERS

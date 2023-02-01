@@ -34,7 +34,7 @@ import android.testing.TestableContext;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.server.testables.TestableDeviceConfig;
+import com.android.modules.utils.testing.TestableDeviceConfig;
 
 import org.junit.Before;
 import org.junit.ClassRule;

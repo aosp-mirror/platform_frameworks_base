@@ -5,31 +5,23 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.util.AttributeSet;
-import android.util.TypedValue;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.colorextraction.ColorExtractor;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.plugins.ClockPlugin;
+import com.android.systemui.plugins.Clock;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
-import java.util.TimeZone;
-
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
  */
@@ -50,17 +42,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
     public static final int SMALL = 1;
 
     /**
-     * Optional/alternative clock injected via plugin.
-     */
-    private ClockPlugin mClockPlugin;
-
-    /**
      * Frame for small/large clocks
      */
-    private FrameLayout mClockFrame;
+    private FrameLayout mSmallClockFrame;
     private FrameLayout mLargeClockFrame;
-    private AnimatableClockView mClockView;
-    private AnimatableClockView mLargeClockView;
 
     private View mStatusArea;
     private int mSmartspaceTopOffset;
@@ -80,14 +65,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
     @VisibleForTesting AnimatorSet mClockOutAnim = null;
     private ObjectAnimator mStatusAreaAnim = null;
 
-    /**
-     * If the Keyguard Slice has a header (big center-aligned text.)
-     */
-    private boolean mSupportsDarkText;
-    private int[] mColorPalette;
-
     private int mClockSwitchYAmount;
     @VisibleForTesting boolean mChildrenAreLaidOut = false;
+    @VisibleForTesting boolean mAnimateOnLayout = true;
 
     public KeyguardClockSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -97,121 +77,72 @@ public class KeyguardClockSwitch extends RelativeLayout {
      * Apply dp changes on font/scale change
      */
     public void onDensityOrFontScaleChanged() {
-        mLargeClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX, mContext.getResources()
-                .getDimensionPixelSize(R.dimen.large_clock_text_size));
-        mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX, mContext.getResources()
-                .getDimensionPixelSize(R.dimen.clock_text_size));
-
         mClockSwitchYAmount = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_clock_switch_y_shift);
-
         mSmartspaceTopOffset = mContext.getResources().getDimensionPixelSize(
                 R.dimen.keyguard_smartspace_top_offset);
-    }
-
-    /**
-     * Returns if this view is presenting a custom clock, or the default implementation.
-     */
-    public boolean hasCustomClock() {
-        return mClockPlugin != null;
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mClockFrame = findViewById(R.id.lockscreen_clock_view);
-        mClockView = findViewById(R.id.animatable_clock_view);
+        mSmallClockFrame = findViewById(R.id.lockscreen_clock_view);
         mLargeClockFrame = findViewById(R.id.lockscreen_clock_view_large);
-        mLargeClockView = findViewById(R.id.animatable_clock_view_large);
         mStatusArea = findViewById(R.id.keyguard_status_area);
 
         onDensityOrFontScaleChanged();
     }
 
-    void setClockPlugin(ClockPlugin plugin, int statusBarState) {
+    void setClock(Clock clock, int statusBarState) {
         // Disconnect from existing plugin.
-        if (mClockPlugin != null) {
-            View smallClockView = mClockPlugin.getView();
-            if (smallClockView != null && smallClockView.getParent() == mClockFrame) {
-                mClockFrame.removeView(smallClockView);
-            }
-            View bigClockView = mClockPlugin.getBigClockView();
-            if (bigClockView != null && bigClockView.getParent() == mLargeClockFrame) {
-                mLargeClockFrame.removeView(bigClockView);
-            }
-            mClockPlugin.onDestroyView();
-            mClockPlugin = null;
-        }
-        if (plugin == null) {
-            mClockView.setVisibility(View.VISIBLE);
-            mLargeClockView.setVisibility(View.VISIBLE);
+        mSmallClockFrame.removeAllViews();
+        mLargeClockFrame.removeAllViews();
+
+        if (clock == null) {
+            Log.e(TAG, "No clock being shown");
             return;
         }
+
         // Attach small and big clock views to hierarchy.
-        View smallClockView = plugin.getView();
-        if (smallClockView != null) {
-            mClockFrame.addView(smallClockView, -1,
-                    new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT));
-            mClockView.setVisibility(View.GONE);
-        }
-        View bigClockView = plugin.getBigClockView();
-        if (bigClockView != null) {
-            mLargeClockFrame.addView(bigClockView);
-            mLargeClockView.setVisibility(View.GONE);
-        }
-
-        // Initialize plugin parameters.
-        mClockPlugin = plugin;
-        mClockPlugin.setStyle(getPaint().getStyle());
-        mClockPlugin.setTextColor(getCurrentTextColor());
-        mClockPlugin.setDarkAmount(mDarkAmount);
-        if (mColorPalette != null) {
-            mClockPlugin.setColorPalette(mSupportsDarkText, mColorPalette);
-        }
+        mSmallClockFrame.addView(clock.getSmallClock());
+        mLargeClockFrame.addView(clock.getLargeClock());
     }
 
-    /**
-     * It will also update plugin setStyle if plugin is connected.
-     */
-    public void setStyle(Style style) {
-        if (mClockPlugin != null) {
-            mClockPlugin.setStyle(style);
-        }
-    }
-
-    /**
-     * It will also update plugin setTextColor if plugin is connected.
-     */
-    public void setTextColor(int color) {
-        if (mClockPlugin != null) {
-            mClockPlugin.setTextColor(color);
-        }
-    }
-
-    private void animateClockChange(boolean useLargeClock) {
+    private void updateClockViews(boolean useLargeClock, boolean animate) {
         if (mClockInAnim != null) mClockInAnim.cancel();
         if (mClockOutAnim != null) mClockOutAnim.cancel();
         if (mStatusAreaAnim != null) mStatusAreaAnim.cancel();
+
+        mClockInAnim = null;
+        mClockOutAnim = null;
+        mStatusAreaAnim = null;
 
         View in, out;
         int direction = 1;
         float statusAreaYTranslation;
         if (useLargeClock) {
-            out = mClockFrame;
+            out = mSmallClockFrame;
             in = mLargeClockFrame;
             if (indexOfChild(in) == -1) addView(in);
             direction = -1;
-            statusAreaYTranslation = mClockFrame.getTop() - mStatusArea.getTop()
+            statusAreaYTranslation = mSmallClockFrame.getTop() - mStatusArea.getTop()
                     + mSmartspaceTopOffset;
         } else {
-            in = mClockFrame;
+            in = mSmallClockFrame;
             out = mLargeClockFrame;
             statusAreaYTranslation = 0f;
 
             // Must remove in order for notifications to appear in the proper place
             removeView(out);
+        }
+
+        if (!animate) {
+            out.setAlpha(0f);
+            in.setAlpha(1f);
+            in.setVisibility(VISIBLE);
+            mStatusArea.setTranslationY(statusAreaYTranslation);
+            return;
         }
 
         mClockOutAnim = new AnimatorSet();
@@ -257,23 +188,11 @@ public class KeyguardClockSwitch extends RelativeLayout {
     }
 
     /**
-     * Set the amount (ratio) that the device has transitioned to doze.
-     *
-     * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
-     */
-    public void setDarkAmount(float darkAmount) {
-        mDarkAmount = darkAmount;
-        if (mClockPlugin != null) {
-            mClockPlugin.setDarkAmount(darkAmount);
-        }
-    }
-
-    /**
      * Display the desired clock and hide the other one
      *
      * @return true if desired clock appeared and false if it was already visible
      */
-    boolean switchToClock(@ClockSize int clockSize) {
+    boolean switchToClock(@ClockSize int clockSize, boolean animate) {
         if (mDisplayedClockSize != null && clockSize == mDisplayedClockSize) {
             return false;
         }
@@ -281,7 +200,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         // let's make sure clock is changed only after all views were laid out so we can
         // translate them properly
         if (mChildrenAreLaidOut) {
-            animateClockChange(clockSize == LARGE);
+            updateClockViews(clockSize == LARGE, animate);
         }
 
         mDisplayedClockSize = clockSize;
@@ -293,70 +212,17 @@ public class KeyguardClockSwitch extends RelativeLayout {
         super.onLayout(changed, l, t, r, b);
 
         if (mDisplayedClockSize != null && !mChildrenAreLaidOut) {
-            animateClockChange(mDisplayedClockSize == LARGE);
+            post(() -> updateClockViews(mDisplayedClockSize == LARGE, mAnimateOnLayout));
         }
 
         mChildrenAreLaidOut = true;
     }
 
-    public Paint getPaint() {
-        return mClockView.getPaint();
-    }
-
-    public int getCurrentTextColor() {
-        return mClockView.getCurrentTextColor();
-    }
-
-    public float getTextSize() {
-        return mClockView.getTextSize();
-    }
-
-    /**
-     * Refresh the time of the clock, due to either time tick broadcast or doze time tick alarm.
-     */
-    public void refresh() {
-        if (mClockPlugin != null) {
-            mClockPlugin.onTimeTick();
-        }
-    }
-
-    /**
-     * Notifies that the time zone has changed.
-     */
-    public void onTimeZoneChanged(TimeZone timeZone) {
-        if (mClockPlugin != null) {
-            mClockPlugin.onTimeZoneChanged(timeZone);
-        }
-    }
-
-    /**
-     * Notifies that the time format has changed.
-     *
-     * @param timeFormat "12" for 12-hour format, "24" for 24-hour format
-     */
-    public void onTimeFormatChanged(String timeFormat) {
-        if (mClockPlugin != null) {
-            mClockPlugin.onTimeFormatChanged(timeFormat);
-        }
-    }
-
-    void updateColors(ColorExtractor.GradientColors colors) {
-        mSupportsDarkText = colors.supportsDarkText();
-        mColorPalette = colors.getColorPalette();
-        if (mClockPlugin != null) {
-            mClockPlugin.setColorPalette(mSupportsDarkText, mColorPalette);
-        }
-    }
-
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, String[] args) {
         pw.println("KeyguardClockSwitch:");
-        pw.println("  mClockPlugin: " + mClockPlugin);
-        pw.println("  mClockFrame: " + mClockFrame);
+        pw.println("  mSmallClockFrame: " + mSmallClockFrame);
         pw.println("  mLargeClockFrame: " + mLargeClockFrame);
         pw.println("  mStatusArea: " + mStatusArea);
-        pw.println("  mDarkAmount: " + mDarkAmount);
-        pw.println("  mSupportsDarkText: " + mSupportsDarkText);
-        pw.println("  mColorPalette: " + Arrays.toString(mColorPalette));
         pw.println("  mDisplayedClockSize: " + mDisplayedClockSize);
     }
 }

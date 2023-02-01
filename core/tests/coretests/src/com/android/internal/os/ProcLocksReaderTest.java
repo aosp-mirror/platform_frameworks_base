@@ -16,7 +16,6 @@
 
 package com.android.internal.os;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -33,11 +32,14 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.ArrayList;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ProcLocksReaderTest {
+public class ProcLocksReaderTest implements
+        ProcLocksReader.ProcLocksReaderCallback {
     private File mProcDirectory;
+    private ArrayList<Integer> mPids = new ArrayList<>();
 
     @Before
     public void setUp() {
@@ -55,14 +57,12 @@ public class ProcLocksReaderTest {
         String simpleLocks =
                 "1: POSIX  ADVISORY  READ  18403 fd:09:9070 1073741826 1073742335\n" +
                 "2: POSIX  ADVISORY  WRITE 18292 fd:09:34062 0 EOF\n";
-        assertFalse(runHasFileLocks(simpleLocks, 18402));
-        assertFalse(runHasFileLocks(simpleLocks, 18404));
-        assertTrue(runHasFileLocks(simpleLocks, 18403));
-        assertTrue(runHasFileLocks(simpleLocks, 18292));
+        runHandleBlockingFileLocks(simpleLocks);
+        assertTrue(mPids.isEmpty());
     }
 
     @Test
-    public void testRunBlockedLocks() throws Exception {
+    public void testRunBlockingLocks() throws Exception {
         String blockedLocks =
                 "1: POSIX  ADVISORY  READ  18403 fd:09:9070 1073741826 1073742335\n" +
                 "2: POSIX  ADVISORY  WRITE 18292 fd:09:34062 0 EOF\n" +
@@ -70,21 +70,43 @@ public class ProcLocksReaderTest {
                 "2: -> POSIX  ADVISORY  WRITE 18293 fd:09:34062 0 EOF\n" +
                 "3: POSIX  ADVISORY  READ  3888 fd:09:13992 128 128\n" +
                 "4: POSIX  ADVISORY  READ  3888 fd:09:14230 1073741826 1073742335\n";
-        assertFalse(runHasFileLocks(blockedLocks, 18402));
-        assertFalse(runHasFileLocks(blockedLocks, 18404));
-        assertTrue(runHasFileLocks(blockedLocks, 18403));
-        assertTrue(runHasFileLocks(blockedLocks, 18292));
-
-        assertFalse(runHasFileLocks(blockedLocks, 18291));
-        assertFalse(runHasFileLocks(blockedLocks, 18293));
-        assertTrue(runHasFileLocks(blockedLocks, 3888));
+        runHandleBlockingFileLocks(blockedLocks);
+        assertTrue(mPids.remove(0).equals(18292));
+        assertTrue(mPids.isEmpty());
     }
 
-    private boolean runHasFileLocks(String fileContents, int pid) throws Exception {
+    @Test
+    public void testRunMultipleBlockingLocks() throws Exception {
+        String blockedLocks =
+                "1: POSIX  ADVISORY  READ  18403 fd:09:9070 1073741826 1073742335\n" +
+                "2: POSIX  ADVISORY  WRITE 18292 fd:09:34062 0 EOF\n" +
+                "2: -> POSIX  ADVISORY  WRITE 18291 fd:09:34062 0 EOF\n" +
+                "2: -> POSIX  ADVISORY  WRITE 18293 fd:09:34062 0 EOF\n" +
+                "3: POSIX  ADVISORY  READ  3888 fd:09:13992 128 128\n" +
+                "4: FLOCK  ADVISORY  WRITE 3840 fe:01:5111809 0 EOF\n" +
+                "4: -> FLOCK  ADVISORY  WRITE 3841 fe:01:5111809 0 EOF\n" +
+                "5: POSIX  ADVISORY  READ  3888 fd:09:14230 1073741826 1073742335\n";
+        runHandleBlockingFileLocks(blockedLocks);
+        assertTrue(mPids.remove(0).equals(18292));
+        assertTrue(mPids.remove(0).equals(3840));
+        assertTrue(mPids.isEmpty());
+    }
+
+    private void runHandleBlockingFileLocks(String fileContents) throws Exception {
         File tempFile = File.createTempFile("locks", null, mProcDirectory);
         Files.write(tempFile.toPath(), fileContents.getBytes());
-        boolean result = new ProcLocksReader(tempFile.toString()).hasFileLocks(pid);
+        mPids.clear();
+        new ProcLocksReader(tempFile.toString()).handleBlockingFileLocks(this);
         Files.delete(tempFile.toPath());
-        return result;
+    }
+
+    /**
+     * Call the callback function of handleBlockingFileLocks().
+     *
+     * @param pid Each process that hold file locks blocking other processes.
+     */
+    @Override
+    public void onBlockingFileLock(int pid) {
+        mPids.add(pid);
     }
 }

@@ -18,10 +18,10 @@ package android.hardware.display;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.companion.virtual.IVirtualDevice;
 import android.graphics.Point;
 import android.hardware.SensorManager;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.IntArray;
 import android.util.Slog;
@@ -30,11 +30,13 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.window.DisplayWindowPolicyController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Display manager local system service interface.
@@ -57,6 +59,14 @@ public abstract class DisplayManagerInternal {
      */
     public abstract void initPowerManagement(DisplayPowerCallbacks callbacks,
             Handler handler, SensorManager sensorManager);
+
+    /**
+     * Called by the VirtualDeviceManagerService to create a VirtualDisplay owned by a
+     * VirtualDevice.
+     */
+    public abstract int createVirtualDisplay(VirtualDisplayConfig config,
+            IVirtualDisplayCallback callback, IVirtualDevice virtualDevice,
+            DisplayWindowPolicyController dwpc, String packageName);
 
     /**
      * Called by the power manager to request a new power state.
@@ -127,6 +137,14 @@ public abstract class DisplayManagerInternal {
      * returned object must be treated as immutable.
      */
     public abstract DisplayInfo getDisplayInfo(int displayId);
+
+    /**
+     * Returns a set of DisplayInfo, for the states that may be assumed by either the given display,
+     * or any other display within that display's group.
+     *
+     * @param displayId The logical display id to fetch DisplayInfo for.
+     */
+    public abstract Set<DisplayInfo> getPossibleDisplayInfo(int displayId);
 
     /**
      * Returns the position of the display's projection.
@@ -341,26 +359,34 @@ public abstract class DisplayManagerInternal {
     public abstract List<RefreshRateLimitation> getRefreshRateLimitations(int displayId);
 
     /**
-     * Returns the window token of the level of the WindowManager hierarchy to mirror. Returns null
-     * if layer mirroring by SurfaceFlinger should not be performed for the given displayId.
-     * For now, only used for mirroring started from MediaProjection.
-     */
-    public abstract IBinder getWindowTokenClientToMirror(int displayId);
-
-    /**
-     * For the given displayId, updates the window token of the level of the WindowManager hierarchy
-     * to mirror. If windowToken is null, then SurfaceFlinger performs no layer mirroring to the
+     * For the given displayId, updates if WindowManager is responsible for mirroring on that
+     * display. If {@code false}, then SurfaceFlinger performs no layer mirroring to the
      * given display.
-     * For now, only used for mirroring started from MediaProjection.
+     * Only used for mirroring started from MediaProjection.
      */
-    public abstract void setWindowTokenClientToMirror(int displayId, IBinder windowToken);
+    public abstract void setWindowManagerMirroring(int displayId, boolean isMirroring);
 
     /**
      * Returns the default size of the surface associated with the display, or null if the surface
      * is not provided for layer mirroring by SurfaceFlinger.
-     * For now, only used for mirroring started from MediaProjection.
+     * Only used for mirroring started from MediaProjection.
      */
     public abstract Point getDisplaySurfaceDefaultSize(int displayId);
+
+    /**
+     * Receives early interactivity changes from power manager.
+     *
+     * @param interactive The interactive state that the device is moving into.
+     */
+    public abstract void onEarlyInteractivityChange(boolean interactive);
+
+    /**
+     * Get {@link DisplayWindowPolicyController} associated to the {@link DisplayInfo#displayId}
+     *
+     * @param displayId The id of the display.
+     * @return The associated {@link DisplayWindowPolicyController}.
+     */
+    public abstract DisplayWindowPolicyController getDisplayWindowPolicyController(int displayId);
 
     /**
      * Describes the requested power state of the display.
@@ -543,8 +569,19 @@ public abstract class DisplayManagerInternal {
         void onProximityNegative();
         void onDisplayStateChange(boolean allInactive, boolean allOff);
 
-        void acquireSuspendBlocker();
-        void releaseSuspendBlocker();
+        /**
+         * Acquires a suspend blocker with a specified label.
+         *
+         * @param id A logging label for the acquisition.
+         */
+        void acquireSuspendBlocker(String id);
+
+        /**
+         * Releases a suspend blocker with a specified label.
+         *
+         * @param id A logging label for the release.
+         */
+        void releaseSuspendBlocker(String id);
     }
 
     /**

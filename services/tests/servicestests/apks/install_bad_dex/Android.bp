@@ -1,0 +1,32 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test_helper_app {
+    name: "FrameworksServicesTests_install_bad_dex_",
+    defaults: ["FrameworksServicesTests_apks_defaults"],
+
+    srcs: ["src/**/*.java"],
+}
+
+// Inject bad classes.dex file.
+java_genrule {
+    name: "FrameworksServicesTests_install_bad_dex",
+    tools: [
+        "soong_zip",
+        "merge_zips",
+    ],
+    srcs: [
+        ":FrameworksServicesTests_install_bad_dex_",
+        "classes.dex",
+    ],
+    out: ["FrameworksServicesTests_install_bad_dex.apk"],
+    cmd: "$(location soong_zip) -o $(genDir)/classes.dex.zip -j -f $(location classes.dex) && " +
+        "$(location merge_zips) -ignore-duplicates $(out) $(genDir)/classes.dex.zip " +
+        "$(location :FrameworksServicesTests_install_bad_dex_)",
+}

@@ -21,93 +21,36 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Abstract base class for keeping track and dispatching events from the biometric's HAL to the
+ * Abstract base class for keeping track and dispatching events from the biometric's HAL to
  * the current client.  Subclasses are responsible for coordinating the interaction with
  * the biometric's HAL for the specific action (e.g. authenticate, enroll, enumerate, etc.).
  */
-public abstract class BaseClientMonitor extends LoggableMonitor
-        implements IBinder.DeathRecipient {
+public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
 
-    private static final String TAG = "Biometrics/ClientMonitor";
+    private static final String TAG = "BaseClientMonitor";
     protected static final boolean DEBUG = true;
 
     // Counter used to distinguish between ClientMonitor instances to help debugging.
     private static int sCount = 0;
-
-    /**
-     * Interface that ClientMonitor holders should use to receive callbacks.
-     */
-    public interface Callback {
-        /**
-         * Invoked when the ClientMonitor operation has been started (e.g. reached the head of
-         * the queue and becomes the current operation).
-         *
-         * @param clientMonitor Reference of the ClientMonitor that is starting.
-         */
-        default void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-        }
-
-        /**
-         * Invoked when the ClientMonitor operation is complete. This abstracts away asynchronous
-         * (i.e. Authenticate, Enroll, Enumerate, Remove) and synchronous (i.e. generateChallenge,
-         * revokeChallenge) so that a scheduler can process ClientMonitors regardless of their
-         * implementation.
-         *
-         * @param clientMonitor Reference of the ClientMonitor that finished.
-         * @param success True if the operation completed successfully.
-         */
-        default void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
-        }
-    }
-
-    /** Holder for wrapping multiple handlers into a single Callback. */
-    public static class CompositeCallback implements Callback {
-        @NonNull
-        private final List<Callback> mCallbacks;
-
-        public CompositeCallback(@NonNull Callback... callbacks) {
-            mCallbacks = new ArrayList<>();
-
-            for (Callback callback : callbacks) {
-                if (callback != null) {
-                    mCallbacks.add(callback);
-                }
-            }
-        }
-
-        @Override
-        public final void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                mCallbacks.get(i).onClientStarted(clientMonitor);
-            }
-        }
-
-        @Override
-        public final void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
-                boolean success) {
-            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).onClientFinished(clientMonitor, success);
-            }
-        }
-    }
 
     private final int mSequentialId;
     @NonNull private final Context mContext;
     private final int mTargetUserId;
     @NonNull private final String mOwner;
     private final int mSensorId; // sensorId as configured by the framework
+    @NonNull private final BiometricLogger mLogger;
+    @NonNull private final BiometricContext mBiometricContext;
 
     @Nullable private IBinder mToken;
     private long mRequestId;
@@ -119,7 +62,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
 
     // Use an empty callback by default since delayed operations can receive events
     // before they are started and cause NPE in subclasses that access this field directly.
-    @NonNull protected Callback mCallback = new Callback() {
+    @NonNull protected ClientMonitorCallback mCallback = new ClientMonitorCallback() {
         @Override
         public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
             Slog.e(TAG, "mCallback onClientStarted: called before set (should not happen)");
@@ -133,18 +76,6 @@ public abstract class BaseClientMonitor extends LoggableMonitor
     };
 
     /**
-     * @return A ClientMonitorEnum constant defined in biometrics.proto
-     */
-    public abstract int getProtoEnum();
-
-    /**
-     * @return True if the ClientMonitor should cancel any current and pending interruptable clients
-     */
-    public boolean interruptsPrecedingClients() {
-        return false;
-    }
-
-    /**
      * @param context    system_server context
      * @param token      a unique token for the client
      * @param listener   recipient of related events (e.g. authentication)
@@ -152,15 +83,13 @@ public abstract class BaseClientMonitor extends LoggableMonitor
      * @param owner      name of the client that owns this
      * @param cookie     BiometricPrompt authentication cookie (to be moved into a subclass soon)
      * @param sensorId   ID of the sensor that the operation should be requested of
-     * @param statsModality One of {@link BiometricsProtoEnums} MODALITY_* constants
-     * @param statsAction   One of {@link BiometricsProtoEnums} ACTION_* constants
-     * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
+     * @param logger     framework stats logger
+     * @param biometricContext system context metadata
      */
     public BaseClientMonitor(@NonNull Context context,
             @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
-            int statsClient) {
-        super(context, statsModality, statsAction, statsClient);
+            @NonNull String owner, int cookie, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
         mSequentialId = sCount++;
         mContext = context;
         mToken = token;
@@ -170,6 +99,8 @@ public abstract class BaseClientMonitor extends LoggableMonitor
         mOwner = owner;
         mCookie = cookie;
         mSensorId = sensorId;
+        mLogger = logger;
+        mBiometricContext = biometricContext;
 
         try {
             if (token != null) {
@@ -180,15 +111,29 @@ public abstract class BaseClientMonitor extends LoggableMonitor
         }
     }
 
-    public int getCookie() {
-        return mCookie;
+    /** A ClientMonitorEnum constant defined in biometrics.proto */
+    public abstract int getProtoEnum();
+
+    /** True if the ClientMonitor should cancel any current and pending interruptable clients. */
+    public boolean interruptsPrecedingClients() {
+        return false;
+    }
+
+    /**
+     * Sets the lifecycle callback before the operation is started via
+     * {@link #start(ClientMonitorCallback)} when the client must wait for a cookie before starting.
+     *
+     * @param callback lifecycle callback (typically same callback used for starting the operation)
+     */
+    public void waitForCookie(@NonNull ClientMonitorCallback callback) {
+        mCallback = callback;
     }
 
     /**
      * Starts the ClientMonitor's lifecycle.
-     * @param callback invoked when the operation is complete (succeeds, fails, etc)
+     * @param callback invoked when the operation is complete (succeeds, fails, etc.)
      */
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         mCallback = wrapCallbackForStart(callback);
         mCallback.onClientStarted(this);
     }
@@ -199,7 +144,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
      * Returns the original callback unless overridden.
      */
     @NonNull
-    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
+    protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
         return callback;
     }
 
@@ -257,14 +202,37 @@ public abstract class BaseClientMonitor extends LoggableMonitor
         }
     }
 
+    /**
+     * Only valid for AuthenticationClient.
+     * @return true if the client is authenticating for a crypto operation.
+     */
+    protected boolean isCryptoOperation() {
+        return false;
+    }
+
+    /** System context that may change during operations. */
+    @NonNull
+    protected BiometricContext getBiometricContext() {
+        return mBiometricContext;
+    }
+
+    /** Logger for this client */
+    @NonNull
+    public BiometricLogger getLogger() {
+        return mLogger;
+    }
+
+    @NonNull
     public final Context getContext() {
         return mContext;
     }
 
+    @NonNull
     public final String getOwnerString() {
         return mOwner;
     }
 
+    @Nullable
     public final ClientMonitorCallbackConverter getListener() {
         return mListener;
     }
@@ -273,6 +241,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
         return mTargetUserId;
     }
 
+    @Nullable
     public final IBinder getToken() {
         return mToken;
     }
@@ -281,13 +250,18 @@ public abstract class BaseClientMonitor extends LoggableMonitor
         return mSensorId;
     }
 
+    /** Cookie set when this monitor was created. */
+    public int getCookie() {
+        return mCookie;
+    }
+
     /** Unique request id. */
-    public final long getRequestId() {
+    public long getRequestId() {
         return mRequestId;
     }
 
     /** If a unique id has been set via {@link #setRequestId(long)} */
-    public final boolean hasRequestId() {
+    public boolean hasRequestId() {
         return mRequestId > 0;
     }
 
@@ -305,7 +279,7 @@ public abstract class BaseClientMonitor extends LoggableMonitor
     }
 
     @VisibleForTesting
-    public Callback getCallback() {
+    public ClientMonitorCallback getCallback() {
         return mCallback;
     }
 

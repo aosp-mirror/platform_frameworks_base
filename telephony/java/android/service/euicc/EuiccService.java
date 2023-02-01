@@ -29,7 +29,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.TelephonyManager;
 import android.telephony.euicc.DownloadableSubscription;
 import android.telephony.euicc.EuiccInfo;
 import android.telephony.euicc.EuiccManager;
@@ -255,6 +254,13 @@ public abstract class EuiccService extends Service {
      */
     public static final String EXTRA_RESOLUTION_CARD_ID =
             "android.service.euicc.extra.RESOLUTION_CARD_ID";
+
+    /**
+     * Intent extra set for resolution requests containing an int indicating the subscription id
+     * to be enabled.
+     */
+    public static final String EXTRA_RESOLUTION_SUBSCRIPTION_ID =
+            "android.service.euicc.extra.RESOLUTION_SUBSCRIPTION_ID";
 
     /**
      * Intent extra set for resolution requests containing an int indicating the current port index.
@@ -517,11 +523,45 @@ public abstract class EuiccService extends Service {
      *     defined in {@code RESOLVABLE_ERROR_}. A subclass should override this method. Otherwise,
      *     this method does nothing and returns null by default.
      * @see android.telephony.euicc.EuiccManager#downloadSubscription
+     * @deprecated prefer {@link #onDownloadSubscription(int, int,
+     *     DownloadableSubscription, boolean, boolean, Bundle)}
      */
+    @Deprecated
     public DownloadSubscriptionResult onDownloadSubscription(int slotId,
             @NonNull DownloadableSubscription subscription, boolean switchAfterDownload,
             boolean forceDeactivateSim, @Nullable Bundle resolvedBundle) {
         return null;
+    }
+
+    /**
+     * Download the given subscription.
+     *
+     * @param slotIndex Index of the SIM slot to use for the operation.
+     * @param portIndex Index of the port from the slot. portIndex is used when
+     *     switchAfterDownload is set to {@code true}, otherwise download is port agnostic.
+     * @param subscription The subscription to download.
+     * @param switchAfterDownload If true, the subscription should be enabled upon successful
+     *     download.
+     * @param forceDeactivateSim If true, and if an active SIM must be deactivated to access the
+     *     eUICC, perform this action automatically. Otherwise, {@link #RESULT_MUST_DEACTIVATE_SIM}
+     *     should be returned to allow the user to consent to this operation first.
+     * @param resolvedBundle The bundle containing information on resolved errors. It can contain
+     *     a string of confirmation code for the key {@link #EXTRA_RESOLUTION_CONFIRMATION_CODE},
+     *     and a boolean for key {@link #EXTRA_RESOLUTION_ALLOW_POLICY_RULES} indicating whether
+     *     the user allows profile policy rules or not.
+     * @return a DownloadSubscriptionResult instance including a result code, a resolvable errors
+     *     bit map, and original the card Id. The result code may be one of the predefined
+     *     {@code RESULT_} constants or any implementation-specific code starting with
+     *     {@link #RESULT_FIRST_USER}. The resolvable error bit map can be either 0 or values
+     *     defined in {@code RESOLVABLE_ERROR_}.
+     * @see android.telephony.euicc.EuiccManager#downloadSubscription
+     */
+    @NonNull
+    public DownloadSubscriptionResult onDownloadSubscription(int slotIndex, int portIndex,
+            @NonNull DownloadableSubscription subscription, boolean switchAfterDownload,
+            boolean forceDeactivateSim, @NonNull Bundle resolvedBundle) {
+        // stub implementation, LPA needs to implement this
+        throw new UnsupportedOperationException("LPA must override onDownloadSubscription");
     }
 
     /**
@@ -694,7 +734,8 @@ public abstract class EuiccService extends Service {
      */
     private class IEuiccServiceWrapper extends IEuiccService.Stub {
         @Override
-        public void downloadSubscription(int slotId, DownloadableSubscription subscription,
+        public void downloadSubscription(int slotId, int portIndex,
+                DownloadableSubscription subscription,
                 boolean switchAfterDownload, boolean forceDeactivateSim, Bundle resolvedBundle,
                 IDownloadSubscriptionCallback callback) {
             mExecutor.execute(new Runnable() {
@@ -702,18 +743,16 @@ public abstract class EuiccService extends Service {
                 public void run() {
                     DownloadSubscriptionResult result;
                     try {
-                        result =
-                            EuiccService.this.onDownloadSubscription(
-                                slotId, subscription, switchAfterDownload, forceDeactivateSim,
-                                resolvedBundle);
-                    } catch (AbstractMethodError e) {
-                        Log.w(TAG, "The new onDownloadSubscription(int, "
+                        result = EuiccService.this.onDownloadSubscription(
+                                slotId, portIndex, subscription, switchAfterDownload,
+                                forceDeactivateSim, resolvedBundle);
+                    } catch (UnsupportedOperationException | AbstractMethodError e) {
+                        Log.w(TAG, "The new onDownloadSubscription(int, int, "
                                 + "DownloadableSubscription, boolean, boolean, Bundle) is not "
                                 + "implemented. Fall back to the old one.", e);
-                        int resultCode = EuiccService.this.onDownloadSubscription(
-                                slotId, subscription, switchAfterDownload, forceDeactivateSim);
-                        result = new DownloadSubscriptionResult(resultCode,
-                            0 /* resolvableErrors */, TelephonyManager.UNSUPPORTED_CARD_ID);
+                        result = EuiccService.this.onDownloadSubscription(
+                                slotId, subscription, switchAfterDownload,
+                                forceDeactivateSim, resolvedBundle);
                     }
                     try {
                         callback.onComplete(result);

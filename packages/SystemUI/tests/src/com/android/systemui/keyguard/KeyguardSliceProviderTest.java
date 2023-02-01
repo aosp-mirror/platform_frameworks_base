@@ -45,6 +45,7 @@ import androidx.slice.core.SliceQuery;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.SystemUIInitializerImpl;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -90,6 +91,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     private DozeParameters mDozeParameters;
     @Mock
     private NextAlarmController mNextAlarmController;
+    @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private TestableKeyguardSliceProvider mProvider;
     private boolean mIsZenMode;
@@ -97,10 +99,9 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mKeyguardUpdateMonitor = mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mIsZenMode = false;
         mProvider = new TestableKeyguardSliceProvider();
-        mProvider.setContextAvailableCallback(context -> { });
+        mProvider.setContextAvailableCallback(context -> new SystemUIInitializerImpl(mContext));
         mProvider.attachInfo(getContext(), null);
         reset(mContentResolver);
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
@@ -265,6 +266,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
             mStatusBarStateController = KeyguardSliceProviderTest.this.mStatusBarStateController;
             mKeyguardBypassController = KeyguardSliceProviderTest.this.mKeyguardBypassController;
             mMediaManager = KeyguardSliceProviderTest.this.mNotificationMediaManager;
+            mKeyguardUpdateMonitor = KeyguardSliceProviderTest.this.mKeyguardUpdateMonitor;
         }
 
         @Override

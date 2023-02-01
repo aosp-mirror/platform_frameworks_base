@@ -100,13 +100,14 @@ public final class Trace {
     /** @hide */
     public static final long TRACE_TAG_VIBRATOR = 1L << 23;
     /** @hide */
+    @SystemApi
     public static final long TRACE_TAG_AIDL = 1L << 24;
     /** @hide */
     public static final long TRACE_TAG_NNAPI = 1L << 25;
     /** @hide */
     public static final long TRACE_TAG_RRO = 1L << 26;
     /** @hide */
-    public static final long TRACE_TAG_APEX_MANAGER = 1L << 18;
+    public static final long TRACE_TAG_THERMAL = 1L << 27;
 
     private static final long TRACE_TAG_NOT_READY = 1L << 63;
     private static final int MAX_SECTION_NAME_LEN = 127;

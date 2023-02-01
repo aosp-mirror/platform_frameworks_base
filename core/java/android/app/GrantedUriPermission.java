@@ -68,7 +68,7 @@ public class GrantedUriPermission implements Parcelable {
             };
 
     private GrantedUriPermission(Parcel in) {
-        uri = in.readParcelable(null);
+        uri = in.readParcelable(null, android.net.Uri.class);
         packageName = in.readString();
     }
 }

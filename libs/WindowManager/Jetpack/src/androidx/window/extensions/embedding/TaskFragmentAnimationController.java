@@ -24,10 +24,15 @@ import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN;
 import static android.view.WindowManager.TRANSIT_OLD_TASK_OPEN;
 
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.window.TaskFragmentOrganizer;
+
+import androidx.annotation.NonNull;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /** Controls the TaskFragment remote animations. */
 class TaskFragmentAnimationController {
@@ -37,10 +42,12 @@ class TaskFragmentAnimationController {
 
     private final TaskFragmentOrganizer mOrganizer;
     private final TaskFragmentAnimationRunner mRemoteRunner = new TaskFragmentAnimationRunner();
-    private final RemoteAnimationDefinition mDefinition;
-    private boolean mIsRegister;
+    @VisibleForTesting
+    final RemoteAnimationDefinition mDefinition;
+    /** Task Ids that we have registered for remote animation. */
+    private final ArraySet<Integer> mRegisterTasks = new ArraySet<>();
 
-    TaskFragmentAnimationController(TaskFragmentOrganizer organizer) {
+    TaskFragmentAnimationController(@NonNull TaskFragmentOrganizer organizer) {
         mOrganizer = organizer;
         mDefinition = new RemoteAnimationDefinition();
         final RemoteAnimationAdapter animationAdapter =
@@ -54,25 +61,32 @@ class TaskFragmentAnimationController {
         mDefinition.addRemoteAnimation(TRANSIT_OLD_TASK_FRAGMENT_CHANGE, animationAdapter);
     }
 
-    void registerRemoteAnimations() {
+    void registerRemoteAnimations(int taskId) {
         if (DEBUG) {
             Log.v(TAG, "registerRemoteAnimations");
         }
-        if (mIsRegister) {
+        if (mRegisterTasks.contains(taskId)) {
             return;
         }
-        mOrganizer.registerRemoteAnimations(mDefinition);
-        mIsRegister = true;
+        mOrganizer.registerRemoteAnimations(taskId, mDefinition);
+        mRegisterTasks.add(taskId);
     }
 
-    void unregisterRemoteAnimations() {
+    void unregisterRemoteAnimations(int taskId) {
         if (DEBUG) {
             Log.v(TAG, "unregisterRemoteAnimations");
         }
-        if (!mIsRegister) {
+        if (!mRegisterTasks.contains(taskId)) {
             return;
         }
-        mOrganizer.unregisterRemoteAnimations();
-        mIsRegister = false;
+        mOrganizer.unregisterRemoteAnimations(taskId);
+        mRegisterTasks.remove(taskId);
+    }
+
+    void unregisterAllRemoteAnimations() {
+        final ArraySet<Integer> tasks = new ArraySet<>(mRegisterTasks);
+        for (int taskId : tasks) {
+            unregisterRemoteAnimations(taskId);
+        }
     }
 }

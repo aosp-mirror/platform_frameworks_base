@@ -39,7 +39,7 @@ import com.android.internal.textservice.ITextServicesSessionListener;
 
 import dalvik.system.CloseGuard;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Locale;
 import java.util.Queue;
 import java.util.concurrent.Executor;
@@ -245,7 +245,7 @@ public class SpellCheckerSession {
             }
         }
 
-        private final Queue<SpellCheckerParams> mPendingTasks = new LinkedList<>();
+        private final Queue<SpellCheckerParams> mPendingTasks = new ArrayDeque<>();
         @GuardedBy("SpellCheckerSessionListenerImpl.this")
         private SpellCheckerSession mSpellCheckerSession;
 

@@ -17,16 +17,18 @@
 
 <resources>
     <!-- Only using in Settings application -->
-    <style name="Theme.SettingsBase" parent="@android:style/Theme.DeviceDefault.Settings" >
+    <style name="Theme.SettingsBase_v31" parent="@android:style/Theme.DeviceDefault.Settings" >
         <item name="android:textAppearanceListItem">@style/TextAppearance.PreferenceTitle.SettingsLib</item>
-        <item name="android:listPreferredItemPaddingStart">24dp</item>
-        <item name="android:listPreferredItemPaddingLeft">24dp</item>
+        <item name="android:listPreferredItemPaddingStart">@dimen/settingslib_listPreferredItemPaddingStart</item>
+        <item name="android:listPreferredItemPaddingLeft">@dimen/settingslib_listPreferredItemPaddingStart</item>
         <item name="android:listPreferredItemPaddingEnd">16dp</item>
         <item name="android:listPreferredItemPaddingRight">16dp</item>
         <item name="preferenceTheme">@style/PreferenceTheme.SettingsLib</item>
         <item name="android:switchStyle">@style/Switch.SettingsLib</item>
         <item name="android:progressBarStyleHorizontal">@style/HorizontalProgressBar.SettingsLib</item>
     </style>
+
+    <style name="Theme.SettingsBase" parent="Theme.SettingsBase_v31" />
 
     <!-- Using in SubSettings page including injected settings page -->
     <style name="Theme.SubSettingsBase" parent="Theme.SettingsBase">

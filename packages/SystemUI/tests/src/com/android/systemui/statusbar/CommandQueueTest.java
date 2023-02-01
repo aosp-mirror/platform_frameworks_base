@@ -41,6 +41,7 @@ import android.view.WindowInsetsController.Behavior;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.SysuiTestCase;
@@ -52,6 +53,13 @@ import org.junit.Test;
 
 @SmallTest
 public class CommandQueueTest extends SysuiTestCase {
+
+    private static final LetterboxDetails[] TEST_LETTERBOX_DETAILS = new LetterboxDetails[] {
+            new LetterboxDetails(
+                    /* letterboxInnerBounds= */ new Rect(100, 0, 200, 500),
+                    /* letterboxFullBounds= */ new Rect(0, 0, 500, 100),
+                    /* appAppearance= */ 123)
+    };
 
     private CommandQueue mCommandQueue;
     private Callbacks mCallbacks;
@@ -127,25 +135,27 @@ public class CommandQueueTest extends SysuiTestCase {
     public void testOnSystemBarAttributesChanged() {
         doTestOnSystemBarAttributesChanged(DEFAULT_DISPLAY, 1,
                 new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
-                BEHAVIOR_DEFAULT, new InsetsVisibilities(), "test");
+                BEHAVIOR_DEFAULT, new InsetsVisibilities(), "test", TEST_LETTERBOX_DETAILS);
     }
 
     @Test
     public void testOnSystemBarAttributesChangedForSecondaryDisplay() {
         doTestOnSystemBarAttributesChanged(SECONDARY_DISPLAY, 1,
                 new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
-                BEHAVIOR_DEFAULT, new InsetsVisibilities(), "test");
+                BEHAVIOR_DEFAULT, new InsetsVisibilities(), "test", TEST_LETTERBOX_DETAILS);
     }
 
     private void doTestOnSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName) {
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            LetterboxDetails[] letterboxDetails) {
         mCommandQueue.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
-                navbarColorManagedByIme, behavior, requestedVisibilities, packageName);
+                navbarColorManagedByIme, behavior, requestedVisibilities, packageName,
+                letterboxDetails);
         waitForIdleSync();
         verify(mCallbacks).onSystemBarAttributesChanged(eq(displayId), eq(appearance),
                 eq(appearanceRegions), eq(navbarColorManagedByIme), eq(behavior),
-                eq(requestedVisibilities), eq(packageName));
+                eq(requestedVisibilities), eq(packageName), eq(letterboxDetails));
     }
 
     @Test
@@ -182,7 +192,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowImeButton() {
-        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true, false);
+        mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(
                 eq(DEFAULT_DISPLAY), eq(null), eq(1), eq(2), eq(true));
@@ -193,7 +203,7 @@ public class CommandQueueTest extends SysuiTestCase {
         // First show in default display to update the "last updated ime display"
         testShowImeButton();
 
-        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true, false);
+        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(eq(DEFAULT_DISPLAY), eq(null), eq(IME_INVISIBLE),
                 eq(BACK_DISPOSITION_DEFAULT), eq(false));
@@ -448,9 +458,10 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testOnBiometricAuthenticated() {
-        mCommandQueue.onBiometricAuthenticated();
+        final int id = 12;
+        mCommandQueue.onBiometricAuthenticated(id);
         waitForIdleSync();
-        verify(mCallbacks).onBiometricAuthenticated();
+        verify(mCallbacks).onBiometricAuthenticated(eq(id));
     }
 
     @Test
@@ -474,9 +485,10 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testHideAuthenticationDialog() {
-        mCommandQueue.hideAuthenticationDialog();
+        final long id = 4;
+        mCommandQueue.hideAuthenticationDialog(id);
         waitForIdleSync();
-        verify(mCallbacks).hideAuthenticationDialog();
+        verify(mCallbacks).hideAuthenticationDialog(eq(id));
     }
 
     @Test

@@ -33,6 +33,12 @@ interface ControlsUiController {
     fun hide()
 
     /**
+     * Returns the preferred activity to start, depending on if the user has favorited any
+     * controls.
+     */
+    fun resolveActivity(): Class<*>
+
+    /**
      * Request all open dialogs be closed. Set [immediately] to true to dismiss without
      * animations.
      */

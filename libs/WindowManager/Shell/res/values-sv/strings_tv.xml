@@ -19,6 +19,16 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="notification_channel_tv_pip" msgid="2576686079160402435">"Bild-i-bild"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(Namnlöst program)"</string>
-    <string name="pip_close" msgid="9135220303720555525">"Stäng PIP"</string>
+    <string name="pip_close" msgid="2955969519031223530">"Stäng"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"Helskärm"</string>
+    <string name="pip_move" msgid="158770205886688553">"Flytta"</string>
+    <string name="pip_expand" msgid="1051966011679297308">"Utöka"</string>
+    <string name="pip_collapse" msgid="3903295106641385962">"Komprimera"</string>
+    <string name="pip_edu_text" msgid="3672999496647508701">" Tryck snabbt två gånger på "<annotation icon="home_icon">" HEM "</annotation>" för kontroller"</string>
+    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"Bild-i-bild-meny."</string>
+    <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"Flytta åt vänster"</string>
+    <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"Flytta åt höger"</string>
+    <string name="a11y_action_pip_move_up" msgid="98502616918621959">"Flytta uppåt"</string>
+    <string name="a11y_action_pip_move_down" msgid="3858802832725159740">"Flytta nedåt"</string>
+    <string name="a11y_action_pip_move_done" msgid="1486845365134416210">"Klar"</string>
 </resources>

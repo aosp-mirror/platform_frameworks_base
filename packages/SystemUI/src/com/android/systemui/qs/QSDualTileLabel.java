@@ -27,6 +27,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.android.systemui.R;
 
 import java.util.Objects;
@@ -48,6 +50,7 @@ public class QSDualTileLabel extends LinearLayout {
     private final TextView mSecondLine;
     private final int mHorizontalPaddingPx;
 
+    @Nullable
     private String mText;
 
     public QSDualTileLabel(Context context) {
@@ -122,6 +125,7 @@ public class QSDualTileLabel extends LinearLayout {
         rescheduleUpdateText();
     }
 
+    @Nullable
     public String getText() {
         return mText;
     }

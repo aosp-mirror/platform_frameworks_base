@@ -32,6 +32,7 @@ android_test {
         "androidx.test.runner",
         "junit",
         "kotlin-test",
+        "kotlin-reflect",
         "services.core",
         "servicestests-utils",
         "truth-prebuilt",

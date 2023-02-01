@@ -98,7 +98,7 @@ TEST(XmlDomTest, BinaryInflate) {
   // the Attribute accepts (eg: string|reference).
   ASSERT_TRUE(new_doc->root->attributes[0].compiled_attribute);
   EXPECT_THAT(new_doc->root->attributes[0].compiled_attribute.value().id,
-              Eq(make_value(ResourceId(0x01010001u))));
+              Eq(ResourceId(0x01010001u)));
 
   EXPECT_THAT(new_doc->root->attributes[0].value, StrEq("@string/foo"));
   EXPECT_THAT(new_doc->root->attributes[0].compiled_value,
@@ -145,21 +145,19 @@ class TestVisitor : public PackageAwareVisitor {
 
   void Visit(Element* el) override {
     if (el->name == "View1") {
-      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(ExtractedPackage{"com.one", false}));
     } else if (el->name == "View2") {
-      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
-      EXPECT_THAT(TransformPackageAlias("two"), Eq(make_value(ExtractedPackage{"com.two", false})));
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(ExtractedPackage{"com.one", false}));
+      EXPECT_THAT(TransformPackageAlias("two"), Eq(ExtractedPackage{"com.two", false}));
     } else if (el->name == "View3") {
-      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
-      EXPECT_THAT(TransformPackageAlias("two"), Eq(make_value(ExtractedPackage{"com.two", false})));
-      EXPECT_THAT(TransformPackageAlias("three"),
-                  Eq(make_value(ExtractedPackage{"com.three", false})));
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(ExtractedPackage{"com.one", false}));
+      EXPECT_THAT(TransformPackageAlias("two"), Eq(ExtractedPackage{"com.two", false}));
+      EXPECT_THAT(TransformPackageAlias("three"), Eq(ExtractedPackage{"com.three", false}));
     } else if (el->name == "View4") {
-      EXPECT_THAT(TransformPackageAlias("one"), Eq(make_value(ExtractedPackage{"com.one", false})));
-      EXPECT_THAT(TransformPackageAlias("two"), Eq(make_value(ExtractedPackage{"com.two", false})));
-      EXPECT_THAT(TransformPackageAlias("three"),
-                  Eq(make_value(ExtractedPackage{"com.three", false})));
-      EXPECT_THAT(TransformPackageAlias("four"), Eq(make_value(ExtractedPackage{"", true})));
+      EXPECT_THAT(TransformPackageAlias("one"), Eq(ExtractedPackage{"com.one", false}));
+      EXPECT_THAT(TransformPackageAlias("two"), Eq(ExtractedPackage{"com.two", false}));
+      EXPECT_THAT(TransformPackageAlias("three"), Eq(ExtractedPackage{"com.three", false}));
+      EXPECT_THAT(TransformPackageAlias("four"), Eq(ExtractedPackage{"", true}));
     }
   }
 };

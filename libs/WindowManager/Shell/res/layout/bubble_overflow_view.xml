@@ -22,7 +22,6 @@
     android:orientation="vertical">
 
     <com.android.wm.shell.bubbles.BadgedImageView
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/bubble_view"
         android:layout_gravity="center"
         android:layout_width="@dimen/bubble_size"
@@ -30,16 +29,14 @@
 
     <TextView
         android:id="@+id/bubble_view_name"
-        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.ListItem"
-        android:textSize="13sp"
+        android:textSize="14sp"
         android:layout_width="@dimen/bubble_name_width"
         android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:lines="2"
+        android:lines="1"
         android:ellipsize="end"
         android:layout_gravity="center"
         android:paddingTop="@dimen/bubble_overflow_text_padding"
         android:paddingEnd="@dimen/bubble_overflow_text_padding"
         android:paddingStart="@dimen/bubble_overflow_text_padding"
-        android:gravity="center"/>
+        android:gravity="center_horizontal|top"/>
 </LinearLayout>

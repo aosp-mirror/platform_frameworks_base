@@ -21,11 +21,12 @@ import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.app.NotificationChannel;
 import android.content.pm.UserInfo;
-import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
-import android.util.ArraySet;
 import android.util.Pair;
 import android.util.SparseArray;
 
@@ -34,12 +35,11 @@ import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -55,7 +55,7 @@ public interface Bubbles {
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
             DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED, DISMISS_INVALID_INTENT,
             DISMISS_OVERFLOW_MAX_REACHED, DISMISS_SHORTCUT_REMOVED, DISMISS_PACKAGE_REMOVED,
-            DISMISS_NO_BUBBLE_UP, DISMISS_RELOAD_FROM_DISK})
+            DISMISS_NO_BUBBLE_UP, DISMISS_RELOAD_FROM_DISK, DISMISS_USER_REMOVED})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
@@ -74,6 +74,7 @@ public interface Bubbles {
     int DISMISS_PACKAGE_REMOVED = 13;
     int DISMISS_NO_BUBBLE_UP = 14;
     int DISMISS_RELOAD_FROM_DISK = 15;
+    int DISMISS_USER_REMOVED = 16;
 
     /**
      * @return {@code true} if there is a bubble associated with the provided key and if its
@@ -89,23 +90,8 @@ public interface Bubbles {
      */
     boolean isBubbleExpanded(String key);
 
-    /** @return {@code true} if stack of bubbles is expanded or not. */
-    boolean isStackExpanded();
-
-    /**
-     * Removes a group key indicating that the summary for this group should no longer be
-     * suppressed.
-     *
-     * @param callback If removed, this callback will be called with the summary key of the group
-     */
-    void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback,
-            Executor callbackExecutor);
-
     /** Tell the stack of bubbles to collapse. */
     void collapseStack();
-
-    /** Tell the controller need update its UI to fit theme. */
-    void updateForThemeChanges();
 
     /**
      * Request the stack expand if needed, then select the specified Bubble as current.
@@ -130,9 +116,6 @@ public interface Bubbles {
 
     /** Called for any taskbar changes. */
     void onTaskbarChanged(Bundle b);
-
-    /** Open the overflow view. */
-    void openBubbleOverflow();
 
     /**
      * We intercept notification entries (including group summaries) dismissed by the user when
@@ -172,8 +155,9 @@ public interface Bubbles {
      *
      * @param entry the {@link BubbleEntry} by the notification.
      * @param shouldBubbleUp {@code true} if this notification should bubble up.
+     * @param fromSystem {@code true} if this update is from NotificationManagerService.
      */
-    void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp);
+    void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp, boolean fromSystem);
 
     /**
      * Called when new notification entry removed.
@@ -191,8 +175,29 @@ public interface Bubbles {
      * @param entryDataByKey a map of ranking key to bubble entry and whether the entry should
      *                       bubble up
      */
-    void onRankingUpdated(RankingMap rankingMap,
+    void onRankingUpdated(
+            RankingMap rankingMap,
             HashMap<String, Pair<BubbleEntry, Boolean>> entryDataByKey);
+
+    /**
+     * Called when a notification channel is modified, in response to
+     * {@link NotificationListenerService#onNotificationChannelModified}.
+     *
+     * @param pkg the package the notification channel belongs to.
+     * @param user the user the notification channel belongs to.
+     * @param channel the channel being modified.
+     * @param modificationType the type of modification that occurred to the channel.
+     */
+    void onNotificationChannelModified(
+            String pkg,
+            UserHandle user,
+            NotificationChannel channel,
+            int modificationType);
+
+    /**
+     * Called when notification panel is expanded or collapsed
+     */
+    void onNotificationPanelExpandedChanged(boolean expanded);
 
     /**
      * Called when the status bar has become visible or invisible (either permanently or
@@ -225,14 +230,11 @@ public interface Bubbles {
     void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles);
 
     /**
-     * Called when config changed.
+     * Called when a user is removed.
      *
-     * @param newConfig the new config.
+     * @param removedUserId the id of the removed user.
      */
-    void onConfigChanged(Configuration newConfig);
-
-    /** Description of current bubble state. */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
+    void onUserRemoved(int removedUserId);
 
     /** Listener to find out about stack expansion / collapse events. */
     interface BubbleExpandListener {
@@ -245,10 +247,10 @@ public interface Bubbles {
         void onBubbleExpandChanged(boolean isExpanding, String key);
     }
 
-    /** Listener to be notified when the flags for notification or bubble suppression changes.*/
-    interface SuppressionChangedListener {
-        /** Called when the notification suppression state of a bubble changes. */
-        void onBubbleNotificationSuppressionChange(Bubble bubble);
+    /** Listener to be notified when the flags on BubbleMetadata have changed. */
+    interface BubbleMetadataFlagListener {
+        /** Called when the flags on BubbleMetadata have changed for the provided bubble. */
+        void onBubbleMetadataFlagChanged(Bubble bubble);
     }
 
     /** Listener to be notified when a pending intent has been canceled for a bubble. */
@@ -259,11 +261,11 @@ public interface Bubbles {
 
     /** Callback to tell SysUi components execute some methods. */
     interface SysuiProxy {
-        void isNotificationShadeExpand(Consumer<Boolean> callback);
+        void isNotificationPanelExpand(Consumer<Boolean> callback);
 
         void getPendingOrActiveEntry(String key, Consumer<BubbleEntry> callback);
 
-        void getShouldRestoredEntries(ArraySet<String> savedBubbleKeys,
+        void getShouldRestoredEntries(Set<String> savedBubbleKeys,
                 Consumer<List<BubbleEntry>> callback);
 
         void setNotificationInterruption(String key);
@@ -274,13 +276,7 @@ public interface Bubbles {
 
         void notifyInvalidateNotifications(String reason);
 
-        void notifyMaybeCancelSummary(String key);
-
-        void removeNotificationEntry(String key);
-
         void updateNotificationBubbleButton(String key);
-
-        void updateNotificationSuppression(String key);
 
         void onStackExpandChanged(boolean shouldExpand);
 

@@ -43,7 +43,6 @@ import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 
@@ -71,7 +70,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
     public void setup() {
         mSmartActionsProvider = mock(
                 ScreenshotNotificationSmartActionsProvider.class);
-        mScreenshotSmartActions = new ScreenshotSmartActions();
+        mScreenshotSmartActions = new ScreenshotSmartActions(() -> mSmartActionsProvider);
         mHandler = mock(Handler.class);
     }
 
@@ -158,8 +157,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         Bitmap bitmap = mock(Bitmap.class);
         when(bitmap.getConfig()).thenReturn(Bitmap.Config.HARDWARE);
         ScreenshotNotificationSmartActionsProvider actionsProvider =
-                SystemUIFactory.getInstance().createScreenshotNotificationSmartActionsProvider(
-                        mContext, null, mHandler);
+                new ScreenshotNotificationSmartActionsProvider();
         CompletableFuture<List<Notification.Action>> smartActionsFuture =
                 mScreenshotSmartActions.getSmartActionsFuture("", null, bitmap,
                         actionsProvider, REGULAR_SMART_ACTIONS,
@@ -183,7 +181,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
                 new SaveImageInBackgroundTask(mContext, null, mScreenshotSmartActions, data,
-                        ActionTransition::new);
+                        ActionTransition::new, mSmartActionsProvider);
 
         Notification.Action shareAction = task.createShareAction(mContext, mContext.getResources(),
                 Uri.parse("Screenshot_123.png")).get().action;
@@ -211,7 +209,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
                 new SaveImageInBackgroundTask(mContext, null, mScreenshotSmartActions, data,
-                        ActionTransition::new);
+                        ActionTransition::new, mSmartActionsProvider);
 
         Notification.Action editAction = task.createEditAction(mContext, mContext.getResources(),
                 Uri.parse("Screenshot_123.png")).get().action;
@@ -239,7 +237,7 @@ public class ScreenshotNotificationSmartActionsTest extends SysuiTestCase {
         data.mActionsReadyListener = null;
         SaveImageInBackgroundTask task =
                 new SaveImageInBackgroundTask(mContext, null, mScreenshotSmartActions, data,
-                        ActionTransition::new);
+                        ActionTransition::new, mSmartActionsProvider);
 
         Notification.Action deleteAction = task.createDeleteAction(mContext,
                 mContext.getResources(),

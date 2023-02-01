@@ -93,6 +93,9 @@ cc_defaults {
 
 cc_defaults {
     name: "hwui_static_deps",
+    defaults: [
+        "android.hardware.graphics.common-ndk_shared",
+    ],
     shared_libs: [
         "libbase",
         "libharfbuzz_ng",
@@ -106,6 +109,8 @@ cc_defaults {
     target: {
         android: {
             shared_libs: [
+                "android.hardware.graphics.common@1.2",
+                "android.hardware.graphics.composer3-V1-ndk",
                 "liblog",
                 "libcutils",
                 "libutils",
@@ -125,9 +130,11 @@ cc_defaults {
             static_libs: [
                 "libEGL_blobCache",
                 "libprotoutil",
+                "libshaders",
                 "libstatslog_hwui",
                 "libstatspull_lazy",
                 "libstatssocket_lazy",
+                "libtonemap",
             ],
         },
         host: {
@@ -207,6 +214,15 @@ filegroup {
     path: "apex/java",
 }
 
+java_api_contribution {
+    name: "framework-graphics-public-stubs",
+    api_surface: "public",
+    api_file: "api/current.txt",
+    visibility: [
+        "//build/orchestrator/apis",
+    ],
+}
+
 // ------------------------
 // APEX
 // ------------------------
@@ -245,6 +261,7 @@ cc_defaults {
         "apex/android_matrix.cpp",
         "apex/android_paint.cpp",
         "apex/android_region.cpp",
+        "apex/properties.cpp",
     ],
 
     header_libs: ["android_graphics_apex_headers"],
@@ -255,7 +272,6 @@ cc_defaults {
                 "apex/android_bitmap.cpp",
                 "apex/android_canvas.cpp",
                 "apex/jni_runtime.cpp",
-                "apex/renderthread.cpp",
             ],
         },
         host: {
@@ -342,6 +358,7 @@ cc_defaults {
         "jni/PathEffect.cpp",
         "jni/PathMeasure.cpp",
         "jni/Picture.cpp",
+        "jni/Region.cpp",
         "jni/Shader.cpp",
         "jni/RenderEffect.cpp",
         "jni/Typeface.cpp",
@@ -391,7 +408,6 @@ cc_defaults {
                 "jni/GraphicsStatsService.cpp",
                 "jni/Movie.cpp",
                 "jni/MovieImpl.cpp",
-                "jni/Region.cpp", // requires libbinder_ndk
                 "jni/pdf/PdfDocument.cpp",
                 "jni/pdf/PdfEditor.cpp",
                 "jni/pdf/PdfRenderer.cpp",
@@ -532,7 +548,10 @@ cc_defaults {
 
     target: {
         android: {
-            header_libs: ["libandroid_headers_private"],
+            header_libs: [
+                "libandroid_headers_private",
+                "libtonemap_headers",
+            ],
 
             srcs: [
                 "hwui/AnimatedImageThread.cpp",
@@ -571,6 +590,7 @@ cc_defaults {
                 "HardwareBitmapUploader.cpp",
                 "HWUIProperties.sysprop",
                 "JankTracker.cpp",
+                "FrameMetricsReporter.cpp",
                 "Layer.cpp",
                 "LayerUpdateQueue.cpp",
                 "ProfileData.cpp",
@@ -623,7 +643,7 @@ cc_library_static {
 cc_defaults {
     name: "hwui_test_defaults",
     defaults: ["hwui_defaults"],
-    test_suites: ["device-tests"],
+    test_suites: ["general-tests"],
     header_libs: ["libandroid_headers_private"],
     target: {
         android: {
@@ -665,6 +685,7 @@ cc_test {
     srcs: [
         "tests/unit/main.cpp",
         "tests/unit/ABitmapTests.cpp",
+        "tests/unit/AutoBackendTextureReleaseTests.cpp",
         "tests/unit/CacheManagerTests.cpp",
         "tests/unit/CanvasContextTests.cpp",
         "tests/unit/CanvasOpTests.cpp",
@@ -676,6 +697,7 @@ cc_test {
         "tests/unit/FatVectorTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
         "tests/unit/JankTrackerTests.cpp",
+        "tests/unit/FrameMetricsReporterTests.cpp",
         "tests/unit/LayerUpdateQueueTests.cpp",
         "tests/unit/LinearAllocatorTests.cpp",
         "tests/unit/MatrixTests.cpp",

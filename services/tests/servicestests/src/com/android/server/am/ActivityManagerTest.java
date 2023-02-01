@@ -55,6 +55,7 @@ import android.server.wm.settings.SettingsSession;
 import android.support.test.uiautomator.UiDevice;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.text.TextUtils;
+import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Pair;
 
@@ -99,6 +100,8 @@ public class ActivityManagerTest {
     private static final String ACTION_FGS_STATS_TEST =
             "com.android.servicestests.apps.simpleservicetestapp.ACTION_FGS_STATS_TEST";
     private static final String EXTRA_MESSENGER = "extra_messenger";
+    private static final String ACTION_RECEIVER_TEST =
+            "com.android.servicestests.apps.simpleservicetestapp.TEST";
 
     private static final String EXTRA_CALLBACK = "callback";
     private static final String EXTRA_COMMAND = "command";
@@ -467,6 +470,8 @@ public class ActivityManagerTest {
             sendCommand(COMMAND_UNBIND_SERVICE, TEST_APP2, TEST_APP1, null);
             runShellCommand("cmd deviceidle whitelist -" + TEST_APP1);
             runShellCommand("cmd deviceidle whitelist -" + TEST_APP2);
+            am.forceStopPackage(TEST_APP1);
+            am.forceStopPackage(TEST_APP2);
         }
     }
 
@@ -499,6 +504,206 @@ public class ActivityManagerTest {
             return Boolean.parseBoolean(matcher.group(1));
         }
         return false;
+    }
+
+    @LargeTest
+    @Test
+    public void testKillAppIfBgRestrictedCachedIdle() throws Exception {
+        final long shortTimeoutMs = 5_000;
+        final long backgroundSettleMs = 10_000;
+        final PackageManager pm = mContext.getPackageManager();
+        final int uid = pm.getPackageUid(TEST_APP1, 0);
+        final MyUidImportanceListener uidListener1 = new MyUidImportanceListener(uid);
+        final MyUidImportanceListener uidListener2 = new MyUidImportanceListener(uid);
+        final MyUidImportanceListener uidListener3 = new MyUidImportanceListener(uid);
+        SettingsSession<String> amConstantsSettings = null;
+        DeviceConfigSession<Boolean> killBgRestrictedAndCachedIdle = null;
+        DeviceConfigSession<Long> killBgRestrictedAndCachedIdleSettleTime = null;
+        final ActivityManager am = mContext.getSystemService(ActivityManager.class);
+        final CountDownLatch[] latchHolder = new CountDownLatch[1];
+        final H handler = new H(Looper.getMainLooper(), latchHolder);
+        final Messenger messenger = new Messenger(handler);
+        try {
+            am.addOnUidImportanceListener(uidListener1,
+                    RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE);
+            am.addOnUidImportanceListener(uidListener2, RunningAppProcessInfo.IMPORTANCE_GONE);
+            am.addOnUidImportanceListener(uidListener3, RunningAppProcessInfo.IMPORTANCE_CACHED);
+            toggleScreenOn(true);
+
+            killBgRestrictedAndCachedIdle = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ActivityManagerConstants.KEY_KILL_BG_RESTRICTED_CACHED_IDLE,
+                    DeviceConfig::getBoolean,
+                    ActivityManagerConstants.DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE);
+            killBgRestrictedAndCachedIdle.set(true);
+            killBgRestrictedAndCachedIdleSettleTime = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ActivityManagerConstants.KEY_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME,
+                    DeviceConfig::getLong,
+                    ActivityManagerConstants.DEFAULT_KILL_BG_RESTRICTED_CACHED_IDLE_SETTLE_TIME_MS);
+            killBgRestrictedAndCachedIdleSettleTime.set(backgroundSettleMs);
+            amConstantsSettings = new SettingsSession<>(
+                Settings.Global.getUriFor(Settings.Global.ACTIVITY_MANAGER_CONSTANTS),
+                Settings.Global::getString, Settings.Global::putString);
+            final KeyValueListParser parser = new KeyValueListParser(',');
+            long currentBackgroundSettleMs =
+                    ActivityManagerConstants.DEFAULT_BACKGROUND_SETTLE_TIME;
+            try {
+                parser.setString(amConstantsSettings.get());
+                currentBackgroundSettleMs = parser.getLong(
+                        ActivityManagerConstants.KEY_BACKGROUND_SETTLE_TIME,
+                        ActivityManagerConstants.DEFAULT_BACKGROUND_SETTLE_TIME);
+            } catch (IllegalArgumentException e) {
+            }
+            // Drain queue to make sure the existing UID_IDLE_MSG has been processed.
+            Thread.sleep(currentBackgroundSettleMs);
+            amConstantsSettings.set(
+                    ActivityManagerConstants.KEY_BACKGROUND_SETTLE_TIME + "=" + backgroundSettleMs);
+
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND allow");
+
+            final Intent intent = new Intent(ACTION_FGS_STATS_TEST);
+            final ComponentName cn = ComponentName.unflattenFromString(
+                    TEST_APP1 + "/" + TEST_FGS_CLASS);
+            final Bundle bundle = new Bundle();
+            intent.setComponent(cn);
+            bundle.putBinder(EXTRA_MESSENGER, messenger.getBinder());
+            intent.putExtras(bundle);
+
+            // Start the FGS.
+            latchHolder[0] = new CountDownLatch(1);
+            mContext.startForegroundService(intent);
+            assertTrue("Timed out to start fg service", uidListener1.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE, shortTimeoutMs));
+            assertTrue("Timed out to get the remote messenger", latchHolder[0].await(
+                    shortTimeoutMs, TimeUnit.MILLISECONDS));
+            assertFalse("FGS shouldn't be killed", uidListener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
+
+            // Stop the FGS, it shouldn't be killed because it's not in FAS state.
+            latchHolder[0] = new CountDownLatch(1);
+            handler.sendRemoteMessage(H.MSG_STOP_SERVICE, 0, 0, null);
+            assertTrue("Timed out to wait for stop fg", latchHolder[0].await(
+                    shortTimeoutMs, TimeUnit.MILLISECONDS));
+            assertFalse("FGS shouldn't be killed", uidListener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
+
+            // Set the FAS state.
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND deny");
+            // Now it should've been killed.
+            assertTrue("Should have been killed", uidListener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
+
+            // Start the FGS.
+            // Temporarily allow RUN_ANY_IN_BACKGROUND to start FGS.
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND allow");
+            latchHolder[0] = new CountDownLatch(1);
+            mContext.startForegroundService(intent);
+            assertTrue("Timed out to start fg service", uidListener1.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE, shortTimeoutMs));
+            assertTrue("Timed out to get the remote messenger", latchHolder[0].await(
+                    shortTimeoutMs, TimeUnit.MILLISECONDS));
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND deny");
+            // It shouldn't be killed since it's not cached.
+            assertFalse("FGS shouldn't be killed", uidListener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
+
+            // Stop the FGS, it should get killed because it's cached & uid idle & in FAS state.
+            latchHolder[0] = new CountDownLatch(1);
+            handler.sendRemoteMessage(H.MSG_STOP_SERVICE, 0, 0, null);
+            assertTrue("Timed out to wait for stop fg", latchHolder[0].await(
+                    shortTimeoutMs, TimeUnit.MILLISECONDS));
+            assertTrue("Should have been killed", uidListener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
+
+            // Start the FGS.
+            // Temporarily allow RUN_ANY_IN_BACKGROUND to start FGS.
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND allow");
+            latchHolder[0] = new CountDownLatch(1);
+            mContext.startForegroundService(intent);
+            assertTrue("Timed out to start fg service", uidListener1.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE, shortTimeoutMs));
+            assertTrue("Timed out to get the remote messenger", latchHolder[0].await(
+                    shortTimeoutMs, TimeUnit.MILLISECONDS));
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND deny");
+            // It shouldn't be killed since it's not cached.
+            assertFalse("FGS shouldn't be killed", uidListener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
+
+            // Stop the FGS.
+            latchHolder[0] = new CountDownLatch(1);
+            handler.sendRemoteMessage(H.MSG_STOP_SERVICE, 0, 0, null);
+            assertTrue("Timed out to wait for stop fg", latchHolder[0].await(
+                    shortTimeoutMs, TimeUnit.MILLISECONDS));
+            assertTrue("Should have been in cached state", uidListener3.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_CACHED, shortTimeoutMs));
+            final long now = SystemClock.uptimeMillis();
+            // Sleep a while to let the UID idle ticking.
+            Thread.sleep(shortTimeoutMs);
+            // Now send a broadcast, it should bring the app out of cached for a while.
+            final Intent intent2 = new Intent(ACTION_RECEIVER_TEST);
+            final Bundle extras = new Bundle();
+            final IRemoteCallback callback = new IRemoteCallback.Stub() {
+                @Override
+                public void sendResult(Bundle data) throws RemoteException {
+                    latchHolder[0].countDown();
+                }
+            };
+            extras.putBinder(EXTRA_CALLBACK, callback.asBinder());
+            intent2.putExtras(extras);
+            intent2.setPackage(TEST_APP1);
+            latchHolder[0] = new CountDownLatch(1);
+            mContext.sendBroadcast(intent2);
+            assertTrue("Timed out to wait for receiving broadcast", latchHolder[0].await(
+                    shortTimeoutMs, TimeUnit.MILLISECONDS));
+            // Try to wait for the killing, it should be killed after backgroundSettleMs
+            // since receiving the broadcast
+            assertFalse("Shouldn't be killed now", uidListener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE,
+                    backgroundSettleMs + now - SystemClock.uptimeMillis() + 2_000));
+            // Now wait a bit longer, it should be killed.
+            assertTrue("Should have been killed", uidListener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
+
+            // Disable this FAS cached idle kill feature.
+            killBgRestrictedAndCachedIdle.set(false);
+
+            // Start the FGS.
+            // Temporarily allow RUN_ANY_IN_BACKGROUND to start FGS.
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND allow");
+            latchHolder[0] = new CountDownLatch(1);
+            mContext.startForegroundService(intent);
+            assertTrue("Timed out to start fg service", uidListener1.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE, shortTimeoutMs));
+            assertTrue("Timed out to get the remote messenger", latchHolder[0].await(
+                    shortTimeoutMs, TimeUnit.MILLISECONDS));
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND deny");
+            assertFalse("FGS shouldn't be killed", uidListener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
+
+            // Stop the FGS, it shouldn't be killed because the feature has been turned off.
+            latchHolder[0] = new CountDownLatch(1);
+            handler.sendRemoteMessage(H.MSG_STOP_SERVICE, 0, 0, null);
+            assertTrue("Timed out to wait for stop fg", latchHolder[0].await(
+                    shortTimeoutMs, TimeUnit.MILLISECONDS));
+            assertFalse("FGS shouldn't be killed", uidListener2.waitFor(
+                    RunningAppProcessInfo.IMPORTANCE_GONE, backgroundSettleMs + shortTimeoutMs));
+        } finally {
+            runShellCommand("cmd appops set " + TEST_APP1 + " RUN_ANY_IN_BACKGROUND default");
+            if (amConstantsSettings != null) {
+                amConstantsSettings.close();
+            }
+            if (killBgRestrictedAndCachedIdle != null) {
+                killBgRestrictedAndCachedIdle.close();
+            }
+            if (killBgRestrictedAndCachedIdleSettleTime != null) {
+                killBgRestrictedAndCachedIdleSettleTime.close();
+            }
+            am.removeOnUidImportanceListener(uidListener1);
+            am.removeOnUidImportanceListener(uidListener2);
+            am.removeOnUidImportanceListener(uidListener3);
+            am.forceStopPackage(TEST_APP1);
+        }
     }
 
     @Ignore("Need to disable calling uid check in ActivityManagerService.killPids before this test")
@@ -717,6 +922,7 @@ public class ActivityManagerTest {
         static final int MSG_DONE = 1;
         static final int MSG_START_FOREGROUND = 2;
         static final int MSG_STOP_FOREGROUND = 3;
+        static final int MSG_STOP_SERVICE = 4;
 
         private Messenger mRemoteMessenger;
         private CountDownLatch[] mLatchHolder;

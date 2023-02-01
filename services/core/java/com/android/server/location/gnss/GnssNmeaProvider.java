@@ -63,16 +63,25 @@ class GnssNmeaProvider extends GnssListenerMultiplexer<Void, IGnssNmeaListener, 
     @Override
     protected boolean registerWithService(Void ignored,
             Collection<GnssListenerRegistration> registrations) {
-        if (D) {
-            Log.d(TAG, "starting gnss nmea messages");
+        if (mGnssNative.startNmeaMessageCollection()) {
+            if (D) {
+                Log.d(TAG, "starting gnss nmea messages collection");
+            }
+            return true;
+        } else {
+            Log.e(TAG, "error starting gnss nmea messages collection");
+            return false;
         }
-        return true;
     }
 
     @Override
     protected void unregisterWithService() {
-        if (D) {
-            Log.d(TAG, "stopping gnss nmea messages");
+        if (mGnssNative.stopNmeaMessageCollection()) {
+            if (D) {
+                Log.d(TAG, "stopping gnss nmea messages collection");
+            }
+        } else {
+            Log.e(TAG, "error stopping gnss nmea messages collection");
         }
     }
 

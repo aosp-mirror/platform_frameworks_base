@@ -1,1 +1,0 @@
-# Always-on Display (AOD)

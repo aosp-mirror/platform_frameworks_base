@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.phone.panelstate
 
 /** A listener interface to be notified of state change events for the notification panel. */
-interface PanelStateListener {
+fun interface PanelStateListener {
     /** Called when the panel's expansion state has changed.   */
     fun onPanelStateChanged(@PanelState state: Int)
 }

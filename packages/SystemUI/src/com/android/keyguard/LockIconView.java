@@ -19,7 +19,7 @@ package com.android.keyguard;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.PointF;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -36,7 +36,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -55,8 +54,9 @@ public class LockIconView extends FrameLayout implements Dumpable {
     private boolean mAod;
 
     @NonNull private final RectF mSensorRect;
-    @NonNull private PointF mLockIconCenter = new PointF(0f, 0f);
-    private int mRadius;
+    @NonNull private Point mLockIconCenter = new Point(0, 0);
+    private float mRadius;
+    private int mLockIconPadding;
 
     private ImageView mLockIcon;
     private ImageView mBgView;
@@ -126,9 +126,13 @@ public class LockIconView extends FrameLayout implements Dumpable {
      * Set the location of the lock icon.
      */
     @VisibleForTesting
-    public void setCenterLocation(@NonNull PointF center, int radius) {
+    public void setCenterLocation(@NonNull Point center, float radius, int drawablePadding) {
         mLockIconCenter = center;
         mRadius = radius;
+        mLockIconPadding = drawablePadding;
+
+        mLockIcon.setPadding(mLockIconPadding, mLockIconPadding, mLockIconPadding,
+                mLockIconPadding);
 
         // mSensorProps coordinates assume portrait mode which is OK b/c the keyguard is always in
         // portrait.
@@ -217,11 +221,12 @@ public class LockIconView extends FrameLayout implements Dumpable {
     }
 
     @Override
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+    public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("Lock Icon View Parameters:");
         pw.println("    Center in px (x, y)= ("
                 + mLockIconCenter.x + ", " + mLockIconCenter.y + ")");
         pw.println("    Radius in pixels: " + mRadius);
+        pw.println("    Drawable padding: " + mLockIconPadding);
         pw.println("    mIconType=" + typeToString(mIconType));
         pw.println("    mAod=" + mAod);
         pw.println("Lock Icon View actual measurements:");

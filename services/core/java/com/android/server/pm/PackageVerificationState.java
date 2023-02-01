@@ -19,8 +19,6 @@ package com.android.server.pm;
 import android.content.pm.PackageManager;
 import android.util.SparseBooleanArray;
 
-import com.android.server.pm.PackageManagerService.VerificationParams;
-
 /**
  * Tracks the package verification state for a particular package. Each package verification has a
  * required verifier and zero or more sufficient verifiers. Only one of the sufficient verifier list

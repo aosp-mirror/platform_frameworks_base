@@ -106,13 +106,20 @@ public class LicenseHtmlGeneratorFromXmlTest {
             + "license content #1\n"
             + "</pre><!-- license-text -->\n"
             + "</td></tr><!-- same-license -->\n"
-            + "</table></body></html>\n";
+            + "</table>\n"
+            + "<div class=\"path-counts\"><table>\n"
+            + "  <tr><th>Path prefix</th><th>Count</th></tr>\n\n"
+            + "  <tr><td>file0</td><td>1</td></tr>\n"
+            + "  <tr><td>file1</td><td>1</td></tr>\n"
+            + "</table></div>\n\n"
+            + "</body></html>\n";
 
     private static final String HTML_NEW_BODY_STRING =
             "<strong>Libraries</strong>\n"
             + "<ul class=\"libraries\">\n"
             + "<li><a href=\"#id0\">libA</a></li>\n"
             + "<li><a href=\"#id1\">libB</a></li>\n"
+            + "<li><a href=\"#id0\">libC</a></li>\n"
             + "</ul>\n"
             + "<strong>Files</strong>\n"
             + "<ul class=\"files\">\n"
@@ -146,7 +153,14 @@ public class LicenseHtmlGeneratorFromXmlTest {
             + "license content #1\n"
             + "</pre><!-- license-text -->\n"
             + "</td></tr><!-- same-license -->\n"
-            + "</table></body></html>\n";
+            + "</table>\n"
+            + "<div class=\"path-counts\"><table>\n"
+            + "  <tr><th>Path prefix</th><th>Count</th></tr>\n\n"
+            + "  <tr><td>file0</td><td>1</td></tr>\n"
+            + "  <tr><td>file1</td><td>1</td></tr>\n"
+            + "  <tr><td>file2</td><td>1</td></tr>\n"
+            + "</table></div>\n\n"
+            + "</body></html>\n";
 
     private static final String EXPECTED_OLD_HTML_STRING = HTML_HEAD_STRING + HTML_OLD_BODY_STRING;
 
@@ -263,7 +277,7 @@ public class LicenseHtmlGeneratorFromXmlTest {
         Map<String, Set<String>> toOne = new HashMap<>();
 
         toBoth.put("", new HashSet<String>(Arrays.asList("0", "1")));
-        toOne.put("", new HashSet<String>(Arrays.asList("0", "1")));
+        toOne.put("", new HashSet<String>(Arrays.asList("0")));
 
         fileNameToLibraryToContentIdMap.put("/file0", toBoth);
         fileNameToLibraryToContentIdMap.put("/file1", toOne);

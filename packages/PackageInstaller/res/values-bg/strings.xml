@@ -56,6 +56,7 @@
     <string name="uninstall_application_text" msgid="3816830743706143980">"Искате ли да деинсталирате това приложение?"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Искате ли да деинсталирате това приложение за "<b>"всички"</b>" потребители? Приложението и данните му ще бъдат премахнати от "<b>"всички"</b>" потребители на устройството."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Искате ли да деинсталирате това приложение за потребителя <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Искате ли да деинсталирате това приложение от служебния си потребителски профил?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Това приложение да се замени ли с фабричната версия? Всички данни ще бъдат премахнати."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Това приложение да се замени ли с фабричната версия? Всички данни ще бъдат премахнати. Промяната ще засегне всеки потребител на устройството, включително тези със служебни потребителски профили."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Запазване на <xliff:g id="SIZE">%1$s</xliff:g> данни от приложението."</string>

@@ -490,8 +490,12 @@ public final class ProgramSelector implements Parcelable {
     public String toString() {
         StringBuilder sb = new StringBuilder("ProgramSelector(type=").append(mProgramType)
                 .append(", primary=").append(mPrimaryId);
-        if (mSecondaryIds.length > 0) sb.append(", secondary=").append(mSecondaryIds);
-        if (mVendorIds.length > 0) sb.append(", vendor=").append(mVendorIds);
+        if (mSecondaryIds.length > 0) {
+            sb.append(", secondary=").append(Arrays.toString(mSecondaryIds));
+        }
+        if (mVendorIds.length > 0) {
+            sb.append(", vendor=").append(Arrays.toString(mVendorIds));
+        }
         sb.append(")");
         return sb.toString();
     }

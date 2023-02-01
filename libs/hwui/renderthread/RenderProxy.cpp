@@ -133,6 +133,10 @@ int64_t* RenderProxy::frameInfo() {
     return mDrawFrameTask.frameInfo();
 }
 
+void RenderProxy::forceDrawNextFrame() {
+    mDrawFrameTask.forceDrawNextFrame();
+}
+
 int RenderProxy::syncAndDrawFrame() {
     return mDrawFrameTask.drawFrame();
 }
@@ -257,10 +261,15 @@ uint32_t RenderProxy::frameTimePercentile(int percentile) {
     });
 }
 
-void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData) {
+void RenderProxy::dumpGraphicsMemory(int fd, bool includeProfileData, bool resetProfile) {
     if (RenderThread::hasInstance()) {
         auto& thread = RenderThread::getInstance();
-        thread.queue().runSync([&]() { thread.dumpGraphicsMemory(fd, includeProfileData); });
+        thread.queue().runSync([&]() {
+            thread.dumpGraphicsMemory(fd, includeProfileData);
+            if (resetProfile) {
+                thread.globalProfileData()->reset();
+            }
+        });
     }
 }
 
@@ -322,7 +331,8 @@ void RenderProxy::setPrepareSurfaceControlForWebviewCallback(
             [this, cb = callback]() { mContext->setPrepareSurfaceControlForWebviewCallback(cb); });
 }
 
-void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
+void RenderProxy::setFrameCallback(
+        std::function<std::function<void(bool)>(int32_t, int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
 
@@ -416,6 +426,15 @@ void RenderProxy::preload() {
     // Create RenderThread object and start the thread. Then preload Vulkan/EGL driver.
     auto& thread = RenderThread::getInstance();
     thread.queue().post([&thread]() { thread.preload(); });
+}
+
+void RenderProxy::setRtAnimationsEnabled(bool enabled) {
+    if (RenderThread::hasInstance()) {
+        RenderThread::getInstance().queue().post(
+                [enabled]() { Properties::enableRTAnimations = enabled; });
+    } else {
+        Properties::enableRTAnimations = enabled;
+    }
 }
 
 } /* namespace renderthread */

@@ -21,6 +21,7 @@ import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -44,12 +45,18 @@ import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.systemui.SystemUI;
+import com.android.systemui.CoreStartable;
+import com.android.systemui.SystemUIApplication;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.util.NotificationChannels;
 
 import java.util.List;
 
-public class StorageNotification extends SystemUI {
+import javax.inject.Inject;
+
+/** */
+@SysUISingleton
+public class StorageNotification extends CoreStartable {
     private static final String TAG = "StorageNotification";
 
     private static final String ACTION_SNOOZE_VOLUME = "com.android.systemui.action.SNOOZE_VOLUME";
@@ -60,6 +67,7 @@ public class StorageNotification extends SystemUI {
     private NotificationManager mNotificationManager;
     private StorageManager mStorageManager;
 
+    @Inject
     public StorageNotification(Context context) {
         super(context);
     }
@@ -166,9 +174,11 @@ public class StorageNotification extends SystemUI {
         mStorageManager.registerListener(mListener);
 
         mContext.registerReceiver(mSnoozeReceiver, new IntentFilter(ACTION_SNOOZE_VOLUME),
-                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
         mContext.registerReceiver(mFinishReceiver, new IntentFilter(ACTION_FINISH_WIZARD),
-                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null,
+                Context.RECEIVER_EXPORTED_UNAUDITED);
 
         // Kick current state into place
         final List<DiskInfo> disks = mStorageManager.getDisks();
@@ -206,9 +216,11 @@ public class StorageNotification extends SystemUI {
 
             } else {
                 // Boo, annoy the user to reinsert the private volume
-                final CharSequence title = mContext.getString(R.string.ext_media_missing_title,
+                final CharSequence title =
+                  mContext.getString(R.string.ext_media_missing_title,
                         rec.getNickname());
-                final CharSequence text = mContext.getString(R.string.ext_media_missing_message);
+                final CharSequence text =
+                  mContext.getString(R.string.ext_media_missing_message);
 
                 Notification.Builder builder =
                         new Notification.Builder(mContext, NotificationChannels.STORAGE)
@@ -224,7 +236,7 @@ public class StorageNotification extends SystemUI {
                                 .setCategory(Notification.CATEGORY_SYSTEM)
                                 .setDeleteIntent(buildSnoozeIntent(fsUuid))
                                 .extend(new Notification.TvExtender());
-                SystemUI.overrideNotificationAppName(mContext, builder, false);
+                SystemUIApplication.overrideNotificationAppName(mContext, builder, false);
 
                 mNotificationManager.notifyAsUser(fsUuid, SystemMessage.NOTE_STORAGE_PRIVATE,
                         builder.build(), UserHandle.ALL);
@@ -252,7 +264,7 @@ public class StorageNotification extends SystemUI {
                             .setLocalOnly(true)
                             .setCategory(Notification.CATEGORY_ERROR)
                             .extend(new Notification.TvExtender());
-            SystemUI.overrideNotificationAppName(mContext, builder, false);
+            SystemUIApplication.overrideNotificationAppName(mContext, builder, false);
 
             mNotificationManager.notifyAsUser(disk.getId(), SystemMessage.NOTE_STORAGE_DISK,
                     builder.build(), UserHandle.ALL);
@@ -372,8 +384,8 @@ public class StorageNotification extends SystemUI {
         if (rec.isSnoozed() && disk.isAdoptable()) {
             return null;
         }
-
-        if (disk.isAdoptable() && !rec.isInited()) {
+        if (disk.isAdoptable() && !rec.isInited() && rec.getType() != VolumeInfo.TYPE_PUBLIC
+            && rec.getType() != VolumeInfo.TYPE_PRIVATE) {
             final CharSequence title = disk.getDescription();
             final CharSequence text = mContext.getString(
                     R.string.ext_media_new_notification_message, disk.getDescription());
@@ -527,7 +539,7 @@ public class StorageNotification extends SystemUI {
                         .setCategory(Notification.CATEGORY_PROGRESS)
                         .setProgress(100, status, false)
                         .setOngoing(true);
-        SystemUI.overrideNotificationAppName(mContext, builder, false);
+        SystemUIApplication.overrideNotificationAppName(mContext, builder, false);
 
         mNotificationManager.notifyAsUser(move.packageName, SystemMessage.NOTE_STORAGE_MOVE,
                 builder.build(), UserHandle.ALL);
@@ -577,7 +589,7 @@ public class StorageNotification extends SystemUI {
                         .setLocalOnly(true)
                         .setCategory(Notification.CATEGORY_SYSTEM)
                         .setAutoCancel(true);
-        SystemUI.overrideNotificationAppName(mContext, builder, false);
+        SystemUIApplication.overrideNotificationAppName(mContext, builder, false);
 
         mNotificationManager.notifyAsUser(move.packageName, SystemMessage.NOTE_STORAGE_MOVE,
                 builder.build(), UserHandle.ALL);
@@ -611,7 +623,7 @@ public class StorageNotification extends SystemUI {
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
                         .setLocalOnly(true)
                         .extend(new Notification.TvExtender());
-        overrideNotificationAppName(mContext, builder, false);
+        SystemUIApplication.overrideNotificationAppName(mContext, builder, false);
         return builder;
     }
 

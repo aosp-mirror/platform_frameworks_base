@@ -88,7 +88,8 @@ import java.util.Arrays;
  * {@link AccountManager#KEY_INTENT}.
  * <p>
  * The activity needs to return the final result when it is complete so the Intent should contain
- * the {@link AccountAuthenticatorResponse} as {@link AccountManager#KEY_ACCOUNT_MANAGER_RESPONSE}.
+ * the {@link AccountAuthenticatorResponse} as
+ * {@link AccountManager#KEY_ACCOUNT_AUTHENTICATOR_RESPONSE}.
  * The activity must then call {@link AccountAuthenticatorResponse#onResult} or
  * {@link AccountAuthenticatorResponse#onError} when it is complete.
  * <li> If the authenticator cannot synchronously process the request and return a result then it
@@ -119,27 +120,27 @@ public abstract class AbstractAccountAuthenticator {
     /**
      * Bundle key used for the {@link String} account type in session bundle.
      * This is used in the default implementation of
-     * {@link #startAddAccountSession} and {@link startUpdateCredentialsSession}.
+     * {@link #startAddAccountSession} and {@link #startUpdateCredentialsSession}.
      */
     private static final String KEY_AUTH_TOKEN_TYPE =
             "android.accounts.AbstractAccountAuthenticato.KEY_AUTH_TOKEN_TYPE";
     /**
      * Bundle key used for the {@link String} array of required features in
      * session bundle. This is used in the default implementation of
-     * {@link #startAddAccountSession} and {@link startUpdateCredentialsSession}.
+     * {@link #startAddAccountSession} and {@link #startUpdateCredentialsSession}.
      */
     private static final String KEY_REQUIRED_FEATURES =
             "android.accounts.AbstractAccountAuthenticator.KEY_REQUIRED_FEATURES";
     /**
      * Bundle key used for the {@link Bundle} options in session bundle. This is
      * used in default implementation of {@link #startAddAccountSession} and
-     * {@link startUpdateCredentialsSession}.
+     * {@link #startUpdateCredentialsSession}.
      */
     private static final String KEY_OPTIONS =
             "android.accounts.AbstractAccountAuthenticator.KEY_OPTIONS";
     /**
      * Bundle key used for the {@link Account} account in session bundle. This is used
-     * used in default implementation of {@link startUpdateCredentialsSession}.
+     * used in default implementation of {@link #startUpdateCredentialsSession}.
      */
     private static final String KEY_ACCOUNT =
             "android.accounts.AbstractAccountAuthenticator.KEY_ACCOUNT";

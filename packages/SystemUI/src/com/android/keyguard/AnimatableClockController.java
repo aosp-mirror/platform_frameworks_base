@@ -22,27 +22,41 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.icu.text.NumberFormat;
+import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shared.clocks.AnimatableClockView;
+import com.android.systemui.shared.navigationbar.RegionSamplingHelper;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.ViewController;
 
+import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
+import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 /**
  * Controller for an AnimatableClockView on the keyguard. Instantiated by
  * {@link KeyguardClockSwitchController}.
  */
 public class AnimatableClockController extends ViewController<AnimatableClockView> {
+    private static final String TAG = "AnimatableClockCtrl";
     private static final int FORMAT_NUMBER = 1234567890;
 
     private final StatusBarStateController mStatusBarStateController;
@@ -50,7 +64,10 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final BatteryController mBatteryController;
     private final int mDozingColor = Color.WHITE;
+    private Optional<RegionSamplingHelper> mRegionSamplingHelper = Optional.empty();
+    private Rect mSamplingBounds = new Rect();
     private int mLockScreenColor;
+    private final boolean mRegionSamplingEnabled;
 
     private boolean mIsDozing;
     private boolean mIsCharging;
@@ -63,13 +80,17 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     private final float mBurmeseLineSpacing;
     private final float mDefaultLineSpacing;
 
+    @Inject
     public AnimatableClockController(
             AnimatableClockView view,
             StatusBarStateController statusBarStateController,
             BroadcastDispatcher broadcastDispatcher,
             BatteryController batteryController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            @Main Resources resources
+            @Main Resources resources,
+            @Main Executor mainExecutor,
+            @Background Executor bgExecutor,
+            FeatureFlags featureFlags
     ) {
         super(view);
         mStatusBarStateController = statusBarStateController;
@@ -82,6 +103,40 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
                 R.dimen.keyguard_clock_line_spacing_scale_burmese);
         mDefaultLineSpacing = resources.getFloat(
                 R.dimen.keyguard_clock_line_spacing_scale);
+
+        mRegionSamplingEnabled = featureFlags.isEnabled(Flags.REGION_SAMPLING);
+        if (!mRegionSamplingEnabled) {
+            return;
+        }
+
+        mRegionSamplingHelper = Optional.of(new RegionSamplingHelper(mView,
+                new RegionSamplingHelper.SamplingCallback() {
+                    @Override
+                    public void onRegionDarknessChanged(boolean isRegionDark) {
+                        if (isRegionDark) {
+                            mLockScreenColor = Color.WHITE;
+                        } else {
+                            mLockScreenColor = Color.BLACK;
+                        }
+                        initColors();
+                    }
+
+                    @Override
+                    public Rect getSampledRegion(View sampledView) {
+                        mSamplingBounds = new Rect(sampledView.getLeft(), sampledView.getTop(),
+                                sampledView.getRight(), sampledView.getBottom());
+                        return mSamplingBounds;
+                    }
+
+                    @Override
+                    public boolean isSamplingEnabled() {
+                        return mRegionSamplingEnabled;
+                    }
+                }, mainExecutor, bgExecutor)
+        );
+        mRegionSamplingHelper.ifPresent((regionSamplingHelper) -> {
+            regionSamplingHelper.setWindowVisible(true);
+        });
     }
 
     private void reset() {
@@ -131,6 +186,21 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
                 reset();
             }
         }
+
+        @Override
+        public void onTimeFormatChanged(String timeFormat) {
+            mView.refreshFormat();
+        }
+
+        @Override
+        public void onTimeZoneChanged(TimeZone timeZone) {
+            mView.onTimeZoneChanged(timeZone);
+        }
+
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            mView.refreshFormat();
+        }
     };
 
     @Override
@@ -150,7 +220,11 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
 
         mStatusBarStateController.addCallback(mStatusBarStateListener);
 
-        refreshTime();
+        mRegionSamplingHelper.ifPresent((regionSamplingHelper) -> {
+            regionSamplingHelper.start(mSamplingBounds);
+        });
+
+        mView.onTimeZoneChanged(TimeZone.getDefault());
         initColors();
         mView.animateDoze(mIsDozing, false);
     }
@@ -161,6 +235,9 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateMonitorCallback);
         mBatteryController.removeCallback(mBatteryCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
+        mRegionSamplingHelper.ifPresent((regionSamplingHelper) -> {
+            regionSamplingHelper.stop();
+        });
     }
 
     /** Animate the clock appearance */
@@ -168,25 +245,17 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
         if (!mIsDozing) mView.animateAppearOnLockscreen();
     }
 
+    /** Animate the clock appearance when a foldable device goes from fully-open/half-open state to
+     * fully folded state and it goes to sleep (always on display screen) */
+    public void animateFoldAppear() {
+        mView.animateFoldAppear(true);
+    }
+
     /**
      * Updates the time for the view.
      */
     public void refreshTime() {
         mView.refreshTime();
-    }
-
-    /**
-     * Updates the timezone for the view.
-     */
-    public void onTimeZoneChanged(TimeZone timeZone) {
-        mView.onTimeZoneChanged(timeZone);
-    }
-
-    /**
-     * Trigger a time format update
-     */
-    public void refreshFormat() {
-        mView.refreshFormat();
     }
 
     /**
@@ -212,9 +281,22 @@ public class AnimatableClockController extends ViewController<AnimatableClockVie
     }
 
     private void initColors() {
-        mLockScreenColor = Utils.getColorAttrDefaultColor(getContext(),
-                com.android.systemui.R.attr.wallpaperTextColorAccent);
+        if (!mRegionSamplingEnabled) {
+            mLockScreenColor = Utils.getColorAttrDefaultColor(getContext(),
+                    com.android.systemui.R.attr.wallpaperTextColorAccent);
+        }
         mView.setColors(mDozingColor, mLockScreenColor);
         mView.animateDoze(mIsDozing, false);
+    }
+
+    /**
+     * Dump information for debugging
+     */
+    public void dump(@NonNull PrintWriter pw) {
+        pw.println(this);
+        mView.dump(pw);
+        mRegionSamplingHelper.ifPresent((regionSamplingHelper) -> {
+            regionSamplingHelper.dump(pw);
+        });
     }
 }

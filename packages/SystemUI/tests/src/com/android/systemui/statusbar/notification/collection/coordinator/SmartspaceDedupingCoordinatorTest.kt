@@ -23,11 +23,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
-import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -35,23 +33,22 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
+import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.TimeUnit
 
 @SmallTest
 class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
@@ -61,22 +58,9 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
     @Mock
     private lateinit var smartspaceController: LockscreenSmartspaceController
     @Mock
-    private lateinit var notificationEntryManager: NotificationEntryManager
-    @Mock
-    private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
-    @Mock
     private lateinit var notifPipeline: NotifPipeline
     @Mock
     private lateinit var pluggableListener: Pluggable.PluggableListener<NotifFilter>
-
-    @Captor
-    private lateinit var filterCaptor: ArgumentCaptor<NotifFilter>
-    @Captor
-    private lateinit var collectionListenerCaptor: ArgumentCaptor<NotifCollectionListener>
-    @Captor
-    private lateinit var stateListenerCaptor: ArgumentCaptor<StatusBarStateController.StateListener>
-    @Captor
-    private lateinit var smartspaceListenerCaptor: ArgumentCaptor<SmartspaceTargetListener>
 
     private lateinit var filter: NotifFilter
     private lateinit var collectionListener: NotifCollectionListener
@@ -108,28 +92,30 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
         deduper = SmartspaceDedupingCoordinator(
                 statusBarStateController,
                 smartspaceController,
-                notificationEntryManager,
-                notificationLockscreenUserManager,
                 notifPipeline,
                 executor,
                 clock
-                )
+        )
 
         // Attach the deduper and capture the listeners/filters that it registers
         deduper.attach(notifPipeline)
 
-        verify(notifPipeline).addPreGroupFilter(filterCaptor.capture())
-        filter = filterCaptor.value
+        filter = withArgCaptor {
+            verify(notifPipeline).addPreGroupFilter(capture())
+        }
         filter.setInvalidationListener(pluggableListener)
 
-        verify(notifPipeline).addCollectionListener(capture(collectionListenerCaptor))
-        collectionListener = collectionListenerCaptor.value
+        collectionListener = withArgCaptor {
+            verify(notifPipeline).addCollectionListener(capture())
+        }
 
-        verify(statusBarStateController).addCallback(capture(stateListenerCaptor))
-        statusBarListener = stateListenerCaptor.value
+        statusBarListener = withArgCaptor {
+            verify(statusBarStateController).addCallback(capture())
+        }
 
-        verify(smartspaceController).addListener(capture(smartspaceListenerCaptor))
-        newTargetListener = smartspaceListenerCaptor.value
+        newTargetListener = withArgCaptor {
+            verify(smartspaceController).addListener(capture())
+        }
 
         // Initialize some test data
         entry1HasRecentlyAlerted = NotificationEntryBuilder()
@@ -356,8 +342,7 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
 
         // THEN the new pipeline is invalidated (but the old one isn't because it's not
         // necessary) because the notif should no longer be filtered out
-        verify(pluggableListener).onPluggableInvalidated(filter)
-        verify(notificationEntryManager, never()).updateNotifications(anyString())
+        verify(pluggableListener).onPluggableInvalidated(eq(filter), any())
         assertFalse(filter.shouldFilterOut(entry2HasNotRecentlyAlerted, now))
     }
 
@@ -394,8 +379,7 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
     }
 
     private fun verifyPipelinesInvalidated() {
-        verify(pluggableListener).onPluggableInvalidated(filter)
-        verify(notificationEntryManager).updateNotifications(anyString())
+        verify(pluggableListener).onPluggableInvalidated(eq(filter), any())
     }
 
     private fun assertExecutorIsClear() {
@@ -403,13 +387,11 @@ class SmartspaceDedupingCoordinatorTest : SysuiTestCase() {
     }
 
     private fun verifyPipelinesNotInvalidated() {
-        verify(pluggableListener, never()).onPluggableInvalidated(filter)
-        verify(notificationEntryManager, never()).updateNotifications(anyString())
+        verify(pluggableListener, never()).onPluggableInvalidated(eq(filter), any())
     }
 
     private fun clearPipelineInvocations() {
         clearInvocations(pluggableListener)
-        clearInvocations(notificationEntryManager)
     }
 }
 
