@@ -17,7 +17,6 @@
 package com.android.server.wallpaper;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.Manifest.permission.QUERY_ALL_PACKAGES;
 import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.WallpaperManager.COMMAND_REAPPLY;
@@ -67,6 +66,7 @@ import android.content.ServiceConnection;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -759,6 +759,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     private final Context mContext;
     private final WindowManagerInternal mWindowManagerInternal;
+    private final PackageManagerInternal mPackageManagerInternal;
     private final IPackageManager mIPackageManager;
     private final ActivityManager mActivityManager;
     private final MyPackageMonitor mMonitor;
@@ -1604,6 +1605,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 context.getResources().getString(R.string.image_wallpaper_component));
         mDefaultWallpaperComponent = WallpaperManager.getDefaultWallpaperComponent(context);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mIPackageManager = AppGlobals.getPackageManager();
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         DisplayManager dm = mContext.getSystemService(DisplayManager.class);
@@ -2283,20 +2285,23 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     @Override
     public WallpaperInfo getWallpaperInfoWithFlags(@SetWallpaperFlags int which, int userId) {
-        final boolean allow =
-                hasPermission(READ_WALLPAPER_INTERNAL) || hasPermission(QUERY_ALL_PACKAGES);
-        if (allow) {
-            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, false, true, "getWallpaperInfo", null);
-            synchronized (mLock) {
-                WallpaperData wallpaper = (which == FLAG_LOCK) ? mLockWallpaperMap.get(userId)
-                        : mWallpaperMap.get(userId);
-                if (wallpaper != null && wallpaper.connection != null) {
-                    return wallpaper.connection.mInfo;
-                }
+
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "getWallpaperInfo", null);
+        synchronized (mLock) {
+            WallpaperData wallpaper = (which == FLAG_LOCK) ? mLockWallpaperMap.get(userId)
+                    : mWallpaperMap.get(userId);
+            if (wallpaper == null
+                    || wallpaper.connection == null
+                    || wallpaper.connection.mInfo == null) return null;
+
+            WallpaperInfo info = wallpaper.connection.mInfo;
+            if (hasPermission(READ_WALLPAPER_INTERNAL)
+                    || mPackageManagerInternal.canQueryPackage(
+                            Binder.getCallingUid(), info.getComponent().getPackageName())) {
+                return info;
             }
         }
-
         return null;
     }
 
