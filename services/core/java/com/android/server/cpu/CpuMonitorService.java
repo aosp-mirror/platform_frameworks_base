@@ -41,6 +41,7 @@ import android.util.SparseArrayMap;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.Watchdog;
@@ -52,17 +53,18 @@ import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 
 /** Service to monitor CPU availability and usage. */
 public final class CpuMonitorService extends SystemService {
     static final String TAG = CpuMonitorService.class.getSimpleName();
-    static final boolean DEBUG =  Log.isLoggable(TAG, Log.DEBUG);
+    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     // TODO(b/267500110): Make these constants resource overlay properties.
     /** Default monitoring interval when no monitoring is in progress. */
     static final long DEFAULT_MONITORING_INTERVAL_MILLISECONDS = -1;
-    // TODO(b/242722241): Add a constant for normal monitoring interval when callbacks are
-    //  registered.
+    /** Monitoring interval when callbacks are registered and the CPU load is normal. */
+    private static final long NORMAL_MONITORING_INTERVAL_MILLISECONDS =
+            TimeUnit.SECONDS.toMillis(5);
+
     /**
      * Monitoring interval when no registered callbacks and the build is either user-debug or eng.
      */
@@ -85,6 +87,7 @@ public final class CpuMonitorService extends SystemService {
     private final HandlerThread mHandlerThread;
     private final CpuInfoReader mCpuInfoReader;
     private final boolean mShouldDebugMonitor;
+    private final long mNormalMonitoringIntervalMillis;
     private final long mDebugMonitoringIntervalMillis;
     private final long mLatestAvailabilityDurationMillis;
     private final Object mLock = new Object();
@@ -94,8 +97,6 @@ public final class CpuMonitorService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArray<CpusetInfo> mCpusetInfosByCpuset;
     private final Runnable mMonitorCpuStats = this::monitorCpuStats;
-    private final NotifyCpuAvailabilityFunctor mNotifyCpuAvailabilityFunctor =
-            new NotifyCpuAvailabilityFunctor();
 
     @GuardedBy("mLock")
     private long mCurrentMonitoringIntervalMillis = DEFAULT_MONITORING_INTERVAL_MILLISECONDS;
@@ -107,29 +108,24 @@ public final class CpuMonitorService extends SystemService {
                 CpuAvailabilityMonitoringConfig config, CpuAvailabilityCallback callback) {
             Objects.requireNonNull(callback, "Callback must be non-null");
             Objects.requireNonNull(config, "Config must be non-null");
+            CpuAvailabilityCallbackInfo callbackInfo;
             synchronized (mLock) {
                 // Verify all CPUSET entries before adding the callback because this will help
                 // delete any previously added callback for a different CPUSET.
                 for (int i = 0; i < mAvailabilityCallbackInfosByCallbacksByCpuset.numMaps(); i++) {
                     int cpuset = mAvailabilityCallbackInfosByCallbacksByCpuset.keyAt(i);
-                    CpuAvailabilityCallbackInfo callbackInfo =
-                            mAvailabilityCallbackInfosByCallbacksByCpuset.delete(cpuset, callback);
+                    callbackInfo = mAvailabilityCallbackInfosByCallbacksByCpuset.delete(cpuset,
+                            callback);
                     if (callbackInfo != null) {
                         Slogf.i(TAG, "Overwriting the existing %s", callbackInfo);
                     }
                 }
-                CpuAvailabilityCallbackInfo callbackInfo = new CpuAvailabilityCallbackInfo(config,
-                        callback, executor);
-                mAvailabilityCallbackInfosByCallbacksByCpuset.add(config.cpuset, callback,
-                        callbackInfo);
-                if (DEBUG) {
-                    Slogf.d(TAG, "Added a CPU availability callback: %s", callbackInfo);
-                }
+                callbackInfo = newCallbackInfoLocked(config, callback, executor);
             }
-            // TODO(b/242722241):
-            //  * On the executor or on the handler thread, call the callback with the latest CPU
-            //    availability info and monitoring interval.
-            //  * Monitor the CPU stats more frequently when the first callback is added.
+            asyncNotifyMonitoringIntervalChangeToClient(callbackInfo);
+            if (DEBUG) {
+                Slogf.d(TAG, "Successfully added %s", callbackInfo);
+            }
         }
 
         @Override
@@ -143,6 +139,7 @@ public final class CpuMonitorService extends SystemService {
                         if (DEBUG) {
                             Slogf.d(TAG, "Successfully removed %s", callbackInfo);
                         }
+                        checkAndStopMonitoringLocked();
                         return;
                     }
                 }
@@ -154,19 +151,20 @@ public final class CpuMonitorService extends SystemService {
 
     public CpuMonitorService(Context context) {
         this(context, new CpuInfoReader(), new ServiceThread(TAG,
-                Process.THREAD_PRIORITY_BACKGROUND, /* allowIo= */ true),
-                Build.IS_USERDEBUG || Build.IS_ENG, DEBUG_MONITORING_INTERVAL_MILLISECONDS,
-                LATEST_AVAILABILITY_DURATION_MILLISECONDS);
+                        Process.THREAD_PRIORITY_BACKGROUND, /* allowIo= */ true),
+                Build.IS_USERDEBUG || Build.IS_ENG, NORMAL_MONITORING_INTERVAL_MILLISECONDS,
+                DEBUG_MONITORING_INTERVAL_MILLISECONDS, LATEST_AVAILABILITY_DURATION_MILLISECONDS);
     }
 
     @VisibleForTesting
     CpuMonitorService(Context context, CpuInfoReader cpuInfoReader, HandlerThread handlerThread,
-            boolean shouldDebugMonitor, long debugMonitoringIntervalMillis,
-            long latestAvailabilityDurationMillis) {
+            boolean shouldDebugMonitor, long normalMonitoringIntervalMillis,
+            long debugMonitoringIntervalMillis, long latestAvailabilityDurationMillis) {
         super(context);
         mContext = context;
         mHandlerThread = handlerThread;
         mShouldDebugMonitor = shouldDebugMonitor;
+        mNormalMonitoringIntervalMillis = normalMonitoringIntervalMillis;
         mDebugMonitoringIntervalMillis = debugMonitoringIntervalMillis;
         mLatestAvailabilityDurationMillis = latestAvailabilityDurationMillis;
         mCpuInfoReader = cpuInfoReader;
@@ -202,12 +200,24 @@ public final class CpuMonitorService extends SystemService {
         }
     }
 
+    @VisibleForTesting
+    long getCurrentMonitoringIntervalMillis() {
+        synchronized (mLock) {
+            return mCurrentMonitoringIntervalMillis;
+        }
+    }
+
     private void doDump(IndentingPrintWriter writer) {
         writer.printf("*%s*\n", getClass().getSimpleName());
         writer.increaseIndent();
         mCpuInfoReader.dump(writer);
+        writer.printf("mShouldDebugMonitor = %s\n", mShouldDebugMonitor ? "Yes" : "No");
+        writer.printf("mNormalMonitoringIntervalMillis = %d\n", mNormalMonitoringIntervalMillis);
+        writer.printf("mDebugMonitoringIntervalMillis = %d\n", mDebugMonitoringIntervalMillis);
+        writer.printf("mLatestAvailabilityDurationMillis = %d\n",
+                mLatestAvailabilityDurationMillis);
         synchronized (mLock) {
-            writer.printf("Current CPU monitoring interval: %d ms\n",
+            writer.printf("mCurrentMonitoringIntervalMillis = %d\n",
                     mCurrentMonitoringIntervalMillis);
             if (hasClientCallbacksLocked()) {
                 writer.println("CPU availability change callbacks:");
@@ -230,6 +240,11 @@ public final class CpuMonitorService extends SystemService {
 
     private void monitorCpuStats() {
         long uptimeMillis = SystemClock.uptimeMillis();
+        // Remove duplicate callbacks caused by switching form debug to normal monitoring.
+        // The removal of the duplicate callback done in the {@link newCallbackInfoLocked} method
+        // may result in a no-op when a duplicate execution of this callback has already started
+        // on the handler thread.
+        mHandler.removeCallbacks(mMonitorCpuStats);
         SparseArray<CpuInfoReader.CpuInfo> cpuInfosByCoreId = mCpuInfoReader.readCpuInfos();
         if (cpuInfosByCoreId == null) {
             // This shouldn't happen because the CPU infos are read & verified during
@@ -262,7 +277,7 @@ public final class CpuMonitorService extends SystemService {
             }
 
             // TODO(b/267500110): Detect heavy CPU load. On detecting heavy CPU load, increase
-            //  the monitoring interval and notify the clients.
+            // the monitoring interval and notify the clients.
 
             // 3. Continue monitoring only when either there is at least one registered client
             // callback or debug monitoring is enabled.
@@ -280,34 +295,94 @@ public final class CpuMonitorService extends SystemService {
     private void checkClientThresholdsAndNotifyLocked(CpusetInfo cpusetInfo) {
         int prevAvailabilityPercent = cpusetInfo.getPrevCpuAvailabilityPercent();
         CpuAvailabilityInfo latestAvailabilityInfo = cpusetInfo.getLatestCpuAvailabilityInfo();
-        ArrayMap<CpuMonitorInternal.CpuAvailabilityCallback,
-                CpuAvailabilityCallbackInfo> callbackMap =
-                mAvailabilityCallbackInfosByCallbacksByCpuset.get(cpusetInfo.cpuset);
         if (latestAvailabilityInfo == null || prevAvailabilityPercent < 0
-                || callbackMap.isEmpty()) {
+                || mAvailabilityCallbackInfosByCallbacksByCpuset.numElementsForKey(
+                cpusetInfo.cpuset) == 0) {
             // When either the current or the previous CPU availability percents are
             // missing, skip the current cpuset as there is not enough data to verify
             // whether the CPU availability has crossed any monitoring threshold.
             return;
         }
-        for (int i = 0; i < callbackMap.size(); i++) {
-            CpuAvailabilityCallbackInfo callbackInfo = callbackMap.valueAt(i);
-            if (didCrossAnyThreshold(prevAvailabilityPercent,
-                    latestAvailabilityInfo.latestAvgAvailabilityPercent,
-                    callbackInfo.config.getThresholds())) {
-                asyncNotifyCpuAvailabilityToClient(latestAvailabilityInfo, callbackInfo);
+        for (int i = 0; i < mAvailabilityCallbackInfosByCallbacksByCpuset.numMaps(); i++) {
+            for (int j = 0; j < mAvailabilityCallbackInfosByCallbacksByCpuset.numElementsForKeyAt(
+                    i); j++) {
+                CpuAvailabilityCallbackInfo callbackInfo =
+                        mAvailabilityCallbackInfosByCallbacksByCpuset.valueAt(i, j);
+                if (callbackInfo.config.cpuset != cpusetInfo.cpuset) {
+                    continue;
+                }
+                if (didCrossAnyThreshold(prevAvailabilityPercent,
+                        latestAvailabilityInfo.latestAvgAvailabilityPercent,
+                        callbackInfo.config.getThresholds())) {
+                    asyncNotifyCpuAvailabilityToClient(latestAvailabilityInfo, callbackInfo);
+                }
             }
+        }
+    }
+
+    private void asyncNotifyMonitoringIntervalChangeToClient(
+            CpuAvailabilityCallbackInfo callbackInfo) {
+        if (callbackInfo.executor == null) {
+            mHandler.post(callbackInfo.notifyMonitoringIntervalChangeRunnable);
+        } else {
+            callbackInfo.executor.execute(callbackInfo.notifyMonitoringIntervalChangeRunnable);
         }
     }
 
     private void asyncNotifyCpuAvailabilityToClient(CpuAvailabilityInfo availabilityInfo,
             CpuAvailabilityCallbackInfo callbackInfo) {
+        callbackInfo.notifyCpuAvailabilityChangeRunnable.prepare(availabilityInfo);
         if (callbackInfo.executor == null) {
-            mHandler.post(() -> mNotifyCpuAvailabilityFunctor.accept(callbackInfo.callback,
-                    availabilityInfo));
+            mHandler.post(callbackInfo.notifyCpuAvailabilityChangeRunnable);
         } else {
-            callbackInfo.executor.execute(() -> mNotifyCpuAvailabilityFunctor.accept(
-                    callbackInfo.callback, availabilityInfo));
+            callbackInfo.executor.execute(callbackInfo.notifyCpuAvailabilityChangeRunnable);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private CpuAvailabilityCallbackInfo newCallbackInfoLocked(
+            CpuAvailabilityMonitoringConfig config,
+            CpuMonitorInternal.CpuAvailabilityCallback callback, Executor executor) {
+        CpuAvailabilityCallbackInfo callbackInfo = new CpuAvailabilityCallbackInfo(this, config,
+                callback, executor);
+        String cpusetStr = CpuAvailabilityMonitoringConfig.toCpusetString(
+                callbackInfo.config.cpuset);
+        CpusetInfo cpusetInfo = mCpusetInfosByCpuset.get(callbackInfo.config.cpuset);
+        Preconditions.checkState(cpusetInfo != null, "Missing cpuset info for cpuset %s",
+                cpusetStr);
+        boolean hasExistingClientCallbacks = hasClientCallbacksLocked();
+        mAvailabilityCallbackInfosByCallbacksByCpuset.add(callbackInfo.config.cpuset,
+                callbackInfo.callback, callbackInfo);
+        if (DEBUG) {
+            Slogf.d(TAG, "Added a CPU availability callback: %s", callbackInfo);
+        }
+        CpuAvailabilityInfo latestInfo = cpusetInfo.getLatestCpuAvailabilityInfo();
+        if (latestInfo != null) {
+            asyncNotifyCpuAvailabilityToClient(latestInfo, callbackInfo);
+        }
+        if (hasExistingClientCallbacks && mHandler.hasCallbacks(mMonitorCpuStats)) {
+            return callbackInfo;
+        }
+        // Remove existing callbacks to ensure any debug monitoring (if started) is stopped before
+        // starting normal monitoring.
+        mHandler.removeCallbacks(mMonitorCpuStats);
+        mCurrentMonitoringIntervalMillis = mNormalMonitoringIntervalMillis;
+        mHandler.post(mMonitorCpuStats);
+        return callbackInfo;
+    }
+
+    @GuardedBy("mLock")
+    private void checkAndStopMonitoringLocked() {
+        if (hasClientCallbacksLocked()) {
+            return;
+        }
+        if (mShouldDebugMonitor) {
+            if (DEBUG) {
+                Slogf.e(TAG, "Switching to debug monitoring");
+            }
+            mCurrentMonitoringIntervalMillis = mDebugMonitoringIntervalMillis;
+        } else {
+            stopMonitoringCpuStatsLocked();
         }
     }
 
@@ -370,13 +445,24 @@ public final class CpuMonitorService extends SystemService {
     }
 
     private static final class CpuAvailabilityCallbackInfo {
+        public final CpuMonitorService service;
         public final CpuAvailabilityMonitoringConfig config;
         public final CpuMonitorInternal.CpuAvailabilityCallback callback;
         @Nullable
         public final Executor executor;
+        public final Runnable notifyMonitoringIntervalChangeRunnable = new Runnable() {
+            @Override
+            public void run() {
+                callback.onMonitoringIntervalChanged(service.getCurrentMonitoringIntervalMillis());
+            }
+        };
+        public final NotifyCpuAvailabilityChangeRunnable notifyCpuAvailabilityChangeRunnable =
+                new NotifyCpuAvailabilityChangeRunnable();
 
-        CpuAvailabilityCallbackInfo(CpuAvailabilityMonitoringConfig config,
+        CpuAvailabilityCallbackInfo(CpuMonitorService service,
+                CpuAvailabilityMonitoringConfig config,
                 CpuMonitorInternal.CpuAvailabilityCallback callback, @Nullable Executor executor) {
+            this.service = service;
             this.config = config;
             this.callback = callback;
             this.executor = executor;
@@ -386,6 +472,25 @@ public final class CpuMonitorService extends SystemService {
         public String toString() {
             return "CpuAvailabilityCallbackInfo{config = " + config + ", callback = " + callback
                     + ", mExecutor = " + executor + '}';
+        }
+
+        private final class NotifyCpuAvailabilityChangeRunnable implements Runnable {
+            private final Object mLock = new Object();
+            @GuardedBy("mLock")
+            private CpuAvailabilityInfo mCpuAvailabilityInfo;
+
+            public void prepare(CpuAvailabilityInfo cpuAvailabilityInfo) {
+                synchronized (mLock) {
+                    mCpuAvailabilityInfo = cpuAvailabilityInfo;
+                }
+            }
+
+            @Override
+            public void run() {
+                synchronized (mLock) {
+                    callback.onAvailabilityChanged(mCpuAvailabilityInfo);
+                }
+            }
         }
     }
 
@@ -561,15 +666,6 @@ public final class CpuMonitorService extends SystemService {
                         + ", totalOnlineMaxCpuFreqKHz = " + totalOnlineMaxCpuFreqKHz
                         + ", totalOfflineMaxCpuFreqKHz = " + totalOfflineMaxCpuFreqKHz + '}';
             }
-        }
-    }
-
-    private static final class NotifyCpuAvailabilityFunctor implements
-            BiConsumer<CpuMonitorInternal.CpuAvailabilityCallback, CpuAvailabilityInfo> {
-        @Override
-        public void accept(CpuMonitorInternal.CpuAvailabilityCallback callback,
-                CpuAvailabilityInfo availabilityInfo) {
-            callback.onAvailabilityChanged(availabilityInfo);
         }
     }
 }
