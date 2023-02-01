@@ -37,6 +37,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -436,10 +437,17 @@ class TaskFragmentContainer {
      * Removes a container that should be finished when this container is finished.
      */
     void removeContainerToFinishOnExit(@NonNull TaskFragmentContainer containerToRemove) {
+        removeContainersToFinishOnExit(Collections.singletonList(containerToRemove));
+    }
+
+    /**
+     * Removes container list that should be finished when this container is finished.
+     */
+    void removeContainersToFinishOnExit(@NonNull List<TaskFragmentContainer> containersToRemove) {
         if (mIsFinished) {
             return;
         }
-        mContainersToFinishOnExit.remove(containerToRemove);
+        mContainersToFinishOnExit.removeAll(containersToRemove);
     }
 
     /**
@@ -478,6 +486,16 @@ class TaskFragmentContainer {
     @GuardedBy("mController.mLock")
     void finish(boolean shouldFinishDependent, @NonNull SplitPresenter presenter,
             @NonNull WindowContainerTransaction wct, @NonNull SplitController controller) {
+        finish(shouldFinishDependent, presenter, wct, controller, true /* shouldRemoveRecord */);
+    }
+
+    /**
+     * Removes all activities that belong to this process and finishes other containers/activities
+     * configured to finish together.
+     */
+    void finish(boolean shouldFinishDependent, @NonNull SplitPresenter presenter,
+            @NonNull WindowContainerTransaction wct, @NonNull SplitController controller,
+            boolean shouldRemoveRecord) {
         if (!mIsFinished) {
             mIsFinished = true;
             if (mAppearEmptyTimeout != null) {
@@ -494,8 +512,10 @@ class TaskFragmentContainer {
 
         // Cleanup the visuals
         presenter.deleteTaskFragment(wct, getTaskFragmentToken());
-        // Cleanup the records
-        controller.removeContainer(this);
+        if (shouldRemoveRecord) {
+            // Cleanup the records
+            controller.removeContainer(this);
+        }
         // Clean up task fragment information
         mInfo = null;
     }
