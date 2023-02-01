@@ -340,7 +340,6 @@ import android.security.keystore.AttestationUtils;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.stats.devicepolicy.DevicePolicyEnums;
-import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -20383,7 +20382,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final long id = mInjector.binderClearCallingIdentity();
             try {
                 int parentUserId = getProfileParentId(caller.getUserId());
-                installOemDefaultDialerAndMessagesApp(parentUserId, caller.getUserId());
+                installOemDefaultDialerAndSmsApp(caller.getUserId());
                 updateTelephonyCrossProfileIntentFilters(parentUserId, caller.getUserId(), true);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
@@ -20391,32 +20390,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void installOemDefaultDialerAndMessagesApp(int sourceUserId, int targetUserId) {
+    private void installOemDefaultDialerAndSmsApp(int targetUserId) {
         try {
-            UserHandle sourceUserHandle = UserHandle.of(sourceUserId);
-            TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
-            String dialerAppPackage = telecomManager.getDefaultDialerPackage(
-                    sourceUserHandle);
-            String messagesAppPackage = SmsApplication.getDefaultSmsApplicationAsUser(mContext,
-                    true, sourceUserHandle).getPackageName();
-            if (dialerAppPackage != null) {
-                mIPackageManager.installExistingPackageAsUser(dialerAppPackage, targetUserId,
-                        PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+            String defaultDialerPackageName = getDefaultRoleHolderPackageName(
+                    com.android.internal.R.string.config_defaultDialer);
+            String defaultSmsPackageName = getDefaultRoleHolderPackageName(
+                    com.android.internal.R.string.config_defaultSms);
+
+            if (defaultDialerPackageName != null) {
+                mIPackageManager.installExistingPackageAsUser(defaultDialerPackageName,
+                        targetUserId, PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
                         PackageManager.INSTALL_REASON_POLICY, null);
             } else {
                 Slogf.w(LOG_TAG, "Couldn't install dialer app, dialer app package is null");
             }
 
-            if (messagesAppPackage != null) {
-                mIPackageManager.installExistingPackageAsUser(messagesAppPackage, targetUserId,
+            if (defaultSmsPackageName != null) {
+                mIPackageManager.installExistingPackageAsUser(defaultSmsPackageName, targetUserId,
                         PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
                         PackageManager.INSTALL_REASON_POLICY, null);
             } else {
-                Slogf.w(LOG_TAG, "Couldn't install messages app, messages app package is null");
+                Slogf.w(LOG_TAG, "Couldn't install sms app, sms app package is null");
             }
         } catch (RemoteException re) {
             // shouldn't happen
-            Slogf.wtf(LOG_TAG, "Failed to install dialer/messages app", re);
+            Slogf.wtf(LOG_TAG, "Failed to install dialer/sms app", re);
         }
     }
 
