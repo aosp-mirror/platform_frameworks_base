@@ -334,7 +334,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Zapnúť funkciu Preskúmanie dotykom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Po klepnutí na položku sa vysloví jej názov a obrazovku je možné preskúmať pomocou gest."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Sledovať zadávaný text"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sledovanie zahŕňa osobné údaje, ako sú čísla kreditných kariet a heslá."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Ovládať priblíženie obrazovky"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Ovládajte umiestnenie a úroveň priblíženia obrazovky."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Gestá"</string>
