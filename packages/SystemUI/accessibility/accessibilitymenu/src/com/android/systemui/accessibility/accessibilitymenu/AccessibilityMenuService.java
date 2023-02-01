@@ -228,6 +228,13 @@ public class AccessibilityMenuService extends AccessibilityService
         mA11yMenuLayout.hideMenu();
     }
 
+    /**
+     * Adjusts brightness using the same logic and utils class as the SystemUI brightness slider.
+     *
+     * @see BrightnessUtils
+     * @see com.android.systemui.settings.brightness.BrightnessController
+     * @param increment The increment amount in gamma-space
+     */
     private void adjustBrightness(int increment) {
         BrightnessInfo info = getDisplay().getBrightnessInfo();
         int gamma = BrightnessUtils.convertLinearToGammaFloat(
