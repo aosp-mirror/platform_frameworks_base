@@ -191,7 +191,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private static final String EXTRA_TRANSIENT_STATE = "transient_state";
 
     /** Allow some time inbetween the long press for back and recents. */
-    private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
+    private static final int LOCK_TO_APP_GESTURE_TOLERANCE = 200;
     private static final long AUTODIM_TIMEOUT_MS = 2250;
 
     private final Context mContext;
@@ -1439,7 +1439,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
                     // If we recently long-pressed the other button then they were
                     // long-pressed 'together'
-                    if ((time - mLastLockToAppLongPress) < LOCK_TO_APP_GESTURE_TOLERENCE) {
+                    if ((time - mLastLockToAppLongPress) < LOCK_TO_APP_GESTURE_TOLERANCE) {
                         stopLockTaskMode = true;
                         return true;
                     } else if (v.getId() == btnId1) {
