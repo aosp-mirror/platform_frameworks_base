@@ -1136,6 +1136,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="HardwareBufferRendererActivity"
+            android:label="HardwareRenderer/HardwareBufferRenderer"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="MyLittleTextureView"
              android:label="HardwareRenderer/MyLittleTextureView"
              android:screenOrientation="fullSensor"
