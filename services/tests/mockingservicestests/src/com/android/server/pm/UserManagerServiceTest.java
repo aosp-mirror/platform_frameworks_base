@@ -261,7 +261,7 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
         mUms.setBootUser(OTHER_USER_ID);
 
         assertWithMessage("getBootUser")
-                .that(mUmi.getBootUser()).isEqualTo(OTHER_USER_ID);
+                .that(mUmi.getBootUser(/* waitUntilSet= */ false)).isEqualTo(OTHER_USER_ID);
     }
 
     @Test
@@ -274,7 +274,8 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
         mUms.setBootUser(PROFILE_USER_ID);
 
         assertWithMessage("getBootUser")
-                .that(mUmi.getBootUser()).isEqualTo(UserHandle.USER_SYSTEM);
+                .that(mUmi.getBootUser(/* waitUntilSet= */ false))
+                .isEqualTo(UserHandle.USER_SYSTEM);
     }
 
     @Test
@@ -290,7 +291,7 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
 
         // Boot user not switchable so return most recently in foreground.
         assertWithMessage("getBootUser")
-                .that(mUmi.getBootUser()).isEqualTo(OTHER_USER_ID);
+                .that(mUmi.getBootUser(/* waitUntilSet= */ false)).isEqualTo(OTHER_USER_ID);
     }
 
     @Test
@@ -300,7 +301,8 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
         addUser(OTHER_USER_ID);
 
         assertWithMessage("getBootUser")
-                .that(mUmi.getBootUser()).isEqualTo(UserHandle.USER_SYSTEM);
+                .that(mUmi.getBootUser(/* waitUntilSet= */ false))
+                .isEqualTo(UserHandle.USER_SYSTEM);
     }
 
     @Test
@@ -313,14 +315,15 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
         setLastForegroundTime(OTHER_USER_ID, 2_000_000L);
 
         assertWithMessage("getBootUser")
-                .that(mUmi.getBootUser()).isEqualTo(OTHER_USER_ID);
+                .that(mUmi.getBootUser(/* waitUntilSet= */ false)).isEqualTo(OTHER_USER_ID);
     }
 
     @Test
     public void testGetBootUser_Headless_ThrowsIfOnlySystemUserExists() throws Exception {
         setSystemUserHeadless(true);
 
-        assertThrows(UserManager.CheckedUserOperationException.class, () -> mUmi.getBootUser());
+        assertThrows(UserManager.CheckedUserOperationException.class,
+                () -> mUmi.getBootUser(/* waitUntilSet= */ false));
     }
 
     private void mockCurrentUser(@UserIdInt int userId) {
