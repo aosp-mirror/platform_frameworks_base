@@ -513,7 +513,7 @@ class SyntheticPasswordManager {
         WeaverConfig weaverConfig = null;
         try {
             weaverConfig = weaver.getConfig();
-        } catch (RemoteException e) {
+        } catch (RemoteException | ServiceSpecificException e) {
             Slog.e(TAG, "Failed to get weaver config", e);
         }
         if (weaverConfig == null || weaverConfig.slots <= 0) {
