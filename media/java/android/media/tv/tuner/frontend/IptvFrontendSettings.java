@@ -92,7 +92,7 @@ public class IptvFrontendSettings extends FrontendSettings {
     private final long mBitrate;
     private final String mContentUrl;
 
-    public IptvFrontendSettings(@NonNull byte[] srcIpAddress, @NonNull byte[] dstIpAddress,
+    private IptvFrontendSettings(@NonNull byte[] srcIpAddress, @NonNull byte[] dstIpAddress,
             int srcPort, int dstPort, @NonNull IptvFrontendSettingsFec fec, int protocol, int igmp,
             long bitrate, @NonNull String contentUrl) {
         super(0);

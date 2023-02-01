@@ -8911,7 +8911,6 @@ package android.media.tv.tuner.frontend {
   }
 
   public class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    ctor public IptvFrontendSettings(@NonNull byte[], @NonNull byte[], int, int, @NonNull android.media.tv.tuner.frontend.IptvFrontendSettingsFec, int, int, long, @NonNull String);
     method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettings.Builder builder();
     method @IntRange(from=0) public long getBitrate();
     method @NonNull public String getContentUrl();
@@ -8946,7 +8945,6 @@ package android.media.tv.tuner.frontend {
   }
 
   public class IptvFrontendSettingsFec {
-    ctor public IptvFrontendSettingsFec(int, int, int);
     method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder builder();
     method @IntRange(from=0) public int getFecColNum();
     method @IntRange(from=0) public int getFecRowNum();
