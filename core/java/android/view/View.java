@@ -8945,9 +8945,31 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         outRect.set(position.left, position.top, position.right, position.bottom);
     }
 
+    /**
+     * Gets the location of this view in window coordinates.
+     *
+     * @param outRect The output location
+     * @param clipToParent Whether to clip child bounds to the parent ones.
+     * @hide
+     */
+    public void getBoundsInWindow(Rect outRect, boolean clipToParent) {
+        if (mAttachInfo == null) {
+            return;
+        }
+        RectF position = mAttachInfo.mTmpTransformRect;
+        getBoundsToWindowInternal(position, clipToParent);
+        outRect.set(Math.round(position.left), Math.round(position.top),
+                Math.round(position.right), Math.round(position.bottom));
+    }
+
     private void getBoundsToScreenInternal(RectF position, boolean clipToParent) {
         position.set(0, 0, mRight - mLeft, mBottom - mTop);
         mapRectFromViewToScreenCoords(position, clipToParent);
+    }
+
+    private void getBoundsToWindowInternal(RectF position, boolean clipToParent) {
+        position.set(0, 0, mRight - mLeft, mBottom - mTop);
+        mapRectFromViewToWindowCoords(position, clipToParent);
     }
 
     /**
@@ -8958,6 +8980,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void mapRectFromViewToScreenCoords(RectF rect, boolean clipToParent) {
+        mapRectFromViewToWindowCoords(rect, clipToParent);
+        rect.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
+    }
+
+    /**
+     * Map a rectangle from view-relative coordinates to window-relative coordinates
+     *
+     * @param rect The rectangle to be mapped
+     * @param clipToParent Whether to clip child bounds to the parent ones.
+     * @hide
+     */
+    public void mapRectFromViewToWindowCoords(RectF rect, boolean clipToParent) {
         if (!hasIdentityMatrix()) {
             getMatrix().mapRect(rect);
         }
@@ -8990,8 +9024,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             ViewRootImpl viewRootImpl = (ViewRootImpl) parent;
             rect.offset(0, -viewRootImpl.mCurScrollY);
         }
-
-        rect.offset(mAttachInfo.mWindowLeft, mAttachInfo.mWindowTop);
     }
 
     /**
@@ -10578,6 +10610,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         getBoundsOnScreen(bounds, true);
         info.setBoundsInScreen(bounds);
+        getBoundsInWindow(bounds, true);
+        info.setBoundsInWindow(bounds);
 
         ViewParent parent = getParentForAccessibility();
         if (parent instanceof View) {
