@@ -196,7 +196,9 @@ class UidPermissionPolicy : SchemePolicy() {
 
         val changedPermissionNames = IndexedSet<String>()
         trimPermissions(packageName, changedPermissionNames)
-        trimPermissionStates(appId)
+        if (appId in newState.systemState.appIds) {
+            trimPermissionStates(appId)
+        }
         changedPermissionNames.forEachIndexed { _, permissionName ->
             evaluatePermissionStateForAllPackages(permissionName, null)
         }
@@ -1066,7 +1068,7 @@ class UidPermissionPolicy : SchemePolicy() {
         state: AccessState = newState,
         action: (PackageState) -> Unit
     ) {
-        val packageNames = state.systemState.appIds[appId]
+        val packageNames = state.systemState.appIds[appId]!!
         packageNames.forEachIndexed { _, packageName ->
             val packageState = state.systemState.packageStates[packageName]!!
             if (packageState.androidPackage != null) {
