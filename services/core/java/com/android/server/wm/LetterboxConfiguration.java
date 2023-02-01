@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ALLOW_IGNORE_ORIENTATION_REQUEST;
+import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_CAMERA_COMPAT_TREATMENT;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
 
 import android.annotation.IntDef;
@@ -307,6 +308,9 @@ final class LetterboxConfiguration {
 
         mIsDisplayRotationImmersiveAppCompatPolicyEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled);
+        mDeviceConfig.updateFlagActiveStatus(
+                /* isActive */ mIsCameraCompatTreatmentEnabled,
+                /* key */ KEY_ENABLE_CAMERA_COMPAT_TREATMENT);
         mDeviceConfig.updateFlagActiveStatus(
                 /* isActive */ mIsDisplayRotationImmersiveAppCompatPolicyEnabled,
                 /* key */ KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
@@ -1086,15 +1090,8 @@ final class LetterboxConfiguration {
 
     /** Whether camera compatibility treatment is enabled. */
     boolean isCameraCompatTreatmentEnabled(boolean checkDeviceConfig) {
-        return mIsCameraCompatTreatmentEnabled
-                && (!checkDeviceConfig || isCameraCompatTreatmentAllowed());
-    }
-
-    // TODO(b/262977416): Cache a runtime flag and implement
-    // DeviceConfig.OnPropertiesChangedListener
-    private static boolean isCameraCompatTreatmentAllowed() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                "enable_compat_camera_treatment", true);
+        return mIsCameraCompatTreatmentEnabled && (!checkDeviceConfig
+                || mDeviceConfig.getFlag(KEY_ENABLE_CAMERA_COMPAT_TREATMENT));
     }
 
     /** Whether camera compatibility refresh is enabled. */
