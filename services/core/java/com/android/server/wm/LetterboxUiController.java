@@ -24,6 +24,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFR
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
 import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
@@ -138,6 +139,8 @@ final class LetterboxUiController {
     private final boolean mIsOverrideToNosensorOrientationEnabled;
     // Corresponds to OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE
     private final boolean mIsOverrideToReverseLandscapeOrientationEnabled;
+    // Corresponds to OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA
+    private final boolean mIsOverrideOrientationOnlyForCameraEnabled;
     // Corresponds to OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION
     private final boolean mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled;
 
@@ -265,6 +268,8 @@ final class LetterboxUiController {
                 isCompatChangeEnabled(OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE);
         mIsOverrideToNosensorOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR);
+        mIsOverrideOrientationOnlyForCameraEnabled =
+                isCompatChangeEnabled(OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
         mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION);
 
@@ -444,6 +449,14 @@ final class LetterboxUiController {
             return candidate;
         }
 
+        DisplayContent displayContent = mActivityRecord.mDisplayContent;
+        if (mIsOverrideOrientationOnlyForCameraEnabled && displayContent != null
+                && (displayContent.mDisplayRotationCompatPolicy == null
+                        || !displayContent.mDisplayRotationCompatPolicy
+                                .isActivityEligibleForOrientationOverride(mActivityRecord))) {
+            return candidate;
+        }
+
         if (mIsOverrideToReverseLandscapeOrientationEnabled
                 && (isFixedOrientationLandscape(candidate) || mIsOverrideAnyOrientationEnabled)) {
             Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
@@ -471,6 +484,10 @@ final class LetterboxUiController {
         }
 
         return candidate;
+    }
+
+    boolean isOverrideOrientationOnlyForCameraEnabled() {
+        return mIsOverrideOrientationOnlyForCameraEnabled;
     }
 
     /**
