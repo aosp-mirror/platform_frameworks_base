@@ -47,6 +47,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import javax.inject.Provider
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Ignore
@@ -126,6 +127,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         whenever(mediaControlPanelFactory.get()).thenReturn(panel)
         whenever(panel.mediaViewController).thenReturn(mediaViewController)
         whenever(mediaDataManager.smartspaceMediaData).thenReturn(smartspaceMediaData)
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         MediaPlayerData.clear()
     }
 
@@ -702,5 +704,40 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             MediaPlayerData.getMediaPlayerIndex("playing local"),
             mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
         )
+    }
+
+    @Test
+    fun testRecommendation_persistentEnabled_newSmartspaceLoaded_updatesSort() {
+        testRecommendation_persistentEnabled_inactiveSmartspaceDataLoaded_isAdded()
+
+        // When an update to existing smartspace data is loaded
+        listener.value.onSmartspaceMediaDataLoaded(
+            SMARTSPACE_KEY,
+            EMPTY_SMARTSPACE_MEDIA_DATA.copy(isActive = true),
+            true
+        )
+
+        // Then the carousel is updated
+        assertTrue(MediaPlayerData.playerKeys().elementAt(0).data.active)
+        assertTrue(MediaPlayerData.visiblePlayerKeys().elementAt(0).data.active)
+    }
+
+    @Test
+    fun testRecommendation_persistentEnabled_inactiveSmartspaceDataLoaded_isAdded() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+
+        // When inactive smartspace data is loaded
+        listener.value.onSmartspaceMediaDataLoaded(
+            SMARTSPACE_KEY,
+            EMPTY_SMARTSPACE_MEDIA_DATA,
+            false
+        )
+
+        // Then it is added to the carousel with correct state
+        assertTrue(MediaPlayerData.playerKeys().elementAt(0).isSsMediaRec)
+        assertFalse(MediaPlayerData.playerKeys().elementAt(0).data.active)
+
+        assertTrue(MediaPlayerData.visiblePlayerKeys().elementAt(0).isSsMediaRec)
+        assertFalse(MediaPlayerData.visiblePlayerKeys().elementAt(0).data.active)
     }
 }

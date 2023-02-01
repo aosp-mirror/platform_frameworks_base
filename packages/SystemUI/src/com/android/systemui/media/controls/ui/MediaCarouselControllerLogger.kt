@@ -48,8 +48,16 @@ constructor(@MediaCarouselControllerLog private val buffer: LogBuffer) {
     fun logMediaRemoved(key: String) =
         buffer.log(TAG, LogLevel.DEBUG, { str1 = key }, { "removing player $str1" })
 
-    fun logRecommendationLoaded(key: String) =
-        buffer.log(TAG, LogLevel.DEBUG, { str1 = key }, { "add recommendation $str1" })
+    fun logRecommendationLoaded(key: String, isActive: Boolean) =
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = key
+                bool1 = isActive
+            },
+            { "add recommendation $str1, active $bool1" }
+        )
 
     fun logRecommendationRemoved(key: String, immediately: Boolean) =
         buffer.log(
