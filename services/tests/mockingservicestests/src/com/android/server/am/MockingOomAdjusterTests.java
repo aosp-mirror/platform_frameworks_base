@@ -630,6 +630,26 @@ public class MockingOomAdjusterTests {
             assertNotEquals(PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ + 2, app.mState.getSetAdj());
         }
     }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_ImpFg_AlmostPerceptibleService() {
+        ProcessRecord system = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, true));
+        system.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+        system.mState.setHasTopUi(true);
+        // Simulate the system starting and binding to a service in the app.
+        ServiceRecord s = bindService(app, system,
+                null, Context.BIND_ALMOST_PERCEPTIBLE, mock(IBinder.class));
+        sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+        assertProcStates(app, PROCESS_STATE_IMPORTANT_FOREGROUND,
+                PERCEPTIBLE_APP_ADJ + 1, SCHED_GROUP_DEFAULT);
+    }
+
     @SuppressWarnings("GuardedBy")
     @Test
     public void testUpdateOomAdj_DoOne_Toast() {
@@ -1056,13 +1076,15 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
-    public void testUpdateOomAdj_DoOne_Service_MediumPerceptible() {
+    public void testUpdateOomAdj_DoOne_Service_AlmostPerceptible() {
         {
             ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                     MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
             ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
                     MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
-            bindService(app, client, null, Context.BIND_ALMOST_PERCEPTIBLE, mock(IBinder.class));
+            bindService(app, client, null,
+                    Context.BIND_ALMOST_PERCEPTIBLE | Context.BIND_NOT_FOREGROUND,
+                    mock(IBinder.class));
             client.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
             sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
             updateOomAdj(client, app);
@@ -1077,13 +1099,48 @@ public class MockingOomAdjusterTests {
                     MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
             WindowProcessController wpc = client.getWindowProcessController();
             doReturn(true).when(wpc).isHeavyWeightProcess();
-            bindService(app, client, null, Context.BIND_ALMOST_PERCEPTIBLE, mock(IBinder.class));
+            bindService(app, client, null,
+                    Context.BIND_ALMOST_PERCEPTIBLE | Context.BIND_NOT_FOREGROUND,
+                    mock(IBinder.class));
             client.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
             sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
             updateOomAdj(client, app);
             doReturn(false).when(wpc).isHeavyWeightProcess();
 
             assertEquals(PERCEPTIBLE_MEDIUM_APP_ADJ + 2, app.mState.getSetAdj());
+        }
+
+        {
+            ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                    MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+            ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                    MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+            bindService(app, client, null,
+                    Context.BIND_ALMOST_PERCEPTIBLE,
+                    mock(IBinder.class));
+            client.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+            sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+            sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+
+            assertEquals(PERCEPTIBLE_APP_ADJ + 1, app.mState.getSetAdj());
+        }
+
+        {
+            ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                    MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, false));
+            ProcessRecord client = spy(makeDefaultProcessRecord(MOCKAPP2_PID, MOCKAPP2_UID,
+                    MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
+            WindowProcessController wpc = client.getWindowProcessController();
+            doReturn(true).when(wpc).isHeavyWeightProcess();
+            bindService(app, client, null,
+                    Context.BIND_ALMOST_PERCEPTIBLE,
+                    mock(IBinder.class));
+            client.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
+            sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
+            sService.mOomAdjuster.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+            doReturn(false).when(wpc).isHeavyWeightProcess();
+
+            assertEquals(PERCEPTIBLE_APP_ADJ + 1, app.mState.getSetAdj());
         }
     }
 
