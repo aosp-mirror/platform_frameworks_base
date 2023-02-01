@@ -2510,8 +2510,18 @@ public final class NfcAdapter {
      *
      * <p>This returns a mapping of package names for this user id to whether we dispatch Tag
      * intents to the package. {@link #ACTION_NDEF_DISCOVERED}, {@link #ACTION_TECH_DISCOVERED} or
-    *  {@link #ACTION_TAG_DISCOVERED} will not be dispatched to an Activity if its package is
-    *  disallowed.
+     * {@link #ACTION_TAG_DISCOVERED} will not be dispatched to an Activity if its package is
+     * mapped to {@code false}.
+     * <p>There are three different possible cases:
+     * <p>A package not being in the preference list.
+     * It does not contain any Tag intent filters or the user never triggers a Tag detection that
+     * matches the intent filter of the package.
+     * <p>A package being mapped to {@code true}.
+     * When a package has been launched by a tag detection for the first time, the package name is
+     * put to the map and by default mapped to {@code true}. The package will receive Tag intents as
+     * usual.
+     * <p>A package being mapped to {@code false}.
+     * The user chooses to disable this package and it will not receive any Tag intents anymore.
      *
      * @param userId the user to whom this preference list will belong to
      * @return a map of the UserId which indicates the mapping from package name to
