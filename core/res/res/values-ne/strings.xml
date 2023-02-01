@@ -333,8 +333,8 @@
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"ट्याप गरिएका वस्तुहरू चर्को स्वरमा बोलिने छन् र इसाराहरूको प्रयोग गरेर स्क्रिनमा अन्वेषण गर्न सकिन्छ।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"आफुले टाइप गरेको पाठको निरीक्षण गर्नुहोस्"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"व्यक्तिगत डेटा जस्तै क्रेडिट कार्ड नम्बरहरू र पासवर्डहरू समावेश गर्दछ।"</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"प्रदर्शन आवर्धन नियन्त्रण गर्नुहोस्"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"प्रदर्शनको जुम स्तर र स्थिति नियन्त्रण गर्नुहोस्।"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"डिस्प्ले म्याग्निफिकेसन नियन्त्रण गर्नुहोस्"</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"डिस्प्लेको जुम लेबल र स्थिति नियन्त्रण गर्नुहोस्।"</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"इसाराहरू सम्बन्धी कार्य गर्नुहोस्"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ट्याप, स्वाइप गर्न, थिच्न र अन्य इसाराहरू सम्बन्धी कार्य गर्न सक्छ"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"फिंगरप्रिन्टका इसाराहरू"</string>
