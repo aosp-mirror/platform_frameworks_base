@@ -79,6 +79,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var viewUtil: ViewUtil
     @Mock private lateinit var vibratorHelper: VibratorHelper
     @Mock private lateinit var swipeGestureHandler: SwipeChipbarAwayGestureHandler
+    private lateinit var chipbarAnimator: TestChipbarAnimator
     private lateinit var fakeWakeLockBuilder: WakeLockFake.Builder
     private lateinit var fakeWakeLock: WakeLockFake
     private lateinit var fakeClock: FakeSystemClock
@@ -98,6 +99,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         fakeWakeLockBuilder.setWakeLock(fakeWakeLock)
 
         uiEventLoggerFake = UiEventLoggerFake()
+        chipbarAnimator = TestChipbarAnimator()
 
         underTest =
             ChipbarCoordinator(
@@ -109,6 +111,7 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
                 configurationController,
                 dumpManager,
                 powerManager,
+                chipbarAnimator,
                 falsingManager,
                 falsingCollector,
                 swipeGestureHandler,
@@ -371,6 +374,26 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         verify(vibratorHelper).vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK))
     }
 
+    /** Regression test for b/266119467. */
+    @Test
+    fun displayView_animationFailure_viewsStillBecomeVisible() {
+        chipbarAnimator.allowAnimation = false
+
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.id.check_box, null),
+                Text.Loaded("text"),
+                endItem = ChipbarEndItem.Loading,
+            )
+        )
+
+        val view = getChipbarView()
+        assertThat(view.getInnerView().alpha).isEqualTo(1f)
+        assertThat(view.getStartIconView().alpha).isEqualTo(1f)
+        assertThat(view.getLoadingIcon().alpha).isEqualTo(1f)
+        assertThat(view.getChipTextView().alpha).isEqualTo(1f)
+    }
+
     @Test
     fun updateView_viewUpdated() {
         // First, display a view
@@ -439,6 +462,25 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
     /** Regression test for b/266209420. */
     @Test
     fun displayViewThenImmediateRemoval_viewStillRemoved() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.drawable.ic_cake, contentDescription = null),
+                Text.Loaded("title text"),
+                endItem = ChipbarEndItem.Error,
+            ),
+        )
+        val chipbarView = getChipbarView()
+
+        underTest.removeView(DEVICE_ID, "test reason")
+
+        verify(windowManager).removeView(chipbarView)
+    }
+
+    /** Regression test for b/266209420. */
+    @Test
+    fun removeView_animationFailure_viewStillRemoved() {
+        chipbarAnimator.allowAnimation = false
+
         underTest.displayView(
             createChipbarInfo(
                 Icon.Resource(R.drawable.ic_cake, contentDescription = null),
@@ -560,8 +602,9 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
 
     private fun ViewGroup.getStartIconView() = this.requireViewById<ImageView>(R.id.start_icon)
 
-    private fun ViewGroup.getChipText(): String =
-        (this.requireViewById<TextView>(R.id.text)).text as String
+    private fun ViewGroup.getChipTextView() = this.requireViewById<TextView>(R.id.text)
+
+    private fun ViewGroup.getChipText(): String = this.getChipTextView().text as String
 
     private fun ViewGroup.getLoadingIcon(): View = this.requireViewById(R.id.loading)
 
@@ -573,6 +616,25 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
         verify(windowManager).addView(viewCaptor.capture(), any())
         return viewCaptor.value as ViewGroup
+    }
+
+    /** Test class that lets us disallow animations. */
+    inner class TestChipbarAnimator : ChipbarAnimator() {
+        var allowAnimation: Boolean = true
+
+        override fun animateViewIn(innerView: ViewGroup, onAnimationEnd: Runnable): Boolean {
+            if (!allowAnimation) {
+                return false
+            }
+            return super.animateViewIn(innerView, onAnimationEnd)
+        }
+
+        override fun animateViewOut(innerView: ViewGroup, onAnimationEnd: Runnable): Boolean {
+            if (!allowAnimation) {
+                return false
+            }
+            return super.animateViewOut(innerView, onAnimationEnd)
+        }
     }
 }
 

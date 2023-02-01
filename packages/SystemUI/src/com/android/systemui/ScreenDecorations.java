@@ -64,6 +64,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.Preconditions;
 import com.android.settingslib.Utils;
+import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.decor.CutoutDecorProviderFactory;
@@ -75,6 +76,7 @@ import com.android.systemui.decor.OverlayWindow;
 import com.android.systemui.decor.PrivacyDotDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerDecorProviderFactory;
 import com.android.systemui.decor.RoundedCornerResDelegate;
+import com.android.systemui.log.ScreenDecorationsLogger;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
@@ -120,6 +122,18 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             R.id.display_cutout_right,
             R.id.display_cutout_bottom
     };
+    private final ScreenDecorationsLogger mLogger;
+
+    private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
+        @Override
+        public void onFaceSensorLocationChanged() {
+            mLogger.onSensorLocationChanged();
+            if (mExecutor != null) {
+                mExecutor.execute(
+                        () -> updateOverlayProviderViews(new Integer[]{mFaceScanningViewId}));
+            }
+        }
+    };
 
     private DisplayTracker mDisplayTracker;
     @VisibleForTesting
@@ -153,6 +167,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     private WindowManager mWindowManager;
     private int mRotation;
     private SettingObserver mColorInversionSetting;
+    @Nullable
     private DelayableExecutor mExecutor;
     private Handler mHandler;
     boolean mPendingConfigChange;
@@ -172,6 +187,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             DisplayCutoutView overlay = (DisplayCutoutView) getOverlayView(
                     mFaceScanningViewId);
             if (overlay != null) {
+                mLogger.cameraProtectionBoundsForScanningOverlay(bounds);
                 overlay.setProtection(protectionPath, bounds);
                 overlay.enableShowProtection(true);
                 updateOverlayWindowVisibilityIfViewExists(
@@ -184,6 +200,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         }
 
         if (mScreenDecorHwcLayer != null) {
+            mLogger.hwcLayerCameraProtectionBounds(bounds);
             mScreenDecorHwcLayer.setProtection(protectionPath, bounds);
             mScreenDecorHwcLayer.enableShowProtection(true);
             return;
@@ -197,11 +214,12 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             }
             ++setProtectionCnt;
             final DisplayCutoutView dcv = (DisplayCutoutView) view;
+            mLogger.dcvCameraBounds(id, bounds);
             dcv.setProtection(protectionPath, bounds);
             dcv.enableShowProtection(true);
         }
         if (setProtectionCnt == 0) {
-            Log.e(TAG, "CutoutView not initialized showCameraProtection");
+            mLogger.cutoutViewNotInitialized();
         }
     }
 
@@ -307,7 +325,9 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
             PrivacyDotViewController dotViewController,
             ThreadFactory threadFactory,
             PrivacyDotDecorProviderFactory dotFactory,
-            FaceScanningProviderFactory faceScanningFactory) {
+            FaceScanningProviderFactory faceScanningFactory,
+            ScreenDecorationsLogger logger,
+            AuthController authController) {
         mContext = context;
         mMainExecutor = mainExecutor;
         mSecureSettings = secureSettings;
@@ -319,6 +339,8 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         mDotFactory = dotFactory;
         mFaceScanningFactory = faceScanningFactory;
         mFaceScanningViewId = com.android.systemui.R.id.face_scanning_anim;
+        mLogger = logger;
+        authController.addCallback(mAuthControllerCallback);
     }
 
     @Override
@@ -1306,7 +1328,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
 
             if (showProtection) {
                 // Make sure that our measured height encompasses the protection
-                mTotalBounds.union(mBoundingRect);
+                mTotalBounds.set(mBoundingRect);
                 mTotalBounds.union((int) protectionRect.left, (int) protectionRect.top,
                         (int) protectionRect.right, (int) protectionRect.bottom);
                 setMeasuredDimension(

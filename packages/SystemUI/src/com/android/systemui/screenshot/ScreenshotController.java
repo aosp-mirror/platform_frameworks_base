@@ -282,7 +282,6 @@ public class ScreenshotController {
     private final TimeoutHandler mScreenshotHandler;
     private final ActionIntentExecutor mActionExecutor;
     private final UserManager mUserManager;
-    private final WorkProfileMessageController mWorkProfileMessageController;
     private final AssistContentRequester mAssistContentRequester;
 
     private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
@@ -293,7 +292,7 @@ public class ScreenshotController {
     };
 
     private ScreenshotView mScreenshotView;
-    private MessageContainerController mMessageContainerController;
+    private final MessageContainerController mMessageContainerController;
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
     private boolean mScreenshotTakenInPortrait;
@@ -332,8 +331,8 @@ public class ScreenshotController {
             ScreenshotNotificationSmartActionsProvider screenshotNotificationSmartActionsProvider,
             ActionIntentExecutor actionExecutor,
             UserManager userManager,
-            WorkProfileMessageController workProfileMessageController,
             AssistContentRequester assistContentRequester,
+            MessageContainerController messageContainerController,
             DisplayTracker displayTracker
     ) {
         mScreenshotSmartActions = screenshotSmartActions;
@@ -367,7 +366,7 @@ public class ScreenshotController {
         mFlags = flags;
         mActionExecutor = actionExecutor;
         mUserManager = userManager;
-        mWorkProfileMessageController = workProfileMessageController;
+        mMessageContainerController = messageContainerController;
         mAssistContentRequester = assistContentRequester;
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
@@ -468,7 +467,11 @@ public class ScreenshotController {
             }
         }
 
-        prepareAnimation(screenshot.getScreenBounds(), showFlash);
+        prepareAnimation(screenshot.getScreenBounds(), showFlash, () -> {
+            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
+                mMessageContainerController.onScreenshotTaken(screenshot);
+            }
+        });
 
         if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
             mScreenshotView.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
@@ -632,7 +635,9 @@ public class ScreenshotController {
         // Inflate the screenshot layout
         mScreenshotView = (ScreenshotView)
                 LayoutInflater.from(mContext).inflate(R.layout.screenshot, null);
-        mMessageContainerController = new MessageContainerController(mScreenshotView);
+        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
+            mMessageContainerController.setView(mScreenshotView);
+        }
         mScreenshotView.addOnAttachStateChangeListener(
                 new View.OnAttachStateChangeListener() {
                     @Override
@@ -782,7 +787,11 @@ public class ScreenshotController {
         enqueueScrollCaptureRequest(owner);
 
         attachWindow();
-        prepareAnimation(screenRect, showFlash);
+        prepareAnimation(screenRect, showFlash, () -> {
+            if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
+                mMessageContainerController.onScreenshotTaken(owner);
+            }
+        });
 
         if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
             mScreenshotView.badgeScreenshot(mContext.getPackageManager().getUserBadgedIcon(
@@ -799,7 +808,8 @@ public class ScreenshotController {
         mScreenshotHandler.cancelTimeout(); // restarted after animation
     }
 
-    private void prepareAnimation(Rect screenRect, boolean showFlash) {
+    private void prepareAnimation(Rect screenRect, boolean showFlash,
+            Runnable onAnimationComplete) {
         mScreenshotView.getViewTreeObserver().addOnPreDrawListener(
                 new ViewTreeObserver.OnPreDrawListener() {
                     @Override
@@ -808,7 +818,7 @@ public class ScreenshotController {
                             Log.d(TAG, "onPreDraw: startAnimation");
                         }
                         mScreenshotView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        startAnimation(screenRect, showFlash);
+                        startAnimation(screenRect, showFlash, onAnimationComplete);
                         return true;
                     }
                 });
@@ -1089,13 +1099,22 @@ public class ScreenshotController {
     /**
      * Starts the animation after taking the screenshot
      */
-    private void startAnimation(Rect screenRect, boolean showFlash) {
+    private void startAnimation(Rect screenRect, boolean showFlash, Runnable onAnimationComplete) {
         if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
             mScreenshotAnimation.cancel();
         }
 
         mScreenshotAnimation =
                 mScreenshotView.createScreenshotDropInAnimation(screenRect, showFlash);
+        if (onAnimationComplete != null) {
+            mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    onAnimationComplete.run();
+                }
+            });
+        }
 
         // Play the shutter sound to notify that we've taken a screenshot
         playCameraSound();
@@ -1194,10 +1213,6 @@ public class ScreenshotController {
 
     private void doPostAnimation(ScreenshotController.SavedImageData imageData) {
         mScreenshotView.setChipIntents(imageData);
-        if (mFlags.isEnabled(SCREENSHOT_WORK_PROFILE_POLICY)) {
-            mWorkProfileMessageController.onScreenshotTaken(imageData.owner,
-                    mMessageContainerController);
-        }
     }
 
     /**

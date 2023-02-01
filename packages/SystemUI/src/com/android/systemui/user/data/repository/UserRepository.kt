@@ -17,8 +17,11 @@
 
 package com.android.systemui.user.data.repository
 
+import android.app.IActivityManager
+import android.app.UserSwitchObserver
 import android.content.Context
 import android.content.pm.UserInfo
+import android.os.IRemoteCallback
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
@@ -30,6 +33,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.util.settings.GlobalSettings
@@ -67,6 +72,9 @@ interface UserRepository {
 
     /** [UserInfo] of the currently-selected user. */
     val selectedUserInfo: Flow<UserInfo>
+
+    /** Whether user switching is currently in progress. */
+    val userSwitchingInProgress: Flow<Boolean>
 
     /** User ID of the last non-guest selected user. */
     val lastSelectedNonGuestUserId: Int
@@ -108,6 +116,8 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val globalSettings: GlobalSettings,
     private val tracker: UserTracker,
+    private val activityManager: IActivityManager,
+    featureFlags: FeatureFlags,
 ) : UserRepository {
 
     private val _userSwitcherSettings = MutableStateFlow(runBlocking { getSettings() })
@@ -129,6 +139,10 @@ constructor(
     private var _isGuestUserResetting: Boolean = false
     override var isGuestUserResetting: Boolean = _isGuestUserResetting
 
+    private val _isUserSwitchingInProgress = MutableStateFlow(false)
+    override val userSwitchingInProgress: Flow<Boolean>
+        get() = _isUserSwitchingInProgress
+
     override val isGuestUserCreationScheduled = AtomicBoolean()
 
     override val isStatusBarUserChipEnabled: Boolean =
@@ -141,6 +155,9 @@ constructor(
     init {
         observeSelectedUser()
         observeUserSettings()
+        if (featureFlags.isEnabled(FACE_AUTH_REFACTOR)) {
+            observeUserSwitching()
+        }
     }
 
     override fun refreshUsers() {
@@ -164,6 +181,28 @@ constructor(
 
     override fun isSimpleUserSwitcher(): Boolean {
         return _userSwitcherSettings.value.isSimpleUserSwitcher
+    }
+
+    private fun observeUserSwitching() {
+        conflatedCallbackFlow {
+                val callback =
+                    object : UserSwitchObserver() {
+                        override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback) {
+                            trySendWithFailureLogging(true, TAG, "userSwitching started")
+                        }
+
+                        override fun onUserSwitchComplete(newUserId: Int) {
+                            trySendWithFailureLogging(false, TAG, "userSwitching completed")
+                        }
+                    }
+                activityManager.registerUserSwitchObserver(callback, TAG)
+                trySendWithFailureLogging(false, TAG, "initial value defaulting to false")
+                awaitClose { activityManager.unregisterUserSwitchObserver(callback) }
+            }
+            .onEach { _isUserSwitchingInProgress.value = it }
+            // TODO (b/262838215), Make this stateIn and initialize directly in field declaration
+            //  once the flag is launched
+            .launchIn(applicationScope)
     }
 
     private fun observeSelectedUser() {
