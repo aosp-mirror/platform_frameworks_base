@@ -54,11 +54,13 @@ import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.shared.regionsampling.UpdateColorCallback
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DATE_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.WEATHER_SMARTSPACE_DATA_PLUGIN
+import com.android.systemui.statusbar.Weather
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.util.settings.SecureSettings
+import java.time.Instant
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -164,7 +166,18 @@ constructor(
             }
             isContentUpdatedOnce = true
         }
+
+        val now = Instant.now()
+        val weatherTarget = targets.find { t ->
+            t.featureType == SmartspaceTarget.FEATURE_WEATHER &&
+                    now.isAfter(Instant.ofEpochMilli(t.creationTimeMillis)) &&
+                    now.isBefore(Instant.ofEpochMilli(t.expiryTimeMillis))
+        }
+        if (weatherTarget != null) {
+            val weatherData = Weather.fromBundle(weatherTarget.baseAction.extras)
+        }
     }
+
 
     private val userTrackerCallback = object : UserTracker.Callback {
         override fun onUserChanged(newUser: Int, userContext: Context) {
