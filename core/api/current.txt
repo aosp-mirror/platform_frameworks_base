@@ -27422,6 +27422,7 @@ package android.media.tv.interactive {
     method public void onTracksChanged(@NonNull java.util.List<android.media.tv.TvTrackInfo>);
     method public void onTuned(@NonNull android.net.Uri);
     method public void onTvRecordingInfo(@Nullable android.media.tv.TvRecordingInfo);
+    method public void onTvRecordingInfoList(@NonNull java.util.List<android.media.tv.TvRecordingInfo>);
     method public void onVideoAvailable();
     method public void onVideoUnavailable(int);
     method @CallSuper public void removeBroadcastInfo(int);
@@ -27485,6 +27486,7 @@ package android.media.tv.interactive {
     method public void sendStreamVolume(float);
     method public void sendTrackInfoList(@Nullable java.util.List<android.media.tv.TvTrackInfo>);
     method public void sendTvRecordingInfo(@Nullable android.media.tv.TvRecordingInfo);
+    method public void sendTvRecordingInfoList(@NonNull java.util.List<android.media.tv.TvRecordingInfo>);
     method public void setCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback);
     method public void setOnUnhandledInputEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppView.OnUnhandledInputEventListener);
     method public void setTeletextAppEnabled(boolean);

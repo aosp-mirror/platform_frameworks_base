@@ -615,13 +615,13 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * Receives requested recording info.
+         * Receives requested recording info list.
          *
-         * @param recordingInfoList The requested recording info list. Null if recording not found.
-         * @hide
+         * @see #requestTvRecordingInfoList(int)
+         * @param recordingInfoList The list of recording info requested. Returns an empty list if
+         *                          no matching recording info found.
          */
-        public void onTvRecordingInfoList(@Nullable List<TvRecordingInfo> recordingInfoList) {
-        }
+        public void onTvRecordingInfoList(@NonNull List<TvRecordingInfo> recordingInfoList) {}
 
         /**
          * Receives started recording's ID.
