@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"საშუალებას აძლევს აპს, წაიკითხოს ვიდეო ფაილები თქვენი ზიარი მეხსიერებიდან."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"სურათების ფაილების წაკითხვა ზიარი მეხსიერებიდან"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"საშუალებას აძლევს აპს, წაიკითხოს სურათის ფაილები თქვენი ზიარი მეხსიერებიდან."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"წაიკითხეთ მომხმარებლის მიერ არჩეული სურათი და ვიდეო ფაილები საზიარო მეხსიერებიდან"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"აპს შეეძლება წაიკითხოს სურათი და ვიდეო ფაილები, რომლებიც არჩეულია თქვენი საზიარო მეხსიერებიდან."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"თქვენი ზიარი მეხსიერების შიგთავსის შეცვლა ან წაშლა"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"საშუალებას აძლევს აპს, ჩაწეროს თქვენი ზიარი მეხსიერების შიგთავსი."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ზარების წამოწყება/მიღება"</string>

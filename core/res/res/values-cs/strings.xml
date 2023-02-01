@@ -326,7 +326,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"uskutečňování a spravování telefonních hovorů"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tělesné senzory"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"přístup k datům ze snímačů vašich životních funkcí"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"přístup k datům ze senzorů vašich životních funkcí"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Oznámení"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"zobrazovat oznámení"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Načítat obsah oken"</string>
@@ -693,6 +693,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Umožňuje aplikaci čtení videosouborů ze sdíleného úložiště."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"čtení obrázkových souborů ze sdíleného úložiště"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Umožňuje aplikaci číst obrázkové soubory ze sdíleného úložiště."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"čtení vybraných obrázkových souborů a souborů videa ze sdíleného úložiště"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Umožňuje aplikaci číst vybrané obrázkové soubory a soubory videa ze sdíleného úložiště."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"úprava nebo mazání obsahu sdíleného úložiště"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Umožňuje aplikaci zápis obsahu do sdíleného úložiště."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"uskutečňování/příjem volání SIP"</string>

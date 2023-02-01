@@ -58,11 +58,12 @@ interface IAppOpsService {
     SyncNotedAppOp noteProxyOperation(int code, in AttributionSource attributionSource,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             boolean skipProxyOperation);
-    SyncNotedAppOp startProxyOperation(int code, in AttributionSource attributionSource,
-            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
-            boolean shouldCollectMessage, boolean skipProxyOperation, int proxyAttributionFlags,
-            int proxiedAttributionFlags, int attributionChainId);
-    void finishProxyOperation(int code, in AttributionSource attributionSource,
+    SyncNotedAppOp startProxyOperation(IBinder clientId, int code,
+            in AttributionSource attributionSource, boolean startIfModeDefault,
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+            boolean skipProxyOperation, int proxyAttributionFlags, int proxiedAttributionFlags,
+            int attributionChainId);
+    void finishProxyOperation(IBinder clientId, int code, in AttributionSource attributionSource,
             boolean skipProxyOperation);
 
     // Remaining methods are only used in Java.

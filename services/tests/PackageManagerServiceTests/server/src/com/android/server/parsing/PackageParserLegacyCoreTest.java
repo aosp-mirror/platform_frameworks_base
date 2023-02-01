@@ -42,7 +42,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.frameworks.servicestests.R;
+import com.android.server.pm.test.service.server.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.parsing.pkg.AndroidPackage;

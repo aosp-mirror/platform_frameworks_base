@@ -53,7 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Patró incorrecte"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Contrasenya incorrecta"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"El PIN no és correcte"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Torna-ho a provar d\'aquí a # segon.}other{Torna-ho a provar d\'aquí a # segons.}}"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Torna-ho a provar d\'aquí a # segon.}many{Try again in # seconds.}other{Torna-ho a provar d\'aquí a # segons.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Introdueix el PIN de la SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Introdueix el PIN de la SIM de: <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Desactiva l\'eSIM per utilitzar el dispositiu sense servei mòbil."</string>
@@ -69,11 +69,13 @@
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%2$d</xliff:g> segons."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"El codi PIN de la SIM no és correcte. Contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="many">Incorrect SIM PIN code, you have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
       <item quantity="other">El codi PIN de la SIM no és correcte. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents.</item>
       <item quantity="one">El codi PIN de la SIM no és correcte. Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"La SIM no es pot fer servir. Contacta amb l\'operador de telefonia mòbil."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="many">Incorrect SIM PUK code, you have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable.</item>
       <item quantity="other">El codi PUK de la SIM no és correcte. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents; si els esgotes tots, la SIM no es podrà tornar a fer servir.</item>
       <item quantity="one">El codi PUK de la SIM no és correcte. Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir.</item>
     </plurals>
@@ -92,10 +94,12 @@
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"No s\'ha reconegut"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Per utilitzar Desbloqueig facial, activa "<b>"Accés a la càmera"</b>" a Configuració &gt; Privadesa"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="many">Enter SIM PIN. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
       <item quantity="other">Introdueix el PIN de la SIM. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents.</item>
       <item quantity="one">Introdueix el PIN de la SIM. Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="many">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact carrier for details.</item>
       <item quantity="other">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queden <xliff:g id="_NUMBER_1">%d</xliff:g> intents; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
       <item quantity="one">La targeta SIM s\'ha desactivat. Introdueix el codi PUK per continuar. Et queda <xliff:g id="_NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM no es podrà tornar a fer servir. Contacta amb l\'operador de telefonia mòbil per obtenir-ne més informació.</item>
     </plurals>

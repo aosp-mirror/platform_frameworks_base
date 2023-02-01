@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Engedélyezi az alkalmazásnak a megosztott tárhelyen található videófájlok olvasását."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"a megosztott tárhelyen található képfájlok olvasása"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Engedélyezi az alkalmazásnak a megosztott tárhelyen található képfájlok olvasását."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"a felhasználó által kiválasztott, megosztott tárhelyen található kép- és videófájlok olvasása"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Engedélyezi az alkalmazásnak a megosztott tárhelyen található, Ön által kiválasztott kép- és videófájlok olvasását."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"a közös tárhely tartalmainak törlése és módosítása"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Engedélyezi az alkalmazás számára a közös tárhely tartalmainak felülírását."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP-hívások indítása/fogadása"</string>

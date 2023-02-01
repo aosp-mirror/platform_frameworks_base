@@ -66,8 +66,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * <p>The {@link ContentCaptureManager} provides additional ways for for apps to
- * integrate with the content capture subsystem.
+ * <p>Provides additional ways for apps to integrate with the content capture subsystem.
  *
  * <p>Content capture provides real-time, continuous capture of application activity, display and
  * events to an intelligence service that is provided by the Android system. The intelligence

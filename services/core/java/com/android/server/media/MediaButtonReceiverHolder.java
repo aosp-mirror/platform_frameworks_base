@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -37,6 +38,7 @@ import android.view.KeyEvent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -102,15 +104,19 @@ final class MediaButtonReceiverHolder {
     }
 
     /**
-     * Creates a new instance.
+     * Creates a new instance from a {@link PendingIntent}.
      *
-     * @param context context
+     * <p>This method assumes the session package name has been validated and effectively belongs to
+     * the media session's owner.
+     *
      * @param userId userId
-     * @param pendingIntent pending intent
-     * @return Can be {@code null} if pending intent was null.
+     * @param pendingIntent pending intent that will receive media button events
+     * @param sessionPackageName package name of media session owner
+     * @return {@link MediaButtonReceiverHolder} instance or {@code null} if pending intent was
+     *     null.
      */
-    public static MediaButtonReceiverHolder create(Context context, int userId,
-            PendingIntent pendingIntent, String sessionPackageName) {
+    public static MediaButtonReceiverHolder create(
+            int userId, @Nullable PendingIntent pendingIntent, String sessionPackageName) {
         if (pendingIntent == null) {
             return null;
         }
@@ -312,7 +318,7 @@ final class MediaButtonReceiverHolder {
     }
 
     private static ComponentName getComponentName(PendingIntent pendingIntent, int componentType) {
-        List<ResolveInfo> resolveInfos = null;
+        List<ResolveInfo> resolveInfos = Collections.emptyList();
         switch (componentType) {
             case COMPONENT_TYPE_ACTIVITY:
                 resolveInfos = pendingIntent.queryIntentComponents(
@@ -330,32 +336,37 @@ final class MediaButtonReceiverHolder {
                         PACKAGE_MANAGER_COMMON_FLAGS | PackageManager.GET_RECEIVERS);
                 break;
         }
-        if (resolveInfos != null && !resolveInfos.isEmpty()) {
-            return createComponentName(resolveInfos.get(0));
+
+        for (ResolveInfo resolveInfo : resolveInfos) {
+            ComponentInfo componentInfo = getComponentInfo(resolveInfo);
+            if (componentInfo != null && TextUtils.equals(componentInfo.packageName,
+                    pendingIntent.getCreatorPackage())
+                    && componentInfo.packageName != null && componentInfo.name != null) {
+                return new ComponentName(componentInfo.packageName, componentInfo.name);
+            }
         }
+
         return null;
     }
 
-    private static ComponentName createComponentName(ResolveInfo resolveInfo) {
-        if (resolveInfo == null) {
-            return null;
-        }
-        ComponentInfo componentInfo;
+    /**
+     * Retrieves the {@link ComponentInfo} from a {@link ResolveInfo} instance. Similar to {@link
+     * ResolveInfo#getComponentInfo()}, but returns {@code null} if this {@link ResolveInfo} points
+     * to a content provider.
+     *
+     * @param resolveInfo Where to extract the {@link ComponentInfo} from.
+     * @return Either a non-null {@link ResolveInfo#activityInfo} or {@link
+     *     ResolveInfo#serviceInfo}. Otherwise {@code null} if {@link ResolveInfo#providerInfo} is
+     *     not {@code null}.
+     */
+    private static ComponentInfo getComponentInfo(@NonNull ResolveInfo resolveInfo) {
         // Code borrowed from ResolveInfo#getComponentInfo().
         if (resolveInfo.activityInfo != null) {
-            componentInfo = resolveInfo.activityInfo;
+            return resolveInfo.activityInfo;
         } else if (resolveInfo.serviceInfo != null) {
-            componentInfo = resolveInfo.serviceInfo;
+            return resolveInfo.serviceInfo;
         } else {
-            // We're not interested in content provider.
-            return null;
-        }
-        // Code borrowed from ComponentInfo#getComponentName().
-        try {
-            return new ComponentName(componentInfo.packageName, componentInfo.name);
-        } catch (IllegalArgumentException | NullPointerException e) {
-            // This may be happen if resolveActivity() end up with matching multiple activities.
-            // see PackageManager#resolveActivity().
+            // We're not interested in content providers.
             return null;
         }
     }

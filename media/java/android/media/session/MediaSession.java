@@ -286,7 +286,7 @@ public final class MediaSession {
     @Deprecated
     public void setMediaButtonReceiver(@Nullable PendingIntent mbr) {
         try {
-            mBinder.setMediaButtonReceiver(mbr, mContext.getPackageName());
+            mBinder.setMediaButtonReceiver(mbr);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setMediaButtonReceiver.", e);
         }

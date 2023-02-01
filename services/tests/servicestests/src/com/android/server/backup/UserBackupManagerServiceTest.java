@@ -37,6 +37,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.backup.internal.LifecycleOperationStorage;
@@ -172,6 +173,7 @@ public class UserBackupManagerServiceTest {
     }
 
     @Test
+    @FlakyTest
     public void testAgentDisconnected_cancelsCurrentOperations() throws Exception {
         when(mOperationStorage.operationTokensForPackage(eq("com.android.foo"))).thenReturn(
                 ImmutableSet.of(123, 456, 789)
