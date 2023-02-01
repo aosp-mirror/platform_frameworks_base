@@ -18,6 +18,7 @@ package com.android.server.pm.permission;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IUidObserver;
@@ -34,6 +35,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalServices;
 
 /**
  * Class that handles one-time permissions for a user
@@ -49,6 +51,7 @@ public class OneTimePermissionUserManager {
 
     private final @NonNull Context mContext;
     private final @NonNull IActivityManager mIActivityManager;
+    private final @NonNull ActivityManagerInternal mActivityManagerInternal;
     private final @NonNull AlarmManager mAlarmManager;
     private final @NonNull PermissionControllerManager mPermissionControllerManager;
 
@@ -79,6 +82,7 @@ public class OneTimePermissionUserManager {
     OneTimePermissionUserManager(@NonNull Context context) {
         mContext = context;
         mIActivityManager = ActivityManager.getService();
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAlarmManager = context.getSystemService(AlarmManager.class);
         mPermissionControllerManager = context.getSystemService(PermissionControllerManager.class);
         mHandler = context.getMainThreadHandler();
@@ -241,12 +245,7 @@ public class OneTimePermissionUserManager {
         }
 
         private int getCurrentState() {
-            try {
-                return getStateFromProcState(mIActivityManager.getUidProcessState(mUid, null));
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Couldn't check uid proc state", e);
-            }
-            return STATE_GONE;
+            return getStateFromProcState(mActivityManagerInternal.getUidProcessState(mUid));
         }
 
         private int getStateFromProcState(int procState) {
