@@ -230,6 +230,13 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
     }
 
+    @Override
+    protected void invokeSession() {
+        this.mRemoteCredentialService.onBeginGetCredential(
+                        this.getProviderRequest(),
+                        /*callback=*/this);
+    }
+
     @Override // Call from request session to data to be shown on the UI
     @Nullable protected GetCredentialProviderData prepareUiData() throws IllegalArgumentException {
         Log.i(TAG, "In prepareUiData");

@@ -115,4 +115,11 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
             ProviderPendingIntentResponse providerPendingIntentResponse) {
         //Not applicable for clearCredential as response is not picked by the user
     }
+
+    @Override
+    protected void invokeSession() {
+        this.mRemoteCredentialService.onClearCredentialState(
+                this.getProviderRequest(),
+                /*callback=*/this);
+    }
 }

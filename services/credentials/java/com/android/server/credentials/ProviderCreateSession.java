@@ -197,6 +197,13 @@ public final class ProviderCreateSession extends ProviderSession<
         }
     }
 
+    @Override
+    protected void invokeSession() {
+        this.mRemoteCredentialService.onCreateCredential(
+                this.getProviderRequest(),
+                /*callback=*/this);
+    }
+
     private List<Entry> prepareUiSaveEntries(@NonNull List<CreateEntry> saveEntries) {
         Log.i(TAG, "in populateUiSaveEntries");
         List<Entry> uiSaveEntries = new ArrayList<>();
