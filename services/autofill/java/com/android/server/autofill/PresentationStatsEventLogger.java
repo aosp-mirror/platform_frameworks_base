@@ -315,12 +315,7 @@ public final class PresentationStatsEventLogger {
                 event.mFillRequestSentTimestampMs,
                 event.mFillResponseReceivedTimestampMs,
                 event.mSuggestionSentTimestampMs,
-                event.mSuggestionPresentedTimestampMs,
-                //TODO(b/265051751): add new framework logging.
-                /* selected_dataset_id= */ 0,
-                /* dialog_dismissed= */ false,
-                /* negative_cta_button_clicked= */ false,
-                /* positive_cta_button_clicked= */ false);
+                event.mSuggestionPresentedTimestampMs);
         mEventInternal = Optional.empty();
     }
 
