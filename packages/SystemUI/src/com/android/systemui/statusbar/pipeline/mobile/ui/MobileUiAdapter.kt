@@ -23,6 +23,8 @@ import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,7 +32,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -51,13 +55,17 @@ constructor(
     interactor: MobileIconsInteractor,
     private val iconController: StatusBarIconController,
     private val iconsViewModelFactory: MobileIconsViewModel.Factory,
+    private val logger: ConnectivityPipelineLogger,
     @Application private val scope: CoroutineScope,
     private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) : CoreStartable {
     private val mobileSubIds: Flow<List<Int>> =
-        interactor.filteredSubscriptions.mapLatest { subscriptions ->
-            subscriptions.map { subscriptionModel -> subscriptionModel.subscriptionId }
-        }
+        interactor.filteredSubscriptions
+            .mapLatest { subscriptions ->
+                subscriptions.map { subscriptionModel -> subscriptionModel.subscriptionId }
+            }
+            .distinctUntilChanged()
+            .onEach { logger.logUiAdapterSubIdsUpdated(it) }
 
     /**
      * We expose the list of tracked subscriptions as a flow of a list of ints, where each int is
@@ -72,6 +80,9 @@ constructor(
     /** In order to keep the logs tame, we will reuse the same top-level mobile icons view model */
     val mobileIconsViewModel = iconsViewModelFactory.create(mobileSubIdsState)
 
+    private var isCollecting: Boolean = false
+    private var lastValue: List<Int>? = null
+
     override fun start() {
         // Only notify the icon controller if we want to *render* the new icons.
         // Note that this flow may still run if
@@ -79,8 +90,18 @@ constructor(
         // get the logging data without rendering.
         if (statusBarPipelineFlags.useNewMobileIcons()) {
             scope.launch {
-                mobileSubIds.collectLatest { iconController.setNewMobileIconSubIds(it) }
+                isCollecting = true
+                mobileSubIds.collectLatest {
+                    logger.logUiAdapterSubIdsSentToIconController(it)
+                    lastValue = it
+                    iconController.setNewMobileIconSubIds(it)
+                }
             }
         }
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println("isCollecting=$isCollecting")
+        pw.println("Last values sent to icon controller: $lastValue")
     }
 }

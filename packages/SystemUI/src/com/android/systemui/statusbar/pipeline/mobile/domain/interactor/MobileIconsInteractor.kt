@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionMod
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.CarrierConfigTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -37,10 +38,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 
@@ -100,6 +103,7 @@ class MobileIconsInteractorImpl
 constructor(
     private val mobileConnectionsRepo: MobileConnectionsRepository,
     private val carrierConfigTracker: CarrierConfigTracker,
+    private val logger: ConnectivityPipelineLogger,
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
 ) : MobileIconsInteractor {
@@ -168,6 +172,8 @@ constructor(
                 }
             }
         }
+            .distinctUntilChanged()
+            .onEach { logger.logFilteredSubscriptionsChanged(it) }
 
     override val defaultDataSubId = mobileConnectionsRepo.defaultDataSubId
 
