@@ -18,16 +18,17 @@ package com.android.settingslib.spa.gallery.ui
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.framework.common.EntrySearchData
+import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
-import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.preference.SimplePreferenceMacro
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.Category
 import com.android.settingslib.spa.widget.ui.CategoryTitle
@@ -36,50 +37,60 @@ private const val TITLE = "Sample Category"
 
 object CategoryPageProvider : SettingsPageProvider {
     override val name = "Category"
+    private val owner = createSettingsPage()
 
     fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+        return SettingsEntryBuilder.createInject(owner)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE
                     override val onClick = navigator(name)
                 })
             }
+            .setSearchDataFn { EntrySearchData(title = TITLE) }
     }
 
     override fun getTitle(arguments: Bundle?): String {
         return TITLE
     }
 
+    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
+        val entryList = mutableListOf<SettingsEntry>()
+        entryList.add(
+            SettingsEntryBuilder.create("Preference 1", owner)
+                .setMacro { SimplePreferenceMacro(title = "Preference 1", summary = "Summary 1") }
+                .build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create("Preference 2", owner)
+                .setMacro { SimplePreferenceMacro(title = "Preference 2", summary = "Summary 2") }
+                .build()
+        )
+        entryList.add(
+            SettingsEntryBuilder.create("Preference 3", owner)
+                .setMacro { SimplePreferenceMacro(title = "Preference 2", summary = "Summary 3") }
+                .build()
+
+        )
+        entryList.add(
+            SettingsEntryBuilder.create("Preference 4", owner)
+                .setMacro { SimplePreferenceMacro(title = "Preference 4", summary = "Summary 4") }
+                .build()
+        )
+        return entryList
+    }
+
     @Composable
     override fun Page(arguments: Bundle?) {
+        val entries = buildEntry(arguments)
         RegularScaffold(title = getTitle(arguments)) {
             CategoryTitle("Category A")
-            Preference(remember {
-                object : PreferenceModel {
-                    override val title = "Preference 1"
-                    override val summary = stateOf("Summary 1")
-                }
-            })
-            Preference(remember {
-                object : PreferenceModel {
-                    override val title = "Preference 2"
-                    override val summary = stateOf("Summary 2")
-                }
-            })
+            entries[0].UiLayout()
+            entries[1].UiLayout()
+
             Category("Category B") {
-                Preference(remember {
-                    object : PreferenceModel {
-                        override val title = "Preference 3"
-                        override val summary = stateOf("Summary 3")
-                    }
-                })
-                Preference(remember {
-                    object : PreferenceModel {
-                        override val title = "Preference 4"
-                        override val summary = stateOf("Summary 4")
-                    }
-                })
+                entries[2].UiLayout()
+                entries[3].UiLayout()
             }
         }
     }
