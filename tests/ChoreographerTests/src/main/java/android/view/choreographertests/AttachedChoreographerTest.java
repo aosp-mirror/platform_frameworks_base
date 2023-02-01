@@ -76,13 +76,13 @@ public class AttachedChoreographerTest {
             mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
 
                 @Override
-                public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                        int height) {
+                public void surfaceCreated(SurfaceHolder holder) {
+                    mSurfaceCreationCountDown.countDown();
                 }
 
                 @Override
-                public void surfaceCreated(SurfaceHolder holder) {
-                    mSurfaceCreationCountDown.countDown();
+                public void surfaceChanged(SurfaceHolder holder, int format, int width,
+                        int height) {
                 }
 
                 @Override
@@ -90,7 +90,6 @@ public class AttachedChoreographerTest {
                 }
             });
         });
-
 
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         uiDevice.wakeUp();
@@ -127,7 +126,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
-    public void test_create_choreographer() {
+    public void testCreateChoreographer() {
         mScenario.onActivity(activity -> {
             if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
                 fail("Unable to create surface within 1 Second");
@@ -162,7 +161,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
-    public void test_copy_surface_control() {
+    public void testCopySurfaceControl() {
         mScenario.onActivity(activity -> {
             if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
                 fail("Unable to create surface within 1 Second");
@@ -195,7 +194,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
-    public void test_mirror_surface_control() {
+    public void testMirrorSurfaceControl() {
         mScenario.onActivity(activity -> {
             if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
                 fail("Unable to create surface within 1 Second");
@@ -227,7 +226,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
-    public void test_postFrameCallback() {
+    public void testPostFrameCallback() {
         mScenario.onActivity(activity -> {
             if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
                 fail("Unable to create surface within 1 Second");
@@ -252,7 +251,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
-    public void test_postFrameCallbackDelayed() {
+    public void testPostFrameCallbackDelayed() {
         mScenario.onActivity(activity -> {
             if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
                 fail("Unable to create surface within 1 Second");
@@ -279,7 +278,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
-    public void test_postCallback() {
+    public void testPostCallback() {
         mScenario.onActivity(activity -> {
             if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
                 fail("Unable to create surface within 1 Second");
@@ -305,7 +304,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
-    public void test_postCallbackDelayed() {
+    public void testPostCallbackDelayed() {
         mScenario.onActivity(activity -> {
             if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
                 fail("Unable to create surface within 1 Second");
@@ -331,7 +330,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
-    public void test_postVsyncCallback() {
+    public void testPostVsyncCallback() {
         mScenario.onActivity(activity -> {
             if (waitForCountDown(mSurfaceCreationCountDown, /* timeout */ 1L)) {
                 fail("Unable to create surface within 1 Second");
@@ -355,7 +354,7 @@ public class AttachedChoreographerTest {
     }
 
     @Test
-    public void test_ChoreographerDivisorRefreshRate() {
+    public void testChoreographerDivisorRefreshRate() {
         for (int divisor : new int[]{2, 3}) {
             CountDownLatch continueLatch = new CountDownLatch(1);
             mScenario.onActivity(activity -> {
