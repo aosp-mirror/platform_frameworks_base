@@ -279,7 +279,7 @@ public final class BugreportManager {
      * <p>The bugreport artifacts will be copied over to the given file descriptor only if the user
      * consents to sharing with the calling app.
      *
-     * <p>{@link BugreportManager} takes ownership of {@code bugreportFd} and {@code screenshotFd}.
+     * <p>{@link BugreportManager} takes ownership of {@code bugreportFd}.
      *
      * <p>The caller may only request to retrieve a given bugreport once. Subsequent calls will fail
      * with error code {@link BugreportCallback#BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE}.
