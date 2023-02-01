@@ -553,6 +553,7 @@ cc_defaults {
         "RootRenderNode.cpp",
         "SkiaCanvas.cpp",
         "SkiaInterpolator.cpp",
+        "Tonemapper.cpp",
         "VectorDrawable.cpp",
     ],
 
@@ -611,7 +612,6 @@ cc_defaults {
                 "ProfileData.cpp",
                 "ProfileDataContainer.cpp",
                 "Readback.cpp",
-                "Tonemapper.cpp",
                 "TreeInfo.cpp",
                 "WebViewFunctorManager.cpp",
                 "protos/graphicsstats.proto",
