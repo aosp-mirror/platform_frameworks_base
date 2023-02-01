@@ -644,27 +644,8 @@ class MediaDataManagerTest : SysuiTestCase() {
                 build()
             }
         val currentTime = clock.elapsedRealtime()
-        mediaDataManager.addResumptionControls(
-            USER_ID,
-            desc,
-            Runnable {},
-            session.sessionToken,
-            APP_NAME,
-            pendingIntent,
-            PACKAGE_NAME
-        )
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        // THEN the media data indicates that it is for resumption
-        verify(listener)
-            .onMediaDataLoaded(
-                eq(PACKAGE_NAME),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
+        addResumeControlAndLoad(desc)
+
         val data = mediaDataCaptor.value
         assertThat(data.resumption).isTrue()
         assertThat(data.song).isEqualTo(SESSION_TITLE)
@@ -690,27 +671,8 @@ class MediaDataManagerTest : SysuiTestCase() {
                 build()
             }
         val currentTime = clock.elapsedRealtime()
-        mediaDataManager.addResumptionControls(
-            USER_ID,
-            desc,
-            Runnable {},
-            session.sessionToken,
-            APP_NAME,
-            pendingIntent,
-            PACKAGE_NAME
-        )
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        // THEN the media data indicates that it is for resumption
-        verify(listener)
-            .onMediaDataLoaded(
-                eq(PACKAGE_NAME),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
+        addResumeControlAndLoad(desc)
+
         val data = mediaDataCaptor.value
         assertThat(data.resumption).isTrue()
         assertThat(data.song).isEqualTo(SESSION_TITLE)
@@ -723,6 +685,84 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testAddResumptionControls_hasPartialProgress() {
+        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+
+        // WHEN resumption controls are added with partial progress
+        val progress = 0.5
+        val extras =
+            Bundle().apply {
+                putInt(
+                    MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED
+                )
+                putDouble(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE, progress)
+            }
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                setExtras(extras)
+                build()
+            }
+        addResumeControlAndLoad(desc)
+
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isTrue()
+        assertThat(data.resumeProgress).isEqualTo(progress)
+    }
+
+    @Test
+    fun testAddResumptionControls_hasNotPlayedProgress() {
+        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+
+        // WHEN resumption controls are added that have not been played
+        val extras =
+            Bundle().apply {
+                putInt(
+                    MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_NOT_PLAYED
+                )
+            }
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                setExtras(extras)
+                build()
+            }
+        addResumeControlAndLoad(desc)
+
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isTrue()
+        assertThat(data.resumeProgress).isEqualTo(0)
+    }
+
+    @Test
+    fun testAddResumptionControls_hasFullProgress() {
+        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+
+        // WHEN resumption controls are added with progress info
+        val extras =
+            Bundle().apply {
+                putInt(
+                    MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_FULLY_PLAYED
+                )
+            }
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                setExtras(extras)
+                build()
+            }
+        addResumeControlAndLoad(desc)
+
+        // THEN the media data includes the progress
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isTrue()
+        assertThat(data.resumeProgress).isEqualTo(1)
+    }
+
+    @Test
     fun testResumptionDisabled_dismissesResumeControls() {
         // WHEN there are resume controls and resumption is switched off
         val desc =
@@ -730,26 +770,8 @@ class MediaDataManagerTest : SysuiTestCase() {
                 setTitle(SESSION_TITLE)
                 build()
             }
-        mediaDataManager.addResumptionControls(
-            USER_ID,
-            desc,
-            Runnable {},
-            session.sessionToken,
-            APP_NAME,
-            pendingIntent,
-            PACKAGE_NAME
-        )
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(listener)
-            .onMediaDataLoaded(
-                eq(PACKAGE_NAME),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
+        addResumeControlAndLoad(desc)
+
         val data = mediaDataCaptor.value
         mediaDataManager.setMediaResumptionEnabled(false)
 
@@ -1689,5 +1711,30 @@ class MediaDataManagerTest : SysuiTestCase() {
         val stateBuilder = PlaybackState.Builder().setActions(stateActions)
         stateBuilder.setState(PlaybackState.STATE_PAUSED, 0, 1.0f)
         whenever(controller.playbackState).thenReturn(stateBuilder.build())
+    }
+
+    /** Helper function to add a resumption control and capture the resulting MediaData */
+    private fun addResumeControlAndLoad(desc: MediaDescription) {
+        mediaDataManager.addResumptionControls(
+            USER_ID,
+            desc,
+            Runnable {},
+            session.sessionToken,
+            APP_NAME,
+            pendingIntent,
+            PACKAGE_NAME
+        )
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(PACKAGE_NAME),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
     }
 }

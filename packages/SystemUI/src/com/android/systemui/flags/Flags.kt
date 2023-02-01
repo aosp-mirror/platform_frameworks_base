@@ -338,8 +338,7 @@ object Flags {
     // TODO(b/254513168): Tracking Bug
     @JvmField val UMO_SURFACE_RIPPLE = unreleasedFlag(907, "umo_surface_ripple")
 
-    @JvmField
-    val MEDIA_FALSING_PENALTY = unreleasedFlag(908, "media_falsing_media", teamfood = true)
+    @JvmField val MEDIA_FALSING_PENALTY = releasedFlag(908, "media_falsing_media")
 
     // TODO(b/261734857): Tracking Bug
     @JvmField val UMO_TURBULENCE_NOISE = unreleasedFlag(909, "umo_turbulence_noise")
@@ -361,6 +360,9 @@ object Flags {
     // TODO(b/266739309): Tracking Bug
     @JvmField
     val MEDIA_RECOMMENDATION_CARD_UPDATE = unreleasedFlag(914, "media_recommendation_card_update")
+
+    // TODO(b/267007629): Tracking Bug
+    val MEDIA_RESUME_PROGRESS = unreleasedFlag(915, "media_resume_progress")
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
@@ -464,7 +466,7 @@ object Flags {
     @Keep
     @JvmField
     val WM_ENABLE_PREDICTIVE_BACK_ANIM =
-        sysPropBooleanFlag(1201, "persist.wm.debug.predictive_back_anim", default = false)
+        sysPropBooleanFlag(1201, "persist.wm.debug.predictive_back_anim", default = true)
 
     @Keep
     @JvmField
@@ -497,7 +499,7 @@ object Flags {
     // TODO(b/238475428): Tracking Bug
     @JvmField
     val WM_SHADE_ANIMATE_BACK_GESTURE =
-        unreleasedFlag(1208, "persist.wm.debug.shade_animate_back_gesture", teamfood = true)
+        unreleasedFlag(1208, "persist.wm.debug.shade_animate_back_gesture", teamfood = false)
 
     // TODO(b/265639042): Tracking Bug
     @JvmField
@@ -513,6 +515,9 @@ object Flags {
     // TODO(b/264916608): Tracking Bug
     @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata")
 
+    // TODO(b/266955521): Tracking bug
+    @JvmField val SCREENSHOT_DETECTION = unreleasedFlag(1303, "screenshot_detection")
+
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
     val QUICK_TAP_IN_PCC = releasedFlag(1400, "quick_tap_in_pcc")
@@ -521,9 +526,18 @@ object Flags {
     val QUICK_TAP_FLOW_FRAMEWORK =
         unreleasedFlag(1401, "quick_tap_flow_framework", teamfood = false)
 
-    // 1500 - chooser
+    // 1500 - chooser aka sharesheet
     // TODO(b/254512507): Tracking Bug
     val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
+
+    // TODO(b/266983432) Tracking Bug
+    val SHARESHEET_CUSTOM_ACTIONS = unreleasedFlag(1501, "sharesheet_custom_actions")
+
+    // TODO(b/266982749) Tracking Bug
+    val SHARESHEET_RESELECTION_ACTION = unreleasedFlag(1502, "sharesheet_reselection_action")
+
+    // TODO(b/266983474) Tracking Bug
+    val SHARESHEET_IMAGE_AND_TEXT_PREVIEW = unreleasedFlag(1503, "sharesheet_image_text_preview")
 
     // 1600 - accessibility
     @JvmField

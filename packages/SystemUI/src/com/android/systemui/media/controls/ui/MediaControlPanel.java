@@ -115,8 +115,6 @@ import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
-import dagger.Lazy;
-
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +122,7 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import kotlin.Triple;
 import kotlin.Unit;
 
@@ -523,8 +522,13 @@ public class MediaControlPanel {
         }
 
         // Seek Bar
-        final MediaController controller = getController();
-        mBackgroundExecutor.execute(() -> mSeekBarViewModel.updateController(controller));
+        if (data.getResumption() && data.getResumeProgress() != null) {
+            double progress = data.getResumeProgress();
+            mSeekBarViewModel.updateStaticProgress(progress);
+        } else {
+            final MediaController controller = getController();
+            mBackgroundExecutor.execute(() -> mSeekBarViewModel.updateController(controller));
+        }
 
         // Show the broadcast dialog button only when the le audio is enabled.
         mShowBroadcastDialogButton =
