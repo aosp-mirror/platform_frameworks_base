@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeBiometricRepository : BiometricRepository {
+class FakeBiometricSettingsRepository : BiometricSettingsRepository {
 
     private val _isFingerprintEnrolled = MutableStateFlow<Boolean>(false)
     override val isFingerprintEnrolled: StateFlow<Boolean> = _isFingerprintEnrolled.asStateFlow()

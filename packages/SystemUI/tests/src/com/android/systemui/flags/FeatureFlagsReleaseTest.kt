@@ -19,7 +19,6 @@ import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
 import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.util.DeviceConfigProxyFake
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertThrows
 import org.junit.Before
@@ -39,9 +38,8 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
     @Mock private lateinit var mResources: Resources
     @Mock private lateinit var mSystemProperties: SystemPropertiesHelper
     @Mock private lateinit var restarter: Restarter
-    private val flagMap = mutableMapOf<Int, Flag<*>>()
+    private val flagMap = mutableMapOf<String, Flag<*>>()
     private val serverFlagReader = ServerFlagReaderFake()
-    private val deviceConfig = DeviceConfigProxyFake()
 
     @Before
     fun setup() {
@@ -49,7 +47,6 @@ class FeatureFlagsReleaseTest : SysuiTestCase() {
         mFeatureFlagsRelease = FeatureFlagsRelease(
             mResources,
             mSystemProperties,
-            deviceConfig,
             serverFlagReader,
             flagMap,
             restarter)

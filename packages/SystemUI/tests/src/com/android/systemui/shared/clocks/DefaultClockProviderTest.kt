@@ -114,7 +114,8 @@ class DefaultClockProviderTest : SysuiTestCase() {
     @Test
     fun defaultClock_events_onTimeTick() {
         val clock = provider.createClock(DEFAULT_CLOCK_ID)
-        clock.events.onTimeTick()
+        clock.smallClock.events.onTimeTick()
+        clock.largeClock.events.onTimeTick()
 
         verify(mockSmallClockView).refreshTime()
         verify(mockLargeClockView).refreshTime()

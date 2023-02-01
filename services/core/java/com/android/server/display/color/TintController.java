@@ -16,13 +16,17 @@
 
 package com.android.server.display.color;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.Slog;
 
 import java.io.PrintWriter;
 
 abstract class TintController {
+
+    /**
+     * The default transition time, in milliseconds, for color transforms to turn on/off.
+     */
+    private static final long TRANSITION_DURATION = 3000L;
 
     private ColorDisplayService.TintValueAnimator mAnimator;
     private Boolean mIsActivated;
@@ -64,6 +68,10 @@ abstract class TintController {
 
     public boolean isActivatedStateNotSet() {
         return mIsActivated == null;
+    }
+
+    public long getTransitionDurationMilliseconds() {
+        return TRANSITION_DURATION;
     }
 
     /**

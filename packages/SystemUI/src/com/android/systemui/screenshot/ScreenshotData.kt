@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.UserHandle
 import android.view.WindowManager.ScreenshotSource
 import android.view.WindowManager.ScreenshotType
+import androidx.annotation.VisibleForTesting
 import com.android.internal.util.ScreenshotRequest
 
 /** ScreenshotData represents the current state of a single screenshot being acquired. */
@@ -41,6 +42,11 @@ data class ScreenshotData(
                 request.insets,
                 request.bitmap,
             )
+        }
+
+        @VisibleForTesting
+        fun forTesting(): ScreenshotData {
+            return ScreenshotData(0, 0, null, null, null, 0, Insets.NONE, null)
         }
     }
 }

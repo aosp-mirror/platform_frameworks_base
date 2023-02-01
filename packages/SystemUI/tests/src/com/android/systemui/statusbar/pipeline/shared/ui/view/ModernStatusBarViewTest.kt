@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.view
 
+import android.graphics.Rect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
@@ -116,6 +117,22 @@ class ModernStatusBarViewTest : SysuiTestCase() {
         binding.shouldIconBeVisibleInternal = false
 
         assertThat(view.isIconVisible).isEqualTo(false)
+    }
+
+    @Test
+    fun getDrawingRect_takesTranslationIntoAccount() {
+        val view = createAndInitView()
+
+        view.translationX = 50f
+        view.translationY = 60f
+
+        val drawingRect = Rect()
+        view.getDrawingRect(drawingRect)
+
+        assertThat(drawingRect.left).isEqualTo(view.left + 50)
+        assertThat(drawingRect.right).isEqualTo(view.right + 50)
+        assertThat(drawingRect.top).isEqualTo(view.top + 60)
+        assertThat(drawingRect.bottom).isEqualTo(view.bottom + 60)
     }
 
     private fun createAndInitView(): ModernStatusBarView {

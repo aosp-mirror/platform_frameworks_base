@@ -906,6 +906,17 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    fun bind_resumeState_withProgress() {
+        val progress = 0.5
+        val state = mediaData.copy(resumption = true, resumeProgress = progress)
+
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(state, PACKAGE)
+
+        verify(seekBarViewModel).updateStaticProgress(progress)
+    }
+
+    @Test
     fun bindNotificationActions() {
         val icon = context.getDrawable(android.R.drawable.ic_media_play)
         val bg = context.getDrawable(R.drawable.qs_media_round_button_background)

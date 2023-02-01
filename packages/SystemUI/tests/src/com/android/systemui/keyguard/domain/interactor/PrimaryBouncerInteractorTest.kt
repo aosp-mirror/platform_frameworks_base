@@ -68,13 +68,13 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Mock private lateinit var keyguardBypassController: KeyguardBypassController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     private val mainHandler = FakeHandler(Looper.getMainLooper())
-    private lateinit var mPrimaryBouncerInteractor: PrimaryBouncerInteractor
+    private lateinit var underTest: PrimaryBouncerInteractor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         DejankUtils.setImmediate(true)
-        mPrimaryBouncerInteractor =
+        underTest =
             PrimaryBouncerInteractor(
                 repository,
                 bouncerView,
@@ -94,7 +94,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testShow_isScrimmed() {
-        mPrimaryBouncerInteractor.show(true)
+        underTest.show(true)
         verify(repository).setOnScreenTurnedOff(false)
         verify(repository).setKeyguardAuthenticated(null)
         verify(repository).setPrimaryHide(false)
@@ -124,7 +124,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testHide() {
-        mPrimaryBouncerInteractor.hide()
+        underTest.hide()
         verify(falsingCollector).onBouncerHidden()
         verify(keyguardStateController).notifyBouncerShowing(false)
         verify(repository).setPrimaryShowingSoon(false)
@@ -137,7 +137,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testExpansion() {
         `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
-        mPrimaryBouncerInteractor.setPanelExpansion(0.6f)
+        underTest.setPanelExpansion(0.6f)
         verify(repository).setPanelExpansion(0.6f)
         verify(mPrimaryBouncerCallbackInteractor).dispatchExpansionChanged(0.6f)
     }
@@ -146,7 +146,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     fun testExpansion_fullyShown() {
         `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
         `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
-        mPrimaryBouncerInteractor.setPanelExpansion(EXPANSION_VISIBLE)
+        underTest.setPanelExpansion(EXPANSION_VISIBLE)
         verify(falsingCollector).onBouncerShown()
         verify(mPrimaryBouncerCallbackInteractor).dispatchFullyShown()
     }
@@ -155,7 +155,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     fun testExpansion_fullyHidden() {
         `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
         `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
-        mPrimaryBouncerInteractor.setPanelExpansion(EXPANSION_HIDDEN)
+        underTest.setPanelExpansion(EXPANSION_HIDDEN)
         verify(repository).setPrimaryVisible(false)
         verify(repository).setPrimaryShow(null)
         verify(repository).setPrimaryHide(true)
@@ -167,7 +167,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testExpansion_startingToHide() {
         `when`(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
-        mPrimaryBouncerInteractor.setPanelExpansion(0.1f)
+        underTest.setPanelExpansion(0.1f)
         verify(repository).setPrimaryStartingToHide(true)
         verify(mPrimaryBouncerCallbackInteractor).dispatchStartingToHide()
     }
@@ -175,7 +175,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testShowMessage() {
         val argCaptor = ArgumentCaptor.forClass(BouncerShowMessageModel::class.java)
-        mPrimaryBouncerInteractor.showMessage("abc", null)
+        underTest.showMessage("abc", null)
         verify(repository).setShowMessage(argCaptor.capture())
         assertThat(argCaptor.value.message).isEqualTo("abc")
     }
@@ -184,62 +184,62 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     fun testDismissAction() {
         val onDismissAction = mock(ActivityStarter.OnDismissAction::class.java)
         val cancelAction = mock(Runnable::class.java)
-        mPrimaryBouncerInteractor.setDismissAction(onDismissAction, cancelAction)
+        underTest.setDismissAction(onDismissAction, cancelAction)
         verify(bouncerViewDelegate).setDismissAction(onDismissAction, cancelAction)
     }
 
     @Test
     fun testUpdateResources() {
-        mPrimaryBouncerInteractor.updateResources()
+        underTest.updateResources()
         verify(repository).setResourceUpdateRequests(true)
     }
 
     @Test
     fun testNotifyKeyguardAuthenticated() {
-        mPrimaryBouncerInteractor.notifyKeyguardAuthenticated(true)
+        underTest.notifyKeyguardAuthenticated(true)
         verify(repository).setKeyguardAuthenticated(true)
     }
 
     @Test
     fun testNotifyShowedMessage() {
-        mPrimaryBouncerInteractor.onMessageShown()
+        underTest.onMessageShown()
         verify(repository).setShowMessage(null)
     }
 
     @Test
     fun testOnScreenTurnedOff() {
-        mPrimaryBouncerInteractor.onScreenTurnedOff()
+        underTest.onScreenTurnedOff()
         verify(repository).setOnScreenTurnedOff(true)
     }
 
     @Test
     fun testSetKeyguardPosition() {
-        mPrimaryBouncerInteractor.setKeyguardPosition(0f)
+        underTest.setKeyguardPosition(0f)
         verify(repository).setKeyguardPosition(0f)
     }
 
     @Test
     fun testNotifyKeyguardAuthenticatedHandled() {
-        mPrimaryBouncerInteractor.notifyKeyguardAuthenticatedHandled()
+        underTest.notifyKeyguardAuthenticatedHandled()
         verify(repository).setKeyguardAuthenticated(null)
     }
 
     @Test
     fun testNotifyUpdatedResources() {
-        mPrimaryBouncerInteractor.notifyUpdatedResources()
+        underTest.notifyUpdatedResources()
         verify(repository).setResourceUpdateRequests(false)
     }
 
     @Test
     fun testSetBackButtonEnabled() {
-        mPrimaryBouncerInteractor.setBackButtonEnabled(true)
+        underTest.setBackButtonEnabled(true)
         verify(repository).setIsBackButtonEnabled(true)
     }
 
     @Test
     fun testStartDisappearAnimation() {
         val runnable = mock(Runnable::class.java)
-        mPrimaryBouncerInteractor.startDisappearAnimation(runnable)
+        underTest.startDisappearAnimation(runnable)
         verify(repository).setPrimaryStartDisappearAnimation(any(Runnable::class.java))
     }
 
@@ -248,42 +248,42 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         `when`(repository.primaryBouncerVisible.value).thenReturn(true)
         `when`(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
         `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
-        assertThat(mPrimaryBouncerInteractor.isFullyShowing()).isTrue()
+        assertThat(underTest.isFullyShowing()).isTrue()
         `when`(repository.primaryBouncerVisible.value).thenReturn(false)
-        assertThat(mPrimaryBouncerInteractor.isFullyShowing()).isFalse()
+        assertThat(underTest.isFullyShowing()).isFalse()
     }
 
     @Test
     fun testIsScrimmed() {
         `when`(repository.primaryBouncerScrimmed.value).thenReturn(true)
-        assertThat(mPrimaryBouncerInteractor.isScrimmed()).isTrue()
+        assertThat(underTest.isScrimmed()).isTrue()
         `when`(repository.primaryBouncerScrimmed.value).thenReturn(false)
-        assertThat(mPrimaryBouncerInteractor.isScrimmed()).isFalse()
+        assertThat(underTest.isScrimmed()).isFalse()
     }
 
     @Test
     fun testIsInTransit() {
         `when`(repository.primaryBouncerShowingSoon.value).thenReturn(true)
-        assertThat(mPrimaryBouncerInteractor.isInTransit()).isTrue()
+        assertThat(underTest.isInTransit()).isTrue()
         `when`(repository.primaryBouncerShowingSoon.value).thenReturn(false)
-        assertThat(mPrimaryBouncerInteractor.isInTransit()).isFalse()
+        assertThat(underTest.isInTransit()).isFalse()
         `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
-        assertThat(mPrimaryBouncerInteractor.isInTransit()).isTrue()
+        assertThat(underTest.isInTransit()).isTrue()
     }
 
     @Test
     fun testIsAnimatingAway() {
         `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(Runnable {})
-        assertThat(mPrimaryBouncerInteractor.isAnimatingAway()).isTrue()
+        assertThat(underTest.isAnimatingAway()).isTrue()
         `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
-        assertThat(mPrimaryBouncerInteractor.isAnimatingAway()).isFalse()
+        assertThat(underTest.isAnimatingAway()).isFalse()
     }
 
     @Test
     fun testWillDismissWithAction() {
         `when`(bouncerViewDelegate.willDismissWithActions()).thenReturn(true)
-        assertThat(mPrimaryBouncerInteractor.willDismissWithAction()).isTrue()
+        assertThat(underTest.willDismissWithAction()).isTrue()
         `when`(bouncerViewDelegate.willDismissWithActions()).thenReturn(false)
-        assertThat(mPrimaryBouncerInteractor.willDismissWithAction()).isFalse()
+        assertThat(underTest.willDismissWithAction()).isFalse()
     }
 }

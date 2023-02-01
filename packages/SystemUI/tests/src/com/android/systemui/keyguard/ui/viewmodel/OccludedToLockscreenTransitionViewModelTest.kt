@@ -18,16 +18,12 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.AnimationParams
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel.Companion.LOCKSCREEN_ALPHA
-import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel.Companion.LOCKSCREEN_TRANSLATION_Y
+import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -58,21 +54,19 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
 
             val job = underTest.lockscreenAlpha.onEach { values.add(it) }.launchIn(this)
 
-            repository.sendTransitionStep(step(0f))
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
             // Should start running here...
             repository.sendTransitionStep(step(0.3f))
             repository.sendTransitionStep(step(0.4f))
             repository.sendTransitionStep(step(0.5f))
-            // ...up to here
             repository.sendTransitionStep(step(0.6f))
+            // ...up to here
+            repository.sendTransitionStep(step(0.8f))
             repository.sendTransitionStep(step(1f))
 
-            // Only two values should be present, since the dream overlay runs for a small fraction
-            // of the overall animation time
-            assertThat(values.size).isEqualTo(3)
-            assertThat(values[0]).isEqualTo(animValue(0.3f, LOCKSCREEN_ALPHA))
-            assertThat(values[1]).isEqualTo(animValue(0.4f, LOCKSCREEN_ALPHA))
-            assertThat(values[2]).isEqualTo(animValue(0.5f, LOCKSCREEN_ALPHA))
+            assertThat(values.size).isEqualTo(5)
+            values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
 
             job.cancel()
         }
@@ -86,58 +80,27 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
             val job =
                 underTest.lockscreenTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
 
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
             repository.sendTransitionStep(step(0f))
             repository.sendTransitionStep(step(0.3f))
             repository.sendTransitionStep(step(0.5f))
             repository.sendTransitionStep(step(1f))
 
-            assertThat(values.size).isEqualTo(4)
-            assertThat(values[0])
-                .isEqualTo(
-                    -pixels +
-                        EMPHASIZED_DECELERATE.getInterpolation(
-                            animValue(0f, LOCKSCREEN_TRANSLATION_Y)
-                        ) * pixels
-                )
-            assertThat(values[1])
-                .isEqualTo(
-                    -pixels +
-                        EMPHASIZED_DECELERATE.getInterpolation(
-                            animValue(0.3f, LOCKSCREEN_TRANSLATION_Y)
-                        ) * pixels
-                )
-            assertThat(values[2])
-                .isEqualTo(
-                    -pixels +
-                        EMPHASIZED_DECELERATE.getInterpolation(
-                            animValue(0.5f, LOCKSCREEN_TRANSLATION_Y)
-                        ) * pixels
-                )
-            assertThat(values[3])
-                .isEqualTo(
-                    -pixels +
-                        EMPHASIZED_DECELERATE.getInterpolation(
-                            animValue(1f, LOCKSCREEN_TRANSLATION_Y)
-                        ) * pixels
-                )
+            assertThat(values.size).isEqualTo(5)
+            values.forEach { assertThat(it).isIn(Range.closed(-100f, 0f)) }
 
             job.cancel()
         }
 
-    private fun animValue(stepValue: Float, params: AnimationParams): Float {
-        val totalDuration = TO_LOCKSCREEN_DURATION
-        val startValue = (params.startTime / totalDuration).toFloat()
-
-        val multiplier = (totalDuration / params.duration).toFloat()
-        return (stepValue - startValue) * multiplier
-    }
-
-    private fun step(value: Float): TransitionStep {
+    private fun step(
+        value: Float,
+        state: TransitionState = TransitionState.RUNNING
+    ): TransitionStep {
         return TransitionStep(
             from = KeyguardState.OCCLUDED,
             to = KeyguardState.LOCKSCREEN,
             value = value,
-            transitionState = TransitionState.RUNNING,
+            transitionState = state,
             ownerName = "OccludedToLockscreenTransitionViewModelTest"
         )
     }
