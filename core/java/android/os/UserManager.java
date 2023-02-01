@@ -1069,11 +1069,6 @@ public class UserManager {
      * Specifies that windows besides app windows should not be
      * created. This will block the creation of the following types of windows.
      * <li>{@link LayoutParams#TYPE_TOAST}</li>
-     * <li>{@link LayoutParams#TYPE_PHONE}</li>
-     * <li>{@link LayoutParams#TYPE_PRIORITY_PHONE}</li>
-     * <li>{@link LayoutParams#TYPE_SYSTEM_ALERT}</li>
-     * <li>{@link LayoutParams#TYPE_SYSTEM_ERROR}</li>
-     * <li>{@link LayoutParams#TYPE_SYSTEM_OVERLAY}</li>
      * <li>{@link LayoutParams#TYPE_APPLICATION_OVERLAY}</li>
      *
      * <p>This can only be set by device owners and profile owners on the primary user.
