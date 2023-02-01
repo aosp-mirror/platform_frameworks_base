@@ -179,7 +179,6 @@ public class SatelliteManager {
      * Error received from satellite service.
      */
     public static final int SATELLITE_SERVICE_ERROR = 17;
-
     /**
      * Satellite service is disabled on the requested subscription.
      */
@@ -275,6 +274,9 @@ public class SatelliteManager {
     @SatelliteServiceResult public int startSatellitePositionUpdates(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SatellitePositionUpdateCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -290,16 +292,16 @@ public class SatelliteManager {
                             public void onSatellitePositionUpdate(
                                     @NonNull PointingInfo pointingInfo) {
                                 logd("onSatellitePositionUpdate: pointingInfo=" + pointingInfo);
-                                executor.execute(() ->
-                                        callback.onSatellitePositionUpdate(pointingInfo));
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSatellitePositionUpdate(pointingInfo)));
                             }
 
                             @Override
                             public void onMessageTransferStateUpdate(
                                     @SatelliteMessageTransferState int state) {
                                 logd("onMessageTransferStateUpdate: state=" + state);
-                                executor.execute(() ->
-                                        callback.onMessageTransferStateUpdate(state));
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onMessageTransferStateUpdate(state)));
                             }
                         });
                 if (result == SATELLITE_SERVICE_SUCCESS) {
@@ -330,6 +332,8 @@ public class SatelliteManager {
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @SatelliteServiceResult public int stopSatellitePositionUpdates(
             @NonNull SatellitePositionUpdateCallback callback) {
+        Objects.requireNonNull(callback);
+
         if (!mSatellitePositionUpdateCallbacks.containsKey(callback)) {
             throw new IllegalArgumentException(
                     "startSatellitePositionUpdates was never called with the callback provided.");
