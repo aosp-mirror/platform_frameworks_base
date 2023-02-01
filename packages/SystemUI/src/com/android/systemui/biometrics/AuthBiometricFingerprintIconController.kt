@@ -106,7 +106,7 @@ open class AuthBiometricFingerprintIconController(
 
         iconView.frame = 0
         iconViewOverlay.frame = 0
-        if (shouldAnimateIconViewForTransition(lastState, newState)) {
+        if (shouldAnimateSfpsIconViewForTransition(lastState, newState)) {
             iconView.playAnimation()
         }
 
@@ -165,6 +165,18 @@ open class AuthBiometricFingerprintIconController(
     }
 
     protected open fun shouldAnimateIconViewForTransition(
+            @BiometricState oldState: Int,
+            @BiometricState newState: Int
+    ) = when (newState) {
+        STATE_HELP,
+        STATE_ERROR -> true
+        STATE_AUTHENTICATING_ANIMATING_IN,
+        STATE_AUTHENTICATING -> oldState == STATE_ERROR || oldState == STATE_HELP
+        STATE_AUTHENTICATED -> true
+        else -> false
+    }
+
+    private fun shouldAnimateSfpsIconViewForTransition(
             @BiometricState oldState: Int,
             @BiometricState newState: Int
     ) = when (newState) {
