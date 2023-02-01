@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import androidx.test.filters.SmallTest
+import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
+import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH_NONE
 import com.android.settingslib.graph.SignalDrawable
 import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.systemui.SysuiTestCase
@@ -117,6 +119,39 @@ class MobileIconViewModelTest : SysuiTestCase() {
             interactor.isInService.value = true
             expected = defaultSignal(level = 2)
             assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun contentDescription_notInService_usesNoPhone() =
+        testScope.runTest {
+            var latest: ContentDescription? = null
+            val job = underTest.contentDescription.onEach { latest = it }.launchIn(this)
+
+            interactor.isInService.value = false
+
+            assertThat((latest as ContentDescription.Resource).res)
+                .isEqualTo(PHONE_SIGNAL_STRENGTH_NONE)
+
+            job.cancel()
+        }
+
+    @Test
+    fun contentDescription_inService_usesLevel() =
+        testScope.runTest {
+            var latest: ContentDescription? = null
+            val job = underTest.contentDescription.onEach { latest = it }.launchIn(this)
+
+            interactor.isInService.value = true
+
+            interactor.level.value = 2
+            assertThat((latest as ContentDescription.Resource).res)
+                .isEqualTo(PHONE_SIGNAL_STRENGTH[2])
+
+            interactor.level.value = 0
+            assertThat((latest as ContentDescription.Resource).res)
+                .isEqualTo(PHONE_SIGNAL_STRENGTH[0])
 
             job.cancel()
         }
