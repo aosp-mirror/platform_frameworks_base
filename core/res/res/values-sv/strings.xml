@@ -340,7 +340,7 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Fingeravtrycksrörelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan registrera rörelser som utförs med hjälp av enhetens fingeravtryckssensor."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skärmbild"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Du kan ta en skärmbild av skärmen."</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan ta en skärmbild av skärmen."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tillåter att appen inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"visas i statusfältet"</string>
@@ -1165,7 +1165,7 @@
     <string name="selected" msgid="6614607926197755875">"valt"</string>
     <string name="not_selected" msgid="410652016565864475">"inte valt"</string>
     <string name="in_progress" msgid="2149208189184319441">"pågår"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Slutför åtgärd genom att använda"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Slutför åtgärd med"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Slutför åtgärden med %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Slutför åtgärd"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Öppna med"</string>

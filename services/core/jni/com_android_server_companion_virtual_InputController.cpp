@@ -21,6 +21,7 @@
 #include <android/keycodes.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <input/Input.h>
 #include <linux/uinput.h>
 #include <math.h>
 #include <nativehelper/JNIHelp.h>
@@ -269,6 +270,14 @@ static int openUinput(const char* readableName, jint vendorId, jint productId, c
             pressureAbsSetup.absinfo.minimum = 0;
             if (ioctl(fd, UI_ABS_SETUP, &pressureAbsSetup) != 0) {
                 ALOGE("Error creating touchscreen uinput pressure axis: %s", strerror(errno));
+                return -errno;
+            }
+            uinput_abs_setup slotAbsSetup;
+            slotAbsSetup.code = ABS_MT_SLOT;
+            slotAbsSetup.absinfo.maximum = MAX_POINTERS;
+            slotAbsSetup.absinfo.minimum = 0;
+            if (ioctl(fd, UI_ABS_SETUP, &slotAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput slots: %s", strerror(errno));
                 return -errno;
             }
         }
