@@ -33,7 +33,6 @@ import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -48,12 +47,11 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner::class)
-class BiometricRepositoryTest : SysuiTestCase() {
-    private lateinit var underTest: BiometricRepository
+class BiometricSettingsRepositoryTest : SysuiTestCase() {
+    private lateinit var underTest: BiometricSettingsRepository
 
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
@@ -73,11 +71,11 @@ class BiometricRepositoryTest : SysuiTestCase() {
         userRepository = FakeUserRepository()
     }
 
-    private suspend fun createBiometricRepository() {
+    private suspend fun createBiometricSettingsRepository() {
         userRepository.setUserInfos(listOf(PRIMARY_USER))
         userRepository.setSelectedUserInfo(PRIMARY_USER)
         underTest =
-            BiometricRepositoryImpl(
+            BiometricSettingsRepositoryImpl(
                 context = context,
                 lockPatternUtils = lockPatternUtils,
                 broadcastDispatcher = fakeBroadcastDispatcher,
@@ -93,7 +91,7 @@ class BiometricRepositoryTest : SysuiTestCase() {
     @Test
     fun fingerprintEnrollmentChange() =
         testScope.runTest {
-            createBiometricRepository()
+            createBiometricSettingsRepository()
             val fingerprintEnabledByDevicePolicy = collectLastValue(underTest.isFingerprintEnrolled)
             runCurrent()
 
@@ -119,7 +117,7 @@ class BiometricRepositoryTest : SysuiTestCase() {
     @Test
     fun strongBiometricAllowedChange() =
         testScope.runTest {
-            createBiometricRepository()
+            createBiometricSettingsRepository()
             val strongBiometricAllowed = collectLastValue(underTest.isStrongBiometricAllowed)
             runCurrent()
 
@@ -142,7 +140,7 @@ class BiometricRepositoryTest : SysuiTestCase() {
     @Test
     fun fingerprintDisabledByDpmChange() =
         testScope.runTest {
-            createBiometricRepository()
+            createBiometricSettingsRepository()
             val fingerprintEnabledByDevicePolicy =
                 collectLastValue(underTest.isFingerprintEnabledByDevicePolicy)
             runCurrent()

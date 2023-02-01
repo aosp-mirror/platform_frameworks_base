@@ -20,7 +20,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.BiometricRepository
+import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.LegacyAlternateBouncer
@@ -34,7 +34,7 @@ class AlternateBouncerInteractor
 @Inject
 constructor(
     private val bouncerRepository: KeyguardBouncerRepository,
-    private val biometricRepository: BiometricRepository,
+    private val biometricSettingsRepository: BiometricSettingsRepository,
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
     private val systemClock: SystemClock,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
@@ -99,9 +99,9 @@ constructor(
     fun canShowAlternateBouncerForFingerprint(): Boolean {
         return if (isModernAlternateBouncerEnabled) {
             bouncerRepository.isAlternateBouncerUIAvailable.value &&
-                biometricRepository.isFingerprintEnrolled.value &&
-                biometricRepository.isStrongBiometricAllowed.value &&
-                biometricRepository.isFingerprintEnabledByDevicePolicy.value &&
+                biometricSettingsRepository.isFingerprintEnrolled.value &&
+                biometricSettingsRepository.isStrongBiometricAllowed.value &&
+                biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&
                 !deviceEntryFingerprintAuthRepository.isLockedOut.value
         } else {
             legacyAlternateBouncer != null &&
