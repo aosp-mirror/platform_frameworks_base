@@ -27,35 +27,31 @@ class CameraAppHelper
 @JvmOverloads
 constructor(
     instrumentation: Instrumentation,
-    pkgManager: PackageManager = instrumentation.context.packageManager
+    private val pkgManager: PackageManager = instrumentation.context.packageManager
 ) :
     StandardAppHelper(
         instrumentation,
         getCameraLauncherName(pkgManager),
         getCameraComponent(pkgManager)
     ) {
+    override fun getOpenAppIntent(): Intent =
+        pkgManager.getLaunchIntentForPackage(packageName)
+            ?: error("Unable to find intent for camera")
+
     companion object {
-        private fun getCameraIntent(): Intent {
-            return Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        }
+        private fun getCameraIntent(): Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
-        private fun getResolveInfo(pkgManager: PackageManager): ResolveInfo {
-            val intent = getCameraIntent()
-            return pkgManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        private fun getResolveInfo(pkgManager: PackageManager): ResolveInfo =
+            pkgManager.resolveActivity(getCameraIntent(), PackageManager.MATCH_DEFAULT_ONLY)
                 ?: error("unable to resolve camera activity")
-        }
 
-        private fun getCameraComponent(pkgManager: PackageManager): ComponentNameMatcher {
-            val resolveInfo = getResolveInfo(pkgManager)
-            return ComponentNameMatcher(
-                resolveInfo.activityInfo.packageName,
-                className = resolveInfo.activityInfo.name
+        private fun getCameraComponent(pkgManager: PackageManager): ComponentNameMatcher =
+            ComponentNameMatcher(
+                getResolveInfo(pkgManager).activityInfo.packageName,
+                className = ""
             )
-        }
 
-        private fun getCameraLauncherName(pkgManager: PackageManager): String {
-            val resolveInfo = getResolveInfo(pkgManager)
-            return resolveInfo.activityInfo.name
-        }
+        private fun getCameraLauncherName(pkgManager: PackageManager): String =
+            getResolveInfo(pkgManager).loadLabel(pkgManager).toString()
     }
 }
