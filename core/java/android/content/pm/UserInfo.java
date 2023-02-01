@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -418,16 +419,25 @@ public class UserInfo implements Parcelable {
             // Don't support switching to pre-created users until they become "real" users.
             return false;
         }
-        return !isProfile();
+        return isFull() || canSwitchToHeadlessSystemUser();
+    }
+
+    /**
+     * @return true if user is of type {@link UserManager#USER_TYPE_SYSTEM_HEADLESS} and
+     * {@link com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser} is true.
+     */
+    private boolean canSwitchToHeadlessSystemUser() {
+        return UserManager.USER_TYPE_SYSTEM_HEADLESS.equals(userType) && Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_canSwitchToHeadlessSystemUser);
     }
 
     /**
      * @return true if this user can be switched to by end user through UI.
+     * @deprecated Use {@link UserInfo#supportsSwitchTo} instead.
      */
+    @Deprecated
     public boolean supportsSwitchToByUser() {
-        // Hide the system user when it does not represent a human user.
-        boolean hideSystemUser = UserManager.isHeadlessSystemUserMode();
-        return (!hideSystemUser || id != UserHandle.USER_SYSTEM) && supportsSwitchTo();
+        return supportsSwitchTo();
     }
 
     // TODO(b/142482943): Make this logic more specific and customizable. (canHaveProfile(userType))

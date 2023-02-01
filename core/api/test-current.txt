@@ -923,7 +923,7 @@ package android.content.pm {
     method public boolean isQuietModeEnabled();
     method public boolean isRestricted();
     method public boolean supportsSwitchTo();
-    method public boolean supportsSwitchToByUser();
+    method @Deprecated public boolean supportsSwitchToByUser();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.UserInfo> CREATOR;
     field public static final int FLAG_ADMIN = 2; // 0x2

@@ -2774,6 +2774,10 @@
      it can't be deleted or downgraded to non-admin status. -->
     <bool name="config_isMainUserPermanentAdmin">false</bool>
 
+    <!-- Whether switch to headless system user is allowed. If allowed,
+    headless system user can run in the foreground even though it is not a full user. -->
+    <bool name="config_canSwitchToHeadlessSystemUser">false</bool>
+
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
