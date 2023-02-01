@@ -120,6 +120,31 @@ public interface RILConstants {
     int BLOCKED_DUE_TO_CALL = 69;                   /* SMS is blocked due to call control */
     int RF_HARDWARE_ISSUE = 70;                     /* RF HW issue is detected */
     int NO_RF_CALIBRATION_INFO = 71;                /* No RF calibration in device */
+    int ENCODING_NOT_SUPPORTED = 72;                /* The encoding scheme is not supported by
+                                                       either the network or the MS. */
+    int FEATURE_NOT_SUPPORTED = 73;                 /* The requesting feature is not supported by
+                                                       the service provider. */
+    int INVALID_CONTACT = 74;                       /* The contact to be added is either not
+                                                       existing or not valid. */
+    int MODEM_INCOMPATIBLE = 75;                    /* The modem of the MS is not compatible with
+                                                       the service provider. */
+    int NETWORK_TIMEOUT = 76;                       /* Modem timeout to receive ACK or response from
+                                                       network after sending a request to it. */
+    int NO_SATELLITE_SIGNAL = 77;                   /* Modem fails to communicate with the satellite
+                                                       network since there is no satellite signal.*/
+    int NOT_SUFFICIENT_ACCOUNT_BALANCE = 78;        /* The request cannot be performed since the
+                                                       subscriber's account balance is not
+                                                       sufficient. */
+    int RADIO_TECHNOLOGY_NOT_SUPPORTED = 79;        /* The radio technology is not supported by the
+                                                       service provider. */
+    int SUBSCRIBER_NOT_AUTHORIZED = 80;             /* The subscription is not authorized to
+                                                       register with the service provider. */
+    int SWITCHED_FROM_SATELLITE_TO_TERRESTRIAL = 81; /* While processing a request from the
+                                                       Framework the satellite modem detects
+                                                       terrestrial signal, aborts the request, and
+                                                       switches to the terrestrial network. */
+    int UNIDENTIFIED_SUBSCRIBER = 82;               /* The subscriber is not registered with the
+                                                       service provider */
 
     // Below is list of OEM specific error codes which can by used by OEMs in case they don't want to
     // reveal particular replacement for Generic failure

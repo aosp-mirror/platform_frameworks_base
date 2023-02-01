@@ -19,10 +19,11 @@ package android.telephony.satellite;
 import android.telephony.satellite.PointingInfo;
 
 /**
- * Callback for position updates from the satellite service.
+ * Interface for satellite state listener.
  * @hide
  */
-oneway interface ISatellitePositionUpdateCallback {
+oneway interface ISatelliteStateListener {
+    void onSatelliteProvisionStateChanged(in int[] features, in boolean provisioned);
     void onSatellitePositionUpdate(in PointingInfo pointingInfo);
     void onMessageTransferStateUpdate(in int state);
 }
