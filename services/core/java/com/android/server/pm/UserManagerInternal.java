@@ -573,5 +573,6 @@ public abstract class UserManagerInternal {
 
      * @throws UserManager.CheckedUserOperationException if no switchable user can be found
      */
-    public abstract @UserIdInt int getBootUser() throws UserManager.CheckedUserOperationException;
+    public abstract @UserIdInt int getBootUser(boolean waitUntilSet)
+            throws UserManager.CheckedUserOperationException;
 }
