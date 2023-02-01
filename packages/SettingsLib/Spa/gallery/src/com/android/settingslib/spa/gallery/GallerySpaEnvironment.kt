@@ -24,6 +24,9 @@ import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.dialog.AlterDialogPageProvider
 import com.android.settingslib.spa.gallery.home.HomePageProvider
+import com.android.settingslib.spa.gallery.itemList.ItemListPageProvider
+import com.android.settingslib.spa.gallery.itemList.ItemOperatePageProvider
+import com.android.settingslib.spa.gallery.itemList.OperateListPageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.ChartPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
@@ -50,6 +53,8 @@ enum class SettingsPageProviderEnum(val displayName: String) {
     HOME("home"),
     PREFERENCE("preference"),
     ARGUMENT("argument"),
+    ITEM_LIST("itemList"),
+    ITEM_OP_PAGE("itemOp"),
 
     // Add your SPPs
 }
@@ -76,6 +81,9 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 LoadingBarPageProvider,
                 ChartPageProvider,
                 AlterDialogPageProvider,
+                ItemListPageProvider,
+                ItemOperatePageProvider,
+                OperateListPageProvider,
             ),
             rootPages = listOf(
                 HomePageProvider.createSettingsPage(),
