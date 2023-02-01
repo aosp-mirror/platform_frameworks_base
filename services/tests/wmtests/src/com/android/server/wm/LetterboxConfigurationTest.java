@@ -51,7 +51,7 @@ import java.util.function.BiConsumer;
  * Tests for the {@link LetterboxConfiguration} class.
  *
  * Build/Install/Run:
- *  atest WmTests:LetterboxConfigurationTests
+ *  atest WmTests:LetterboxConfigurationTest
  */
 @SmallTest
 @Presubmit
@@ -243,18 +243,18 @@ public class LetterboxConfigurationTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, "true", false);
         mLetterboxConfiguration.setIsCompatFakeFocusEnabled(false);
-        assertFalse(mLetterboxConfiguration.isCompatFakeFocusEnabledOnDevice());
+        assertFalse(mLetterboxConfiguration.isCompatFakeFocusEnabled());
 
         // Set runtime flag to false and build time flag to true
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, "false", false);
         mLetterboxConfiguration.setIsCompatFakeFocusEnabled(true);
-        assertFalse(mLetterboxConfiguration.isCompatFakeFocusEnabledOnDevice());
+        assertFalse(mLetterboxConfiguration.isCompatFakeFocusEnabled());
 
         // Set runtime flag to true so that both are enabled
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, "true", false);
-        assertTrue(mLetterboxConfiguration.isCompatFakeFocusEnabledOnDevice());
+        assertTrue(mLetterboxConfiguration.isCompatFakeFocusEnabled());
 
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, Boolean.toString(wasFakeFocusEnabled),
