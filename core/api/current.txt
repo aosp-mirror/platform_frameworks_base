@@ -12197,6 +12197,7 @@ package android.content.pm {
     method @Nullable public String getAppPackageName();
     method @NonNull public int[] getChildSessionIds();
     method public long getCreatedMillis();
+    method public boolean getDontKillApp();
     method public int getInstallLocation();
     method public int getInstallReason();
     method @Nullable public String getInstallerAttributionTag();
@@ -12252,6 +12253,7 @@ package android.content.pm {
     method public void setAppPackageName(@Nullable String);
     method public void setApplicationEnabledSettingPersistent();
     method @Deprecated public void setAutoRevokePermissionsMode(boolean);
+    method public void setDontKillApp(boolean);
     method public void setInstallLocation(int);
     method public void setInstallReason(int);
     method public void setInstallScenario(int);

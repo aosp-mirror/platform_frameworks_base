@@ -3626,7 +3626,6 @@ package android.content.pm {
     method public boolean getAllocateAggressive();
     method @Deprecated public boolean getAllowDowngrade();
     method public int getAutoRevokePermissionsMode();
-    method public boolean getDontKillApp();
     method public boolean getEnableRollback();
     method @Nullable public String[] getGrantedRuntimePermissions();
     method public boolean getInstallAsFullApp(boolean);
@@ -3642,7 +3641,6 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public void setAllocateAggressive(boolean);
     method @Deprecated public void setAllowDowngrade(boolean);
     method @RequiresPermission(allOf={android.Manifest.permission.INSTALL_PACKAGES, "com.android.permission.USE_INSTALLER_V2"}) public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
-    method public void setDontKillApp(boolean);
     method public void setEnableRollback(boolean);
     method public void setEnableRollback(boolean, int);
     method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
