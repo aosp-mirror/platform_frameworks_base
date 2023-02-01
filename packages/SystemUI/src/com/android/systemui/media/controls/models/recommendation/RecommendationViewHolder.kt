@@ -20,6 +20,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.SeekBar
 import android.widget.TextView
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
@@ -37,6 +38,7 @@ class RecommendationViewHolder private constructor(itemView: View, updatedView: 
     // Recommendation screen
     lateinit var cardIcon: ImageView
     lateinit var mediaAppIcons: List<CachingIconView>
+    lateinit var mediaProgressBars: List<SeekBar>
     lateinit var cardTitle: TextView
 
     val mediaCoverContainers =
@@ -82,6 +84,13 @@ class RecommendationViewHolder private constructor(itemView: View, updatedView: 
         if (updatedView) {
             mediaAppIcons = mediaCoverContainers.map { it.requireViewById(R.id.media_rec_app_icon) }
             cardTitle = itemView.requireViewById(R.id.media_rec_title)
+            mediaProgressBars =
+                mediaCoverContainers.map {
+                    it.requireViewById<SeekBar?>(R.id.media_progress_bar).apply {
+                        // Media playback is in the direction of tape, not time, so it stays LTR
+                        layoutDirection = View.LAYOUT_DIRECTION_LTR
+                    }
+                }
         } else {
             cardIcon = itemView.requireViewById<ImageView>(R.id.recommendation_card_icon)
         }
