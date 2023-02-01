@@ -34,6 +34,22 @@ import org.junit.runners.JUnit4;
 public final class SchemeMonochromeTest extends SysuiTestCase {
 
     @Test
+    public void testKeyColors() {
+        SchemeMonochrome scheme = new SchemeMonochrome(Hct.fromInt(0xff0000ff), false, 0.0);
+
+        assertThat(MaterialDynamicColors.primaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff070707);
+        assertThat(MaterialDynamicColors.secondaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff070707);
+        assertThat(MaterialDynamicColors.tertiaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff070707);
+        assertThat(MaterialDynamicColors.neutralPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff070707);
+        assertThat(MaterialDynamicColors.neutralVariantPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff070707);
+    }
+
+    @Test
     public void lightTheme_minContrast_primary() {
         SchemeMonochrome scheme = new SchemeMonochrome(Hct.fromInt(0xff0000ff), false, -1.0);
         assertThat(MaterialDynamicColors.primary.getArgb(scheme)).isSameColorAs(0xff747474);
