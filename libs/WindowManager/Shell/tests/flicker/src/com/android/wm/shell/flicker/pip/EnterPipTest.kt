@@ -74,8 +74,14 @@ open class EnterPipTest(flicker: FlickerTest) : PipTransition(flicker) {
     /** Checks [pipApp] layer remains visible throughout the animation */
     @Presubmit
     @Test
-    open fun pipAppLayerAlwaysVisible() {
-        flicker.assertLayers { this.isVisible(pipApp) }
+    open fun pipAppLayerOrOverlayAlwaysVisible() {
+        flicker.assertLayers {
+            this.isVisible(pipApp)
+                .then()
+                .isVisible(ComponentNameMatcher.PIP_CONTENT_OVERLAY)
+                .then()
+                .isVisible(pipApp)
+        }
     }
 
     /**
@@ -94,8 +100,10 @@ open class EnterPipTest(flicker: FlickerTest) : PipTransition(flicker) {
      */
     @Presubmit
     @Test
-    open fun pipLayerRemainInsideVisibleBounds() {
-        flicker.assertLayersVisibleRegion(pipApp) { coversAtMost(displayBounds) }
+    open fun pipLayerOrOverlayRemainInsideVisibleBounds() {
+        flicker.assertLayersVisibleRegion(pipApp.or(ComponentNameMatcher.PIP_CONTENT_OVERLAY) ) {
+            coversAtMost(displayBounds)
+        }
     }
 
     /** Checks that the visible region of [pipApp] always reduces during the animation */
