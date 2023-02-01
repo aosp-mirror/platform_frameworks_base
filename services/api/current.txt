@@ -225,6 +225,14 @@ package com.android.server.role {
 
 }
 
+package com.android.server.security {
+
+  public final class FileIntegrityLocal {
+    method public static void setUpFsVerity(@NonNull String) throws java.io.IOException;
+  }
+
+}
+
 package com.android.server.stats {
 
   public final class StatsHelper {
