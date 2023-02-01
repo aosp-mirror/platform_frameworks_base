@@ -977,6 +977,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             // Now that we have a display-device, we need a LogicalDisplay to map it to. Find the
             // right one, if it doesn't exist, create a new one.
             final int logicalDisplayId = displayLayout.getLogicalDisplayId();
+
             LogicalDisplay newDisplay = getDisplayLocked(logicalDisplayId);
             if (newDisplay == null) {
                 newDisplay = createNewLogicalDisplayLocked(
@@ -989,6 +990,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 newDisplay.swapDisplaysLocked(oldDisplay);
             }
 
+            newDisplay.setPositionLocked(displayLayout.getPosition());
             setEnabledLocked(newDisplay, displayLayout.isEnabled());
             newDisplay.setBrightnessThrottlingDataIdLocked(
                     displayLayout.getBrightnessThrottlingMapId() == null

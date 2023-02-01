@@ -118,6 +118,7 @@ class DeviceStateToLayoutMap {
                 final int state = l.getState().intValue();
                 final Layout layout = createLayout(state);
                 for (com.android.server.display.config.layout.Display d: l.getDisplay()) {
+                    assert layout != null;
                     Layout.Display display = layout.createDisplayLocked(
                             DisplayAddress.fromPhysicalDisplayId(d.getAddress().longValue()),
                             d.isDefaultDisplay(),
