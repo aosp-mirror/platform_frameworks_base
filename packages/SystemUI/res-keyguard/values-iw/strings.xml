@@ -53,7 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"קו ביטול נעילה שגוי"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"סיסמה שגויה"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"קוד האימות שגוי"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{אפשר לנסות שוב בעוד שנייה אחת.}two{אפשר לנסות שוב בעוד # שניות.}many{אפשר לנסות שוב בעוד # שניות.}other{אפשר לנסות שוב בעוד # שניות.}}"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{אפשר לנסות שוב בעוד שנייה אחת.}one{אפשר לנסות שוב בעוד # שניות.}two{אפשר לנסות שוב בעוד # שניות.}other{אפשר לנסות שוב בעוד # שניות.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"‏יש להזין את קוד האימות של כרטיס ה-SIM."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"‏יש להזין את קוד האימות של כרטיס ה-SIM של <xliff:g id="CARRIER">%1$s</xliff:g>."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"‏<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> יש להשבית את כרטיס ה-eSIM כדי להשתמש במכשיר ללא שירות סלולרי."</string>
@@ -69,17 +69,15 @@
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4252405904570284368">"שרטטת קו ביטול נעילה שגוי <xliff:g id="NUMBER_0">%1$d</xliff:g> פעמים. \n\nאפשר לנסות שוב בעוד <xliff:g id="NUMBER_1">%2$d</xliff:g> שניות."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="8047350661459040581">"‏קוד האימות של כרטיס ה-SIM שגוי. יש ליצור קשר עם הספק כדי לבטל את נעילת המכשיר."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="7030584350995485026">
+      <item quantity="one">‏קוד האימות של כרטיס ה-SIM שגוי, נותר לך עוד ניסיון <xliff:g id="NUMBER_1">%d</xliff:g> .</item>
       <item quantity="two">‏קוד האימות של כרטיס ה-SIM שגוי. נותרו לך עוד <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות.</item>
-      <item quantity="many">‏קוד האימות של כרטיס ה-SIM שגוי. נותרו לך עוד <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות.</item>
       <item quantity="other">‏קוד האימות של כרטיס ה-SIM שגוי. נותרו לך עוד <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות.</item>
-      <item quantity="one">‏קוד האימות של כרטיס ה-SIM שגוי. נותר לך עוד ניסיון <xliff:g id="NUMBER_0">%d</xliff:g> לפני שיהיה עליך ליצור קשר עם הספק כדי לבטל את נעילת המכשיר.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3698285357028468617">"‏לא ניתן להשתמש בכרטיס ה-SIM. יש ליצור קשר עם הספק."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="3937306685604862886">
+      <item quantity="one">‏קוד ה-PUK של כרטיס ה-SIM שגוי. נותרו לך עוד <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM יינעל לצמיתות.</item>
       <item quantity="two">‏קוד ה-PUK של כרטיס ה-SIM שגוי. נותרו לך עוד <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM יינעל לצמיתות.</item>
-      <item quantity="many">‏קוד ה-PUK של כרטיס ה-SIM שגוי. נותרו לך עוד <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM יינעל לצמיתות.</item>
       <item quantity="other">‏קוד ה-PUK של כרטיס ה-SIM שגוי. נותרו לך עוד <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM יינעל לצמיתות.</item>
-      <item quantity="one">‏קוד ה-PUK של כרטיס ה-SIM שגוי. נותר לך ניסיון <xliff:g id="NUMBER_0">%d</xliff:g> נוסף לפני שכרטיס ה-SIM יינעל לצמיתות.</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"‏נכשלה פעולת קוד הגישה של כרטיס ה-SIM"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"‏הניסיון לביטול הנעילה של כרטיס ה-SIM באמצעות קוד PUK נכשל!"</string>
@@ -96,16 +94,14 @@
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"לא זוהתה"</string>
     <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"‏כדי להשתמש בתכונה \'פתיחה ע\"י זיהוי הפנים\', יש להפעיל את ה"<b>"גישה למצלמה"</b>" בהגדרות &gt; פרטיות"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
+      <item quantity="one">‏יש להזין קוד אימות של כרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות נוספים.</item>
       <item quantity="two">‏יש להזין קוד אימות של כרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות נוספים.</item>
-      <item quantity="many">‏יש להזין קוד אימות של כרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות נוספים.</item>
       <item quantity="other">‏יש להזין קוד אימות של כרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות נוספים.</item>
-      <item quantity="one">‏יש להזין קוד אימות של כרטיס SIM. נותר לך ניסיון נוסף (<xliff:g id="NUMBER_0">%d</xliff:g>) לפני שיהיה צורך ליצור קשר עם הספק כדי לבטל את נעילת המכשיר.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="571308542462946935">
+      <item quantity="one">‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נותרו לך <xliff:g id="_NUMBER_1">%d</xliff:g> ניסיונות נוספים לפני שכרטיס ה-SIM יינעל באופן סופי. למידע נוסף, ניתן לפנות לספק שלך.</item>
       <item quantity="two">‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נותרו לך <xliff:g id="_NUMBER_1">%d</xliff:g> ניסיונות נוספים לפני שכרטיס ה-SIM יינעל באופן סופי. למידע נוסף, ניתן לפנות לספק שלך.</item>
-      <item quantity="many">‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נותרו לך <xliff:g id="_NUMBER_1">%d</xliff:g> ניסיונות נוספים לפני שכרטיס ה-SIM יינעל באופן סופי. למידע נוסף, ניתן לפנות לספק שלך.</item>
       <item quantity="other">‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נותרו לך <xliff:g id="_NUMBER_1">%d</xliff:g> ניסיונות נוספים לפני שכרטיס ה-SIM יינעל באופן סופי. למידע נוסף, ניתן לפנות לספק שלך.</item>
-      <item quantity="one">‏כרטיס ה-SIM מושבת כעת. יש להזין קוד PUK כדי להמשיך. נותר לך ניסיון אחד (<xliff:g id="_NUMBER_0">%d</xliff:g>) נוסף לפני שכרטיס ה-SIM יינעל באופן סופי. למידע נוסף, ניתן לפנות לספק שלך.</item>
     </plurals>
     <string name="clock_title_default" msgid="6342735240617459864">"ברירת מחדל"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"בועה"</string>

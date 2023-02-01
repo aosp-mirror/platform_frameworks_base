@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"允许应用读取您共享存储空间中的视频文件。"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"读取共享存储空间中的图片文件"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"允许应用读取您共享存储空间中的图片文件。"</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"从共享存储空间读取用户选择的图片和视频文件"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"使应用能够从共享存储空间读取您所选的图片和视频文件。"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"修改或删除您共享存储空间中的内容"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"允许该应用写入您共享存储空间中的内容。"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"拨打/接听SIP电话"</string>

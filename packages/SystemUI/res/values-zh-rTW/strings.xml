@@ -470,7 +470,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"解鎖即可使用"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"擷取卡片時發生問題，請稍後再試"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"螢幕鎖定設定"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"掃描 QR 圖碼"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"掃描 QR code"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"工作資料夾"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"飛航模式"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"你不會聽到下一個<xliff:g id="WHEN">%1$s</xliff:g> 的鬧鐘"</string>

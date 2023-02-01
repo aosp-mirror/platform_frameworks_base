@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ວິດີໂອຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"ອ່ານໄຟລ໌ຮູບຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ຮູບຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"ອ່ານໄຟລ໌ຮູບ ແລະ ວິດີໂອທີ່ຜູ້ໃຊ້ເລືອກຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ຮູບ ແລະ ວິດີໂອທີ່ທ່ານເລືອກຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ແກ້ໄຂ ຫຼືລຶບເນື້ອຫາໃນບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ອະນຸຍາດໃຫ້ແອັບຂຽນເນື້ອຫາຕ່າງໆຂອງບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"ຮັບສາຍ/ໂທອອກ ຜ່ານ SIP"</string>
