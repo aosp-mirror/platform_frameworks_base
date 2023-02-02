@@ -3986,6 +3986,56 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 args, callback, resultReceiver);
     }
 
+    private void dumpWallpaper(WallpaperData wallpaper, PrintWriter pw) {
+        pw.print(" User "); pw.print(wallpaper.userId);
+        pw.print(": id="); pw.print(wallpaper.wallpaperId);
+        pw.print(": mWhich="); pw.print(wallpaper.mWhich);
+        pw.print(": mSystemWasBoth="); pw.println(wallpaper.mSystemWasBoth);
+        pw.println(" Display state:");
+        mWallpaperDisplayHelper.forEachDisplayData(wpSize -> {
+            pw.print("  displayId=");
+            pw.println(wpSize.mDisplayId);
+            pw.print("  mWidth=");
+            pw.print(wpSize.mWidth);
+            pw.print("  mHeight=");
+            pw.println(wpSize.mHeight);
+            pw.print("  mPadding="); pw.println(wpSize.mPadding);
+        });
+        pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
+        pw.print("  mName=");  pw.println(wallpaper.name);
+        pw.print("  mAllowBackup="); pw.println(wallpaper.allowBackup);
+        pw.print("  mWallpaperComponent="); pw.println(wallpaper.wallpaperComponent);
+        pw.print("  mWallpaperDimAmount="); pw.println(wallpaper.mWallpaperDimAmount);
+        pw.print("  isColorExtracted="); pw.println(wallpaper.mIsColorExtractedFromDim);
+        pw.println("  mUidToDimAmount:");
+        for (Map.Entry<Integer, Float> entry : wallpaper.mUidToDimAmount.entrySet()) {
+            pw.print("    UID="); pw.print(entry.getKey());
+            pw.print(" dimAmount="); pw.println(entry.getValue());
+        }
+        if (wallpaper.connection != null) {
+            WallpaperConnection conn = wallpaper.connection;
+            pw.print("  Wallpaper connection ");
+            pw.print(conn);
+            pw.println(":");
+            if (conn.mInfo != null) {
+                pw.print("    mInfo.component=");
+                pw.println(conn.mInfo.getComponent());
+            }
+            conn.forEachDisplayConnector(connector -> {
+                pw.print("     mDisplayId=");
+                pw.println(connector.mDisplayId);
+                pw.print("     mToken=");
+                pw.println(connector.mToken);
+                pw.print("     mEngine=");
+                pw.println(connector.mEngine);
+            });
+            pw.print("    mService=");
+            pw.println(conn.mService);
+            pw.print("    mLastDiedTime=");
+            pw.println(wallpaper.lastDiedTime - SystemClock.uptimeMillis());
+        }
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -3996,90 +4046,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         synchronized (mLock) {
             pw.println("System wallpaper state:");
             for (int i = 0; i < mWallpaperMap.size(); i++) {
-                WallpaperData wallpaper = mWallpaperMap.valueAt(i);
-                pw.print(" User "); pw.print(wallpaper.userId);
-                pw.print(": id="); pw.println(wallpaper.wallpaperId);
-                pw.println(" Display state:");
-                mWallpaperDisplayHelper.forEachDisplayData(wpSize -> {
-                    pw.print("  displayId=");
-                    pw.println(wpSize.mDisplayId);
-                    pw.print("  mWidth=");
-                    pw.print(wpSize.mWidth);
-                    pw.print("  mHeight=");
-                    pw.println(wpSize.mHeight);
-                    pw.print("  mPadding="); pw.println(wpSize.mPadding);
-                });
-                pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
-                pw.print("  mName=");  pw.println(wallpaper.name);
-                pw.print("  mAllowBackup="); pw.println(wallpaper.allowBackup);
-                pw.print("  mWallpaperComponent="); pw.println(wallpaper.wallpaperComponent);
-                pw.print("  mWallpaperDimAmount="); pw.println(wallpaper.mWallpaperDimAmount);
-                pw.print("  isColorExtracted="); pw.println(wallpaper.mIsColorExtractedFromDim);
-                pw.println("  mUidToDimAmount:");
-                for (Map.Entry<Integer, Float> entry : wallpaper.mUidToDimAmount.entrySet()) {
-                    pw.print("    UID="); pw.print(entry.getKey());
-                    pw.print(" dimAmount="); pw.println(entry.getValue());
-                }
-                if (wallpaper.connection != null) {
-                    WallpaperConnection conn = wallpaper.connection;
-                    pw.print("  Wallpaper connection ");
-                    pw.print(conn);
-                    pw.println(":");
-                    if (conn.mInfo != null) {
-                        pw.print("    mInfo.component=");
-                        pw.println(conn.mInfo.getComponent());
-                    }
-                    conn.forEachDisplayConnector(connector -> {
-                        pw.print("     mDisplayId=");
-                        pw.println(connector.mDisplayId);
-                        pw.print("     mToken=");
-                        pw.println(connector.mToken);
-                        pw.print("     mEngine=");
-                        pw.println(connector.mEngine);
-                    });
-                    pw.print("    mService=");
-                    pw.println(conn.mService);
-                    pw.print("    mLastDiedTime=");
-                    pw.println(wallpaper.lastDiedTime - SystemClock.uptimeMillis());
-                }
+                dumpWallpaper(mWallpaperMap.valueAt(i), pw);
             }
             pw.println("Lock wallpaper state:");
             for (int i = 0; i < mLockWallpaperMap.size(); i++) {
-                WallpaperData wallpaper = mLockWallpaperMap.valueAt(i);
-                pw.print(" User "); pw.print(wallpaper.userId);
-                pw.print(": id="); pw.println(wallpaper.wallpaperId);
-                pw.print("  mCropHint="); pw.println(wallpaper.cropHint);
-                pw.print("  mName=");  pw.println(wallpaper.name);
-                pw.print("  mAllowBackup="); pw.println(wallpaper.allowBackup);
-                pw.print("  mWallpaperDimAmount="); pw.println(wallpaper.mWallpaperDimAmount);
+                dumpWallpaper(mLockWallpaperMap.valueAt(i), pw);
             }
             pw.println("Fallback wallpaper state:");
-            pw.print(" User "); pw.print(mFallbackWallpaper.userId);
-            pw.print(": id="); pw.println(mFallbackWallpaper.wallpaperId);
-            pw.print("  mCropHint="); pw.println(mFallbackWallpaper.cropHint);
-            pw.print("  mName=");  pw.println(mFallbackWallpaper.name);
-            pw.print("  mAllowBackup="); pw.println(mFallbackWallpaper.allowBackup);
-            if (mFallbackWallpaper.connection != null) {
-                WallpaperConnection conn = mFallbackWallpaper.connection;
-                pw.print("  Fallback Wallpaper connection ");
-                pw.print(conn);
-                pw.println(":");
-                if (conn.mInfo != null) {
-                    pw.print("    mInfo.component=");
-                    pw.println(conn.mInfo.getComponent());
-                }
-                conn.forEachDisplayConnector(connector -> {
-                    pw.print("     mDisplayId=");
-                    pw.println(connector.mDisplayId);
-                    pw.print("     mToken=");
-                    pw.println(connector.mToken);
-                    pw.print("     mEngine=");
-                    pw.println(connector.mEngine);
-                });
-                pw.print("    mService=");
-                pw.println(conn.mService);
-                pw.print("    mLastDiedTime=");
-                pw.println(mFallbackWallpaper.lastDiedTime - SystemClock.uptimeMillis());
+            if (mFallbackWallpaper != null) {
+                dumpWallpaper(mFallbackWallpaper, pw);
             }
         }
     }
