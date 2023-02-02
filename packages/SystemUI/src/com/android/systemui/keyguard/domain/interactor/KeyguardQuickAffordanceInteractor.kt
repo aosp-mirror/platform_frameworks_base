@@ -367,6 +367,10 @@ constructor(
                 name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_FULLSCREEN_PREVIEW,
                 value = featureFlags.isEnabled(Flags.WALLPAPER_FULLSCREEN_PREVIEW),
             ),
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_MONOCHROMATIC_THEME,
+                value = featureFlags.isEnabled(Flags.MONOCHROMATIC_THEME)
+            )
         )
     }
 
