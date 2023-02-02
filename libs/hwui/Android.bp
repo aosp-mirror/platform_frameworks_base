@@ -511,6 +511,7 @@ cc_defaults {
         "canvas/CanvasOpBuffer.cpp",
         "canvas/CanvasOpRasterizer.cpp",
         "effects/StretchEffect.cpp",
+        "effects/GainmapRenderer.cpp",
         "pipeline/skia/HolePunch.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
         "pipeline/skia/SkiaRecordingCanvas.cpp",

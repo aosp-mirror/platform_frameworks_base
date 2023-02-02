@@ -102,6 +102,8 @@ private:
      */
     void initDisplayList(uirenderer::RenderNode* renderNode, int width, int height);
 
+    void handleMutableImages(Bitmap& bitmap, DrawImagePayload& payload);
+
     using INHERITED = SkiaCanvas;
 };
 
