@@ -103,7 +103,7 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.storage.AppFuseBridge { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.tv.TvInputHal { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbAlsaJackDetector { *; }
--keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbMidiDevice { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbAlsaMidiDevice { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.vibrator.VibratorController$OnVibrationCompleteListener { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.vibrator.VibratorManagerService$OnSyncedVibrationCompleteListener { *; }
 -keepclasseswithmembers,allowoptimization,allowaccessmodification class com.android.server.** {
