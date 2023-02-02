@@ -2409,6 +2409,8 @@ package android.provider {
     field public static final String DISABLE_WINDOW_BLURS = "disable_window_blurs";
     field public static final String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
     field public static final String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
+    field public static final String HDR_CONVERSION_MODE = "hdr_conversion_mode";
+    field public static final String HDR_FORCE_CONVERSION_TYPE = "hdr_force_conversion_type";
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
     field public static final String HIDDEN_API_POLICY = "hidden_api_policy";
     field public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
