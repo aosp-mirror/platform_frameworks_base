@@ -36,7 +36,7 @@ private const val TITLE = "Sample Illustration"
 
 object IllustrationPageProvider : SettingsPageProvider {
     override val name = "Illustration"
-    val owner = createSettingsPage()
+    private val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val entryList = mutableListOf<SettingsEntry>()

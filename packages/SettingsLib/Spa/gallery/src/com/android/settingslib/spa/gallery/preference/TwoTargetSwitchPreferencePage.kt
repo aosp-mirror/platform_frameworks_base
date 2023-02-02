@@ -40,7 +40,7 @@ private const val TITLE = "Sample TwoTargetSwitchPreference"
 
 object TwoTargetSwitchPreferencePageProvider : SettingsPageProvider {
     override val name = "TwoTargetSwitchPreference"
-    val owner = createSettingsPage()
+    private val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val entryList = mutableListOf<SettingsEntry>()

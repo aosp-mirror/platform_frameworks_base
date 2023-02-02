@@ -46,7 +46,7 @@ private const val TITLE = "Sample Chart"
 
 object ChartPageProvider : SettingsPageProvider {
     override val name = "Chart"
-    val owner = createSettingsPage()
+    private val owner = createSettingsPage()
 
     override fun getTitle(arguments: Bundle?): String {
         return TITLE
