@@ -1058,6 +1058,18 @@ public abstract class BackupAgent extends ContextWrapper {
     public void onRestoreFinished() {
     }
 
+    /**
+     * Clears all pending logs currently stored in the agent's event logger.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public final void clearBackupRestoreEventLogger() {
+        if (mLogger != null) {
+            mLogger.clearData();
+        }
+    }
+
     // ----- Core implementation -----
 
     /** @hide */
@@ -1345,6 +1357,20 @@ public abstract class BackupAgent extends ContextWrapper {
                 in.complete(mLogger.getLoggingResults());
             } else {
                 in.complete(Collections.emptyList());
+            }
+        }
+
+        @Override
+        public void clearBackupRestoreEventLogger() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                BackupAgent.this.clearBackupRestoreEventLogger();
+            } catch (Exception e) {
+                Log.d(TAG, "clearBackupRestoreEventLogger (" + BackupAgent.this.getClass().getName()
+                        + ") threw", e);
+                throw e;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
     }
