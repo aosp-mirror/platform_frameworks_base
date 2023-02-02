@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"앱이 공유 저장소에서 동영상 파일을 읽도록 허용합니다."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"공유 저장소에서 이미지 파일 읽기"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"앱이 공유 저장소에서 이미지 파일을 읽도록 허용합니다."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"공유 저장소에서 사용자가 선택한 이미지 및 동영상 파일 읽기"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"앱이 공유 저장소에서 내가 선택한 이미지와 동영상 파일을 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"공유 저장공간의 콘텐츠 수정 또는 삭제"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"앱이 공유 저장공간의 콘텐츠에 쓰도록 허용합니다."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP 통화 발신/수신"</string>

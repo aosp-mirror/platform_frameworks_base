@@ -90,7 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Perangkat dikunci oleh admin"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Perangkat dikunci secara manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Tidak dikenali"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Untuk menggunakan Face Unlock, aktifkan "<b>"Akses kamera"</b>" di Setelan &gt; Privasi"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Untuk menggunakan Buka dengan Wajah, aktifkan "<b>"Akses kamera"</b>" di Setelan &gt; Privasi"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">Masukkan PIN SIM. Tersisa <xliff:g id="NUMBER_1">%d</xliff:g> percobaan.</item>
       <item quantity="one">Masukkan PIN SIM. Tersisa <xliff:g id="NUMBER_0">%d</xliff:g> percobaan sebelum Anda harus menghubungi operator untuk membuka kunci perangkat.</item>

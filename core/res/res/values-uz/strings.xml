@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Ilovaga video fayllarni umumiy xotiradan oʻqish imkonini beradi."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"umumiy xotiradan rasmli fayllarni oʻqish"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Ilovaga rasm fayllarini umumiy xotiradan oʻqish imkonini beradi."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"umumiy xotiradan siz tanlagan rasm va video fayllarni oʻqish"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Ilovaga siz tanlagan rasm va video fayllarni umumiy xotiradan oʻqish imkonini beradi."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"umumiy xotiradagi kontentlarni tahrirlash yoki oʻchirib tashlash"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Ilovaga umumiy xotiradagi kontentlarga yozish imkonini beradi."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP qo‘ng‘iroqlarini amalga oshirish/qabul qilish"</string>

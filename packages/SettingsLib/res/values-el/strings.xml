@@ -317,7 +317,7 @@
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Χωρίς μέτρηση με βάση τη χρήση"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Μέγεθος προσωρινής μνήμης για τη λειτουργία καταγραφής"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Μέγεθος αρχείων κατ/φής ανά προ/νή μνήμη αρχείου κατ/φής"</string>
-    <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Διαγραφή αποθηκευτικού χώρου μόνιμων αρχείων καταγραφής;"</string>
+    <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Εκκαθάριση αποθηκευτικού χώρου μόνιμων αρχείων καταγραφής;"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Όταν δεν γίνεται πλέον παρακολούθηση με μόνιμο αρχείο καταγραφής, θα πρέπει να διαγραφούν τα δεδομένα του αρχείου καταγραφής στη συσκευή σας."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"Αποθ.δεδ.αρχείων κατ.μόνιμα στη συσκ."</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Επιλογή αρχείων καταγραφής προσωρινής μνήμης για αποθήκευση μόνιμα στη συσκευή"</string>

@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ವೀಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಚಿತ್ರದ ಫೈಲ್‌ಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಚಿತ್ರದ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ಬಳಕೆದಾರರು ಆಯ್ಕೆಮಾಡಿದ ಚಿತ್ರ ಮತ್ತು ವೀಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಓದಿರಿ"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯಿಂದ ನೀವು ಆಯ್ಕೆಮಾಡಿದ ಚಿತ್ರ ಮತ್ತು ವೀಡಿಯೊ ಫೈಲ್‌ಗಳನ್ನು ಓದಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ ಅಥವಾ ಅಳಿಸಿ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸಂಗ್ರಹಣೆಯ ವಿಷಯಗಳನ್ನು ಬರೆಯಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"ಎಸ್‌ಐಪಿ ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>
@@ -1168,7 +1170,7 @@
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ಕ್ರಿಯೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"ಇದರ ಮೂಲಕ ತೆರೆಯಿರಿ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$s ಜೊತೆಗೆ ತೆರೆಯಿರಿ"</string>
-    <string name="whichViewApplicationLabel" msgid="7367556735684742409">"ತೆರೆ"</string>
+    <string name="whichViewApplicationLabel" msgid="7367556735684742409">"ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"ಇವುಗಳ ಮೂಲಕ <xliff:g id="HOST">%1$s</xliff:g> ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"ಇವುಗಳ ಮೂಲಕ ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"<xliff:g id="APPLICATION">%1$s</xliff:g> ಮೂಲಕ ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
@@ -1356,7 +1358,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ಅನ್‌ಲಾಗ್ ಆಡಿಯೋ ಪರಿಕರ ಪತ್ತೆಯಾಗಿದೆ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ಲಗತ್ತಿಸಲಾದ ಸಾಧನವು ಈ ಫೋನಿನೊಂದಿಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ ಕನೆಕ್ಟ್‌ ಆಗಿದೆ"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ಡೀಬಗಿಂಗ್ ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>

@@ -692,6 +692,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permite que la app lea los archivos de video del almacenamiento compartido."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"leer los archivos de imagen del almacenamiento compartido"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Permite que la app lea los archivos de imagen del almacenamiento compartido."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"leer los archivos de imagen y video que el usuario haya seleccionado del almacenamiento compartido"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Permite que la app lea los archivos de imagen y video que selecciones del almacenamiento compartido."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"cambiar o borrar contenido de almacenamiento compartido"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Editar almacen. compartido"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"realizar/recibir llamadas SIP"</string>
@@ -1157,8 +1159,8 @@
     <string name="no" msgid="5122037903299899715">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Atención"</string>
     <string name="loading" msgid="3138021523725055037">"Cargando…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"Sí"</string>
-    <string name="capital_off" msgid="7443704171014626777">"No"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ACTIVADO"</string>
+    <string name="capital_off" msgid="7443704171014626777">"Desactivado"</string>
     <string name="checked" msgid="9179896827054513119">"activado"</string>
     <string name="not_checked" msgid="7972320087569023342">"desactivado"</string>
     <string name="selected" msgid="6614607926197755875">"seleccionado"</string>

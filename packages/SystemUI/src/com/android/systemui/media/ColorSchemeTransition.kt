@@ -37,7 +37,7 @@ import com.android.systemui.util.getColorWithAlpha
  * is triggered.
  */
 interface ColorTransition {
-    fun updateColorScheme(scheme: ColorScheme?)
+    fun updateColorScheme(scheme: ColorScheme?): Boolean
 }
 
 /**
@@ -67,14 +67,16 @@ open class AnimatingColorTransition(
         applyColor(currentColor)
     }
 
-    override fun updateColorScheme(scheme: ColorScheme?) {
+    override fun updateColorScheme(scheme: ColorScheme?): Boolean {
         val newTargetColor = if (scheme == null) defaultColor else extractColor(scheme)
         if (newTargetColor != targetColor) {
             sourceColor = currentColor
             targetColor = newTargetColor
             valueAnimator.cancel()
             valueAnimator.start()
+            return true
         }
+        return false
     }
 
     init {
@@ -235,9 +237,11 @@ class ColorSchemeTransition internal constructor(
         return Utils.getColorAttr(context, id).defaultColor
     }
 
-    fun updateColorScheme(colorScheme: ColorScheme?, enableGradient: Boolean) {
+    fun updateColorScheme(colorScheme: ColorScheme?, enableGradient: Boolean): Boolean {
         isGradientEnabled = enableGradient
-        colorTransitions.forEach { it.updateColorScheme(colorScheme) }
+        var anyChanged = false
+        colorTransitions.forEach { anyChanged = it.updateColorScheme(colorScheme) || anyChanged }
         colorScheme?.let { mediaViewHolder.gutsViewHolder.colorScheme = colorScheme }
+        return anyChanged
     }
 }

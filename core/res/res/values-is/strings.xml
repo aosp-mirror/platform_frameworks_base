@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Leyfir forritinu að lesa myndskeiðaskrár úr samnýtta geymslurýminu þínu."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"lesa myndskrár úr samnýttu geymslurými"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Leyfir forritinu að lesa myndskrár úr samnýtta geymslurýminu þínu."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"lesa mynd- og myndskeiðaskrár sem notendur velja úr samnýttu geymslurými"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Leyfir forritinu að lesa mynd- og myndskeiðaskrár sem þú velur úr samnýtta geymslurýminu þínu."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"breyta eða eyða innihaldi samnýtta geymslurýmisins"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Leyfir forriti að skrifa í innihald samnýtta geymslurýmisins."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"hringja/svara SIP-símtölum"</string>
