@@ -121,6 +121,7 @@ package android {
     field public static final String INTERACT_ACROSS_PROFILES = "android.permission.INTERACT_ACROSS_PROFILES";
     field public static final String INTERNET = "android.permission.INTERNET";
     field public static final String KILL_BACKGROUND_PROCESSES = "android.permission.KILL_BACKGROUND_PROCESSES";
+    field public static final String LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE = "android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE";
     field public static final String LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK = "android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK";
     field public static final String LOADER_USAGE_STATS = "android.permission.LOADER_USAGE_STATS";
     field public static final String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
@@ -7197,6 +7198,7 @@ package android.app {
   }
 
   public class StatusBarManager {
+    method @RequiresPermission(android.Manifest.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE) public boolean canLaunchCaptureContentActivityForNote(@NonNull android.app.Activity);
     method public void requestAddTileService(@NonNull android.content.ComponentName, @NonNull CharSequence, @NonNull android.graphics.drawable.Icon, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
     field public static final int TILE_ADD_REQUEST_ERROR_APP_NOT_IN_FOREGROUND = 1004; // 0x3ec
     field public static final int TILE_ADD_REQUEST_ERROR_BAD_COMPONENT = 1002; // 0x3ea
@@ -10711,6 +10713,7 @@ package android.content {
     field public static final String ACTION_INSERT_OR_EDIT = "android.intent.action.INSERT_OR_EDIT";
     field public static final String ACTION_INSTALL_FAILURE = "android.intent.action.INSTALL_FAILURE";
     field @Deprecated public static final String ACTION_INSTALL_PACKAGE = "android.intent.action.INSTALL_PACKAGE";
+    field @RequiresPermission(android.Manifest.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE) public static final String ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE = "android.intent.action.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE";
     field public static final String ACTION_LOCALE_CHANGED = "android.intent.action.LOCALE_CHANGED";
     field public static final String ACTION_LOCKED_BOOT_COMPLETED = "android.intent.action.LOCKED_BOOT_COMPLETED";
     field public static final String ACTION_MAIN = "android.intent.action.MAIN";
@@ -10804,6 +10807,11 @@ package android.content {
     field public static final String ACTION_VOICE_COMMAND = "android.intent.action.VOICE_COMMAND";
     field @Deprecated public static final String ACTION_WALLPAPER_CHANGED = "android.intent.action.WALLPAPER_CHANGED";
     field public static final String ACTION_WEB_SEARCH = "android.intent.action.WEB_SEARCH";
+    field public static final int CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN = 4; // 0x4
+    field public static final int CAPTURE_CONTENT_FOR_NOTE_FAILED = 1; // 0x1
+    field public static final int CAPTURE_CONTENT_FOR_NOTE_SUCCESS = 0; // 0x0
+    field public static final int CAPTURE_CONTENT_FOR_NOTE_USER_CANCELED = 2; // 0x2
+    field public static final int CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED = 3; // 0x3
     field public static final String CATEGORY_ACCESSIBILITY_SHORTCUT_TARGET = "android.intent.category.ACCESSIBILITY_SHORTCUT_TARGET";
     field public static final String CATEGORY_ALTERNATIVE = "android.intent.category.ALTERNATIVE";
     field public static final String CATEGORY_APP_BROWSER = "android.intent.category.APP_BROWSER";
@@ -10859,6 +10867,7 @@ package android.content {
     field public static final String EXTRA_AUTO_LAUNCH_SINGLE_CHOICE = "android.intent.extra.AUTO_LAUNCH_SINGLE_CHOICE";
     field public static final String EXTRA_BCC = "android.intent.extra.BCC";
     field public static final String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
+    field public static final String EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE = "android.intent.extra.CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE";
     field public static final String EXTRA_CC = "android.intent.extra.CC";
     field @Deprecated public static final String EXTRA_CHANGED_COMPONENT_NAME = "android.intent.extra.changed_component_name";
     field public static final String EXTRA_CHANGED_COMPONENT_NAME_LIST = "android.intent.extra.changed_component_name_list";

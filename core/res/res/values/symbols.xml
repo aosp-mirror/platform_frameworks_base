@@ -370,6 +370,7 @@
   <java-symbol type="string" name="config_controlsPackage" />
   <java-symbol type="string" name="config_screenRecorderComponent" />
   <java-symbol type="string" name="config_somnambulatorComponent" />
+  <java-symbol type="string" name="config_screenshotAppClipsServiceComponent" />
   <java-symbol type="string" name="config_screenshotServiceComponent" />
   <java-symbol type="string" name="config_screenshotErrorReceiverComponent" />
   <java-symbol type="string" name="config_slicePermissionComponent" />

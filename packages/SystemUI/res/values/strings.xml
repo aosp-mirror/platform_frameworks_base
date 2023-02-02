@@ -247,6 +247,8 @@
     <string name="screenshot_detected_template"><xliff:g id="appName" example="Google Chrome">%1$s</xliff:g> detected this screenshot.</string>
     <!-- A notice shown to the user to indicate that multiple apps have detected the screenshot that the user has just taken. [CHAR LIMIT=75] -->
     <string name="screenshot_detected_multiple_template"><xliff:g id="appName" example="Google Chrome">%1$s</xliff:g> and other open apps detected this screenshot.</string>
+    <!-- Add to note button used in App Clips flow to return the saved screenshot image to notes app. [CHAR LIMIT=NONE] -->
+    <string name="app_clips_save_add_to_note">Add to note</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_name">Screen Recorder</string>

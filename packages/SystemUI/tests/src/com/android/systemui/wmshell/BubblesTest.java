@@ -74,6 +74,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.view.IWindowManager;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -392,7 +393,8 @@ public class BubblesTest extends SysuiTestCase {
                 syncExecutor,
                 mock(Handler.class),
                 mTaskViewTransitions,
-                mock(SyncTransactionQueue.class));
+                mock(SyncTransactionQueue.class),
+                mock(IWindowManager.class));
         mBubbleController.setExpandListener(mBubbleExpandListener);
         spyOn(mBubbleController);
 

@@ -3233,6 +3233,12 @@
     <string name="config_somnambulatorComponent" translatable="false"
             >com.android.systemui/com.android.systemui.Somnambulator</string>
 
+    <!-- The component name of the screenshot App Clips service that communicates with SystemUI to
+         evaluate certain aspects of App Clips flow such as whether a calling activity can launch
+         capture content for note activity. -->
+    <string name="config_screenshotAppClipsServiceComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.screenshot.appclips.AppClipsService</string>
+
     <!-- The component name of a special dock app that merely launches a dream.
          We don't want to launch this app when docked because it causes an unnecessary
          activity transition.  We just want to start the dream.. -->
