@@ -20,9 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.app.compat.CompatChanges;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
@@ -31,7 +28,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArraySet;
@@ -186,28 +182,6 @@ public class IntentFilter implements Parcelable {
     private static final boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
 
     /**
-     * An intent with action set as null used to always pass the action test during intent
-     * filter matching. This causes a lot of confusion and unexpected intent matches.
-     * Null action intents should be blocked when either the intent sender or receiver
-     * application targets U or higher.
-     *
-     * mBlockNullAction indicates whether the intent filter owner (intent receiver) is
-     * targeting U+. This value will be properly set by package manager when IntentFilters are
-     * passed to an application, so that when an application is trying to perform intent filter
-     * matching locally, the correct matching algorithm will be chosen.
-     *
-     * When an IntentFilter is sent to system server (e.g. for registering runtime receivers),
-     * the value set in mBlockNullAction will be ignored and overwritten with the correct
-     * value evaluated based on the Binder calling identity. This makes sure that the
-     * security enforcement cannot be bypassed by crafting a malicious IntentFilter.
-     *
-     * @hide
-     */
-    @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
-    public static final long BLOCK_NULL_ACTION_INTENTS = 264497795;
-
-    /**
      * The filter {@link #setPriority} value at which system high-priority
      * receivers are placed; that is, receivers that should execute before
      * application code. Applications should never use filters with this or
@@ -354,8 +328,6 @@ public class IntentFilter implements Parcelable {
     private ArrayList<String> mMimeGroups = null;
     private boolean mHasStaticPartialTypes = false;
     private boolean mHasDynamicPartialTypes = false;
-    private boolean mBlockNullAction = false;
-    private boolean mBlockNullActionEvaluated = false;
     private PersistableBundle mExtras = null;
 
     private static final int STATE_VERIFY_AUTO         = 0x00000001;
@@ -555,8 +527,6 @@ public class IntentFilter implements Parcelable {
         }
         mHasStaticPartialTypes = o.mHasStaticPartialTypes;
         mHasDynamicPartialTypes = o.mHasDynamicPartialTypes;
-        mBlockNullAction = o.getBlockNullAction();
-        mBlockNullActionEvaluated = true;
         mVerifyState = o.mVerifyState;
         mInstantAppVisibility = o.mInstantAppVisibility;
     }
@@ -2233,30 +2203,6 @@ public class IntentFilter implements Parcelable {
     }
 
     /**
-     * @hide
-     */
-    public final void setBlockNullAction(boolean blockNullAction) {
-        mBlockNullAction = blockNullAction;
-        mBlockNullActionEvaluated = true;
-    }
-
-    /**
-     * @hide
-     */
-    public final boolean getBlockNullAction() {
-        if (!mBlockNullActionEvaluated) {
-            if (Process.myUid() == Process.ROOT_UID) {
-                // Do not evaluate the boolean when running as root, as we do not want
-                // the value to be evaluated when classes are being preloaded in Zygote.
-                return true;
-            }
-            mBlockNullAction = CompatChanges.isChangeEnabled(BLOCK_NULL_ACTION_INTENTS);
-            mBlockNullActionEvaluated = true;
-        }
-        return mBlockNullAction;
-    }
-
-    /**
      * Return a {@link Predicate} which tests whether this filter matches the
      * given <var>intent</var>.
      * <p>
@@ -2308,9 +2254,7 @@ public class IntentFilter implements Parcelable {
         String type = resolve ? intent.resolveType(resolver) : intent.getType();
         return match(intent.getAction(), type, intent.getScheme(),
                      intent.getData(), intent.getCategories(), logTag,
-                     false /* supportWildcards */,
-                     CompatChanges.isChangeEnabled(BLOCK_NULL_ACTION_INTENTS),
-                     null /* ignoreActions */,
+                     false /* supportWildcards */, null /* ignoreActions */,
                      intent.getExtras());
     }
 
@@ -2362,7 +2306,6 @@ public class IntentFilter implements Parcelable {
             Uri data, Set<String> categories, String logTag, boolean supportWildcards,
             @Nullable Collection<String> ignoreActions) {
         return match(action, type, scheme, data, categories, logTag, supportWildcards,
-                CompatChanges.isChangeEnabled(BLOCK_NULL_ACTION_INTENTS),
                 ignoreActions, null /* extras */);
     }
 
@@ -2370,19 +2313,12 @@ public class IntentFilter implements Parcelable {
      * Variant of {@link #match(String, String, String, Uri, Set, String, boolean, Collection)}
      * that supports matching the extra values in the intent.
      *
-     * @param blockNullAction This value decides whether to always block null action regardless
-     *                        of the value of mBlockNullAction. Usually this is determined
-     *                        by the caller's target SDK value. For more details, check the
-     *                        documentation for {@link #BLOCK_NULL_ACTION_INTENTS}.
-     *
      * @hide
      */
     public final int match(String action, String type, String scheme,
             Uri data, Set<String> categories, String logTag, boolean supportWildcards,
-            boolean blockNullAction, @Nullable Collection<String> ignoreActions,
-            @Nullable Bundle extras) {
-        if ((action == null && (blockNullAction || getBlockNullAction()))
-                || !matchAction(action, supportWildcards, ignoreActions)) {
+            @Nullable Collection<String> ignoreActions, @Nullable Bundle extras) {
+        if (action != null && !matchAction(action, supportWildcards, ignoreActions)) {
             if (false) Log.v(
                 logTag, "No matching action " + action + " for " + this);
             return NO_MATCH_ACTION;
@@ -2917,7 +2853,6 @@ public class IntentFilter implements Parcelable {
         dest.writeInt(mPriority);
         dest.writeInt(mHasStaticPartialTypes ? 1 : 0);
         dest.writeInt(mHasDynamicPartialTypes ? 1 : 0);
-        dest.writeInt(getBlockNullAction() ? 1 : 0);
         dest.writeInt(getAutoVerify() ? 1 : 0);
         dest.writeInt(mInstantAppVisibility);
         dest.writeInt(mOrder);
@@ -3027,8 +2962,6 @@ public class IntentFilter implements Parcelable {
         mPriority = source.readInt();
         mHasStaticPartialTypes = source.readInt() > 0;
         mHasDynamicPartialTypes = source.readInt() > 0;
-        mBlockNullAction = source.readInt() > 0;
-        mBlockNullActionEvaluated = true;
         setAutoVerify(source.readInt() > 0);
         setVisibilityToInstantApp(source.readInt());
         mOrder = source.readInt();

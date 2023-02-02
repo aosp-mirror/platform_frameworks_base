@@ -16,16 +16,13 @@
 
 package com.android.server.pm;
 
-import static android.content.IntentFilter.BLOCK_NULL_ACTION_INTENTS;
 import static android.os.Process.THREAD_PRIORITY_DEFAULT;
 
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.compat.CompatChanges;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -142,26 +139,19 @@ final class AppsFilterUtils {
 
     private static boolean matchesPackage(Intent intent, AndroidPackage potentialTarget,
             WatchedArraySet<String> protectedBroadcasts) {
-        final boolean blockNullAction = CompatChanges.isChangeEnabled(BLOCK_NULL_ACTION_INTENTS,
-                potentialTarget.getPackageName(), UserHandle.SYSTEM);
-
         if (matchesAnyComponents(
-                intent, potentialTarget.getServices(), null /*protectedBroadcasts*/,
-                blockNullAction)) {
+                intent, potentialTarget.getServices(), null /*protectedBroadcasts*/)) {
             return true;
         }
         if (matchesAnyComponents(
-                intent, potentialTarget.getActivities(), null /*protectedBroadcasts*/,
-                blockNullAction)) {
+                intent, potentialTarget.getActivities(), null /*protectedBroadcasts*/)) {
             return true;
         }
-        if (matchesAnyComponents(intent, potentialTarget.getReceivers(), protectedBroadcasts,
-                blockNullAction)) {
+        if (matchesAnyComponents(intent, potentialTarget.getReceivers(), protectedBroadcasts)) {
             return true;
         }
         if (matchesAnyComponents(
-                intent, potentialTarget.getProviders(), null /*protectedBroadcasts*/,
-                blockNullAction)) {
+                intent, potentialTarget.getProviders(), null /*protectedBroadcasts*/)) {
             return true;
         }
         return false;
@@ -169,14 +159,13 @@ final class AppsFilterUtils {
 
     private static boolean matchesAnyComponents(Intent intent,
             List<? extends ParsedMainComponent> components,
-            WatchedArraySet<String> protectedBroadcasts,
-            boolean blockNullAction) {
+            WatchedArraySet<String> protectedBroadcasts) {
         for (int i = ArrayUtils.size(components) - 1; i >= 0; i--) {
             ParsedMainComponent component = components.get(i);
             if (!component.isExported()) {
                 continue;
             }
-            if (matchesAnyFilter(intent, component, protectedBroadcasts, blockNullAction)) {
+            if (matchesAnyFilter(intent, component, protectedBroadcasts)) {
                 return true;
             }
         }
@@ -184,11 +173,10 @@ final class AppsFilterUtils {
     }
 
     private static boolean matchesAnyFilter(Intent intent, ParsedComponent component,
-            WatchedArraySet<String> protectedBroadcasts, boolean blockNullAction) {
+            WatchedArraySet<String> protectedBroadcasts) {
         List<ParsedIntentInfo> intents = component.getIntents();
         for (int i = ArrayUtils.size(intents) - 1; i >= 0; i--) {
             IntentFilter intentFilter = intents.get(i).getIntentFilter();
-            intentFilter.setBlockNullAction(blockNullAction);
             if (matchesIntentFilter(intent, intentFilter, protectedBroadcasts)) {
                 return true;
             }
@@ -199,9 +187,8 @@ final class AppsFilterUtils {
     private static boolean matchesIntentFilter(Intent intent, IntentFilter intentFilter,
             @Nullable WatchedArraySet<String> protectedBroadcasts) {
         return intentFilter.match(intent.getAction(), intent.getType(), intent.getScheme(),
-                intent.getData(), intent.getCategories(), "AppsFilter", true, false,
-                protectedBroadcasts != null ? protectedBroadcasts.untrackedStorage() : null,
-                null) > 0;
+                intent.getData(), intent.getCategories(), "AppsFilter", true,
+                protectedBroadcasts != null ? protectedBroadcasts.untrackedStorage() : null) > 0;
     }
 
     /**
