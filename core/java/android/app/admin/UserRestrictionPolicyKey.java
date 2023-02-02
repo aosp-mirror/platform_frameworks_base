@@ -22,26 +22,39 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
-import android.os.Parcelable;
+
+import java.util.Objects;
 
 /**
- * Default implementation for {@link PolicyKey} used to identify a policy that doesn't require any
- * additional arguments to be represented.
+ * Class used to identify a policy that relates to a certain user restriction
+ * (See {@link DevicePolicyManager#addUserRestriction} and
+ * {@link DevicePolicyManager#addUserRestrictionGlobally}).
  *
  * @hide
  */
 @SystemApi
-public final class NoArgsPolicyKey extends PolicyKey {
+public final class UserRestrictionPolicyKey extends PolicyKey {
+
+    private final String mRestriction;
 
     /**
      * @hide
      */
-    public NoArgsPolicyKey(@NonNull String identifier) {
+    public UserRestrictionPolicyKey(@NonNull String identifier, @NonNull String restriction) {
         super(identifier);
+        mRestriction = Objects.requireNonNull(restriction);
     }
 
-    private NoArgsPolicyKey(Parcel source) {
-        this(source.readString());
+    private UserRestrictionPolicyKey(Parcel source) {
+        this(source.readString(), source.readString());
+    }
+
+    /**
+     * Returns the user restriction associated with this policy.
+     */
+    @NonNull
+    public String getRestriction() {
+        return mRestriction;
     }
 
     /**
@@ -60,24 +73,25 @@ public final class NoArgsPolicyKey extends PolicyKey {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getIdentifier());
+        dest.writeString(mRestriction);
     }
 
     @NonNull
-    public static final Parcelable.Creator<NoArgsPolicyKey> CREATOR =
-            new Parcelable.Creator<NoArgsPolicyKey>() {
+    public static final Creator<UserRestrictionPolicyKey> CREATOR =
+            new Creator<UserRestrictionPolicyKey>() {
                 @Override
-                public NoArgsPolicyKey createFromParcel(Parcel source) {
-                    return new NoArgsPolicyKey(source);
+                public UserRestrictionPolicyKey createFromParcel(Parcel source) {
+                    return new UserRestrictionPolicyKey(source);
                 }
 
                 @Override
-                public NoArgsPolicyKey[] newArray(int size) {
-                    return new NoArgsPolicyKey[size];
+                public UserRestrictionPolicyKey[] newArray(int size) {
+                    return new UserRestrictionPolicyKey[size];
                 }
             };
 
     @Override
     public String toString() {
-        return "DefaultPolicyKey " + getIdentifier();
+        return "UserRestrictionPolicyKey " + getIdentifier();
     }
 }

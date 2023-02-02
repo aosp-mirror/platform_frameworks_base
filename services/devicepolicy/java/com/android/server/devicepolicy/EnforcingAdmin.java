@@ -93,6 +93,15 @@ final class EnforcingAdmin {
                 activeAdmin);
     }
 
+
+    static EnforcingAdmin createEnterpriseEnforcingAdmin(
+            @NonNull String packageName, int userId) {
+        Objects.requireNonNull(packageName);
+        return new EnforcingAdmin(
+                packageName, /* componentName= */ null, Set.of(DPC_AUTHORITY), userId,
+                /* activeAdmin= */ null);
+    }
+
     static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName, int userId) {
         Objects.requireNonNull(componentName);
         return new EnforcingAdmin(
@@ -130,10 +139,9 @@ final class EnforcingAdmin {
     }
 
     private EnforcingAdmin(
-            String packageName, ComponentName componentName, Set<String> authorities, int userId,
-            ActiveAdmin activeAdmin) {
+            String packageName, @Nullable ComponentName componentName, Set<String> authorities,
+            int userId, @Nullable ActiveAdmin activeAdmin) {
         Objects.requireNonNull(packageName);
-        Objects.requireNonNull(componentName);
         Objects.requireNonNull(authorities);
 
         // Role authorities should not be using this constructor
@@ -262,10 +270,12 @@ final class EnforcingAdmin {
     @Override
     public int hashCode() {
         if (mIsRoleAuthority) {
-            // TODO(b/256854977): should we add UserId?
-            return Objects.hash(mPackageName);
+            return Objects.hash(mPackageName, mUserId);
         } else {
-            return Objects.hash(mComponentName, getAuthorities());
+            return Objects.hash(
+                    mComponentName == null ? mPackageName : mComponentName,
+                    mUserId,
+                    getAuthorities());
         }
     }
 
@@ -274,8 +284,10 @@ final class EnforcingAdmin {
         serializer.attributeBoolean(/* namespace= */ null, ATTR_IS_ROLE, mIsRoleAuthority);
         serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, mUserId);
         if (!mIsRoleAuthority) {
-            serializer.attribute(
-                    /* namespace= */ null, ATTR_CLASS_NAME, mComponentName.getClassName());
+            if (mComponentName != null) {
+                serializer.attribute(
+                        /* namespace= */ null, ATTR_CLASS_NAME, mComponentName.getClassName());
+            }
             // Role authorities get recomputed on load so no need to save them.
             serializer.attribute(
                     /* namespace= */ null,
@@ -295,7 +307,8 @@ final class EnforcingAdmin {
             return new EnforcingAdmin(packageName, userId, null);
         } else {
             String className = parser.getAttributeValue(/* namespace= */ null, ATTR_CLASS_NAME);
-            ComponentName componentName = new ComponentName(packageName, className);
+            ComponentName componentName = className == null
+                    ? null :  new ComponentName(packageName, className);
             Set<String> authorities = Set.of(authoritiesStr.split(ATTR_AUTHORITIES_SEPARATOR));
             return new EnforcingAdmin(packageName, componentName, authorities, userId, null);
         }

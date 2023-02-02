@@ -11252,6 +11252,13 @@ public class DevicePolicyManager {
      * See the constants in {@link android.os.UserManager} for the list of restrictions that can
      * be enforced device-wide.
      *
+     * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
+     * above, calling this API will result in applying the restriction locally on the calling user,
+     * or locally on the parent profile if called from the
+     * {@link DevicePolicyManager} instance obtained from
+     * {@link #getParentProfileInstance(ComponentName)}. To set a restriction globally, call
+     * {@link #addUserRestrictionGlobally} instead.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param key   The key of the restriction.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
@@ -11260,7 +11267,38 @@ public class DevicePolicyManager {
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
             try {
-                mService.setUserRestriction(admin, key, true, mParentInstance);
+                mService.setUserRestriction(
+                        admin, mContext.getPackageName(), key, true, mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by a profile or device owner to set a user restriction specified by the provided
+     * {@code key} globally on all users. To clear the restriction use
+     * {@link #clearUserRestriction}.
+     *
+     * <p>For a given user, a restriction will be set if it was applied globally or locally by any
+     * admin.
+     *
+     * <p> The calling device admin must be a profile or device owner; if it is not, a security
+     * exception will be thrown.
+     *
+     * <p> See the constants in {@link android.os.UserManager} for the list of restrictions that can
+     * be enforced device-wide.
+     *
+     * @param key The key of the restriction.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws IllegalStateException if caller is not targeting Android
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or above.
+     */
+    public void addUserRestrictionGlobally(@NonNull @UserManager.UserRestrictionKey String key) {
+        throwIfParentInstance("addUserRestrictionGlobally");
+        if (mService != null) {
+            try {
+                mService.setUserRestrictionGlobally(mContext.getPackageName(), key);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11279,6 +11317,10 @@ public class DevicePolicyManager {
      * <p>
      * See the constants in {@link android.os.UserManager} for the list of restrictions.
      *
+     * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
+     * above, calling this API will result in clearing any local and global restriction with the
+     * specified key that was previously set by the caller.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param key   The key of the restriction.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
@@ -11287,7 +11329,8 @@ public class DevicePolicyManager {
             @UserManager.UserRestrictionKey String key) {
         if (mService != null) {
             try {
-                mService.setUserRestriction(admin, key, false, mParentInstance);
+                mService.setUserRestriction(
+                        admin, mContext.getPackageName(), key, false, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11307,6 +11350,18 @@ public class DevicePolicyManager {
      * {@link #getParentProfileInstance(ComponentName)}, for retrieving device-wide restrictions
      * it previously set with {@link #addUserRestriction(ComponentName, String)}.
      *
+     * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
+     * above, this API will return the local restrictions set on the calling user, or on the parent
+     * profile if called from the {@link DevicePolicyManager} instance obtained from
+     * {@link #getParentProfileInstance(ComponentName)}. To get global restrictions set by admin,
+     * call {@link #getUserRestrictionsGlobally()} instead.
+     *
+     * <p>Note that this is different that the returned restrictions for callers targeting pre
+     * Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, were this API returns
+     * all local/global restrictions set by the admin on the calling user using
+     * {@link #addUserRestriction(ComponentName, String)} or the parent user if called on the
+     * {@link DevicePolicyManager} instance it obtained from {@link #getParentProfileInstance}.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return a {@link Bundle} whose keys are the user restrictions, and the values a
      * {@code boolean} indicating whether the restriction is set.
@@ -11316,7 +11371,33 @@ public class DevicePolicyManager {
         Bundle ret = null;
         if (mService != null) {
             try {
-                ret = mService.getUserRestrictions(admin, mParentInstance);
+                ret = mService.getUserRestrictions(
+                        admin, mContext.getPackageName(), mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return ret == null ? new Bundle() : ret;
+    }
+
+    /**
+     * Called by a profile or device owner to get global user restrictions set with
+     * {@link #addUserRestrictionGlobally(String)}.
+     * <p>
+     * To get all the user restrictions currently set for a certain user, use
+     * {@link UserManager#getUserRestrictions()}.
+     * @return a {@link Bundle} whose keys are the user restrictions, and the values a
+     * {@code boolean} indicating whether the restriction is set.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws IllegalStateException if caller is not targeting Android
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or above.
+     */
+    public @NonNull Bundle getUserRestrictionsGlobally() {
+        throwIfParentInstance("createAdminSupportIntent");
+        Bundle ret = null;
+        if (mService != null) {
+            try {
+                ret = mService.getUserRestrictionsGlobally(mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

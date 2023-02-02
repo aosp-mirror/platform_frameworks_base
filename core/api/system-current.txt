@@ -1558,6 +1558,13 @@ package android.app.admin {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.UnknownAuthority> CREATOR;
   }
 
+  public final class UserRestrictionPolicyKey extends android.app.admin.PolicyKey {
+    method public int describeContents();
+    method @NonNull public String getRestriction();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.UserRestrictionPolicyKey> CREATOR;
+  }
+
 }
 
 package android.app.ambientcontext {
