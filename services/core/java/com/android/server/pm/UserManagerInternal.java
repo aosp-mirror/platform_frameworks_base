@@ -551,11 +551,12 @@ public abstract class UserManagerInternal {
      * switched to.
      *
      * <p>Otherwise, in {@link UserManager#isHeadlessSystemUserMode() headless system user mode},
-     * this will be the user who was last in the foreground on this device. If there is no
-     * switchable user on the device, a new user will be created and its id will be returned.
+     * this will be the user who was last in the foreground on this device.
      *
-     * <p>In non-headless system user mode, the return value will be {@link UserHandle#USER_SYSTEM}.
+     * <p>In non-headless system user mode, the return value will be
+     * {@link android.os.UserHandle#USER_SYSTEM}.
+
+     * @throws UserManager.CheckedUserOperationException if no switchable user can be found
      */
-    public abstract @UserIdInt int getBootUser()
-            throws UserManager.CheckedUserOperationException;
+    public abstract @UserIdInt int getBootUser() throws UserManager.CheckedUserOperationException;
 }
