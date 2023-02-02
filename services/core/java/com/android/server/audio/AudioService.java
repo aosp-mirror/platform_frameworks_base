@@ -3757,8 +3757,19 @@ public class AudioService extends IAudioService.Stub
         return false;
     }
 
-     /*package*/ void onSetStreamVolume(int streamType, int index, int flags, int device,
-            String caller, boolean hasModifyAudioSettings) {
+    /**
+     * Update stream volume, ringer mode and mute status after a volume index change
+     * @param streamType
+     * @param index
+     * @param flags
+     * @param device the device for which the volume is changed
+     * @param caller
+     * @param hasModifyAudioSettings
+     * @param canChangeMute true if the origin of this event is one where the mute state should be
+     *                      updated following the change in volume index
+     */
+    /*package*/ void onSetStreamVolume(int streamType, int index, int flags, int device,
+            String caller, boolean hasModifyAudioSettings, boolean canChangeMute) {
         final int stream = mStreamVolumeAlias[streamType];
         setStreamVolumeInt(stream, index, device, false, caller, hasModifyAudioSettings);
         // setting volume on ui sounds stream type also controls silent mode
@@ -3768,10 +3779,8 @@ public class AudioService extends IAudioService.Stub
                     TAG + ".onSetStreamVolume", false /*external*/);
         }
         // setting non-zero volume for a muted stream unmutes the stream and vice versa
-        // (only when changing volume for the current device),
         // except for BT SCO stream where only explicit mute is allowed to comply to BT requirements
-        if ((streamType != AudioSystem.STREAM_BLUETOOTH_SCO)
-                && (getDeviceForStream(stream) == device)) {
+        if ((streamType != AudioSystem.STREAM_BLUETOOTH_SCO) && canChangeMute) {
             // As adjustStreamVolume with muteAdjust flags mute/unmutes stream and aliased streams.
             muteAliasStreams(stream, index == 0);
         }
@@ -4494,7 +4503,10 @@ public class AudioService extends IAudioService.Stub
 
         if (!mSoundDoseHelper.willDisplayWarningAfterCheckVolume(streamType, index, device,
                 flags)) {
-            onSetStreamVolume(streamType, index, flags, device, caller, hasModifyAudioSettings);
+            onSetStreamVolume(streamType, index, flags, device, caller, hasModifyAudioSettings,
+                    // ada is non-null when called from setDeviceVolume,
+                    // which shouldn't update the mute state
+                    ada == null /*canChangeMute*/);
             index = mStreamStates[streamType].getIndex(device);
         }
 
@@ -5317,7 +5329,8 @@ public class AudioService extends IAudioService.Stub
             if (!shouldMute) {
                 // unmute
                 // ring and notifications volume should never be 0 when not silenced
-                if (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING) {
+                if (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING
+                        || mStreamVolumeAlias[streamType] == AudioSystem.STREAM_NOTIFICATION) {
                     synchronized (VolumeStreamState.class) {
                         final VolumeStreamState vss = mStreamStates[streamType];
                         for (int i = 0; i < vss.mIndexMap.size(); i++) {
@@ -6048,6 +6061,8 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
+        readVolumeGroupsSettings(userSwitch);
+
         // apply new ringer mode before checking volume for alias streams so that streams
         // muted by ringer mode have the correct volume
         setRingerModeInt(getRingerModeInternal(), false);
@@ -6058,8 +6073,6 @@ public class AudioService extends IAudioService.Stub
 
         mSoundDoseHelper.restoreMusicActiveMs();
         mSoundDoseHelper.enforceSafeMediaVolumeIfActive(TAG);
-
-        readVolumeGroupsSettings(userSwitch);
 
         if (DEBUG_VOL) {
             Log.d(TAG, "Restoring device volume behavior");
@@ -8500,7 +8513,8 @@ public class AudioService extends IAudioService.Stub
                     // Only propage mute of stream when applicable
                     if (mIndexMin == 0 || isCallStream(mStreamType)) {
                         // For call stream, align mute only when muted, not when index is set to 0
-                        mVolumeGroupState.mute(forceMuteState ? mIsMuted : groupIndex == 0);
+                        mVolumeGroupState.mute(
+                                forceMuteState ? mIsMuted : groupIndex == 0 || mIsMuted);
                     }
                 }
             }

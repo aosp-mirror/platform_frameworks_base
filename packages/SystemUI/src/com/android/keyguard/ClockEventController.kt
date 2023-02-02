@@ -93,6 +93,8 @@ open class ClockEventController @Inject constructor(
                 if (regionSamplingEnabled) {
                     clock?.smallClock?.view?.addOnLayoutChangeListener(mLayoutChangedListener)
                     clock?.largeClock?.view?.addOnLayoutChangeListener(mLayoutChangedListener)
+                } else {
+                    updateColors()
                 }
                 updateFontSizes()
             }
