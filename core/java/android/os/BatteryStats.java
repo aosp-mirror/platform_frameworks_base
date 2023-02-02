@@ -4356,13 +4356,6 @@ public abstract class BatteryStats {
         }
     }
 
-    /**
-     * Temporary for settings.
-     */
-    public final void dumpCheckinLocked(Context context, PrintWriter pw, int which, int reqUid) {
-        dumpCheckinLocked(context, pw, which, reqUid, checkWifiOnly(context));
-    }
-
     private static final String[] CHECKIN_POWER_COMPONENT_LABELS =
             new String[BatteryConsumer.POWER_COMPONENT_COUNT];
     static {
@@ -7477,22 +7470,8 @@ public abstract class BatteryStats {
     public static final int DUMP_DEVICE_WIFI_ONLY = 1<<6;
 
     private void dumpHistory(PrintWriter pw, int flags, long histStart, boolean checkin) {
-        if (!checkin) {
-            synchronized (this) {
-                final long historyTotalSize = getHistoryTotalSize();
-                final long historyUsedSize = getHistoryUsedSize();
-                pw.print("Battery History (");
-                pw.print((100 * historyUsedSize) / historyTotalSize);
-                pw.print("% used, ");
-                printSizeValue(pw, historyUsedSize);
-                pw.print(" used of ");
-                printSizeValue(pw, historyTotalSize);
-                pw.print(", ");
-                pw.print(getHistoryStringPoolSize());
-                pw.print(" strings using ");
-                printSizeValue(pw, getHistoryStringPoolBytes());
-                pw.println("):");
-            }
+        synchronized (this) {
+            dumpHistoryTagPoolLocked(pw, checkin);
         }
 
         final HistoryPrinter hprinter = new HistoryPrinter();
@@ -7583,6 +7562,43 @@ public abstract class BatteryStats {
         if (histStart >= 0) {
             commitCurrentHistoryBatchLocked();
             pw.print(checkin ? "NEXT: " : "  NEXT: "); pw.println(lastTime+1);
+        }
+    }
+
+    private void dumpHistoryTagPoolLocked(PrintWriter pw, boolean checkin) {
+        if (checkin) {
+            for (int i = 0; i < getHistoryStringPoolSize(); i++) {
+                pw.print(BATTERY_STATS_CHECKIN_VERSION);
+                pw.print(',');
+                pw.print(HISTORY_STRING_POOL);
+                pw.print(',');
+                pw.print(i);
+                pw.print(",");
+                pw.print(getHistoryTagPoolUid(i));
+                pw.print(",\"");
+                String str = getHistoryTagPoolString(i);
+                if (str != null) {
+                    str = str.replace("\\", "\\\\");
+                    str = str.replace("\"", "\\\"");
+                    pw.print(str);
+                }
+                pw.print("\"");
+                pw.println();
+            }
+        } else {
+            final long historyTotalSize = getHistoryTotalSize();
+            final long historyUsedSize = getHistoryUsedSize();
+            pw.print("Battery History (");
+            pw.print((100 * historyUsedSize) / historyTotalSize);
+            pw.print("% used, ");
+            printSizeValue(pw, historyUsedSize);
+            pw.print(" used of ");
+            printSizeValue(pw, historyTotalSize);
+            pw.print(", ");
+            pw.print(getHistoryStringPoolSize());
+            pw.print(" strings using ");
+            printSizeValue(pw, getHistoryStringPoolBytes());
+            pw.println("):");
         }
     }
 
@@ -7804,33 +7820,17 @@ public abstract class BatteryStats {
 
     // This is called from BatteryStatsService.
     @SuppressWarnings("unused")
-    public void dumpCheckinLocked(Context context, PrintWriter pw,
+    public void dumpCheckin(Context context, PrintWriter pw,
             List<ApplicationInfo> apps, int flags, long histStart) {
-        prepareForDumpLocked();
+        synchronized (this) {
+            prepareForDumpLocked();
 
-        dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
-                CHECKIN_VERSION, getParcelVersion(), getStartPlatformVersion(),
-                getEndPlatformVersion());
+            dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
+                    CHECKIN_VERSION, getParcelVersion(), getStartPlatformVersion(),
+                    getEndPlatformVersion());
+        }
 
         if ((flags & (DUMP_INCLUDE_HISTORY | DUMP_HISTORY_ONLY)) != 0) {
-            for (int i = 0; i < getHistoryStringPoolSize(); i++) {
-                pw.print(BATTERY_STATS_CHECKIN_VERSION);
-                pw.print(',');
-                pw.print(HISTORY_STRING_POOL);
-                pw.print(',');
-                pw.print(i);
-                pw.print(",");
-                pw.print(getHistoryTagPoolUid(i));
-                pw.print(",\"");
-                String str = getHistoryTagPoolString(i);
-                if (str != null) {
-                    str = str.replace("\\", "\\\\");
-                    str = str.replace("\"", "\\\"");
-                    pw.print(str);
-                }
-                pw.print("\"");
-                pw.println();
-            }
             dumpHistory(pw, flags, histStart, true);
         }
 
@@ -7838,6 +7838,13 @@ public abstract class BatteryStats {
             return;
         }
 
+        synchronized (this) {
+            dumpCheckinLocked(context, pw, apps, flags);
+        }
+    }
+
+    private void dumpCheckinLocked(Context context, PrintWriter pw, List<ApplicationInfo> apps,
+            int flags) {
         if (apps != null) {
             SparseArray<Pair<ArrayList<String>, MutableBoolean>> uids = new SparseArray<>();
             for (int i=0; i<apps.size(); i++) {
