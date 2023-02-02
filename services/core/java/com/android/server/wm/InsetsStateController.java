@@ -17,9 +17,9 @@
 package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsets.Type.displayCutout;
@@ -38,7 +38,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
@@ -97,14 +96,11 @@ class InsetsStateController {
 
     InsetsStateController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
-        mSourceProviderFunc = type -> {
-            final InsetsSource source = mState.getOrCreateSource(
-                    type, InsetsState.toPublicType(type));
-            if (type == ITYPE_IME) {
-                return new ImeInsetsSourceProvider(source, this, mDisplayContent);
-            }
-            return new WindowContainerInsetsSourceProvider(source, this, mDisplayContent);
-        };
+        mSourceProviderFunc = id -> (id == ID_IME)
+                ? new ImeInsetsSourceProvider(mState.getOrCreateSource(
+                        id, ime()), this, mDisplayContent)
+                : new WindowContainerInsetsSourceProvider(mState.getOrCreateSource(
+                        id, InsetsState.toPublicType(id)), this, mDisplayContent);
     }
 
     InsetsState getRawInsetsState() {
@@ -129,14 +125,14 @@ class InsetsStateController {
     }
 
     /**
-     * @return The provider of a specific type.
+     * @return The provider of a specific source ID.
      */
-    WindowContainerInsetsSourceProvider getSourceProvider(@InternalInsetsType int type) {
-        return mProviders.computeIfAbsent(type, mSourceProviderFunc);
+    WindowContainerInsetsSourceProvider getSourceProvider(int id) {
+        return mProviders.computeIfAbsent(id, mSourceProviderFunc);
     }
 
     ImeInsetsSourceProvider getImeSourceProvider() {
-        return (ImeInsetsSourceProvider) getSourceProvider(ITYPE_IME);
+        return (ImeInsetsSourceProvider) getSourceProvider(ID_IME);
     }
 
     /**
@@ -221,7 +217,7 @@ class InsetsStateController {
         // Make sure that we always have a control target for the IME, even if the IME target is
         // null. Otherwise there is no leash that will hide it and IME becomes "randomly" visible.
         InsetsControlTarget target = imeTarget != null ? imeTarget : mEmptyImeControlTarget;
-        onControlChanged(ITYPE_IME, target);
+        onControlChanged(ID_IME, target);
         ProtoLog.d(WM_DEBUG_IME, "onImeControlTargetChanged %s",
                 target != null ? target.getWindow() : "null");
         notifyPendingInsetsControlChanged();

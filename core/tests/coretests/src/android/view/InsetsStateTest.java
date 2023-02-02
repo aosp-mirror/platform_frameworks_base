@@ -18,15 +18,9 @@ package android.view;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ISIDE_BOTTOM;
 import static android.view.InsetsState.ISIDE_TOP;
-import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
-import static android.view.InsetsState.ITYPE_CAPTION_BAR;
-import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
 import static android.view.RoundedCorner.POSITION_BOTTOM_RIGHT;
 import static android.view.RoundedCorner.POSITION_TOP_LEFT;
@@ -80,15 +74,28 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class InsetsStateTest {
 
-    private InsetsState mState = new InsetsState();
-    private InsetsState mState2 = new InsetsState();
+    private static final int ID_STATUS_BAR = InsetsSource.createId(
+            null /* owner */, 0 /* index */, statusBars());
+    private static final int ID_NAVIGATION_BAR = InsetsSource.createId(
+            null /* owner */, 0 /* index */, navigationBars());
+    private static final int ID_CAPTION_BAR = InsetsSource.createId(
+            null /* owner */, 0 /* index */, captionBar());
+    private static final int ID_CLIMATE_BAR = InsetsSource.createId(
+            null /* owner */, 1 /* index */, statusBars());
+    private static final int ID_EXTRA_NAVIGATION_BAR = InsetsSource.createId(
+            null /* owner */, 1 /* index */, navigationBars());
+    private static final int ID_BOTTOM_GESTURES = InsetsSource.createId(
+            null /* owner */, 0 /* index */, systemGestures());
+
+    private final InsetsState mState = new InsetsState();
+    private final InsetsState mState2 = new InsetsState();
 
     @Test
     public void testCalculateInsets() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 200, 100, 300))
                 .setVisible(true);
         SparseIntArray typeSideMap = new SparseIntArray();
@@ -97,18 +104,18 @@ public class InsetsStateTest {
                 typeSideMap);
         assertEquals(Insets.of(0, 100, 0, 100), insets.getSystemWindowInsets());
         assertEquals(Insets.of(0, 100, 0, 100), insets.getInsets(Type.all()));
-        assertEquals(ISIDE_TOP, typeSideMap.get(ITYPE_STATUS_BAR));
-        assertEquals(ISIDE_BOTTOM, typeSideMap.get(ITYPE_IME));
+        assertEquals(ISIDE_TOP, typeSideMap.get(ID_STATUS_BAR));
+        assertEquals(ISIDE_BOTTOM, typeSideMap.get(ID_IME));
         assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(statusBars()));
         assertEquals(Insets.of(0, 0, 0, 100), insets.getInsets(ime()));
     }
 
     @Test
     public void testCalculateInsets_imeAndNav() {
-        mState.getOrCreateSource(ITYPE_NAVIGATION_BAR, navigationBars())
+        mState.getOrCreateSource(ID_NAVIGATION_BAR, navigationBars())
                 .setFrame(new Rect(0, 200, 100, 300))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 100, 100, 300))
                 .setVisible(true);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
@@ -124,10 +131,10 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_navRightStatusTop() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_NAVIGATION_BAR, navigationBars())
+        mState.getOrCreateSource(ID_NAVIGATION_BAR, navigationBars())
                 .setFrame(new Rect(80, 0, 100, 300))
                 .setVisible(true);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
@@ -139,16 +146,14 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_extraNavRightClimateTop() throws Exception {
-        mState.getOrCreateSource(ITYPE_CLIMATE_BAR, statusBars())
+        mState.getOrCreateSource(ID_CLIMATE_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_EXTRA_NAVIGATION_BAR, navigationBars())
+        mState.getOrCreateSource(ID_EXTRA_NAVIGATION_BAR, navigationBars())
                 .setFrame(new Rect(80, 0, 100, 300))
                 .setVisible(true);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
                 false, 0, 0, 0, TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED, null);
-        // ITYPE_CLIMATE_BAR is a type of status bar and ITYPE_EXTRA_NAVIGATION_BAR is a type
-        // of navigation bar.
         assertEquals(Insets.of(0, 100, 20, 0), insets.getSystemWindowInsets());
         assertEquals(Insets.of(0, 100, 0, 0), insets.getInsets(Type.statusBars()));
         assertEquals(Insets.of(0, 0, 20, 0), insets.getInsets(Type.navigationBars()));
@@ -156,10 +161,10 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_imeIgnoredWithoutAdjustResize() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 200, 100, 300))
                 .setVisible(true);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
@@ -172,10 +177,10 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_systemUiFlagLayoutStable() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(false);
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 200, 100, 300))
                 .setVisible(true);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
@@ -190,7 +195,7 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_systemUiFlagLayoutStable_windowFlagFullscreen() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(false);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
@@ -205,7 +210,7 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_flagLayoutNoLimits() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
@@ -229,10 +234,10 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_captionStatusBarOverlap() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_CAPTION_BAR, captionBar())
+        mState.getOrCreateSource(ID_CAPTION_BAR, captionBar())
                 .setFrame(new Rect(0, 0, 100, 300))
                 .setVisible(true);
 
@@ -244,7 +249,7 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_captionBarOffset() {
-        mState.getOrCreateSource(ITYPE_CAPTION_BAR, captionBar())
+        mState.getOrCreateSource(ID_CAPTION_BAR, captionBar())
                 .setFrame(new Rect(0, 0, 100, 300))
                 .setVisible(true);
 
@@ -256,10 +261,10 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_extraNavRightStatusTop() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_EXTRA_NAVIGATION_BAR, navigationBars())
+        mState.getOrCreateSource(ID_EXTRA_NAVIGATION_BAR, navigationBars())
                 .setFrame(new Rect(80, 0, 100, 300))
                 .setVisible(true);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
@@ -271,10 +276,10 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateInsets_navigationRightClimateTop() {
-        mState.getOrCreateSource(ITYPE_CLIMATE_BAR, statusBars())
+        mState.getOrCreateSource(ID_CLIMATE_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_NAVIGATION_BAR, navigationBars())
+        mState.getOrCreateSource(ID_NAVIGATION_BAR, navigationBars())
                 .setFrame(new Rect(80, 0, 100, 300))
                 .setVisible(true);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false,
@@ -286,13 +291,13 @@ public class InsetsStateTest {
 
     @Test
     public void testStripForDispatch() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 200, 100, 300))
                 .setVisible(true);
-        mState.removeSource(ITYPE_IME);
+        mState.removeSource(ID_IME);
         WindowInsets insets = mState.calculateInsets(new Rect(0, 0, 100, 300), null, false, false,
                 SOFT_INPUT_ADJUST_RESIZE, 0, 0, TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED, null);
         assertEquals(0, insets.getSystemWindowInsetBottom());
@@ -300,41 +305,41 @@ public class InsetsStateTest {
 
     @Test
     public void testEquals_differentRect() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100));
-        mState2.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState2.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 10, 10));
         assertNotEqualsAndHashCode();
     }
 
     @Test
     public void testEquals_differentSource() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100));
-        mState2.getOrCreateSource(ITYPE_IME, ime())
+        mState2.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 0, 100, 100));
         assertNotEqualsAndHashCode();
     }
 
     @Test
     public void testEquals_sameButDifferentInsertOrder() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100));
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 0, 100, 100));
-        mState2.getOrCreateSource(ITYPE_IME, ime())
+        mState2.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 0, 100, 100));
-        mState2.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState2.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100));
         assertEqualsAndHashCode();
     }
 
     @Test
     public void testEquals_visibility() {
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState2.getOrCreateSource(ITYPE_IME, ime())
+        mState2.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 0, 100, 100));
         assertNotEqualsAndHashCode();
     }
@@ -400,10 +405,10 @@ public class InsetsStateTest {
 
     @Test
     public void testEquals_excludeInvisibleIme() {
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(false);
-        mState2.getOrCreateSource(ITYPE_IME, ime())
+        mState2.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 0, 100, 200))
                 .setVisible(false);
         assertTrue(mState2.equals(mState, true, true /* excludeInvisibleIme */));
@@ -411,11 +416,11 @@ public class InsetsStateTest {
 
     @Test
     public void testParcelUnparcel() {
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisibleFrame(new Rect(0, 0, 50, 10))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100));
         Parcel p = Parcel.obtain();
         mState.writeToParcel(p, 0 /* flags */);
@@ -427,13 +432,13 @@ public class InsetsStateTest {
 
     @Test
     public void testCopy() {
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisibleFrame(new Rect(0, 0, 50, 10))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100));
-        mState2.getOrCreateSource(ITYPE_NAVIGATION_BAR, navigationBars())
+        mState2.getOrCreateSource(ID_NAVIGATION_BAR, navigationBars())
                 .setFrame(new Rect(0, 0, 100, 100));
         mState2.set(mState, true);
         assertEquals(mState, mState2);
@@ -441,15 +446,15 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateVisibleInsets() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 200, 100, 300))
                 .setVisible(true);
 
         // Make sure bottom gestures are ignored
-        mState.getOrCreateSource(ITYPE_BOTTOM_GESTURES, systemGestures())
+        mState.getOrCreateSource(ID_BOTTOM_GESTURES, systemGestures())
                 .setFrame(new Rect(0, 100, 100, 300))
                 .setVisible(true);
         Insets visibleInsets = mState.calculateVisibleInsets(
@@ -460,15 +465,15 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateVisibleInsets_adjustNothing() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 200, 100, 300))
                 .setVisible(true);
 
         // Make sure bottom gestures are ignored
-        mState.getOrCreateSource(ITYPE_BOTTOM_GESTURES, systemGestures())
+        mState.getOrCreateSource(ID_BOTTOM_GESTURES, systemGestures())
                 .setFrame(new Rect(0, 100, 100, 300))
                 .setVisible(true);
         Insets visibleInsets = mState.calculateVisibleInsets(
@@ -479,15 +484,15 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateVisibleInsets_layoutNoLimits() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 100, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 200, 100, 300))
                 .setVisible(true);
 
         // Make sure bottom gestures are ignored
-        mState.getOrCreateSource(ITYPE_BOTTOM_GESTURES, systemGestures())
+        mState.getOrCreateSource(ID_BOTTOM_GESTURES, systemGestures())
                 .setFrame(new Rect(0, 100, 100, 300))
                 .setVisible(true);
         Insets visibleInsets = mState.calculateVisibleInsets(
@@ -498,13 +503,13 @@ public class InsetsStateTest {
 
     @Test
     public void testCalculateUncontrollableInsets() {
-        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 200, 100))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_IME, ime())
+        mState.getOrCreateSource(ID_IME, ime())
                 .setFrame(new Rect(0, 200, 200, 300))
                 .setVisible(true);
-        mState.getOrCreateSource(ITYPE_NAVIGATION_BAR, navigationBars())
+        mState.getOrCreateSource(ID_NAVIGATION_BAR, navigationBars())
                 .setFrame(new Rect(100, 0, 200, 300))
                 .setVisible(true);
 

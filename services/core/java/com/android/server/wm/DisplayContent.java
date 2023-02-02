@@ -46,7 +46,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static android.view.Display.STATE_UNKNOWN;
 import static android.view.Display.isSuspendedState;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.Surface.ROTATION_0;
@@ -3377,7 +3377,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     int getInputMethodWindowVisibleHeight() {
         final InsetsState state = getInsetsStateController().getRawInsetsState();
-        final InsetsSource imeSource = state.peekSource(ITYPE_IME);
+        final InsetsSource imeSource = state.peekSource(ID_IME);
         if (imeSource == null || !imeSource.isVisible()) {
             return 0;
         }
@@ -4031,7 +4031,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final int imePid = mInputMethodWindow.mSession.mPid;
             mAtmService.onImeWindowSetOnDisplayArea(imePid, mImeWindowsContainer);
         }
-        mInsetsStateController.getSourceProvider(ITYPE_IME).setWindowContainer(win,
+        mInsetsStateController.getSourceProvider(ID_IME).setWindowContainer(win,
                 mDisplayPolicy.getImeSourceFrameProvider(), null);
         computeImeTarget(true /* updateImeTarget */);
         updateImeControlTarget();
@@ -4281,7 +4281,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // 3. The z-order of IME might have been changed. Update the above insets state.
         mInsetsStateController.updateAboveInsetsState(
                 mInsetsStateController.getRawInsetsState().isSourceOrDefaultVisible(
-                        ITYPE_IME, ime()));
+                        ID_IME, ime()));
         // 4. Update the IME control target to apply any inset change and animation.
         // 5. Reparent the IME container surface to either the input target app, or the IME window
         // parent.
@@ -4507,7 +4507,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             ProtoLog.i(WM_DEBUG_IME, "setInputMethodInputTarget %s", target);
             setImeInputTarget(target);
             mInsetsStateController.updateAboveInsetsState(mInsetsStateController
-                    .getRawInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
+                    .getRawInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
             // Force updating the IME parent when the IME control target has been updated to the
             // remote target but updateImeParent not happen because ImeLayeringTarget and
             // ImeInputTarget are different. Then later updateImeParent would be ignored when there

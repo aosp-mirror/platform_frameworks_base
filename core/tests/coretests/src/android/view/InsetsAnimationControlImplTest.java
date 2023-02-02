@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsets.Type.systemBars;
@@ -68,6 +66,11 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class InsetsAnimationControlImplTest {
 
+    private static final int ID_STATUS_BAR = InsetsSource.createId(
+            null /* owner */, 0 /* index */, statusBars());
+    private static final int ID_NAVIGATION_BAR = InsetsSource.createId(
+            null /* owner */, 0 /* index */, navigationBars());
+
     private InsetsAnimationControlImpl mController;
 
     private SurfaceSession mSession = new SurfaceSession();
@@ -89,31 +92,31 @@ public class InsetsAnimationControlImplTest {
                 .setName("testSurface")
                 .build();
         mInsetsState = new InsetsState();
-        mInsetsState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars())
+        mInsetsState.getOrCreateSource(ID_STATUS_BAR, statusBars())
                 .setFrame(new Rect(0, 0, 500, 100));
-        mInsetsState.getOrCreateSource(ITYPE_NAVIGATION_BAR, navigationBars())
+        mInsetsState.getOrCreateSource(ID_NAVIGATION_BAR, navigationBars())
                 .setFrame(new Rect(400, 0, 500, 500));
-        InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ITYPE_STATUS_BAR,
+        InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ID_STATUS_BAR,
                 WindowInsets.Type.statusBars(), mInsetsState,
                 () -> mMockTransaction, mMockController);
         topConsumer.setControl(
-                new InsetsSourceControl(ITYPE_STATUS_BAR, WindowInsets.Type.statusBars(),
+                new InsetsSourceControl(ID_STATUS_BAR, WindowInsets.Type.statusBars(),
                         mStatusLeash, true, new Point(0, 0), Insets.of(0, 100, 0, 0)),
                 new int[1], new int[1]);
 
-        InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ITYPE_NAVIGATION_BAR,
+        InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ID_NAVIGATION_BAR,
                 WindowInsets.Type.navigationBars(), mInsetsState,
                 () -> mMockTransaction, mMockController);
         navConsumer.setControl(
-                new InsetsSourceControl(ITYPE_NAVIGATION_BAR, WindowInsets.Type.navigationBars(),
+                new InsetsSourceControl(ID_NAVIGATION_BAR, WindowInsets.Type.navigationBars(),
                         mNavLeash, true, new Point(400, 0), Insets.of(0, 0, 100, 0)),
                 new int[1], new int[1]);
         mMockController.setRequestedVisibleTypes(0, WindowInsets.Type.navigationBars());
         navConsumer.applyLocalVisibilityOverride();
 
         SparseArray<InsetsSourceControl> controls = new SparseArray<>();
-        controls.put(ITYPE_STATUS_BAR, topConsumer.getControl());
-        controls.put(ITYPE_NAVIGATION_BAR, navConsumer.getControl());
+        controls.put(ID_STATUS_BAR, topConsumer.getControl());
+        controls.put(ID_NAVIGATION_BAR, navConsumer.getControl());
         mController = new InsetsAnimationControlImpl(controls,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
                 mMockController, 10 /* durationMs */, new LinearInterpolator(),

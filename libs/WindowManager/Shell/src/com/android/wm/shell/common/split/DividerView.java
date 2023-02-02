@@ -223,7 +223,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         // But there is no need to do it when IME showing because there are no rounded corners at
         // the bottom. This also avoids the problem of task bar height not changing when IME
         // floating.
-        if (!insetsState.isSourceOrDefaultVisible(InsetsState.ITYPE_IME, WindowInsets.Type.ime())
+        if (!insetsState.isSourceOrDefaultVisible(InsetsSource.ID_IME, WindowInsets.Type.ime())
                 && taskBarInsetsSource != null
                 && taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
             mTempRect.inset(taskBarInsetsSource.calculateVisibleInsets(mTempRect));

@@ -25,7 +25,7 @@ import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
@@ -315,12 +315,14 @@ class InsetsPolicy {
         // The caller should not receive the visible insets provided by itself.
         if (attrs.type == TYPE_INPUT_METHOD) {
             state = new InsetsState(state);
-            state.removeSource(ITYPE_IME);
+            state.removeSource(ID_IME);
         } else if (attrs.providedInsets != null) {
             for (InsetsFrameProvider provider : attrs.providedInsets) {
                 // TODO(b/234093736): Let InsetsFrameProvider return the public type and the ID.
                 final int sourceId = provider.type;
-                final @InsetsType int type = InsetsState.toPublicType(sourceId);
+                final @InsetsType int type = sourceId == ID_IME
+                        ? WindowInsets.Type.ime()
+                        : InsetsState.toPublicType(sourceId);
                 if ((type & WindowInsets.Type.systemBars()) == 0) {
                     continue;
                 }
@@ -399,7 +401,7 @@ class InsetsPolicy {
             // During switching tasks with gestural navigation, before the next IME input target
             // starts the input, we should adjust and freeze the last IME visibility of the window
             // in case delivering obsoleted IME insets state during transitioning.
-            final InsetsSource originalImeSource = originalState.peekSource(ITYPE_IME);
+            final InsetsSource originalImeSource = originalState.peekSource(ID_IME);
 
             if (originalImeSource != null) {
                 final boolean imeVisibility = w.isRequestedVisible(Type.ime());

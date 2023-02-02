@@ -48,7 +48,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -3177,11 +3177,11 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void testImeInsetsFrozenFlag_resetWhenReportedToBeImeInputTarget() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
 
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindowContainer(
+        mDisplayContent.getInsetsStateController().getSourceProvider(ID_IME).setWindowContainer(
                 mImeWindow, null, null);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
-        InsetsSource imeSource = new InsetsSource(ITYPE_IME, ime());
+        InsetsSource imeSource = new InsetsSource(ID_IME, ime());
         app.mAboveInsetsState.addSource(imeSource);
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.updateImeInputAndControlTarget(app);
@@ -3211,8 +3211,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Verify when IME is visible and the app can receive the right IME insets from policy.
         makeWindowVisibleAndDrawn(app, mImeWindow);
         state = app.getInsetsState();
-        assertTrue(state.peekSource(ITYPE_IME).isVisible());
-        assertEquals(state.peekSource(ITYPE_IME).getFrame(), imeSource.getFrame());
+        assertTrue(state.peekSource(ID_IME).isVisible());
+        assertEquals(state.peekSource(ID_IME).getFrame(), imeSource.getFrame());
     }
 
     @SetupWindows(addWindows = { W_ACTIVITY, W_INPUT_METHOD })
@@ -3222,7 +3222,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final WindowState app1 = createWindow(null, TYPE_APPLICATION, "app1");
         final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
 
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindowContainer(
+        mDisplayContent.getInsetsStateController().getSourceProvider(ID_IME).setWindowContainer(
                 mImeWindow, null, null);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
@@ -3237,7 +3237,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         mDisplayContent.getInsetsStateController().onInsetsModified(app1);
 
         // Verify app1's IME insets is visible and app2's IME insets frozen flag set.
-        assertTrue(app1.getInsetsState().peekSource(ITYPE_IME).isVisible());
+        assertTrue(app1.getInsetsState().peekSource(ID_IME).isVisible());
         assertTrue(app2.mActivityRecord.mImeInsetsFrozenUntilStartInput);
 
         // Simulate switching to app2 to make it visible to be IME targets.
@@ -3256,7 +3256,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         verify(app2.mClient, atLeastOnce()).resized(any(), anyBoolean(), any(),
                 insetsStateCaptor.capture(), anyBoolean(), anyBoolean(), anyInt(), anyInt(),
                 anyBoolean());
-        assertFalse(app2.getInsetsState().isSourceOrDefaultVisible(ITYPE_IME, ime()));
+        assertFalse(app2.getInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
     }
 
     @Test
@@ -3288,7 +3288,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         makeWindowVisibleAndDrawn(app1, app2);
 
         final InsetsStateController controller = mDisplayContent.getInsetsStateController();
-        controller.getSourceProvider(ITYPE_IME).setWindowContainer(
+        controller.getSourceProvider(ID_IME).setWindowContainer(
                 ime, null, null);
         ime.getControllableInsetProvider().setServerVisible(true);
 
@@ -3306,8 +3306,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         controller.onInsetsModified(app1);
 
         // Expect all activities in split-screen will get IME insets visible state
-        assertTrue(app1.getInsetsState().peekSource(ITYPE_IME).isVisible());
-        assertTrue(app2.getInsetsState().peekSource(ITYPE_IME).isVisible());
+        assertTrue(app1.getInsetsState().peekSource(ID_IME).isVisible());
+        assertTrue(app2.getInsetsState().peekSource(ID_IME).isVisible());
     }
 
     @Test

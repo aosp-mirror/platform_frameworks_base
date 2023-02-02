@@ -17,7 +17,7 @@
 package com.android.wm.shell.common;
 
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.Surface.ROTATION_0;
 import static android.view.WindowInsets.Type.ime;
 
@@ -138,15 +138,15 @@ public class DisplayImeControllerTest extends ShellTestCase {
     private InsetsSourceControl[] insetsSourceControl() {
         return new InsetsSourceControl[]{
                 new InsetsSourceControl(
-                        ITYPE_IME, ime(), mock(SurfaceControl.class), false, new Point(0, 0),
+                        ID_IME, ime(), mock(SurfaceControl.class), false, new Point(0, 0),
                         Insets.NONE)
         };
     }
 
     private InsetsState insetsStateWithIme(boolean visible) {
         InsetsState state = new InsetsState();
-        state.addSource(new InsetsSource(ITYPE_IME, ime()));
-        state.setSourceVisible(ITYPE_IME, visible);
+        state.addSource(new InsetsSource(ID_IME, ime()));
+        state.setSourceVisible(ID_IME, visible);
         return state;
     }
 

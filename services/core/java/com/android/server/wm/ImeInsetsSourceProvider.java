@@ -17,7 +17,7 @@
 package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
@@ -57,7 +57,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     private Runnable mShowImeRunner;
     private boolean mIsImeLayoutDrawn;
     private boolean mImeShowing;
-    private final InsetsSource mLastSource = new InsetsSource(ITYPE_IME, WindowInsets.Type.ime());
+    private final InsetsSource mLastSource = new InsetsSource(ID_IME, WindowInsets.Type.ime());
 
     /** @see #setFrozen(boolean) */
     private boolean mFrozen;

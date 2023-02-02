@@ -16,7 +16,7 @@
 
 package android.view;
 
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsets.Type.statusBars;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -69,10 +69,12 @@ public class SurfaceControlViewHostInsetsTest {
 
     private InsetsState statusBarState(boolean visible) {
         final InsetsState insetsState = new InsetsState();
+        final int id = InsetsSource.createId(null /* owner */, 0 /* index */, statusBars());
         insetsState.setDisplayFrame(new Rect(0, 0, 1000, 1000));
-        insetsState.getOrCreateSource(ITYPE_STATUS_BAR, WindowInsets.Type.statusBars())
-                .setVisible(visible)
-                .setFrame(new Rect(0, 0, 100, 10));
+        insetsState.getOrCreateSource(
+                InsetsSource.createId(null /* owner */, 0 /* index */, statusBars()), statusBars())
+                        .setVisible(visible)
+                        .setFrame(new Rect(0, 0, 100, 10));
         return insetsState;
     }
 
