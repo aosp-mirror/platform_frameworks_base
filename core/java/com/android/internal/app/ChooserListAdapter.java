@@ -202,12 +202,12 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     ri.nonLocalizedLabel = li.getNonLocalizedLabel();
                     ri.icon = li.getIconResource();
                     ri.iconResourceId = ri.icon;
-                    ri.userHandle = mInitialIntentsUserSpace;
                 }
                 if (userManager.isManagedProfile()) {
                     ri.noResourceId = true;
                     ri.icon = 0;
                 }
+                ri.userHandle = mInitialIntentsUserSpace;
                 mCallerTargets.add(new DisplayResolveInfo(ii, ri, ii, makePresentationGetter(ri)));
                 if (mCallerTargets.size() == MAX_SUGGESTED_APP_TARGETS) break;
             }
