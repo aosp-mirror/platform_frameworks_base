@@ -1,14 +1,20 @@
 package com.android.systemui.navigationbar.gestural
 
 import android.content.Context
+import android.content.res.Configuration
+import android.content.res.TypedArray
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
+import android.util.MathUtils.min
+import android.util.TypedValue
 import android.view.View
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
+import com.android.internal.R.style.Theme_DeviceDefault
 import com.android.internal.util.LatencyTracker
 import com.android.settingslib.Utils
 import com.android.systemui.navigationbar.gestural.BackPanelController.DelayedOnAnimationEndListener
@@ -16,7 +22,10 @@ import com.android.systemui.navigationbar.gestural.BackPanelController.DelayedOn
 private const val TAG = "BackPanel"
 private const val DEBUG = false
 
-class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : View(context) {
+class BackPanel(
+        context: Context,
+        private val latencyTracker: LatencyTracker
+) : View(context) {
 
     var arrowsPointLeft = false
         set(value) {
@@ -45,52 +54,54 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
     /**
      * The length of the arrow measured horizontally. Used for animating [arrowPath]
      */
-    private var arrowLength = AnimatedFloat("arrowLength", SpringForce())
+    private var arrowLength = AnimatedFloat(
+            name = "arrowLength",
+            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_PIXELS
+    )
 
     /**
      * The height of the arrow measured vertically from its center to its top (i.e. half the total
      * height). Used for animating [arrowPath]
      */
-    private var arrowHeight = AnimatedFloat("arrowHeight", SpringForce())
-
-    private val backgroundWidth = AnimatedFloat(
-        name = "backgroundWidth",
-        SpringForce().apply {
-            stiffness = 600f
-            dampingRatio = 0.65f
-        }
+    var arrowHeight = AnimatedFloat(
+            name = "arrowHeight",
+            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_ROTATION_DEGREES
     )
 
-    private val backgroundHeight = AnimatedFloat(
-        name = "backgroundHeight",
-        SpringForce().apply {
-            stiffness = 600f
-            dampingRatio = 0.65f
-        }
+    val backgroundWidth = AnimatedFloat(
+            name = "backgroundWidth",
+            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_PIXELS,
+            minimumValue = 0f,
+    )
+
+    val backgroundHeight = AnimatedFloat(
+            name = "backgroundHeight",
+            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_PIXELS,
+            minimumValue = 0f,
     )
 
     /**
      * Corners of the background closer to the edge of the screen (where the arrow appeared from).
      * Used for animating [arrowBackgroundRect]
      */
-    private val backgroundEdgeCornerRadius = AnimatedFloat(
-        name = "backgroundEdgeCornerRadius",
-        SpringForce().apply {
-            stiffness = 400f
-            dampingRatio = SpringForce.DAMPING_RATIO_MEDIUM_BOUNCY
-        }
-    )
+    val backgroundEdgeCornerRadius = AnimatedFloat("backgroundEdgeCornerRadius")
 
     /**
      * Corners of the background further from the edge of the screens (toward the direction the
      * arrow is being dragged). Used for animating [arrowBackgroundRect]
      */
-    private val backgroundFarCornerRadius = AnimatedFloat(
-        name = "backgroundDragCornerRadius",
-        SpringForce().apply {
-            stiffness = 2200f
-            dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
-        }
+    val backgroundFarCornerRadius = AnimatedFloat("backgroundFarCornerRadius")
+
+    var scale = AnimatedFloat(
+            name = "scale",
+            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_SCALE,
+            minimumValue = 0f
+    )
+
+    val scalePivotX = AnimatedFloat(
+            name = "scalePivotX",
+            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_PIXELS,
+            minimumValue = backgroundWidth.pos / 2,
     )
 
     /**
@@ -98,34 +109,40 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
      * background's margin relative to the screen edge. The arrow will be centered within the
      * background.
      */
-    private var horizontalTranslation = AnimatedFloat("horizontalTranslation", SpringForce())
+    var horizontalTranslation = AnimatedFloat(name = "horizontalTranslation")
 
-    private val currentAlpha: FloatPropertyCompat<BackPanel> =
-        object : FloatPropertyCompat<BackPanel>("currentAlpha") {
-            override fun setValue(panel: BackPanel, value: Float) {
-                panel.alpha = value
-            }
+    var arrowAlpha = AnimatedFloat(
+            name = "arrowAlpha",
+            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_ALPHA,
+            minimumValue = 0f,
+            maximumValue = 1f
+    )
 
-            override fun getValue(panel: BackPanel): Float = panel.alpha
-        }
+    val backgroundAlpha = AnimatedFloat(
+            name = "backgroundAlpha",
+            minimumVisibleChange = SpringAnimation.MIN_VISIBLE_CHANGE_ALPHA,
+            minimumValue = 0f,
+            maximumValue = 1f
+    )
 
-    private val alphaAnimation = SpringAnimation(this, currentAlpha)
-        .setSpring(
-            SpringForce()
-                .setStiffness(60f)
-                .setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
-        )
+    private val allAnimatedFloat = setOf(
+            arrowLength,
+            arrowHeight,
+            backgroundWidth,
+            backgroundEdgeCornerRadius,
+            backgroundFarCornerRadius,
+            scalePivotX,
+            scale,
+            horizontalTranslation,
+            arrowAlpha,
+            backgroundAlpha
+    )
 
     /**
      * Canvas vertical translation. How far up/down the arrow and background appear relative to the
      * canvas.
      */
-    private var verticalTranslation: AnimatedFloat = AnimatedFloat(
-        name = "verticalTranslation",
-        SpringForce().apply {
-            stiffness = SpringForce.STIFFNESS_MEDIUM
-        }
-    )
+    var verticalTranslation = AnimatedFloat("verticalTranslation")
 
     /**
      * Use for drawing debug info. Can only be set if [DEBUG]=true
@@ -136,28 +153,67 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         }
 
     internal fun updateArrowPaint(arrowThickness: Float) {
-        // Arrow constants
+
         arrowPaint.strokeWidth = arrowThickness
 
-        arrowPaint.color =
-            Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.colorPrimary)
-        arrowBackgroundPaint.color = Utils.getColorAccentDefaultColor(context)
+        val isDeviceInNightTheme = resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+
+        val colorControlActivated = ContextThemeWrapper(context, Theme_DeviceDefault)
+                .run {
+                    val typedValue = TypedValue()
+                    val a: TypedArray = obtainStyledAttributes(typedValue.data,
+                            intArrayOf(android.R.attr.colorControlActivated))
+                    val color = a.getColor(0, 0)
+                    a.recycle()
+                    color
+                }
+
+        val colorPrimary =
+                Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.colorPrimary)
+
+        arrowPaint.color = Utils.getColorAccentDefaultColor(context)
+
+        arrowBackgroundPaint.color = if (isDeviceInNightTheme) {
+            colorPrimary
+        } else {
+            colorControlActivated
+        }
     }
 
-    private inner class AnimatedFloat(name: String, springForce: SpringForce) {
+    inner class AnimatedFloat(
+            name: String,
+            private val minimumVisibleChange: Float? = null,
+            private val minimumValue: Float? = null,
+            private val maximumValue: Float? = null,
+    ) {
+
         // The resting position when not stretched by a touch drag
         private var restingPosition = 0f
 
         // The current position as updated by the SpringAnimation
         var pos = 0f
-            set(v) {
+            private set(v) {
                 if (field != v) {
                     field = v
                     invalidate()
                 }
             }
 
-        val animation: SpringAnimation
+        private val animation: SpringAnimation
+        var spring: SpringForce
+            get() = animation.spring
+            set(value) {
+                animation.cancel()
+                animation.spring = value
+            }
+
+        val isRunning: Boolean
+            get() = animation.isRunning
+
+        fun addEndListener(listener: DelayedOnAnimationEndListener) {
+            animation.addEndListener(listener)
+        }
 
         init {
             val floatProp = object : FloatPropertyCompat<AnimatedFloat>(name) {
@@ -167,8 +223,12 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
 
                 override fun getValue(animatedFloat: AnimatedFloat): Float = animatedFloat.pos
             }
-            animation = SpringAnimation(this, floatProp)
-            animation.spring = springForce
+            animation = SpringAnimation(this, floatProp).apply {
+                spring = SpringForce()
+                this@AnimatedFloat.minimumValue?.let { setMinValue(it) }
+                this@AnimatedFloat.maximumValue?.let { setMaxValue(it) }
+                this@AnimatedFloat.minimumVisibleChange?.let { minimumVisibleChange = it }
+            }
         }
 
         fun snapTo(newPosition: Float) {
@@ -178,8 +238,24 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
             pos = newPosition
         }
 
-        fun stretchTo(stretchAmount: Float) {
-            animation.animateToFinalPosition(restingPosition + stretchAmount)
+        fun snapToRestingPosition() {
+            snapTo(restingPosition)
+        }
+
+
+        fun stretchTo(
+                stretchAmount: Float,
+                startingVelocity: Float? = null,
+                springForce: SpringForce? = null
+        ) {
+            animation.apply {
+                startingVelocity?.let {
+                    cancel()
+                    setStartVelocity(it)
+                }
+                springForce?.let { spring = springForce }
+                animateToFinalPosition(restingPosition + stretchAmount)
+            }
         }
 
         /**
@@ -188,18 +264,23 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
          *
          * The [restingPosition] will remain unchanged. Only the animation is updated.
          */
-        fun stretchBy(finalPosition: Float, amount: Float) {
-            val stretchedAmount = amount * (finalPosition - restingPosition)
+        fun stretchBy(finalPosition: Float?, amount: Float) {
+            val stretchedAmount = amount * ((finalPosition ?: 0f) - restingPosition)
             animation.animateToFinalPosition(restingPosition + stretchedAmount)
         }
 
-        fun updateRestingPosition(pos: Float, animated: Boolean) {
+        fun updateRestingPosition(pos: Float?, animated: Boolean = true) {
+            if (pos == null) return
+
             restingPosition = pos
-            if (animated)
+            if (animated) {
                 animation.animateToFinalPosition(restingPosition)
-            else
+            } else {
                 snapTo(restingPosition)
+            }
         }
+
+        fun cancel() = animation.cancel()
     }
 
     init {
@@ -224,126 +305,203 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         return arrowPath
     }
 
-    fun addEndListener(endListener: DelayedOnAnimationEndListener): Boolean {
-        return if (alphaAnimation.isRunning) {
-            alphaAnimation.addEndListener(endListener)
-            true
-        } else if (horizontalTranslation.animation.isRunning) {
-            horizontalTranslation.animation.addEndListener(endListener)
+    fun addAnimationEndListener(
+            animatedFloat: AnimatedFloat,
+            endListener: DelayedOnAnimationEndListener
+    ): Boolean {
+        return if (animatedFloat.isRunning) {
+            animatedFloat.addEndListener(endListener)
             true
         } else {
-            endListener.runNow()
+            endListener.run()
             false
         }
     }
 
+    fun cancelAnimations() {
+        allAnimatedFloat.forEach { it.cancel() }
+    }
+
     fun setStretch(
-        horizontalTranslationStretchAmount: Float,
-        arrowStretchAmount: Float,
-        backgroundWidthStretchAmount: Float,
-        fullyStretchedDimens: EdgePanelParams.BackIndicatorDimens
+            horizontalTranslationStretchAmount: Float,
+            arrowStretchAmount: Float,
+            arrowAlphaStretchAmount: Float,
+            backgroundAlphaStretchAmount: Float,
+            backgroundWidthStretchAmount: Float,
+            backgroundHeightStretchAmount: Float,
+            edgeCornerStretchAmount: Float,
+            farCornerStretchAmount: Float,
+            fullyStretchedDimens: EdgePanelParams.BackIndicatorDimens
     ) {
         horizontalTranslation.stretchBy(
-            finalPosition = fullyStretchedDimens.horizontalTranslation,
-            amount = horizontalTranslationStretchAmount
+                finalPosition = fullyStretchedDimens.horizontalTranslation,
+                amount = horizontalTranslationStretchAmount
         )
         arrowLength.stretchBy(
-            finalPosition = fullyStretchedDimens.arrowDimens.length,
-            amount = arrowStretchAmount
+                finalPosition = fullyStretchedDimens.arrowDimens.length,
+                amount = arrowStretchAmount
         )
         arrowHeight.stretchBy(
-            finalPosition = fullyStretchedDimens.arrowDimens.height,
-            amount = arrowStretchAmount
+                finalPosition = fullyStretchedDimens.arrowDimens.height,
+                amount = arrowStretchAmount
+        )
+        arrowAlpha.stretchBy(
+                finalPosition = fullyStretchedDimens.arrowDimens.alpha,
+                amount = arrowAlphaStretchAmount
+        )
+        backgroundAlpha.stretchBy(
+                finalPosition = fullyStretchedDimens.backgroundDimens.alpha,
+                amount = backgroundAlphaStretchAmount
         )
         backgroundWidth.stretchBy(
-            finalPosition = fullyStretchedDimens.backgroundDimens.width,
-            amount = backgroundWidthStretchAmount
+                finalPosition = fullyStretchedDimens.backgroundDimens.width,
+                amount = backgroundWidthStretchAmount
+        )
+        backgroundHeight.stretchBy(
+                finalPosition = fullyStretchedDimens.backgroundDimens.height,
+                amount = backgroundHeightStretchAmount
+        )
+        backgroundEdgeCornerRadius.stretchBy(
+                finalPosition = fullyStretchedDimens.backgroundDimens.edgeCornerRadius,
+                amount = edgeCornerStretchAmount
+        )
+        backgroundFarCornerRadius.stretchBy(
+                finalPosition = fullyStretchedDimens.backgroundDimens.farCornerRadius,
+                amount = farCornerStretchAmount
         )
     }
 
+    fun popOffEdge(startingVelocity: Float) {
+        val heightStretchAmount = startingVelocity * 50
+        val widthStretchAmount = startingVelocity * 150
+        val scaleStretchAmount = startingVelocity * 0.8f
+        backgroundHeight.stretchTo(stretchAmount = 0f, startingVelocity = -heightStretchAmount)
+        backgroundWidth.stretchTo(stretchAmount = 0f, startingVelocity = widthStretchAmount)
+        scale.stretchTo(stretchAmount = 0f, startingVelocity = -scaleStretchAmount)
+    }
+
+    fun popScale(startingVelocity: Float) {
+        scalePivotX.snapTo(backgroundWidth.pos / 2)
+        scale.stretchTo(stretchAmount = 0f, startingVelocity = startingVelocity)
+    }
+
+    fun popArrowAlpha(startingVelocity: Float, springForce: SpringForce? = null) {
+        arrowAlpha.stretchTo(stretchAmount = 0f, startingVelocity = startingVelocity,
+                springForce = springForce)
+    }
+
     fun resetStretch() {
-        horizontalTranslation.stretchTo(0f)
-        arrowLength.stretchTo(0f)
-        arrowHeight.stretchTo(0f)
-        backgroundWidth.stretchTo(0f)
-        backgroundHeight.stretchTo(0f)
-        backgroundEdgeCornerRadius.stretchTo(0f)
-        backgroundFarCornerRadius.stretchTo(0f)
+        backgroundAlpha.snapTo(1f)
+        verticalTranslation.snapTo(0f)
+        scale.snapTo(1f)
+
+        horizontalTranslation.snapToRestingPosition()
+        arrowLength.snapToRestingPosition()
+        arrowHeight.snapToRestingPosition()
+        arrowAlpha.snapToRestingPosition()
+        backgroundWidth.snapToRestingPosition()
+        backgroundHeight.snapToRestingPosition()
+        backgroundEdgeCornerRadius.snapToRestingPosition()
+        backgroundFarCornerRadius.snapToRestingPosition()
     }
 
     /**
      * Updates resting arrow and background size not accounting for stretch
      */
     internal fun setRestingDimens(
-        restingParams: EdgePanelParams.BackIndicatorDimens,
-        animate: Boolean
+            restingParams: EdgePanelParams.BackIndicatorDimens,
+            animate: Boolean = true
     ) {
-        horizontalTranslation.updateRestingPosition(restingParams.horizontalTranslation, animate)
+        horizontalTranslation.updateRestingPosition(restingParams.horizontalTranslation)
+        scale.updateRestingPosition(restingParams.scale)
+        arrowAlpha.updateRestingPosition(restingParams.arrowDimens.alpha)
+        backgroundAlpha.updateRestingPosition(restingParams.backgroundDimens.alpha)
+
         arrowLength.updateRestingPosition(restingParams.arrowDimens.length, animate)
         arrowHeight.updateRestingPosition(restingParams.arrowDimens.height, animate)
+        scalePivotX.updateRestingPosition(restingParams.backgroundDimens.width, animate)
         backgroundWidth.updateRestingPosition(restingParams.backgroundDimens.width, animate)
         backgroundHeight.updateRestingPosition(restingParams.backgroundDimens.height, animate)
         backgroundEdgeCornerRadius.updateRestingPosition(
-            restingParams.backgroundDimens.edgeCornerRadius,
-            animate
+                restingParams.backgroundDimens.edgeCornerRadius, animate
         )
         backgroundFarCornerRadius.updateRestingPosition(
-            restingParams.backgroundDimens.farCornerRadius,
-            animate
+                restingParams.backgroundDimens.farCornerRadius, animate
         )
     }
 
     fun animateVertically(yPos: Float) = verticalTranslation.stretchTo(yPos)
 
-    fun setArrowStiffness(arrowStiffness: Float, arrowDampingRatio: Float) {
-        arrowLength.animation.spring.apply {
-            stiffness = arrowStiffness
-            dampingRatio = arrowDampingRatio
-        }
-        arrowHeight.animation.spring.apply {
-            stiffness = arrowStiffness
-            dampingRatio = arrowDampingRatio
-        }
+    fun setSpring(
+            horizontalTranslation: SpringForce? = null,
+            verticalTranslation: SpringForce? = null,
+            scale: SpringForce? = null,
+            arrowLength: SpringForce? = null,
+            arrowHeight: SpringForce? = null,
+            arrowAlpha: SpringForce? = null,
+            backgroundAlpha: SpringForce? = null,
+            backgroundFarCornerRadius: SpringForce? = null,
+            backgroundEdgeCornerRadius: SpringForce? = null,
+            backgroundWidth: SpringForce? = null,
+            backgroundHeight: SpringForce? = null,
+    ) {
+        arrowLength?.let { this.arrowLength.spring = it }
+        arrowHeight?.let { this.arrowHeight.spring = it }
+        arrowAlpha?.let { this.arrowAlpha.spring = it }
+        backgroundAlpha?.let { this.backgroundAlpha.spring = it }
+        backgroundFarCornerRadius?.let { this.backgroundFarCornerRadius.spring = it }
+        backgroundEdgeCornerRadius?.let { this.backgroundEdgeCornerRadius.spring = it }
+        scale?.let { this.scale.spring = it }
+        backgroundWidth?.let { this.backgroundWidth.spring = it }
+        backgroundHeight?.let { this.backgroundHeight.spring = it }
+        horizontalTranslation?.let { this.horizontalTranslation.spring = it }
+        verticalTranslation?.let { this.verticalTranslation.spring = it }
     }
 
     override fun hasOverlappingRendering() = false
 
     override fun onDraw(canvas: Canvas) {
-        var edgeCorner = backgroundEdgeCornerRadius.pos
+        val edgeCorner = backgroundEdgeCornerRadius.pos
         val farCorner = backgroundFarCornerRadius.pos
         val halfHeight = backgroundHeight.pos / 2
+        val canvasWidth = width
+        val backgroundWidth = backgroundWidth.pos
+        val scalePivotX = scalePivotX.pos
 
         canvas.save()
 
-        if (!isLeftPanel) canvas.scale(-1f, 1f, width / 2.0f, 0f)
+        if (!isLeftPanel) canvas.scale(-1f, 1f, canvasWidth / 2.0f, 0f)
 
         canvas.translate(
-            horizontalTranslation.pos,
-            height * 0.5f + verticalTranslation.pos
+                horizontalTranslation.pos,
+                height * 0.5f + verticalTranslation.pos
         )
+
+        canvas.scale(scale.pos, scale.pos, scalePivotX, 0f)
 
         val arrowBackground = arrowBackgroundRect.apply {
             left = 0f
             top = -halfHeight
-            right = backgroundWidth.pos
+            right = backgroundWidth
             bottom = halfHeight
         }.toPathWithRoundCorners(
-            topLeft = edgeCorner,
-            bottomLeft = edgeCorner,
-            topRight = farCorner,
-            bottomRight = farCorner
+                topLeft = edgeCorner,
+                bottomLeft = edgeCorner,
+                topRight = farCorner,
+                bottomRight = farCorner
         )
-        canvas.drawPath(arrowBackground, arrowBackgroundPaint)
+        canvas.drawPath(arrowBackground,
+                arrowBackgroundPaint.apply { alpha = (255 * backgroundAlpha.pos).toInt() })
 
         val dx = arrowLength.pos
         val dy = arrowHeight.pos
 
         // How far the arrow bounding box should be from the edge of the screen. Measured from
         // either the tip or the back of the arrow, whichever is closer
-        var arrowOffset = (backgroundWidth.pos - dx) / 2
+        val arrowOffset = (backgroundWidth - dx) / 2
         canvas.translate(
-            /* dx= */ arrowOffset,
-            /* dy= */ 0f /* pass 0 for the y position since the canvas was already translated */
+                /* dx= */ arrowOffset,
+                /* dy= */ 0f /* pass 0 for the y position since the canvas was already translated */
         )
 
         val arrowPointsAwayFromEdge = !arrowsPointLeft.xor(isLeftPanel)
@@ -355,6 +513,8 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
         }
 
         val arrowPath = calculateArrowPath(dx = dx, dy = dy)
+        val arrowPaint = arrowPaint
+                .apply { alpha = (255 * min(arrowAlpha.pos, backgroundAlpha.pos)).toInt() }
         canvas.drawPath(arrowPath, arrowPaint)
         canvas.restore()
 
@@ -372,26 +532,17 @@ class BackPanel(context: Context, private val latencyTracker: LatencyTracker) : 
     }
 
     private fun RectF.toPathWithRoundCorners(
-        topLeft: Float = 0f,
-        topRight: Float = 0f,
-        bottomRight: Float = 0f,
-        bottomLeft: Float = 0f
+            topLeft: Float = 0f,
+            topRight: Float = 0f,
+            bottomRight: Float = 0f,
+            bottomLeft: Float = 0f
     ): Path = Path().apply {
         val corners = floatArrayOf(
-            topLeft, topLeft,
-            topRight, topRight,
-            bottomRight, bottomRight,
-            bottomLeft, bottomLeft
+                topLeft, topLeft,
+                topRight, topRight,
+                bottomRight, bottomRight,
+                bottomLeft, bottomLeft
         )
         addRoundRect(this@toPathWithRoundCorners, corners, Path.Direction.CW)
-    }
-
-    fun cancelAlphaAnimations() {
-        alphaAnimation.cancel()
-        alpha = 1f
-    }
-
-    fun fadeOut() {
-        alphaAnimation.animateToFinalPosition(0f)
     }
 }

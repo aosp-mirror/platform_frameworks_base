@@ -43,12 +43,18 @@
     <dimen name="navigation_edge_panel_height">268dp</dimen>
     <!-- The threshold to drag to trigger the edge action -->
     <dimen name="navigation_edge_action_drag_threshold">16dp</dimen>
+    <!-- The drag distance to consider evaluating gesture -->
+    <dimen name="navigation_edge_action_min_distance_to_start_animation">24dp</dimen>
     <!-- The threshold to progress back animation for edge swipe -->
     <dimen name="navigation_edge_action_progress_threshold">412dp</dimen>
     <!-- The minimum display position of the arrow on the screen -->
     <dimen name="navigation_edge_arrow_min_y">64dp</dimen>
     <!-- The amount by which the arrow is shifted to avoid the finger-->
     <dimen name="navigation_edge_finger_offset">64dp</dimen>
+    <!-- The threshold to dynamically activate the edge action -->
+    <dimen name="navigation_edge_action_reactivation_drag_threshold">32dp</dimen>
+    <!-- The threshold to dynamically deactivate the edge action -->
+    <dimen name="navigation_edge_action_deactivation_drag_threshold">32dp</dimen>
 
     <!-- The thickness of the arrow -->
     <dimen name="navigation_edge_arrow_thickness">4dp</dimen>
@@ -56,37 +62,61 @@
     <dimen name="navigation_edge_minimum_x_delta_for_switch">32dp</dimen>
 
     <!-- entry state -->
+    <item name="navigation_edge_entry_scale" format="float" type="dimen">0.98</item>
     <dimen name="navigation_edge_entry_margin">4dp</dimen>
-    <dimen name="navigation_edge_entry_background_width">8dp</dimen>
-    <dimen name="navigation_edge_entry_background_height">60dp</dimen>
-    <dimen name="navigation_edge_entry_edge_corners">30dp</dimen>
-    <dimen name="navigation_edge_entry_far_corners">30dp</dimen>
-    <dimen name="navigation_edge_entry_arrow_length">10dp</dimen>
-    <dimen name="navigation_edge_entry_arrow_height">7dp</dimen>
+    <item name="navigation_edge_entry_background_alpha" format="float" type="dimen">1.0</item>
+    <dimen name="navigation_edge_entry_background_width">0dp</dimen>
+    <dimen name="navigation_edge_entry_background_height">48dp</dimen>
+    <dimen name="navigation_edge_entry_edge_corners">6dp</dimen>
+    <dimen name="navigation_edge_entry_far_corners">6dp</dimen>
+    <item name="navigation_edge_entry_arrow_alpha" format="float" type="dimen">0.0</item>
+    <dimen name="navigation_edge_entry_arrow_length">8.6dp</dimen>
+    <dimen name="navigation_edge_entry_arrow_height">5dp</dimen>
 
     <!-- pre-threshold -->
     <dimen name="navigation_edge_pre_threshold_margin">4dp</dimen>
-    <dimen name="navigation_edge_pre_threshold_background_width">64dp</dimen>
-    <dimen name="navigation_edge_pre_threshold_background_height">60dp</dimen>
-    <dimen name="navigation_edge_pre_threshold_edge_corners">22dp</dimen>
-    <dimen name="navigation_edge_pre_threshold_far_corners">26dp</dimen>
+    <item name="navigation_edge_pre_threshold_background_alpha" format="float" type="dimen">1.0
+    </item>
+    <item name="navigation_edge_pre_threshold_scale" format="float" type="dimen">0.98</item>
+    <dimen name="navigation_edge_pre_threshold_background_width">51dp</dimen>
+    <dimen name="navigation_edge_pre_threshold_background_height">46dp</dimen>
+    <dimen name="navigation_edge_pre_threshold_edge_corners">16dp</dimen>
+    <dimen name="navigation_edge_pre_threshold_far_corners">20dp</dimen>
+    <item name="navigation_edge_pre_threshold_arrow_alpha" format="float" type="dimen">1.0</item>
+    <dimen name="navigation_edge_pre_threshold_arrow_length">8dp</dimen>
+    <dimen name="navigation_edge_pre_threshold_arrow_height">5.6dp</dimen>
 
-    <!-- post-threshold / active -->
+    <!-- active (post-threshold) -->
+    <item name="navigation_edge_active_scale" format="float" type="dimen">1.0</item>
     <dimen name="navigation_edge_active_margin">14dp</dimen>
-    <dimen name="navigation_edge_active_background_width">60dp</dimen>
-    <dimen name="navigation_edge_active_background_height">60dp</dimen>
-    <dimen name="navigation_edge_active_edge_corners">30dp</dimen>
-    <dimen name="navigation_edge_active_far_corners">30dp</dimen>
-    <dimen name="navigation_edge_active_arrow_length">8dp</dimen>
-    <dimen name="navigation_edge_active_arrow_height">9dp</dimen>
+    <item name="navigation_edge_active_background_alpha" format="float" type="dimen">1.0</item>
+    <dimen name="navigation_edge_active_background_width">48dp</dimen>
+    <dimen name="navigation_edge_active_background_height">48dp</dimen>
+    <dimen name="navigation_edge_active_edge_corners">24dp</dimen>
+    <dimen name="navigation_edge_active_far_corners">24dp</dimen>
+    <item name="navigation_edge_active_arrow_alpha" format="float" type="dimen">1.0</item>
+    <dimen name="navigation_edge_active_arrow_length">6.4dp</dimen>
+    <dimen name="navigation_edge_active_arrow_height">7.2dp</dimen>
 
+    <!-- committed -->
+    <item name="navigation_edge_committed_scale" format="float" type="dimen">0.85</item>
+    <item name="navigation_edge_committed_alpha" format="float" type="dimen">0</item>
+
+    <!-- cancelled -->
+    <dimen name="navigation_edge_cancelled_background_width">0dp</dimen>
+
+    <item name="navigation_edge_stretch_scale" format="float" type="dimen">1.0</item>
     <dimen name="navigation_edge_stretch_margin">18dp</dimen>
-    <dimen name="navigation_edge_stretch_background_width">74dp</dimen>
-    <dimen name="navigation_edge_stretch_background_height">60dp</dimen>
-    <dimen name="navigation_edge_stretch_edge_corners">30dp</dimen>
-    <dimen name="navigation_edge_stretch_far_corners">30dp</dimen>
-    <dimen name="navigation_edge_stretched_arrow_length">7dp</dimen>
-    <dimen name="navigation_edge_stretched_arrow_height">10dp</dimen>
+    <dimen name="navigation_edge_stretch_background_width">60dp</dimen>
+    <item name="navigation_edge_stretch_background_alpha" format="float" type="dimen">
+        @dimen/navigation_edge_entry_background_alpha
+    </item>
+    <dimen name="navigation_edge_stretch_background_height">48dp</dimen>
+    <dimen name="navigation_edge_stretch_edge_corners">24dp</dimen>
+    <dimen name="navigation_edge_stretch_far_corners">24dp</dimen>
+    <item name="navigation_edge_strech_arrow_alpha" format="float" type="dimen">1.0</item>
+    <dimen name="navigation_edge_stretched_arrow_length">5.6dp</dimen>
+    <dimen name="navigation_edge_stretched_arrow_height">8dp</dimen>
 
     <dimen name="navigation_edge_cancelled_arrow_length">12dp</dimen>
     <dimen name="navigation_edge_cancelled_arrow_height">0dp</dimen>
