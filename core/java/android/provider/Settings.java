@@ -7422,7 +7422,7 @@ public final class Settings {
          * @hide
          */
         @SuppressLint("NoSettingsProvider")
-        public static final String STYLUS_BUTTONS_DISABLED = "stylus_buttons_disabled";
+        public static final String STYLUS_BUTTONS_ENABLED = "stylus_buttons_enabled";
 
         /**
          * Host name and port for global http proxy. Uses ':' seperator for

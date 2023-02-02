@@ -522,7 +522,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDoublePressOnStemPrimaryBehavior;
     int mTriplePressOnStemPrimaryBehavior;
     int mLongPressOnStemPrimaryBehavior;
-    boolean mStylusButtonsDisabled = false;
+    boolean mStylusButtonsEnabled = true;
     boolean mHasSoftInput = false;
     boolean mHapticTextHandleEnabled;
     boolean mUseTvRouting;
@@ -781,7 +781,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Global.POWER_BUTTON_SUPPRESSION_DELAY_AFTER_GESTURE_WAKE), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.STYLUS_BUTTONS_DISABLED), false, this,
+                    Settings.Secure.STYLUS_BUTTONS_ENABLED), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -2601,9 +2601,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mContext.getResources().getInteger(
                             com.android.internal.R.integer.config_keyChordPowerVolumeUp));
 
-            mStylusButtonsDisabled = Settings.Secure.getIntForUser(resolver,
-                    Secure.STYLUS_BUTTONS_DISABLED, 0, UserHandle.USER_CURRENT) == 1;
-            mInputManagerInternal.setStylusButtonMotionEventsEnabled(!mStylusButtonsDisabled);
+            mStylusButtonsEnabled = Settings.Secure.getIntForUser(resolver,
+                    Secure.STYLUS_BUTTONS_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
+            mInputManagerInternal.setStylusButtonMotionEventsEnabled(mStylusButtonsEnabled);
         }
         if (updateRotation) {
             updateRotation(true);
@@ -4315,7 +4315,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_STYLUS_BUTTON_SECONDARY:
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY:
             case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL: {
-                if (down && !mStylusButtonsDisabled) {
+                if (down && mStylusButtonsEnabled) {
                     sendSystemKeyToStatusBarAsync(keyCode);
                 }
                 result &= ~ACTION_PASS_TO_USER;
