@@ -1441,6 +1441,8 @@
   <java-symbol type="drawable" name="ic_feedback_downrank" />
 
   <java-symbol type="drawable" name="ic_account_circle" />
+  <java-symbol type="drawable" name="ic_dual_screen" />
+  <java-symbol type="drawable" name="ic_thermostat" />
   <java-symbol type="color" name="user_icon_1" />
   <java-symbol type="color" name="user_icon_2" />
   <java-symbol type="color" name="user_icon_3" />
