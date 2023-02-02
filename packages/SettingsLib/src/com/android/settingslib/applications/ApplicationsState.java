@@ -101,6 +101,9 @@ public class ApplicationsState {
     @VisibleForTesting
     static ApplicationsState sInstance;
 
+    // Whether the app icon cache mechanism is enabled or not.
+    private static boolean sAppIconCacheEnabled = false;
+
     public static ApplicationsState getInstance(Application app) {
         return getInstance(app, AppGlobals.getPackageManager());
     }
@@ -113,6 +116,11 @@ public class ApplicationsState {
             }
             return sInstance;
         }
+    }
+
+    /** Set whether the app icon cache mechanism is enabled or not. */
+    public static void setAppIconCacheEnabled(boolean enabled) {
+        sAppIconCacheEnabled = enabled;
     }
 
     final Context mContext;
@@ -776,7 +784,8 @@ public class ApplicationsState {
     }
 
     private static boolean isAppIconCacheEnabled(Context context) {
-        return SETTING_PKG.equals(context.getPackageName());
+        return SETTING_PKG.equals(context.getPackageName())
+                || sAppIconCacheEnabled;
     }
 
     void rebuildActiveSessions() {
