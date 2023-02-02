@@ -1,5 +1,5 @@
 <!--
-Copyright (C) 2022 The Android Open Source Project
+Copyright (C) 2023 The Android Open Source Project
 
    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -13,78 +13,42 @@ Copyright (C) 2022 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<vector android:width="24dp" android:height="24dp"
-        android:viewportWidth="24" android:viewportHeight="24"
-        xmlns:android="http://schemas.android.com/apk/res/android">
-  <path android:pathData="
-        M22.45 11.94
-        l-.58-.21
-        a1.19 1.19 0 0 1-.26-2.12
-        l.51-.34
-        a1.2 1.2 0 0 0-.83-2.19
-        l-.61.08
-        a1.2 1.2 0 0 1-1.21-1.76
-        l.29-.54
-        A1.2 1.2 0 0 0 18 3.31
-        l-.5.36
-        a1.21 1.21 0 0 1-1.9-1
-        v-.61
-        a1.2 1.2 0 0 0-2.27-.56
-        l-.26.5
-        a1.2 1.2 0 0 1-2.14 0
-        l-.28-.54
-        a1.2 1.2 0 0 0-2.27.56
-        v.61
-        a1.21 1.21 0 0 1-1.9 1
-        L6 3.31
-        a1.2 1.2 0 0 0-1.76 1.55
-        l.29.54
-        a1.2 1.2 0 0 1-1.21 1.76
-        l-.61-.08
-        a1.2 1.2 0 0 0-.83 2.19
-        l.51.34
-        a1.19 1.19 0 0 1-.26 2.12
-        l-.58.21
-        a1.21 1.21 0 0 0 .29 2.33
-        l.61.06
-        a1.2 1.2 0 0 1 .76 2
-        l-.42.46
-        a1.2 1.2 0 0 0 1.33 1.92
-        l.57-.22
-        a1.21 1.21 0 0 1 1.61 1.42
-        l-.16.59
-        a1.2 1.2 0 0 0 2.07 1.09
-        l.4-.47
-        a1.2 1.2 0 0 1 2.08.51
-        l.14.6
-        a1.2 1.2 0 0 0 2.34 0
-        l.14-.6
-        a1.2 1.2 0 0 1 2.08-.51
-        l.4.47
-        a1.2 1.2 0 0 0 2.07-1.09
-        l-.16-.59
-        a1.21 1.21 0 0 1 1.61-1.42
-        l.57.22
-        a1.2 1.2 0 0 0 1.33-1.92
-        l-.42-.46
-        a1.2 1.2 0 0 1 .76-2
-        l.61-.06
-        a1.21 1.21 0 0 0 .29-2.33
-        z
-        M12 19
-        a7 7 0 1 1 7-7 7 7 0 0 1-7 7
-        z
-        "
-        android:fillColor="#000000" />
-  <path android:pathData="
-        M9 7.75
-        a.75.75 0 1 0 0 1.5.75.75 0 1 0 0-1.5
-        z
-        M15 7.75
-        a.75.75 0 1 0 0 1.5.75.75 0 1 0 0-1.5
-        z
-        "
-        android:fillColor="#000000" />
-  <path android:strokeColor="#000000" android:strokeMiterLimit="10" android:strokeWidth="2"
-        android:pathData="M4 12h16M12 12v8" />
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:name="ring"
+        android:pathData="M 12 21 C 16.971 21 21 16.971 21 12 C 21 7.029 16.971 3 12 3 C 7.029 3 3 7.029 3 12 C 3 16.971 7.029 21 12 21 Z"
+        android:fillColor="#00000000"
+        android:strokeColor="#ffffff"
+        android:strokeWidth="2"/>
+    <group android:name="group">
+        <clip-path
+            android:pathData="M 20.5 12 C 20.5 16.694 16.694 20.5 12 20.5 C 7.306 20.5 3.5 16.694 3.5 12 C 3.5 7.306 7.306 3.5 12 3.5 C 16.694 3.5 20.5 7.306 20.5 12 Z"/>
+        <path
+            android:pathData="M 14.812 9.023 C 13.014 9.707 11.027 9.707 9.229 9.023 L 8.265 10.693 C 8.06 11.048 7.605 11.17 7.25 10.964 C 6.895 10.759 6.773 10.305 6.978 9.949 L 7.899 8.355 C 5.988 7.137 4.702 5.084 4.502 2.695 L 4.456 2.153 L 19.584 2.153 L 19.539 2.695 C 19.339 5.084 18.052 7.137 16.142 8.355 L 17.067 9.958 C 17.259 10.307 17.142 10.746 16.801 10.952 C 16.45 11.165 15.993 11.052 15.781 10.701 L 15.775 10.693 L 14.812 9.023 Z"
+            android:fillColor="#ffffff"/>
+        <group android:name="stars">
+            <path android:pathData="
+                M 7,14  h1v1h-1z
+                M 13,15 h1v1h-1z
+                M 14,11 h1v1h-1z
+
+                M 11,17 h0.5v0.5h-0.5z
+                M 10,15 h0.5v0.5h-0.5z
+                M 13,18 h0.5v0.5h-0.5z
+                M 17,15 h0.5v0.5h-0.5z
+                M 15,14 h0.5v0.5h-0.5z
+                M 18,12 h0.5v0.5h-0.5z
+                M 5,13  h0.5v0.5h-0.5z
+                M 5,10  h0.5v0.5h-0.5z
+                M 9,11  h0.5v0.5h-0.5z
+                M 8,17  h0.5v0.5h-0.5z
+                M 12,12 h0.5v0.5h-0.5z
+            " android:fillColor="#ffffff"/>
+        </group>
+    </group>
 </vector>
