@@ -366,12 +366,12 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             }
             mListener = listener;
         }
-        notifySupportedStatesChanged();
+        notifySupportedStatesChanged(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED);
         notifyDeviceStateChangedIfNeeded();
     }
 
     /** Notifies the listener that the set of supported device states has changed. */
-    private void notifySupportedStatesChanged() {
+    private void notifySupportedStatesChanged(@SupportedStatesUpdatedReason int reason) {
         List<DeviceState> supportedStates = new ArrayList<>();
         Listener listener;
         synchronized (mLock) {
@@ -390,7 +390,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         }
 
         listener.onSupportedDeviceStatesChanged(
-                supportedStates.toArray(new DeviceState[supportedStates.size()]));
+                supportedStates.toArray(new DeviceState[supportedStates.size()]), reason);
     }
 
     /** Computes the current device state and notifies the listener of a change, if needed. */
@@ -688,7 +688,10 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         if (isThermalStatusCriticalOrAbove != isPreviousThermalStatusCriticalOrAbove) {
             Slog.i(TAG, "Updating supported device states due to thermal status change."
                     + " isThermalStatusCriticalOrAbove: " + isThermalStatusCriticalOrAbove);
-            notifySupportedStatesChanged();
+            notifySupportedStatesChanged(
+                    isThermalStatusCriticalOrAbove
+                            ? SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL
+                            : SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL);
         }
     }
 

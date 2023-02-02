@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.tv.TvInputManager;
+import android.media.tv.interactive.TvInteractiveAppView;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,6 +54,8 @@ public class TvRecordingClient {
     private boolean mIsPaused;
     private boolean mIsRecordingStopping;
     private final Queue<Pair<String, Bundle>> mPendingAppPrivateCommands = new ArrayDeque<>();
+    private TvInteractiveAppView mTvIAppView;
+    private String mRecordingId;
 
     /**
      * Creates a new TvRecordingClient object.
@@ -67,6 +70,26 @@ public class TvRecordingClient {
         mCallback = callback;
         mHandler = handler == null ? new Handler(Looper.getMainLooper()) : handler;
         mTvInputManager = (TvInputManager) context.getSystemService(Context.TV_INPUT_SERVICE);
+    }
+
+    /**
+     * Sets the related {@link TvInteractiveAppView} instance so the interactive app service can be
+     * notified for recording events.
+     *
+     * @param view The related {@link TvInteractiveAppView} instance that is linked to this TV
+     *             recording client. {@code null} to unlink the view.
+     * @param recordingId The ID of the recording which is assigned by applications. {@code null} is
+     *                    valid only when the TvInteractiveAppView parameter is null.
+     * @hide
+     */
+    public void setTvInteractiveAppView(
+            @Nullable TvInteractiveAppView view, @Nullable String recordingId) {
+        if (view != null && recordingId == null) {
+            throw new IllegalArgumentException(
+                    "null recordingId is allowed only when the view is null");
+        }
+        mTvIAppView = view;
+        mRecordingId = view == null ? null : recordingId;
     }
 
     /**
@@ -468,6 +491,9 @@ public class TvRecordingClient {
                 if (mCallback != null) {
                     mCallback.onConnectionFailed(mInputId);
                 }
+                if (mTvIAppView != null) {
+                    mTvIAppView.notifyRecordingConnectionFailed(mRecordingId, mInputId);
+                }
             }
         }
 
@@ -485,7 +511,12 @@ public class TvRecordingClient {
                 return;
             }
             mIsTuned = true;
-            mCallback.onTuned(channelUri);
+            if (mCallback != null) {
+                mCallback.onTuned(channelUri);
+            }
+            if (mTvIAppView != null) {
+                mTvIAppView.notifyRecordingTuned(mRecordingId, channelUri);
+            }
         }
 
         @Override
@@ -506,6 +537,9 @@ public class TvRecordingClient {
             if (mCallback != null) {
                 mCallback.onDisconnected(mInputId);
             }
+            if (mTvIAppView != null) {
+                mTvIAppView.notifyRecordingDisconnected(mRecordingId, mInputId);
+            }
         }
 
         @Override
@@ -524,7 +558,12 @@ public class TvRecordingClient {
             mIsRecordingStarted = false;
             mIsPaused = false;
             mIsRecordingStopping = false;
-            mCallback.onRecordingStopped(recordedProgramUri);
+            if (mCallback != null) {
+                mCallback.onRecordingStopped(recordedProgramUri);
+            }
+            if (mTvIAppView != null) {
+                mTvIAppView.notifyRecordingStopped(mRecordingId);
+            }
         }
 
         @Override
@@ -536,7 +575,12 @@ public class TvRecordingClient {
                 Log.w(TAG, "onError - session not created");
                 return;
             }
-            mCallback.onError(error);
+            if (mCallback == null) {
+                mCallback.onError(error);
+            }
+            if (mTvIAppView != null) {
+                mTvIAppView.notifyRecordingError(mRecordingId, error);
+            }
         }
 
         @Override

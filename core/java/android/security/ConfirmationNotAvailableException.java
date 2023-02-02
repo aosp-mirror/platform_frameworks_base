@@ -17,7 +17,7 @@
 package android.security;
 
 /**
- * This exception is thrown when presenting a prompt fails because the the environment lacks
+ * This exception is thrown when presenting a prompt fails because the environment lacks
  * facilities for showing confirmations.
  */
 public class ConfirmationNotAvailableException extends Exception {

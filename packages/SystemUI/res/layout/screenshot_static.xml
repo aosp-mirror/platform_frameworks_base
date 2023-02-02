@@ -134,7 +134,7 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_end="0dp" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <FrameLayout
         android:id="@+id/screenshot_message_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -145,10 +145,12 @@
         android:paddingVertical="@dimen/overlay_action_container_padding_vertical"
         android:elevation="4dp"
         android:background="@drawable/action_chip_container_background"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         >
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <include layout="@layout/screenshot_work_profile_first_run" />
+        <include layout="@layout/screenshot_detection_notice" />
+    </FrameLayout>
 </com.android.systemui.screenshot.DraggableConstraintLayout>

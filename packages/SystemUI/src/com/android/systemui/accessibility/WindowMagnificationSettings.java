@@ -53,6 +53,7 @@ import android.widget.Switch;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
+import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.lang.annotation.Retention;
@@ -79,7 +80,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private final MagnificationGestureDetector mGestureDetector;
     private boolean mSingleTapDetected = false;
 
-    private SeekBar mZoomSeekbar;
+    private SeekBarWithIconButtonsView mZoomSeekbar;
     private Switch mAllowDiagonalScrollingSwitch;
     private LinearLayout mPanelView;
     private LinearLayout mSettingView;
@@ -90,9 +91,10 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private Button mDoneButton;
     private Button mEditButton;
     private ImageButton mChangeModeButton;
+    private int mLastSelectedButtonIndex = MagnificationSize.NONE;
     private boolean mAllowDiagonalScrolling = false;
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
-    private static final float A11Y_SCALE_MIN_VALUE = 2.0f;
+    private static final float A11Y_SCALE_MIN_VALUE = 1.0f;
     private WindowMagnificationSettingsCallback mCallback;
 
     @Retention(RetentionPolicy.SOURCE)
@@ -124,10 +126,11 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 0,
                 UserHandle.USER_CURRENT) == 1;
 
-        inflateView();
-
         mParams = createLayoutParams(context);
         mWindowInsetChangeRunnable = this::onWindowInsetChanged;
+
+        inflateView();
+
         mGestureDetector = new MagnificationGestureDetector(context,
                 context.getMainThreadHandler(), this);
     }
@@ -136,9 +139,12 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             float scale = progress * A11Y_CHANGE_SCALE_DIFFERENCE + A11Y_SCALE_MIN_VALUE;
-            mSecureSettings.putFloatForUser(
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale,
-                    UserHandle.USER_CURRENT);
+            // update persisted scale only when scale >= 2.0
+            if (scale >= 2.0f) {
+                Settings.Secure.putFloatForUser(mContext.getContentResolver(),
+                        Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale,
+                        UserHandle.USER_CURRENT);
+            }
             mCallback.onMagnifierScale(scale);
         }
 
@@ -388,7 +394,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mEditButton = mSettingView.findViewById(R.id.magnifier_edit_button);
         mChangeModeButton = mSettingView.findViewById(R.id.magnifier_full_button);
 
-        mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_seekbar);
+        mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
+
         mZoomSeekbar.setOnSeekBarChangeListener(new ZoomSeekbarChangeListener());
 
         float scale = mSecureSettings.getFloatForUser(
@@ -423,11 +430,14 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mSettingView.setOnApplyWindowInsetsListener((v, insets) -> {
             // Adds a pending post check to avoiding redundant calculation because this callback
             // is sent frequently when the switch icon window dragged by the users.
-            if (!mSettingView.getHandler().hasCallbacks(mWindowInsetChangeRunnable)) {
+            if (mSettingView.isAttachedToWindow()
+                    && !mSettingView.getHandler().hasCallbacks(mWindowInsetChangeRunnable)) {
                 mSettingView.getHandler().post(mWindowInsetChangeRunnable);
             }
             return v.onApplyWindowInsets(insets);
         });
+
+        updateSelectedButton(mLastSelectedButtonIndex);
     }
 
     void onConfigurationChanged(int configDiff) {
@@ -505,23 +515,29 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     public void editMagnifierSizeMode(boolean enable) {
         setEditMagnifierSizeMode(enable);
+        updateSelectedButton(MagnificationSize.NONE);
         hideSettingPanel();
     }
 
     private void setMagnifierSize(@MagnificationSize int index) {
         mCallback.onSetMagnifierSize(index);
+        updateSelectedButton(index);
     }
 
     private void toggleDiagonalScrolling() {
         boolean enabled = mSecureSettings.getIntForUser(
                 Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, 0,
                 UserHandle.USER_CURRENT) == 1;
+        setDiagonalScrolling(!enabled);
+    }
 
-        mSecureSettings.putIntForUser(
-                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, enabled ? 0 : 1,
+    @VisibleForTesting
+    void setDiagonalScrolling(boolean enabled) {
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_ALLOW_DIAGONAL_SCROLLING, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
 
-        mCallback.onSetDiagonalScrolling(!enabled);
+        mCallback.onSetDiagonalScrolling(enabled);
     }
 
     private void setEditMagnifierSizeMode(boolean enable) {
@@ -566,5 +582,27 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                     Collections.singletonList(
                             new Rect(0, 0, mSettingView.getWidth(), mSettingView.getHeight())));
         });
+    }
+
+    private void updateSelectedButton(@MagnificationSize int index) {
+        // Clear the state of last selected button
+        if (mLastSelectedButtonIndex == MagnificationSize.SMALL) {
+            mSmallButton.setSelected(false);
+        } else if (mLastSelectedButtonIndex == MagnificationSize.MEDIUM) {
+            mMediumButton.setSelected(false);
+        } else if (mLastSelectedButtonIndex == MagnificationSize.LARGE) {
+            mLargeButton.setSelected(false);
+        }
+
+        // Set the state for selected button
+        if (index == MagnificationSize.SMALL) {
+            mSmallButton.setSelected(true);
+        } else if (index == MagnificationSize.MEDIUM) {
+            mMediumButton.setSelected(true);
+        } else if (index == MagnificationSize.LARGE) {
+            mLargeButton.setSelected(true);
+        }
+
+        mLastSelectedButtonIndex = index;
     }
 }

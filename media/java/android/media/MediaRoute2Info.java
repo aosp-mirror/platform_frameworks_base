@@ -1086,8 +1086,16 @@ public final class MediaRoute2Info implements Parcelable {
         }
 
         /**
-         * Sets the visibility of this route to public. This is the default
-         * visibility for routes that are public to all other apps.
+         * Sets the visibility of this route to public.
+         *
+         * <p>By default, unless you call {@link #setVisibilityRestricted}, the new route will be
+         * public.
+         *
+         * <p>Public routes are visible to any application with a matching {@link
+         * RouteDiscoveryPreference#getPreferredFeatures feature}.
+         *
+         * <p>Calls to this method override previous calls to {@link #setVisibilityPublic} and
+         * {@link #setVisibilityRestricted}.
          */
         @NonNull
         public Builder setVisibilityPublic() {
@@ -1097,8 +1105,16 @@ public final class MediaRoute2Info implements Parcelable {
         }
 
         /**
-         * Sets the visibility of this route to restricted. This means that the
-         * route is only visible to a set of package name.
+         * Sets the visibility of this route to restricted.
+         *
+         * <p>Routes with restricted visibility are only visible to its publisher application and
+         * applications whose package name is included in the provided {@code allowedPackages} set
+         * with a matching {@link RouteDiscoveryPreference#getPreferredFeatures feature}.
+         *
+         * <p>Calls to this method override previous calls to {@link #setVisibilityPublic} and
+         * {@link #setVisibilityRestricted}.
+         *
+         * @see #setVisibilityPublic
          * @param allowedPackages set of package names which are allowed to see this route.
          */
         @NonNull

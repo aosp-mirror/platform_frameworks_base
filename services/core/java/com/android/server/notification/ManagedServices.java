@@ -132,6 +132,7 @@ abstract public class ManagedServices {
 
     // contains connections to all connected services, including app services
     // and system services
+    @GuardedBy("mMutex")
     private final ArrayList<ManagedServiceInfo> mServices = new ArrayList<>();
     /**
      * The services that have been bound by us. If the service is also connected, it will also
@@ -157,7 +158,8 @@ abstract public class ManagedServices {
     // List of approved packages or components (by user, then by primary/secondary) that are
     // allowed to be bound as managed services. A package or component appearing in this list does
     // not mean that we are currently bound to said package/component.
-    protected ArrayMap<Integer, ArrayMap<Boolean, ArraySet<String>>> mApproved = new ArrayMap<>();
+    protected final ArrayMap<Integer, ArrayMap<Boolean, ArraySet<String>>> mApproved =
+            new ArrayMap<>();
 
     // List of packages or components (by user) that are configured to be enabled/disabled
     // explicitly by the user
@@ -316,6 +318,7 @@ abstract public class ManagedServices {
         return changes;
     }
 
+    @GuardedBy("mApproved")
     private boolean clearUserSetFlagLocked(ComponentName component, int userId) {
         String approvedValue = getApprovedValue(component.flattenToString());
         ArraySet<String> userSet = mUserSetServices.get(userId);
@@ -376,8 +379,8 @@ abstract public class ManagedServices {
             pw.println("      " + cmpt);
         }
 
-        pw.println("    Live " + getCaption() + "s (" + mServices.size() + "):");
         synchronized (mMutex) {
+            pw.println("    Live " + getCaption() + "s (" + mServices.size() + "):");
             for (ManagedServiceInfo info : mServices) {
                 if (filter != null && !filter.matches(info.component)) continue;
                 pw.println("      " + info.component
@@ -1011,10 +1014,12 @@ abstract public class ManagedServices {
             return null;
         }
         final IBinder token = service.asBinder();
-        final int N = mServices.size();
-        for (int i = 0; i < N; i++) {
-            final ManagedServiceInfo info = mServices.get(i);
-            if (info.service.asBinder() == token) return info;
+        synchronized (mMutex) {
+            final int nServices = mServices.size();
+            for (int i = 0; i < nServices; i++) {
+                final ManagedServiceInfo info = mServices.get(i);
+                if (info.service.asBinder() == token) return info;
+            }
         }
         return null;
     }
@@ -1488,10 +1493,12 @@ abstract public class ManagedServices {
         }
     }
 
+    @GuardedBy("mMutex")
     private void registerServiceLocked(final ComponentName name, final int userid) {
         registerServiceLocked(name, userid, false /* isSystem */);
     }
 
+    @GuardedBy("mMutex")
     private void registerServiceLocked(final ComponentName name, final int userid,
             final boolean isSystem) {
         if (DEBUG) Slog.v(TAG, "registerService: " + name + " u=" + userid);
@@ -1622,6 +1629,7 @@ abstract public class ManagedServices {
         }
     }
 
+    @GuardedBy("mMutex")
     private void unregisterServiceLocked(ComponentName name, int userid) {
         final int N = mServices.size();
         for (int i = N - 1; i >= 0; i--) {
@@ -1656,6 +1664,7 @@ abstract public class ManagedServices {
         return serviceInfo;
     }
 
+    @GuardedBy("mMutex")
     private ManagedServiceInfo removeServiceLocked(int i) {
         final ManagedServiceInfo info = mServices.remove(i);
         onServiceRemovedLocked(info);

@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.util.Pair;
 
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.CrossProfileIntentsChecker;
 import com.android.internal.app.AbstractMultiProfilePagerAdapter.QuietModeManager;
@@ -53,7 +54,7 @@ public class ResolverWrapperActivity extends ResolverActivity {
             List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
             boolean filterLastUsed, UserHandle userHandle) {
         return new ResolverWrapperAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, createListController(userHandle), this);
+                filterLastUsed, createListController(userHandle), this, userHandle);
     }
 
     @Override
@@ -95,22 +96,11 @@ public class ResolverWrapperActivity extends ResolverActivity {
         return super.isVoiceInteraction();
     }
 
-    // TODO: Remove this and override safelyStartActivityInternal() instead.
-    @Override
-    public void safelyStartActivityAsUser(TargetInfo cti, UserHandle user,
-            @Nullable Bundle options) {
-        if (sOverrides.onSafelyStartCallback != null &&
-                sOverrides.onSafelyStartCallback.apply(cti)) {
-            return;
-        }
-        super.safelyStartActivityAsUser(cti, user, options);
-    }
-
     @Override
     public void safelyStartActivityInternal(TargetInfo cti, UserHandle user,
             @Nullable Bundle options) {
         if (sOverrides.onSafelyStartInternalCallback != null
-                && sOverrides.onSafelyStartInternalCallback.apply(user)) {
+                && sOverrides.onSafelyStartInternalCallback.apply(new Pair<>(cti, user))) {
             return;
         }
         super.safelyStartActivityInternal(cti, user, options);
@@ -166,6 +156,12 @@ public class ResolverWrapperActivity extends ResolverActivity {
         super.startActivityAsUser(intent, options, user);
     }
 
+    @Override
+    protected List<UserHandle> getResolverRankerServiceUserHandleListInternal(UserHandle
+            userHandle) {
+        return super.getResolverRankerServiceUserHandleListInternal(userHandle);
+    }
+
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
@@ -174,8 +170,7 @@ public class ResolverWrapperActivity extends ResolverActivity {
     static class OverrideData {
         @SuppressWarnings("Since15")
         public Function<PackageManager, PackageManager> createPackageManager;
-        public Function<TargetInfo, Boolean> onSafelyStartCallback;
-        public Function<UserHandle, Boolean> onSafelyStartInternalCallback;
+        public Function<Pair<TargetInfo, UserHandle>, Boolean> onSafelyStartInternalCallback;
         public ResolverListController resolverListController;
         public ResolverListController workResolverListController;
         public Boolean isVoiceInteraction;
@@ -189,7 +184,6 @@ public class ResolverWrapperActivity extends ResolverActivity {
         public CrossProfileIntentsChecker mCrossProfileIntentsChecker;
 
         public void reset() {
-            onSafelyStartCallback = null;
             onSafelyStartInternalCallback = null;
             isVoiceInteraction = null;
             createPackageManager = null;

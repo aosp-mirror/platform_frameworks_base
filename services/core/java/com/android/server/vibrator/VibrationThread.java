@@ -33,12 +33,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-/** Plays a {@link Vibration} in dedicated thread. */
+/** Plays a {@link HalVibration} in dedicated thread. */
 final class VibrationThread extends Thread {
     static final String TAG = "VibrationThread";
     static final boolean DEBUG = false;
 
-    /** Calls into VibratorManager functionality needed for playing a {@link Vibration}. */
+    /** Calls into VibratorManager functionality needed for playing a {@link HalVibration}. */
     interface VibratorManagerHooks {
 
         /**

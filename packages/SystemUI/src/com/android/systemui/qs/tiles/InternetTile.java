@@ -259,17 +259,19 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 Log.d(TAG, "setWifiIndicators: " + indicators);
             }
             mWifiInfo.mEnabled = indicators.enabled;
-            if (indicators.qsIcon == null) {
-                return;
-            }
-            mWifiInfo.mConnected = indicators.qsIcon.visible;
-            mWifiInfo.mWifiSignalIconId = indicators.qsIcon.icon;
-            mWifiInfo.mWifiSignalContentDescription = indicators.qsIcon.contentDescription;
-            mWifiInfo.mEnabled = indicators.enabled;
             mWifiInfo.mSsid = indicators.description;
             mWifiInfo.mIsTransient = indicators.isTransient;
             mWifiInfo.mStatusLabel = indicators.statusLabel;
-            refreshState(mWifiInfo);
+            if (indicators.qsIcon != null) {
+                mWifiInfo.mConnected = indicators.qsIcon.visible;
+                mWifiInfo.mWifiSignalIconId = indicators.qsIcon.icon;
+                mWifiInfo.mWifiSignalContentDescription = indicators.qsIcon.contentDescription;
+                refreshState(mWifiInfo);
+            } else {
+                mWifiInfo.mConnected = false;
+                mWifiInfo.mWifiSignalIconId = 0;
+                mWifiInfo.mWifiSignalContentDescription = null;
+            }
         }
 
         @Override

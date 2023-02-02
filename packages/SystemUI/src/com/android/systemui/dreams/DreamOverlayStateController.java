@@ -56,6 +56,8 @@ public class DreamOverlayStateController implements
     public static final int STATE_LOW_LIGHT_ACTIVE = 1 << 1;
     public static final int STATE_DREAM_ENTRY_ANIMATIONS_FINISHED = 1 << 2;
     public static final int STATE_DREAM_EXIT_ANIMATIONS_RUNNING = 1 << 3;
+    public static final int STATE_HAS_ASSISTANT_ATTENTION = 1 << 4;
+    public static final int STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE = 1 << 5;
 
     private static final int OP_CLEAR_STATE = 1;
     private static final int OP_SET_STATE = 2;
@@ -251,6 +253,22 @@ public class DreamOverlayStateController implements
         return containsState(STATE_DREAM_EXIT_ANIMATIONS_RUNNING);
     }
 
+    /**
+     * Returns whether assistant currently has the user's attention.
+     * @return {@code true} if assistant has the user's attention, {@code false} otherwise.
+     */
+    public boolean hasAssistantAttention() {
+        return containsState(STATE_HAS_ASSISTANT_ATTENTION);
+    }
+
+    /**
+     * Returns whether the dream overlay status bar is currently visible.
+     * @return {@code true} if the status bar is visible, {@code false} otherwise.
+     */
+    public boolean isDreamOverlayStatusBarVisible() {
+        return containsState(STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE);
+    }
+
     private boolean containsState(int state) {
         return (mState & state) != 0;
     }
@@ -307,6 +325,23 @@ public class DreamOverlayStateController implements
     public void setExitAnimationsRunning(boolean running) {
         modifyState(running ? OP_SET_STATE : OP_CLEAR_STATE,
                 STATE_DREAM_EXIT_ANIMATIONS_RUNNING);
+    }
+
+    /**
+     * Sets whether assistant currently has the user's attention.
+     * @param hasAttention {@code true} if has the user's attention, {@code false} otherwise.
+     */
+    public void setHasAssistantAttention(boolean hasAttention) {
+        modifyState(hasAttention ? OP_SET_STATE : OP_CLEAR_STATE, STATE_HAS_ASSISTANT_ATTENTION);
+    }
+
+    /**
+     * Sets whether the dream overlay status bar is visible.
+     * @param visible {@code true} if the status bar is visible, {@code false} otherwise.
+     */
+    public void setDreamOverlayStatusBarVisible(boolean visible) {
+        modifyState(
+                visible ? OP_SET_STATE : OP_CLEAR_STATE, STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE);
     }
 
     /**

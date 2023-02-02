@@ -943,11 +943,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
                 return false;
             }
 
-            // System apps are never considered stopped for purposes of
-            // filtering, because there may be no way for the user to
-            // actually re-launch them.
-            return !packageState.isSystem()
-                    && packageState.getUserStateOrDefault(userId).isStopped();
+            return packageState.getUserStateOrDefault(userId).isStopped();
         }
     }
 

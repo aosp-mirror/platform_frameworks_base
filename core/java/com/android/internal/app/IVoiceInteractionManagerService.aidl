@@ -39,6 +39,7 @@ import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 
 interface IVoiceInteractionManagerService {
     void showSession(in Bundle sessionArgs, int flags, String attributionTag);
@@ -299,6 +300,12 @@ interface IVoiceInteractionManagerService {
      * Requests to shutdown hotword detection service.
      */
     void shutdownHotwordDetectionService();
+
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
+    void enableVisualQueryDetection(in IVisualQueryDetectionAttentionListener Listener);
+
+    @EnforcePermission("ACCESS_VOICE_INTERACTION_SERVICE")
+    void disableVisualQueryDetection();
 
     void startPerceiving(in IVisualQueryDetectionVoiceInteractionCallback callback);
 

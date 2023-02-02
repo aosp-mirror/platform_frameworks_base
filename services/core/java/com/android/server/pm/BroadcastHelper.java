@@ -18,6 +18,8 @@ package com.android.server.pm;
 
 import static android.os.PowerExemptionManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+import static android.safetylabel.SafetyLabelConstants.PERMISSION_RATIONALE_ENABLED;
+import static android.safetylabel.SafetyLabelConstants.SAFETY_LABEL_CHANGE_NOTIFICATIONS_ENABLED;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.PACKAGE_SCHEME;
@@ -42,6 +44,7 @@ import android.os.Bundle;
 import android.os.PowerExemptionManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
@@ -335,11 +338,13 @@ public final class BroadcastHelper {
                 broadcastAllowlist, null /* filterExtrasForReceiver */, null);
         // Send to PermissionController for all new users, even if it may not be running for some
         // users
-        sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                packageName, extras, 0,
-                mContext.getPackageManager().getPermissionControllerPackageName(),
-                null, userIds, instantUserIds,
-                broadcastAllowlist, null /* filterExtrasForReceiver */, null);
+        if (isPrivacySafetyLabelChangeNotificationsEnabled()) {
+            sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
+                    packageName, extras, 0,
+                    mContext.getPackageManager().getPermissionControllerPackageName(),
+                    null, userIds, instantUserIds,
+                    broadcastAllowlist, null /* filterExtrasForReceiver */, null);
+        }
     }
 
     public void sendFirstLaunchBroadcast(String pkgName, String installerPkg,
@@ -382,6 +387,13 @@ public final class BroadcastHelper {
         filteredExtras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, filteredPkgs.first);
         filteredExtras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, filteredPkgs.second);
         return filteredExtras;
+    }
+
+    /** Returns whether the Safety Label Change notification, a privacy feature, is enabled. */
+    public static boolean isPrivacySafetyLabelChangeNotificationsEnabled() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                SAFETY_LABEL_CHANGE_NOTIFICATIONS_ENABLED, false) && DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_PRIVACY, PERMISSION_RATIONALE_ENABLED, false);
     }
 
     @NonNull

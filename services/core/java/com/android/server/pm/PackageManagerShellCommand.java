@@ -344,6 +344,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runBypassStagedInstallerCheck();
                 case "bypass-allowed-apex-update-check":
                     return runBypassAllowedApexUpdateCheck();
+                case "disable-verification-for-uid":
+                    return runDisableVerificationForUid();
                 case "set-silent-updates-policy":
                     return runSetSilentUpdatesPolicy();
                 default: {
@@ -508,6 +510,29 @@ class PackageManagerShellCommand extends ShellCommand {
             mInterface.getPackageInstaller()
                     .bypassNextAllowedApexUpdateCheck(Boolean.parseBoolean(getNextArg()));
             return 0;
+        } catch (RemoteException e) {
+            pw.println("Failure ["
+                    + e.getClass().getName() + " - "
+                    + e.getMessage() + "]");
+            return -1;
+        }
+    }
+
+    private int runDisableVerificationForUid() {
+        final PrintWriter pw = getOutPrintWriter();
+        try {
+            int uid = Integer.parseInt(getNextArgRequired());
+            var amInternal = LocalServices.getService(ActivityManagerInternal.class);
+            boolean isInstrumented =
+                    amInternal.getInstrumentationSourceUid(uid) != Process.INVALID_UID;
+            if (isInstrumented) {
+                mInterface.getPackageInstaller().disableVerificationForUid(uid);
+                return 0;
+            } else {
+                // Only available for testing
+                pw.println("Error: must specify an instrumented uid");
+                return -1;
+            }
         } catch (RemoteException e) {
             pw.println("Failure ["
                     + e.getClass().getName() + " - "

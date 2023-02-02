@@ -79,7 +79,7 @@ static long android_graphics_HardwareBufferRenderer_create(JNIEnv* env, jobject,
     return (jlong)proxy;
 }
 
-static void HardwareBufferRenderer_destroy(jobject renderProxy) {
+static void HardwareBufferRenderer_destroy(jlong renderProxy) {
     auto* proxy = reinterpret_cast<RenderProxy*>(renderProxy);
     delete proxy;
 }
@@ -109,7 +109,7 @@ static SkMatrix createMatrixFromBufferTransform(SkScalar width, SkScalar height,
     return matrix;
 }
 
-static int android_graphics_HardwareBufferRenderer_render(JNIEnv* env, jobject, jobject renderProxy,
+static int android_graphics_HardwareBufferRenderer_render(JNIEnv* env, jobject, jlong renderProxy,
                                                           jint transform, jint width, jint height,
                                                           jlong colorspacePtr, jobject consumer) {
     auto* proxy = reinterpret_cast<RenderProxy*>(renderProxy);
@@ -119,11 +119,17 @@ static int android_graphics_HardwareBufferRenderer_render(JNIEnv* env, jobject, 
     auto colorSpace = GraphicsJNI::getNativeColorSpace(colorspacePtr);
     proxy->setHardwareBufferRenderParams(
             HardwareBufferRenderParams(matrix, colorSpace, createRenderCallback(env, consumer)));
+    nsecs_t vsync = systemTime(SYSTEM_TIME_MONOTONIC);
+    UiFrameInfoBuilder(proxy->frameInfo())
+                .setVsync(vsync, vsync, UiFrameInfoBuilder::INVALID_VSYNC_ID,
+                    UiFrameInfoBuilder::UNKNOWN_DEADLINE,
+                    UiFrameInfoBuilder::UNKNOWN_FRAME_INTERVAL)
+                .addFlag(FrameInfoFlags::SurfaceCanvas);
     return proxy->syncAndDrawFrame();
 }
 
 static void android_graphics_HardwareBufferRenderer_setLightGeometry(JNIEnv*, jobject,
-                                                                     jobject renderProxyPtr,
+                                                                     jlong renderProxyPtr,
                                                                      jfloat lightX, jfloat lightY,
                                                                      jfloat lightZ,
                                                                      jfloat lightRadius) {
@@ -132,7 +138,7 @@ static void android_graphics_HardwareBufferRenderer_setLightGeometry(JNIEnv*, jo
 }
 
 static void android_graphics_HardwareBufferRenderer_setLightAlpha(JNIEnv* env, jobject,
-                                                                  jobject renderProxyPtr,
+                                                                  jlong renderProxyPtr,
                                                                   jfloat ambientShadowAlpha,
                                                                   jfloat spotShadowAlpha) {
     auto* proxy = reinterpret_cast<RenderProxy*>(renderProxyPtr);

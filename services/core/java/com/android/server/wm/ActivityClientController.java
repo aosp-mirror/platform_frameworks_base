@@ -749,6 +749,8 @@ class ActivityClientController extends IActivityClientController.Stub {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r != null) {
+                    EventLogTags.writeWmSetRequestedOrientation(requestedOrientation,
+                            r.shortComponentName);
                     r.setRequestedOrientation(requestedOrientation);
                 }
             }

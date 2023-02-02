@@ -26,6 +26,7 @@ import android.content.ContentCaptureOptions;
 import android.content.Intent;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
+import android.media.AudioSystem;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.ParcelFileDescriptor;
@@ -129,7 +130,7 @@ public abstract class VisualQueryDetectionService extends Service
 
         @Override
         public void updateAudioFlinger(IBinder audioFlinger) {
-            Log.v(TAG, "Ignore #updateAudioFlinger");
+            AudioSystem.setAudioFlingerBinder(audioFlinger);
         }
 
         @Override

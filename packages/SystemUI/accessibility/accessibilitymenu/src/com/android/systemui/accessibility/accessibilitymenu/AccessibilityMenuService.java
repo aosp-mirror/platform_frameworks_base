@@ -22,18 +22,27 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.settingslib.display.BrightnessUtils;
+import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut.ShortcutId;
 import com.android.systemui.accessibility.accessibilitymenu.view.A11yMenuOverlayLayout;
+
+import java.util.List;
 
 /** @hide */
 public class AccessibilityMenuService extends AccessibilityService
@@ -41,6 +50,11 @@ public class AccessibilityMenuService extends AccessibilityService
     private static final String TAG = "A11yMenuService";
 
     private static final long BUFFER_MILLISECONDS_TO_PREVENT_UPDATE_FAILURE = 100L;
+
+    private static final int BRIGHTNESS_UP_INCREMENT_GAMMA =
+            (int) Math.ceil(BrightnessUtils.GAMMA_SPACE_MAX * 0.11f);
+    private static final int BRIGHTNESS_DOWN_INCREMENT_GAMMA =
+            (int) -Math.ceil(BrightnessUtils.GAMMA_SPACE_MAX * 0.11f);
 
     private long mLastTimeTouchedOutside = 0L;
     // Timeout used to ignore the A11y button onClick() when ACTION_OUTSIDE is also received on
@@ -50,6 +64,8 @@ public class AccessibilityMenuService extends AccessibilityService
     private A11yMenuOverlayLayout mA11yMenuLayout;
 
     private static boolean sInitialized = false;
+
+    private AudioManager mAudioManager;
 
     // TODO(b/136716947): Support multi-display once a11y framework side is ready.
     private DisplayManager mDisplayManager;
@@ -140,6 +156,7 @@ public class AccessibilityMenuService extends AccessibilityService
 
         mDisplayManager = getSystemService(DisplayManager.class);
         mDisplayManager.registerDisplayListener(mDisplayListener, null);
+        mAudioManager = getSystemService(AudioManager.class);
 
         sInitialized = true;
     }
@@ -170,7 +187,91 @@ public class AccessibilityMenuService extends AccessibilityService
      * @param view the shortcut button being clicked.
      */
     public void handleClick(View view) {
+        // Shortcuts are repeatable in a11y menu rather than unique, so use tag ID to handle.
+        int viewTag = (int) view.getTag();
+
+        if (viewTag == ShortcutId.ID_ASSISTANT_VALUE.ordinal()) {
+            // Always restart the voice command activity, so that the UI is reloaded.
+            startActivityIfIntentIsSafe(
+                    new Intent(Intent.ACTION_VOICE_COMMAND),
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        } else if (viewTag == ShortcutId.ID_A11YSETTING_VALUE.ordinal()) {
+            startActivityIfIntentIsSafe(
+                    new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS),
+                    Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        } else if (viewTag == ShortcutId.ID_POWER_VALUE.ordinal()) {
+            performGlobalAction(GLOBAL_ACTION_POWER_DIALOG);
+        } else if (viewTag == ShortcutId.ID_RECENT_VALUE.ordinal()) {
+            performGlobalAction(GLOBAL_ACTION_RECENTS);
+        } else if (viewTag == ShortcutId.ID_LOCKSCREEN_VALUE.ordinal()) {
+            performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
+        } else if (viewTag == ShortcutId.ID_QUICKSETTING_VALUE.ordinal()) {
+            performGlobalAction(GLOBAL_ACTION_QUICK_SETTINGS);
+        } else if (viewTag == ShortcutId.ID_NOTIFICATION_VALUE.ordinal()) {
+            performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS);
+        } else if (viewTag == ShortcutId.ID_SCREENSHOT_VALUE.ordinal()) {
+            performGlobalAction(GLOBAL_ACTION_TAKE_SCREENSHOT);
+        } else if (viewTag == ShortcutId.ID_BRIGHTNESS_UP_VALUE.ordinal()) {
+            adjustBrightness(BRIGHTNESS_UP_INCREMENT_GAMMA);
+            return;
+        } else if (viewTag == ShortcutId.ID_BRIGHTNESS_DOWN_VALUE.ordinal()) {
+            adjustBrightness(BRIGHTNESS_DOWN_INCREMENT_GAMMA);
+            return;
+        } else if (viewTag == ShortcutId.ID_VOLUME_UP_VALUE.ordinal()) {
+            adjustVolume(AudioManager.ADJUST_RAISE);
+            return;
+        } else if (viewTag == ShortcutId.ID_VOLUME_DOWN_VALUE.ordinal()) {
+            adjustVolume(AudioManager.ADJUST_LOWER);
+            return;
+        }
+
         mA11yMenuLayout.hideMenu();
+    }
+
+    private void adjustBrightness(int increment) {
+        BrightnessInfo info = getDisplay().getBrightnessInfo();
+        int gamma = BrightnessUtils.convertLinearToGammaFloat(
+                info.brightness,
+                info.brightnessMinimum,
+                info.brightnessMaximum
+        );
+        gamma = Math.max(
+                BrightnessUtils.GAMMA_SPACE_MIN,
+                Math.min(BrightnessUtils.GAMMA_SPACE_MAX, gamma + increment));
+
+        float brightness = BrightnessUtils.convertGammaToLinearFloat(
+                gamma,
+                info.brightnessMinimum,
+                info.brightnessMaximum
+        );
+        mDisplayManager.setTemporaryBrightness(getDisplayId(), brightness);
+        mDisplayManager.setBrightness(getDisplayId(), brightness);
+        mA11yMenuLayout.showSnackbar(
+                getString(R.string.brightness_percentage_label,
+                        (gamma / (BrightnessUtils.GAMMA_SPACE_MAX / 100))));
+    }
+
+    private void adjustVolume(int direction) {
+        mAudioManager.adjustStreamVolume(
+                AudioManager.STREAM_MUSIC, direction,
+                AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+        final int maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        final int volume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        mA11yMenuLayout.showSnackbar(
+                getString(
+                        R.string.music_volume_percentage_label,
+                        (int) (100.0 / maxVolume * volume))
+        );
+    }
+
+    private void startActivityIfIntentIsSafe(Intent intent, int flag) {
+        PackageManager packageManager = getPackageManager();
+        List<ResolveInfo> activities =
+                packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        if (!activities.isEmpty()) {
+            intent.setFlags(flag);
+            startActivity(intent);
+        }
     }
 
     @Override

@@ -16,7 +16,7 @@
 
 package com.android.systemui.media.dialog;
 
-import static android.media.RouteListingPreference.Item.DISABLE_REASON_SUBSCRIPTION_REQUIRED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQUIRED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -436,7 +436,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
                 R.string.media_output_status_require_premium);
         when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
         when(mMediaDevice2.hasDisabledReason()).thenReturn(true);
-        when(mMediaDevice2.getDisableReason()).thenReturn(DISABLE_REASON_SUBSCRIPTION_REQUIRED);
+        when(mMediaDevice2.getDisableReason()).thenReturn(SUBTEXT_SUBSCRIPTION_REQUIRED);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
 
         assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);

@@ -20,6 +20,7 @@
 #include "android_media_tv_Tuner.h"
 
 #include <aidl/android/hardware/tv/tuner/AudioExtraMetaData.h>
+#include <aidl/android/hardware/tv/tuner/AudioPresentation.h>
 #include <aidl/android/hardware/tv/tuner/AudioStreamType.h>
 #include <aidl/android/hardware/tv/tuner/AvStreamType.h>
 #include <aidl/android/hardware/tv/tuner/Constant.h>
@@ -161,12 +162,14 @@
 #include <nativehelper/ScopedLocalRef.h>
 #include <utils/Log.h>
 
+#include "android_media_AudioPresentation.h"
 #include "android_media_MediaCodecLinearBlock.h"
 #include "android_runtime/AndroidRuntime.h"
 
 #pragma GCC diagnostic ignored "-Wunused-function"
 
 using ::aidl::android::hardware::tv::tuner::AudioExtraMetaData;
+using ::aidl::android::hardware::tv::tuner::AudioPreselection;
 using ::aidl::android::hardware::tv::tuner::AudioStreamType;
 using ::aidl::android::hardware::tv::tuner::AvStreamType;
 using ::aidl::android::hardware::tv::tuner::Constant;
@@ -362,6 +365,9 @@ void DestroyCallback(const C2Buffer * buf, void *arg) {
 }
 
 namespace android {
+
+static JAudioPresentationInfo::fields_t gAudioPresentationFields;
+
 /////////////// LnbClientCallbackImpl ///////////////////////
 void LnbClientCallbackImpl::onEvent(const LnbEventType lnbEventType) {
     ALOGV("LnbClientCallbackImpl::onEvent, type=%d", lnbEventType);
@@ -634,27 +640,45 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
             eventClazz,
             "<init>",
             "(IZJZJJJLandroid/media/MediaCodec$LinearBlock;"
-            "ZJIZILandroid/media/tv/tuner/filter/AudioDescriptor;)V");
+            "ZJIZILandroid/media/tv/tuner/filter/AudioDescriptor;"
+            "Ljava/util/List;)V");
     jfieldID eventContext = env->GetFieldID(eventClazz, "mNativeContext", "J");
 
     const DemuxFilterMediaEvent &mediaEvent = event.get<DemuxFilterEvent::Tag::media>();
     jobject audioDescriptor = nullptr;
-    if (mediaEvent.extraMetaData.getTag() == DemuxFilterMediaEventExtraMetaData::Tag::audio) {
-        jclass adClazz = env->FindClass("android/media/tv/tuner/filter/AudioDescriptor");
-        jmethodID adInit = env->GetMethodID(adClazz, "<init>", "(BBCBBB)V");
+    gAudioPresentationFields.init(env);
+    jobject presentationsJObj = JAudioPresentationInfo::asJobject(env, gAudioPresentationFields);
+    switch (mediaEvent.extraMetaData.getTag()) {
+        case DemuxFilterMediaEventExtraMetaData::Tag::audio: {
+            jclass adClazz = env->FindClass("android/media/tv/tuner/filter/AudioDescriptor");
+            jmethodID adInit = env->GetMethodID(adClazz, "<init>", "(BBCBBB)V");
 
-        const AudioExtraMetaData &ad =
-                mediaEvent.extraMetaData.get<DemuxFilterMediaEventExtraMetaData::Tag::audio>();
-        jbyte adFade = ad.adFade;
-        jbyte adPan = ad.adPan;
-        jchar versionTextTag = ad.versionTextTag;
-        jbyte adGainCenter = ad.adGainCenter;
-        jbyte adGainFront = ad.adGainFront;
-        jbyte adGainSurround = ad.adGainSurround;
+            const AudioExtraMetaData &ad =
+                    mediaEvent.extraMetaData.get<DemuxFilterMediaEventExtraMetaData::Tag::audio>();
+            jbyte adFade = ad.adFade;
+            jbyte adPan = ad.adPan;
+            jchar versionTextTag = ad.versionTextTag;
+            jbyte adGainCenter = ad.adGainCenter;
+            jbyte adGainFront = ad.adGainFront;
+            jbyte adGainSurround = ad.adGainSurround;
 
-        audioDescriptor = env->NewObject(adClazz, adInit, adFade, adPan, versionTextTag,
-                                         adGainCenter, adGainFront, adGainSurround);
-        env->DeleteLocalRef(adClazz);
+            audioDescriptor = env->NewObject(adClazz, adInit, adFade, adPan, versionTextTag,
+                                             adGainCenter, adGainFront, adGainSurround);
+            env->DeleteLocalRef(adClazz);
+            break;
+        }
+        case DemuxFilterMediaEventExtraMetaData::Tag::audioPresentations: {
+            JAudioPresentationInfo::addPresentations(
+                    env, gAudioPresentationFields,
+                    mediaEvent.extraMetaData
+                            .get<DemuxFilterMediaEventExtraMetaData::Tag::audioPresentations>(),
+                    presentationsJObj);
+            break;
+        }
+        default: {
+            ALOGE("FilterClientCallbackImpl::getMediaEvent: unknown extraMetaData");
+            break;
+        }
     }
 
     jlong dataLength = mediaEvent.dataLength;
@@ -683,7 +707,8 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
 
     jobject obj = env->NewObject(eventClazz, eventInit, streamId, isPtsPresent, pts, isDtsPresent,
                                  dts, dataLength, offset, nullptr, isSecureMemory, avDataId,
-                                 mpuSequenceNumber, isPesPrivateData, sc, audioDescriptor);
+                                 mpuSequenceNumber, isPesPrivateData, sc, audioDescriptor,
+                                 presentationsJObj);
 
     uint64_t avSharedMemSize = mFilterClient->getAvSharedHandleInfo().size;
     if (mediaEvent.avMemory.fds.size() > 0 || mediaEvent.avDataId != 0 ||
@@ -702,6 +727,7 @@ void FilterClientCallbackImpl::getMediaEvent(jobjectArray &arr, const int size,
     }
     env->DeleteLocalRef(obj);
     env->DeleteLocalRef(eventClazz);
+    env->DeleteLocalRef(presentationsJObj);
 }
 
 void FilterClientCallbackImpl::getPesEvent(jobjectArray &arr, const int size,

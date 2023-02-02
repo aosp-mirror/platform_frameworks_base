@@ -525,13 +525,13 @@ class InstallingSession {
     }
 
     private void processApkInstallRequests(boolean success, List<InstallRequest> installRequests) {
-        if (success) {
+        if (!success) {
             for (InstallRequest request : installRequests) {
                 if (request.getReturnCode() != PackageManager.INSTALL_SUCCEEDED) {
                     cleanUpForFailedInstall(request);
                 }
             }
-
+        } else {
             mInstallPackageHelper.installPackagesTraced(installRequests);
 
             for (InstallRequest request : installRequests) {

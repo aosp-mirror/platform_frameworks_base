@@ -17,7 +17,6 @@
 package android.media;
 
 import android.annotation.IntDef;
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -45,14 +44,24 @@ import java.util.Objects;
 public final class RouteListingPreference implements Parcelable {
 
     /**
-     * {@link Intent} action for apps to take the user to a screen for transferring media playback
-     * to the route with the id provided by the extra with key {@link #EXTRA_ROUTE_ID}.
+     * {@link Intent} action that the system uses to take the user the app when the user selects an
+     * {@link Item} whose {@link Item#getSelectionBehavior() selection behavior} is {@link
+     * Item#SELECTION_BEHAVIOR_GO_TO_APP}.
+     *
+     * <p>The launched intent will identify the selected item using the extra identified by {@link
+     * #EXTRA_ROUTE_ID}.
+     *
+     * @see #getLinkedItemComponentName()
+     * @see Item#SELECTION_BEHAVIOR_GO_TO_APP
      */
     public static final String ACTION_TRANSFER_MEDIA = "android.media.action.TRANSFER_MEDIA";
 
     /**
      * {@link Intent} string extra key that contains the {@link Item#getRouteId() id} of the route
      * to transfer to, as part of an {@link #ACTION_TRANSFER_MEDIA} intent.
+     *
+     * @see #getLinkedItemComponentName()
+     * @see Item#SELECTION_BEHAVIOR_GO_TO_APP
      */
     public static final String EXTRA_ROUTE_ID = "android.media.extra.ROUTE_ID";
 
@@ -72,12 +81,12 @@ public final class RouteListingPreference implements Parcelable {
 
     @NonNull private final List<Item> mItems;
     private final boolean mUseSystemOrdering;
-    @Nullable private final ComponentName mInAppOnlyItemRoutingReceiver;
+    @Nullable private final ComponentName mLinkedItemComponentName;
 
     private RouteListingPreference(Builder builder) {
         mItems = builder.mItems;
         mUseSystemOrdering = builder.mUseSystemOrdering;
-        mInAppOnlyItemRoutingReceiver = builder.mInAppOnlyItemRoutingReceiver;
+        mLinkedItemComponentName = builder.mLinkedItemComponentName;
     }
 
     private RouteListingPreference(Parcel in) {
@@ -85,7 +94,7 @@ public final class RouteListingPreference implements Parcelable {
                 in.readParcelableList(new ArrayList<>(), Item.class.getClassLoader(), Item.class);
         mItems = List.copyOf(items);
         mUseSystemOrdering = in.readBoolean();
-        mInAppOnlyItemRoutingReceiver = ComponentName.readFromParcel(in);
+        mLinkedItemComponentName = ComponentName.readFromParcel(in);
     }
 
     /**
@@ -110,18 +119,20 @@ public final class RouteListingPreference implements Parcelable {
     }
 
     /**
-     * Returns a {@link ComponentName} for handling routes disabled via {@link
-     * Item#DISABLE_REASON_IN_APP_ONLY}, or null if the user needs to manually navigate to the app
-     * in order to route to select the corresponding routes.
+     * Returns a {@link ComponentName} for navigating to the application.
      *
-     * <p>If the user selects an {@link Item} disabled via {@link Item#DISABLE_REASON_IN_APP_ONLY},
-     * and this method returns a non-null {@link ComponentName}, the system takes the user back to
-     * the app by launching an intent to the returned {@link ComponentName}, using action {@link
-     * #ACTION_TRANSFER_MEDIA}, with the extra {@link #EXTRA_ROUTE_ID}.
+     * <p>Must not be null if any of the {@link #getItems() items} of this route listing preference
+     * has {@link Item#getSelectionBehavior() selection behavior} {@link
+     * Item#SELECTION_BEHAVIOR_GO_TO_APP}.
+     *
+     * <p>The system navigates to the application when the user selects {@link Item} with {@link
+     * Item#SELECTION_BEHAVIOR_GO_TO_APP} by launching an intent to the returned {@link
+     * ComponentName}, using action {@link #ACTION_TRANSFER_MEDIA}, with the extra {@link
+     * #EXTRA_ROUTE_ID}.
      */
     @Nullable
-    public ComponentName getInAppOnlyItemRoutingReceiver() {
-        return mInAppOnlyItemRoutingReceiver;
+    public ComponentName getLinkedItemComponentName() {
+        return mLinkedItemComponentName;
     }
 
     // RouteListingPreference Parcelable implementation.
@@ -135,7 +146,7 @@ public final class RouteListingPreference implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelableList(mItems, flags);
         dest.writeBoolean(mUseSystemOrdering);
-        ComponentName.writeToParcel(mInAppOnlyItemRoutingReceiver, dest);
+        ComponentName.writeToParcel(mLinkedItemComponentName, dest);
     }
 
     // Equals and hashCode.
@@ -151,13 +162,12 @@ public final class RouteListingPreference implements Parcelable {
         RouteListingPreference that = (RouteListingPreference) other;
         return mItems.equals(that.mItems)
                 && mUseSystemOrdering == that.mUseSystemOrdering
-                && Objects.equals(
-                        mInAppOnlyItemRoutingReceiver, that.mInAppOnlyItemRoutingReceiver);
+                && Objects.equals(mLinkedItemComponentName, that.mLinkedItemComponentName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mItems, mUseSystemOrdering, mInAppOnlyItemRoutingReceiver);
+        return Objects.hash(mItems, mUseSystemOrdering, mLinkedItemComponentName);
     }
 
     /** Builder for {@link RouteListingPreference}. */
@@ -165,7 +175,7 @@ public final class RouteListingPreference implements Parcelable {
 
         private List<Item> mItems;
         private boolean mUseSystemOrdering;
-        private ComponentName mInAppOnlyItemRoutingReceiver;
+        private ComponentName mLinkedItemComponentName;
 
         /** Creates a new instance with default values (documented in the setters). */
         public Builder() {
@@ -198,14 +208,13 @@ public final class RouteListingPreference implements Parcelable {
         }
 
         /**
-         * See {@link #getInAppOnlyItemRoutingReceiver()}.
+         * See {@link #getLinkedItemComponentName()}.
          *
          * <p>The default value is {@code null}.
          */
         @NonNull
-        public Builder setInAppOnlyItemRoutingReceiver(
-                @Nullable ComponentName inAppOnlyItemRoutingReceiver) {
-            mInAppOnlyItemRoutingReceiver = inAppOnlyItemRoutingReceiver;
+        public Builder setLinkedItemComponentName(@Nullable ComponentName linkedItemComponentName) {
+            mLinkedItemComponentName = linkedItemComponentName;
             return this;
         }
 
@@ -221,6 +230,29 @@ public final class RouteListingPreference implements Parcelable {
 
     /** Holds preference information for a specific route in a {@link RouteListingPreference}. */
     public static final class Item implements Parcelable {
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(
+                prefix = {"SELECTION_BEHAVIOR_"},
+                value = {
+                    SELECTION_BEHAVIOR_NONE,
+                    SELECTION_BEHAVIOR_TRANSFER,
+                    SELECTION_BEHAVIOR_GO_TO_APP
+                })
+        public @interface SelectionBehavior {}
+
+        /** The corresponding route is not selectable by the user. */
+        public static final int SELECTION_BEHAVIOR_NONE = 0;
+        /** If the user selects the corresponding route, the media transfers to the said route. */
+        public static final int SELECTION_BEHAVIOR_TRANSFER = 1;
+        /**
+         * If the user selects the corresponding route, the system takes the user to the
+         * application.
+         *
+         * <p>The system uses {@link #getLinkedItemComponentName()} in order to navigate to the app.
+         */
+        public static final int SELECTION_BEHAVIOR_GO_TO_APP = 2;
 
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
@@ -249,48 +281,42 @@ public final class RouteListingPreference implements Parcelable {
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(
-                prefix = {"DISABLE_REASON_"},
+                prefix = {"SUBTEXT_"},
                 value = {
-                    DISABLE_REASON_NONE,
-                    DISABLE_REASON_SUBSCRIPTION_REQUIRED,
-                    DISABLE_REASON_DOWNLOADED_CONTENT,
-                    DISABLE_REASON_AD,
-                    DISABLE_REASON_IN_APP_ONLY,
-                    DISABLE_REASON_CUSTOM
+                    SUBTEXT_NONE,
+                    SUBTEXT_SUBSCRIPTION_REQUIRED,
+                    SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED,
+                    SUBTEXT_AD_ROUTING_DISALLOWED,
+                    SUBTEXT_CUSTOM
                 })
-        public @interface DisableReason {}
+        public @interface SubText {}
 
-        /** The corresponding route is available for routing. */
-        public static final int DISABLE_REASON_NONE = 0;
+        /** The corresponding route has no associated subtext. */
+        public static final int SUBTEXT_NONE = 0;
         /**
-         * The corresponding route requires a special subscription in order to be available for
-         * routing.
+         * The corresponding route's subtext must indicate that it requires a special subscription
+         * in order to be available for routing.
          */
-        public static final int DISABLE_REASON_SUBSCRIPTION_REQUIRED = 1;
+        public static final int SUBTEXT_SUBSCRIPTION_REQUIRED = 1;
         /**
-         * The corresponding route is not available because downloaded content cannot be routed to
-         * it.
+         * The corresponding route's subtext must indicate that downloaded content cannot be routed
+         * to it.
          */
-        public static final int DISABLE_REASON_DOWNLOADED_CONTENT = 2;
-        /** The corresponding route is not available because an ad is in progress. */
-        public static final int DISABLE_REASON_AD = 3;
+        public static final int SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED = 2;
         /**
-         * The corresponding route is only available for routing from within the app.
-         *
-         * <p>The user may still select the corresponding route if the app provides an {@link
-         * #getInAppOnlyItemRoutingReceiver() in-app routing receiver}, in which case the system
-         * will take the user to the app.
+         * The corresponding route's subtext must indicate that it is not available because an ad is
+         * in progress.
          */
-        public static final int DISABLE_REASON_IN_APP_ONLY = 4;
+        public static final int SUBTEXT_AD_ROUTING_DISALLOWED = 3;
         /**
-         * The corresponding route is not available because of the reason described by {@link
-         * #getCustomDisableReasonMessage()}.
+         * The corresponding route's subtext must be obtained from {@link
+         * #getCustomSubtextMessage()}.
          *
          * <p>Applications should strongly prefer one of the other disable reasons (for the full
-         * list, see {@link #getDisableReason()}) in order to guarantee correct localization and
-         * rendering across all form factors.
+         * list, see {@link #getSubText()}) in order to guarantee correct localization and rendering
+         * across all form factors.
          */
-        public static final int DISABLE_REASON_CUSTOM = 5;
+        public static final int SUBTEXT_CUSTOM = 10000;
 
         @NonNull
         public static final Creator<Item> CREATOR =
@@ -307,29 +333,27 @@ public final class RouteListingPreference implements Parcelable {
                 };
 
         @NonNull private final String mRouteId;
+        @SelectionBehavior private final int mSelectionBehavior;
         @Flags private final int mFlags;
-        @DisableReason private final int mDisableReason;
-        private final int mSessionParticipantCount;
-        @Nullable private final CharSequence mCustomDisableReasonMessage;
+        @SubText private final int mSubText;
+
+        @Nullable private final CharSequence mCustomSubtextMessage;
 
         private Item(@NonNull Builder builder) {
             mRouteId = builder.mRouteId;
+            mSelectionBehavior = builder.mSelectionBehavior;
             mFlags = builder.mFlags;
-            mDisableReason = builder.mDisableReason;
-            mSessionParticipantCount = builder.mSessionParticipantCount;
-            mCustomDisableReasonMessage = builder.mCustomDisableReasonMessage;
-            validateCustomDisableReasonMessage();
+            mSubText = builder.mSubText;
+            mCustomSubtextMessage = builder.mCustomSubtextMessage;
         }
 
         private Item(Parcel in) {
             mRouteId = in.readString();
             Preconditions.checkArgument(!TextUtils.isEmpty(mRouteId));
+            mSelectionBehavior = in.readInt();
             mFlags = in.readInt();
-            mDisableReason = in.readInt();
-            mSessionParticipantCount = in.readInt();
-            Preconditions.checkArgument(mSessionParticipantCount >= 0);
-            mCustomDisableReasonMessage = in.readCharSequence();
-            validateCustomDisableReasonMessage();
+            mSubText = in.readInt();
+            mCustomSubtextMessage = in.readCharSequence();
         }
 
         /**
@@ -340,6 +364,17 @@ public final class RouteListingPreference implements Parcelable {
         @NonNull
         public String getRouteId() {
             return mRouteId;
+        }
+
+        /**
+         * Returns the behavior that the corresponding route has if the user selects it.
+         *
+         * @see #SELECTION_BEHAVIOR_NONE
+         * @see #SELECTION_BEHAVIOR_TRANSFER
+         * @see #SELECTION_BEHAVIOR_GO_TO_APP
+         */
+        public int getSelectionBehavior() {
+            return mSelectionBehavior;
         }
 
         /**
@@ -354,49 +389,42 @@ public final class RouteListingPreference implements Parcelable {
         }
 
         /**
-         * Returns the reason for the corresponding route to be disabled, or {@link
-         * #DISABLE_REASON_NONE} if the route is not disabled.
+         * Returns the type of subtext associated to this route.
          *
-         * @see #DISABLE_REASON_NONE
-         * @see #DISABLE_REASON_SUBSCRIPTION_REQUIRED
-         * @see #DISABLE_REASON_DOWNLOADED_CONTENT
-         * @see #DISABLE_REASON_AD
-         * @see #DISABLE_REASON_IN_APP_ONLY
-         * @see #DISABLE_REASON_CUSTOM
+         * <p>Subtext types other than {@link #SUBTEXT_NONE} and {@link #SUBTEXT_CUSTOM} must not
+         * have {@link #SELECTION_BEHAVIOR_TRANSFER}.
+         *
+         * <p>If this method returns {@link #SUBTEXT_CUSTOM}, then the subtext is obtained form
+         * {@link #getCustomSubtextMessage()}.
+         *
+         * @see #SUBTEXT_NONE
+         * @see #SUBTEXT_SUBSCRIPTION_REQUIRED
+         * @see #SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED
+         * @see #SUBTEXT_AD_ROUTING_DISALLOWED
+         * @see #SUBTEXT_CUSTOM
          */
-        @DisableReason
-        public int getDisableReason() {
-            return mDisableReason;
+        @SubText
+        public int getSubText() {
+            return mSubText;
         }
 
         /**
-         * Returns a non-negative number of participants in the ongoing session (if any) on the
-         * corresponding route.
+         * Returns a human-readable {@link CharSequence} providing the subtext for the corresponding
+         * route.
          *
-         * <p>The system ignores this value if zero, or if {@link #getFlags()} does not include
-         * {@link #FLAG_ONGOING_SESSION}.
-         */
-        public int getSessionParticipantCount() {
-            return mSessionParticipantCount;
-        }
-
-        /**
-         * Returns a human-readable {@link CharSequence} describing the reason for this route to be
-         * disabled. May be null if {@link #getDisableReason()} is not {@link
-         * #DISABLE_REASON_CUSTOM}.
-         *
-         * <p>This value is ignored if the {@link #getDisableReason() disable reason} for this item
-         * is not {@link #DISABLE_REASON_CUSTOM}.
+         * <p>This value is ignored if the {@link #getSubText() subtext} for this item is not {@link
+         * #SUBTEXT_CUSTOM}..
          *
          * <p>Applications must provide a localized message that matches the system's locale. See
          * {@link Locale#getDefault()}.
          *
-         * <p>This message is a hint for the system. Applications should strongly prefer one of the
-         * other disable reasons listed in {@link #getDisableReason()}.
+         * <p>Applications should avoid using custom messages (and instead use one of non-custom
+         * subtexts listed in {@link #getSubText()} in order to guarantee correct visual
+         * representation and localization on all form factors.
          */
         @Nullable
-        public CharSequence getCustomDisableReasonMessage() {
-            return mCustomDisableReasonMessage;
+        public CharSequence getCustomSubtextMessage() {
+            return mCustomSubtextMessage;
         }
 
         // Item Parcelable implementation.
@@ -409,10 +437,10 @@ public final class RouteListingPreference implements Parcelable {
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(mRouteId);
+            dest.writeInt(mSelectionBehavior);
             dest.writeInt(mFlags);
-            dest.writeInt(mDisableReason);
-            dest.writeInt(mSessionParticipantCount);
-            dest.writeCharSequence(mCustomDisableReasonMessage);
+            dest.writeInt(mSubText);
+            dest.writeCharSequence(mCustomSubtextMessage);
         }
 
         // Equals and hashCode.
@@ -427,40 +455,26 @@ public final class RouteListingPreference implements Parcelable {
             }
             Item item = (Item) other;
             return mRouteId.equals(item.mRouteId)
+                    && mSelectionBehavior == item.mSelectionBehavior
                     && mFlags == item.mFlags
-                    && mDisableReason == item.mDisableReason
-                    && mSessionParticipantCount == item.mSessionParticipantCount
-                    && TextUtils.equals(
-                            mCustomDisableReasonMessage, item.mCustomDisableReasonMessage);
+                    && mSubText == item.mSubText
+                    && TextUtils.equals(mCustomSubtextMessage, item.mCustomSubtextMessage);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(
-                    mRouteId,
-                    mFlags,
-                    mDisableReason,
-                    mSessionParticipantCount,
-                    mCustomDisableReasonMessage);
-        }
-
-        private void validateCustomDisableReasonMessage() {
-            if (mDisableReason == DISABLE_REASON_CUSTOM) {
-                Preconditions.checkArgument(
-                        !TextUtils.isEmpty(mCustomDisableReasonMessage),
-                        "customDisableReasonMessage must not be null or empty if disable reason is"
-                                + " DISABLE_REASON_CUSTOM.");
-            }
+                    mRouteId, mSelectionBehavior, mFlags, mSubText, mCustomSubtextMessage);
         }
 
         /** Builder for {@link Item}. */
         public static final class Builder {
 
             private final String mRouteId;
+            private int mSelectionBehavior;
             private int mFlags;
-            private int mDisableReason;
-            private int mSessionParticipantCount;
-            private CharSequence mCustomDisableReasonMessage;
+            private int mSubText;
+            private CharSequence mCustomSubtextMessage;
 
             /**
              * Constructor.
@@ -470,39 +484,51 @@ public final class RouteListingPreference implements Parcelable {
             public Builder(@NonNull String routeId) {
                 Preconditions.checkArgument(!TextUtils.isEmpty(routeId));
                 mRouteId = routeId;
-                mDisableReason = DISABLE_REASON_NONE;
+                mSelectionBehavior = SELECTION_BEHAVIOR_TRANSFER;
+                mSubText = SUBTEXT_NONE;
             }
 
-            /** See {@link Item#getFlags()}. */
+            /**
+             * See {@link Item#getSelectionBehavior()}.
+             *
+             * <p>The default value is {@link #ACTION_TRANSFER_MEDIA}.
+             */
+            @NonNull
+            public Builder setSelectionBehavior(int selectionBehavior) {
+                mSelectionBehavior = selectionBehavior;
+                return this;
+            }
+
+            /**
+             * See {@link Item#getFlags()}.
+             *
+             * <p>The default value is zero (no flags).
+             */
             @NonNull
             public Builder setFlags(int flags) {
                 mFlags = flags;
                 return this;
             }
 
-            /** See {@link Item#getDisableReason()}. */
+            /**
+             * See {@link Item#getSubText()}.
+             *
+             * <p>The default value is {@link #SUBTEXT_NONE}.
+             */
             @NonNull
-            public Builder setDisableReason(int disableReason) {
-                mDisableReason = disableReason;
+            public Builder setSubText(int subText) {
+                mSubText = subText;
                 return this;
             }
 
-            /** See {@link Item#getSessionParticipantCount()}. */
+            /**
+             * See {@link Item#getCustomSubtextMessage()}.
+             *
+             * <p>The default value is {@code null}.
+             */
             @NonNull
-            public Builder setSessionParticipantCount(
-                    @IntRange(from = 0) int sessionParticipantCount) {
-                Preconditions.checkArgument(
-                        sessionParticipantCount >= 0,
-                        "sessionParticipantCount must be non-negative.");
-                mSessionParticipantCount = sessionParticipantCount;
-                return this;
-            }
-
-            /** See {@link Item#getCustomDisableReasonMessage()}. */
-            @NonNull
-            public Builder setCustomDisableReasonMessage(
-                    @Nullable CharSequence customDisableReasonMessage) {
-                mCustomDisableReasonMessage = customDisableReasonMessage;
+            public Builder setCustomSubtextMessage(@Nullable CharSequence customSubtextMessage) {
+                mCustomSubtextMessage = customSubtextMessage;
                 return this;
             }
 

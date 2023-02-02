@@ -27,6 +27,7 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
@@ -46,9 +47,7 @@ import java.util.Objects;
  * Helper class for building an options Bundle that can be used with
  * {@link android.content.Context#sendBroadcast(android.content.Intent)
  * Context.sendBroadcast(Intent)} and related methods.
- * {@hide}
  */
-@SystemApi
 public class BroadcastOptions extends ComponentOptions {
     private long mTemporaryAppAllowlistDuration;
     private @TempAllowListType int mTemporaryAppAllowlistType;
@@ -64,6 +63,7 @@ public class BroadcastOptions extends ComponentOptions {
     private boolean mRequireCompatChangeEnabled = true;
     private boolean mIsAlarmBroadcast = false;
     private boolean mIsDeferUntilActive = false;
+    private boolean mShareIdentity = false;
     private long mIdForResponseEvent;
     private @Nullable IntentFilter mRemoveMatchingFilter;
     private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
@@ -172,6 +172,12 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.is_alarm";
 
     /**
+     * Whether the broadcasting app's identity should be available to the receiver.
+     * @see #setShareIdentityEnabled(boolean)
+     */
+    private static final String KEY_SHARE_IDENTITY = "android:broadcast.share_identity";
+
+    /**
      * @hide
      * @deprecated Use {@link android.os.PowerExemptionManager#
      * TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED} instead.
@@ -270,7 +276,12 @@ public class BroadcastOptions extends ComponentOptions {
      */
     public static final int DELIVERY_GROUP_POLICY_MERGED = 2;
 
-    public static BroadcastOptions makeBasic() {
+    /**
+     * Creates a basic {@link BroadcastOptions} with no options initially set.
+     *
+     * @return an instance of {@code BroadcastOptions} against which options can be set
+     */
+    public static @NonNull BroadcastOptions makeBasic() {
         BroadcastOptions opts = new BroadcastOptions();
         return opts;
     }
@@ -318,6 +329,7 @@ public class BroadcastOptions extends ComponentOptions {
         mRequireCompatChangeEnabled = opts.getBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, true);
         mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
         mIsAlarmBroadcast = opts.getBoolean(KEY_ALARM_BROADCAST, false);
+        mShareIdentity = opts.getBoolean(KEY_SHARE_IDENTITY, false);
         mRemoveMatchingFilter = opts.getParcelable(KEY_REMOVE_MATCHING_FILTER,
                 IntentFilter.class);
         mDeliveryGroupPolicy = opts.getInt(KEY_DELIVERY_GROUP_POLICY,
@@ -335,8 +347,10 @@ public class BroadcastOptions extends ComponentOptions {
      * power allowlist when this broadcast is being delivered to it.
      * @param duration The duration in milliseconds; 0 means to not place on allowlist.
      * @deprecated use {@link #setTemporaryAppAllowlist(long, int, int,  String)} instead.
+     * @hide
      */
     @Deprecated
+    @SystemApi
     @RequiresPermission(anyOf = {android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
             android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
             android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND})
@@ -350,6 +364,8 @@ public class BroadcastOptions extends ComponentOptions {
      * Set a duration for which the system should temporary place an application on the
      * power allowlist when this broadcast is being delivered to it, specify the temp allowlist
      * type.
+     * @hide
+     *
      * @param duration the duration in milliseconds.
      *                 0 means to not place on allowlist, and clears previous call to this method.
      * @param type one of {@link TempAllowListType}.
@@ -360,6 +376,7 @@ public class BroadcastOptions extends ComponentOptions {
      * @param reason A human-readable reason explaining why the app is temp allowlisted. Only
      *               used for logging purposes. Could be null or empty string.
      */
+    @SystemApi
     @RequiresPermission(anyOf = {android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST,
             android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
             android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND})
@@ -500,7 +517,9 @@ public class BroadcastOptions extends ComponentOptions {
      * Sets whether pending intent can be sent for an application with background restrictions
      * @param dontSendToRestrictedApps if true, pending intent will not be sent for an application
      * with background restrictions. Default value is {@code false}
+     * @hide
      */
+    @SystemApi
     public void setDontSendToRestrictedApps(boolean dontSendToRestrictedApps) {
         mDontSendToRestrictedApps = dontSendToRestrictedApps;
     }
@@ -516,7 +535,9 @@ public class BroadcastOptions extends ComponentOptions {
     /**
      * Sets the process will be able to start activities from background for the duration of
      * the broadcast dispatch. Default value is {@code false}
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND)
     public void setBackgroundActivityStartsAllowed(boolean allowBackgroundActivityStarts) {
         mAllowBackgroundActivityStarts = allowBackgroundActivityStarts;
@@ -578,6 +599,7 @@ public class BroadcastOptions extends ComponentOptions {
      * <p>
      * This requirement applies to both manifest registered and runtime
      * registered receivers.
+     * @hide
      *
      * @param changeId the {@link ChangeId} to inspect
      * @param enabled the required enabled state of the inspected
@@ -585,6 +607,7 @@ public class BroadcastOptions extends ComponentOptions {
      * @see CompatChanges#isChangeEnabled
      * @see #clearRequireCompatChange()
      */
+    @SystemApi
     public void setRequireCompatChange(long changeId, boolean enabled) {
         mRequireCompatChangeId = changeId;
         mRequireCompatChangeEnabled = enabled;
@@ -593,7 +616,9 @@ public class BroadcastOptions extends ComponentOptions {
     /**
      * Clear any previously defined requirement for this broadcast requested via
      * {@link #setRequireCompatChange(long, boolean)}.
+     * @hide
      */
+    @SystemApi
     public void clearRequireCompatChange() {
         mRequireCompatChangeId = CHANGE_INVALID;
         mRequireCompatChangeEnabled = true;
@@ -618,6 +643,39 @@ public class BroadcastOptions extends ComponentOptions {
      */
     public boolean isAlarmBroadcast() {
         return mIsAlarmBroadcast;
+    }
+
+    /**
+     * Sets whether the identity of the broadcasting app should be shared with all receivers
+     * that will receive this broadcast.
+     *
+     * <p>Use this option when broadcasting to a receiver that needs to know the identity of the
+     * broadcaster; with this set to {@code true}, the receiver will have access to the broadcasting
+     * app's package name and uid.
+     *
+     * <p>Defaults to {@code false} if not set.
+     *
+     * @param shareIdentityEnabled whether the broadcasting app's identity should be shared with the
+     *                             receiver
+     * @return {@code this} {@link BroadcastOptions} instance
+     * @see BroadcastReceiver#getSentFromUid()
+     * @see BroadcastReceiver#getSentFromPackage()
+     */
+    public @NonNull BroadcastOptions setShareIdentityEnabled(boolean shareIdentityEnabled) {
+        mShareIdentity = shareIdentityEnabled;
+        return this;
+    }
+
+    /**
+     * Returns whether the broadcasting app has opted-in to sharing its identity with the receiver.
+     *
+     * @return {@code true} if the broadcasting app has opted in to sharing its identity
+     * @see #setShareIdentityEnabled(boolean)
+     * @see BroadcastReceiver#getSentFromUid()
+     * @see BroadcastReceiver#getSentFromPackage()
+     */
+    public boolean isShareIdentityEnabled() {
+        return mShareIdentity;
     }
 
     /**
@@ -989,7 +1047,7 @@ public class BroadcastOptions extends ComponentOptions {
      *                               extras merger is supplied.
      */
     @Override
-    public Bundle toBundle() {
+    public @NonNull Bundle toBundle() {
         Bundle b = super.toBundle();
         if (isTemporaryAppAllowlistSet()) {
             b.putLong(KEY_TEMPORARY_APP_ALLOWLIST_DURATION, mTemporaryAppAllowlistDuration);
@@ -999,6 +1057,9 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mIsAlarmBroadcast) {
             b.putBoolean(KEY_ALARM_BROADCAST, true);
+        }
+        if (mShareIdentity) {
+            b.putBoolean(KEY_SHARE_IDENTITY, true);
         }
         if (mMinManifestReceiverApiLevel != 0) {
             b.putInt(KEY_MIN_MANIFEST_RECEIVER_API_LEVEL, mMinManifestReceiverApiLevel);

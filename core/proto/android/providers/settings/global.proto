@@ -88,6 +88,9 @@ message GlobalSettingsProto {
 
     optional SettingProto assisted_gps_enabled = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto audio_safe_volume_state = 15 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto audio_safe_csd_current_value = 157 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto audio_safe_csd_next_warning = 158 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto audio_safe_csd_dose_records = 159 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     reserved 17; // Used to be autofill_compat_mode_allowed_packages
 
@@ -1087,5 +1090,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 157;
+    // Next tag = 160;
 }

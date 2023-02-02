@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -26,6 +27,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -101,19 +103,22 @@ public abstract class BroadcastReceiver {
         @UnsupportedAppUsage
         boolean mFinished;
         String mReceiverClassName;
+        final int mSentFromUid;
+        final String mSentFromPackage;
 
         /** @hide */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public PendingResult(int resultCode, String resultData, Bundle resultExtras, int type,
                 boolean ordered, boolean sticky, IBinder token, int userId, int flags) {
             this(resultCode, resultData, resultExtras, type, ordered, sticky,
-                    guessAssumeDelivered(type, ordered), token, userId, flags);
+                    guessAssumeDelivered(type, ordered), token, userId, flags,
+                    Process.INVALID_UID, null);
         }
 
         /** @hide */
         public PendingResult(int resultCode, String resultData, Bundle resultExtras, int type,
                 boolean ordered, boolean sticky, boolean assumeDelivered, IBinder token,
-                int userId, int flags) {
+                int userId, int flags, int sentFromUid, String sentFromPackage) {
             mResultCode = resultCode;
             mResultData = resultData;
             mResultExtras = resultExtras;
@@ -124,6 +129,8 @@ public abstract class BroadcastReceiver {
             mToken = token;
             mSendingUser = userId;
             mFlags = flags;
+            mSentFromUid = sentFromUid;
+            mSentFromPackage = sentFromPackage;
         }
 
         /** @hide */
@@ -320,6 +327,16 @@ public abstract class BroadcastReceiver {
         /** @hide */
         public int getSendingUserId() {
             return mSendingUser;
+        }
+
+        /** @hide */
+        public int getSentFromUid() {
+            return mSentFromUid;
+        }
+
+        /** @hide */
+        public String getSentFromPackage() {
+            return mSentFromPackage;
         }
 
         void checkSynchronousHint() {
@@ -684,6 +701,26 @@ public abstract class BroadcastReceiver {
     /** @hide */
     public int getSendingUserId() {
         return mPendingResult.mSendingUser;
+    }
+
+    /**
+     * Returns the uid of the app that initially sent this broadcast.
+     *
+     * @return the uid of the broadcasting app or {@link Process#INVALID_UID} if the current
+     * receiver cannot access the identity of the broadcasting app
+     */
+    public int getSentFromUid() {
+        return mPendingResult != null ? mPendingResult.mSentFromUid : Process.INVALID_UID;
+    }
+
+    /**
+     * Returns the package name of the app that initially sent this broadcast.
+     *
+     * @return the package name of the broadcasting app or {@code null} if the current
+     * receiver cannot access the identity of the broadcasting app
+     */
+    public @Nullable String getSentFromPackage() {
+        return mPendingResult != null ? mPendingResult.mSentFromPackage : null;
     }
 
     /**

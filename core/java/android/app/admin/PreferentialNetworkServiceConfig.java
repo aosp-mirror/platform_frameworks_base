@@ -544,9 +544,9 @@ public final class PreferentialNetworkServiceConfig implements Parcelable {
         pw.print("blockNonMatchingNetworks=");
         pw.println(mShouldBlockNonMatchingNetworks);
         pw.print("includedUids=");
-        pw.println(mIncludedUids);
+        pw.println(Arrays.toString(mIncludedUids));
         pw.print("excludedUids=");
-        pw.println(mExcludedUids);
+        pw.println(Arrays.toString(mExcludedUids));
     }
 
     @Override

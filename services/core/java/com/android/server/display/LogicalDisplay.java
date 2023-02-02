@@ -152,6 +152,13 @@ final class LogicalDisplay {
     // the {@link mIsEnabled} is changing, or the underlying mPrimiaryDisplayDevice is changing.
     private boolean mIsInTransition;
 
+    /**
+     * The ID of the brightness throttling data that should be used. This can change e.g. in
+     * concurrent displays mode in which a stricter brightness throttling policy might need to be
+     * used.
+     */
+    private String mBrightnessThrottlingDataId;
+
     public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         mDisplayId = displayId;
         mLayerStack = layerStack;
@@ -160,6 +167,7 @@ final class LogicalDisplay {
         mTempFrameRateOverride = new SparseArray<>();
         mIsEnabled = true;
         mIsInTransition = false;
+        mBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID;
     }
 
     /**
@@ -762,7 +770,7 @@ final class LogicalDisplay {
     /**
      * Sets the display as enabled.
      *
-     * @param enable True if enabled, false otherwise.
+     * @param enabled True if enabled, false otherwise.
      */
     public void setEnabledLocked(boolean enabled) {
         mIsEnabled = enabled;
@@ -785,6 +793,22 @@ final class LogicalDisplay {
         mIsInTransition = isInTransition;
     }
 
+    /**
+     * @return The ID of the brightness throttling data that this display should use.
+     */
+    public String getBrightnessThrottlingDataIdLocked() {
+        return mBrightnessThrottlingDataId;
+    }
+
+    /**
+     * @param brightnessThrottlingDataId The ID of the brightness throttling data that this
+     *                                  display should use.
+     */
+    public void setBrightnessThrottlingDataIdLocked(String brightnessThrottlingDataId) {
+        mBrightnessThrottlingDataId =
+                brightnessThrottlingDataId;
+    }
+
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mIsEnabled=" + mIsEnabled);
@@ -802,6 +826,7 @@ final class LogicalDisplay {
         pw.println("mRequestedMinimalPostProcessing=" + mRequestedMinimalPostProcessing);
         pw.println("mFrameRateOverrides=" + Arrays.toString(mFrameRateOverrides));
         pw.println("mPendingFrameRateOverrideUids=" + mPendingFrameRateOverrideUids);
+        pw.println("mBrightnessThrottlingDataId=" + mBrightnessThrottlingDataId);
     }
 
     @Override

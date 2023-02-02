@@ -356,13 +356,22 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     };
 
     @Inject
-    public ThemeOverlayController(Context context, BroadcastDispatcher broadcastDispatcher,
-            @Background Handler bgHandler, @Main Executor mainExecutor,
-            @Background Executor bgExecutor, ThemeOverlayApplier themeOverlayApplier,
-            SecureSettings secureSettings, WallpaperManager wallpaperManager,
-            UserManager userManager, DeviceProvisionedController deviceProvisionedController,
-            UserTracker userTracker, DumpManager dumpManager, FeatureFlags featureFlags,
-            @Main Resources resources, WakefulnessLifecycle wakefulnessLifecycle) {
+    public ThemeOverlayController(
+            Context context,
+            BroadcastDispatcher broadcastDispatcher,
+            @Background Handler bgHandler,
+            @Main Executor mainExecutor,
+            @Background Executor bgExecutor,
+            ThemeOverlayApplier themeOverlayApplier,
+            SecureSettings secureSettings,
+            WallpaperManager wallpaperManager,
+            UserManager userManager,
+            DeviceProvisionedController deviceProvisionedController,
+            UserTracker userTracker,
+            DumpManager dumpManager,
+            FeatureFlags featureFlags,
+            @Main Resources resources,
+            WakefulnessLifecycle wakefulnessLifecycle) {
         mContext = context;
         mIsMonetEnabled = featureFlags.isEnabled(Flags.MONET);
         mDeviceProvisionedController = deviceProvisionedController;

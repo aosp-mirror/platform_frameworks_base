@@ -57,6 +57,7 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -116,8 +117,6 @@ import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
-import dagger.Lazy;
-
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,6 +124,7 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
+import dagger.Lazy;
 import kotlin.Triple;
 import kotlin.Unit;
 
@@ -524,8 +524,13 @@ public class MediaControlPanel {
         }
 
         // Seek Bar
-        final MediaController controller = getController();
-        mBackgroundExecutor.execute(() -> mSeekBarViewModel.updateController(controller));
+        if (data.getResumption() && data.getResumeProgress() != null) {
+            double progress = data.getResumeProgress();
+            mSeekBarViewModel.updateStaticProgress(progress);
+        } else {
+            final MediaController controller = getController();
+            mBackgroundExecutor.execute(() -> mSeekBarViewModel.updateController(controller));
+        }
 
         // Show the broadcast dialog button only when the le audio is enabled.
         mShowBroadcastDialogButton =
@@ -732,9 +737,14 @@ public class MediaControlPanel {
             contentDescription =
                     mRecommendationViewHolder.getGutsViewHolder().getGutsText().getText();
         } else if (data != null) {
-            contentDescription = mContext.getString(
-                    R.string.controls_media_smartspace_rec_description,
-                    data.getAppName(mContext));
+            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
+                contentDescription = mContext.getString(
+                        R.string.controls_media_smartspace_rec_header);
+            } else {
+                contentDescription = mContext.getString(
+                        R.string.controls_media_smartspace_rec_description,
+                        data.getAppName(mContext));
+            }
         } else {
             contentDescription = null;
         }
@@ -1365,6 +1375,24 @@ public class MediaControlPanel {
             hasSubtitle |= !TextUtils.isEmpty(subtitle);
             TextView subtitleView = mRecommendationViewHolder.getMediaSubtitles().get(itemIndex);
             subtitleView.setText(subtitle);
+
+            // Set up progress bar
+            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
+                SeekBar mediaProgressBar =
+                        mRecommendationViewHolder.getMediaProgressBars().get(itemIndex);
+                TextView mediaSubtitle =
+                        mRecommendationViewHolder.getMediaSubtitles().get(itemIndex);
+                // show progress bar if the recommended album is played.
+                Double progress = MediaDataUtils.getDescriptionProgress(recommendation.getExtras());
+                if (progress == null || progress <= 0.0) {
+                    mediaProgressBar.setVisibility(View.GONE);
+                    mediaSubtitle.setVisibility(View.VISIBLE);
+                } else {
+                    mediaProgressBar.setProgress((int) (progress * 100));
+                    mediaProgressBar.setVisibility(View.VISIBLE);
+                    mediaSubtitle.setVisibility(View.GONE);
+                }
+            }
         }
         mSmartspaceMediaItemsCount = NUM_REQUIRED_RECOMMENDATIONS;
 
@@ -1439,6 +1467,12 @@ public class MediaControlPanel {
                 (title) -> title.setTextColor(textPrimaryColor));
         mRecommendationViewHolder.getMediaSubtitles().forEach(
                 (subtitle) -> subtitle.setTextColor(textSecondaryColor));
+        if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
+            mRecommendationViewHolder.getMediaProgressBars().forEach(
+                    (progressBar) -> progressBar.setProgressTintList(
+                            ColorStateList.valueOf(textPrimaryColor))
+            );
+        }
 
         mRecommendationViewHolder.getGutsViewHolder().setColors(colorScheme);
     }

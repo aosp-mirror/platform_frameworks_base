@@ -3866,13 +3866,12 @@ public class CarrierConfigManager {
      * NR_SA - NR SA is unmetered for sub-6 frequencies
      * NR_SA_MMWAVE - NR SA is unmetered for mmwave frequencies
      *
-     * Note that this config only applies if an unmetered SubscriptionPlan is set via
-     * {@link SubscriptionManager#setSubscriptionPlans(int, List)} or an unmetered override is set
+     * Note that this config only applies if an unmetered SubscriptionPlan is set via {@link
+     * SubscriptionManager#setSubscriptionPlans(int, List, long)} or an unmetered override is set
      * via {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, int[], long)}
      * or {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, long)}.
      * If neither SubscriptionPlans nor an override are set, then no network types can be unmetered
      * regardless of the value of this config.
-     * TODO: remove other unmetered keys and replace with this
      * @hide
      */
     public static final String KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
@@ -3887,71 +3886,16 @@ public class CarrierConfigManager {
      * NR_SA - NR SA is unmetered when roaming for sub-6 frequencies
      * NR_SA_MMWAVE - NR SA is unmetered when roaming for mmwave frequencies
      *
-     * Note that this config only applies if an unmetered SubscriptionPlan is set via
-     * {@link SubscriptionManager#setSubscriptionPlans(int, List)} or an unmetered override is set
+     * Note that this config only applies if an unmetered SubscriptionPlan is set via {@link
+     * SubscriptionManager#setSubscriptionPlans(int, List, long)} or an unmetered override is set
      * via {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, int[], long)}
      * or {@link SubscriptionManager#setSubscriptionOverrideUnmetered(int, boolean, long)}.
      * If neither SubscriptionPlans nor an override are set, then no network types can be unmetered
      * when roaming regardless of the value of this config.
-     * TODO: remove KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL and replace with this
      * @hide
      */
     public static final String KEY_ROAMING_UNMETERED_NETWORK_TYPES_STRING_ARRAY =
             "roaming_unmetered_network_types_string_array";
-
-    /**
-     * Whether NR (non-standalone) should be unmetered for all frequencies.
-     * If either {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL} or
-     * {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL} are true, then this value will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_NSA_BOOL = "unmetered_nr_nsa_bool";
-
-    /**
-     * Whether NR (non-standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
-     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_NSA_MMWAVE_BOOL = "unmetered_nr_nsa_mmwave_bool";
-
-    /**
-     * Whether NR (non-standalone) frequencies below 6GHz (sub6) should be unmetered.
-     * If this is true, then the value for {@link #KEY_UNMETERED_NR_NSA_BOOL} will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_NSA_SUB6_BOOL = "unmetered_nr_nsa_sub6_bool";
-
-    /**
-     * Whether NR (non-standalone) should be unmetered when the device is roaming.
-     * If false, then the values for {@link #KEY_UNMETERED_NR_NSA_BOOL},
-     * {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL}, {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL},
-     * and unmetered {@link SubscriptionPlan} will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL =
-            "unmetered_nr_nsa_when_roaming_bool";
-
-    /**
-     * Whether NR (standalone) should be unmetered for all frequencies.
-     * If either {@link #KEY_UNMETERED_NR_SA_MMWAVE_BOOL} or
-     * {@link #KEY_UNMETERED_NR_SA_SUB6_BOOL} are true, then this value will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_SA_BOOL = "unmetered_nr_sa_bool";
-
-    /**
-     * Whether NR (standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
-     * If this is true, then the value for {@link #KEY_UNMETERED_NR_SA_BOOL} will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_SA_MMWAVE_BOOL = "unmetered_nr_sa_mmwave_bool";
-
-    /**
-     * Whether NR (standalone) frequencies below 6GHz (sub6) should be unmetered.
-     * If this is true, then the value for {@link #KEY_UNMETERED_NR_SA_BOOL} will be ignored.
-     * @hide
-     */
-    public static final String KEY_UNMETERED_NR_SA_SUB6_BOOL = "unmetered_nr_sa_sub6_bool";
 
     /**
      * Support ASCII 7-BIT encoding for long SMS. This carrier config is used to enable
@@ -10043,13 +9987,6 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[] {
                 "NR_NSA", "NR_NSA_MMWAVE", "NR_SA", "NR_SA_MMWAVE"});
         sDefaults.putStringArray(KEY_ROAMING_UNMETERED_NETWORK_TYPES_STRING_ARRAY, new String[0]);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_MMWAVE_BOOL, false);
-        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_SUB6_BOOL, false);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_WIFI_CALLING_ICON_IN_STATUS_BAR_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_SUPPORTS_OPP_DATA_AUTO_PROVISIONING_BOOL, false);

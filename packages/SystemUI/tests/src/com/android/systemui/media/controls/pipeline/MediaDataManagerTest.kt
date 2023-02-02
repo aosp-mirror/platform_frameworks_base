@@ -46,6 +46,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.controls.models.player.MediaData
+import com.android.systemui.media.controls.models.recommendation.EXTRA_KEY_TRIGGER_SOURCE
+import com.android.systemui.media.controls.models.recommendation.EXTRA_VALUE_TRIGGER_PERIODIC
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaDataProvider
 import com.android.systemui.media.controls.resume.MediaResumeListener
@@ -82,6 +84,8 @@ import org.mockito.junit.MockitoJUnit
 private const val KEY = "KEY"
 private const val KEY_2 = "KEY_2"
 private const val KEY_MEDIA_SMARTSPACE = "MEDIA_SMARTSPACE_ID"
+private const val SMARTSPACE_CREATION_TIME = 1234L
+private const val SMARTSPACE_EXPIRY_TIME = 5678L
 private const val PACKAGE_NAME = "com.example.app"
 private const val SYSTEM_PACKAGE_NAME = "com.android.systemui"
 private const val APP_NAME = "SystemUI"
@@ -230,10 +234,12 @@ class MediaDataManagerTest : SysuiTestCase() {
         whenever(mediaSmartspaceTarget.smartspaceTargetId).thenReturn(KEY_MEDIA_SMARTSPACE)
         whenever(mediaSmartspaceTarget.featureType).thenReturn(SmartspaceTarget.FEATURE_MEDIA)
         whenever(mediaSmartspaceTarget.iconGrid).thenReturn(validRecommendationList)
-        whenever(mediaSmartspaceTarget.creationTimeMillis).thenReturn(1234L)
+        whenever(mediaSmartspaceTarget.creationTimeMillis).thenReturn(SMARTSPACE_CREATION_TIME)
+        whenever(mediaSmartspaceTarget.expiryTimeMillis).thenReturn(SMARTSPACE_EXPIRY_TIME)
         whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(false)
         whenever(mediaFlags.isExplicitIndicatorEnabled()).thenReturn(true)
         whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(false)
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         whenever(logger.getNewInstanceId()).thenReturn(instanceIdSequence.newInstanceId())
     }
 
@@ -644,27 +650,8 @@ class MediaDataManagerTest : SysuiTestCase() {
                 build()
             }
         val currentTime = clock.elapsedRealtime()
-        mediaDataManager.addResumptionControls(
-            USER_ID,
-            desc,
-            Runnable {},
-            session.sessionToken,
-            APP_NAME,
-            pendingIntent,
-            PACKAGE_NAME
-        )
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        // THEN the media data indicates that it is for resumption
-        verify(listener)
-            .onMediaDataLoaded(
-                eq(PACKAGE_NAME),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
+        addResumeControlAndLoad(desc)
+
         val data = mediaDataCaptor.value
         assertThat(data.resumption).isTrue()
         assertThat(data.song).isEqualTo(SESSION_TITLE)
@@ -690,27 +677,8 @@ class MediaDataManagerTest : SysuiTestCase() {
                 build()
             }
         val currentTime = clock.elapsedRealtime()
-        mediaDataManager.addResumptionControls(
-            USER_ID,
-            desc,
-            Runnable {},
-            session.sessionToken,
-            APP_NAME,
-            pendingIntent,
-            PACKAGE_NAME
-        )
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        // THEN the media data indicates that it is for resumption
-        verify(listener)
-            .onMediaDataLoaded(
-                eq(PACKAGE_NAME),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
+        addResumeControlAndLoad(desc)
+
         val data = mediaDataCaptor.value
         assertThat(data.resumption).isTrue()
         assertThat(data.song).isEqualTo(SESSION_TITLE)
@@ -723,6 +691,84 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testAddResumptionControls_hasPartialProgress() {
+        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+
+        // WHEN resumption controls are added with partial progress
+        val progress = 0.5
+        val extras =
+            Bundle().apply {
+                putInt(
+                    MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED
+                )
+                putDouble(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE, progress)
+            }
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                setExtras(extras)
+                build()
+            }
+        addResumeControlAndLoad(desc)
+
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isTrue()
+        assertThat(data.resumeProgress).isEqualTo(progress)
+    }
+
+    @Test
+    fun testAddResumptionControls_hasNotPlayedProgress() {
+        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+
+        // WHEN resumption controls are added that have not been played
+        val extras =
+            Bundle().apply {
+                putInt(
+                    MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_NOT_PLAYED
+                )
+            }
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                setExtras(extras)
+                build()
+            }
+        addResumeControlAndLoad(desc)
+
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isTrue()
+        assertThat(data.resumeProgress).isEqualTo(0)
+    }
+
+    @Test
+    fun testAddResumptionControls_hasFullProgress() {
+        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+
+        // WHEN resumption controls are added with progress info
+        val extras =
+            Bundle().apply {
+                putInt(
+                    MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_FULLY_PLAYED
+                )
+            }
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                setExtras(extras)
+                build()
+            }
+        addResumeControlAndLoad(desc)
+
+        // THEN the media data includes the progress
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isTrue()
+        assertThat(data.resumeProgress).isEqualTo(1)
+    }
+
+    @Test
     fun testResumptionDisabled_dismissesResumeControls() {
         // WHEN there are resume controls and resumption is switched off
         val desc =
@@ -730,26 +776,8 @@ class MediaDataManagerTest : SysuiTestCase() {
                 setTitle(SESSION_TITLE)
                 build()
             }
-        mediaDataManager.addResumptionControls(
-            USER_ID,
-            desc,
-            Runnable {},
-            session.sessionToken,
-            APP_NAME,
-            pendingIntent,
-            PACKAGE_NAME
-        )
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(listener)
-            .onMediaDataLoaded(
-                eq(PACKAGE_NAME),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
+        addResumeControlAndLoad(desc)
+
         val data = mediaDataCaptor.value
         mediaDataManager.setMediaResumptionEnabled(false)
 
@@ -825,8 +853,9 @@ class MediaDataManagerTest : SysuiTestCase() {
                         cardAction = mediaSmartspaceBaseAction,
                         recommendations = validRecommendationList,
                         dismissIntent = DISMISS_INTENT,
-                        headphoneConnectionTimeMillis = 1234L,
-                        instanceId = InstanceId.fakeInstanceId(instanceId)
+                        headphoneConnectionTimeMillis = SMARTSPACE_CREATION_TIME,
+                        instanceId = InstanceId.fakeInstanceId(instanceId),
+                        expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
                 eq(false)
@@ -848,8 +877,9 @@ class MediaDataManagerTest : SysuiTestCase() {
                         targetId = KEY_MEDIA_SMARTSPACE,
                         isActive = true,
                         dismissIntent = DISMISS_INTENT,
-                        headphoneConnectionTimeMillis = 1234L,
-                        instanceId = InstanceId.fakeInstanceId(instanceId)
+                        headphoneConnectionTimeMillis = SMARTSPACE_CREATION_TIME,
+                        instanceId = InstanceId.fakeInstanceId(instanceId),
+                        expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
                 eq(false)
@@ -879,8 +909,9 @@ class MediaDataManagerTest : SysuiTestCase() {
                         targetId = KEY_MEDIA_SMARTSPACE,
                         isActive = true,
                         dismissIntent = null,
-                        headphoneConnectionTimeMillis = 1234L,
-                        instanceId = InstanceId.fakeInstanceId(instanceId)
+                        headphoneConnectionTimeMillis = SMARTSPACE_CREATION_TIME,
+                        instanceId = InstanceId.fakeInstanceId(instanceId),
+                        expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
                     )
                 ),
                 eq(false)
@@ -906,6 +937,129 @@ class MediaDataManagerTest : SysuiTestCase() {
 
         verify(listener).onSmartspaceMediaDataRemoved(eq(KEY_MEDIA_SMARTSPACE), eq(false))
         verifyNoMoreInteractions(logger)
+    }
+
+    @Test
+    fun testOnSmartspaceMediaDataLoaded_persistentEnabled_headphoneTrigger_isActive() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        val instanceId = instanceIdSequence.lastInstanceId
+
+        verify(listener)
+            .onSmartspaceMediaDataLoaded(
+                eq(KEY_MEDIA_SMARTSPACE),
+                eq(
+                    SmartspaceMediaData(
+                        targetId = KEY_MEDIA_SMARTSPACE,
+                        isActive = true,
+                        packageName = PACKAGE_NAME,
+                        cardAction = mediaSmartspaceBaseAction,
+                        recommendations = validRecommendationList,
+                        dismissIntent = DISMISS_INTENT,
+                        headphoneConnectionTimeMillis = SMARTSPACE_CREATION_TIME,
+                        instanceId = InstanceId.fakeInstanceId(instanceId),
+                        expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
+                    )
+                ),
+                eq(false)
+            )
+    }
+
+    @Test
+    fun testOnSmartspaceMediaDataLoaded_persistentEnabled_periodicTrigger_notActive() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        val extras =
+            Bundle().apply {
+                putString("package_name", PACKAGE_NAME)
+                putParcelable("dismiss_intent", DISMISS_INTENT)
+                putString(EXTRA_KEY_TRIGGER_SOURCE, EXTRA_VALUE_TRIGGER_PERIODIC)
+            }
+        whenever(mediaSmartspaceBaseAction.extras).thenReturn(extras)
+
+        smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        val instanceId = instanceIdSequence.lastInstanceId
+
+        verify(listener)
+            .onSmartspaceMediaDataLoaded(
+                eq(KEY_MEDIA_SMARTSPACE),
+                eq(
+                    SmartspaceMediaData(
+                        targetId = KEY_MEDIA_SMARTSPACE,
+                        isActive = false,
+                        packageName = PACKAGE_NAME,
+                        cardAction = mediaSmartspaceBaseAction,
+                        recommendations = validRecommendationList,
+                        dismissIntent = DISMISS_INTENT,
+                        headphoneConnectionTimeMillis = SMARTSPACE_CREATION_TIME,
+                        instanceId = InstanceId.fakeInstanceId(instanceId),
+                        expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
+                    )
+                ),
+                eq(false)
+            )
+    }
+
+    @Test
+    fun testOnSmartspaceMediaDataLoaded_persistentEnabled_noTargets_inactive() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+
+        smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        val instanceId = instanceIdSequence.lastInstanceId
+
+        smartspaceMediaDataProvider.onTargetsAvailable(listOf())
+        uiExecutor.advanceClockToLast()
+        uiExecutor.runAllReady()
+
+        verify(listener)
+            .onSmartspaceMediaDataLoaded(
+                eq(KEY_MEDIA_SMARTSPACE),
+                eq(
+                    SmartspaceMediaData(
+                        targetId = KEY_MEDIA_SMARTSPACE,
+                        isActive = false,
+                        packageName = PACKAGE_NAME,
+                        cardAction = mediaSmartspaceBaseAction,
+                        recommendations = validRecommendationList,
+                        dismissIntent = DISMISS_INTENT,
+                        headphoneConnectionTimeMillis = SMARTSPACE_CREATION_TIME,
+                        instanceId = InstanceId.fakeInstanceId(instanceId),
+                        expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
+                    )
+                ),
+                eq(false)
+            )
+        verify(listener, never()).onSmartspaceMediaDataRemoved(eq(KEY_MEDIA_SMARTSPACE), eq(false))
+    }
+
+    @Test
+    fun testSetRecommendationInactive_notifiesListeners() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+
+        smartspaceMediaDataProvider.onTargetsAvailable(listOf(mediaSmartspaceTarget))
+        val instanceId = instanceIdSequence.lastInstanceId
+
+        mediaDataManager.setRecommendationInactive(KEY_MEDIA_SMARTSPACE)
+        uiExecutor.advanceClockToLast()
+        uiExecutor.runAllReady()
+
+        verify(listener)
+            .onSmartspaceMediaDataLoaded(
+                eq(KEY_MEDIA_SMARTSPACE),
+                eq(
+                    SmartspaceMediaData(
+                        targetId = KEY_MEDIA_SMARTSPACE,
+                        isActive = false,
+                        packageName = PACKAGE_NAME,
+                        cardAction = mediaSmartspaceBaseAction,
+                        recommendations = validRecommendationList,
+                        dismissIntent = DISMISS_INTENT,
+                        headphoneConnectionTimeMillis = SMARTSPACE_CREATION_TIME,
+                        instanceId = InstanceId.fakeInstanceId(instanceId),
+                        expiryTimeMs = SMARTSPACE_EXPIRY_TIME,
+                    )
+                ),
+                eq(false)
+            )
     }
 
     @Test
@@ -1689,5 +1843,30 @@ class MediaDataManagerTest : SysuiTestCase() {
         val stateBuilder = PlaybackState.Builder().setActions(stateActions)
         stateBuilder.setState(PlaybackState.STATE_PAUSED, 0, 1.0f)
         whenever(controller.playbackState).thenReturn(stateBuilder.build())
+    }
+
+    /** Helper function to add a resumption control and capture the resulting MediaData */
+    private fun addResumeControlAndLoad(desc: MediaDescription) {
+        mediaDataManager.addResumptionControls(
+            USER_ID,
+            desc,
+            Runnable {},
+            session.sessionToken,
+            APP_NAME,
+            pendingIntent,
+            PACKAGE_NAME
+        )
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(PACKAGE_NAME),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
     }
 }

@@ -108,6 +108,7 @@ import android.text.Highlights;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Layout;
+import android.text.NoCopySpan;
 import android.text.ParcelableSpan;
 import android.text.PrecomputedText;
 import android.text.SegmentFinder;
@@ -904,6 +905,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private long mLastScroll;
     private Scroller mScroller;
     private TextPaint mTempTextPaint;
+
+    private Object mTempCursor;
 
     @UnsupportedAppUsage
     private BoringLayout.Metrics mBoring;
@@ -10060,10 +10063,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         int offset = mLayout.getOffsetForHorizontal(line, point.x);
         String textToInsert = gesture.getTextToInsert();
-        getEditableText().insert(offset, textToInsert);
-        Selection.setSelection(getEditableText(), offset + textToInsert.length());
+        return tryInsertTextForHandwritingGesture(offset, textToInsert, gesture);
         // TODO(b/243980426): Insert extra spaces if necessary.
-        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
@@ -10163,12 +10164,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (startOffset < endOffset) {
             getEditableText().delete(startOffset, endOffset);
             Selection.setSelection(getEditableText(), startOffset);
+            return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
         } else {
             // No whitespace found, so insert a space.
-            getEditableText().insert(startOffset, " ");
-            Selection.setSelection(getEditableText(), startOffset + 1);
+            return tryInsertTextForHandwritingGesture(startOffset, " ", gesture);
         }
-        return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
 
     /** @hide */
@@ -10250,6 +10250,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         return mLayout.getRangeForRect(
                 area, segmentFinder, Layout.INCLUSION_STRATEGY_CONTAINS_CENTER);
+    }
+
+    private int tryInsertTextForHandwritingGesture(
+            int offset, String textToInsert, HandwritingGesture gesture) {
+        // A temporary cursor span is placed at the insertion offset. The span will be pushed
+        // forward when text is inserted, then the real cursor can be placed after the inserted
+        // text. A temporary cursor span is used in order to avoid modifying the real selection span
+        // in the case that the text is filtered out.
+        Editable editableText = getEditableText();
+        if (mTempCursor == null) {
+            mTempCursor = new NoCopySpan.Concrete();
+        }
+        editableText.setSpan(mTempCursor, offset, offset, Spanned.SPAN_POINT_POINT);
+
+        editableText.insert(offset, textToInsert);
+
+        int newOffset = editableText.getSpanStart(mTempCursor);
+        editableText.removeSpan(mTempCursor);
+        if (newOffset == offset) {
+            // The inserted text was filtered out.
+            return handleGestureFailure(gesture);
+        } else {
+            // Place the cursor after the inserted text.
+            Selection.setSelection(editableText, newOffset);
+            return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
+        }
     }
 
     private Pattern getWhitespacePattern() {
@@ -13627,6 +13653,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Helper method to set {@code rect} to the text content's non-clipped area in the view's
+     * coordinates.
+     *
+     * @return true if at least part of the text content is visible; false if the text content is
+     * completely clipped or translated out of the visible area.
+     */
+    boolean getContentVisibleRect(Rect rect) {
+        if (!getLocalVisibleRect(rect)) {
+            return false;
+        }
+        // getLocalVisibleRect returns a rect relative to the unscrolled left top corner of the
+        // view. In other words, the returned rectangle's origin point is (-scrollX, -scrollY) in
+        // view's coordinates. So we need to offset it with the negative scrolled amount to convert
+        // it to view's coordinate.
+        rect.offset(-getScrollX(), -getScrollY());
+        // Clip the view's visible rect with the text layout's visible rect.
+        return rect.intersect(getCompoundPaddingLeft(), getCompoundPaddingTop(),
+                getWidth() - getCompoundPaddingRight(), getHeight() - getCompoundPaddingBottom());
+    }
+
+    /**
      * Populate requested character bounds in a {@link CursorAnchorInfo.Builder}
      *
      * @param builder The builder to populate
@@ -13646,9 +13693,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
         final Rect rect = new Rect();
-        getLocalVisibleRect(rect);
+        getContentVisibleRect(rect);
         final RectF visibleRect = new RectF(rect);
-
 
         final float[] characterBounds = getCharacterBounds(startIndex, endIndex,
                 viewportToContentHorizontalOffset, viewportToContentVerticalOffset);

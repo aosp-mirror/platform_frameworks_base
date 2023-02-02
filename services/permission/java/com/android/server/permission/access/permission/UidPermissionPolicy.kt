@@ -39,7 +39,6 @@ import com.android.server.permission.access.util.andInv
 import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
 import com.android.server.permission.access.util.isInternal
-import com.android.server.permission.access.util.isRuntime
 import com.android.server.pm.KnownPackages
 import com.android.server.pm.parsing.PackageInfoUtils
 import com.android.server.pm.permission.CompatibilityPermissionInfo
@@ -224,9 +223,8 @@ class UidPermissionPolicy : SchemePolicy() {
             if (permission.isRemoved) {
                 return@forEachIndexed
             }
-            val isRequestedByOtherPackages = anyPackageInAppId(appId) { packageState ->
-                packageState.packageName != packageName &&
-                    permissionName in packageState.androidPackage!!.requestedPermissions
+            val isRequestedByOtherPackages = anyRequestingPackageInAppId(appId, permissionName) {
+                it.packageName != packageName
             }
             if (isRequestedByOtherPackages) {
                 return@forEachIndexed
@@ -618,12 +616,12 @@ class UidPermissionPolicy : SchemePolicy() {
                     newTargetSdkVersion < Build.VERSION_CODES.Q
                 val isTargetSdkVersionUpgraded = oldTargetSdkVersion < Build.VERSION_CODES.Q &&
                     newTargetSdkVersion >= Build.VERSION_CODES.Q
-                val oldIsRequestLegacyExternalStorage = anyPackageInAppId(appId, oldState) {
-                    it.androidPackage!!.isRequestLegacyExternalStorage
-                }
-                val newIsRequestLegacyExternalStorage = anyPackageInAppId(appId, newState) {
-                    it.androidPackage!!.isRequestLegacyExternalStorage
-                }
+                val oldIsRequestLegacyExternalStorage = anyRequestingPackageInAppId(
+                    appId, permissionName, oldState
+                ) { it.androidPackage!!.isRequestLegacyExternalStorage }
+                val newIsRequestLegacyExternalStorage = anyRequestingPackageInAppId(
+                    appId, permissionName, newState
+                ) { it.androidPackage!!.isRequestLegacyExternalStorage }
                 val isNewlyRequestingLegacyExternalStorage = !isTargetSdkVersionUpgraded &&
                     !oldIsRequestLegacyExternalStorage && newIsRequestLegacyExternalStorage
                 if ((isNewlyRequestingLegacyExternalStorage || isTargetSdkVersionDowngraded) &&
@@ -644,9 +642,8 @@ class UidPermissionPolicy : SchemePolicy() {
         val systemState = newState.systemState
         systemState.userIds.forEachIndexed { _, userId ->
             systemState.appIds.forEachKeyIndexed { _, appId ->
-                val isPermissionRequested = anyPackageInAppId(appId) { packageState ->
-                    permissionName in packageState.androidPackage!!.requestedPermissions
-                }
+                val isPermissionRequested =
+                    anyRequestingPackageInAppId(appId, permissionName) { true }
                 if (isPermissionRequested) {
                     evaluatePermissionState(appId, userId, permissionName, installedPackageState)
                 }
@@ -708,10 +705,9 @@ class UidPermissionPolicy : SchemePolicy() {
                 val wasRevoked = oldFlags.hasBits(PermissionFlags.INSTALL_REVOKED)
                 val isRequestedByInstalledPackage = installedPackageState != null &&
                     permissionName in installedPackageState.androidPackage!!.requestedPermissions
-                val isRequestedBySystemPackage = anyPackageInAppId(appId) {
-                    it.isSystem && permissionName in it.androidPackage!!.requestedPermissions
-                }
-                val isCompatibilityPermission = anyPackageInAppId(appId) {
+                val isRequestedBySystemPackage =
+                    anyRequestingPackageInAppId(appId, permissionName) { it.isSystem }
+                val isCompatibilityPermission = anyRequestingPackageInAppId(appId, permissionName) {
                     isCompatibilityPermissionForPackage(it.androidPackage!!, permissionName)
                 }
                 // If this is an existing, non-system package,
@@ -732,18 +728,19 @@ class UidPermissionPolicy : SchemePolicy() {
                 PermissionFlags.PROTECTION_GRANTED
             } else {
                 val mayGrantByPrivileged = !permission.isPrivileged || (
-                    anyPackageInAppId(appId) {
+                    anyRequestingPackageInAppId(appId, permissionName) {
                         checkPrivilegedPermissionAllowlist(it, permission)
                     }
                 )
                 val shouldGrantBySignature = permission.isSignature && (
-                    anyPackageInAppId(appId) {
+                    anyRequestingPackageInAppId(appId, permissionName) {
                         shouldGrantPermissionBySignature(it, permission)
                     }
                 )
-                val shouldGrantByProtectionFlags = anyPackageInAppId(appId) {
-                    shouldGrantPermissionByProtectionFlags(it, permission)
-                }
+                val shouldGrantByProtectionFlags =
+                    anyRequestingPackageInAppId(appId, permissionName) {
+                        shouldGrantPermissionByProtectionFlags(it, permission)
+                    }
                 if (mayGrantByPrivileged &&
                     (shouldGrantBySignature || shouldGrantByProtectionFlags)) {
                     PermissionFlags.PROTECTION_GRANTED
@@ -789,7 +786,7 @@ class UidPermissionPolicy : SchemePolicy() {
                 val wasGrantedByImplicit = newFlags.hasBits(PermissionFlags.IMPLICIT_GRANTED)
                 val isLeanbackNotificationsPermission = newState.systemState.isLeanback &&
                     permissionName in NOTIFICATIONS_PERMISSIONS
-                val isImplicitPermission = anyPackageInAppId(appId) {
+                val isImplicitPermission = anyRequestingPackageInAppId(appId, permissionName) {
                     permissionName in it.androidPackage!!.implicitPermissions
                 }
                 val sourcePermissions = newState.systemState
@@ -1043,24 +1040,24 @@ class UidPermissionPolicy : SchemePolicy() {
         state: AccessState = newState
     ): Int {
         var targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT
-        forEachPackageInAppId(appId, state) { packageState ->
-            val androidPackage = packageState.androidPackage!!
-            if (permissionName in androidPackage.requestedPermissions) {
-                targetSdkVersion = targetSdkVersion.coerceAtMost(androidPackage.targetSdkVersion)
-            }
+        forEachRequestingPackageInAppId(appId, permissionName, state) {
+            targetSdkVersion = targetSdkVersion.coerceAtMost(it.androidPackage!!.targetSdkVersion)
         }
         return targetSdkVersion
     }
 
-    private inline fun MutateStateScope.anyPackageInAppId(
+    private inline fun MutateStateScope.anyRequestingPackageInAppId(
         appId: Int,
+        permissionName: String,
         state: AccessState = newState,
         predicate: (PackageState) -> Boolean
     ): Boolean {
         val packageNames = state.systemState.appIds[appId]
         return packageNames.anyIndexed { _, packageName ->
             val packageState = state.systemState.packageStates[packageName]!!
-            packageState.androidPackage != null && predicate(packageState)
+            val androidPackage = packageState.androidPackage
+            androidPackage != null && permissionName in androidPackage.requestedPermissions &&
+                predicate(packageState)
         }
     }
 
@@ -1073,6 +1070,22 @@ class UidPermissionPolicy : SchemePolicy() {
         packageNames.forEachIndexed { _, packageName ->
             val packageState = state.systemState.packageStates[packageName]!!
             if (packageState.androidPackage != null) {
+                action(packageState)
+            }
+        }
+    }
+
+    private inline fun MutateStateScope.forEachRequestingPackageInAppId(
+        appId: Int,
+        permissionName: String,
+        state: AccessState = newState,
+        action: (PackageState) -> Unit
+    ) {
+        val packageNames = state.systemState.appIds[appId]
+        packageNames.forEachIndexed { _, packageName ->
+            val packageState = state.systemState.packageStates[packageName]!!
+            val androidPackage = packageState.androidPackage
+            if (androidPackage != null && permissionName in androidPackage.requestedPermissions) {
                 action(packageState)
             }
         }

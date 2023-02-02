@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.os.Bundle;
 
 import java.lang.annotation.Retention;
@@ -29,6 +31,10 @@ import java.lang.annotation.RetentionPolicy;
  * Base class for {@link ActivityOptions} and {@link BroadcastOptions}.
  * @hide
  */
+// Expose the methods and constants required to test the SystemApis in subclasses.
+@TestApi
+// Suppressed since lint is recommending class have a suffix of Params.
+@SuppressLint("UserHandleName")
 public class ComponentOptions {
 
     /**
@@ -57,17 +63,30 @@ public class ComponentOptions {
     private boolean mPendingIntentBalAllowedByPermission = false;
     private boolean mIsInteractive = false;
 
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"MODE_BACKGROUND_ACTIVITY_START_"}, value = {
             MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED,
             MODE_BACKGROUND_ACTIVITY_START_ALLOWED,
             MODE_BACKGROUND_ACTIVITY_START_DENIED})
     public @interface BackgroundActivityStartMode {}
-    /** No explicit value chosen. The system will decide whether to grant privileges. */
+    /**
+     * No explicit value chosen. The system will decide whether to grant privileges.
+     * @hide
+     */
+    @TestApi
     public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0;
-    /** Allow the {@link PendingIntent} to use the background activity start privileges. */
+    /**
+     * Allow the {@link PendingIntent} to use the background activity start privileges.
+     * @hide
+     */
+    @TestApi
     public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1;
-    /** Deny the {@link PendingIntent} to use the background activity start privileges. */
+    /**
+     * Deny the {@link PendingIntent} to use the background activity start privileges.
+     * @hide
+     */
+    @TestApi
     public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2;
 
     ComponentOptions() {
@@ -118,6 +137,7 @@ public class ComponentOptions {
      *
      * @deprecated use #setPendingIntentBackgroundActivityStartMode(int) to set the full range
      * of states
+     * @hide
      */
     @Deprecated public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
         mPendingIntentBalAllowed = allowed;
@@ -130,6 +150,7 @@ public class ComponentOptions {
      * @deprecated use {@link #getPendingIntentBackgroundActivityStartMode()} since for apps
      * targeting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or higher this value might
      * not match the actual behavior if the value was not explicitly set.
+     * @hide
      */
     @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
         if (mPendingIntentBalAllowed == null) {
@@ -147,6 +168,7 @@ public class ComponentOptions {
      * methods. A privileged sender of a PendingIntent should only grant
      * {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOWED} if the PendingIntent is from a trusted source
      * and/or executed on behalf the user.
+     * @hide
      */
     public @NonNull ComponentOptions setPendingIntentBackgroundActivityStartMode(
             @BackgroundActivityStartMode int state) {
@@ -169,6 +191,7 @@ public class ComponentOptions {
     /**
      * Gets the mode for allowing or denying the senders privileges to start background activities
      * to the PendingIntent.
+     * @hide
      *
      * @see #setPendingIntentBackgroundActivityStartMode(int)
      */
@@ -199,6 +222,7 @@ public class ComponentOptions {
         return mPendingIntentBalAllowedByPermission;
     }
 
+    /** @hide */
     public Bundle toBundle() {
         Bundle b = new Bundle();
         if (mPendingIntentBalAllowed != null) {

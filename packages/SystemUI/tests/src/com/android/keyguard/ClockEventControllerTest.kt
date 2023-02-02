@@ -32,10 +32,12 @@ import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
+import com.android.systemui.plugins.ClockTickRate
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -72,7 +74,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var animations: ClockAnimations
     @Mock private lateinit var events: ClockEvents
     @Mock private lateinit var clock: ClockController
-    @Mock private lateinit var mainExecutor: Executor
+    @Mock private lateinit var mainExecutor: DelayableExecutor
     @Mock private lateinit var bgExecutor: Executor
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var smallClockController: ClockFaceController
@@ -97,6 +99,8 @@ class ClockEventControllerTest : SysuiTestCase() {
         whenever(largeClockController.events).thenReturn(largeClockEvents)
         whenever(clock.events).thenReturn(events)
         whenever(clock.animations).thenReturn(animations)
+        whenever(smallClockEvents.tickRate).thenReturn(ClockTickRate.PER_MINUTE)
+        whenever(largeClockEvents.tickRate).thenReturn(ClockTickRate.PER_MINUTE)
 
         repository = FakeKeyguardRepository()
 

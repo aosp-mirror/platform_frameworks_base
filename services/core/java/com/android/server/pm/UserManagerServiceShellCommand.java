@@ -25,6 +25,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
@@ -36,6 +37,7 @@ import android.os.UserManager;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
@@ -103,6 +105,9 @@ public class UserManagerServiceShellCommand extends ShellCommand {
         pw.println();
         pw.println("  is-headless-system-user-mode [-v | --verbose]");
         pw.println("    Checks whether the device uses headless system user mode.");
+        pw.println("  is-visible-background-users-on-default-display-supported [-v | --verbose]");
+        pw.println("    Checks whether the device allows users to be start visible on background "
+                + "in the default display.");
         pw.println("    It returns the effective mode, even when using emulation");
         pw.println("    (to get the real mode as well, use -v or --verbose)");
         pw.println();
@@ -129,6 +134,8 @@ public class UserManagerServiceShellCommand extends ShellCommand {
                     return runSetSystemUserModeEmulation();
                 case "is-headless-system-user-mode":
                     return runIsHeadlessSystemUserMode();
+                case "is-visible-background-users-on-default-display-supported":
+                    return runIsVisibleBackgroundUserOnDefaultDisplaySupported();
                 case "is-user-visible":
                     return runIsUserVisible();
                 default:
@@ -431,15 +438,43 @@ public class UserManagerServiceShellCommand extends ShellCommand {
                     return -1;
             }
         }
-
-        boolean isHsum = mService.isHeadlessSystemUserMode();
+        boolean effective = mService.isHeadlessSystemUserMode();
         if (!verbose) {
             // NOTE: do not change output below, as it's used by ITestDevice
             // (it's ok to change the verbose option though)
-            pw.println(isHsum);
+            pw.println(effective);
         } else {
-            pw.printf("effective=%b real=%b\n", isHsum,
+            pw.printf("effective=%b real=%b\n", effective,
                     RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER);
+        }
+        return 0;
+    }
+
+    private int runIsVisibleBackgroundUserOnDefaultDisplaySupported() {
+        PrintWriter pw = getOutPrintWriter();
+
+        boolean verbose = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-v":
+                case "--verbose":
+                    verbose = true;
+                    break;
+                default:
+                    pw.println("Invalid option: " + opt);
+                    return -1;
+            }
+        }
+
+        boolean effective = UserManager.isVisibleBackgroundUsersOnDefaultDisplayEnabled();
+        if (!verbose) {
+            // NOTE: do not change output below, as it's used by ITestDevice
+            // (it's ok to change the verbose option though)
+            pw.println(effective);
+        } else {
+            pw.printf("effective=%b real=%b\n", effective, Resources.getSystem()
+                    .getBoolean(R.bool.config_multiuserVisibleBackgroundUsersOnDefaultDisplay));
         }
         return 0;
     }

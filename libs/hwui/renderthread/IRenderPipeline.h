@@ -95,6 +95,9 @@ public:
     virtual void setPictureCapturedCallback(
             const std::function<void(sk_sp<SkPicture>&&)>& callback) = 0;
 
+    virtual bool supportsExtendedRangeHdr() const { return false; }
+    virtual void setTargetSdrHdrRatio(float ratio) = 0;
+
     virtual ~IRenderPipeline() {}
 };
 

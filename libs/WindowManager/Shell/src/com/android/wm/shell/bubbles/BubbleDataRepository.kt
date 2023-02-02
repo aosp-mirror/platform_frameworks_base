@@ -110,7 +110,7 @@ internal class BubbleDataRepository(
                     b.title,
                     b.taskId,
                     b.locusId?.id,
-                    b.isClearable
+                    b.isDismissable
             )
         }
     }
@@ -206,7 +206,7 @@ internal class BubbleDataRepository(
                                 entity.title,
                                 entity.taskId,
                                 entity.locus,
-                                entity.isClearable,
+                                entity.isDismissable,
                                 mainExecutor,
                                 bubbleMetadataFlagListener
                         )

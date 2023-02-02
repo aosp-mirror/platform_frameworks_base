@@ -2034,7 +2034,7 @@ public class VibratorManagerServiceTest {
 
     private void vibrateAndWaitUntilFinished(VibratorManagerService service,
             CombinedVibration effect, VibrationAttributes attrs) throws InterruptedException {
-        Vibration vib =
+        HalVibration vib =
                 service.vibrateInternal(UID, Display.DEFAULT_DISPLAY, PACKAGE_NAME, effect, attrs,
                         "some reason", service);
         if (vib != null) {

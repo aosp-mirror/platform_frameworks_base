@@ -25,6 +25,7 @@ android_app {
         "androidx.coordinatorlayout_coordinatorlayout",
         "androidx.core_core",
         "androidx.viewpager_viewpager",
+        "SettingsLib",
     ],
 
     uses_libs: [

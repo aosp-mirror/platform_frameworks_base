@@ -16,7 +16,7 @@
 
 package com.android.systemui.media.dialog;
 
-import static android.media.RouteListingPreference.Item.DISABLE_REASON_SUBSCRIPTION_REQUIRED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQUIRED;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -411,10 +411,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     @RequiresApi(34)
     private static class Api34Impl {
         @DoNotInline
-        static String composeDisabledReason(@RouteListingPreference.Item.DisableReason int reason,
-                Context context) {
+        static String composeDisabledReason(
+                @RouteListingPreference.Item.SubText int reason, Context context) {
             switch(reason) {
-                case DISABLE_REASON_SUBSCRIPTION_REQUIRED:
+                case SUBTEXT_SUBSCRIPTION_REQUIRED:
                     return context.getString(R.string.media_output_status_require_premium);
             }
             return "";

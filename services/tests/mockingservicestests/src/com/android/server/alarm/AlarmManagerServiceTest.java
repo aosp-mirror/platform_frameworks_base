@@ -112,7 +112,6 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.ActivityManager;
@@ -1265,7 +1264,30 @@ public class AlarmManagerServiceTest {
         mService.interactiveStateChangedLocked(false);
         mService.interactiveStateChangedLocked(true);
         runnableCaptor.getValue().run();
-        verify(mMockContext).sendBroadcastAsUser(mService.mTimeTickIntent, UserHandle.ALL);
+        final ArgumentCaptor<Bundle> optionsCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mMockContext).sendBroadcastAsUser(eq(mService.mTimeTickIntent), eq(UserHandle.ALL),
+                isNull(), optionsCaptor.capture());
+        verifyTimeTickBroadcastOptions(optionsCaptor.getValue());
+    }
+
+    @Test
+    public void sendsTimeTickOnAlarmTrigger() throws Exception {
+        final ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+        // Stubbing so the handler doesn't actually run the runnable.
+        doReturn(true).when(mService.mHandler).post(runnableCaptor.capture());
+        mService.mTimeTickTrigger.doAlarm(mock(IAlarmCompleteListener.class));
+        runnableCaptor.getValue().run();
+        final ArgumentCaptor<Bundle> optionsCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mMockContext).sendBroadcastAsUser(eq(mService.mTimeTickIntent), eq(UserHandle.ALL),
+                isNull(), optionsCaptor.capture());
+        verifyTimeTickBroadcastOptions(optionsCaptor.getValue());
+    }
+
+    private void verifyTimeTickBroadcastOptions(Bundle actualOptionsBundle) {
+        final BroadcastOptions actualOptions = new BroadcastOptions(actualOptionsBundle);
+        assertEquals(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT,
+                actualOptions.getDeliveryGroupPolicy());
+        assertTrue(actualOptions.isDeferUntilActive());
     }
 
     @Test

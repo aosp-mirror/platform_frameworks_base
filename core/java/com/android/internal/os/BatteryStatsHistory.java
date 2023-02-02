@@ -274,20 +274,6 @@ public class BatteryStatsHistory {
         initHistoryBuffer();
     }
 
-    /**
-     * Creates a read-only wrapper for the supplied writable history.
-     */
-    public BatteryStatsHistory(BatteryStatsHistory writableHistory) {
-        this(Parcel.obtain(), writableHistory.mSystemDir, 0, 0, null, null, null, writableHistory);
-        mMutable = false;
-
-        synchronized (mWritableHistory) {
-            // Make a copy of battery history to avoid concurrent modification.
-            mHistoryBuffer.appendFrom(mWritableHistory.mHistoryBuffer, 0,
-                    mWritableHistory.mHistoryBuffer.dataSize());
-        }
-    }
-
     @VisibleForTesting
     public BatteryStatsHistory(Parcel historyBuffer, File systemDir,
             int maxHistoryFiles, int maxHistoryBufferSize,
@@ -308,6 +294,9 @@ public class BatteryStatsHistory {
         mTracer = tracer;
         mClock = clock;
         mWritableHistory = writableHistory;
+        if (mWritableHistory != null) {
+            mMutable = false;
+        }
 
         mHistoryDir = new File(systemDir, HISTORY_DIR);
         mHistoryDir.mkdirs();
@@ -415,7 +404,14 @@ public class BatteryStatsHistory {
      * in the system directory, so it is not safe while actively writing history.
      */
     public BatteryStatsHistory copy() {
-        return new BatteryStatsHistory(this);
+        synchronized (this) {
+            // Make a copy of battery history to avoid concurrent modification.
+            Parcel historyBufferCopy = Parcel.obtain();
+            historyBufferCopy.appendFrom(mHistoryBuffer, 0, mHistoryBuffer.dataSize());
+
+            return new BatteryStatsHistory(historyBufferCopy, mSystemDir, 0, 0, null, null, null,
+                    this);
+        }
     }
 
     /**

@@ -61,8 +61,7 @@ public class ThermalManagerServiceMockingTest {
         mAidlBinder.attachInterface(mAidlHalMock, IThermal.class.getName());
         mTemperatureFuture = new CompletableFuture<>();
         mTemperatureCallback = temperature -> mTemperatureFuture.complete(temperature);
-        mAidlWrapper = new ThermalManagerService.ThermalHalAidlWrapper();
-        mAidlWrapper.setCallback(mTemperatureCallback);
+        mAidlWrapper = new ThermalManagerService.ThermalHalAidlWrapper(mTemperatureCallback);
         mAidlWrapper.initProxyAndRegisterCallback(mAidlBinder);
     }
 

@@ -33,6 +33,8 @@ import static android.stats.devicepolicy.nano.DevicePolicyEnums.RESOLVER_EMPTY_S
 import static android.stats.devicepolicy.nano.DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_WORK;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PROTECTED;
+
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
@@ -780,7 +782,7 @@ public class ResolverActivity extends Activity implements
         return getCloneProfileUserHandle() != null;
     }
 
-    private boolean isLaunchedAsCloneProfile() {
+    protected final boolean isLaunchedAsCloneProfile() {
         return hasCloneProfile()
                 && (UserHandle.myUserId() == getCloneProfileUserHandle().getIdentifier());
     }
@@ -1517,9 +1519,7 @@ public class ResolverActivity extends Activity implements
         safelyStartActivityAsUser(cti, user, null);
     }
 
-    // TODO: Make method public final.
-    @VisibleForTesting
-    protected void safelyStartActivityAsUser(
+    protected final void safelyStartActivityAsUser(
             TargetInfo cti, UserHandle user, @Nullable Bundle options) {
         // We're dispatching intents that might be coming from legacy apps, so
         // don't kill ourselves.
@@ -1609,9 +1609,12 @@ public class ResolverActivity extends Activity implements
         Intent startIntent = getIntent();
         boolean isAudioCaptureDevice =
                 startIntent.getBooleanExtra(EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
+        UserHandle initialIntentsUserSpace = isLaunchedAsCloneProfile()
+                && userHandle.equals(getPersonalProfileUserHandle())
+                ? getCloneProfileUserHandle() : userHandle;
         return new ResolverListAdapter(context, payloadIntents, initialIntents, rList,
                 filterLastUsed, createListController(userHandle), this,
-                isAudioCaptureDevice);
+                isAudioCaptureDevice, initialIntentsUserSpace);
     }
 
     @VisibleForTesting
@@ -2536,19 +2539,17 @@ public class ResolverActivity extends Activity implements
     }
 
     /**
-     * This function is temporary in nature, and its usages will be replaced with just
-     * resolveInfo.userHandle, once it is available, once sharesheet is stable.
-     */
-    public static UserHandle getResolveInfoUserHandle(ResolveInfo resolveInfo,
-            UserHandle predictedHandle) {
-        return resolveInfo.userHandle;
-    }
-
-    /**
      * Returns the {@link List} of {@link UserHandle} to pass on to the
      * {@link ResolverRankerServiceResolverComparator} as per the provided {@code userHandle}.
      */
-    protected final List<UserHandle> getResolverRankerServiceUserHandleList(UserHandle userHandle) {
+    @VisibleForTesting(visibility = PROTECTED)
+    public final List<UserHandle> getResolverRankerServiceUserHandleList(UserHandle userHandle) {
+        return getResolverRankerServiceUserHandleListInternal(userHandle);
+    }
+
+    @VisibleForTesting
+    protected List<UserHandle> getResolverRankerServiceUserHandleListInternal(UserHandle
+            userHandle) {
         List<UserHandle> userList = new ArrayList<>();
         userList.add(userHandle);
         // Add clonedProfileUserHandle to the list only if we are:
@@ -2559,5 +2560,17 @@ public class ResolverActivity extends Activity implements
             userList.add(getCloneProfileUserHandle());
         }
         return userList;
+    }
+
+    /**
+     * This function is temporary in nature, and its usages will be replaced with just
+     * resolveInfo.userHandle, once it is available, once sharesheet is stable.
+     */
+    public static UserHandle getResolveInfoUserHandle(ResolveInfo resolveInfo,
+            UserHandle predictedHandle) {
+        if (resolveInfo.userHandle == null) {
+            Log.e(TAG, "ResolveInfo with null UserHandle found: " + resolveInfo);
+        }
+        return resolveInfo.userHandle;
     }
 }

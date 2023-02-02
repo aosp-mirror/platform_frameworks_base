@@ -681,12 +681,15 @@ final class VerifyingSession {
         }
 
         final int installerUid = mVerificationInfo == null ? -1 : mVerificationInfo.mInstallerUid;
+        final boolean requestedDisableVerification =
+                (mInstallFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0;
 
         // Check if installing from ADB
         if ((mInstallFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
-            boolean requestedDisableVerification =
-                    (mInstallFlags & PackageManager.INSTALL_DISABLE_VERIFICATION) != 0;
             return isAdbVerificationEnabled(pkgInfoLite, userId, requestedDisableVerification);
+        } else if (requestedDisableVerification) {
+            // Skip verification for non-adb installs
+            return false;
         }
 
         // only when not installed from ADB, skip verification for instant apps when

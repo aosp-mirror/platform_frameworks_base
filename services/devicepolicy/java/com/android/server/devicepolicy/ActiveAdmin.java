@@ -1441,8 +1441,7 @@ class ActiveAdmin {
         if (mManagedSubscriptionsPolicy != null) {
             pw.println("mManagedSubscriptionsPolicy:");
             pw.increaseIndent();
-            pw.print("mPolicyType=");
-            mManagedSubscriptionsPolicy.getPolicyType();
+            pw.println(mManagedSubscriptionsPolicy);
             pw.decreaseIndent();
         }
     }

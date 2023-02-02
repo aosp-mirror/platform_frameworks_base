@@ -37,6 +37,7 @@ import android.content.UndoOperation;
 import android.content.UndoOwner;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -101,6 +102,7 @@ import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -3128,6 +3130,9 @@ public class Editor {
             }
         }
 
+        final int keyboard = mTextView.getResources().getConfiguration().keyboard;
+        menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
+
         menu.add(Menu.NONE, TextView.ID_UNDO, MENU_ITEM_ORDER_UNDO,
                 com.android.internal.R.string.undo)
                 .setAlphabeticShortcut('z')
@@ -3135,6 +3140,7 @@ public class Editor {
                 .setEnabled(mTextView.canUndo());
         menu.add(Menu.NONE, TextView.ID_REDO, MENU_ITEM_ORDER_REDO,
                 com.android.internal.R.string.redo)
+                .setAlphabeticShortcut('z', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canRedo());
 
@@ -3155,6 +3161,7 @@ public class Editor {
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
         menu.add(Menu.NONE, TextView.ID_PASTE_AS_PLAIN_TEXT, MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
                 com.android.internal.R.string.paste_as_plain_text)
+                .setAlphabeticShortcut('v', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
                 .setEnabled(mTextView.canPasteAsPlainText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
         menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
@@ -4785,12 +4792,14 @@ public class Editor {
                 }
 
                 if (includeVisibleLineBounds) {
-                    Rect visibleRect = new Rect();
-                    if (mTextView.getLocalVisibleRect(visibleRect)) {
+                    final Rect visibleRect = new Rect();
+                    if (mTextView.getContentVisibleRect(visibleRect)) {
+                        // Subtract the viewportToContentVerticalOffset to convert the view
+                        // coordinates to layout coordinates.
                         final float visibleTop =
-                                visibleRect.top + viewportToContentVerticalOffset;
+                                visibleRect.top - viewportToContentVerticalOffset;
                         final float visibleBottom =
-                                visibleRect.bottom + viewportToContentVerticalOffset;
+                                visibleRect.bottom - viewportToContentVerticalOffset;
                         final int firstLine =
                                 layout.getLineForVertical((int) Math.floor(visibleTop));
                         final int lastLine =
@@ -4803,7 +4812,7 @@ public class Editor {
                                     + viewportToContentVerticalOffset;
                             final float right = layout.getLineRight(line)
                                     + viewportToContentHorizontalOffset;
-                            final float bottom = layout.getLineBottom(line)
+                            final float bottom = layout.getLineBottom(line, false)
                                     + viewportToContentVerticalOffset;
                             builder.addVisibleLineBounds(left, top, right, bottom);
                         }

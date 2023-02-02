@@ -17,11 +17,6 @@
  */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body">Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps you trust to access all device logs.
-        \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device.\n\nLearn more at g.co/android/devicelogs.
-    </string>
-
     <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
-    <string name="log_access_confirmation_learn_more" translatable="false"></string>
+    <string name="log_access_confirmation_learn_more_url" translatable="false"></string>
 </resources>

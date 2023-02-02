@@ -25,6 +25,7 @@ import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.View
 import android.widget.FrameLayout
+import android.view.ViewTreeObserver
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -42,12 +43,15 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.dagger.KeyguardSmallClockLog
 import com.android.systemui.log.dagger.KeyguardLargeClockLog
 import com.android.systemui.plugins.ClockController
+import com.android.systemui.plugins.ClockFaceController
+import com.android.systemui.plugins.ClockTickRate
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.concurrency.DelayableExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
@@ -72,7 +76,7 @@ open class ClockEventController @Inject constructor(
     private val configurationController: ConfigurationController,
     @Main private val resources: Resources,
     private val context: Context,
-    @Main private val mainExecutor: Executor,
+    @Main private val mainExecutor: DelayableExecutor,
     @Background private val bgExecutor: Executor,
     @KeyguardSmallClockLog private val smallLogBuffer: LogBuffer?,
     @KeyguardLargeClockLog private val largeLogBuffer: LogBuffer?,
@@ -94,6 +98,7 @@ open class ClockEventController @Inject constructor(
                     clock?.largeClock?.view?.addOnLayoutChangeListener(mLayoutChangedListener)
                 }
                 updateFontSizes()
+                updateTimeListeners()
             }
         }
 
@@ -208,6 +213,10 @@ open class ClockEventController @Inject constructor(
     }
 
     var regionSampler: RegionSampler? = null
+    var smallTimeListener: TimeListener? = null
+    var largeTimeListener: TimeListener? = null
+    val shouldTimeListenerRun: Boolean
+        get() = isKeyguardVisible && dozeAmount < DOZE_TICKRATE_THRESHOLD
 
     private var smallClockIsDark = true
     private var largeClockIsDark = true
@@ -246,6 +255,9 @@ open class ClockEventController @Inject constructor(
                     clock?.animations?.doze(if (isDozing) 1f else 0f)
                 }
             }
+
+            smallTimeListener?.update(shouldTimeListenerRun)
+            largeTimeListener?.update(shouldTimeListenerRun)
         }
 
         override fun onTimeFormatChanged(timeFormat: String) {
@@ -285,6 +297,8 @@ open class ClockEventController @Inject constructor(
                 }
             }
         }
+        smallTimeListener?.update(shouldTimeListenerRun)
+        largeTimeListener?.update(shouldTimeListenerRun)
     }
 
     fun unregisterListeners() {
@@ -299,6 +313,25 @@ open class ClockEventController @Inject constructor(
         batteryController.removeCallback(batteryCallback)
         keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
         regionSampler?.stopRegionSampler()
+        smallTimeListener?.stop()
+        largeTimeListener?.stop()
+    }
+
+    private fun updateTimeListeners() {
+        smallTimeListener?.stop()
+        largeTimeListener?.stop()
+
+        smallTimeListener = null
+        largeTimeListener = null
+
+        clock?.smallClock?.let {
+            smallTimeListener = TimeListener(it, mainExecutor)
+            smallTimeListener?.update(shouldTimeListenerRun)
+        }
+        clock?.largeClock?.let {
+            largeTimeListener = TimeListener(it, mainExecutor)
+            largeTimeListener?.update(shouldTimeListenerRun)
+        }
     }
 
     private fun updateFontSizes() {
@@ -308,12 +341,18 @@ open class ClockEventController @Inject constructor(
             resources.getDimensionPixelSize(R.dimen.large_clock_text_size).toFloat())
     }
 
+    private fun handleDoze(doze: Float) {
+        dozeAmount = doze
+        clock?.animations?.doze(dozeAmount)
+        smallTimeListener?.update(doze < DOZE_TICKRATE_THRESHOLD)
+        largeTimeListener?.update(doze < DOZE_TICKRATE_THRESHOLD)
+    }
+
     @VisibleForTesting
     internal fun listenForDozeAmount(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardInteractor.dozeAmount.collect {
-                dozeAmount = it
-                clock?.animations?.doze(dozeAmount)
+                handleDoze(it)
             }
         }
     }
@@ -322,8 +361,7 @@ open class ClockEventController @Inject constructor(
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
         return scope.launch {
             keyguardTransitionInteractor.dozeAmountTransition.collect {
-                dozeAmount = it.value
-                clock?.animations?.doze(dozeAmount)
+                handleDoze(it.value)
             }
         }
     }
@@ -338,8 +376,7 @@ open class ClockEventController @Inject constructor(
             keyguardTransitionInteractor.anyStateToAodTransition.filter {
                 it.transitionState == TransitionState.FINISHED
             }.collect {
-                dozeAmount = 1f
-                clock?.animations?.doze(dozeAmount)
+                handleDoze(1f)
             }
         }
     }
@@ -359,7 +396,54 @@ open class ClockEventController @Inject constructor(
         }
     }
 
+    class TimeListener(val clockFace: ClockFaceController, val executor: DelayableExecutor) {
+        val predrawListener = ViewTreeObserver.OnPreDrawListener {
+            clockFace.events.onTimeTick()
+            true
+        }
+
+        val secondsRunnable = object : Runnable {
+            override fun run() {
+                if (!isRunning) {
+                    return
+                }
+
+                executor.executeDelayed(this, 990)
+                clockFace.events.onTimeTick()
+            }
+        }
+
+        var isRunning: Boolean = false
+            private set
+
+        fun start() {
+            if (isRunning) {
+                return
+            }
+
+            isRunning = true
+            when (clockFace.events.tickRate) {
+                ClockTickRate.PER_MINUTE -> {/* Handled by KeyguardClockSwitchController */}
+                ClockTickRate.PER_SECOND -> executor.execute(secondsRunnable)
+                ClockTickRate.PER_FRAME -> {
+                    clockFace.view.viewTreeObserver.addOnPreDrawListener(predrawListener)
+                    clockFace.view.invalidate()
+                }
+            }
+        }
+
+        fun stop() {
+            if (!isRunning) { return }
+
+            isRunning = false
+            clockFace.view.viewTreeObserver.removeOnPreDrawListener(predrawListener)
+        }
+
+        fun update(shouldRun: Boolean) = if (shouldRun) start() else stop()
+    }
+
     companion object {
         private val TAG = ClockEventController::class.simpleName!!
+        private val DOZE_TICKRATE_THRESHOLD = 0.99f
     }
 }

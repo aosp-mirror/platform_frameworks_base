@@ -229,6 +229,35 @@ public class AssistUtils {
         }
     }
 
+    /**
+     * Enables visual detection service.
+     *
+     * @param listener to receive visual attention gained/lost events.
+     */
+    public void enableVisualQueryDetection(
+            IVisualQueryDetectionAttentionListener listener) {
+        try {
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.enableVisualQueryDetection(listener);
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register visual query detection attention listener", e);
+        }
+    }
+
+    /**
+     * Disables visual query detection.
+     */
+    public void disableVisualQueryDetection() {
+        try {
+            if (mVoiceInteractionManagerService != null) {
+                mVoiceInteractionManagerService.disableVisualQueryDetection();
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to register visual query detection attention listener", e);
+        }
+    }
+
     @UnsupportedAppUsage
     public ComponentName getAssistComponentForUser(int userId) {
         final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),

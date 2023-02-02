@@ -78,6 +78,8 @@ public:
     virtual void setHardwareBuffer(AHardwareBuffer* buffer) override;
     bool hasHardwareBuffer() override { return mHardwareBuffer != nullptr; }
 
+    void setTargetSdrHdrRatio(float ratio) override;
+
 protected:
     sk_sp<SkSurface> getBufferSkSurface(
             const renderthread::HardwareBufferRenderParams& bufferParams);
@@ -92,6 +94,7 @@ protected:
     ColorMode mColorMode = ColorMode::Default;
     SkColorType mSurfaceColorType;
     sk_sp<SkColorSpace> mSurfaceColorSpace;
+    float mTargetSdrHdrRatio = 1.f;
 
     bool isCapturingSkp() const { return mCaptureMode != CaptureMode::None; }
 

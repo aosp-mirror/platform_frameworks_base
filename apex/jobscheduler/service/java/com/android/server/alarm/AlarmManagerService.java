@@ -1933,8 +1933,9 @@ public class AlarmManagerService extends SystemService {
                     Intent.FLAG_RECEIVER_REGISTERED_ONLY
                             | Intent.FLAG_RECEIVER_FOREGROUND
                             | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-            mTimeTickOptions = BroadcastOptions
-                    .makeRemovingMatchingFilter(new IntentFilter(Intent.ACTION_TIME_TICK))
+            mTimeTickOptions = BroadcastOptions.makeBasic()
+                    .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                    .setDeferUntilActive(true)
                     .toBundle();
             mTimeTickTrigger = new IAlarmListener.Stub() {
                 @Override
@@ -4252,8 +4253,8 @@ public class AlarmManagerService extends SystemService {
                     }
                 }
                 // And send a TIME_TICK right now, since it is important to get the UI updated.
-                mHandler.post(() ->
-                        getContext().sendBroadcastAsUser(mTimeTickIntent, UserHandle.ALL));
+                mHandler.post(() -> getContext().sendBroadcastAsUser(mTimeTickIntent,
+                        UserHandle.ALL, null, mTimeTickOptions));
             } else {
                 mNonInteractiveStartTime = nowELAPSED;
             }

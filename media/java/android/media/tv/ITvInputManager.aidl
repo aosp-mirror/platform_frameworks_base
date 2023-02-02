@@ -99,6 +99,7 @@ interface ITvInputManager {
     void timeShiftResume(in IBinder sessionToken, int userId);
     void timeShiftSeekTo(in IBinder sessionToken, long timeMs, int userId);
     void timeShiftSetPlaybackParams(in IBinder sessionToken, in PlaybackParams params, int userId);
+    void timeShiftSetMode(in IBinder sessionToken, int mode, int userId);
     void timeShiftEnablePositionTracking(in IBinder sessionToken, boolean enable, int userId);
 
     List<TunedInfo> getCurrentTunedInfos(int userId);

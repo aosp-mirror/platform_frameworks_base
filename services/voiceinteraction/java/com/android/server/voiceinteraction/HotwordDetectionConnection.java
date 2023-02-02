@@ -51,7 +51,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.provider.DeviceConfig;
-import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.HotwordDetector;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
@@ -66,6 +65,7 @@ import android.view.contentcapture.IContentCaptureManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
+import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.internal.infra.ServiceConnector;
 import com.android.server.LocalServices;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -88,19 +88,18 @@ final class HotwordDetectionConnection {
     static final boolean DEBUG = false;
 
     /**
-     * For apps targeting Android API {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above,
-     * implementors of the {@link HotwordDetectionService} must not augment the phrase IDs which are
-     * supplied via {@link HotwordDetectionService
-     * #onDetect(AlwaysOnHotwordDetector.EventPayload, long, HotwordDetectionService.Callback)}.
+     * For apps targeting Android API Build.VERSION_CODES#UPSIDE_DOWN_CAKE and above,
+     * implementors of the HotwordDetectionService must not augment the phrase IDs which are
+     * supplied via HotwordDetectionService
+     * #onDetect(AlwaysOnHotwordDetector.EventPayload, long, HotwordDetectionService.Callback).
      *
-     * <p>The {@link HotwordDetectedResult#getHotwordPhraseId()} must match one of the phrase IDs
-     * from the {@link android.service.voice.AlwaysOnHotwordDetector
-     * .EventPayload#getKeyphraseRecognitionExtras()} list.
+     * <p>The HotwordDetectedResult#getHotwordPhraseId() must match one of the phrase IDs
+     * from the AlwaysOnHotwordDetector.EventPayload#getKeyphraseRecognitionExtras() list.
      * </p>
      *
-     * <p>This behavior change is made to ensure the {@link HotwordDetectionService} honors what
-     * it receives from the {@link android.hardware.soundtrigger.SoundTriggerModule}, and it
-     * cannot signal to the client application a phrase which was not origially detected.
+     * <p>This behavior change is made to ensure the HotwordDetectionService honors what
+     * it receives from the android.hardware.soundtrigger.SoundTriggerModule, and it
+     * cannot signal to the client application a phrase which was not originally detected.
      * </p>
      */
     @ChangeId
@@ -326,6 +325,15 @@ final class HotwordDetectionConnection {
             return;
         }
         session.startListeningFromMicLocked(audioFormat, callback);
+    }
+
+    public void setVisualQueryDetectionAttentionListenerLocked(
+            @Nullable IVisualQueryDetectionAttentionListener listener) {
+        final VisualQueryDetectorSession session = getVisualQueryDetectorSessionLocked();
+        if (session == null) {
+            return;
+        }
+        session.setVisualQueryDetectionAttentionListenerLocked(listener);
     }
 
     /**

@@ -25,13 +25,16 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.player.MediaData
+import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.util.MediaControllerFactory
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -48,7 +51,6 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "KEY"
@@ -56,6 +58,7 @@ private const val PACKAGE = "PKG"
 private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
+private const val SMARTSPACE_KEY = "SMARTSPACE_KEY"
 
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
@@ -85,10 +88,13 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     private lateinit var resumeData: MediaData
     private lateinit var mediaTimeoutListener: MediaTimeoutListener
     private var clock = FakeSystemClock()
+    @Mock private lateinit var mediaFlags: MediaFlags
+    @Mock private lateinit var smartspaceData: SmartspaceMediaData
 
     @Before
     fun setup() {
-        `when`(mediaControllerFactory.create(any())).thenReturn(mediaController)
+        whenever(mediaControllerFactory.create(any())).thenReturn(mediaController)
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         executor = FakeExecutor(clock)
         mediaTimeoutListener =
             MediaTimeoutListener(
@@ -96,7 +102,8 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
                 executor,
                 logger,
                 statusBarStateController,
-                clock
+                clock,
+                mediaFlags,
             )
         mediaTimeoutListener.timeoutCallback = timeoutCallback
         mediaTimeoutListener.stateCallback = stateCallback
@@ -133,9 +140,9 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     @Test
     fun testOnMediaDataLoaded_registersPlaybackListener() {
         val playingState = mock(android.media.session.PlaybackState::class.java)
-        `when`(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
+        whenever(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
 
-        `when`(mediaController.playbackState).thenReturn(playingState)
+        whenever(mediaController.playbackState).thenReturn(playingState)
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
         verify(logger).logPlaybackState(eq(KEY), eq(playingState))
@@ -188,8 +195,8 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
         // To playing
         val playingState = mock(android.media.session.PlaybackState::class.java)
-        `when`(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
-        `when`(mediaController.playbackState).thenReturn(playingState)
+        whenever(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
+        whenever(mediaController.playbackState).thenReturn(playingState)
         mediaTimeoutListener.onMediaDataLoaded(newKey, KEY, mediaData)
         verify(mediaController).unregisterCallback(anyObject())
         verify(mediaController).registerCallback(anyObject())
@@ -208,8 +215,8 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
         // Migrate, still not playing
         val playingState = mock(android.media.session.PlaybackState::class.java)
-        `when`(playingState.state).thenReturn(PlaybackState.STATE_PAUSED)
-        `when`(mediaController.playbackState).thenReturn(playingState)
+        whenever(playingState.state).thenReturn(PlaybackState.STATE_PAUSED)
+        whenever(mediaController.playbackState).thenReturn(playingState)
         mediaTimeoutListener.onMediaDataLoaded(newKey, KEY, mediaData)
 
         // The number of queued timeout tasks remains the same. The timeout task isn't cancelled nor
@@ -296,8 +303,8 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
         // WHEN we get an update with media playing
         val playingState = mock(android.media.session.PlaybackState::class.java)
-        `when`(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
-        `when`(mediaController.playbackState).thenReturn(playingState)
+        whenever(playingState.state).thenReturn(PlaybackState.STATE_PLAYING)
+        whenever(mediaController.playbackState).thenReturn(playingState)
         val mediaPlaying = mediaData.copy(isPlaying = true)
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaPlaying)
 
@@ -347,7 +354,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // WHEN regular media is paused
         val pausedState =
             PlaybackState.Builder().setState(PlaybackState.STATE_PAUSED, 0L, 0f).build()
-        `when`(mediaController.playbackState).thenReturn(pausedState)
+        whenever(mediaController.playbackState).thenReturn(pausedState)
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         assertThat(executor.numPending()).isEqualTo(1)
 
@@ -379,7 +386,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // AND that media is resumed
         val playingState =
             PlaybackState.Builder().setState(PlaybackState.STATE_PAUSED, 0L, 0f).build()
-        `when`(mediaController.playbackState).thenReturn(playingState)
+        whenever(mediaController.playbackState).thenReturn(playingState)
         mediaTimeoutListener.onMediaDataLoaded(KEY, PACKAGE, mediaData)
 
         // THEN the timeout length is changed to a regular media control
@@ -593,8 +600,91 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         assertThat(executor.numPending()).isEqualTo(1)
     }
 
+    @Test
+    fun testSmartspaceDataLoaded_schedulesTimeout() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        val duration = 60_000
+        val createTime = 1234L
+        val expireTime = createTime + duration
+        whenever(smartspaceData.headphoneConnectionTimeMillis).thenReturn(createTime)
+        whenever(smartspaceData.expiryTimeMs).thenReturn(expireTime)
+
+        mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(executor.advanceClockToNext()).isEqualTo(duration)
+    }
+
+    @Test
+    fun testSmartspaceMediaData_timesOut_invokesCallback() {
+        // Given a pending timeout
+        testSmartspaceDataLoaded_schedulesTimeout()
+
+        executor.runAllReady()
+        verify(timeoutCallback).invoke(eq(SMARTSPACE_KEY), eq(true))
+    }
+
+    @Test
+    fun testSmartspaceDataLoaded_alreadyExists_updatesTimeout() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        val duration = 100
+        val createTime = 1234L
+        val expireTime = createTime + duration
+        whenever(smartspaceData.headphoneConnectionTimeMillis).thenReturn(createTime)
+        whenever(smartspaceData.expiryTimeMs).thenReturn(expireTime)
+
+        mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+        assertThat(executor.numPending()).isEqualTo(1)
+
+        val expiryLonger = expireTime + duration
+        whenever(smartspaceData.expiryTimeMs).thenReturn(expiryLonger)
+        mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+
+        assertThat(executor.numPending()).isEqualTo(1)
+        assertThat(executor.advanceClockToNext()).isEqualTo(duration * 2)
+    }
+
+    @Test
+    fun testSmartspaceDataRemoved_cancelTimeout() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+
+        mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+        assertThat(executor.numPending()).isEqualTo(1)
+
+        mediaTimeoutListener.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
+        assertThat(executor.numPending()).isEqualTo(0)
+    }
+
+    @Test
+    fun testSmartspaceData_dozedPastTimeout_invokedOnWakeup() {
+        // Given a pending timeout
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        verify(statusBarStateController).addCallback(capture(dozingCallbackCaptor))
+        val duration = 60_000
+        val createTime = 1234L
+        val expireTime = createTime + duration
+        whenever(smartspaceData.headphoneConnectionTimeMillis).thenReturn(createTime)
+        whenever(smartspaceData.expiryTimeMs).thenReturn(expireTime)
+
+        mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+        assertThat(executor.numPending()).isEqualTo(1)
+
+        // And we doze past the scheduled timeout
+        val time = clock.currentTimeMillis()
+        clock.setElapsedRealtime(time + duration * 2)
+        assertThat(executor.numPending()).isEqualTo(1)
+
+        // Then when no longer dozing, the timeout runs immediately
+        dozingCallbackCaptor.value.onDozingChanged(false)
+        verify(timeoutCallback).invoke(eq(SMARTSPACE_KEY), eq(true))
+        verify(logger).logTimeout(eq(SMARTSPACE_KEY))
+
+        // and cancel any later scheduled timeout
+        assertThat(executor.numPending()).isEqualTo(0)
+    }
+
     private fun loadMediaDataWithPlaybackState(state: PlaybackState) {
-        `when`(mediaController.playbackState).thenReturn(state)
+        whenever(mediaController.playbackState).thenReturn(state)
         mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
     }

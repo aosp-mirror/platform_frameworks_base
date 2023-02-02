@@ -238,6 +238,24 @@ constructor(
     }
 
     /**
+     * Set the progress to a fixed percentage value that cannot be changed by the user.
+     *
+     * @param percent value between 0 and 1
+     */
+    fun updateStaticProgress(percent: Double) {
+        val position = (percent * 100).toInt()
+        _data =
+            Progress(
+                enabled = true,
+                seekAvailable = false,
+                playing = false,
+                scrubbing = false,
+                elapsedTime = position,
+                duration = 100,
+            )
+    }
+
+    /**
      * Puts the seek bar into a resumption state.
      *
      * This should be called when the media session behind the controller has been destroyed.

@@ -56,7 +56,9 @@ import android.view.InputEventSender;
 import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.View;
+
 import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -306,6 +308,39 @@ public final class TvInputManager {
      * yet started.
      */
     public static final long TIME_SHIFT_INVALID_TIME = Long.MIN_VALUE;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, prefix = "TIME_SHIFT_MODE_", value = {
+            TIME_SHIFT_MODE_OFF,
+            TIME_SHIFT_MODE_LOCAL,
+            TIME_SHIFT_MODE_NETWORK,
+            TIME_SHIFT_MODE_AUTO})
+    public @interface TimeShiftMode {}
+    /**
+     * Time shift mode: off.
+     * <p>Time shift is disabled.
+     * @hide
+     */
+    public static final int TIME_SHIFT_MODE_OFF = 1;
+    /**
+     * Time shift mode: local.
+     * <p>Time shift is handle locally, using on-device data. E.g. playing a local file.
+     * @hide
+     */
+    public static final int TIME_SHIFT_MODE_LOCAL = 2;
+    /**
+     * Time shift mode: network.
+     * <p>Time shift is handle remotely via network. E.g. online streaming.
+     * @hide
+     */
+    public static final int TIME_SHIFT_MODE_NETWORK = 3;
+    /**
+     * Time shift mode: auto.
+     * <p>Time shift mode is handled automatically.
+     * @hide
+     */
+    public static final int TIME_SHIFT_MODE_AUTO = 4;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -719,6 +754,36 @@ public final class TvInputManager {
         }
 
         /**
+         * This is called when cueing message becomes available or unavailable.
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param available The current availability of cueing message. {@code true} if cueing
+         *                  message is available; {@code false} if it becomes unavailable.
+         */
+        public void onCueingMessageAvailability(Session session, boolean available) {
+        }
+
+        /**
+         * This is called when time shift mode is set or updated.
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param mode The current time shift mode. The value is one of the following:
+         * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+         * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+         * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+         */
+        public void onTimeShiftMode(Session session, @TimeShiftMode int mode) {
+        }
+
+        /**
+         * Informs the app available speeds for time-shifting.
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param speeds An ordered array of playback speeds, expressed as values relative to the
+         *               normal playback speed 1.0.
+         * @see PlaybackParams#getSpeed()
+         */
+        public void onAvailableSpeeds(Session session, float[] speeds) {
+        }
+
+        /**
          * This is called when the session has been tuned to the given channel.
          *
          * @param channelUri The URI of a channel.
@@ -968,6 +1033,33 @@ public final class TvInputManager {
                             && mSession.getInteractiveAppSession() != null) {
                         mSession.getInteractiveAppSession().notifySignalStrength(strength);
                     }
+                }
+            });
+        }
+
+        void postCueingMessageAvailability(final boolean available) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onCueingMessageAvailability(mSession, available);
+                }
+            });
+        }
+
+        void postTimeShiftMode(final int mode) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onTimeShiftMode(mSession, mode);
+                }
+            });
+        }
+
+        void postAvailableSpeeds(float[] speeds) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSessionCallback.onAvailableSpeeds(mSession, speeds);
                 }
             });
         }
@@ -1471,6 +1563,42 @@ public final class TvInputManager {
                         return;
                     }
                     record.postSignalStrength(strength);
+                }
+            }
+
+            @Override
+            public void onCueingMessageAvailability(boolean available, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postCueingMessageAvailability(available);
+                }
+            }
+
+            @Override
+            public void onTimeShiftMode(int mode, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postTimeShiftMode(mode);
+                }
+            }
+
+            @Override
+            public void onAvailableSpeeds(float[] speeds, int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postAvailableSpeeds(speeds);
                 }
             }
 
@@ -3052,6 +3180,27 @@ public final class TvInputManager {
             }
             try {
                 mService.timeShiftSetPlaybackParams(mToken, params, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Sets time shift mode.
+         *
+         * @param mode The time shift mode. The value is one of the following:
+         * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+         * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+         * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+         * @hide
+         */
+        void timeShiftSetMode(@TimeShiftMode int mode) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.timeShiftSetMode(mToken, mode, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

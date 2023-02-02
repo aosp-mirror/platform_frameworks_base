@@ -53,9 +53,11 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
@@ -625,6 +627,21 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Sets time shift mode.
+     *
+     * @param mode The time shift mode. The value is one of the following:
+     * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+     * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+     * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+     * @hide
+     */
+    public void timeShiftSetMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
+        if (mSession != null) {
+            mSession.timeShiftSetMode(mode);
+        }
+    }
+
+    /**
      * Sets the callback to be invoked when the time shift position is changed.
      *
      * @param callback The callback to receive time shift position changes. A value of {@code null}
@@ -1171,6 +1188,43 @@ public class TvView extends ViewGroup {
         }
 
         /**
+         * This is called when cueing message becomes available or unavailable.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param available The current availability of cueing message. {@code true} if cueing
+         *                  message is available; {@code false} if it becomes unavailable.
+         * @hide
+         */
+        public void onCueingMessageAvailability(@NonNull String inputId, boolean available) {
+        }
+
+        /**
+         * This is called when time shift mode is set or updated.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param mode The current time shift mode. The value is one of the following:
+         * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
+         * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
+         * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
+         * @hide
+         */
+        public void onTimeShiftMode(
+                @NonNull String inputId, @TvInputManager.TimeShiftMode int mode) {
+        }
+
+        /**
+         * This is called when time-shifting is enabled to inform the available speeds.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param speeds An ordered array of playback speeds, expressed as values relative to the
+         *               normal playback speed 1.0.
+         * @see PlaybackParams#getSpeed()
+         * @hide
+         */
+        public void onAvailableSpeeds(@NonNull String inputId, float[] speeds) {
+        }
+
+        /**
          * This is called when the session has been tuned to the given channel.
          *
          * @param channelUri The URI of a channel.
@@ -1541,6 +1595,48 @@ public class TvView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onSignalStrengthUpdated(mInputId, strength);
+            }
+        }
+
+        @Override
+        public void onCueingMessageAvailability(Session session, boolean available) {
+            if (DEBUG) {
+                Log.d(TAG, "onCueingMessageAvailability(available=" + available + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onCueingMessageAvailability - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onCueingMessageAvailability(mInputId, available);
+            }
+        }
+
+        @Override
+        public void onTimeShiftMode(Session session, int mode) {
+            if (DEBUG) {
+                Log.d(TAG, "onTimeShiftMode(mode=" + mode + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTimeShiftMode - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onTimeShiftMode(mInputId, mode);
+            }
+        }
+
+        @Override
+        public void onAvailableSpeeds(Session session, float[] speeds) {
+            if (DEBUG) {
+                Log.d(TAG, "onAvailableSpeeds(speeds=" + Arrays.toString(speeds) + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onAvailableSpeeds - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onAvailableSpeeds(mInputId, speeds);
             }
         }
 

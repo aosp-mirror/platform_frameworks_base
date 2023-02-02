@@ -289,4 +289,36 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
         verify(mCallback, times(1)).onStateChanged();
         assertThat(stateController.areEntryAnimationsFinished()).isTrue();
     }
+
+    @Test
+    public void testNotifyDreamOverlayStatusBarVisibleChanged() {
+        final DreamOverlayStateController stateController =
+                new DreamOverlayStateController(mExecutor, true);
+
+        stateController.addCallback(mCallback);
+        mExecutor.runAllReady();
+        assertThat(stateController.isDreamOverlayStatusBarVisible()).isFalse();
+
+        stateController.setDreamOverlayStatusBarVisible(true);
+        mExecutor.runAllReady();
+
+        verify(mCallback, times(1)).onStateChanged();
+        assertThat(stateController.isDreamOverlayStatusBarVisible()).isTrue();
+    }
+
+    @Test
+    public void testNotifyHasAssistantAttentionChanged() {
+        final DreamOverlayStateController stateController =
+                new DreamOverlayStateController(mExecutor, true);
+
+        stateController.addCallback(mCallback);
+        mExecutor.runAllReady();
+        assertThat(stateController.hasAssistantAttention()).isFalse();
+
+        stateController.setHasAssistantAttention(true);
+        mExecutor.runAllReady();
+
+        verify(mCallback, times(1)).onStateChanged();
+        assertThat(stateController.hasAssistantAttention()).isTrue();
+    }
 }

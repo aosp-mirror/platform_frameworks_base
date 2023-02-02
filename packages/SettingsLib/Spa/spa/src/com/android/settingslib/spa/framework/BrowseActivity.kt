@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.unit.IntOffset
 import androidx.core.view.WindowCompat
@@ -42,6 +43,7 @@ import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.AnimatedNavHost
 import com.android.settingslib.spa.framework.compose.LocalNavController
 import com.android.settingslib.spa.framework.compose.NavControllerWrapperImpl
@@ -136,7 +138,12 @@ private fun NavControllerWrapperImpl.NavContent(allProvider: Collection<Settings
                         AnimatedContentScope.SlideDirection.Right, animationSpec = slideEffect
                     ) + fadeOut(animationSpec = fadeEffect)
                 },
-            ) { navBackStackEntry -> spp.PageWithEvent(navBackStackEntry.arguments) }
+            ) { navBackStackEntry ->
+                val page = remember(navBackStackEntry.arguments) {
+                    spp.createSettingsPage(navBackStackEntry.arguments)
+                }
+                page.PageWithEvent()
+            }
         }
     }
 }

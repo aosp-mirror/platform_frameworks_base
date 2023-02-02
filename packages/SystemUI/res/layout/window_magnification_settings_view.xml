@@ -15,6 +15,7 @@
     limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/magnifier_panel_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -46,55 +47,72 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:background="@drawable/accessibility_magnification_setting_view_image_btn_layout_bg"
+        android:layout_width="@dimen/magnification_setting_image_button_background_width"
+        android:layout_height="@dimen/magnification_setting_image_button_height"
         android:orientation="horizontal">
         <ImageButton
             android:id="@+id/magnifier_small_button"
             android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:scaleType="center"
+            android:layout_height="@dimen/magnification_setting_image_button_height"
             android:layout_weight="1"
-            android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
-            android:padding="@dimen/magnification_switch_button_padding"
+            android:scaleType="fitCenter"
+            android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
+            android:paddingLeft="@dimen/magnification_setting_image_button_padding_horizontal"
+            android:paddingRight="@dimen/magnification_setting_image_button_padding_horizontal"
+            android:paddingTop="@dimen/magnification_setting_image_button_padding_vertical"
+            android:paddingBottom="@dimen/magnification_setting_image_button_padding_vertical"
             android:src="@drawable/ic_magnification_menu_small"
-            android:tint="@color/accessibility_magnifier_icon_color"
+            android:tint="@color/accessibility_magnification_image_button_tint"
             android:tintMode="src_atop" />
 
         <ImageButton
             android:id="@+id/magnifier_medium_button"
             android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:scaleType="center"
+            android:layout_height="@dimen/magnification_setting_image_button_height"
             android:layout_weight="1"
-            android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
-            android:padding="@dimen/magnification_switch_button_padding"
+            android:scaleType="fitCenter"
+            android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
+            android:paddingLeft="@dimen/magnification_setting_image_button_padding_horizontal"
+            android:paddingRight="@dimen/magnification_setting_image_button_padding_horizontal"
+            android:paddingTop="@dimen/magnification_setting_image_button_padding_vertical"
+            android:paddingBottom="@dimen/magnification_setting_image_button_padding_vertical"
             android:src="@drawable/ic_magnification_menu_medium"
-            android:tint="@color/accessibility_magnifier_icon_color"
+            android:tint="@color/accessibility_magnification_image_button_tint"
             android:tintMode="src_atop" />
 
         <ImageButton
             android:id="@+id/magnifier_large_button"
             android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:scaleType="center"
+            android:layout_height="@dimen/magnification_setting_image_button_height"
             android:layout_weight="1"
-            android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
-            android:padding="@dimen/magnification_switch_button_padding"
+            android:scaleType="fitCenter"
+            android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
+            android:paddingLeft="@dimen/magnification_setting_image_button_padding_horizontal"
+            android:paddingRight="@dimen/magnification_setting_image_button_padding_horizontal"
+            android:paddingTop="@dimen/magnification_setting_image_button_padding_vertical"
+            android:paddingBottom="@dimen/magnification_setting_image_button_padding_vertical"
             android:src="@drawable/ic_magnification_menu_large"
-            android:tint="@color/accessibility_magnifier_icon_color"
+            android:tint="@color/accessibility_magnification_image_button_tint"
             android:tintMode="src_atop" />
 
         <ImageButton
             android:id="@+id/magnifier_full_button"
             android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:scaleType="center"
+            android:layout_height="@dimen/magnification_setting_image_button_height"
             android:layout_weight="1"
-            android:background="@drawable/accessibility_magnification_setting_view_btn_bg"
-            android:padding="@dimen/magnification_switch_button_padding"
-            android:src="@drawable/ic_open_in_new_fullscreen"
-            android:tint="@color/accessibility_magnifier_icon_color"
+            android:scaleType="fitCenter"
+            android:background="@drawable/accessibility_magnification_setting_view_image_btn_bg"
+            android:paddingLeft
+                ="@dimen/magnification_setting_image_button_open_in_full_padding_horizontal"
+            android:paddingRight
+                ="@dimen/magnification_setting_image_button_open_in_full_padding_horizontal"
+            android:paddingTop
+                ="@dimen/magnification_setting_image_button_open_in_full_padding_vertical"
+            android:paddingBottom
+                ="@dimen/magnification_setting_image_button_open_in_full_padding_vertical"
+            android:src="@drawable/ic_open_in_full"
+            android:tint="@color/accessibility_magnification_image_button_tint"
             android:tintMode="src_atop" />
     </LinearLayout>
 
@@ -112,13 +130,19 @@
             android:layout_weight="1"
             android:singleLine="true"
             android:text="@string/accessibility_allow_diagonal_scrolling"
-            android:textAppearance="@style/TextAppearance.MagnificationSetting.Title" />
+            android:textAppearance="@style/TextAppearance.MagnificationSetting.Title"
+            android:layout_gravity="center_vertical" />
 
         <Switch
             android:id="@+id/magnifier_horizontal_lock_switch"
-            android:layout_width="wrap_content"
+            android:switchMinWidth="@dimen/settingslib_switch_track_width"
+            android:layout_gravity="right|center_vertical"
+            android:layout_width="@dimen/settingslib_switch_track_width"
             android:layout_height="wrap_content"
-            android:layout_gravity="right" />
+            android:track="@drawable/settingslib_track_selector"
+            android:thumb="@drawable/settingslib_thumb_selector"
+            android:theme="@style/MainSwitch.Settingslib"/>
+
     </LinearLayout>
 
     <TextView
@@ -128,13 +152,14 @@
         android:textAppearance="@style/TextAppearance.MagnificationSetting.Title"
         android:focusable="true" />
 
-    <SeekBar
-        android:id="@+id/magnifier_zoom_seekbar"
-        android:layout_height="wrap_content"
+    <com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
+        android:id="@+id/magnifier_zoom_slider"
         android:layout_width="match_parent"
-        android:layout_marginTop="@dimen/magnification_setting_seekbar_margin"
-        android:progress="0"
-        android:max="6" />
+        android:layout_height="wrap_content"
+        app:max="6"
+        app:progress="0"
+        app:iconStartContentDescription="@string/accessibility_control_zoom_out"
+        app:iconEndContentDescription="@string/accessibility_control_zoom_in"/>
 
     <Button
         android:id="@+id/magnifier_done_button"

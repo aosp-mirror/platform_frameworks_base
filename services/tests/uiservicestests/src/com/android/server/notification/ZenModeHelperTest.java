@@ -525,6 +525,13 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
     @Test
     public void testZenUpgradeNotification() {
+        /**
+         * Commit a485ec65b5ba947d69158ad90905abf3310655cf disabled DND status change
+         * notification on watches. So, assume that the device is not watch.
+         */
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)).thenReturn(false);
+
         // shows zen upgrade notification if stored settings says to shows,
         // zen has not been updated, boot is completed
         // and we're setting zen mode on

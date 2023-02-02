@@ -371,6 +371,7 @@ public class FullScreenMagnificationController implements
 
             final MagnificationConfig config = new MagnificationConfig.Builder()
                     .setMode(MAGNIFICATION_MODE_FULLSCREEN)
+                    .setActivated(mMagnificationActivated)
                     .setScale(scale)
                     .setCenterX(getCenterX())
                     .setCenterY(getCenterY()).build();

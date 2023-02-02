@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.framework.common
 
 import android.os.Bundle
+import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
 import com.android.settingslib.spa.framework.util.isRuntimeParam
 import com.android.settingslib.spa.framework.util.navLink
@@ -91,14 +92,22 @@ data class SettingsPage(
     }
 
     fun isBrowsable(): Boolean {
-        return !isCreateBy(NULL_PAGE_NAME) &&
-            !hasRuntimeParam()
+        return !isCreateBy(NULL_PAGE_NAME) && !hasRuntimeParam()
+    }
+
+    private fun getProvider(): SettingsPageProvider? {
+        if (!SpaEnvironmentFactory.isReady()) return null
+        val pageProviderRepository by SpaEnvironmentFactory.instance.pageProviderRepository
+        return pageProviderRepository.getProviderOrNull(sppName)
     }
 
     fun isEnabled(): Boolean {
-        if (!SpaEnvironmentFactory.isReady()) return false
-        val pageProviderRepository by SpaEnvironmentFactory.instance.pageProviderRepository
-        return pageProviderRepository.getProviderOrNull(sppName)?.isEnabled(arguments) ?: false
+        return getProvider()?.isEnabled(arguments) ?: false
+    }
+
+    @Composable
+    fun UiLayout() {
+        getProvider()?.Page(arguments)
     }
 }
 

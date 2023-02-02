@@ -31,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 final class OverrideRequest {
     private final IBinder mToken;
     private final int mPid;
+    private final int mUid;
     private final int mRequestedState;
     @DeviceStateRequest.RequestFlags
     private final int mFlags;
@@ -68,10 +69,11 @@ final class OverrideRequest {
     @Retention(RetentionPolicy.SOURCE)
     public @interface OverrideRequestType {}
 
-    OverrideRequest(IBinder token, int pid, int requestedState,
+    OverrideRequest(IBinder token, int pid, int uid, int requestedState,
             @DeviceStateRequest.RequestFlags int flags, @OverrideRequestType int requestType) {
         mToken = token;
         mPid = pid;
+        mUid = uid;
         mRequestedState = requestedState;
         mFlags = flags;
         mRequestType = requestType;
@@ -83,6 +85,10 @@ final class OverrideRequest {
 
     int getPid() {
         return mPid;
+    }
+
+    int getUid() {
+        return mUid;
     }
 
     int getRequestedState() {

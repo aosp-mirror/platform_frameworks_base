@@ -30,9 +30,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 
@@ -74,7 +74,6 @@ fun rememberAlertDialogPresenter(
     return alertDialogPresenter
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun AlertDialogPresenter.SettingsAlertDialog(
     confirmButton: AlertDialogButton?,
@@ -82,15 +81,9 @@ private fun AlertDialogPresenter.SettingsAlertDialog(
     title: String?,
     text: @Composable (() -> Unit)?,
 ) {
-    val configuration = LocalConfiguration.current
     AlertDialog(
         onDismissRequest = ::close,
-        modifier = when (configuration.orientation) {
-            Configuration.ORIENTATION_LANDSCAPE -> {
-                Modifier.width(configuration.screenWidthDp.dp * 0.6f)
-            }
-            else -> Modifier
-        },
+        modifier = Modifier.width(getDialogWidth()),
         confirmButton = { confirmButton?.let { Button(it) } },
         dismissButton = dismissButton?.let { { Button(it) } },
         title = title?.let { { Text(it) } },
@@ -103,6 +96,15 @@ private fun AlertDialogPresenter.SettingsAlertDialog(
         },
         properties = DialogProperties(usePlatformDefaultWidth = false),
     )
+}
+
+@Composable
+private fun getDialogWidth(): Dp {
+    val configuration = LocalConfiguration.current
+    return configuration.screenWidthDp.dp * when (configuration.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> 0.6f
+        else -> 0.8f
+    }
 }
 
 @Composable

@@ -238,6 +238,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.AUDIO_SAFE_VOLUME_STATE,
                 GlobalSettingsProto.AUDIO_SAFE_VOLUME_STATE);
+        dumpSetting(s, p,
+                Settings.Global.AUDIO_SAFE_CSD_CURRENT_VALUE,
+                GlobalSettingsProto.AUDIO_SAFE_CSD_CURRENT_VALUE);
+        dumpSetting(s, p,
+                Settings.Global.AUDIO_SAFE_CSD_NEXT_WARNING,
+                GlobalSettingsProto.AUDIO_SAFE_CSD_NEXT_WARNING);
+        dumpSetting(s, p,
+                Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS,
+                GlobalSettingsProto.AUDIO_SAFE_CSD_DOSE_RECORDS);
 
         final long autofillToken = p.start(GlobalSettingsProto.AUTOFILL);
         dumpSetting(s, p,

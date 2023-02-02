@@ -60,6 +60,7 @@ oneway interface ITvInputSession {
     void timeShiftResume();
     void timeShiftSeekTo(long timeMs);
     void timeShiftSetPlaybackParams(in PlaybackParams params);
+    void timeShiftSetMode(int mode);
     void timeShiftEnablePositionTracking(boolean enable);
 
     // For the recording session

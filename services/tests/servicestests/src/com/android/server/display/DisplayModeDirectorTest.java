@@ -754,7 +754,7 @@ public class DisplayModeDirectorTest {
 
     @Test
     public void testVotingWithSwitchingTypeRenderFrameRateOnlyRenderRateIsNotPhysicalRefreshRate() {
-        DisplayModeDirector director = createDirectorFromFpsRange(90, 120);
+        DisplayModeDirector director = createDirectorFromFpsRange(60, 120);
         SparseArray<Vote> votes = new SparseArray<>();
         SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
         votesByDisplay.put(DISPLAY_ID, votes);
@@ -775,23 +775,23 @@ public class DisplayModeDirectorTest {
         assertThat(desiredSpecs.appRequest.physical.max).isPositiveInfinity();
         assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(0);
         assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.baseModeId).isEqualTo(90);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(60);
 
         director.setModeSwitchingType(DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY);
         assertThat(director.getModeSwitchingType())
                 .isEqualTo(DisplayManager.SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY);
 
         desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
-        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(60);
-        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
-        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.appRequest.physical.min).isWithin(FLOAT_TOLERANCE).of(60);
+        assertThat(desiredSpecs.appRequest.physical.max).isWithin(FLOAT_TOLERANCE).of(60);
         assertThat(desiredSpecs.appRequest.render.min).isWithin(FLOAT_TOLERANCE).of(0);
         assertThat(desiredSpecs.appRequest.render.max).isWithin(FLOAT_TOLERANCE).of(60);
 
-        assertThat(desiredSpecs.baseModeId).isEqualTo(90);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(60);
     }
 
     @Test
@@ -1732,6 +1732,31 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
+    public void testRenderFrameRateIsAchievableWhenSwitchingTypeNone() {
+        Display.Mode[] modes = new Display.Mode[2];
+        modes[0] = new Display.Mode(
+                /*modeId=*/60, /*width=*/1000, /*height=*/1000, 60);
+        modes[1] = new Display.Mode(
+                /*modeId=*/90, /*width=*/1000, /*height=*/1000, 90);
+
+        DisplayModeDirector director = createDirectorFromModeArray(modes, modes[1]);
+        director.setModeSwitchingType(DisplayManager.SWITCHING_TYPE_NONE);
+
+        SparseArray<Vote> votes = new SparseArray<>();
+        SparseArray<SparseArray<Vote>> votesByDisplay = new SparseArray<>();
+        votesByDisplay.put(DISPLAY_ID, votes);
+        votes.put(Vote.PRIORITY_APP_REQUEST_RENDER_FRAME_RATE_RANGE,
+                Vote.forRenderFrameRates(0, 60));
+        director.injectVotesByDisplay(votesByDisplay);
+        DesiredDisplayModeSpecs desiredSpecs = director.getDesiredDisplayModeSpecs(DISPLAY_ID);
+        assertThat(desiredSpecs.primary.physical.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.physical.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.render.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.primary.render.max).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(desiredSpecs.baseModeId).isEqualTo(90);
+    }
+
+    @Test
     public void testProximitySensorVoting() {
         DisplayModeDirector director =
                 createDirectorFromRefreshRateArray(new float[]{60.f, 90.f}, 0);
@@ -2235,6 +2260,10 @@ public class DisplayModeDirectorTest {
             .thenReturn(75);
         when(resources.getInteger(R.integer.config_defaultRefreshRate))
             .thenReturn(45);
+        when(resources.getInteger(R.integer.config_fixedRefreshRateInHighZone))
+            .thenReturn(65);
+        when(resources.getInteger(R.integer.config_defaultRefreshRateInZone))
+            .thenReturn(85);
         when(resources.getIntArray(R.array.config_brightnessThresholdsOfPeakRefreshRate))
             .thenReturn(new int[]{5});
         when(resources.getIntArray(R.array.config_ambientThresholdsOfPeakRefreshRate))
@@ -2254,6 +2283,8 @@ public class DisplayModeDirectorTest {
         assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 45, 0.0);
         assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 75,
                 0.0);
+        assertEquals(director.getBrightnessObserver().getRefreshRateInHighZone(), 65);
+        assertEquals(director.getBrightnessObserver().getRefreshRateInLowZone(), 85);
         assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
                 new int[]{250});
         assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
@@ -2265,17 +2296,21 @@ public class DisplayModeDirectorTest {
 
         // Notify that the default display is updated, such that DisplayDeviceConfig has new values
         DisplayDeviceConfig displayDeviceConfig = mock(DisplayDeviceConfig.class);
-        when(displayDeviceConfig.getDefaultLowRefreshRate()).thenReturn(50);
-        when(displayDeviceConfig.getDefaultHighRefreshRate()).thenReturn(55);
+        when(displayDeviceConfig.getDefaultLowBlockingZoneRefreshRate()).thenReturn(50);
+        when(displayDeviceConfig.getDefaultHighBlockingZoneRefreshRate()).thenReturn(55);
+        when(displayDeviceConfig.getDefaultRefreshRate()).thenReturn(60);
+        when(displayDeviceConfig.getDefaultPeakRefreshRate()).thenReturn(65);
         when(displayDeviceConfig.getLowDisplayBrightnessThresholds()).thenReturn(new int[]{25});
         when(displayDeviceConfig.getLowAmbientBrightnessThresholds()).thenReturn(new int[]{30});
         when(displayDeviceConfig.getHighDisplayBrightnessThresholds()).thenReturn(new int[]{210});
         when(displayDeviceConfig.getHighAmbientBrightnessThresholds()).thenReturn(new int[]{2100});
         director.defaultDisplayDeviceUpdated(displayDeviceConfig);
 
-        assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 50, 0.0);
-        assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 55,
+        assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 60, 0.0);
+        assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 65,
                 0.0);
+        assertEquals(director.getBrightnessObserver().getRefreshRateInHighZone(), 55);
+        assertEquals(director.getBrightnessObserver().getRefreshRateInLowZone(), 50);
         assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
                 new int[]{210});
         assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
@@ -2288,6 +2323,8 @@ public class DisplayModeDirectorTest {
         // Notify that the default display is updated, such that DeviceConfig has new values
         FakeDeviceConfig config = mInjector.getDeviceConfig();
         config.setDefaultPeakRefreshRate(60);
+        config.setRefreshRateInHighZone(65);
+        config.setRefreshRateInLowZone(70);
         config.setLowAmbientBrightnessThresholds(new int[]{20});
         config.setLowDisplayBrightnessThresholds(new int[]{10});
         config.setHighDisplayBrightnessThresholds(new int[]{255});
@@ -2295,9 +2332,11 @@ public class DisplayModeDirectorTest {
 
         director.defaultDisplayDeviceUpdated(displayDeviceConfig);
 
-        assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 50, 0.0);
+        assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 60, 0.0);
         assertEquals(director.getSettingsObserver().getDefaultPeakRefreshRate(), 60,
                 0.0);
+        assertEquals(director.getBrightnessObserver().getRefreshRateInHighZone(), 65);
+        assertEquals(director.getBrightnessObserver().getRefreshRateInLowZone(), 70);
         assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
                 new int[]{255});
         assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
@@ -2337,8 +2376,8 @@ public class DisplayModeDirectorTest {
                         any(Handler.class));
 
         DisplayDeviceConfig ddcMock = mock(DisplayDeviceConfig.class);
-        when(ddcMock.getDefaultLowRefreshRate()).thenReturn(50);
-        when(ddcMock.getDefaultHighRefreshRate()).thenReturn(55);
+        when(ddcMock.getDefaultLowBlockingZoneRefreshRate()).thenReturn(50);
+        when(ddcMock.getDefaultHighBlockingZoneRefreshRate()).thenReturn(55);
         when(ddcMock.getLowDisplayBrightnessThresholds()).thenReturn(new int[]{25});
         when(ddcMock.getLowAmbientBrightnessThresholds()).thenReturn(new int[]{30});
         when(ddcMock.getHighDisplayBrightnessThresholds()).thenReturn(new int[]{210});

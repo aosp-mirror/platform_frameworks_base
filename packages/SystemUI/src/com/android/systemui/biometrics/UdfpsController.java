@@ -557,7 +557,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         final InstanceId sessionIdProvider = mSessionTracker.getSessionId(
                 getBiometricSessionType());
         final int sessionId = (sessionIdProvider != null) ? sessionIdProvider.getId() : -1;
-        final int touchConfigId = BOUNDING_BOX_TOUCH_CONFIG_ID;
+        final int touchConfigId = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_selected_udfps_touch_detection);
 
         SysUiStatsLog.write(SysUiStatsLog.BIOMETRIC_TOUCH_REPORTED, biometricTouchReportedTouchType,
                 touchConfigId, sessionId, data.getX(), data.getY(), data.getMinor(),

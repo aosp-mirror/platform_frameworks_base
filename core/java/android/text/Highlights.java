@@ -38,9 +38,9 @@ public class Highlights {
     }
 
     /**
-     * Returns a number of highlight.
+     * Returns the number of highlight.
      *
-     * @return a number of highlight.
+     * @return the number of highlight.
      *
      * @see Builder#addRange(Paint, int, int)
      * @see Builder#addRanges(Paint, int...)
@@ -53,7 +53,7 @@ public class Highlights {
      * Returns a paint used for the i-th highlight.
      *
      * @param index an index of the highlight. Must be between 0 and {@link #getSize()}
-     * @return a paint object
+     * @return the paint object
      *
      * @see Builder#addRange(Paint, int, int)
      * @see Builder#addRanges(Paint, int...)
@@ -72,7 +72,7 @@ public class Highlights {
      * [1, 2, 3, 4].
      *
      * @param index an index of the highlight. Must be between 0 and {@link #getSize()}
-     * @return a paint object
+     * @return the flattened ranges.
      *
      * @see Builder#addRange(Paint, int, int)
      * @see Builder#addRanges(Paint, int...)
@@ -89,6 +89,9 @@ public class Highlights {
 
         /**
          * Add single range highlight.
+         *
+         * If the given range has overlaps with the already added ranges, the previous highlights
+         * are overdrawn by this range.
          *
          * @param paint a paint object used for drawing highlight path.
          * @param start an inclusive offset of the text.
@@ -110,6 +113,9 @@ public class Highlights {
 
         /**
          * Add multiple ranges highlight.
+         *
+         * If the given ranges have overlap with the already added ranges, the previous highlights
+         * are overdrawn by this range.
          *
          * @param paint a paint object used for drawing highlight path.
          * @param ranges a flatten ranges. The {@code 2 * i}-th element is an inclusive start offset

@@ -177,7 +177,8 @@ constructor(
         val receiver =
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
-                    clockController.clock?.events?.onTimeTick()
+                    clockController.clock?.smallClock?.events?.onTimeTick()
+                    clockController.clock?.largeClock?.events?.onTimeTick()
                 }
             }
         broadcastDispatcher.registerReceiver(
