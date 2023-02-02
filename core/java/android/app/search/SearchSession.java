@@ -204,7 +204,6 @@ public final class SearchSession implements AutoCloseable {
      * @param callback The callback to be unregistered.
      */
     public void unregisterEmptyQueryResultUpdateCallback(
-            @NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull Callback callback) {
         synchronized (mRegisteredCallbacks) {
             if (mIsClosed.get()) {
