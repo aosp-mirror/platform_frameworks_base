@@ -51,6 +51,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 
+import com.android.settingslib.udfps.UdfpsOverlayParams;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
@@ -778,7 +779,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
 
         @Override
-        public void onUdfpsLocationChanged() {
+        public void onUdfpsLocationChanged(UdfpsOverlayParams udfpsOverlayParams) {
             updateUdfpsConfig();
         }
     };
