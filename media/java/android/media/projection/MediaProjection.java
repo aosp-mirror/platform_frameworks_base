@@ -253,23 +253,19 @@ public final class MediaProjection {
         public void onStop() { }
 
         /**
-         * Indicates the width and height of the captured region in pixels. Called immediately after
-         * capture begins to provide the app with accurate sizing for the stream. Also called
-         * when the region captured in this MediaProjection session is resized.
+         * Invoked immediately after capture begins or when the size of the captured region changes,
+         * providing the accurate sizing for the streamed capture.
          * <p>
          * The given width and height, in pixels, corresponds to the same width and height that
-         * would be returned from {@link android.view.WindowMetrics#getBounds()}
+         * would be returned from {@link android.view.WindowMetrics#getBounds()} of the captured
+         * region.
          * </p>
          * <p>
-         * Without the application resizing the {@link VirtualDisplay} (returned from
-         * {@code MediaProjection#createVirtualDisplay}) and output {@link Surface} (provided
-         * to {@code MediaProjection#createVirtualDisplay}), the captured stream will have
-         * letterboxing (black bars) around the recorded content to make up for the
-         * difference in aspect ratio.
-         * </p>
-         * <p>
-         * The application can prevent the letterboxing by overriding this method, and
-         * updating the size of both the {@link VirtualDisplay} and output {@link Surface}:
+         * If the recorded content has a different aspect ratio from either the
+         * {@link VirtualDisplay} or output {@link Surface}, the captured stream has letterboxing
+         * (black bars) around the recorded content. The application can avoid the letterboxing
+         * around the recorded content by updating the size of both the {@link VirtualDisplay} and
+         * output {@link Surface}:
          * </p>
          *
          * <pre>
@@ -293,27 +289,29 @@ public final class MediaProjection {
         public void onCapturedContentResize(int width, int height) { }
 
         /**
-         * Indicates the visibility of the captured region has changed. Called immediately after
-         * capture begins with the initial visibility state, and when visibility changes. Provides
-         * the app with accurate state for presenting its own UI. The application can take advantage
-         * of this by showing or hiding the captured content, based on if the captured region is
-         * currently visible to the user.
+         * Invoked immediately after capture begins or when the visibility of the captured region
+         * changes, providing the current visibility of the captured region.
+         * <p>
+         * Applications can take advantage of this callback by showing or hiding the captured
+         * content from the output {@link Surface}, based on if the captured region is currently
+         * visible to the user.
+         * </p>
          * <p>
          * For example, if the user elected to capture a single app (from the activity shown from
-         * {@link MediaProjectionManager#createScreenCaptureIntent()}), the callback may be
-         * triggered for the following reasons:
+         * {@link MediaProjectionManager#createScreenCaptureIntent()}), the following scenarios
+         * trigger the callback:
          * <ul>
          *     <li>
-         *         The captured region may become visible ({@code isVisible} with value
-         *         {@code true}), because the captured app is at least partially visible. This may
-         *         happen if the captured app was previously covered by another app. The other app
-         *         moves to show at least some portion of the captured app.
+         *         The captured region is visible ({@code isVisible} with value {@code true}),
+         *         because the captured app is at least partially visible. This may happen if the
+         *         user moves the covering app to show at least some portion of the captured app
+         *         (e.g. the user has multiple apps visible in a multi-window mode such as split
+         *         screen).
          *     </li>
          *     <li>
-         *         The captured region may become invisible ({@code isVisible} with value
-         *         {@code false}) if it is entirely hidden. This may happen if the captured app is
-         *         entirely covered by another app, or the user navigates away from the captured
-         *         app.
+         *         The captured region is invisible ({@code isVisible} with value {@code false}) if
+         *         it is entirely hidden. This may happen if another app entirely covers the
+         *         captured app, or the user navigates away from the captured app.
          *     </li>
          * </ul>
          * </p>
