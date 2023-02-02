@@ -2302,7 +2302,7 @@ pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
       setpriority(PRIO_PROCESS, 0, PROCESS_PRIORITY_MIN);
     }
 
-#if defined(__BIONIC__)
+#if defined(__BIONIC__) && !defined(NO_RESET_STACK_PROTECTOR)
     // Reset the stack guard for the new process.
     android_reset_stack_guards();
 #endif

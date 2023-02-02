@@ -6241,4 +6241,17 @@ ul.</string>
     <string name="mic_access_on_toast">Microphone is available</string>
     <!-- Toast message that is shown when the user mutes the microphone from the keyboard. [CHAR LIMIT=TOAST] -->
     <string name="mic_access_off_toast">Microphone is blocked</string>
+
+    <!-- Name of concurrent display notifications. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_name">Dual screen</string>
+    <!-- Title of concurrent display active notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_active_title">Dual screen is on</string>
+    <!-- Content of concurrent display active notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_active_content"><xliff:g id="app_name" example="Camera app">%1$s</xliff:g> is using both displays to show content</string>
+    <!-- Title of concurrent display thermal notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_thermal_title">Device is too warm</string>
+    <!-- Content of concurrent display thermal notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_thermal_content">Dual Screen is unavailable because your phone is getting too warm</string>
+    <!-- Text of device state notification turn off button. [CHAR LIMIT=NONE] -->
+    <string name="device_state_notification_turn_off_button">Turn off</string>
 </resources>

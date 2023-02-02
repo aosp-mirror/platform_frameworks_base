@@ -468,6 +468,21 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testAssistantAttentionIconShownWhenAttentionGained() {
+        mController.onViewAttached();
+
+        when(mDreamOverlayStateController.hasAssistantAttention()).thenReturn(true);
+
+        final ArgumentCaptor<DreamOverlayStateController.Callback> callbackCapture =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        verify(mDreamOverlayStateController).addCallback(callbackCapture.capture());
+        callbackCapture.getValue().onStateChanged();
+
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE, true, null);
+    }
+
+    @Test
     public void testStatusBarHiddenWhenSystemStatusBarShown() {
         mController.onViewAttached();
 
@@ -570,6 +585,13 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         callbackCapture.getValue().onStateChanged();
 
         assertThat(mView.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testDreamOverlayStatusBarVisibleSetToFalseOnDetach() {
+        mController.onViewAttached();
+        mController.onViewDetached();
+        verify(mDreamOverlayStateController).setDreamOverlayStatusBarVisible(false);
     }
 
     private StatusBarWindowStateListener updateStatusBarWindowState(boolean show) {

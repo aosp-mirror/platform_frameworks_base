@@ -361,6 +361,16 @@ public class InputConnectionWrapper implements InputConnection {
      * @throws NullPointerException if the target is {@code null}.
      */
     @Override
+    public boolean requestCursorUpdates(@CursorUpdateMode int cursorUpdateMode,
+            @CursorUpdateFilter int cursorUpdateFilter) {
+        return mTarget.requestCursorUpdates(cursorUpdateMode, cursorUpdateFilter);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws NullPointerException if the target is {@code null}.
+     */
+    @Override
     public void requestTextBoundsInfo(
             @NonNull RectF bounds, @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<TextBoundsInfoResult> consumer) {

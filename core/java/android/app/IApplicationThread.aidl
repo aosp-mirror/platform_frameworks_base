@@ -66,7 +66,8 @@ oneway interface IApplicationThread {
     void scheduleReceiver(in Intent intent, in ActivityInfo info,
             in CompatibilityInfo compatInfo,
             int resultCode, in String data, in Bundle extras, boolean ordered,
-            boolean assumeDelivered, int sendingUser, int processState);
+            boolean assumeDelivered, int sendingUser, int processState, int sentFromUid,
+            in String sentFromPackage);
 
     void scheduleReceiverList(in List<ReceiverInfo> info);
 
@@ -102,7 +103,8 @@ oneway interface IApplicationThread {
             in String[] args);
     void scheduleRegisteredReceiver(IIntentReceiver receiver, in Intent intent,
             int resultCode, in String data, in Bundle extras, boolean ordered,
-            boolean sticky, boolean assumeDelivered, int sendingUser, int processState);
+            boolean sticky, boolean assumeDelivered, int sendingUser, int processState,
+            int sentFromUid, in String sentFromPackage);
     void scheduleLowMemory();
     void profilerControl(boolean start, in ProfilerInfo profilerInfo, int profileType);
     void setSchedulingGroup(int group);

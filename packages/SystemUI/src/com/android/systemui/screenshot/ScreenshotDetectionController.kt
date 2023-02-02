@@ -17,8 +17,10 @@
 package com.android.systemui.screenshot
 
 import android.content.pm.PackageManager
+import android.view.Display
 import android.view.IWindowManager
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.TextView
 import com.android.systemui.R
 import javax.inject.Inject
@@ -34,8 +36,18 @@ constructor(
      * notified.
      */
     fun maybeNotifyOfScreenshot(data: ScreenshotData): List<CharSequence> {
-        // TODO: actually ask the window manager once API is available.
-        return listOf()
+        // No notification for screenshots from overview.
+        if (data.source == WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW) return listOf()
+
+        // Notify listeners, retrieve a list of listening components.
+        val components = windowManager.notifyScreenshotListeners(Display.DEFAULT_DISPLAY)
+
+        // Convert component names to app names.
+        return components.map {
+            packageManager
+                .getActivityInfo(it, PackageManager.ComponentInfoFlags.of(0))
+                .loadLabel(packageManager)
+        }
     }
 
     fun populateView(view: ViewGroup, appNames: List<CharSequence>) {

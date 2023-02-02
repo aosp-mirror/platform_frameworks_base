@@ -5,9 +5,7 @@ package android.test.mock {
     method public android.content.Context createCredentialProtectedStorageContext();
     method public java.io.File getPreloadsFileCache();
     method public boolean isCredentialProtectedStorage();
-    method public void sendBroadcast(android.content.Intent, String, android.os.Bundle);
     method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, String, android.os.Bundle);
-    method public void sendOrderedBroadcast(android.content.Intent, String, android.os.Bundle, android.content.BroadcastReceiver, android.os.Handler, int, String, android.os.Bundle);
   }
 
   @Deprecated public class MockPackageManager extends android.content.pm.PackageManager {

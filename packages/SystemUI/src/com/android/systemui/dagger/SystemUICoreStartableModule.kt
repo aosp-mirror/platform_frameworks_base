@@ -28,6 +28,7 @@ import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.UdfpsOverlay
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.dagger.qualifiers.PerUser
+import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.keyboard.KeyboardUI
@@ -309,4 +310,10 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(DreamMonitor::class)
     abstract fun bindDreamMonitor(sysui: DreamMonitor): CoreStartable
+
+    /**Inject into AssistantAttentionMonitor */
+    @Binds
+    @IntoMap
+    @ClassKey(AssistantAttentionMonitor::class)
+    abstract fun bindAssistantAttentionMonitor(sysui: AssistantAttentionMonitor): CoreStartable
 }

@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.incremental.IncrementalManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -40,6 +41,7 @@ import com.android.server.pm.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
 public final class PackageManagerServiceTestParams {
@@ -119,4 +121,6 @@ public final class PackageManagerServiceTestParams {
     public SuspendPackageHelper suspendPackageHelper;
     public DistractingPackageHelper distractingPackageHelper;
     public StorageEventHelper storageEventHelper;
+    public Set<String> initialNonStoppedSystemPackages = new ArraySet<>();
+    public boolean shouldStopSystemPackagesByDefault;
 }

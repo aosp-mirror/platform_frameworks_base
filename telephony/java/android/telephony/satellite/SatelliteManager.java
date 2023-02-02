@@ -25,19 +25,23 @@ import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.util.ArrayMap;
 
+import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * Manages satellite operations such as provisioning, pointing, messaging, location sharing, etc.
@@ -116,9 +120,9 @@ public class SatelliteManager {
      */
     public static final int SATELLITE_SERVICE_SERVER_ERROR = 2;
     /**
-     * Internal error received from the satellite service
+     * Unexpected telephony internal error.
      */
-    public static final int SATELLITE_SERVICE_INTERNAL_ERROR = 3;
+    public static final int SATELLITE_SERVICE_TELEPHONY_INTERNAL_ERROR = 3;
     /**
      * Modem error received from the satellite service.
      */
@@ -175,13 +179,17 @@ public class SatelliteManager {
      * Error received from satellite service.
      */
     public static final int SATELLITE_SERVICE_ERROR = 17;
+    /**
+     * Satellite service is disabled on the requested subscription.
+     */
+    public static final int SATELLITE_SERVICE_DISABLED = 18;
 
     /** @hide */
     @IntDef(prefix = {"SATELLITE_SERVICE_"}, value = {
             SATELLITE_SERVICE_SUCCESS,
             SATELLITE_SERVICE_SERVER_NOT_REACHABLE,
             SATELLITE_SERVICE_SERVER_ERROR,
-            SATELLITE_SERVICE_INTERNAL_ERROR,
+            SATELLITE_SERVICE_TELEPHONY_INTERNAL_ERROR,
             SATELLITE_SERVICE_MODEM_ERROR,
             SATELLITE_SERVICE_SYSTEM_ERROR,
             SATELLITE_SERVICE_INVALID_ARGUMENTS,
@@ -195,7 +203,8 @@ public class SatelliteManager {
             SATELLITE_SERVICE_NO_RESOURCES,
             SATELLITE_SERVICE_REQUEST_FAILED,
             SATELLITE_SERVICE_INVALID_SUBSCRIPTION_ID,
-            SATELLITE_SERVICE_ERROR
+            SATELLITE_SERVICE_ERROR,
+            SATELLITE_SERVICE_DISABLED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteServiceResult {}
@@ -265,6 +274,9 @@ public class SatelliteManager {
     @SatelliteServiceResult public int startSatellitePositionUpdates(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SatellitePositionUpdateCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -280,16 +292,16 @@ public class SatelliteManager {
                             public void onSatellitePositionUpdate(
                                     @NonNull PointingInfo pointingInfo) {
                                 logd("onSatellitePositionUpdate: pointingInfo=" + pointingInfo);
-                                executor.execute(() ->
-                                        callback.onSatellitePositionUpdate(pointingInfo));
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onSatellitePositionUpdate(pointingInfo)));
                             }
 
                             @Override
                             public void onMessageTransferStateUpdate(
                                     @SatelliteMessageTransferState int state) {
                                 logd("onMessageTransferStateUpdate: state=" + state);
-                                executor.execute(() ->
-                                        callback.onMessageTransferStateUpdate(state));
+                                executor.execute(() -> Binder.withCleanCallingIdentity(
+                                        () -> callback.onMessageTransferStateUpdate(state)));
                             }
                         });
                 if (result == SATELLITE_SERVICE_SUCCESS) {
@@ -320,6 +332,8 @@ public class SatelliteManager {
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @SatelliteServiceResult public int stopSatellitePositionUpdates(
             @NonNull SatellitePositionUpdateCallback callback) {
+        Objects.requireNonNull(callback);
+
         if (!mSatellitePositionUpdateCallbacks.containsKey(callback)) {
             throw new IllegalArgumentException(
                     "startSatellitePositionUpdates was never called with the callback provided.");
@@ -340,6 +354,46 @@ public class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("stopSatellitePositionUpdates RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_SERVICE_REQUEST_FAILED;
+    }
+
+    /**
+     * Get maximum number of characters per text message on satellite.
+     * @param executor - The executor on which the result listener will be called.
+     * @param resultListener - Listener that will be called when the operation is successful.
+     *                       If this method returns {@link #SATELLITE_SERVICE_SUCCESS}, listener
+     *                       will be called with maximum characters limit.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     *
+     * @return The result of the operation
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteServiceResult
+    public int getMaxCharactersPerSatelliteTextMessage(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Integer> resultListener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(resultListener);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IIntegerConsumer internalCallback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> resultListener.accept(result)));
+                    }
+                };
+
+                return telephony.getMaxCharactersPerSatelliteTextMessage(mSubId, internalCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("getMaxCharactersPerSatelliteTextMessage() RemoteException:" + ex);
             ex.rethrowFromSystemServer();
         }
         return SATELLITE_SERVICE_REQUEST_FAILED;

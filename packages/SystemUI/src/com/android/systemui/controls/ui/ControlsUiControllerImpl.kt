@@ -28,6 +28,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.os.Trace
 import android.service.controls.Control
 import android.service.controls.ControlsProviderService
 import android.util.Log
@@ -224,6 +225,7 @@ class ControlsUiControllerImpl @Inject constructor (
         activityContext: Context
     ) {
         Log.d(ControlsUiController.TAG, "show()")
+        Trace.instant(Trace.TRACE_TAG_APP, "ControlsUiControllerImpl#show")
         this.parent = parent
         this.onDismiss = onDismiss
         this.activityContext = activityContext

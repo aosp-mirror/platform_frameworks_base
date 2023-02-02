@@ -3344,11 +3344,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @GuardedBy("ImfLock.class")
-    void setRequestImeTokenToWindow(IBinder windowToken, IBinder token) {
-        mVisibilityStateComputer.setRequestImeTokenToWindow(windowToken, token);
-    }
-
     @BinderThread
     @Override
     public void reportPerceptibleAsync(IBinder windowToken, boolean perceptible) {
@@ -4603,10 +4598,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    /** Called right after {@link com.android.internal.inputmethod.IInputMethod#showSoftInput}. */
+    /**
+     * Called right after {@link IInputMethod#showSoftInput} or {@link IInputMethod#hideSoftInput}.
+     */
     @GuardedBy("ImfLock.class")
-    void onShowHideSoftInputRequested(boolean show, IBinder requestToken,
+    void onShowHideSoftInputRequested(boolean show, IBinder requestImeToken,
             @SoftInputShowHideReason int reason, @Nullable ImeTracker.Token statsToken) {
+        final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(requestImeToken);
         final WindowManagerInternal.ImeTargetInfo info =
                 mWindowManagerInternal.onToggleImeRequested(
                         show, mCurFocusedWindow, requestToken, mCurTokenDisplayId);

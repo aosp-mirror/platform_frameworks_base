@@ -2709,4 +2709,9 @@ interface ITelephony {
      * Stop receiving satellite pointing updates.
      */
     int stopSatellitePositionUpdates(int subId, int callbackId);
+
+    /**
+     * Get maximum number of characters per text message on satellite.
+     */
+    int getMaxCharactersPerSatelliteTextMessage(int subId, IIntegerConsumer internalCallback);
 }

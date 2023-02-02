@@ -153,6 +153,7 @@ void CanvasContext::removeRenderNode(RenderNode* node) {
 
 void CanvasContext::destroy() {
     stopDrawing();
+    setHardwareBuffer(nullptr);
     setSurface(nullptr);
     setSurfaceControl(nullptr);
     freePrefetchedLayers();
@@ -176,12 +177,23 @@ static void setBufferCount(ANativeWindow* window) {
     native_window_set_buffer_count(window, bufferCount);
 }
 
+void CanvasContext::setHardwareBuffer(AHardwareBuffer* buffer) {
+    if (mHardwareBuffer) {
+        AHardwareBuffer_release(mHardwareBuffer);
+        mHardwareBuffer = nullptr;
+    }
+
+    if (buffer) {
+        AHardwareBuffer_acquire(buffer);
+        mHardwareBuffer = buffer;
+    }
+    mRenderPipeline->setHardwareBuffer(mHardwareBuffer);
+}
+
 void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
     ATRACE_CALL();
 
     if (window) {
-        // Ensure the hint session is running here, away from any critical paths
-        mHintSessionWrapper.init();
         mNativeSurface = std::make_unique<ReliableSurface>(window);
         mNativeSurface->init();
         if (enableTimeout) {
@@ -261,7 +273,7 @@ void CanvasContext::setStopped(bool stopped) {
             mRenderThread.removeFrameCallback(this);
             mRenderPipeline->onStop();
             mRenderThread.cacheManager().onContextStopped(this);
-        } else if (mIsDirty && hasSurface()) {
+        } else if (mIsDirty && hasOutputTarget()) {
             mRenderThread.postFrameCallback(this);
         }
     }
@@ -289,7 +301,8 @@ void CanvasContext::setOpaque(bool opaque) {
 
 float CanvasContext::setColorMode(ColorMode mode) {
     if (mode != mColorMode) {
-        if (mode == ColorMode::Hdr && !mRenderPipeline->supportsExtendedRangeHdr()) {
+        const bool isHdr = mode == ColorMode::Hdr || mode == ColorMode::Hdr10;
+        if (isHdr && !mRenderPipeline->supportsExtendedRangeHdr()) {
             mode = ColorMode::WideColorGamut;
         }
         mColorMode = mode;
@@ -299,13 +312,15 @@ float CanvasContext::setColorMode(ColorMode mode) {
     switch (mColorMode) {
         case ColorMode::Hdr:
             return 3.f;  // TODO: Refine this number
+        case ColorMode::Hdr10:
+            return 10.f;
         default:
             return 1.f;
     }
 }
 
 float CanvasContext::targetSdrHdrRatio() const {
-    if (mColorMode == ColorMode::Hdr) {
+    if (mColorMode == ColorMode::Hdr || mColorMode == ColorMode::Hdr10) {
         return mTargetSdrHdrRatio;
     } else {
         return 1.f;
@@ -425,7 +440,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t sy
 
     mIsDirty = true;
 
-    if (CC_UNLIKELY(!hasSurface())) {
+    if (CC_UNLIKELY(!hasOutputTarget())) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
         info.out.canDrawThisFrame = false;
         return;
@@ -570,7 +585,7 @@ void CanvasContext::draw() {
         std::scoped_lock lock(mFrameMetricsReporterMutex);
         drawResult = mRenderPipeline->draw(frame, windowDirty, dirty, mLightGeometry,
                                            &mLayerUpdateQueue, mContentDrawBounds, mOpaque,
-                                           mLightInfo, mRenderNodes, &(profiler()));
+                                           mLightInfo, mRenderNodes, &(profiler()), mBufferParams);
     }
 
     uint64_t frameCompleteNr = getFrameNumber();
@@ -1048,6 +1063,10 @@ void CanvasContext::sendLoadIncreaseHint() {
 
 void CanvasContext::setSyncDelayDuration(nsecs_t duration) {
     mSyncDelayDuration = duration;
+}
+
+void CanvasContext::startHintSession() {
+    mHintSessionWrapper.init();
 }
 
 } /* namespace renderthread */

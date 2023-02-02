@@ -2976,6 +2976,29 @@ public class UserManager {
     }
 
     /**
+     * @hide
+     */
+    public static boolean isVisibleBackgroundUsersOnDefaultDisplayEnabled() {
+        return SystemProperties.getBoolean("fw.visible_bg_users_on_default_display",
+                Resources.getSystem()
+                        .getBoolean(R.bool.config_multiuserVisibleBackgroundUsersOnDefaultDisplay));
+    }
+
+    /**
+     * Returns whether the device allows (full) users to be started in background visible in the
+     * {@link android.view.Display#DEFAULT_DISPLAY default display}.
+     *
+     * @return {@code false} for most devices, except passenger-only automotive build (i.e., when
+     * Android runs in a separate system in the back seat to manage the passenger displays).
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isVisibleBackgroundUsersOnDefaultDisplaySupported() {
+        return isVisibleBackgroundUsersOnDefaultDisplayEnabled();
+    }
+
+    /**
      * Checks if the user is visible at the moment.
      *
      * <p>Roughly speaking, a "visible user" is a user that can present UI on at least one display.

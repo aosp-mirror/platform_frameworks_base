@@ -125,8 +125,7 @@ object Flags {
         resourceBooleanFlag(204, R.bool.config_enableBouncerUserSwitcher, "bouncer_user_switcher")
 
     // TODO(b/254512676): Tracking Bug
-    @JvmField
-    val LOCKSCREEN_CUSTOM_CLOCKS = unreleasedFlag(207, "lockscreen_custom_clocks", teamfood = true)
+    @JvmField val LOCKSCREEN_CUSTOM_CLOCKS = releasedFlag(207, "lockscreen_custom_clocks")
 
     /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
@@ -235,7 +234,7 @@ object Flags {
     // TODO(b/258517050): Clean up after the feature is launched.
     @JvmField
     val SMARTSPACE_DATE_WEATHER_DECOUPLED =
-        sysPropBooleanFlag(403, "persist.sysui.ss.dw_decoupled", default = false)
+        sysPropBooleanFlag(403, "persist.sysui.ss.dw_decoupled", default = true)
 
     // 500 - quick settings
 
@@ -335,19 +334,19 @@ object Flags {
     @JvmField val DREAM_MEDIA_TAP_TO_OPEN = unreleasedFlag(906, "dream_media_tap_to_open")
 
     // TODO(b/254513168): Tracking Bug
-    @JvmField val UMO_SURFACE_RIPPLE = unreleasedFlag(907, "umo_surface_ripple")
+    @JvmField val UMO_SURFACE_RIPPLE = releasedFlag(907, "umo_surface_ripple")
 
     @JvmField val MEDIA_FALSING_PENALTY = releasedFlag(908, "media_falsing_media")
 
     // TODO(b/261734857): Tracking Bug
-    @JvmField val UMO_TURBULENCE_NOISE = unreleasedFlag(909, "umo_turbulence_noise")
+    @JvmField val UMO_TURBULENCE_NOISE = releasedFlag(909, "umo_turbulence_noise")
 
     // TODO(b/263272731): Tracking Bug
     val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE =
         unreleasedFlag(910, "media_ttt_receiver_success_ripple", teamfood = true)
 
     // TODO(b/263512203): Tracking Bug
-    val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator", teamfood = true)
+    val MEDIA_EXPLICIT_INDICATOR = releasedFlag(911, "media_explicit_indicator")
 
     // TODO(b/265813373): Tracking Bug
     val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE =
@@ -362,6 +361,9 @@ object Flags {
 
     // TODO(b/267007629): Tracking Bug
     val MEDIA_RESUME_PROGRESS = unreleasedFlag(915, "media_resume_progress")
+
+    // TODO(b/267166152) : Tracking Bug
+    val MEDIA_RETAIN_RECOMMENDATIONS = unreleasedFlag(916, "media_retain_recommendations")
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
@@ -538,12 +540,6 @@ object Flags {
     // TODO(b/266983474) Tracking Bug
     val SHARESHEET_IMAGE_AND_TEXT_PREVIEW = unreleasedFlag(1503, "sharesheet_image_text_preview")
 
-    // 1600 - accessibility
-    // TODO(b/262224538): Tracking Bug
-    @JvmField
-    val A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS =
-        releasedFlag(1600, "a11y_floating_menu_fling_spring_animations")
-
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
 
@@ -565,16 +561,15 @@ object Flags {
 
     @JvmField
     val CONTROLS_MANAGEMENT_NEW_FLOWS =
-        unreleasedFlag(2002, "controls_management_new_flows", teamfood = true)
+        releasedFlag(2002, "controls_management_new_flows", teamfood = true)
 
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
 
     // 2200 - udfps
     // TODO(b/259264861): Tracking Bug
-    @JvmField val UDFPS_NEW_TOUCH_DETECTION = unreleasedFlag(2200, "udfps_new_touch_detection")
-    @JvmField val UDFPS_ELLIPSE_DEBUG_UI = unreleasedFlag(2201, "udfps_ellipse_debug")
-    @JvmField val UDFPS_ELLIPSE_DETECTION = unreleasedFlag(2202, "udfps_ellipse_detection")
+    @JvmField val UDFPS_NEW_TOUCH_DETECTION = releasedFlag(2200, "udfps_new_touch_detection")
+    @JvmField val UDFPS_ELLIPSE_DETECTION = releasedFlag(2201, "udfps_ellipse_detection")
 
     // 2300 - stylus
     @JvmField val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used")

@@ -885,7 +885,12 @@ class ShortcutPackage extends ShortcutPackageItem {
      * available ShareTarget definitions in this package.
      */
     public List<ShortcutManager.ShareShortcutInfo> getMatchingShareTargets(
-            @NonNull IntentFilter filter) {
+            @NonNull final IntentFilter filter) {
+        return getMatchingShareTargets(filter, null);
+    }
+
+    List<ShortcutManager.ShareShortcutInfo> getMatchingShareTargets(
+            @NonNull final IntentFilter filter, @Nullable final String pkgName) {
         synchronized (mLock) {
             final List<ShareTargetInfo> matchedTargets = new ArrayList<>();
             for (int i = 0; i < mShareTargets.size(); i++) {
@@ -909,8 +914,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             // included in the result
             findAll(shortcuts, ShortcutInfo::isNonManifestVisible,
                     ShortcutInfo.CLONE_REMOVE_FOR_APP_PREDICTION,
-                    mShortcutUser.mService.mContext.getPackageName(),
-                    0, /*getPinnedByAnyLauncher=*/ false);
+                    pkgName, 0, /*getPinnedByAnyLauncher=*/ false);
 
             final List<ShortcutManager.ShareShortcutInfo> result = new ArrayList<>();
             for (int i = 0; i < shortcuts.size(); i++) {
@@ -1108,7 +1112,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // Now prepare to publish manifest shortcuts.
         List<ShortcutInfo> newManifestShortcutList = null;
-        final int shareTargetSize;
+        int shareTargetSize = 0;
         synchronized (mLock) {
             try {
                 shareTargetSize = mShareTargets.size();

@@ -27,11 +27,13 @@ import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.ui.MediaPlayerData
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Executor
@@ -40,11 +42,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 private const val KEY = "TEST_KEY"
@@ -72,6 +74,7 @@ class MediaDataFilterTest : SysuiTestCase() {
     @Mock private lateinit var smartspaceData: SmartspaceMediaData
     @Mock private lateinit var smartspaceMediaRecommendationItem: SmartspaceAction
     @Mock private lateinit var logger: MediaUiEventLogger
+    @Mock private lateinit var mediaFlags: MediaFlags
 
     private lateinit var mediaDataFilter: MediaDataFilter
     private lateinit var dataMain: MediaData
@@ -82,6 +85,7 @@ class MediaDataFilterTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         MediaPlayerData.clear()
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         mediaDataFilter =
             MediaDataFilter(
                 context,
@@ -90,7 +94,8 @@ class MediaDataFilterTest : SysuiTestCase() {
                 lockscreenUserManager,
                 executor,
                 clock,
-                logger
+                logger,
+                mediaFlags
             )
         mediaDataFilter.mediaDataManager = mediaDataManager
         mediaDataFilter.addListener(listener)
@@ -108,19 +113,20 @@ class MediaDataFilterTest : SysuiTestCase() {
             )
         dataGuest = dataMain.copy(userId = USER_GUEST)
 
-        `when`(smartspaceData.targetId).thenReturn(SMARTSPACE_KEY)
-        `when`(smartspaceData.isActive).thenReturn(true)
-        `when`(smartspaceData.isValid()).thenReturn(true)
-        `when`(smartspaceData.packageName).thenReturn(SMARTSPACE_PACKAGE)
-        `when`(smartspaceData.recommendations).thenReturn(listOf(smartspaceMediaRecommendationItem))
-        `when`(smartspaceData.headphoneConnectionTimeMillis)
+        whenever(smartspaceData.targetId).thenReturn(SMARTSPACE_KEY)
+        whenever(smartspaceData.isActive).thenReturn(true)
+        whenever(smartspaceData.isValid()).thenReturn(true)
+        whenever(smartspaceData.packageName).thenReturn(SMARTSPACE_PACKAGE)
+        whenever(smartspaceData.recommendations)
+            .thenReturn(listOf(smartspaceMediaRecommendationItem))
+        whenever(smartspaceData.headphoneConnectionTimeMillis)
             .thenReturn(clock.currentTimeMillis() - 100)
-        `when`(smartspaceData.instanceId).thenReturn(SMARTSPACE_INSTANCE_ID)
+        whenever(smartspaceData.instanceId).thenReturn(SMARTSPACE_INSTANCE_ID)
     }
 
     private fun setUser(id: Int) {
-        `when`(lockscreenUserManager.isCurrentProfile(anyInt())).thenReturn(false)
-        `when`(lockscreenUserManager.isCurrentProfile(eq(id))).thenReturn(true)
+        whenever(lockscreenUserManager.isCurrentProfile(anyInt())).thenReturn(false)
+        whenever(lockscreenUserManager.isCurrentProfile(eq(id))).thenReturn(true)
         mediaDataFilter.handleUserSwitched(id)
     }
 
@@ -277,7 +283,7 @@ class MediaDataFilterTest : SysuiTestCase() {
 
     @Test
     fun hasActiveMediaOrRecommendation_inactiveRecommendationSet_returnsFalse() {
-        `when`(smartspaceData.isActive).thenReturn(false)
+        whenever(smartspaceData.isActive).thenReturn(false)
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
         assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
@@ -285,7 +291,7 @@ class MediaDataFilterTest : SysuiTestCase() {
 
     @Test
     fun hasActiveMediaOrRecommendation_invalidRecommendationSet_returnsFalse() {
-        `when`(smartspaceData.isValid()).thenReturn(false)
+        whenever(smartspaceData.isValid()).thenReturn(false)
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
         assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
@@ -293,8 +299,8 @@ class MediaDataFilterTest : SysuiTestCase() {
 
     @Test
     fun hasActiveMediaOrRecommendation_activeAndValidRecommendationSet_returnsTrue() {
-        `when`(smartspaceData.isActive).thenReturn(true)
-        `when`(smartspaceData.isValid()).thenReturn(true)
+        whenever(smartspaceData.isActive).thenReturn(true)
+        whenever(smartspaceData.isValid()).thenReturn(true)
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
         assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isTrue()
@@ -349,7 +355,7 @@ class MediaDataFilterTest : SysuiTestCase() {
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_noMedia_inactiveRec_showsNothing() {
-        `when`(smartspaceData.isActive).thenReturn(false)
+        whenever(smartspaceData.isActive).thenReturn(false)
 
         mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
 
@@ -379,7 +385,7 @@ class MediaDataFilterTest : SysuiTestCase() {
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_noRecentMedia_inactiveRec_showsNothing() {
-        `when`(smartspaceData.isActive).thenReturn(false)
+        whenever(smartspaceData.isActive).thenReturn(false)
 
         val dataOld = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
         mediaDataFilter.onMediaDataLoaded(KEY, null, dataOld)
@@ -395,7 +401,7 @@ class MediaDataFilterTest : SysuiTestCase() {
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasRecentMedia_inactiveRec_showsNothing() {
-        `when`(smartspaceData.isActive).thenReturn(false)
+        whenever(smartspaceData.isActive).thenReturn(false)
 
         // WHEN we have media that was recently played, but not currently active
         val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
@@ -418,7 +424,7 @@ class MediaDataFilterTest : SysuiTestCase() {
 
     @Test
     fun testOnSmartspaceMediaDataLoaded_hasRecentMedia_activeInvalidRec_usesMedia() {
-        `when`(smartspaceData.isValid()).thenReturn(false)
+        whenever(smartspaceData.isValid()).thenReturn(false)
 
         // WHEN we have media that was recently played, but not currently active
         val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
@@ -512,5 +518,60 @@ class MediaDataFilterTest : SysuiTestCase() {
         verify(listener).onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
         assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
         assertThat(mediaDataFilter.hasActiveMedia()).isFalse()
+    }
+
+    @Test
+    fun testOnSmartspaceLoaded_persistentEnabled_isInactive_notifiesListeners() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        whenever(smartspaceData.isActive).thenReturn(false)
+
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+
+        verify(listener)
+            .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
+        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
+        assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isTrue()
+    }
+
+    @Test
+    fun testOnSmartspaceLoaded_persistentEnabled_inactive_hasRecentMedia_staysInactive() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+        whenever(smartspaceData.isActive).thenReturn(false)
+
+        // If there is media that was recently played but inactive
+        val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
+        mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+        verify(listener)
+            .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
+
+        // And an inactive recommendation is loaded
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+
+        // Smartspace is loaded but the media stays inactive
+        verify(listener)
+            .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
+        verify(listener, never())
+            .onMediaDataLoaded(any(), any(), any(), anyBoolean(), anyInt(), anyBoolean())
+        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isFalse()
+        assertThat(mediaDataFilter.hasAnyMediaOrRecommendation()).isTrue()
+    }
+
+    @Test
+    fun testOnSwipeToDismiss_persistentEnabled_recommendationSetInactive() {
+        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
+
+        val data =
+            EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                targetId = SMARTSPACE_KEY,
+                isActive = true,
+                packageName = SMARTSPACE_PACKAGE,
+                recommendations = listOf(smartspaceMediaRecommendationItem),
+            )
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, data)
+        mediaDataFilter.onSwipeToDismiss()
+
+        verify(mediaDataManager).setRecommendationInactive(eq(SMARTSPACE_KEY))
+        verify(mediaDataManager, never())
+            .dismissSmartspaceRecommendation(eq(SMARTSPACE_KEY), anyLong())
     }
 }

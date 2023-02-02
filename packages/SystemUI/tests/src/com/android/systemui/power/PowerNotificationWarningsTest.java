@@ -42,7 +42,6 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -155,16 +154,6 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         mPowerNotificationWarnings.dismissInvalidChargerWarning();
         verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
                 eq(SystemMessage.NOTE_BAD_CHARGER), any());
-    }
-
-    @Test
-    public void testDisableLowBatteryReminder_noNotification() {
-        mGlobalSettings.putInt(Settings.Global.LOW_POWER_MODE_REMINDER_ENABLED, 0);
-
-        mPowerNotificationWarnings.showLowBatteryWarning(false);
-
-        verify(mMockNotificationManager, times(0))
-                .notifyAsUser(anyString(), eq(SystemMessage.NOTE_POWER_LOW), any(), any());
     }
 
     @Test

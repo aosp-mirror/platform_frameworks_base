@@ -31,26 +31,26 @@ interface ImeVisibilityApplier {
     /**
      * Performs showing IME on top of the given window.
      *
-     * @param windowToken    The token of a window that currently has focus.
+     * @param showInputToken A token that represents the requester to show IME.
      * @param statsToken     A token that tracks the progress of an IME request.
      * @param showFlags      Provides additional operating flags to show IME.
      * @param resultReceiver If non-null, this will be called back to the caller when
      *                       it has processed request to tell what it has done.
      * @param reason         The reason for requesting to show IME.
      */
-    default void performShowIme(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
+    default void performShowIme(IBinder showInputToken, @Nullable ImeTracker.Token statsToken,
             int showFlags, ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {}
 
     /**
      * Performs hiding IME to the given window
      *
-     * @param windowToken    The token of a window that currently has focus.
+     * @param hideInputToken A token that represents the requester to hide IME.
      * @param statsToken     A token that tracks the progress of an IME request.
      * @param resultReceiver If non-null, this will be called back to the caller when
      *                       it has processed request to tell what it has done.
      * @param reason         The reason for requesting to hide IME.
      */
-    default void performHideIme(IBinder windowToken, @Nullable ImeTracker.Token statsToken,
+    default void performHideIme(IBinder hideInputToken, @Nullable ImeTracker.Token statsToken,
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {}
 
     /**

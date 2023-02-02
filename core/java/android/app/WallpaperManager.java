@@ -784,6 +784,7 @@ public class WallpaperManager {
      * @return true if the lockscreen wallpaper always uses a wallpaperService, not a static image
      * @hide
      */
+    @TestApi
     public boolean isLockscreenLiveWallpaperEnabled() {
         return mLockscreenLiveWallpaper;
     }
@@ -1258,6 +1259,8 @@ public class WallpaperManager {
      * @param which Specifies home or lock screen
      * @hide
      */
+    @TestApi
+    @Nullable
     public Bitmap getBitmapAsUser(int userId, boolean hardware, @SetWallpaperFlags int which) {
         final ColorManagementProxy cmProxy = getColorManagementProxy();
         return sGlobals.peekWallpaperBitmap(mContext, true, which, userId, hardware, cmProxy);
@@ -1496,6 +1499,13 @@ public class WallpaperManager {
     /**
      * Returns the information about the home screen wallpaper if its current wallpaper is a live
      * wallpaper component. Otherwise, if the wallpaper is a static image, this returns null.
+     *
+     * <p>
+     * In order to use this, apps should declare a {@code <queries>} tag with the action
+     * {@code "android.service.wallpaper.WallpaperService"}. Otherwise,
+     * this method will return {@code null} if the caller doesn't otherwise have
+     * <a href="{@docRoot}training/package-visibility">visibility</a> of the wallpaper package.
+     * </p>
      */
     public WallpaperInfo getWallpaperInfo() {
         return getWallpaperInfoForUser(mContext.getUserId());
@@ -1516,6 +1526,13 @@ public class WallpaperManager {
      * Returns the information about the home screen wallpaper if its current wallpaper is a live
      * wallpaper component. Otherwise, if the wallpaper is a static image or is not set, this
      * returns null.
+     *
+     * <p>
+     * In order to use this, apps should declare a {@code <queries>} tag with the action
+     * {@code "android.service.wallpaper.WallpaperService"}. Otherwise,
+     * this method will return {@code null} if the caller doesn't otherwise have
+     * <a href="{@docRoot}training/package-visibility">visibility</a> of the wallpaper package.
+     * </p>
      *
      * @param which Specifies wallpaper to request (home or lock).
      * @throws IllegalArgumentException if {@code which} is not exactly one of
@@ -2421,6 +2438,7 @@ public class WallpaperManager {
      *
      * @hide
      */
+    @TestApi
     public void setWallpaperZoomOut(@NonNull IBinder windowToken, float zoom) {
         if (zoom < 0 || zoom > 1f) {
             throw new IllegalArgumentException("zoom must be between 0 and 1: " + zoom);

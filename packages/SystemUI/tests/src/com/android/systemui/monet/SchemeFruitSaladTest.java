@@ -34,6 +34,22 @@ import org.junit.runners.JUnit4;
 public final class SchemeFruitSaladTest extends SysuiTestCase {
 
     @Test
+    public void testKeyColors() {
+        SchemeFruitSalad scheme = new SchemeFruitSalad(Hct.fromInt(0xff0000ff), false, 0.0);
+
+        assertThat(MaterialDynamicColors.primaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff0091C0);
+        assertThat(MaterialDynamicColors.secondaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff3A7E9E);
+        assertThat(MaterialDynamicColors.tertiaryPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff6E72AC);
+        assertThat(MaterialDynamicColors.neutralPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff777682);
+        assertThat(MaterialDynamicColors.neutralVariantPaletteKeyColor.getArgb(scheme))
+                .isSameColorAs(0xff75758B);
+    }
+
+    @Test
     public void lightTheme_minContrast_primary() {
         SchemeFruitSalad scheme = new SchemeFruitSalad(Hct.fromInt(0xff0000ff), false, -1.0);
         assertThat(MaterialDynamicColors.primary.getArgb(scheme)).isSameColorAs(0xff007ea7);

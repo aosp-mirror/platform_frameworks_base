@@ -31,6 +31,7 @@ import static com.android.server.pm.PackageManagerService.SCAN_AS_ODM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_OEM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRIVILEGED;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_PRODUCT;
+import static com.android.server.pm.PackageManagerService.SCAN_AS_STOPPED_SYSTEM_APP;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_SYSTEM_EXT;
 import static com.android.server.pm.PackageManagerService.SCAN_AS_VENDOR;
@@ -198,6 +199,7 @@ final class ScanPackageUtils {
         if (createNewPackage) {
             final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
             final boolean virtualPreload = (scanFlags & SCAN_AS_VIRTUAL_PRELOAD) != 0;
+            final boolean isStoppedSystemApp = (scanFlags & SCAN_AS_STOPPED_SYSTEM_APP) != 0;
 
             // Flags contain system values stored in the server variant of AndroidPackage,
             // and so the server-side PackageInfoUtils is still called, even without a
@@ -212,7 +214,7 @@ final class ScanPackageUtils {
                     AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage),
                     AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage),
                     parsedPackage.getLongVersionCode(), pkgFlags, pkgPrivateFlags, user,
-                    true /*allowInstall*/, instantApp, virtualPreload,
+                    true /*allowInstall*/, instantApp, virtualPreload, isStoppedSystemApp,
                     UserManagerService.getInstance(), usesSdkLibraries,
                     parsedPackage.getUsesSdkLibrariesVersionsMajor(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),

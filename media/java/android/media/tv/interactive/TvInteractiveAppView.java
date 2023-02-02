@@ -635,8 +635,8 @@ public class TvInteractiveAppView extends ViewGroup {
     /**
      * Sends the requested {@link android.media.tv.TvRecordingInfo}.
      *
-     * @param recordingInfo The recording info requested {@code null} if no recording found.
-     * @hide
+     * @see TvInteractiveAppService.Session#requestTvRecordingInfo(String)
+     * @param recordingInfo The recording info requested. {@code null} if no recording found.
      */
     public void sendTvRecordingInfo(@Nullable TvRecordingInfo recordingInfo) {
         if (DEBUG) {
@@ -650,10 +650,11 @@ public class TvInteractiveAppView extends ViewGroup {
     /**
      * Sends the requested {@link android.media.tv.TvRecordingInfo}.
      *
-     * @param recordingInfoList The list of recording info requested.
-     * @hide
+     * @see TvInteractiveAppService.Session#requestTvRecordingInfoList(int)
+     * @param recordingInfoList The list of recording info requested. Returns an empty list if no
+     *                          matching recording info found.
      */
-    public void sendTvRecordingInfoList(@Nullable List<TvRecordingInfo> recordingInfoList) {
+    public void sendTvRecordingInfoList(@NonNull List<TvRecordingInfo> recordingInfoList) {
         if (DEBUG) {
             Log.d(TAG, "sendTvRecordingInfoList");
         }

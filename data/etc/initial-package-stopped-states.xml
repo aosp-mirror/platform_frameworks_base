@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+ -->
+
+<!--
+This XML defines an allowlist for packages that should not be scanned in a "stopped" state.
+When this feature is turned on (indicated by the config config_stopSystemPackagesByDefault in
+core/res/res/values/config.xml) packages on the system partition that are encountered by
+the PackageManagerService for the first time are scanned in the "stopped" state. This allowlist
+is also considered while creating new users on the device. Stopped state is not set during
+subsequent reboots.
+
+Example usage
+    1. <initial-package-state package="com.example.app" stopped="false"/>
+        Indicates that a system package - com.example.app's initial stopped state should not be set
+        by the Package Manager. By default, system apps are marked as stopped.
+    2. <initial-package-state package="com.example.app" stopped="true"/>
+        Indicates that a system package - com.example.app's initial state should be set by the
+        Package Manager to "stopped=true". It will have the same effect on the
+        package's stopped state even if this package was not included in the allow list.
+    3. <initial-package-state package="com.example.app"/>
+        Invalid usage.
+-->
+
+<config></config>

@@ -18974,14 +18974,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return null;
             }
 
-            // Starts with all displays but DEFAULT_DISPLAY
-            int[] displayIds = new int[allDisplays.length - 1];
+            boolean allowOnDefaultDisplay = UserManager
+                    .isVisibleBackgroundUsersOnDefaultDisplayEnabled();
+            int displaysSize = allDisplays.length;
+            if (!allowOnDefaultDisplay) {
+                displaysSize--;
+            }
+            int[] displayIds = new int[displaysSize];
 
-            // TODO(b/247592632): check for other properties like isSecure or proper display type
             int numberValidDisplays = 0;
             for (Display display : allDisplays) {
                 int displayId = display.getDisplayId();
-                if (display.isValid() && displayId != Display.DEFAULT_DISPLAY) {
+                // TODO(b/247592632): check other properties like isSecure or proper display type
+                if (display.isValid()
+                        && (allowOnDefaultDisplay || displayId != Display.DEFAULT_DISPLAY)) {
                     displayIds[numberValidDisplays++] = displayId;
                 }
             }
@@ -18993,14 +18999,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // STOPSHIP: if not removed, it should at least be unit tested
                 String testingProp = "fw.display_ids_for_starting_users_for_testing_purposes";
                 int displayId = SystemProperties.getInt(testingProp, Display.DEFAULT_DISPLAY);
-                if (displayId != Display.DEFAULT_DISPLAY && displayId > 0) {
-                    Slogf.w(TAG, "getSecondaryDisplayIdsForStartingBackgroundUsers(): no valid "
+                if (allowOnDefaultDisplay && displayId == Display.DEFAULT_DISPLAY
+                        || displayId > 0) {
+                    Slogf.w(TAG, "getDisplayIdsForStartingVisibleBackgroundUsers(): no valid "
                             + "display found, but returning %d as set by property %s", displayId,
                             testingProp);
                     return new int[] { displayId };
                 }
-                Slogf.e(TAG, "getDisplayIdsForStartingBackgroundUsers(): no valid display on %s",
-                        Arrays.toString(allDisplays));
+                Slogf.e(TAG, "getDisplayIdsForStartingVisibleBackgroundUsers(): no valid display"
+                        + " on %s", Arrays.toString(allDisplays));
                 return null;
             }
 

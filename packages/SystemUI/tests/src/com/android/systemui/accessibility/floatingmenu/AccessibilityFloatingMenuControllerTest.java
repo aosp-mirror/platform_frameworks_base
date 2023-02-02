@@ -19,8 +19,6 @@ package com.android.systemui.accessibility.floatingmenu;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 
-import static com.android.systemui.flags.Flags.A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -46,7 +44,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
-import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -74,6 +71,7 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     public MockitoRule mockito = MockitoJUnit.rule();
 
     private Context mContextWrapper;
+    private WindowManager mWindowManager;
     private AccessibilityManager mAccessibilityManager;
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private AccessibilityFloatingMenuController mController;
@@ -97,6 +95,7 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
             }
         };
 
+        mWindowManager = mContext.getSystemService(WindowManager.class);
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
         mLastButtonTargets = Settings.Secure.getStringForUser(mContextWrapper.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, UserHandle.USER_CURRENT);
@@ -158,7 +157,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     public void onKeyguardVisibilityChanged_showing_destroyWidget() {
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
-        mController.mFloatingMenu = new AccessibilityFloatingMenu(mContextWrapper, mSecureSettings);
+        mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
+                mAccessibilityManager, mSecureSettings);
         captureKeyguardUpdateMonitorCallback();
         mKeyguardCallback.onUserUnlocked();
 
@@ -184,7 +184,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         final int fakeUserId = 1;
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
-        mController.mFloatingMenu = new AccessibilityFloatingMenu(mContextWrapper, mSecureSettings);
+        mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
+                mAccessibilityManager, mSecureSettings);
         captureKeyguardUpdateMonitorCallback();
 
         mKeyguardCallback.onUserSwitching(fakeUserId);
@@ -197,7 +198,8 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         final int fakeUserId = 1;
         enableAccessibilityFloatingMenuConfig();
         mController = setUpController();
-        mController.mFloatingMenu = new AccessibilityFloatingMenu(mContextWrapper, mSecureSettings);
+        mController.mFloatingMenu = new MenuViewLayerController(mContextWrapper, mWindowManager,
+                mAccessibilityManager, mSecureSettings);
         captureKeyguardUpdateMonitorCallback();
         mKeyguardCallback.onUserUnlocked();
         mKeyguardCallback.onKeyguardVisibilityChanged(true);
@@ -318,40 +320,18 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onTargetsChanged_flingSpringAnimationsDisabled_floatingMenuIsCreated() {
-        Settings.Secure.putIntForUser(mContextWrapper.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_BUTTON_MODE, ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU,
-                UserHandle.USER_CURRENT);
-        final FakeFeatureFlags featureFlags = new FakeFeatureFlags();
-        featureFlags.set(A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS, false);
-
-        mController = setUpController();
-        mController.onAccessibilityButtonTargetsChanged(TEST_A11Y_BTN_TARGETS);
-
-        assertThat(mController.mFloatingMenu).isInstanceOf(AccessibilityFloatingMenu.class);
-    }
-
-    @Test
     public void onTargetsChanged_isFloatingViewLayerControllerCreated() {
         Settings.Secure.putIntForUser(mContextWrapper.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_BUTTON_MODE, ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU,
                 UserHandle.USER_CURRENT);
-        final FakeFeatureFlags featureFlags = new FakeFeatureFlags();
-        featureFlags.set(A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS, true);
 
-        mController = setUpController(featureFlags);
+        mController = setUpController();
         mController.onAccessibilityButtonTargetsChanged(TEST_A11Y_BTN_TARGETS);
 
         assertThat(mController.mFloatingMenu).isInstanceOf(MenuViewLayerController.class);
     }
 
     private AccessibilityFloatingMenuController setUpController() {
-        final FakeFeatureFlags featureFlags = new FakeFeatureFlags();
-        featureFlags.set(A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS, false);
-        return setUpController(featureFlags);
-    }
-
-    private AccessibilityFloatingMenuController setUpController(FakeFeatureFlags featureFlags) {
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
         final FakeDisplayTracker displayTracker = new FakeDisplayTracker(mContext);
@@ -361,7 +341,7 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         final AccessibilityFloatingMenuController controller =
                 new AccessibilityFloatingMenuController(mContextWrapper, windowManager,
                         displayManager, mAccessibilityManager, mTargetsObserver, mModeObserver,
-                        mKeyguardUpdateMonitor, featureFlags, mSecureSettings, displayTracker);
+                        mKeyguardUpdateMonitor, mSecureSettings, displayTracker);
         controller.init();
 
         return controller;

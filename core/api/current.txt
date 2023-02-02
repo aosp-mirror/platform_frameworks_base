@@ -5206,6 +5206,13 @@ package android.app {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.BackgroundServiceStartNotAllowedException> CREATOR;
   }
 
+  public class BroadcastOptions {
+    method public boolean isShareIdentityEnabled();
+    method @NonNull public static android.app.BroadcastOptions makeBasic();
+    method @NonNull public android.app.BroadcastOptions setShareIdentityEnabled(boolean);
+    method @NonNull public android.os.Bundle toBundle();
+  }
+
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
     ctor public DatePickerDialog(@NonNull android.content.Context);
     ctor public DatePickerDialog(@NonNull android.content.Context, @StyleRes int);
@@ -9569,6 +9576,8 @@ package android.content {
     method public final int getResultCode();
     method public final String getResultData();
     method public final android.os.Bundle getResultExtras(boolean);
+    method @Nullable public String getSentFromPackage();
+    method public int getSentFromUid();
     method public final android.content.BroadcastReceiver.PendingResult goAsync();
     method public final boolean isInitialStickyBroadcast();
     method public final boolean isOrderedBroadcast();
@@ -10169,11 +10178,14 @@ package android.content {
     method public abstract void revokeUriPermission(String, android.net.Uri, int);
     method public abstract void sendBroadcast(@RequiresPermission android.content.Intent);
     method public abstract void sendBroadcast(@RequiresPermission android.content.Intent, @Nullable String);
+    method public void sendBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String);
     method public void sendBroadcastWithMultiplePermissions(@NonNull android.content.Intent, @NonNull String[]);
     method public abstract void sendOrderedBroadcast(@RequiresPermission android.content.Intent, @Nullable String);
+    method public void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
     method public abstract void sendOrderedBroadcast(@NonNull @RequiresPermission android.content.Intent, @Nullable String, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
+    method public void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method public void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable String, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public abstract void sendOrderedBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY) public abstract void sendStickyBroadcast(@RequiresPermission android.content.Intent);
@@ -12190,7 +12202,6 @@ package android.content.pm {
     method @Nullable public String getInstallerAttributionTag();
     method @Nullable public String getInstallerPackageName();
     method public int getInstallerUid();
-    method @NonNull public boolean getIsPreApprovalRequested();
     method public int getMode();
     method public int getOriginatingUid();
     method @Nullable public android.net.Uri getOriginatingUri();
@@ -12210,6 +12221,7 @@ package android.content.pm {
     method public boolean isApplicationEnabledSettingPersistent();
     method public boolean isCommitted();
     method public boolean isMultiPackage();
+    method public boolean isPreApprovalRequested();
     method public boolean isRequestUpdateOwnership();
     method public boolean isSealed();
     method public boolean isStaged();
@@ -15311,6 +15323,29 @@ package android.graphics {
 
   public class EmbossMaskFilter extends android.graphics.MaskFilter {
     ctor @Deprecated public EmbossMaskFilter(float[], float, float, float);
+  }
+
+  public class HardwareBufferRenderer implements java.lang.AutoCloseable {
+    ctor public HardwareBufferRenderer(@NonNull android.hardware.HardwareBuffer);
+    method public void close();
+    method public boolean isClosed();
+    method @NonNull public android.graphics.HardwareBufferRenderer.RenderRequest obtainRenderRequest();
+    method public void setContentRoot(@Nullable android.graphics.RenderNode);
+    method public void setLightSourceAlpha(@FloatRange(from=0.0f, to=1.0f) float, @FloatRange(from=0.0f, to=1.0f) float);
+    method public void setLightSourceGeometry(float, float, @FloatRange(from=0.0f) float, @FloatRange(from=0.0f) float);
+  }
+
+  public final class HardwareBufferRenderer.RenderRequest {
+    method public void draw(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.graphics.HardwareBufferRenderer.RenderResult>);
+    method @NonNull public android.graphics.HardwareBufferRenderer.RenderRequest setBufferTransform(int);
+    method @NonNull public android.graphics.HardwareBufferRenderer.RenderRequest setColorSpace(@Nullable android.graphics.ColorSpace);
+  }
+
+  public static final class HardwareBufferRenderer.RenderResult {
+    method @NonNull public android.hardware.SyncFence getFence();
+    method public int getStatus();
+    field public static final int ERROR_UNKNOWN = 1; // 0x1
+    field public static final int SUCCESS = 0; // 0x0
   }
 
   public class HardwareRenderer {
@@ -19321,7 +19356,9 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, @IntRange(from=1) int, @IntRange(from=1) int, @IntRange(from=1) int, @Nullable android.view.Surface, int);
+    method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, @IntRange(from=1) int, @IntRange(from=1) int, @IntRange(from=1) int, float, @Nullable android.view.Surface, int);
     method public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, @IntRange(from=1) int, @IntRange(from=1) int, @IntRange(from=1) int, @Nullable android.view.Surface, int, @Nullable android.hardware.display.VirtualDisplay.Callback, @Nullable android.os.Handler);
+    method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull String, @IntRange(from=1) int, @IntRange(from=1) int, @IntRange(from=1) int, float, @Nullable android.view.Surface, int, @Nullable android.os.Handler, @Nullable android.hardware.display.VirtualDisplay.Callback);
     method public android.view.Display getDisplay(int);
     method public android.view.Display[] getDisplays();
     method public android.view.Display[] getDisplays(String);
@@ -24558,8 +24595,8 @@ package android.media {
 
   public final class RouteListingPreference implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.content.ComponentName getInAppOnlyItemRoutingReceiver();
     method @NonNull public java.util.List<android.media.RouteListingPreference.Item> getItems();
+    method @Nullable public android.content.ComponentName getLinkedItemComponentName();
     method public boolean getUseSystemOrdering();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final String ACTION_TRANSFER_MEDIA = "android.media.action.TRANSFER_MEDIA";
@@ -24570,37 +24607,39 @@ package android.media {
   public static final class RouteListingPreference.Builder {
     ctor public RouteListingPreference.Builder();
     method @NonNull public android.media.RouteListingPreference build();
-    method @NonNull public android.media.RouteListingPreference.Builder setInAppOnlyItemRoutingReceiver(@Nullable android.content.ComponentName);
     method @NonNull public android.media.RouteListingPreference.Builder setItems(@NonNull java.util.List<android.media.RouteListingPreference.Item>);
+    method @NonNull public android.media.RouteListingPreference.Builder setLinkedItemComponentName(@Nullable android.content.ComponentName);
     method @NonNull public android.media.RouteListingPreference.Builder setUseSystemOrdering(boolean);
   }
 
   public static final class RouteListingPreference.Item implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public CharSequence getCustomDisableReasonMessage();
-    method public int getDisableReason();
+    method @Nullable public CharSequence getCustomSubtextMessage();
     method public int getFlags();
     method @NonNull public String getRouteId();
-    method public int getSessionParticipantCount();
+    method public int getSelectionBehavior();
+    method public int getSubText();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference.Item> CREATOR;
-    field public static final int DISABLE_REASON_AD = 3; // 0x3
-    field public static final int DISABLE_REASON_CUSTOM = 5; // 0x5
-    field public static final int DISABLE_REASON_DOWNLOADED_CONTENT = 2; // 0x2
-    field public static final int DISABLE_REASON_IN_APP_ONLY = 4; // 0x4
-    field public static final int DISABLE_REASON_NONE = 0; // 0x0
-    field public static final int DISABLE_REASON_SUBSCRIPTION_REQUIRED = 1; // 0x1
     field public static final int FLAG_ONGOING_SESSION = 1; // 0x1
     field public static final int FLAG_SUGGESTED_ROUTE = 2; // 0x2
+    field public static final int SELECTION_BEHAVIOR_GO_TO_APP = 2; // 0x2
+    field public static final int SELECTION_BEHAVIOR_NONE = 0; // 0x0
+    field public static final int SELECTION_BEHAVIOR_TRANSFER = 1; // 0x1
+    field public static final int SUBTEXT_AD_ROUTING_DISALLOWED = 3; // 0x3
+    field public static final int SUBTEXT_CUSTOM = 10000; // 0x2710
+    field public static final int SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED = 2; // 0x2
+    field public static final int SUBTEXT_NONE = 0; // 0x0
+    field public static final int SUBTEXT_SUBSCRIPTION_REQUIRED = 1; // 0x1
   }
 
   public static final class RouteListingPreference.Item.Builder {
     ctor public RouteListingPreference.Item.Builder(@NonNull String);
     method @NonNull public android.media.RouteListingPreference.Item build();
-    method @NonNull public android.media.RouteListingPreference.Item.Builder setCustomDisableReasonMessage(@Nullable CharSequence);
-    method @NonNull public android.media.RouteListingPreference.Item.Builder setDisableReason(int);
+    method @NonNull public android.media.RouteListingPreference.Item.Builder setCustomSubtextMessage(@Nullable CharSequence);
     method @NonNull public android.media.RouteListingPreference.Item.Builder setFlags(int);
-    method @NonNull public android.media.RouteListingPreference.Item.Builder setSessionParticipantCount(@IntRange(from=0) int);
+    method @NonNull public android.media.RouteListingPreference.Item.Builder setSelectionBehavior(int);
+    method @NonNull public android.media.RouteListingPreference.Item.Builder setSubText(int);
   }
 
   public final class RoutingSessionInfo implements android.os.Parcelable {
@@ -27394,6 +27433,8 @@ package android.media.tv.interactive {
     method public boolean onTrackballEvent(@NonNull android.view.MotionEvent);
     method public void onTracksChanged(@NonNull java.util.List<android.media.tv.TvTrackInfo>);
     method public void onTuned(@NonNull android.net.Uri);
+    method public void onTvRecordingInfo(@Nullable android.media.tv.TvRecordingInfo);
+    method public void onTvRecordingInfoList(@NonNull java.util.List<android.media.tv.TvRecordingInfo>);
     method public void onVideoAvailable();
     method public void onVideoUnavailable(int);
     method @CallSuper public void removeBroadcastInfo(int);
@@ -27456,6 +27497,8 @@ package android.media.tv.interactive {
     method public void sendSigningResult(@NonNull String, @NonNull byte[]);
     method public void sendStreamVolume(float);
     method public void sendTrackInfoList(@Nullable java.util.List<android.media.tv.TvTrackInfo>);
+    method public void sendTvRecordingInfo(@Nullable android.media.tv.TvRecordingInfo);
+    method public void sendTvRecordingInfoList(@NonNull java.util.List<android.media.tv.TvRecordingInfo>);
     method public void setCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback);
     method public void setOnUnhandledInputEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppView.OnUnhandledInputEventListener);
     method public void setTeletextAppEnabled(boolean);
@@ -32095,9 +32138,11 @@ package android.os {
     method public void onEarlyReportFinished();
     method public void onError(int);
     method public void onFinished();
+    method public void onFinished(@NonNull String);
     method public void onProgress(@FloatRange(from=0.0f, to=100.0f) float);
     field public static final int BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS = 5; // 0x5
     field public static final int BUGREPORT_ERROR_INVALID_INPUT = 1; // 0x1
+    field public static final int BUGREPORT_ERROR_NO_BUGREPORT_TO_RETRIEVE = 6; // 0x6
     field public static final int BUGREPORT_ERROR_RUNTIME = 2; // 0x2
     field public static final int BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT = 4; // 0x4
     field public static final int BUGREPORT_ERROR_USER_DENIED_CONSENT = 3; // 0x3
@@ -51336,8 +51381,12 @@ package android.view {
     method public android.view.SurfaceControl getSurfaceControl();
     method public void setChildSurfacePackage(@NonNull android.view.SurfaceControlViewHost.SurfacePackage);
     method public void setSecure(boolean);
+    method public void setSurfaceLifecycle(int);
     method public void setZOrderMediaOverlay(boolean);
     method public void setZOrderOnTop(boolean);
+    field public static final int SURFACE_LIFECYCLE_DEFAULT = 0; // 0x0
+    field public static final int SURFACE_LIFECYCLE_FOLLOWS_ATTACHMENT = 2; // 0x2
+    field public static final int SURFACE_LIFECYCLE_FOLLOWS_VISIBILITY = 1; // 0x1
   }
 
   public class TextureView extends android.view.View {
@@ -52424,7 +52473,9 @@ package android.view {
     method public int getScaledHoverSlop();
     method public int getScaledMaximumDrawingCacheSize();
     method public int getScaledMaximumFlingVelocity();
+    method public int getScaledMaximumFlingVelocity(int, int, int);
     method public int getScaledMinimumFlingVelocity();
+    method public int getScaledMinimumFlingVelocity(int, int, int);
     method public int getScaledMinimumScalingSpan();
     method public int getScaledOverflingDistance();
     method public int getScaledOverscrollDistance();

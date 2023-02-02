@@ -42,7 +42,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.database.DatabaseUtils;
-import android.healthconnect.HealthConnectManager;
+import android.health.connect.HealthConnectManager;
 import android.media.AudioAttributes.AttributeUsage;
 import android.os.Binder;
 import android.os.Build;

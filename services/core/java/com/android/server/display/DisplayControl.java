@@ -28,7 +28,8 @@ import java.util.Objects;
  * Calls into SurfaceFlinger for Display creation and deletion.
  */
 public class DisplayControl {
-    private static native IBinder nativeCreateDisplay(String name, boolean secure);
+    private static native IBinder nativeCreateDisplay(String name, boolean secure,
+            float requestedRefreshRate);
     private static native void nativeDestroyDisplay(IBinder displayToken);
     private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
     private static native long[] nativeGetPhysicalDisplayIds();
@@ -46,7 +47,25 @@ public class DisplayControl {
      */
     public static IBinder createDisplay(String name, boolean secure) {
         Objects.requireNonNull(name, "name must not be null");
-        return nativeCreateDisplay(name, secure);
+        return nativeCreateDisplay(name, secure, 0.0f);
+    }
+
+    /**
+     * Create a display in SurfaceFlinger.
+     *
+     * @param name The name of the display
+     * @param secure Whether this display is secure.
+     * @param requestedRefreshRate The requested refresh rate in frames per second.
+     * For best results, specify a divisor of the physical refresh rate, e.g., 30 or 60 on
+     * 120hz display. If an arbitrary refresh rate is specified, the rate will be rounded
+     * up or down to a divisor of the physical display. If 0 is specified, the virtual
+     * display is refreshed at the physical display refresh rate.
+     * @return The token reference for the display in SurfaceFlinger.
+     */
+    public static IBinder createDisplay(String name, boolean secure,
+            float requestedRefreshRate) {
+        Objects.requireNonNull(name, "name must not be null");
+        return nativeCreateDisplay(name, secure, requestedRefreshRate);
     }
 
     /**

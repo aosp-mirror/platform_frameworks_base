@@ -863,8 +863,9 @@ public final class SensorPrivacyService extends SystemService {
          */
         private void enforceObserveSensorPrivacyPermission() {
             String systemUIPackage = mContext.getString(R.string.config_systemUi);
-            if (Binder.getCallingUid() == mPackageManagerInternal
-                    .getPackageUid(systemUIPackage, MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM)) {
+            int systemUIAppId = UserHandle.getAppId(mPackageManagerInternal
+                    .getPackageUid(systemUIPackage, MATCH_SYSTEM_ONLY, UserHandle.USER_SYSTEM));
+            if (UserHandle.getCallingAppId() == systemUIAppId) {
                 // b/221782106, possible race condition with role grant might bootloop device.
                 return;
             }

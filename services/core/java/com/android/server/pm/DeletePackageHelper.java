@@ -840,7 +840,7 @@ final class DeletePackageHelper {
 
     private boolean isCallerAllowedToSilentlyUninstall(@NonNull Computer snapshot, int callingUid,
             String pkgName, int userId) {
-        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID
+        if (PackageManagerServiceUtils.isRootOrShell(callingUid)
                 || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return true;
         }

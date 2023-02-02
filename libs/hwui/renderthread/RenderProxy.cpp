@@ -45,8 +45,12 @@ RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode,
     pid_t uiThreadId = pthread_gettid_np(pthread_self());
     pid_t renderThreadId = getRenderThreadTid();
     mContext = mRenderThread.queue().runSync([=, this]() -> CanvasContext* {
-        return CanvasContext::create(mRenderThread, translucent, rootRenderNode, contextFactory,
-                                     uiThreadId, renderThreadId);
+        CanvasContext* context = CanvasContext::create(mRenderThread, translucent, rootRenderNode,
+                                                       contextFactory, uiThreadId, renderThreadId);
+        if (context != nullptr) {
+            mRenderThread.queue().post([=] { context->startHintSession(); });
+        }
+        return context;
     });
     mDrawFrameTask.setContext(&mRenderThread, mContext, rootRenderNode);
 }
@@ -83,6 +87,18 @@ void RenderProxy::setName(const char* name) {
     // block since name/value pointers owned by caller
     // TODO: Support move arguments
     mRenderThread.queue().runSync([this, name]() { mContext->setName(std::string(name)); });
+}
+
+void RenderProxy::setHardwareBuffer(AHardwareBuffer* buffer) {
+    if (buffer) {
+        AHardwareBuffer_acquire(buffer);
+    }
+    mRenderThread.queue().post([this, hardwareBuffer = buffer]() mutable {
+        mContext->setHardwareBuffer(hardwareBuffer);
+        if (hardwareBuffer) {
+            AHardwareBuffer_release(hardwareBuffer);
+        }
+    });
 }
 
 void RenderProxy::setSurface(ANativeWindow* window, bool enableTimeout) {
@@ -134,7 +150,7 @@ void RenderProxy::setOpaque(bool opaque) {
 float RenderProxy::setColorMode(ColorMode mode) {
     // We only need to figure out what the renderer supports for HDR, otherwise this can stay
     // an async call since we already know the return value
-    if (mode == ColorMode::Hdr) {
+    if (mode == ColorMode::Hdr || mode == ColorMode::Hdr10) {
         return mRenderThread.queue().runSync(
                 [=]() -> float { return mContext->setColorMode(mode); });
     } else {
@@ -338,6 +354,10 @@ void RenderProxy::drawRenderNode(RenderNode* node) {
 
 void RenderProxy::setContentDrawBounds(int left, int top, int right, int bottom) {
     mDrawFrameTask.setContentDrawBounds(left, top, right, bottom);
+}
+
+void RenderProxy::setHardwareBufferRenderParams(const HardwareBufferRenderParams& params) {
+    mDrawFrameTask.setHardwareBufferRenderParams(params);
 }
 
 void RenderProxy::setPictureCapturedCallback(

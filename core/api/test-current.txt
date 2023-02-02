@@ -165,7 +165,7 @@ package android.app {
     method @Nullable public String getIconResourcePackage();
   }
 
-  public class ActivityOptions {
+  public class ActivityOptions extends android.app.ComponentOptions {
     method public boolean isEligibleForLegacyPermissionPrompt();
     method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS) public static android.app.ActivityOptions makeCustomTaskAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
@@ -269,7 +269,7 @@ package android.app {
     method public default void onOpActiveChanged(@NonNull String, int, @NonNull String, @Nullable String, boolean, int, int);
   }
 
-  public class BroadcastOptions {
+  public class BroadcastOptions extends android.app.ComponentOptions {
     ctor public BroadcastOptions(@NonNull android.os.Bundle);
     method @Deprecated public int getMaxManifestReceiverApiLevel();
     method public long getTemporaryAppAllowlistDuration();
@@ -280,6 +280,12 @@ package android.app {
     method public boolean testRequireCompatChange(int);
     field public static final long CHANGE_ALWAYS_DISABLED = 210856463L; // 0xc916a0fL
     field public static final long CHANGE_ALWAYS_ENABLED = 209888056L; // 0xc82a338L
+  }
+
+  public class ComponentOptions {
+    field public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1; // 0x1
+    field public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2; // 0x2
+    field public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0; // 0x0
   }
 
   public class DownloadManager {
@@ -464,8 +470,11 @@ package android.app {
 
   public class WallpaperManager {
     method @Nullable public android.graphics.Bitmap getBitmap();
+    method @Nullable public android.graphics.Bitmap getBitmapAsUser(int, boolean, int);
+    method public boolean isLockscreenLiveWallpaperEnabled();
     method @Nullable public android.graphics.Rect peekBitmapDimensions();
     method @Nullable public android.graphics.Rect peekBitmapDimensions(int);
+    method public void setWallpaperZoomOut(@NonNull android.os.IBinder, float);
     method public boolean shouldEnableWideColorGamut();
     method @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) public boolean wallpaperSupportsWcg(int);
   }
@@ -813,6 +822,7 @@ package android.content.pm {
     field public static final float OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE = 1.5f;
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY = 203647190L; // 0xc2368d6L
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN = 208648326L; // 0xc6fb886L
+    field public static final long OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS = 237531167L; // 0xe28701fL
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
   }
 
@@ -2070,6 +2080,7 @@ package android.os {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.content.pm.UserInfo> getUsers(boolean, boolean, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean hasBaseUserRestriction(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean isUserTypeEnabled(@NonNull String);
+    method public boolean isVisibleBackgroundUsersOnDefaultDisplaySupported();
     method public boolean isVisibleBackgroundUsersSupported();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo preCreateUser(@NonNull String) throws android.os.UserManager.UserOperationException;
   }
@@ -3144,7 +3155,9 @@ package android.view {
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method public void getBoundsOnScreen(@NonNull android.graphics.Rect, boolean);
     method public android.view.View getTooltipView();
+    method public void getWindowDisplayFrame(@NonNull android.graphics.Rect);
     method public boolean isAutofilled();
     method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);

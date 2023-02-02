@@ -442,7 +442,8 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     ): WindowManager.LayoutParams {
         val paddingX = animation?.paddingX ?: 0
         val paddingY = animation?.paddingY ?: 0
-        if (animation != null && animation.listenForTouchesOutsideView()) {
+        if (!featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION) && animation != null &&
+                animation.listenForTouchesOutsideView()) {
             flags = flags or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         }
 

@@ -37,6 +37,8 @@ package com.android.server.display.config {
   public class BrightnessThrottlingMap {
     ctor public BrightnessThrottlingMap();
     method @NonNull public final java.util.List<com.android.server.display.config.BrightnessThrottlingPoint> getBrightnessThrottlingPoint();
+    method public String getId();
+    method public void setId(String);
   }
 
   public class BrightnessThrottlingPoint {
@@ -188,8 +190,12 @@ package com.android.server.display.config {
 
   public class RefreshRateConfigs {
     ctor public RefreshRateConfigs();
+    method public final java.math.BigInteger getDefaultPeakRefreshRate();
+    method public final java.math.BigInteger getDefaultRefreshRate();
     method public final com.android.server.display.config.BlockingZoneConfig getHigherBlockingZoneConfigs();
     method public final com.android.server.display.config.BlockingZoneConfig getLowerBlockingZoneConfigs();
+    method public final void setDefaultPeakRefreshRate(java.math.BigInteger);
+    method public final void setDefaultRefreshRate(java.math.BigInteger);
     method public final void setHigherBlockingZoneConfigs(com.android.server.display.config.BlockingZoneConfig);
     method public final void setLowerBlockingZoneConfigs(com.android.server.display.config.BlockingZoneConfig);
   }
@@ -238,10 +244,7 @@ package com.android.server.display.config {
 
   public class ThermalThrottling {
     ctor public ThermalThrottling();
-    method @NonNull public final com.android.server.display.config.BrightnessThrottlingMap getBrightnessThrottlingMap();
-    method public final com.android.server.display.config.BrightnessThrottlingMap getConcurrentDisplaysBrightnessThrottlingMap();
-    method public final void setBrightnessThrottlingMap(@NonNull com.android.server.display.config.BrightnessThrottlingMap);
-    method public final void setConcurrentDisplaysBrightnessThrottlingMap(com.android.server.display.config.BrightnessThrottlingMap);
+    method public final java.util.List<com.android.server.display.config.BrightnessThrottlingMap> getBrightnessThrottlingMap();
   }
 
   public class ThresholdPoint {

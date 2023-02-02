@@ -82,13 +82,33 @@ open class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTest(flic
 
     @Presubmit
     @Test
-    override fun pipAppLayerAlwaysVisible() {
-        if (!flicker.scenario.isGesturalNavigation) super.pipAppLayerAlwaysVisible()
-        else {
-            // pip layer in gesture nav will disappear during transition
-            flicker.assertLayers {
-                this.isVisible(pipApp).then().isInvisible(pipApp).then().isVisible(pipApp)
-            }
+    override fun pipAppLayerOrOverlayAlwaysVisible() {
+        // pip layer in gesture nav will disappear during transition
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        super.pipAppLayerOrOverlayAlwaysVisible()
+    }
+
+    @Presubmit
+    @Test
+    fun pipAppWindowVisibleChanges() {
+        // pip layer in gesture nav will disappear during transition
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        flicker.assertWm {
+            this.isAppWindowVisible(pipApp)
+                .then()
+                .isAppWindowInvisible(pipApp, isOptional = true)
+                .then()
+                .isAppWindowVisible(pipApp, isOptional = true)
+        }
+    }
+
+    @Presubmit
+    @Test
+    fun pipAppLayerVisibleChanges() {
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        // pip layer in gesture nav will disappear during transition
+        flicker.assertLayers {
+            this.isVisible(pipApp).then().isInvisible(pipApp).then().isVisible(pipApp)
         }
     }
 
@@ -116,12 +136,19 @@ open class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTest(flic
 
     @Presubmit
     @Test
-    override fun pipLayerRemainInsideVisibleBounds() {
-        if (!flicker.scenario.isGesturalNavigation) super.pipLayerRemainInsideVisibleBounds()
-        else {
-            // pip layer in gesture nav will disappear during transition
-            flicker.assertLayersStart { this.visibleRegion(pipApp).coversAtMost(displayBounds) }
-            flicker.assertLayersEnd { this.visibleRegion(pipApp).coversAtMost(displayBounds) }
-        }
+    override fun pipLayerOrOverlayRemainInsideVisibleBounds() {
+        // pip layer in gesture nav will disappear during transition
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        super.pipLayerOrOverlayRemainInsideVisibleBounds()
+    }
+
+    @Presubmit
+    @Test
+    fun pipLayerRemainInsideVisibleBounds() {
+        // pip layer in gesture nav will disappear during transition
+        Assume.assumeTrue(flicker.scenario.isGesturalNavigation)
+        // pip layer in gesture nav will disappear during transition
+        flicker.assertLayersStart { this.visibleRegion(pipApp).coversAtMost(displayBounds) }
+        flicker.assertLayersEnd { this.visibleRegion(pipApp).coversAtMost(displayBounds) }
     }
 }

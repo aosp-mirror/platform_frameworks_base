@@ -387,6 +387,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final int SCAN_DROP_CACHE = 1 << 24;
     static final int SCAN_AS_FACTORY = 1 << 25;
     static final int SCAN_AS_APEX = 1 << 26;
+    static final int SCAN_AS_STOPPED_SYSTEM_APP = 1 << 27;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,
@@ -403,6 +404,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             SCAN_AS_INSTANT_APP,
             SCAN_AS_FULL_APP,
             SCAN_AS_VIRTUAL_PRELOAD,
+            SCAN_AS_STOPPED_SYSTEM_APP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScanFlags {}
@@ -964,6 +966,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     final @Nullable String mRecentsPackage;
     final @Nullable String mAmbientContextDetectionPackage;
     final @Nullable String mWearableSensingPackage;
+    final @NonNull Set<String> mInitialNonStoppedSystemPackages;
+    final boolean mShouldStopSystemPackagesByDefault;
     private final @NonNull String mRequiredSdkSandboxPackage;
 
     @GuardedBy("mLock")
@@ -1771,6 +1775,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
         mRequiredSdkSandboxPackage = testParams.requiredSdkSandboxPackage;
+        mInitialNonStoppedSystemPackages = testParams.initialNonStoppedSystemPackages;
+        mShouldStopSystemPackagesByDefault = testParams.shouldStopSystemPackagesByDefault;
 
         mLiveComputer = createLiveComputer();
         mSnapshotStatistics = null;
@@ -2096,6 +2102,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             mCacheDir = PackageManagerServiceUtils.preparePackageParserCache(
                     mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion);
+
+            mInitialNonStoppedSystemPackages = mInjector.getSystemConfig()
+                    .getInitialNonStoppedSystemPackages();
+            mShouldStopSystemPackagesByDefault = mContext.getResources()
+                    .getBoolean(R.bool.config_stopSystemPackagesByDefault);
 
             final int[] userIds = mUserManager.getUserIds();
             PackageParser2 packageParser = mInjector.getScanningCachingPackageParser();
@@ -3201,7 +3212,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                 callingMethod);
 
-        if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
+        if (!PackageManagerServiceUtils.isSystemOrRoot(callingUid)
                 && UserHandle.getUserId(callingUid) != userId) {
             throw new SecurityException("Calling uid " + callingUid + " cannot call for user "
                     + userId);
@@ -5312,7 +5323,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             snapshot.enforceCrossUserPermission(callingUid, userId, false /*requireFullPermission*/,
                     true /*checkShell*/, "isPackageStateProtected");
 
-            if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)
                     && snapshot.checkUidPermission(MANAGE_DEVICE_ADMINS, callingUid)
                     != PERMISSION_GRANTED) {
                 throw new SecurityException("Caller must have the "
@@ -5847,8 +5858,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             snapshot.enforceCrossUserPermission(callingUid, userId, true /*requireFullPermission*/,
                     true /*checkShell*/, "setHarmfulAppInfo");
 
-            if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID &&
-                    snapshot.checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid)
+            if (!PackageManagerServiceUtils.isSystemOrRoot(callingAppId)
+                    && snapshot.checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid)
                             != PERMISSION_GRANTED) {
                 throw new SecurityException("Caller must have the "
                         + SET_HARMFUL_APP_WARNINGS + " permission.");
@@ -6602,7 +6613,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public void uninstallApex(String packageName, long versionCode, int userId,
                 IntentSender intentSender, int flags) {
             final int callerUid = Binder.getCallingUid();
-            if (callerUid != Process.ROOT_UID && callerUid != Process.SHELL_UID) {
+            if (!PackageManagerServiceUtils.isRootOrShell(callerUid)) {
                 throw new SecurityException("Not allowed to uninstall apexes");
             }
             PackageInstallerService.PackageDeleteObserverAdapter adapter =
@@ -6647,7 +6658,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshotComputer();
             final String[] callerPackageNames = snapshot.getPackagesForUid(callingUid);
-            if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID
+            if (!PackageManagerServiceUtils.isRootOrShell(callingUid)
                     && !ArrayUtils.contains(callerPackageNames, packageName)) {
                 throw new SecurityException("dumpProfiles");
             }

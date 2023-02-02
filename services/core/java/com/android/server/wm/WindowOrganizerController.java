@@ -1036,17 +1036,30 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 taskDisplayArea.moveRootTaskBehindRootTask(thisTask.getRootTask(), restoreAt);
                 break;
             }
-            case HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER:
+            case HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER: {
                 final Rect insetsProviderWindowContainer = hop.getInsetsProviderFrame();
-                final WindowContainer receiverWindowContainer =
+                final WindowContainer container =
                         WindowContainer.fromBinder(hop.getContainer());
-                receiverWindowContainer.addLocalRectInsetsSourceProvider(
+                if (container == null) {
+                    Slog.e(TAG, "Attempt to add local insets source provider on unknown: "
+                                    + container);
+                    break;
+                }
+                container.addLocalRectInsetsSourceProvider(
                         insetsProviderWindowContainer, hop.getInsetsTypes());
                 break;
-            case HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER:
-                WindowContainer.fromBinder(hop.getContainer())
-                        .removeLocalInsetsSourceProvider(hop.getInsetsTypes());
+            }
+            case HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER: {
+                final WindowContainer container =
+                        WindowContainer.fromBinder(hop.getContainer());
+                if (container == null) {
+                    Slog.e(TAG, "Attempt to remove local insets source provider from unknown: "
+                                    + container);
+                    break;
+                }
+                container.removeLocalInsetsSourceProvider(hop.getInsetsTypes());
                 break;
+            }
             case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: {
                 final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
                 if (container == null || container.asDisplayArea() == null

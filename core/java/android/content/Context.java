@@ -2445,13 +2445,12 @@ public abstract class Context {
      * @see #sendBroadcast(Intent)
      * @see #sendOrderedBroadcast(Intent, String)
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
-     * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
-    @SystemApi
-    public abstract void sendBroadcast(Intent intent,
+    public void sendBroadcast(@NonNull Intent intent,
             @Nullable String receiverPermission,
-            @Nullable Bundle options);
+            @Nullable Bundle options) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Like {@link #sendBroadcast(Intent, String)}, but also allows specification
@@ -2485,6 +2484,32 @@ public abstract class Context {
      */
     public abstract void sendOrderedBroadcast(@RequiresPermission Intent intent,
             @Nullable String receiverPermission);
+
+    /**
+     * Broadcast the given intent to all interested BroadcastReceivers, delivering
+     * them one at a time to allow more preferred receivers to consume the
+     * broadcast before it is delivered to less preferred receivers.  This
+     * call is asynchronous; it returns immediately, and you will continue
+     * executing while the receivers are run.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent             The Intent to broadcast; all receivers matching this
+     *                           Intent will receive the broadcast.
+     * @param receiverPermission (optional) String naming a permissions that
+     *                           a receiver must hold in order to receive your broadcast.
+     *                           If null, no permission is required.
+     * @param options            (optional) Additional sending options, generated from a
+     *                           {@link android.app.BroadcastOptions}.
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see #sendBroadcast(Intent)
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    public void sendOrderedBroadcast(@NonNull Intent intent, @Nullable String receiverPermission,
+            @Nullable Bundle options) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Version of {@link #sendBroadcast(Intent)} that allows you to
@@ -2572,14 +2597,13 @@ public abstract class Context {
      * @see android.content.BroadcastReceiver
      * @see #registerReceiver
      * @see android.app.Activity#RESULT_OK
-     * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
-    @SystemApi
-    public abstract void sendOrderedBroadcast(@NonNull Intent intent,
+    public void sendOrderedBroadcast(@NonNull Intent intent,
             @Nullable String receiverPermission, @Nullable Bundle options,
             @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
-            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras);
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Like {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler,
@@ -6151,10 +6175,10 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.healthconnect.HealthConnectManager}.
+     * {@link android.health.connect.HealthConnectManager}.
      *
      * @see #getSystemService(String)
-     * @see android.healthconnect.HealthConnectManager
+     * @see android.health.connect.HealthConnectManager
      */
     public static final String HEALTHCONNECT_SERVICE = "healthconnect";
 

@@ -76,7 +76,9 @@ open class ExitPipWithSwipeDownTest(flicker: FlickerTest) : ExitPipTransition(fl
                         ?.height
                         ?: error("Couldn't find Nav or Task bar layer")
                 // The dismiss button doesn't appear at the complete bottom of the screen,
-                val displayY = device.displayHeight - barLayerHeight
+                // it appears above the hot seat but `hotseatBarSize` is not available outside
+                // the platform
+                val displayY = (device.displayHeight * 0.9).toInt() - barLayerHeight
                 device.swipe(pipCenterX, pipCenterY, displayCenterX, displayY, 50)
                 // Wait until the other app is no longer visible
                 wmHelper

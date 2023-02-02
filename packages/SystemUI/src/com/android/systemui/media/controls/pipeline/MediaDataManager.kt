@@ -50,7 +50,6 @@ import android.support.v4.media.MediaMetadataCompat
 import android.text.TextUtils
 import android.util.Log
 import androidx.media.utils.MediaConstants
-import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.logging.InstanceId
 import com.android.systemui.Dumpable
 import com.android.systemui.R
@@ -64,6 +63,8 @@ import com.android.systemui.media.controls.models.player.MediaButton
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaDeviceData
 import com.android.systemui.media.controls.models.player.MediaViewHolder
+import com.android.systemui.media.controls.models.recommendation.EXTRA_KEY_TRIGGER_SOURCE
+import com.android.systemui.media.controls.models.recommendation.EXTRA_VALUE_TRIGGER_PERIODIC
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaDataProvider
 import com.android.systemui.media.controls.resume.MediaResumeListener
@@ -120,7 +121,6 @@ private val LOADING =
         appUid = Process.INVALID_UID
     )
 
-@VisibleForTesting
 internal val EMPTY_SMARTSPACE_MEDIA_DATA =
     SmartspaceMediaData(
         targetId = "INVALID",
@@ -130,7 +130,8 @@ internal val EMPTY_SMARTSPACE_MEDIA_DATA =
         recommendations = emptyList(),
         dismissIntent = null,
         headphoneConnectionTimeMillis = 0,
-        instanceId = InstanceId.fakeInstanceId(-1)
+        instanceId = InstanceId.fakeInstanceId(-1),
+        expiryTimeMs = 0,
     )
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
@@ -549,6 +550,11 @@ class MediaDataManager(
             if (DEBUG) Log.d(TAG, "Updating $key timedOut: $timedOut")
             onMediaDataLoaded(key, key, it)
         }
+
+        if (key == smartspaceMediaData.targetId) {
+            if (DEBUG) Log.d(TAG, "smartspace card expired")
+            dismissSmartspaceRecommendation(key, delay = 0L)
+        }
     }
 
     /** Called when the player's [PlaybackState] has been updated with new actions and/or state */
@@ -606,8 +612,8 @@ class MediaDataManager(
     }
 
     /**
-     * Called whenever the recommendation has been expired, or swiped from QQS. This will make the
-     * recommendation view to not be shown anymore during this headphone connection session.
+     * Called whenever the recommendation has been expired or removed by the user. This will remove
+     * the recommendation card entirely from the carousel.
      */
     fun dismissSmartspaceRecommendation(key: String, delay: Long) {
         if (smartspaceMediaData.targetId != key || !smartspaceMediaData.isValid()) {
@@ -627,6 +633,23 @@ class MediaDataManager(
             { notifySmartspaceMediaDataRemoved(smartspaceMediaData.targetId, immediately = true) },
             delay
         )
+    }
+
+    /** Called when the recommendation card should no longer be visible in QQS or lockscreen */
+    fun setRecommendationInactive(key: String) {
+        if (!mediaFlags.isPersistentSsCardEnabled()) {
+            Log.e(TAG, "Only persistent recommendation can be inactive!")
+            return
+        }
+        if (DEBUG) Log.d(TAG, "Setting smartspace recommendation inactive")
+
+        if (smartspaceMediaData.targetId != key || !smartspaceMediaData.isValid()) {
+            // If this doesn't match, or we've already invalidated the data, no action needed
+            return
+        }
+
+        smartspaceMediaData = smartspaceMediaData.copy(isActive = false)
+        notifySmartspaceMediaDataLoaded(smartspaceMediaData.targetId, smartspaceMediaData)
     }
 
     private fun loadMediaDataInBgForResumption(
@@ -1268,12 +1291,25 @@ class MediaDataManager(
                 if (DEBUG) {
                     Log.d(TAG, "Set Smartspace media to be inactive for the data update")
                 }
-                smartspaceMediaData =
-                    EMPTY_SMARTSPACE_MEDIA_DATA.copy(
-                        targetId = smartspaceMediaData.targetId,
-                        instanceId = smartspaceMediaData.instanceId
+                if (mediaFlags.isPersistentSsCardEnabled()) {
+                    // Smartspace uses this signal to hide the card (e.g. when it expires or user
+                    // disconnects headphones), so treat as setting inactive when flag is on
+                    smartspaceMediaData = smartspaceMediaData.copy(isActive = false)
+                    notifySmartspaceMediaDataLoaded(
+                        smartspaceMediaData.targetId,
+                        smartspaceMediaData,
                     )
-                notifySmartspaceMediaDataRemoved(smartspaceMediaData.targetId, immediately = false)
+                } else {
+                    smartspaceMediaData =
+                        EMPTY_SMARTSPACE_MEDIA_DATA.copy(
+                            targetId = smartspaceMediaData.targetId,
+                            instanceId = smartspaceMediaData.instanceId,
+                        )
+                    notifySmartspaceMediaDataRemoved(
+                        smartspaceMediaData.targetId,
+                        immediately = false,
+                    )
+                }
             }
             1 -> {
                 val newMediaTarget = mediaTargets.get(0)
@@ -1282,7 +1318,7 @@ class MediaDataManager(
                     return
                 }
                 if (DEBUG) Log.d(TAG, "Forwarding Smartspace media update.")
-                smartspaceMediaData = toSmartspaceMediaData(newMediaTarget, isActive = true)
+                smartspaceMediaData = toSmartspaceMediaData(newMediaTarget)
                 notifySmartspaceMediaDataLoaded(smartspaceMediaData.targetId, smartspaceMediaData)
             }
             else -> {
@@ -1291,7 +1327,7 @@ class MediaDataManager(
                 Log.wtf(TAG, "More than 1 Smartspace Media Update. Resetting the status...")
                 notifySmartspaceMediaDataRemoved(
                     smartspaceMediaData.targetId,
-                    false /* immediately */
+                    immediately = false,
                 )
                 smartspaceMediaData = EMPTY_SMARTSPACE_MEDIA_DATA
             }
@@ -1497,21 +1533,28 @@ class MediaDataManager(
     }
 
     /**
-     * Converts the pass-in SmartspaceTarget to SmartspaceMediaData with the pass-in active status.
+     * Converts the pass-in SmartspaceTarget to SmartspaceMediaData
      *
      * @return An empty SmartspaceMediaData with the valid target Id is returned if the
      * SmartspaceTarget's data is invalid.
      */
-    private fun toSmartspaceMediaData(
-        target: SmartspaceTarget,
-        isActive: Boolean
-    ): SmartspaceMediaData {
+    private fun toSmartspaceMediaData(target: SmartspaceTarget): SmartspaceMediaData {
         var dismissIntent: Intent? = null
         if (target.baseAction != null && target.baseAction.extras != null) {
             dismissIntent =
                 target.baseAction.extras.getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY)
                     as Intent?
         }
+
+        val isActive =
+            when {
+                !mediaFlags.isPersistentSsCardEnabled() -> true
+                target.baseAction == null -> true
+                else ->
+                    target.baseAction.extras.getString(EXTRA_KEY_TRIGGER_SOURCE) !=
+                        EXTRA_VALUE_TRIGGER_PERIODIC
+            }
+
         packageName(target)?.let {
             return SmartspaceMediaData(
                 targetId = target.smartspaceTargetId,
@@ -1521,7 +1564,8 @@ class MediaDataManager(
                 recommendations = target.iconGrid,
                 dismissIntent = dismissIntent,
                 headphoneConnectionTimeMillis = target.creationTimeMillis,
-                instanceId = logger.getNewInstanceId()
+                instanceId = logger.getNewInstanceId(),
+                expiryTimeMs = target.expiryTimeMillis,
             )
         }
         return EMPTY_SMARTSPACE_MEDIA_DATA.copy(
@@ -1529,7 +1573,8 @@ class MediaDataManager(
             isActive = isActive,
             dismissIntent = dismissIntent,
             headphoneConnectionTimeMillis = target.creationTimeMillis,
-            instanceId = logger.getNewInstanceId()
+            instanceId = logger.getNewInstanceId(),
+            expiryTimeMs = target.expiryTimeMillis,
         )
     }
 

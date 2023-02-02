@@ -280,13 +280,13 @@ class MediaRouter2ServiceImpl {
     public void setRouteListingPreference(
             @NonNull IMediaRouter2 router,
             @Nullable RouteListingPreference routeListingPreference) {
-        ComponentName inAppOnlyItemRoutingReceiver =
+        ComponentName linkedItemLandingComponent =
                 routeListingPreference != null
-                        ? routeListingPreference.getInAppOnlyItemRoutingReceiver()
+                        ? routeListingPreference.getLinkedItemComponentName()
                         : null;
-        if (inAppOnlyItemRoutingReceiver != null) {
+        if (linkedItemLandingComponent != null) {
             MediaServerUtils.enforcePackageName(
-                    inAppOnlyItemRoutingReceiver.getPackageName(), Binder.getCallingUid());
+                    linkedItemLandingComponent.getPackageName(), Binder.getCallingUid());
         }
 
         final long token = Binder.clearCallingIdentity();

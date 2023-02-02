@@ -201,7 +201,7 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
     outWindowInfo->colorspace = colorSpace;
     outWindowInfo->colorMode = colorMode;
 
-    if (colorMode == ColorMode::Hdr) {
+    if (colorMode == ColorMode::Hdr || colorMode == ColorMode::Hdr10) {
         outWindowInfo->dataspace =
                 static_cast<android_dataspace>(STANDARD_DCI_P3 | TRANSFER_SRGB | RANGE_EXTENDED);
     } else {
@@ -509,7 +509,7 @@ void VulkanSurface::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
         mNativeBuffers[i].skSurface.reset();
     }
 
-    if (mWindowInfo.colorMode == ColorMode::Hdr) {
+    if (mWindowInfo.colorMode == ColorMode::Hdr || mWindowInfo.colorMode == ColorMode::Hdr10) {
         mWindowInfo.dataspace =
                 static_cast<android_dataspace>(STANDARD_DCI_P3 | TRANSFER_SRGB | RANGE_EXTENDED);
     } else {
@@ -521,7 +521,7 @@ void VulkanSurface::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
                         "Unsupported colorspace");
 
     if (mNativeWindow) {
-        int err = native_window_set_buffers_data_space(mNativeWindow.get(), mWindowInfo.dataspace);
+        int err = ANativeWindow_setBuffersDataSpace(mNativeWindow.get(), mWindowInfo.dataspace);
         if (err != 0) {
             ALOGE("VulkanSurface::setColorSpace() native_window_set_buffers_data_space(%d) "
                   "failed: %s (%d)",

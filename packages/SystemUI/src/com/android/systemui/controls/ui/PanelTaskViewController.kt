@@ -27,6 +27,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
+import android.os.Trace
 import com.android.systemui.R
 import com.android.systemui.util.boundsOnScreen
 import com.android.wm.shell.TaskView
@@ -84,6 +85,7 @@ class PanelTaskViewController(
                         options,
                         taskView.boundsOnScreen
                     )
+                    Trace.instant(Trace.TRACE_TAG_APP, "PanelTaskViewController - startActivity")
                 }
             }
 

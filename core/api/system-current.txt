@@ -817,7 +817,6 @@ package android.app {
     method public int getPendingIntentBackgroundActivityStartMode();
     method public boolean isDeferUntilActive();
     method @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed();
-    method public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public void recordResponseEventWhileInBackground(@IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
     method @NonNull public android.app.BroadcastOptions setDeferUntilActive(boolean);
@@ -832,7 +831,6 @@ package android.app {
     method public void setRequireNoneOfPermissions(@Nullable String[]);
     method @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppAllowlist(long, int, int, @Nullable String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST, android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND, android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND}) public void setTemporaryAppWhitelistDuration(long);
-    method public android.os.Bundle toBundle();
     field public static final int DELIVERY_GROUP_POLICY_ALL = 0; // 0x0
     field public static final int DELIVERY_GROUP_POLICY_MOST_RECENT = 1; // 0x1
   }
@@ -3232,10 +3230,8 @@ package android.content {
     method public abstract boolean isCredentialProtectedStorage();
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.content.Intent registerReceiverForAllUsers(@Nullable android.content.BroadcastReceiver, @NonNull android.content.IntentFilter, @Nullable String, @Nullable android.os.Handler);
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.content.Intent registerReceiverForAllUsers(@Nullable android.content.BroadcastReceiver, @NonNull android.content.IntentFilter, @Nullable String, @Nullable android.os.Handler, int);
-    method public abstract void sendBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
     method public void sendBroadcastMultiplePermissions(@NonNull android.content.Intent, @NonNull String[], @Nullable android.app.BroadcastOptions);
-    method public abstract void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @Nullable android.os.Bundle, @NonNull android.os.UserHandle);
     field public static final String AMBIENT_CONTEXT_SERVICE = "ambient_context";
@@ -3298,9 +3294,7 @@ package android.content {
     method public android.content.Context createCredentialProtectedStorageContext();
     method @Nullable public java.io.File getPreloadsFileCache();
     method public boolean isCredentialProtectedStorage();
-    method public void sendBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
     method public void sendBroadcastAsUser(android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
-    method public void sendOrderedBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
@@ -3592,7 +3586,7 @@ package android.content.pm {
   }
 
   public class PackageInstaller {
-    method @NonNull public android.content.pm.PackageInstaller.InstallInfo getInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
+    method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
     field public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
     field public static final String ACTION_CONFIRM_PRE_APPROVAL = "android.content.pm.action.CONFIRM_PRE_APPROVAL";
@@ -7961,6 +7955,7 @@ package android.media.tv.tuner.filter {
 
   public class MediaEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getAudioHandle();
+    method @NonNull public java.util.List<android.media.AudioPresentation> getAudioPresentations();
     method public long getAvDataId();
     method public long getDataLength();
     method public long getDts();
@@ -8911,7 +8906,6 @@ package android.media.tv.tuner.frontend {
   }
 
   public class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    ctor public IptvFrontendSettings(@NonNull byte[], @NonNull byte[], int, int, @NonNull android.media.tv.tuner.frontend.IptvFrontendSettingsFec, int, int, long, @NonNull String);
     method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettings.Builder builder();
     method @IntRange(from=0) public long getBitrate();
     method @NonNull public String getContentUrl();
@@ -8946,7 +8940,6 @@ package android.media.tv.tuner.frontend {
   }
 
   public class IptvFrontendSettingsFec {
-    ctor public IptvFrontendSettingsFec(int, int, int);
     method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder builder();
     method @IntRange(from=0) public int getFecColNum();
     method @IntRange(from=0) public int getFecRowNum();
@@ -9941,6 +9934,7 @@ package android.os {
   public final class BugreportManager {
     method @RequiresPermission(android.Manifest.permission.DUMP) @WorkerThread public void preDumpUiData();
     method @RequiresPermission(android.Manifest.permission.DUMP) public void requestBugreport(@NonNull android.os.BugreportParams, @Nullable CharSequence, @Nullable CharSequence);
+    method @RequiresPermission(android.Manifest.permission.DUMP) @WorkerThread public void retrieveBugreport(@NonNull String, @NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
     method @RequiresPermission(android.Manifest.permission.DUMP) @WorkerThread public void startBugreport(@NonNull android.os.ParcelFileDescriptor, @Nullable android.os.ParcelFileDescriptor, @NonNull android.os.BugreportParams, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
   }
 
@@ -9949,6 +9943,7 @@ package android.os {
     ctor public BugreportParams(int, int);
     method public int getFlags();
     method public int getMode();
+    field public static final int BUGREPORT_FLAG_DEFER_CONSENT = 2; // 0x2
     field public static final int BUGREPORT_FLAG_USE_PREDUMPED_UI_DATA = 1; // 0x1
     field public static final int BUGREPORT_MODE_FULL = 0; // 0x0
     field public static final int BUGREPORT_MODE_INTERACTIVE = 1; // 0x1

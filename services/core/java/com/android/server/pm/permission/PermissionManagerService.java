@@ -51,7 +51,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
-import android.healthconnect.HealthConnectManager;
+import android.health.connect.HealthConnectManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;

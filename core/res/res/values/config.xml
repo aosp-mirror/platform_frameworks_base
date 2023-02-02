@@ -2674,6 +2674,14 @@
     <!-- Maximum velocity to initiate a fling, as measured in dips per second. -->
     <dimen name="config_viewMaxFlingVelocity">8000dp</dimen>
 
+    <!-- Minimum velocity (absolute value) to initiate a fling from a rotary encoder device, as
+         measured in dips per second. Setting this to -1dp disables rotary encoder fling.  -->
+    <dimen name="config_viewMinRotaryEncoderFlingVelocity">-1dp</dimen>
+
+    <!-- Maximum velocity (absolute value) to initiate a fling from a rotary encoder device, as
+         measured in dips per second. Setting this to -1dp disables rotary encoder fling.  -->
+    <dimen name="config_viewMaxRotaryEncoderFlingVelocity">-1dp</dimen>
+
     <!-- Amount of time in ms the user needs to press the relevant key to bring up the
          global actions dialog -->
     <integer name="config_globalActionsKeyTimeout">500</integer>
@@ -2734,6 +2742,11 @@
     <!-- Whether the device allows users to start in background visible on displays.
          Should be false for most devices, except automotive vehicle with passenger displays. -->
     <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
+
+    <!-- Whether the device allows users to start in background visible on the default display.
+         Should be false for most devices, except passenger-only automotive build (i.e., when
+         Android runs in a separate system in the back seat to manage the passenger displays) -->
+    <bool name="config_multiuserVisibleBackgroundUsersOnDefaultDisplay">false</bool>
 
     <!-- Whether to automatically switch to the designated Dock User (the user chosen for
          displaying dreams, etc.) after a timeout when the device is docked.  -->
@@ -5001,6 +5014,26 @@
       -->
     </integer-array>
 
+    <!-- The properties for handling UDFPS touch detection
+    <string-array name="config_udfps_touch_detection_options">
+        <item>[detector_type],[sensor_shape],[target_size],[min_ellipse_overlap_percentage]</item>
+    </string-array>
+
+        [detector_type]: 0 for bounding box detector, 1 for ellipse detector
+        [sensor_shape]: 0 for square, 1 for circle
+        [target_size]: percentage (defined as a float of 0-1) of sensor that is considered the target, expands outward from center
+        [min_ellipse_overlap_percentage]: minimum percentage (float from 0-1) needed to be considered a valid overlap
+        [step_size]: size of each step when iterating over sensor pixel grid
+    -->
+    <string-array name="config_udfps_touch_detection_options">
+        <item>0,0,1.0,0,1</item>
+        <item>1,1,1.0,0,1</item>
+        <item>1,1,1.0,.4,1</item>
+    </string-array>
+
+    <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
+    <integer name="config_selected_udfps_touch_detection">2</integer>
+
     <!-- An array of arrays of side fingerprint sensor properties relative to each display.
          Note: this value is temporary and is expected to be queried directly
          from the HAL in the future. -->
@@ -6210,4 +6243,27 @@
         trusted certificate using the SHA-256 digest algorithm. -->
     <string-array name="config_healthConnectMigrationKnownSigners">
     </string-array>
+
+    <!-- The Universal Stylus Initiative (USI) protocol version supported by each display.
+         (@see https://universalstylus.org/).
+
+         The i-th value in this array corresponds to the supported USI version of the i-th display
+         listed in config_displayUniqueIdArray. On a single-display device, the
+         config_displayUniqueIdArray may be empty, in which case the only value in this array should
+         be the USI version for the main built-in display.
+
+         If the display does not support USI, the version value should be an empty string. If the
+         display supports USI, the version must be in the following format:
+           "<major-version>.<minor-version>"
+
+         For example, "", "1.0", and "2.0" are valid values. -->
+    <string-array name="config_displayUsiVersionArray" translatable="false">
+        <item>""</item>
+    </string-array>
+
+    <!-- Whether system apps should be scanned in the stopped state during initial boot.
+        Packages can be added by OEMs in an allowlist, to prevent them from being scanned as
+        "stopped" during initial boot of a device, or after an OTA update. Stopped state of
+        an app is not changed during subsequent reboots.  -->
+    <bool name="config_stopSystemPackagesByDefault">false</bool>
 </resources>

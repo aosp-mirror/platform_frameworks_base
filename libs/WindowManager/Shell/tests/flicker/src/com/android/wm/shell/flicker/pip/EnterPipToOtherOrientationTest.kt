@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.pip
 
 import android.app.Activity
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
@@ -197,7 +198,7 @@ open class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(
     }
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 267424412)
     @Test
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()

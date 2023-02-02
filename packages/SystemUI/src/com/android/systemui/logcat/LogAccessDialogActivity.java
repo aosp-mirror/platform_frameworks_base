@@ -28,11 +28,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.text.Html;
-import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
@@ -64,7 +63,10 @@ public class LogAccessDialogActivity extends Activity implements
 
     private String mAlertTitle;
     private String mAlertBody;
-    private String mAlertLearnMore;
+
+    private boolean mAlertLearnMoreLink;
+    private SpannableString mAlertLearnMore;
+
     private AlertDialog.Builder mAlertDialog;
     private AlertDialog mAlert;
     private View mAlertView;
@@ -90,8 +92,20 @@ public class LogAccessDialogActivity extends Activity implements
             return;
         }
 
-        mAlertBody = getResources().getString(R.string.log_access_confirmation_body);
-        mAlertLearnMore = getResources().getString(R.string.log_access_confirmation_learn_more);
+        mAlertBody = getString(R.string.log_access_confirmation_body);
+        mAlertLearnMoreLink = this.getResources()
+            .getBoolean(R.bool.log_access_confirmation_learn_more_as_link);
+        if (mAlertLearnMoreLink) {
+            mAlertLearnMore = new SpannableString(
+                    getString(R.string.log_access_confirmation_learn_more));
+            mAlertLearnMore.setSpan(new URLSpan(
+                    getString(R.string.log_access_confirmation_learn_more_url)),
+                    0, mAlertLearnMore.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        } else {
+            mAlertLearnMore = new SpannableString(
+                getString(R.string.log_access_confirmation_learn_more_at,
+                getString(R.string.log_access_confirmation_learn_more_url)));
+        }
 
         // create View
         int themeId = R.style.LogAccessDialogTheme;
@@ -180,15 +194,6 @@ public class LogAccessDialogActivity extends Activity implements
         return titleString;
     }
 
-    private Spannable styleFont(String text) {
-        Spannable s = (Spannable) Html.fromHtml(text);
-        for (URLSpan span : s.getSpans(0, s.length(), URLSpan.class)) {
-            TypefaceSpan typefaceSpan = new TypefaceSpan("google-sans");
-            s.setSpan(typefaceSpan, s.getSpanStart(span), s.getSpanEnd(span), 0);
-        }
-        return s;
-    }
-
     /**
      * Returns the dialog view.
      * If we cannot retrieve the package name, it returns null and we decline the full device log
@@ -207,13 +212,12 @@ public class LogAccessDialogActivity extends Activity implements
             .setText(mAlertTitle);
 
         if (!TextUtils.isEmpty(mAlertLearnMore)) {
-            Spannable mSpannableLearnMore = styleFont(mAlertLearnMore);
-
             ((TextView) view.findViewById(R.id.log_access_dialog_body))
-                    .setText(TextUtils.concat(mAlertBody, "\n\n", mSpannableLearnMore));
-
-            ((TextView) view.findViewById(R.id.log_access_dialog_body))
+                .setText(TextUtils.concat(mAlertBody, "\n\n", mAlertLearnMore));
+            if (mAlertLearnMoreLink) {
+                ((TextView) view.findViewById(R.id.log_access_dialog_body))
                     .setMovementMethod(LinkMovementMethod.getInstance());
+            }
         } else {
             ((TextView) view.findViewById(R.id.log_access_dialog_body))
                     .setText(mAlertBody);

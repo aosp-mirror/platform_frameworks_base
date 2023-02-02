@@ -6000,6 +6000,7 @@ public class TelephonyManager {
      * Returns the IMS private user identity (IMPI) that was loaded from the ISIM.
      * @return the IMPI, or null if not present or not loaded
      * @hide
+     * @deprecated use {@link #getImsPrivateUserIdentity()}
      */
     @UnsupportedAppUsage
     public String getIsimImpi() {
@@ -6014,6 +6015,35 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             // This could happen before phone restarts due to crashing
             return null;
+        }
+    }
+
+    /**
+     * Returns the IMS private user identity (IMPI) of the subscription that was loaded from the
+     * ISIM records {@link #APPTYPE_ISIM}. This value is fetched from the Elementary file EF_IMPI.
+     * The contents of the file is a <b>Ip Multimedia Service Private User Identity</b> of the user
+     * as defined in the section 4.2.2 of 3GPP TS 131 103.
+     *
+     * @return IMPI (IMS private user identity) of type string.
+     * @throws IllegalStateException in case the ISIM has’t been loaded
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    public String getImsPrivateUserIdentity() {
+        try {
+            IPhoneSubInfo info = getSubscriberInfoService();
+            if (info == null) {
+                Rlog.e(TAG, "getImsPrivateUserIdentity(): IPhoneSubInfo instance is NULL");
+                throw new RuntimeException("IMPI error: Subscriber Info is null");
+            }
+            return info.getImsPrivateUserIdentity(getSubId(), getOpPackageName(),
+                    getAttributionTag());
+        } catch (RemoteException | NullPointerException | IllegalArgumentException ex) {
+            Rlog.e(TAG, "getImsPrivateUserIdentity() Exception = " + ex);
+            throw new RuntimeException(ex.getMessage());
         }
     }
 
@@ -6050,6 +6080,7 @@ public class TelephonyManager {
      * @return an array of IMPU strings, with one IMPU per string, or null if
      *      not present or not loaded
      * @hide
+     * @deprecated use {@link #getImsPublicUserIdentities()}
      */
     @UnsupportedAppUsage
     @Nullable
@@ -6067,6 +6098,39 @@ public class TelephonyManager {
             // This could happen before phone restarts due to crashing
             return null;
         }
+    }
+
+    /**
+     * Returns the IMS public user identities (IMPU) of the subscription that was loaded from the
+     * ISIM records {@link #APPTYPE_ISIM}. This value is fetched from the Elementary file EF_IMPU.
+     * The contents of the file are <b>Ip Multimedia Service Public User Identities</b> of the user
+     * as defined in the section 4.2.4 of 3GPP TS 131 103. It contains one or more records.
+     *
+     * @return List of public user identities of type android.net.Uri or empty list  if
+     *         EF_IMPU is not available.
+     * @throws IllegalStateException in case the ISIM hasn’t been loaded
+     * @throws SecurityException if the caller does not have the required permission/privilege
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(anyOf = {android.Manifest.permission.READ_PHONE_NUMBERS,
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    public List<Uri> getImsPublicUserIdentities() {
+        try {
+            IPhoneSubInfo info = getSubscriberInfoService();
+            if (info == null) {
+                throw new RuntimeException("IMPU error: Subscriber Info is null");
+            }
+            return info.getImsPublicUserIdentities(getSubId(), getOpPackageName(),
+                    getAttributionTag());
+        } catch (IllegalArgumentException | NullPointerException ex) {
+            Rlog.e(TAG, "getImsPublicUserIdentities Exception = " + ex);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getImsPublicUserIdentities Exception = " + ex);
+            ex.rethrowAsRuntimeException();
+        }
+        return Collections.EMPTY_LIST;
     }
 
     /**

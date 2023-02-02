@@ -344,7 +344,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
         ClockController clock = getClock();
         if (clock != null) {
-            clock.getEvents().onTimeTick();
+            clock.getSmallClock().getEvents().onTimeTick();
+            clock.getLargeClock().getEvents().onTimeTick();
         }
     }
 

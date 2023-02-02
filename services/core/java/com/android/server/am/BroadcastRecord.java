@@ -89,6 +89,7 @@ final class BroadcastRecord extends Binder {
     final boolean initialSticky; // initial broadcast from register to sticky?
     final boolean prioritized; // contains more than one priority tranche
     final boolean deferUntilActive; // infinitely deferrable broadcast
+    final boolean shareIdentity;  // whether the broadcaster's identity should be shared
     final int userId;       // user id this broadcast was for
     final @Nullable String resolvedType; // the resolved data type
     final @Nullable String[] requiredPermissions; // permissions the caller has required
@@ -417,6 +418,7 @@ final class BroadcastRecord extends Binder {
         pushMessage = options != null && options.isPushMessagingBroadcast();
         pushMessageOverQuota = options != null && options.isPushMessagingOverQuotaBroadcast();
         interactive = options != null && options.isInteractive();
+        shareIdentity = options != null && options.isShareIdentityEnabled();
         this.filterExtrasForReceiver = filterExtrasForReceiver;
     }
 
@@ -481,6 +483,7 @@ final class BroadcastRecord extends Binder {
         pushMessage = from.pushMessage;
         pushMessageOverQuota = from.pushMessageOverQuota;
         interactive = from.interactive;
+        shareIdentity = from.shareIdentity;
         filterExtrasForReceiver = from.filterExtrasForReceiver;
     }
 
