@@ -28,7 +28,7 @@ enum class ColumnEnum(val id: String) {
     PAGE_ROUTE("pageRoute"),
     PAGE_INTENT_URI("pageIntent"),
     PAGE_ENTRY_COUNT("entryCount"),
-    HAS_RUNTIME_PARAM("hasRuntimeParam"),
+    PAGE_BROWSABLE("pageBrowsable"),
     PAGE_START_ADB("pageStartAdb"),
 
     // Columns related to entry
@@ -67,7 +67,7 @@ enum class QueryEnum(
             ColumnEnum.PAGE_ROUTE,
             ColumnEnum.PAGE_INTENT_URI,
             ColumnEnum.PAGE_ENTRY_COUNT,
-            ColumnEnum.HAS_RUNTIME_PARAM,
+            ColumnEnum.PAGE_BROWSABLE,
         )
     ),
 

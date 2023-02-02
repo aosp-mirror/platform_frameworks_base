@@ -25,10 +25,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
+import com.android.settingslib.spa.framework.util.genEntryId
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
 import com.android.settingslib.spa.tests.testutils.SppHome
 import com.android.settingslib.spa.tests.testutils.SppLayer2
-import com.android.settingslib.spa.tests.testutils.getUniqueEntryId
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -52,7 +52,7 @@ class SettingsSliceDataRepositoryTest {
 
         // Slice supported
         val page = SppLayer2.createSettingsPage()
-        val entryId = getUniqueEntryId("Layer2Entry1", page)
+        val entryId = genEntryId("Layer2Entry1", page)
         val sliceUri = Uri.Builder().appendSpaParams(page.buildRoute(), entryId).build()
         assertThat(sliceUri.getDestination()).isEqualTo("SppLayer2")
         assertThat(sliceUri.getSliceId()).isEqualTo("${entryId}_Bundle[{}]")
@@ -61,7 +61,7 @@ class SettingsSliceDataRepositoryTest {
         assertThat(sliceDataRepository.getOrBuildSliceData(sliceUri)).isSameInstanceAs(sliceData)
 
         // Slice unsupported
-        val entryId2 = getUniqueEntryId("Layer2Entry2", page)
+        val entryId2 = genEntryId("Layer2Entry2", page)
         val sliceUri2 = Uri.Builder().appendSpaParams(page.buildRoute(), entryId2).build()
         assertThat(sliceUri2.getDestination()).isEqualTo("SppLayer2")
         assertThat(sliceUri2.getSliceId()).isEqualTo("${entryId2}_Bundle[{}]")
@@ -73,7 +73,7 @@ class SettingsSliceDataRepositoryTest {
         SpaEnvironmentFactory.reset(spaEnvironment)
 
         val page = SppLayer2.createSettingsPage()
-        val entryId = getUniqueEntryId("Layer2Entry1", page)
+        val entryId = genEntryId("Layer2Entry1", page)
         val sliceUri = Uri.Builder().appendSpaParams(page.buildRoute(), entryId).build()
 
         // build slice data first
