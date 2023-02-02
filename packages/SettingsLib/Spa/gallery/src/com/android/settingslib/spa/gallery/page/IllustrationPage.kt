@@ -21,8 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
-import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
@@ -36,9 +36,9 @@ private const val TITLE = "Sample Illustration"
 
 object IllustrationPageProvider : SettingsPageProvider {
     override val name = "Illustration"
+    val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        val owner = SettingsPage.create(name)
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             SettingsEntryBuilder.create( "Lottie Illustration", owner)
@@ -71,7 +71,7 @@ object IllustrationPageProvider : SettingsPageProvider {
     }
 
      fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+        return SettingsEntryBuilder.createInject(owner)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE
