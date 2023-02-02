@@ -25,8 +25,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
-import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -40,9 +40,9 @@ private const val TITLE = "Sample TwoTargetSwitchPreference"
 
 object TwoTargetSwitchPreferencePageProvider : SettingsPageProvider {
     override val name = "TwoTargetSwitchPreference"
+    val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        val owner = SettingsPage.create(name)
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             SettingsEntryBuilder.create( "TwoTargetSwitchPreference", owner)
@@ -73,7 +73,7 @@ object TwoTargetSwitchPreferencePageProvider : SettingsPageProvider {
     }
 
     fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+        return SettingsEntryBuilder.createInject(owner)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE

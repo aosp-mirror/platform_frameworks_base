@@ -21,8 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
-import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.chart.BarChart
@@ -36,7 +36,6 @@ import com.android.settingslib.spa.widget.chart.PieChartData
 import com.android.settingslib.spa.widget.chart.PieChartModel
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
-import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import java.text.NumberFormat
 
@@ -47,9 +46,13 @@ private const val TITLE = "Sample Chart"
 
 object ChartPageProvider : SettingsPageProvider {
     override val name = "Chart"
+    val owner = createSettingsPage()
+
+    override fun getTitle(arguments: Bundle?): String {
+        return TITLE
+    }
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        val owner = SettingsPage.create(name)
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
             SettingsEntryBuilder.create("Line Chart", owner)
@@ -133,22 +136,13 @@ object ChartPageProvider : SettingsPageProvider {
     }
 
     fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = SettingsPage.create(name))
+        return SettingsEntryBuilder.createInject(owner)
             .setUiLayoutFn {
                 Preference(object : PreferenceModel {
                     override val title = TITLE
                     override val onClick = navigator(name)
                 })
             }
-    }
-
-    @Composable
-    override fun Page(arguments: Bundle?) {
-        RegularScaffold(title = TITLE) {
-            for (entry in buildEntry(arguments)) {
-                entry.UiLayout(arguments)
-            }
-        }
     }
 }
 
