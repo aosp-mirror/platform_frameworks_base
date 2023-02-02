@@ -30,14 +30,10 @@ data class SettingsPageWithEntry(
     val injectEntry: SettingsEntry,
 )
 
-private fun SettingsPage.getTitle(sppRepository: SettingsPageProviderRepository): String {
-    return sppRepository.getProviderOrNull(sppName)!!.getTitle(arguments)
-}
-
 /**
  * The repository to maintain all Settings entries
  */
-class SettingsEntryRepository(private val sppRepository: SettingsPageProviderRepository) {
+class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
     // Map of entry unique Id to entry
     private val entryMap: Map<String, SettingsEntry>
 
@@ -123,7 +119,7 @@ class SettingsEntryRepository(private val sppRepository: SettingsPageProviderRep
             if (it.toPage == null)
                 defaultTitle
             else {
-                it.toPage.getTitle(sppRepository)
+                it.toPage.getTitle()
             }
         }
     }
