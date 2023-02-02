@@ -2234,8 +2234,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             while (leashReference.getParent() != ancestor) {
                 leashReference = leashReference.getParent();
             }
+
             final SurfaceControl rootLeash = leashReference.makeAnimationLeash().setName(
                     "Transition Root: " + leashReference.getName()).build();
+            rootLeash.setUnreleasedWarningCallSite("Transition.calculateTransitionRoots");
             startT.setLayer(rootLeash, leashReference.getLastLayer());
             outInfo.addRootLeash(endDisplayId, rootLeash,
                     ancestor.getBounds().left, ancestor.getBounds().top);
