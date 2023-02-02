@@ -546,17 +546,16 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         }
 
         if (deviceProfile == null) {
-            // Summary is not needed for null profile.
-            mSummary.setVisibility(View.GONE);
+            summary = getHtmlFromResources(this, SUMMARIES.get(null), deviceName);
             mConstraintList.setVisibility(View.GONE);
         } else {
+            summary = getHtmlFromResources(this, SUMMARIES.get(deviceProfile),
+                    getString(PROFILES_NAME.get(deviceProfile)), appLabel);
             mPermissionTypes.addAll(PERMISSION_TYPES.get(deviceProfile));
             setupPermissionList();
         }
 
         title = getHtmlFromResources(this, TITLES.get(deviceProfile), appLabel, deviceName);
-        summary = getHtmlFromResources(this, SUMMARIES.get(deviceProfile),
-                getString(PROFILES_NAME.get(deviceProfile)), appLabel);
         profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
 
         mTitle.setText(title);
@@ -586,7 +585,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         if (deviceProfile == null) {
             summary = getHtmlFromResources(this, summaryResourceId);
-            mSummary.setVisibility(View.GONE);
         } else {
             summary = getHtmlFromResources(this, summaryResourceId, profileName, appLabel);
         }
