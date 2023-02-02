@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
@@ -88,6 +89,8 @@ public class InfoMediaManagerTest {
     private MediaManager.MediaDeviceCallback mCallback;
     @Mock
     private MediaSessionManager mMediaSessionManager;
+    @Mock
+    private ComponentName mComponentName;
 
     private InfoMediaManager mInfoMediaManager;
     private Context mContext;
@@ -370,6 +373,24 @@ public class InfoMediaManagerTest {
         when(mRouterManager.getRouteListingPreference(any())).thenReturn(null);
 
         assertThat(mInfoMediaManager.preferRouteListingOrdering()).isFalse();
+    }
+
+    @Test
+    public void getInAppOnlyItemRoutingReceiver_oldSdkVersion_returnsNull() {
+        assertThat(mInfoMediaManager.getLinkedItemComponentName()).isNull();
+    }
+
+    @Test
+    public void getInAppOnlyItemRoutingReceiver_newSdkVersionWithReceiverExist_returns() {
+        ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT",
+                Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
+        when(mRouterManager.getRouteListingPreference(any())).thenReturn(
+                new RouteListingPreference.Builder().setItems(
+                        ImmutableList.of()).setUseSystemOrdering(
+                        false).setLinkedItemComponentName(mComponentName).build());
+        mInfoMediaManager.mRouterManager = mRouterManager;
+
+        assertThat(mInfoMediaManager.getLinkedItemComponentName()).isEqualTo(mComponentName);
     }
 
     private List<MediaRoute2Info> getRoutesListWithDuplicatedIds() {

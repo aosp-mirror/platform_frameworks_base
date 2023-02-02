@@ -30,8 +30,14 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
+import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION;
 import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED_ROUTE;
+import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_NONE;
+import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_CUSTOM;
+import static android.media.RouteListingPreference.Item.SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED;
 import static android.media.RouteListingPreference.Item.SUBTEXT_NONE;
+import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQUIRED;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
@@ -50,6 +56,8 @@ import androidx.annotation.DoNotInline;
 import androidx.annotation.IntDef;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+
+import com.android.settingslib.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -194,26 +202,56 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public abstract String getId();
 
     /**
-     * Get disabled reason of device
+     * Get selection behavior of device
      *
-     * @return disabled reason of device
+     * @return selection behavior of device
      */
     @RouteListingPreference.Item.SubText
-    public int getDisableReason() {
+    public int getSelectionBehavior() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && mItem != null
-                ? mItem.getSubText()
-                : -1;
+                ? mItem.getSelectionBehavior() : SELECTION_BEHAVIOR_NONE;
     }
 
     /**
-     * Checks if device is has disabled reason
+     * Checks if device is has subtext
      *
-     * @return true if device has disabled reason
+     * @return true if device has subtext
      */
-    public boolean hasDisabledReason() {
+    public boolean hasSubtext() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
                 && mItem != null
                 && mItem.getSubText() != SUBTEXT_NONE;
+    }
+
+    /**
+     * Get subtext of device
+     *
+     * @return subtext of device
+     */
+    @RouteListingPreference.Item.SubText
+    public int getSubtext() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && mItem != null
+                ? mItem.getSubText() : SUBTEXT_NONE;
+    }
+
+    /**
+     * Returns subtext string for current route.
+     *
+     * @return subtext string for this route
+     */
+    public String getSubtextString() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && mItem != null
+                ? Api34Impl.composeSubtext(mItem, mContext) : null;
+    }
+
+    /**
+     * Checks if device has ongoing shared session, which allow user to join
+     *
+     * @return true if device has ongoing session
+     */
+    public boolean hasOngoingSession() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && Api34Impl.hasOngoingSession(mItem);
     }
 
     /**
@@ -513,7 +551,27 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     private static class Api34Impl {
         @DoNotInline
         static boolean isSuggestedDevice(RouteListingPreference.Item item) {
-            return item != null && item.getFlags() == FLAG_SUGGESTED_ROUTE;
+            return item != null && (item.getFlags() & FLAG_SUGGESTED_ROUTE) != 0;
+        }
+
+        @DoNotInline
+        static boolean hasOngoingSession(RouteListingPreference.Item item) {
+            return item != null && (item.getFlags() & FLAG_ONGOING_SESSION) != 0;
+        }
+
+        @DoNotInline
+        static String composeSubtext(RouteListingPreference.Item item, Context context) {
+            switch (item.getSubText()) {
+                case SUBTEXT_SUBSCRIPTION_REQUIRED:
+                    return context.getString(R.string.media_output_status_require_premium);
+                case SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED:
+                    return context.getString(R.string.media_output_status_not_support_downloads);
+                case SUBTEXT_AD_ROUTING_DISALLOWED:
+                    return context.getString(R.string.media_output_status_try_after_ad);
+                case SUBTEXT_CUSTOM:
+                    return (String) item.getCustomSubtextMessage();
+            }
+            return "";
         }
     }
 }

@@ -34,10 +34,12 @@ import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
+import android.annotation.Nullable;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
 import android.content.Context;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
@@ -189,6 +191,14 @@ public class InfoMediaManager extends MediaManager {
     boolean preferRouteListingOrdering() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
                 && Api34Impl.preferRouteListingOrdering(mRouterManager, mPackageName);
+    }
+
+    @Nullable
+    ComponentName getLinkedItemComponentName() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            return null;
+        }
+        return Api34Impl.getLinkedItemComponentName(mRouterManager, mPackageName);
     }
 
     /**
@@ -679,6 +689,16 @@ public class InfoMediaManager extends MediaManager {
                     mediaRouter2Manager.getRouteListingPreference(packageName);
             return routeListingPreference != null
                     && !routeListingPreference.getUseSystemOrdering();
+        }
+
+        @DoNotInline
+        @Nullable
+        static ComponentName getLinkedItemComponentName(
+                MediaRouter2Manager mediaRouter2Manager, String packageName) {
+            RouteListingPreference routeListingPreference =
+                    mediaRouter2Manager.getRouteListingPreference(packageName);
+            return routeListingPreference == null ? null
+                    : routeListingPreference.getLinkedItemComponentName();
         }
 
         @DoNotInline
