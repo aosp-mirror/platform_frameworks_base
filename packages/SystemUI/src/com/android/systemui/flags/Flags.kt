@@ -532,13 +532,16 @@ object Flags {
     val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
 
     // TODO(b/266983432) Tracking Bug
-    val SHARESHEET_CUSTOM_ACTIONS = unreleasedFlag(1501, "sharesheet_custom_actions")
+    val SHARESHEET_CUSTOM_ACTIONS =
+        unreleasedFlag(1501, "sharesheet_custom_actions", teamfood = true)
 
     // TODO(b/266982749) Tracking Bug
-    val SHARESHEET_RESELECTION_ACTION = unreleasedFlag(1502, "sharesheet_reselection_action")
+    val SHARESHEET_RESELECTION_ACTION =
+        unreleasedFlag(1502, "sharesheet_reselection_action", teamfood = true)
 
     // TODO(b/266983474) Tracking Bug
-    val SHARESHEET_IMAGE_AND_TEXT_PREVIEW = unreleasedFlag(1503, "sharesheet_image_text_preview")
+    val SHARESHEET_IMAGE_AND_TEXT_PREVIEW =
+        unreleasedFlag(1503, "sharesheet_image_text_preview", teamfood = true)
 
     // 1600 - accessibility
     @JvmField
