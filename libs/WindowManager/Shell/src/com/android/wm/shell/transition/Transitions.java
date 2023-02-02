@@ -24,6 +24,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
+import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
@@ -326,6 +327,17 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** @return true if the transition was triggered by closing something vs opening something */
     public static boolean isClosingType(@WindowManager.TransitionType int type) {
         return type == TRANSIT_CLOSE || type == TRANSIT_TO_BACK;
+    }
+
+    /** Returns {@code true} if the transition has a display change. */
+    public static boolean hasDisplayChange(@NonNull TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getMode() == TRANSIT_CHANGE && change.hasFlags(FLAG_IS_DISPLAY)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

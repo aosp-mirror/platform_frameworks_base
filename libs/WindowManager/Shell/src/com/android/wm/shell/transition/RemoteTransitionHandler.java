@@ -93,6 +93,11 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        if (!Transitions.SHELL_TRANSITIONS_ROTATION && Transitions.hasDisplayChange(info)) {
+            // Note that if the remote doesn't have permission ACCESS_SURFACE_FLINGER, some
+            // operations of the start transaction may be ignored.
+            return false;
+        }
         RemoteTransition pendingRemote = mRequestedRemotes.get(transition);
         if (pendingRemote == null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s doesn't have "
