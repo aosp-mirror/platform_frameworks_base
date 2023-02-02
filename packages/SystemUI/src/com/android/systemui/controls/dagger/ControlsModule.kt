@@ -44,12 +44,15 @@ import com.android.systemui.controls.ui.ControlsActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.ControlsUiControllerImpl
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tiles.DeviceControlsTile
 import dagger.Binds
 import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import dagger.multibindings.StringKey
 
 /**
  * Module for injecting classes in `com.android.systemui.controls`-
@@ -149,4 +152,9 @@ abstract class ControlsModule {
     @IntoMap
     @ClassKey(ControlsActivity::class)
     abstract fun provideControlsActivity(activity: ControlsActivity): Activity
+
+    @Binds
+    @IntoMap
+    @StringKey(DeviceControlsTile.TILE_SPEC)
+    abstract fun bindDeviceControlsTile(controlsTile: DeviceControlsTile): QSTileImpl<*>
 }
