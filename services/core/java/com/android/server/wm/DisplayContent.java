@@ -1679,7 +1679,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             // The orientation source may not be the top if it uses SCREEN_ORIENTATION_BEHIND.
             final ActivityRecord topCandidate = !r.isVisibleRequested() ? topRunningActivity() : r;
-            if (handleTopActivityLaunchingInDifferentOrientation(
+            if (topCandidate != null && handleTopActivityLaunchingInDifferentOrientation(
                     topCandidate, r, true /* checkOpening */)) {
                 // Display orientation should be deferred until the top fixed rotation is finished.
                 return false;
