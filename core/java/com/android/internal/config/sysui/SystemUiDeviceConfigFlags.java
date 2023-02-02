@@ -562,6 +562,13 @@ public final class SystemUiDeviceConfigFlags {
             "task_manager_show_user_visible_jobs";
 
     /**
+     * (boolean) Whether the task manager should tell JobScheduler it's about to ask for an
+     * app stop.
+     */
+    public static final String TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP =
+            "task_manager_inform_job_scheduler_of_pending_app_stop";
+
+    /**
      * (boolean) Whether to show notification volume control slider separate from ring.
      */
     public static final String VOLUME_SEPARATE_NOTIFICATION = "volume_separate_notification";

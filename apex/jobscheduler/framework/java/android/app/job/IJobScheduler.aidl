@@ -48,5 +48,5 @@ interface IJobScheduler {
     @EnforcePermission(allOf={"MANAGE_ACTIVITY_TASKS", "INTERACT_ACROSS_USERS_FULL"})
     void unregisterUserVisibleJobObserver(in IUserVisibleJobObserver observer);
     @EnforcePermission(allOf={"MANAGE_ACTIVITY_TASKS", "INTERACT_ACROSS_USERS_FULL"})
-    void stopUserVisibleJobsForUser(String packageName, int userId);
+    void notePendingUserRequestedAppStop(String packageName, int userId, String debugReason);
 }

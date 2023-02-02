@@ -48,6 +48,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_FOOTER_DOT
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS
@@ -158,6 +159,7 @@ class FgsManagerControllerImpl @Inject constructor(
         private const val DEFAULT_TASK_MANAGER_SHOW_FOOTER_DOT = false
         private const val DEFAULT_TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS = true
         private const val DEFAULT_TASK_MANAGER_SHOW_USER_VISIBLE_JOBS = true
+        private const val DEFAULT_TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP = true
     }
 
     override var newChangesSinceDialogWasDismissed = false
@@ -172,6 +174,9 @@ class FgsManagerControllerImpl @Inject constructor(
     private var showStopBtnForUserAllowlistedApps = false
 
     private var showUserVisibleJobs = DEFAULT_TASK_MANAGER_SHOW_USER_VISIBLE_JOBS
+
+    private var informJobSchedulerOfPendingAppStop =
+        DEFAULT_TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP
 
     override val includesUserVisibleJobs: Boolean
         get() = showUserVisibleJobs
@@ -233,6 +238,11 @@ class FgsManagerControllerImpl @Inject constructor(
                 NAMESPACE_SYSTEMUI,
                 TASK_MANAGER_SHOW_USER_VISIBLE_JOBS, DEFAULT_TASK_MANAGER_SHOW_USER_VISIBLE_JOBS)
 
+            informJobSchedulerOfPendingAppStop = deviceConfigProxy.getBoolean(
+                NAMESPACE_SYSTEMUI,
+                TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP,
+                DEFAULT_TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP)
+
             try {
                 activityManager.registerForegroundServiceObserver(foregroundServiceObserver)
                 // Clumping FGS and user-visible jobs here and showing a single entry and button
@@ -262,10 +272,13 @@ class FgsManagerControllerImpl @Inject constructor(
                     showStopBtnForUserAllowlistedApps)
                 var wasShowingUserVisibleJobs = showUserVisibleJobs
                 showUserVisibleJobs = it.getBoolean(
-                        TASK_MANAGER_SHOW_USER_VISIBLE_JOBS, showUserVisibleJobs)
+                    TASK_MANAGER_SHOW_USER_VISIBLE_JOBS, showUserVisibleJobs)
                 if (showUserVisibleJobs != wasShowingUserVisibleJobs) {
                     onShowUserVisibleJobsFlagChanged()
                 }
+                informJobSchedulerOfPendingAppStop = it.getBoolean(
+                    TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS,
+                    informJobSchedulerOfPendingAppStop)
             }
 
             _isAvailable.value = deviceConfigProxy.getBoolean(
@@ -475,14 +488,11 @@ class FgsManagerControllerImpl @Inject constructor(
     private fun stopPackage(userId: Int, packageName: String, timeStarted: Long) {
         logEvent(stopped = true, packageName, userId, timeStarted)
         val userPackageKey = UserPackage(userId, packageName)
-        if (showUserVisibleJobs &&
-                runningTaskIdentifiers[userPackageKey]?.hasRunningJobs() == true) {
+        if (showUserVisibleJobs || informJobSchedulerOfPendingAppStop) {
             // TODO(255768978): allow fine-grained job control
-            jobScheduler.stopUserVisibleJobsForUser(packageName, userId)
+            jobScheduler.notePendingUserRequestedAppStop(packageName, userId, "task manager")
         }
-        if (runningTaskIdentifiers[userPackageKey]?.hasFgs() == true) {
-            activityManager.stopAppForUser(packageName, userId)
-        }
+        activityManager.stopAppForUser(packageName, userId)
     }
 
     private fun onShowUserVisibleJobsFlagChanged() {

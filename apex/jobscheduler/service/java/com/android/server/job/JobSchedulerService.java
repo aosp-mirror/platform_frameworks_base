@@ -1701,16 +1701,15 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     @VisibleForTesting
-    void stopUserVisibleJobsInternal(@NonNull String packageName, int userId) {
+    void notePendingUserRequestedAppStopInternal(@NonNull String packageName, int userId,
+            @Nullable String debugReason) {
         final int packageUid = mLocalPM.getPackageUid(packageName, 0, userId);
         if (packageUid < 0) {
             Slog.wtf(TAG, "Asked to stop jobs of an unknown package");
             return;
         }
         synchronized (mLock) {
-            mConcurrencyManager.stopUserVisibleJobsLocked(userId, packageName,
-                    JobParameters.STOP_REASON_USER,
-                    JobParameters.INTERNAL_STOP_REASON_USER_UI_STOP);
+            mConcurrencyManager.markJobsForUserStopLocked(userId, packageName, debugReason);
             final ArraySet<JobStatus> jobs = mJobs.getJobsByUid(packageUid);
             for (int i = jobs.size() - 1; i >= 0; i--) {
                 final JobStatus job = jobs.valueAt(i);
@@ -2387,12 +2386,25 @@ public class JobSchedulerService extends com.android.server.SystemService
      *
      * @param failureToReschedule Provided job status that we will reschedule.
      * @return A newly instantiated JobStatus with the same constraints as the last job except
-     * with adjusted timing constraints.
+     * with adjusted timing constraints, or {@code null} if the job shouldn't be rescheduled for
+     * some policy reason.
      * @see #maybeQueueReadyJobsForExecutionLocked
      */
+    @Nullable
     @VisibleForTesting
     JobStatus getRescheduleJobForFailureLocked(JobStatus failureToReschedule,
             @JobParameters.StopReason int stopReason, int internalStopReason) {
+        if (internalStopReason == JobParameters.INTERNAL_STOP_REASON_USER_UI_STOP
+                && failureToReschedule.isUserVisibleJob()) {
+            // If a user stops an app via Task Manager and the job was user-visible, then assume
+            // the user wanted to stop that task and not let it run in the future. It's in the
+            // app's best interests to provide action buttons in their notification to avoid this
+            // scenario.
+            Slog.i(TAG,
+                    "Dropping " + failureToReschedule.toShortString() + " because of user stop");
+            return null;
+        }
+
         final long elapsedNowMillis = sElapsedRealtimeClock.millis();
         final JobInfo job = failureToReschedule.getJob();
 
@@ -4225,12 +4237,13 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @Override
         @EnforcePermission(allOf = {MANAGE_ACTIVITY_TASKS, INTERACT_ACROSS_USERS_FULL})
-        public void stopUserVisibleJobsForUser(@NonNull String packageName, int userId) {
-            super.stopUserVisibleJobsForUser_enforcePermission();
+        public void notePendingUserRequestedAppStop(@NonNull String packageName, int userId,
+                @Nullable String debugReason) {
+            super.notePendingUserRequestedAppStop_enforcePermission();
             if (packageName == null) {
                 throw new NullPointerException("packageName");
             }
-            JobSchedulerService.this.stopUserVisibleJobsInternal(packageName, userId);
+            notePendingUserRequestedAppStopInternal(packageName, userId, debugReason);
         }
     }
 

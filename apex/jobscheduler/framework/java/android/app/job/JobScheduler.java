@@ -515,5 +515,6 @@ public abstract class JobScheduler {
             android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     @SuppressWarnings("HiddenAbstractMethod")
-    public abstract void stopUserVisibleJobsForUser(@NonNull String packageName, int userId);
+    public abstract void notePendingUserRequestedAppStop(@NonNull String packageName, int userId,
+            @Nullable String debugReason);
 }
