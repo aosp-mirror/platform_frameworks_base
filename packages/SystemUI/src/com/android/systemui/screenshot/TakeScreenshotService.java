@@ -26,6 +26,7 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_CALLBACK;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_SERVICE;
 import static com.android.systemui.screenshot.LogConfig.logTag;
+import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED;
 import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER;
 
 import android.annotation.MainThread;
@@ -202,6 +203,7 @@ public class TakeScreenshotService extends Service {
         // animation and error notification.
         if (!mUserManager.isUserUnlocked()) {
             Log.w(TAG, "Skipping screenshot because storage is locked!");
+            logFailedRequest(request);
             mNotificationsController.notifyScreenshotError(
                     R.string.screenshot_failed_to_save_user_locked_text);
             callback.reportError();
@@ -212,6 +214,7 @@ public class TakeScreenshotService extends Service {
             mBgExecutor.execute(() -> {
                 Log.w(TAG, "Skipping screenshot because an IT admin has disabled "
                         + "screenshots on the device");
+                logFailedRequest(request);
                 String blockedByAdminText = mDevicePolicyManager.getResources().getString(
                         SCREENSHOT_BLOCKED_BY_ADMIN,
                         () -> mContext.getString(R.string.screenshot_blocked_by_admin));
@@ -225,38 +228,43 @@ public class TakeScreenshotService extends Service {
         if (mFeatureFlags.isEnabled(Flags.SCREENSHOT_METADATA)) {
             Log.d(TAG, "Processing screenshot data");
             ScreenshotData screenshotData = ScreenshotData.fromRequest(request);
-            mProcessor.processAsync(screenshotData,
-                    (data) -> dispatchToController(data, onSaved, callback));
+            try {
+                mProcessor.processAsync(screenshotData,
+                        (data) -> dispatchToController(data, onSaved, callback));
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Failed to process screenshot request!", e);
+                logFailedRequest(request);
+                mNotificationsController.notifyScreenshotError(
+                        R.string.screenshot_failed_to_capture_text);
+                callback.reportError();
+            }
         } else {
-            mProcessor.processAsync(request,
-                    (r) -> dispatchToController(r, onSaved, callback));
+            try {
+                mProcessor.processAsync(request,
+                        (r) -> dispatchToController(r, onSaved, callback));
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Failed to process screenshot request!", e);
+                logFailedRequest(request);
+                mNotificationsController.notifyScreenshotError(
+                        R.string.screenshot_failed_to_capture_text);
+                callback.reportError();
+            }
         }
     }
 
     private void dispatchToController(ScreenshotData screenshot,
             Consumer<Uri> uriConsumer, RequestCallback callback) {
-
         mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(screenshot.getSource()), 0,
                 screenshot.getPackageNameString());
-
-        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
-                && screenshot.getBitmap() == null) {
-            Log.e(TAG, "Got null bitmap from screenshot message");
-            mNotificationsController.notifyScreenshotError(
-                    R.string.screenshot_failed_to_capture_text);
-            callback.reportError();
-            return;
-        }
-
         mScreenshot.handleScreenshot(screenshot, uriConsumer, callback);
     }
 
     private void dispatchToController(ScreenshotRequest request,
             Consumer<Uri> uriConsumer, RequestCallback callback) {
-
         ComponentName topComponent = request.getTopComponent();
-        mUiEventLogger.log(ScreenshotEvent.getScreenshotSource(request.getSource()), 0,
-                topComponent == null ? "" : topComponent.getPackageName());
+        String packageName = topComponent == null ? "" : topComponent.getPackageName();
+        mUiEventLogger.log(
+                ScreenshotEvent.getScreenshotSource(request.getSource()), 0, packageName);
 
         switch (request.getType()) {
             case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
@@ -275,19 +283,20 @@ public class TakeScreenshotService extends Service {
                 int taskId = request.getTaskId();
                 int userId = request.getUserId();
 
-                if (screenshot == null) {
-                    Log.e(TAG, "Got null bitmap from screenshot message");
-                    mNotificationsController.notifyScreenshotError(
-                            R.string.screenshot_failed_to_capture_text);
-                    callback.reportError();
-                } else {
-                    mScreenshot.handleImageAsScreenshot(screenshot, screenBounds, insets,
-                            taskId, userId, topComponent, uriConsumer, callback);
-                }
+                mScreenshot.handleImageAsScreenshot(screenshot, screenBounds, insets,
+                        taskId, userId, topComponent, uriConsumer, callback);
                 break;
             default:
-                Log.w(TAG, "Invalid screenshot option: " + request.getType());
+                Log.wtf(TAG, "Invalid screenshot option: " + request.getType());
         }
+    }
+
+    private void logFailedRequest(ScreenshotRequest request) {
+        ComponentName topComponent = request.getTopComponent();
+        String packageName = topComponent == null ? "" : topComponent.getPackageName();
+        mUiEventLogger.log(
+                ScreenshotEvent.getScreenshotSource(request.getSource()), 0, packageName);
+        mUiEventLogger.log(SCREENSHOT_CAPTURE_FAILED, 0, packageName);
     }
 
     private static void sendComplete(Messenger target) {

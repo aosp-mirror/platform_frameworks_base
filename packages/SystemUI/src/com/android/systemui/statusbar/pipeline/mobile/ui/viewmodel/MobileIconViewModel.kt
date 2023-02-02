@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
+import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
+import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH_NONE
 import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -43,6 +45,7 @@ interface MobileIconViewModelCommon {
     val subscriptionId: Int
     /** An int consumable by [SignalDrawable] for display */
     val iconId: Flow<Int>
+    val contentDescription: Flow<ContentDescription>
     val roaming: Flow<Boolean>
     /** The RAT icon (LTE, 3G, 5G, etc) to be displayed. Null if we shouldn't show anything */
     val networkTypeIcon: Flow<Icon?>
@@ -99,6 +102,23 @@ constructor(
                 columnName = "iconId",
                 initialValue = initial,
             )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
+    }
+
+    override val contentDescription: Flow<ContentDescription> = run {
+        val initial = ContentDescription.Resource(PHONE_SIGNAL_STRENGTH_NONE)
+        combine(
+                iconInteractor.level,
+                iconInteractor.isInService,
+            ) { level, isInService ->
+                val resId =
+                    when {
+                        isInService -> PHONE_SIGNAL_STRENGTH[level]
+                        else -> PHONE_SIGNAL_STRENGTH_NONE
+                    }
+                ContentDescription.Resource(resId)
+            }
+            .distinctUntilChanged()
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
 

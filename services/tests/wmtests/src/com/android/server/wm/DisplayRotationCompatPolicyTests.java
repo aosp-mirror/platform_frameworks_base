@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
@@ -30,7 +31,9 @@ import static android.view.Surface.ROTATION_90;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
@@ -57,6 +60,8 @@ import android.view.Display;
 import android.view.Surface.Rotation;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -125,6 +130,69 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 });
         mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(
                 mDisplayContent, mMockHandler);
+    }
+
+    @Test
+    public void testOpenedCameraInSplitScreen_showToast() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        spyOn(mTask);
+        spyOn(mDisplayRotationCompatPolicy);
+        doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivity).getWindowingMode();
+        doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mTask).getWindowingMode();
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        verify(mDisplayRotationCompatPolicy).showToast(
+                R.string.display_rotation_camera_compat_toast_in_split_screen);
+    }
+
+    @Test
+    public void testOnScreenRotationAnimationFinished_treatmentNotEnabled_doNotShowToast() {
+        when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
+                    /* checkDeviceConfig */ anyBoolean()))
+                .thenReturn(false);
+        spyOn(mDisplayRotationCompatPolicy);
+
+        mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
+
+        verify(mDisplayRotationCompatPolicy, never()).showToast(
+                R.string.display_rotation_camera_compat_toast_after_rotation);
+    }
+
+    @Test
+    public void testOnScreenRotationAnimationFinished_noOpenCamera_doNotShowToast() {
+        spyOn(mDisplayRotationCompatPolicy);
+
+        mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
+
+        verify(mDisplayRotationCompatPolicy, never()).showToast(
+                R.string.display_rotation_camera_compat_toast_after_rotation);
+    }
+
+    @Test
+    public void testOnScreenRotationAnimationFinished_notFullscreen_doNotShowToast() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivity).getWindowingMode();
+        spyOn(mDisplayRotationCompatPolicy);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
+
+        verify(mDisplayRotationCompatPolicy, never()).showToast(
+                R.string.display_rotation_camera_compat_toast_after_rotation);
+    }
+
+    @Test
+    public void testOnScreenRotationAnimationFinished_showToast() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        spyOn(mDisplayRotationCompatPolicy);
+
+        mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
+
+        verify(mDisplayRotationCompatPolicy).showToast(
+                R.string.display_rotation_camera_compat_toast_after_rotation);
     }
 
     @Test

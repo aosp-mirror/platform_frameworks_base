@@ -125,6 +125,45 @@
             android:layout_width="@dimen/clipboard_preview_size"
             android:layout_height="@dimen/clipboard_preview_size"/>
     </FrameLayout>
+    <LinearLayout
+        android:id="@+id/minimized_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:elevation="7dp"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="@dimen/overlay_action_container_margin_horizontal"
+        android:layout_marginBottom="@dimen/overlay_action_container_margin_bottom"
+        android:background="@drawable/clipboard_minimized_background">
+        <ImageView
+            android:src="@drawable/ic_content_paste"
+            android:tint="?attr/overlayButtonTextColor"
+            android:layout_width="24dp"
+            android:layout_height="24dp"/>
+        <ImageView
+            android:src="@*android:drawable/ic_chevron_end"
+            android:tint="?attr/overlayButtonTextColor"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:paddingEnd="-8dp"
+            android:paddingStart="-4dp"/>
+    </LinearLayout>
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/clipboard_content_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="clipboard_preview,minimized_preview"/>
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/clipboard_content_end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="clipboard_preview,minimized_preview"/>
     <FrameLayout
         android:id="@+id/dismiss_button"
         android:layout_width="@dimen/overlay_dismiss_button_tappable_size"
@@ -132,10 +171,10 @@
         android:elevation="10dp"
         android:visibility="gone"
         android:alpha="0"
-        app:layout_constraintStart_toEndOf="@id/clipboard_preview"
-        app:layout_constraintEnd_toEndOf="@id/clipboard_preview"
-        app:layout_constraintTop_toTopOf="@id/clipboard_preview"
-        app:layout_constraintBottom_toTopOf="@id/clipboard_preview"
+        app:layout_constraintStart_toEndOf="@id/clipboard_content_end"
+        app:layout_constraintEnd_toEndOf="@id/clipboard_content_end"
+        app:layout_constraintTop_toTopOf="@id/clipboard_content_top"
+        app:layout_constraintBottom_toTopOf="@id/clipboard_content_top"
         android:contentDescription="@string/clipboard_dismiss_description">
         <ImageView
             android:id="@+id/dismiss_image"

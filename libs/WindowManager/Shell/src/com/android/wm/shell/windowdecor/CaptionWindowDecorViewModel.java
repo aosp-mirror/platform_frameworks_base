@@ -36,6 +36,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.transition.Transitions;
 
 /**
  * View model for the window decoration with a caption and shadows. Works with
@@ -65,6 +66,9 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         mTaskOrganizer = taskOrganizer;
         mDisplayController = displayController;
         mSyncQueue = syncQueue;
+        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
+        }
     }
 
     @Override

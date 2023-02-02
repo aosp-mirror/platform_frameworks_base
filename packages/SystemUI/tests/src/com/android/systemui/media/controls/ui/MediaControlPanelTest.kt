@@ -52,6 +52,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
+import androidx.media.utils.MediaConstants
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.widget.CachingIconView
@@ -206,6 +207,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var coverContainer3: ViewGroup
     @Mock private lateinit var recAppIconItem: CachingIconView
     @Mock private lateinit var recCardTitle: TextView
+    @Mock private lateinit var recProgressBar1: SeekBar
+    @Mock private lateinit var recProgressBar2: SeekBar
+    @Mock private lateinit var recProgressBar3: SeekBar
+    @Mock private lateinit var recSubtitleMock1: TextView
+    @Mock private lateinit var recSubtitleMock2: TextView
+    @Mock private lateinit var recSubtitleMock3: TextView
     @Mock private lateinit var coverItem: ImageView
     private lateinit var coverItem1: ImageView
     private lateinit var coverItem2: ImageView
@@ -2081,6 +2088,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(recommendationViewHolder.cardTitle).thenReturn(recCardTitle)
         whenever(recommendationViewHolder.mediaCoverItems)
             .thenReturn(listOf(coverItem, coverItem, coverItem))
+        whenever(recommendationViewHolder.mediaProgressBars)
+            .thenReturn(listOf(recProgressBar1, recProgressBar2, recProgressBar3))
+        whenever(recommendationViewHolder.mediaSubtitles)
+            .thenReturn(listOf(recSubtitleMock1, recSubtitleMock2, recSubtitleMock3))
 
         val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
@@ -2116,6 +2127,65 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(recCardTitle).setTextColor(any<Int>())
         verify(recAppIconItem, times(3)).setImageDrawable(any(Drawable::class.java))
         verify(coverItem, times(3)).setImageDrawable(any(Drawable::class.java))
+    }
+
+    @Test
+    fun bindRecommendationWithProgressBars() {
+        fakeFeatureFlag.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, true)
+        whenever(recommendationViewHolder.mediaAppIcons)
+            .thenReturn(listOf(recAppIconItem, recAppIconItem, recAppIconItem))
+        whenever(recommendationViewHolder.cardTitle).thenReturn(recCardTitle)
+        whenever(recommendationViewHolder.mediaCoverItems)
+            .thenReturn(listOf(coverItem, coverItem, coverItem))
+        whenever(recommendationViewHolder.mediaProgressBars)
+            .thenReturn(listOf(recProgressBar1, recProgressBar2, recProgressBar3))
+        whenever(recommendationViewHolder.mediaSubtitles)
+            .thenReturn(listOf(recSubtitleMock1, recSubtitleMock2, recSubtitleMock3))
+
+        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        canvas.drawColor(Color.RED)
+        val albumArt = Icon.createWithBitmap(bmp)
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED
+                )
+                putDouble(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE, 0.5)
+            }
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "title1")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(bundle)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "title3")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
+            )
+
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(data)
+
+        verify(recProgressBar1).setProgress(50)
+        verify(recProgressBar1).visibility = View.VISIBLE
+        verify(recProgressBar2).visibility = View.GONE
+        verify(recProgressBar3).visibility = View.GONE
+        verify(recSubtitleMock1).visibility = View.GONE
+        verify(recSubtitleMock2).visibility = View.VISIBLE
+        verify(recSubtitleMock3).visibility = View.VISIBLE
     }
 
     @Test

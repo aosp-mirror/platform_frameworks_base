@@ -364,6 +364,9 @@ object Flags {
     // TODO(b/267007629): Tracking Bug
     val MEDIA_RESUME_PROGRESS = unreleasedFlag(915, "media_resume_progress")
 
+    // TODO(b/267166152) : Tracking Bug
+    val MEDIA_RETAIN_RECOMMENDATIONS = unreleasedFlag(916, "media_retain_recommendations")
+
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
 
@@ -546,6 +549,8 @@ object Flags {
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
+    // TODO(b/267162944): Tracking bug
+    @JvmField val CLIPBOARD_MINIMIZED_LAYOUT = unreleasedFlag(1702, "clipboard_data_model")
 
     // 1800 - shade container
     @JvmField
