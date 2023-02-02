@@ -241,7 +241,7 @@ public class Canvas extends BaseCanvas {
 
     /**
      * Return true if the device that the current layer draws into is opaque
-     * (i.e. does not support per-pixel alpha).
+     * (that is, it does not support per-pixel alpha).
      *
      * @return true if the device that the current layer draws into is opaque
      */
