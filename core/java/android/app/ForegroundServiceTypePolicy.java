@@ -109,7 +109,7 @@ public abstract class ForegroundServiceTypePolicy {
      */
     // TODO (b/254661666): Change to @EnabledAfter(T)
     @ChangeId
-    @Disabled
+    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
     @Overridable
     public static final long FGS_TYPE_NONE_DISABLED_CHANGE_ID = 255038118L;
 
@@ -144,7 +144,7 @@ public abstract class ForegroundServiceTypePolicy {
      */
     // TODO (b/254661666): Change to @EnabledAfter(T)
     @ChangeId
-    @Disabled
+    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
     @Overridable
     public static final long FGS_TYPE_PERMISSION_CHANGE_ID = 254662522L;
 
@@ -1059,7 +1059,7 @@ public abstract class ForegroundServiceTypePolicy {
             if (policy.isTypeDisabled(callerUid)) {
                 return FGS_TYPE_POLICY_CHECK_DISABLED;
             }
-            int permissionResult = PERMISSION_DENIED;
+            int permissionResult = PERMISSION_GRANTED;
             // Do we have the permission to start FGS with this type.
             if (policy.mAllOfPermissions != null) {
                 permissionResult = policy.mAllOfPermissions.checkPermissions(context,
