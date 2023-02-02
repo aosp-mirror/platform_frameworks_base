@@ -1733,14 +1733,14 @@ final class AutofillManagerServiceImpl
 
     private boolean isFieldClassificationServiceAvailableLocked() {
         if (mMaster.verbose) {
-            Slog.v(TAG, "isAugmentedAutofillService(): "
+            Slog.v(TAG, "isFieldClassificationService(): "
                     + "setupCompleted=" + isSetupCompletedLocked()
                     + ", disabled=" + isDisabledByUserRestrictionsLocked()
                     + ", augmentedService="
-                    + mMaster.mAugmentedAutofillResolver.getServiceName(mUserId));
+                    + mMaster.mFieldClassificationResolver.getServiceName(mUserId));
         }
         if (!isSetupCompletedLocked() || isDisabledByUserRestrictionsLocked()
-                || mMaster.mAugmentedAutofillResolver.getServiceName(mUserId) == null) {
+                || mMaster.mFieldClassificationResolver.getServiceName(mUserId) == null) {
             return false;
         }
         return true;
