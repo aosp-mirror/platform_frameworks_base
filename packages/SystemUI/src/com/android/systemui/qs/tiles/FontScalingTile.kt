@@ -101,6 +101,7 @@ constructor(
     }
 
     companion object {
+        const val TILE_SPEC = "font_scaling"
         private const val INTERACTION_JANK_TAG = "font_scaling"
     }
 }

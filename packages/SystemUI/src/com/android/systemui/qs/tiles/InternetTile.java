@@ -67,6 +67,9 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Internet **/
 public class InternetTile extends QSTileImpl<SignalState> {
+
+    public static final String TILE_SPEC = "internet";
+
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
 
     protected final NetworkController mController;
