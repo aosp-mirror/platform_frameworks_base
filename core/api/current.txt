@@ -24030,6 +24030,7 @@ package android.media {
     method @Nullable public android.net.Uri getIconUri();
     method @NonNull public String getId();
     method @NonNull public CharSequence getName();
+    method public int getType();
     method public int getVolume();
     method public int getVolumeHandling();
     method public int getVolumeMax();
@@ -24046,6 +24047,22 @@ package android.media {
     field public static final String FEATURE_REMOTE_VIDEO_PLAYBACK = "android.media.route.feature.REMOTE_VIDEO_PLAYBACK";
     field public static final int PLAYBACK_VOLUME_FIXED = 0; // 0x0
     field public static final int PLAYBACK_VOLUME_VARIABLE = 1; // 0x1
+    field public static final int TYPE_BLE_HEADSET = 26; // 0x1a
+    field public static final int TYPE_BLUETOOTH_A2DP = 8; // 0x8
+    field public static final int TYPE_BUILTIN_SPEAKER = 2; // 0x2
+    field public static final int TYPE_DOCK = 13; // 0xd
+    field public static final int TYPE_GROUP = 2000; // 0x7d0
+    field public static final int TYPE_HDMI = 9; // 0x9
+    field public static final int TYPE_HEARING_AID = 23; // 0x17
+    field public static final int TYPE_REMOTE_AUDIO_VIDEO_RECEIVER = 1003; // 0x3eb
+    field public static final int TYPE_REMOTE_SPEAKER = 1002; // 0x3ea
+    field public static final int TYPE_REMOTE_TV = 1001; // 0x3e9
+    field public static final int TYPE_UNKNOWN = 0; // 0x0
+    field public static final int TYPE_USB_ACCESSORY = 12; // 0xc
+    field public static final int TYPE_USB_DEVICE = 11; // 0xb
+    field public static final int TYPE_USB_HEADSET = 22; // 0x16
+    field public static final int TYPE_WIRED_HEADPHONES = 4; // 0x4
+    field public static final int TYPE_WIRED_HEADSET = 3; // 0x3
   }
 
   public static final class MediaRoute2Info.Builder {
@@ -24061,6 +24078,7 @@ package android.media {
     method @NonNull public android.media.MediaRoute2Info.Builder setDescription(@Nullable CharSequence);
     method @NonNull public android.media.MediaRoute2Info.Builder setExtras(@Nullable android.os.Bundle);
     method @NonNull public android.media.MediaRoute2Info.Builder setIconUri(@Nullable android.net.Uri);
+    method @NonNull public android.media.MediaRoute2Info.Builder setType(int);
     method @NonNull public android.media.MediaRoute2Info.Builder setVisibilityPublic();
     method @NonNull public android.media.MediaRoute2Info.Builder setVisibilityRestricted(@NonNull java.util.Set<java.lang.String>);
     method @NonNull public android.media.MediaRoute2Info.Builder setVolume(int);
