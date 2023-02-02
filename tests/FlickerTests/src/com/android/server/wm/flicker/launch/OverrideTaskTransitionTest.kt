@@ -33,7 +33,7 @@ import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.junit.FlickerBuilderProvider
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import org.junit.FixMethodOrder
 import org.junit.Test

@@ -26,7 +26,7 @@ import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import com.android.server.wm.traces.common.Rect
 import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume

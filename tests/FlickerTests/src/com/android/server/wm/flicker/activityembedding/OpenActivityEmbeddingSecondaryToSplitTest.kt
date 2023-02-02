@@ -23,7 +23,7 @@ import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith

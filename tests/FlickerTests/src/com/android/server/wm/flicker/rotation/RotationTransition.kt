@@ -22,7 +22,7 @@ import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.Test
 
 /** Base class for app rotation tests */

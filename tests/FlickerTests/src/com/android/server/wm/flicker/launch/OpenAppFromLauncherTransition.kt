@@ -19,7 +19,7 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.replacesLayer
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.Test
 
 /** Base class for app launch tests */

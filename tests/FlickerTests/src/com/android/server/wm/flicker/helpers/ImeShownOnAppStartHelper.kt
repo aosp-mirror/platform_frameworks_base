@@ -23,9 +23,10 @@ import android.view.WindowInsets.Type.statusBars
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import com.android.server.wm.traces.common.Condition
 import com.android.server.wm.traces.common.DeviceStateDump
+import com.android.server.wm.traces.common.component.matchers.IComponentMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
@@ -48,12 +49,13 @@ constructor(
 
     override fun launchViaIntent(
         wmHelper: WindowManagerStateHelper,
-        expectedWindowName: String,
+        launchedAppComponentMatcherOverride: IComponentMatcher?,
         action: String?,
         stringExtras: Map<String, String>,
         waitConditions: Array<Condition<DeviceStateDump>>
     ) {
-        super.launchViaIntent(wmHelper, expectedWindowName, action, stringExtras, waitConditions)
+        super.launchViaIntent(
+            wmHelper, launchedAppComponentMatcherOverride, action, stringExtras, waitConditions)
         waitIMEShown(wmHelper)
     }
 

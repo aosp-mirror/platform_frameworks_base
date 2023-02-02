@@ -22,7 +22,7 @@ import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.traces.layers.LayerTraceEntrySubject
 import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
-import com.android.server.wm.traces.common.IComponentMatcher
+import com.android.server.wm.traces.common.component.matchers.IComponentMatcher
 import com.android.server.wm.traces.common.region.Region
 import com.android.server.wm.traces.common.service.PlatformConsts
 

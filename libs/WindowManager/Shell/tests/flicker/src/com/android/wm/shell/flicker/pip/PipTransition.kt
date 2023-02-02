@@ -26,7 +26,7 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.BaseTest
 import com.google.common.truth.Truth

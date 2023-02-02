@@ -32,7 +32,7 @@ import com.android.server.wm.flicker.statusBarLayerPositionAtStartAndEnd
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.taskBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.taskBarWindowIsAlwaysVisible
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.Test
 

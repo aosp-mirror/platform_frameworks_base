@@ -24,7 +24,7 @@ import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.replacesLayer
-import com.android.server.wm.traces.common.ComponentNameMatcher.Companion.LAUNCHER
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher.Companion.LAUNCHER
 import org.junit.Test
 
 /** Base test class for transitions that close an app back to the launcher screen */

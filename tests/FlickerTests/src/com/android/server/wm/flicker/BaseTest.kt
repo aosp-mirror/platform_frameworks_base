@@ -22,7 +22,7 @@ import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.server.wm.flicker.junit.FlickerBuilderProvider
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.AssumptionViolatedException
 import org.junit.Test

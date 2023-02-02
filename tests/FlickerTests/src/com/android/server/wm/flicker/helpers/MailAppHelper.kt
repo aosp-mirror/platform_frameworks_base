@@ -22,7 +22,7 @@ import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 
 class MailAppHelper
