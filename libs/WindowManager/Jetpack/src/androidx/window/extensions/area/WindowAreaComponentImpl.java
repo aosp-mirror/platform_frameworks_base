@@ -25,12 +25,12 @@ import android.hardware.devicestate.DeviceStateRequest;
 import android.util.ArraySet;
 
 import androidx.annotation.NonNull;
+import androidx.window.extensions.core.util.function.Consumer;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * Reference implementation of androidx.window.extensions.area OEM interface for use with
