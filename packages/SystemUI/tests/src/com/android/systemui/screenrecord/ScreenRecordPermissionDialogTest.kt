@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenrecord
 
+import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -59,6 +60,7 @@ class ScreenRecordPermissionDialogTest : SysuiTestCase() {
         dialog =
             ScreenRecordPermissionDialog(
                 context,
+                UserHandle.of(0),
                 controller,
                 starter,
                 dialogLaunchAnimator,
