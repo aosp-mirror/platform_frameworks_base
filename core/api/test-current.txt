@@ -3148,6 +3148,9 @@ package android.view {
 
   public final class SurfaceControl implements android.os.Parcelable {
     ctor public SurfaceControl(@NonNull android.view.SurfaceControl, @NonNull String);
+    method @NonNull public android.view.Choreographer getChoreographer();
+    method @NonNull public android.view.Choreographer getChoreographer(@NonNull android.os.Looper);
+    method public boolean hasChoreographer();
     method public boolean isSameSurface(@NonNull android.view.SurfaceControl);
   }
 
