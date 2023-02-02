@@ -40298,7 +40298,7 @@ package android.service.credentials {
     ctor public GetCredentialRequest(@NonNull android.service.credentials.CallingAppInfo, @NonNull android.credentials.CredentialOption);
     method public int describeContents();
     method @NonNull public android.service.credentials.CallingAppInfo getCallingAppInfo();
-    method @NonNull public android.credentials.CredentialOption getGetCredentialOption();
+    method @NonNull public android.credentials.CredentialOption getCredentialOption();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.credentials.GetCredentialRequest> CREATOR;
   }

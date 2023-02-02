@@ -90,7 +90,7 @@ public final class GetCredentialRequest implements Parcelable {
      * Returns the parameters needed to return a given type of credential.
      */
     @NonNull
-    public CredentialOption getGetCredentialOption() {
+    public CredentialOption getCredentialOption() {
         return mCredentialOption;
     }
 }
