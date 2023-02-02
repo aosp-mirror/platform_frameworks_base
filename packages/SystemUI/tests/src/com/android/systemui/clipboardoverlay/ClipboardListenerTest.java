@@ -16,6 +16,8 @@
 
 package com.android.systemui.clipboardoverlay;
 
+import static com.android.systemui.flags.Flags.CLIPBOARD_MINIMIZED_LAYOUT;
+
 import static com.google.android.setupcompat.util.WizardManagerHelper.SETTINGS_SECURE_USER_SETUP_COMPLETE;
 
 import static org.junit.Assert.assertEquals;
@@ -38,6 +40,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FakeFeatureFlags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +63,7 @@ public class ClipboardListenerTest extends SysuiTestCase {
     private ClipboardOverlayController mOverlayController;
     @Mock
     private ClipboardToast mClipboardToast;
+    private FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     @Mock
     private UiEventLogger mUiEventLogger;
 
@@ -93,8 +97,10 @@ public class ClipboardListenerTest extends SysuiTestCase {
         when(mClipboardManager.getPrimaryClip()).thenReturn(mSampleClipData);
         when(mClipboardManager.getPrimaryClipSource()).thenReturn(mSampleSource);
 
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, true);
+
         mClipboardListener = new ClipboardListener(getContext(), mOverlayControllerProvider,
-                mClipboardToast, mClipboardManager, mUiEventLogger);
+                mClipboardToast, mClipboardManager, mFeatureFlags, mUiEventLogger);
     }
 
 
@@ -186,5 +192,35 @@ public class ClipboardListenerTest extends SysuiTestCase {
                 ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN, 0, mSampleSource);
         verify(mClipboardToast, times(1)).showCopiedToast();
         verifyZeroInteractions(mOverlayControllerProvider);
+    }
+
+    @Test
+    public void test_minimizedLayoutFlagOff_usesLegacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
+
+        mClipboardListener.start();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mOverlayControllerProvider).get();
+
+        verify(mOverlayController).setClipDataLegacy(
+                mClipDataCaptor.capture(), mStringCaptor.capture());
+
+        assertEquals(mSampleClipData, mClipDataCaptor.getValue());
+        assertEquals(mSampleSource, mStringCaptor.getValue());
+    }
+
+    @Test
+    public void test_minimizedLayoutFlagOn_usesNew() {
+        mClipboardListener.start();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mOverlayControllerProvider).get();
+
+        verify(mOverlayController).setClipData(
+                mClipDataCaptor.capture(), mStringCaptor.capture());
+
+        assertEquals(mSampleClipData, mClipDataCaptor.getValue());
+        assertEquals(mSampleSource, mStringCaptor.getValue());
     }
 }

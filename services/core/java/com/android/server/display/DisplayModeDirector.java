@@ -2812,8 +2812,8 @@ public class DisplayModeDirector {
                     .sendToTarget();
 
             if (refreshRateInLowZone != -1) {
-                mHandler.obtainMessage(MSG_REFRESH_RATE_IN_LOW_ZONE_CHANGED, refreshRateInLowZone)
-                    .sendToTarget();
+                mHandler.obtainMessage(MSG_REFRESH_RATE_IN_LOW_ZONE_CHANGED, refreshRateInLowZone,
+                        0).sendToTarget();
             }
 
             int[] highDisplayBrightnessThresholds = getHighDisplayBrightnessThresholds();
@@ -2825,8 +2825,8 @@ public class DisplayModeDirector {
                     .sendToTarget();
 
             if (refreshRateInHighZone != -1) {
-                mHandler.obtainMessage(MSG_REFRESH_RATE_IN_HIGH_ZONE_CHANGED, refreshRateInHighZone)
-                    .sendToTarget();
+                mHandler.obtainMessage(MSG_REFRESH_RATE_IN_HIGH_ZONE_CHANGED, refreshRateInHighZone,
+                        0).sendToTarget();
             }
 
             final int refreshRateInHbmSunlight = getRefreshRateInHbmSunlight();

@@ -29,6 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.R
+import com.android.systemui.common.ui.binder.ContentDescriptionViewBinder
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.StatusBarIconView
@@ -94,6 +95,12 @@ object MobileIconBinder {
                 launch {
                     viewModel.iconId.distinctUntilChanged().collect { iconId ->
                         mobileDrawable.level = iconId
+                    }
+                }
+
+                launch {
+                    viewModel.contentDescription.distinctUntilChanged().collect {
+                        ContentDescriptionViewBinder.bind(it, view)
                     }
                 }
 

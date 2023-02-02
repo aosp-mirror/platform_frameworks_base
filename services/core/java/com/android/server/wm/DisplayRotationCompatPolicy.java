@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
@@ -34,6 +36,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.RefreshCallbackItem;
 import android.app.servertransaction.ResumeActivityItem;
@@ -44,10 +47,13 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.widget.Toast;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.UiThread;
 
 import java.util.Map;
 import java.util.Set;
@@ -232,6 +238,27 @@ final class DisplayRotationCompatPolicy {
         activity.mLetterboxUiController.setIsRefreshAfterRotationRequested(false);
     }
 
+    /**
+     * Notifies that animation in {@link ScreenAnimationRotation} has finished.
+     *
+     * <p>This class uses this signal as a trigger for notifying the user about forced rotation
+     * reason with the {@link Toast}.
+     */
+    void onScreenRotationAnimationFinished() {
+        if (!isTreatmentEnabledForDisplay() || mCameraIdPackageBiMap.isEmpty()) {
+            return;
+        }
+        ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+                    /* considerKeyguardState= */ true);
+        if (topActivity == null
+                // Checking windowing mode on activity level because we don't want to
+                // show toast in case of activity embedding.
+                || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+            return;
+        }
+        showToast(R.string.display_rotation_camera_compat_toast_after_rotation);
+    }
+
     String getSummaryForDisplayRotationHistoryRecord() {
         String summaryIfEnabled = "";
         if (isTreatmentEnabledForDisplay()) {
@@ -281,6 +308,10 @@ final class DisplayRotationCompatPolicy {
                 && mDisplayContent.getDisplay().getType() == TYPE_INTERNAL;
     }
 
+    boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
+        return isTreatmentEnabledForDisplay() && isCameraActiveInFullscreen(activity);
+    }
+
     /**
      * Whether camera compat treatment is applicable for the given activity.
      *
@@ -292,12 +323,16 @@ final class DisplayRotationCompatPolicy {
      * </ul>
      */
     boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity) {
-        return activity != null && !activity.inMultiWindowMode()
+        return activity != null && isCameraActiveInFullscreen(activity)
                 && activity.getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED
                 // "locked" and "nosensor" values are often used by camera apps that can't
                 // handle dynamic changes so we shouldn't force rotate them.
                 && activity.getOverrideOrientation() != SCREEN_ORIENTATION_NOSENSOR
-                && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED
+                && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED;
+    }
+
+    private boolean isCameraActiveInFullscreen(@NonNull ActivityRecord activity) {
+        return !activity.inMultiWindowMode()
                 && mCameraIdPackageBiMap.containsPackageName(activity.packageName)
                 && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
     }
@@ -334,7 +369,31 @@ final class DisplayRotationCompatPolicy {
             }
             mCameraIdPackageBiMap.put(packageName, cameraId);
         }
-        updateOrientationWithWmLock();
+        ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+                    /* considerKeyguardState= */ true);
+        if (topActivity == null || topActivity.getTask() == null) {
+            return;
+        }
+        // Checking whether an activity in fullscreen rather than the task as this camera compat
+        // treatment doesn't cover activity embedding.
+        if (topActivity.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+            if (topActivity.mLetterboxUiController.isOverrideOrientationOnlyForCameraEnabled()) {
+                topActivity.recomputeConfiguration();
+            }
+            updateOrientationWithWmLock();
+            return;
+        }
+        // Checking that the whole app is in multi-window mode as we shouldn't show toast
+        // for the activity embedding case.
+        if (topActivity.getTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW) {
+            showToast(R.string.display_rotation_camera_compat_toast_in_split_screen);
+        }
+    }
+
+    @VisibleForTesting
+    void showToast(@StringRes int stringRes) {
+        UiThread.getHandler().post(
+                () -> Toast.makeText(mWmService.mContext, stringRes, Toast.LENGTH_LONG).show());
     }
 
     private synchronized void notifyCameraClosed(@NonNull String cameraId) {
@@ -375,6 +434,17 @@ final class DisplayRotationCompatPolicy {
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Display id=%d is notified that Camera %s is closed, updating rotation.",
                 mDisplayContent.mDisplayId, cameraId);
+        ActivityRecord topActivity = mDisplayContent.topRunningActivity(
+                /* considerKeyguardState= */ true);
+        if (topActivity == null
+                // Checking whether an activity in fullscreen rather than the task as this camera
+                // compat treatment doesn't cover activity embedding.
+                || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+            return;
+        }
+        if (topActivity.mLetterboxUiController.isOverrideOrientationOnlyForCameraEnabled()) {
+            topActivity.recomputeConfiguration();
+        }
         updateOrientationWithWmLock();
     }
 
@@ -395,6 +465,10 @@ final class DisplayRotationCompatPolicy {
 
         private final Map<String, String> mPackageToCameraIdMap = new ArrayMap<>();
         private final Map<String, String> mCameraIdToPackageMap = new ArrayMap<>();
+
+        boolean isEmpty() {
+            return mCameraIdToPackageMap.isEmpty();
+        }
 
         void put(String packageName, String cameraId) {
             // Always using the last connected camera ID for the package even for the concurrent

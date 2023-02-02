@@ -121,16 +121,13 @@ class ControlsControllerImpl @Inject constructor (
         userChanging = false
     }
 
-    private val userTrackerCallback = object : UserTracker.Callback {
-        override fun onUserChanged(newUser: Int, userContext: Context) {
-            userChanging = true
-            val newUserHandle = UserHandle.of(newUser)
-            if (currentUser == newUserHandle) {
-                userChanging = false
-                return
-            }
-            setValuesForUser(newUserHandle)
+    override fun changeUser(newUser: UserHandle) {
+        userChanging = true
+        if (currentUser == newUser) {
+            userChanging = false
+            return
         }
+        setValuesForUser(newUser)
     }
 
     @VisibleForTesting
@@ -231,7 +228,6 @@ class ControlsControllerImpl @Inject constructor (
         dumpManager.registerDumpable(javaClass.name, this)
         resetFavorites()
         userChanging = false
-        userTracker.addCallback(userTrackerCallback, executor)
         context.registerReceiver(
             restoreFinishedReceiver,
             IntentFilter(BackupHelper.ACTION_RESTORE_FINISHED),
@@ -243,7 +239,6 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     fun destroy() {
-        userTracker.removeCallback(userTrackerCallback)
         context.unregisterReceiver(restoreFinishedReceiver)
         listingController.removeCallback(listingCallback)
     }

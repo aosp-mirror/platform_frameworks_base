@@ -61,6 +61,8 @@ public class IllustrationPreference extends Preference {
     private View mMiddleGroundView;
     private OnBindListener mOnBindListener;
 
+    private boolean mLottieDynamicColor;
+
     /**
      * Interface to listen in on when {@link #onBindViewHolder(PreferenceViewHolder)} occurs.
      */
@@ -144,6 +146,10 @@ public class IllustrationPreference extends Preference {
 
         if (IS_ENABLED_LOTTIE_ADAPTIVE_COLOR) {
             ColorUtils.applyDynamicColors(getContext(), illustrationView);
+        }
+
+        if (mLottieDynamicColor) {
+            LottieColorUtils.applyDynamicColors(getContext(), illustrationView);
         }
 
         if (mOnBindListener != null) {
@@ -260,6 +266,21 @@ public class IllustrationPreference extends Preference {
             mMaxHeight = maxHeight;
             notifyChanged();
         }
+    }
+
+    /**
+     * Sets the lottie illustration apply dynamic color.
+     */
+    public void applyDynamicColor() {
+        mLottieDynamicColor = true;
+        notifyChanged();
+    }
+
+    /**
+     * Return if the lottie illustration apply dynamic color or not.
+     */
+    public boolean isApplyDynamicColor() {
+        return mLottieDynamicColor;
     }
 
     private void resetImageResourceCache() {
@@ -403,9 +424,15 @@ public class IllustrationPreference extends Preference {
 
         mIsAutoScale = false;
         if (attrs != null) {
-            final TypedArray a = context.obtainStyledAttributes(attrs,
+            TypedArray a = context.obtainStyledAttributes(attrs,
                     R.styleable.LottieAnimationView, 0 /*defStyleAttr*/, 0 /*defStyleRes*/);
             mImageResId = a.getResourceId(R.styleable.LottieAnimationView_lottie_rawRes, 0);
+
+            a = context.obtainStyledAttributes(attrs,
+                    R.styleable.IllustrationPreference, 0 /*defStyleAttr*/, 0 /*defStyleRes*/);
+            mLottieDynamicColor = a.getBoolean(R.styleable.IllustrationPreference_dynamicColor,
+                    false);
+
             a.recycle();
         }
     }
