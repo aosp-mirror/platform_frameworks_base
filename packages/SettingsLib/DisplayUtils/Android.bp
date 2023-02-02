@@ -8,7 +8,7 @@ package {
 }
 
 android_library {
-    name: "SettingsLibDisplayDensityUtils",
+    name: "SettingsLibDisplayUtils",
 
     srcs: ["src/**/*.java"],
 
