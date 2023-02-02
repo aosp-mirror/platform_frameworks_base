@@ -74,7 +74,7 @@ import java.util.function.Consumer;
 class WallpaperController {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WallpaperController" : TAG_WM;
     private WindowManagerService mService;
-    private final DisplayContent mDisplayContent;
+    private DisplayContent mDisplayContent;
 
     private final ArrayList<WallpaperWindowToken> mWallpaperTokens = new ArrayList<>();
 
@@ -127,6 +127,14 @@ class WallpaperController {
     private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
         if ((w.mAttrs.type == TYPE_WALLPAPER)) {
             if (mFindResults.topWallpaper == null || mFindResults.resetTopWallpaper) {
+                WallpaperWindowToken token = w.mToken.asWallpaperToken();
+                if (token == null) {
+                    Slog.w(TAG, "Window " + w + " has wallpaper type but not wallpaper token");
+                    return false;
+                }
+                if (!token.canShowWhenLocked() && mDisplayContent.isKeyguardLocked()) {
+                    return false;
+                }
                 mFindResults.setTopWallpaper(w);
                 mFindResults.resetTopWallpaper = false;
             }
@@ -760,10 +768,10 @@ class WallpaperController {
         result.setWallpaperTarget(wallpaperTarget);
     }
 
-    private void updateWallpaperTokens(boolean visible) {
+    private void updateWallpaperTokens(boolean visibility, boolean locked) {
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.updateWallpaperWindows(visible);
+            token.updateWallpaperWindows(visibility && (!locked || token.canShowWhenLocked()));
         }
     }
 
@@ -801,7 +809,13 @@ class WallpaperController {
             }
         }
 
-        updateWallpaperTokens(visible);
+        // Keep both wallpapers visible unless the keyguard is locked (then hide private wp)
+        updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
+
+        if (DEBUG_WALLPAPER) {
+            Slog.v(TAG, "adjustWallpaperWindows: wallpaper visibility " + visible
+                    + ", lock visibility " + mDisplayContent.isKeyguardLocked());
+        }
 
         if (visible && mLastFrozen != mFindResults.isWallpaperTargetForLetterbox) {
             mLastFrozen = mFindResults.isWallpaperTargetForLetterbox;
@@ -902,7 +916,6 @@ class WallpaperController {
     void removeWallpaperToken(WallpaperWindowToken token) {
         mWallpaperTokens.remove(token);
     }
-
 
     @VisibleForTesting
     boolean canScreenshotWallpaper() {
