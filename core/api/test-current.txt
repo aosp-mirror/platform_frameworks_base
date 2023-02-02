@@ -3733,6 +3733,7 @@ package android.window {
   public final class TaskFragmentInfo implements android.os.Parcelable {
     method public boolean equalsForTaskFragmentOrganizer(@Nullable android.window.TaskFragmentInfo);
     method @NonNull public java.util.List<android.os.IBinder> getActivities();
+    method @NonNull public java.util.List<android.os.IBinder> getActivitiesRequestedInTaskFragment();
     method @NonNull public android.content.res.Configuration getConfiguration();
     method @NonNull public android.os.IBinder getFragmentToken();
     method @NonNull public android.graphics.Point getPositionInParent();

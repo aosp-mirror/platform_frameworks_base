@@ -181,4 +181,14 @@ interface IActivityClientController {
      * that started the task.
      */
     void enableTaskLocaleOverride(in IBinder token);
+
+    /**
+     * Return {@code true} if the activity was explicitly requested to be launched in the
+     * TaskFragment.
+     *
+     * @param activityToken The token of the Activity.
+     * @param taskFragmentToken The token of the TaskFragment.
+     */
+    boolean isRequestedToLaunchInTaskFragment(in IBinder activityToken,
+            in IBinder taskFragmentToken);
 }

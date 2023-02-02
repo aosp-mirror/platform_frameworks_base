@@ -2957,6 +2957,8 @@ class ActivityStarter {
             int embeddingCheckResult = canEmbedActivity(mInTaskFragment, mStartActivity, task);
             if (embeddingCheckResult == EMBEDDING_ALLOWED) {
                 newParent = mInTaskFragment;
+                mStartActivity.mRequestedLaunchingTaskFragmentToken =
+                        mInTaskFragment.getFragmentToken();
             } else {
                 // Start mStartActivity to task instead if it can't be embedded to mInTaskFragment.
                 sendCanNotEmbedActivityError(mInTaskFragment, embeddingCheckResult);

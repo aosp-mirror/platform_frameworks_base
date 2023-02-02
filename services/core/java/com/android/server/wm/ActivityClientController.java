@@ -1714,4 +1714,20 @@ class ActivityClientController extends IActivityClientController.Stub {
             }
         }
     }
+
+    /**
+     * Returns {@code true} if the activity was explicitly requested to be launched in its
+     * current TaskFragment.
+     *
+     * @see ActivityRecord#mRequestedLaunchingTaskFragmentToken
+     */
+    public boolean isRequestedToLaunchInTaskFragment(IBinder activityToken,
+            IBinder taskFragmentToken) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(activityToken);
+            if (r == null) return false;
+
+            return r.mRequestedLaunchingTaskFragmentToken == taskFragmentToken;
+        }
+    }
 }
