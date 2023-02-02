@@ -61,7 +61,7 @@ class GetCredentialRequest constructor(
         @JvmStatic
         fun createFrom(from: android.credentials.GetCredentialRequest): GetCredentialRequest {
             return GetCredentialRequest(
-                from.getCredentialOptions.map {
+                from.credentialOptions.map {
                     GetCredentialOption.createFrom(
                         it.type,
                         it.credentialRetrievalData,
