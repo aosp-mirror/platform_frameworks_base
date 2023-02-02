@@ -264,6 +264,19 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     }
 
     @Test
+    public void notifPositionAlignedWithClockAndBurnInOffsetInSplitShadeMode() {
+        setSplitShadeTopMargin(100); // this makes clock to be at 100
+        givenAOD();
+        mIsSplitShade = true;
+        givenMaxBurnInOffset(100);
+        givenHighestBurnInOffset(); // this makes clock to be at 200
+        // WHEN the position algorithm is run
+        positionClock();
+        // THEN the notif padding adjusts for burn-in offset: clock position - burn-in offset
+        assertThat(mClockPosition.stackScrollerPadding).isEqualTo(100);
+    }
+
+    @Test
     public void clockPositionedDependingOnMarginInSplitShade() {
         setSplitShadeTopMargin(400);
         givenLockScreen();
