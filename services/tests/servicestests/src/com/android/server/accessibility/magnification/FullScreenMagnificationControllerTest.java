@@ -1196,6 +1196,27 @@ public class FullScreenMagnificationControllerTest {
                 persistedScale);
     }
 
+    @Test
+    public void testOnContextChanged_alwaysOnFeatureDisabled_resetMagnification() {
+        setScaleToMagnifying();
+
+        mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(false);
+        mFullScreenMagnificationController.onUserContextChanged(DISPLAY_0);
+
+        verify(mRequestObserver).onFullScreenMagnificationActivationState(eq(DISPLAY_0), eq(false));
+    }
+
+    @Test
+    public void testOnContextChanged_alwaysOnFeatureEnabled_setScaleTo1xAndStayActivated() {
+        setScaleToMagnifying();
+
+        mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(true);
+        mFullScreenMagnificationController.onUserContextChanged(DISPLAY_0);
+
+        assertEquals(1.0f, mFullScreenMagnificationController.getScale(DISPLAY_0), 0);
+        assertTrue(mFullScreenMagnificationController.isActivated(DISPLAY_0));
+    }
+
     private void setScaleToMagnifying() {
         register(DISPLAY_0);
         float scale = 2.0f;

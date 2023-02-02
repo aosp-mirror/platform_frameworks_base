@@ -57,6 +57,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -99,7 +100,8 @@ public class FullScreenMagnificationController implements
     private final Rect mTempRect = new Rect();
     // Whether the following typing focus feature for magnification is enabled.
     private boolean mMagnificationFollowTypingEnabled = true;
-
+    // Whether the always on magnification feature is enabled.
+    private boolean mAlwaysOnMagnificationEnabled = false;
     private final DisplayManagerInternal mDisplayManagerInternal;
 
     /**
@@ -291,18 +293,15 @@ public class FullScreenMagnificationController implements
 
         @Override
         public void onDisplaySizeChanged() {
-            // Treat as context change and reset
-            final Message m = PooledLambda.obtainMessage(
-                    FullScreenMagnificationController::resetIfNeeded,
-                    FullScreenMagnificationController.this, mDisplayId, true);
-            mControllerCtx.getHandler().sendMessage(m);
+            // Treat as context change
+            onUserContextChanged();
         }
 
         @Override
         public void onUserContextChanged() {
             final Message m = PooledLambda.obtainMessage(
-                    FullScreenMagnificationController::resetIfNeeded,
-                    FullScreenMagnificationController.this, mDisplayId, true);
+                    FullScreenMagnificationController::onUserContextChanged,
+                    FullScreenMagnificationController.this, mDisplayId);
             mControllerCtx.getHandler().sendMessage(m);
         }
 
@@ -793,6 +792,33 @@ public class FullScreenMagnificationController implements
 
     boolean isMagnificationFollowTypingEnabled() {
         return mMagnificationFollowTypingEnabled;
+    }
+
+    void setAlwaysOnMagnificationEnabled(boolean enabled) {
+        mAlwaysOnMagnificationEnabled = enabled;
+    }
+
+    boolean isAlwaysOnMagnificationEnabled() {
+        return mAlwaysOnMagnificationEnabled;
+    }
+
+    /**
+     * if the magnifier with given displayId is activated:
+     * 1. if {@link #isAlwaysOnMagnificationEnabled()}, zoom the magnifier to 100%,
+     * 2. otherwise, reset the magnification.
+     *
+     * @param displayId The logical display id.
+     */
+    void onUserContextChanged(int displayId) {
+        synchronized (mLock) {
+            if (isAlwaysOnMagnificationEnabled()) {
+                setScaleAndCenter(displayId, 1.0f, Float.NaN, Float.NaN,
+                        true,
+                        AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+            } else {
+                reset(displayId, true);
+            }
+        }
     }
 
     /**
