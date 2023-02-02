@@ -477,12 +477,32 @@
                     minOccurs="0" maxOccurs="1">
             <xs:annotation name="final"/>
         </xs:element>
+        <xs:element name="refreshRateZoneProfiles" type="refreshRateZoneProfiles"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
         <xs:element name="lowerBlockingZoneConfigs" type="blockingZoneConfig"
                     minOccurs="0" maxOccurs="1">
             <xs:annotation name="final"/>
         </xs:element>
         <xs:element name="higherBlockingZoneConfigs" type="blockingZoneConfig"
                     minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateZoneProfiles">
+        <xs:sequence>
+            <xs:element name="refreshRateZoneProfile" type="refreshRateZone"
+                        minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateZone">
+        <xs:attribute name="id" use="required" type="xs:string" />
+        <xs:element name="refreshRateRange" type="refreshRateRange">
             <xs:annotation name="final"/>
         </xs:element>
     </xs:complexType>

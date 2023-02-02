@@ -33,6 +33,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.Spline;
 import android.view.DisplayAddress;
+import android.view.SurfaceControl;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -53,6 +54,7 @@ import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
 import com.android.server.display.config.RefreshRateConfigs;
 import com.android.server.display.config.RefreshRateRange;
+import com.android.server.display.config.RefreshRateZone;
 import com.android.server.display.config.SdrHdrRatioMap;
 import com.android.server.display.config.SdrHdrRatioPoint;
 import com.android.server.display.config.SensorDetails;
@@ -503,10 +505,10 @@ public class DisplayDeviceConfig {
     /**
      * Array of light sensor lux values to define our levels for auto backlight
      * brightness support.
-
+     *
      * The N + 1 entries of this array define N control points defined in mBrightnessLevelsNits,
      * with first value always being 0 lux
-
+     *
      * The control points must be strictly increasing.  Each control point
      * corresponds to an entry in the brightness backlight values arrays.
      * For example, if lux == level[1] (second element of the levels array)
@@ -515,7 +517,6 @@ public class DisplayDeviceConfig {
      *
      * Spline interpolation is used to determine the auto-brightness
      * backlight values for lux levels between these control points.
-     *
      */
     private float[] mBrightnessLevelsLux;
 
@@ -618,6 +619,10 @@ public class DisplayDeviceConfig {
      * If non-positive, then the refresh rate is unchanged even if thresholds are configured.
      */
     private int mDefaultLowBlockingZoneRefreshRate = DEFAULT_LOW_REFRESH_RATE;
+
+    // Refresh rate profiles, currently only for concurrent mode profile and controlled by Layout
+    private final Map<String, SurfaceControl.RefreshRateRange> mRefreshRateZoneProfiles =
+            new HashMap<>();
 
     /**
      * The display uses different gamma curves for different refresh rates. It's hard for panel
@@ -1354,6 +1359,23 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * @return Refresh rate range for specific profile id or null
+     */
+    @Nullable
+    public SurfaceControl.RefreshRateRange getRefreshRange(@Nullable String id) {
+        if (TextUtils.isEmpty(id)) {
+            return null;
+        }
+        return mRefreshRateZoneProfiles.get(id);
+    }
+
+    @NonNull
+    @VisibleForTesting
+    Map<String, SurfaceControl.RefreshRateRange> getRefreshRangeProfiles() {
+        return mRefreshRateZoneProfiles;
+    }
+
+    /**
      * @return An array of lower display brightness thresholds. This, in combination with lower
      * ambient brightness thresholds help define buckets in which the refresh rate switching is not
      * allowed
@@ -1500,6 +1522,7 @@ public class DisplayDeviceConfig {
                 + ", mDefaultHighBlockingZoneRefreshRate= " + mDefaultHighBlockingZoneRefreshRate
                 + ", mDefaultPeakRefreshRate= " + mDefaultPeakRefreshRate
                 + ", mDefaultRefreshRate= " + mDefaultRefreshRate
+                + ", mRefreshRateZoneProfiles= " + mRefreshRateZoneProfiles
                 + ", mLowDisplayBrightnessThresholds= "
                 + Arrays.toString(mLowDisplayBrightnessThresholds)
                 + ", mLowAmbientBrightnessThresholds= "
@@ -1828,6 +1851,7 @@ public class DisplayDeviceConfig {
         loadDefaultRefreshRate(refreshRateConfigs);
         loadLowerRefreshRateBlockingZones(lowerBlockingZoneConfig);
         loadHigherRefreshRateBlockingZones(higherBlockingZoneConfig);
+        loadRefreshRateZoneProfiles(refreshRateConfigs);
     }
 
     private void loadPeakDefaultRefreshRate(RefreshRateConfigs refreshRateConfigs) {
@@ -1847,6 +1871,21 @@ public class DisplayDeviceConfig {
         } else {
             mDefaultRefreshRate =
                 refreshRateConfigs.getDefaultRefreshRate().intValue();
+        }
+    }
+
+    /** Loads the refresh rate profiles. */
+    private void loadRefreshRateZoneProfiles(RefreshRateConfigs refreshRateConfigs) {
+        if (refreshRateConfigs == null) {
+            return;
+        }
+        for (RefreshRateZone zone :
+                refreshRateConfigs.getRefreshRateZoneProfiles().getRefreshRateZoneProfile()) {
+            RefreshRateRange range = zone.getRefreshRateRange();
+            mRefreshRateZoneProfiles.put(
+                    zone.getId(),
+                    new SurfaceControl.RefreshRateRange(
+                            range.getMinimum().floatValue(), range.getMaximum().floatValue()));
         }
     }
 

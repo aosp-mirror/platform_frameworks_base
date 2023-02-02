@@ -194,10 +194,12 @@ package com.android.server.display.config {
     method public final java.math.BigInteger getDefaultRefreshRate();
     method public final com.android.server.display.config.BlockingZoneConfig getHigherBlockingZoneConfigs();
     method public final com.android.server.display.config.BlockingZoneConfig getLowerBlockingZoneConfigs();
+    method public final com.android.server.display.config.RefreshRateZoneProfiles getRefreshRateZoneProfiles();
     method public final void setDefaultPeakRefreshRate(java.math.BigInteger);
     method public final void setDefaultRefreshRate(java.math.BigInteger);
     method public final void setHigherBlockingZoneConfigs(com.android.server.display.config.BlockingZoneConfig);
     method public final void setLowerBlockingZoneConfigs(com.android.server.display.config.BlockingZoneConfig);
+    method public final void setRefreshRateZoneProfiles(com.android.server.display.config.RefreshRateZoneProfiles);
   }
 
   public class RefreshRateRange {
@@ -206,6 +208,19 @@ package com.android.server.display.config {
     method public final java.math.BigInteger getMinimum();
     method public final void setMaximum(java.math.BigInteger);
     method public final void setMinimum(java.math.BigInteger);
+  }
+
+  public class RefreshRateZone {
+    ctor public RefreshRateZone();
+    method public String getId();
+    method public final com.android.server.display.config.RefreshRateRange getRefreshRateRange();
+    method public void setId(String);
+    method public final void setRefreshRateRange(com.android.server.display.config.RefreshRateRange);
+  }
+
+  public class RefreshRateZoneProfiles {
+    ctor public RefreshRateZoneProfiles();
+    method public final java.util.List<com.android.server.display.config.RefreshRateZone> getRefreshRateZoneProfile();
   }
 
   public class SdrHdrRatioMap {

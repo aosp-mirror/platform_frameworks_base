@@ -221,6 +221,10 @@ public class Layout {
         @Nullable
         private final String mBrightnessThrottlingMapId;
 
+        // Refresh rate zone id for specific layout
+        @Nullable
+        private String mRefreshRateZoneId;
+
         Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled,
                 String brightnessThrottlingMapId, int position) {
             mAddress = address;
@@ -238,6 +242,7 @@ public class Layout {
                     + ", addr: " + mAddress
                     +  ((mPosition == POSITION_UNKNOWN) ? "" : ", position: " + mPosition)
                     + ", brightnessThrottlingMapId: " + mBrightnessThrottlingMapId
+                    + ", mRefreshRateZoneId: " + mRefreshRateZoneId
                     + "}";
         }
 
@@ -254,7 +259,8 @@ public class Layout {
                     && otherDisplay.mLogicalDisplayId == this.mLogicalDisplayId
                     && this.mAddress.equals(otherDisplay.mAddress)
                     && Objects.equals(mBrightnessThrottlingMapId,
-                    otherDisplay.mBrightnessThrottlingMapId);
+                    otherDisplay.mBrightnessThrottlingMapId)
+                    && Objects.equals(otherDisplay.mRefreshRateZoneId, this.mRefreshRateZoneId);
         }
 
         @Override
@@ -265,6 +271,7 @@ public class Layout {
             result = 31 * result + mLogicalDisplayId;
             result = 31 * result + mAddress.hashCode();
             result = 31 * result + mBrightnessThrottlingMapId.hashCode();
+            result = 31 * result + Objects.hashCode(mRefreshRateZoneId);
             return result;
         }
 
@@ -278,6 +285,16 @@ public class Layout {
 
         public boolean isEnabled() {
             return mIsEnabled;
+        }
+
+
+        public void setRefreshRateZoneId(@Nullable String refreshRateZoneId) {
+            mRefreshRateZoneId = refreshRateZoneId;
+        }
+
+        @Nullable
+        public String getRefreshRateZoneId() {
+            return mRefreshRateZoneId;
         }
 
         public void setPosition(int position) {
