@@ -18,6 +18,7 @@ package com.android.settingslib.spa.gallery.page
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
@@ -101,10 +102,13 @@ object ArgumentPageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        RegularScaffold(title = getTitle(arguments)) {
-            for (entry in buildEntry(arguments)) {
+        val title = remember { getTitle(arguments) }
+        val entries = remember { buildEntry(arguments) }
+        val rtArgNext = remember { ArgumentPageModel.buildNextArgument(arguments) }
+        RegularScaffold(title) {
+            for (entry in entries) {
                 if (entry.toPage != null) {
-                    entry.UiLayout(ArgumentPageModel.buildNextArgument(arguments))
+                    entry.UiLayout(rtArgNext)
                 } else {
                     entry.UiLayout()
                 }
