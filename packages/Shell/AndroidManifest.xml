@@ -356,6 +356,9 @@
     <!-- Permission needed to test wallpaper dimming -->
     <uses-permission android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT" />
 
+    <!-- Permission needed to test wallpaper read methods -->
+    <uses-permission android:name="android.permission.READ_WALLPAPER_INTERNAL" />
+
     <!-- Permission required to test ContentResolver caching. -->
     <uses-permission android:name="android.permission.CACHE_CONTENT" />
 
