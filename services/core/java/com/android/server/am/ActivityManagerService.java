@@ -101,6 +101,7 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
@@ -12714,18 +12715,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUid(
                     ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
                     callingUid);
-            String[] categories = intent.getCategories() == null ? new String[0]
-                    : intent.getCategories().toArray(String[]::new);
-            FrameworkStatsLog.write(FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED,
-                    FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
-                    callingUid,
-                    componentInfo,
-                    callerPackage,
-                    intent.getAction(),
-                    categories,
-                    resolvedType,
-                    intent.getScheme(),
-                    hasToBeExportedToMatch);
+            ActivityManagerUtils.logUnsafeIntentEvent(
+                    UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
+                    callingUid, intent, resolvedType, hasToBeExportedToMatch);
             if (!hasToBeExportedToMatch) {
                 return;
             }
@@ -13499,6 +13491,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean visibleToInstantApps
                 = (flags & Context.RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0;
 
+        // Override the block null action intent information with actual calling UID
+        filter.setBlockNullAction(CompatChanges.isChangeEnabled(
+                IntentFilter.BLOCK_NULL_ACTION_INTENTS, Binder.getCallingUid()));
+
         int callingUid;
         int callingPid;
         boolean instantApp;
@@ -13639,7 +13635,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // provider that needs to lock mProviderMap in ActivityThread
                 // and also it may need to wait application response, so we
                 // cannot lock ActivityManagerService here.
-                if (filter.match(resolver, intent, true, TAG) >= 0) {
+                if (filter.match(intent.getAction(), intent.resolveType(resolver),
+                        intent.getScheme(), intent.getData(), intent.getCategories(), TAG,
+                        false /* supportWildcards */,
+                        false /* blockNullAction: already evaluated in the beginning */,
+                        null /* ignoreActions */,
+                        intent.getExtras()) >= 0) {
                     if (allSticky == null) {
                         allSticky = new ArrayList<Intent>();
                     }

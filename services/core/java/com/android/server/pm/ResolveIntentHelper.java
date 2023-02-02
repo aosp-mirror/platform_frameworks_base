@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTANT;
 import static com.android.server.pm.PackageManagerService.DEBUG_INTENT_MATCHING;
 import static com.android.server.pm.PackageManagerService.TAG;
@@ -55,9 +56,9 @@ import android.util.Slog;
 
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.am.ActivityManagerUtils;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -112,15 +113,13 @@ final class ResolveIntentHelper {
 
     private static void filterNonExportedComponents(Intent intent, int filterCallingUid,
             int callingPid, List<ResolveInfo> query, PlatformCompat platformCompat,
-            String resolvedType, Computer computer, Handler handler) {
+            String resolvedType, Handler handler) {
         if (query == null
                 || intent.getPackage() != null
                 || intent.getComponent() != null
                 || ActivityManager.canAccessUnexportedComponents(filterCallingUid)) {
             return;
         }
-        AndroidPackage caller = computer.getPackage(filterCallingUid);
-        String callerPackage = caller == null ? "Not specified" : caller.getPackageName();
         ActivityManagerInternal activityManagerInternal = LocalServices
                 .getService(ActivityManagerInternal.class);
         final IUnsafeIntentStrictModeCallback callback = activityManagerInternal
@@ -130,18 +129,9 @@ final class ResolveIntentHelper {
                 boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUid(
                         ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
                         filterCallingUid);
-                String[] categories = intent.getCategories() == null ? new String[0]
-                        : intent.getCategories().toArray(String[]::new);
-                FrameworkStatsLog.write(FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED,
-                        FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
-                        filterCallingUid,
-                        query.get(i).getComponentInfo().getComponentName().flattenToShortString(),
-                        callerPackage,
-                        intent.getAction(),
-                        categories,
-                        resolvedType,
-                        intent.getScheme(),
-                        hasToBeExportedToMatch);
+                ActivityManagerUtils.logUnsafeIntentEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
+                        filterCallingUid, intent, resolvedType, hasToBeExportedToMatch);
                 if (callback != null) {
                     handler.post(() -> {
                         try {
@@ -200,7 +190,7 @@ final class ResolveIntentHelper {
                     resolveForStart, true /*allowDynamicSplits*/);
             if (exportedComponentsOnly) {
                 filterNonExportedComponents(intent, filterCallingUid, callingPid, query,
-                        mPlatformCompat, resolvedType, computer, mHandler);
+                        mPlatformCompat, resolvedType, mHandler);
             }
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
 
@@ -465,9 +455,6 @@ final class ResolveIntentHelper {
                     ri.activityInfo = ai;
                     list = new ArrayList<>(1);
                     list.add(ri);
-                    PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            mPlatformCompat, componentResolver, list, true, intent,
-                            resolvedType, filterCallingUid);
                 }
             }
         } else {
@@ -489,9 +476,12 @@ final class ResolveIntentHelper {
             }
         }
 
+        PackageManagerServiceUtils.applySaferIntentEnforcements(
+                mPlatformCompat, componentResolver, list, true, intent,
+                resolvedType, filterCallingUid);
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
-            PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
+            PackageManagerServiceUtils.applySaferIntentEnforcements(
                     mPlatformCompat, componentResolver,
                     list, true, originalIntent, resolvedType, filterCallingUid);
         }
