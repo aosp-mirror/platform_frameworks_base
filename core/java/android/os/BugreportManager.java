@@ -70,10 +70,7 @@ public final class BugreportManager {
      * An interface describing the callback for bugreport progress and status.
      *
      * <p>Callers will receive {@link #onProgress} calls as the bugreport progresses, followed by a
-     * terminal call to either {@link #onFinished} or {@link #onError}. Note that
-     * {@link #onFinished(String)} will only be invoked when calling {@code startBugreport} with the
-     * {@link BugreportParams#BUGREPORT_FLAG_DEFER_CONSENT} flag set. Otherwise,
-     * {@link #onFinished()} will be invoked.
+     * terminal call to either {@link #onFinished} or {@link #onError}.
      *
      * <p>If an issue is encountered while starting the bugreport asynchronously, callers will
      * receive an {@link #onError} call without any {@link #onProgress} callbacks.
@@ -149,8 +146,7 @@ public final class BugreportManager {
         /** Called when taking bugreport finishes successfully.
          *
          * <p>This callback will be invoked if the
-         * {@link BugreportParams#BUGREPORT_FLAG_DEFER_CONSENT} flag is not set. Otherwise, the
-         * {@link #onFinished(String)} callback will be invoked.
+         * {@link BugreportParams#BUGREPORT_FLAG_DEFER_CONSENT} flag is not set.
          */
         public void onFinished() {}
 
@@ -161,8 +157,10 @@ public final class BugreportManager {
          * {@link #onFinished()} callback will be invoked.
          *
          * @param bugreportFile the absolute path of the generated bugreport file.
+         * @hide
 
          */
+        @SystemApi
         public void onFinished(@NonNull String bugreportFile) {}
 
         /**

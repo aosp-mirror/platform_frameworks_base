@@ -9943,6 +9943,10 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.DUMP) @WorkerThread public void startBugreport(@NonNull android.os.ParcelFileDescriptor, @Nullable android.os.ParcelFileDescriptor, @NonNull android.os.BugreportParams, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
   }
 
+  public abstract static class BugreportManager.BugreportCallback {
+    method public void onFinished(@NonNull String);
+  }
+
   public final class BugreportParams {
     ctor public BugreportParams(int);
     ctor public BugreportParams(int, int);
