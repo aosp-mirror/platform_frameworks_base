@@ -5329,7 +5329,8 @@ public class AudioService extends IAudioService.Stub
             if (!shouldMute) {
                 // unmute
                 // ring and notifications volume should never be 0 when not silenced
-                if (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING) {
+                if (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING
+                        || mStreamVolumeAlias[streamType] == AudioSystem.STREAM_NOTIFICATION) {
                     synchronized (VolumeStreamState.class) {
                         final VolumeStreamState vss = mStreamStates[streamType];
                         for (int i = 0; i < vss.mIndexMap.size(); i++) {
@@ -6060,6 +6061,8 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
+        readVolumeGroupsSettings(userSwitch);
+
         // apply new ringer mode before checking volume for alias streams so that streams
         // muted by ringer mode have the correct volume
         setRingerModeInt(getRingerModeInternal(), false);
@@ -6070,8 +6073,6 @@ public class AudioService extends IAudioService.Stub
 
         mSoundDoseHelper.restoreMusicActiveMs();
         mSoundDoseHelper.enforceSafeMediaVolumeIfActive(TAG);
-
-        readVolumeGroupsSettings(userSwitch);
 
         if (DEBUG_VOL) {
             Log.d(TAG, "Restoring device volume behavior");
@@ -8512,7 +8513,8 @@ public class AudioService extends IAudioService.Stub
                     // Only propage mute of stream when applicable
                     if (mIndexMin == 0 || isCallStream(mStreamType)) {
                         // For call stream, align mute only when muted, not when index is set to 0
-                        mVolumeGroupState.mute(forceMuteState ? mIsMuted : groupIndex == 0);
+                        mVolumeGroupState.mute(
+                                forceMuteState ? mIsMuted : groupIndex == 0 || mIsMuted);
                     }
                 }
             }
