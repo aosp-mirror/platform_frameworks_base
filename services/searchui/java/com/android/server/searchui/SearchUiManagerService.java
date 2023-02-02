@@ -125,6 +125,26 @@ public class SearchUiManagerService extends
                     (service) -> service.queryLocked(sessionId, query, callback));
         }
 
+        public void registerEmptyQueryResultUpdateCallback(@NonNull SearchSessionId sessionId,
+                @NonNull ISearchCallback callback) {
+            runForUserLocked("registerEmptyQueryResultUpdateCallback", sessionId,
+                    (service) -> service.registerEmptyQueryResultUpdateCallbackLocked(sessionId,
+                            callback));
+        }
+
+        public void unregisterEmptyQueryResultUpdateCallback(@NonNull SearchSessionId sessionId,
+                @NonNull ISearchCallback callback) {
+            runForUserLocked("unregisterEmptyQueryResultUpdateCallback", sessionId,
+                    (service) -> service.unregisterEmptyQueryResultUpdateCallbackLocked(sessionId,
+                            callback));
+        }
+
+        @Override
+        public void requestEmptyQueryResultUpdate(@NonNull SearchSessionId sessionId) {
+            runForUserLocked("requestEmptyQueryResultUpdate", sessionId,
+                    (service) -> service.requestEmptyQueryResultUpdateLocked(sessionId));
+        }
+
         @Override
         public void destroySearchSession(@NonNull SearchSessionId sessionId) {
             runForUserLocked("destroySearchSession", sessionId,
