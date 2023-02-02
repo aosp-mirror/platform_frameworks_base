@@ -16,17 +16,12 @@
 
 package com.android.server;
 
-import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.compat.CompatChanges;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.Binder;
-import android.os.Process;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.FastImmutableArraySet;
@@ -39,7 +34,6 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.FastPrintWriter;
-import com.android.server.am.ActivityManagerUtils;
 import com.android.server.pm.Computer;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 
@@ -175,7 +169,7 @@ public abstract class IntentResolver<F, R extends Object> {
         }
 
         final int match = filter.match(intent.getAction(), resolvedType, intent.getScheme(),
-                intent.getData(), intent.getCategories(), TAG, false, false, null, null);
+                intent.getData(), intent.getCategories(), TAG);
 
         if (match >= 0) {
             if (debug) {
@@ -846,28 +840,7 @@ public abstract class IntentResolver<F, R extends Object> {
                 continue;
             }
 
-            // IntentFilter#mBlockNullAction indicates whether the intent filter owner
-            // (intent receiver) is targeting U+. The blockNullAction local variable here
-            // indicates whether the calling process (intent sender) is targeting U+.
-            // IntentFilter#mBlockNullAction is ignored here, and will be updated and handled in
-            // PackageManagerServiceUtils#applySaferIntentEnforcements.
-
-            // Bypass CompatChanges check when calling UID is SYSTEM_UID as it may be in the
-            // system server bootstrapping process and can cause circular dependency.
-            final boolean blockNullAction = Binder.getCallingUid() == Process.SYSTEM_UID
-                    || CompatChanges.isChangeEnabled(
-                            IntentFilter.BLOCK_NULL_ACTION_INTENTS, Binder.getCallingUid());
-            // Set this to false as it will be updated and handled later
-            intentFilter.setBlockNullAction(false);
-            match = intentFilter.match(action, resolvedType, scheme, data, categories, TAG,
-                    false /*supportWildcards*/, blockNullAction,
-                    null /*ignoreActions*/,
-                    null /*extras*/);
-            if (action == null) {
-                ActivityManagerUtils.logUnsafeIntentEvent(
-                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH,
-                        Binder.getCallingUid(), intent, resolvedType, match < 0);
-            }
+            match = intentFilter.match(action, resolvedType, scheme, data, categories, TAG);
             if (match >= 0) {
                 if (debug) Slog.v(TAG, "  Filter matched!  match=0x" +
                         Integer.toHexString(match) + " hasDefault="

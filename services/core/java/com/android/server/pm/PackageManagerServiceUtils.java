@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.content.IntentFilter.BLOCK_NULL_ACTION_INTENTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
@@ -25,8 +24,6 @@ import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
-import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
-import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH;
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
@@ -97,7 +94,6 @@ import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.Watchdog;
-import com.android.server.am.ActivityManagerUtils;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -1170,18 +1166,16 @@ public class PackageManagerServiceUtils {
         return (ps.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
-    /**
-     * Apply several enforcements for making intents safer.
-     */
-    public static void applySaferIntentEnforcements(
+    // Static to give access to ComputeEngine
+    public static void applyEnforceIntentFilterMatching(
             PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
+        if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
+
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
-
-        final boolean disable = DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get();
 
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
@@ -1193,12 +1187,10 @@ public class PackageManagerServiceUtils {
             }
 
             // Only enforce filter matching if target app's target SDK >= T
-            final boolean enforce = compat.isChangeEnabledInternal(
-                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo);
-
-            // Only block null action if target app's target SDK >= U
-            final boolean blockNullAction = compat.isChangeEnabledInternal(
-                    BLOCK_NULL_ACTION_INTENTS, info.applicationInfo);
+            if (!compat.isChangeEnabledInternal(
+                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo)) {
+                continue;
+            }
 
             final ParsedMainComponent comp;
             if (info instanceof ActivityInfo) {
@@ -1220,48 +1212,25 @@ public class PackageManagerServiceUtils {
 
             boolean match = false;
             for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
-                IntentFilter filter = comp.getIntents().get(j).getIntentFilter();
-                // Update all intent filters with block null action intent information
-                filter.setBlockNullAction(blockNullAction);
-
-                if (disable) continue;
-                if (IntentResolver.intentMatchesFilter(filter, intent, resolvedType)) {
+                IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
+                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
                     match = true;
                     break;
                 }
             }
-
-            if (disable) continue;
-
             if (!match) {
-                if (enforce) {
-                    if (blockNullAction && intent.getAction() == null) {
-                        Slog.w(TAG, "Blocking null action intent: " + intent);
-                    } else {
-                        // Other non-matching reasons
-                        Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
-                    }
-                    Slog.w(TAG, "Access blocked: " + comp.getComponentName());
-                    if (DEBUG_INTENT_MATCHING) {
-                        Slog.v(TAG, "Component intent filters:");
-                        comp.getIntents()
-                                .forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
-                        Slog.v(TAG, "-----------------------------");
-                    }
-                    resolveInfos.remove(i);
+                Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
+                Slog.w(TAG, "Access blocked: " + comp.getComponentName());
+                if (DEBUG_INTENT_MATCHING) {
+                    Slog.v(TAG, "Component intent filters:");
+                    comp.getIntents().forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
+                    Slog.v(TAG, "-----------------------------");
                 }
-                if (blockNullAction && intent.getAction() == null) {
-                    ActivityManagerUtils.logUnsafeIntentEvent(
-                            UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NULL_ACTION_MATCH,
-                            filterCallingUid, intent, resolvedType, enforce);
-                } else {
-                    ActivityManagerUtils.logUnsafeIntentEvent(
-                            UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH,
-                            filterCallingUid, intent, resolvedType, enforce);
-                }
+                resolveInfos.remove(i);
             }
         }
     }
+
 
     /**
      * Do NOT use for intent resolution filtering. That should be done with

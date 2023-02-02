@@ -65,7 +65,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.compat.CompatChanges;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -573,6 +572,9 @@ public class ComputerEngine implements Computer {
                     ri.activityInfo = ai;
                     list = new ArrayList<>(1);
                     list.add(ri);
+                    PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
+                            mInjector.getCompatibility(), mComponentResolver,
+                            list, false, intent, resolvedType, filterCallingUid);
                 }
             }
         } else {
@@ -598,12 +600,9 @@ public class ComputerEngine implements Computer {
             }
         }
 
-        PackageManagerServiceUtils.applySaferIntentEnforcements(
-                mInjector.getCompatibility(), mComponentResolver,
-                list, false, intent, resolvedType, filterCallingUid);
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
-            PackageManagerServiceUtils.applySaferIntentEnforcements(
+            PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                     mInjector.getCompatibility(), mComponentResolver,
                     list, false, originalIntent, resolvedType, filterCallingUid);
         }
@@ -686,6 +685,9 @@ public class ComputerEngine implements Computer {
                     ri.serviceInfo = si;
                     list = new ArrayList<>(1);
                     list.add(ri);
+                    PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
+                            mInjector.getCompatibility(), mComponentResolver,
+                            list, false, intent, resolvedType, callingUid);
                 }
             }
         } else {
@@ -693,12 +695,9 @@ public class ComputerEngine implements Computer {
                     userId, callingUid, instantAppPkgName);
         }
 
-        PackageManagerServiceUtils.applySaferIntentEnforcements(
-                mInjector.getCompatibility(), mComponentResolver,
-                list, false, intent, resolvedType, callingUid);
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
-            PackageManagerServiceUtils.applySaferIntentEnforcements(
+            PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
                     mInjector.getCompatibility(), mComponentResolver,
                     list, false, originalIntent, resolvedType, callingUid);
         }
@@ -3688,13 +3687,10 @@ public class ComputerEngine implements Computer {
                 ps, callingUid, component, TYPE_ACTIVITY, userId, true /* filterUninstall */)) {
             return false;
         }
-        final boolean callerBlocksNullAction = CompatChanges.isChangeEnabled(
-                IntentFilter.BLOCK_NULL_ACTION_INTENTS, callingUid);
         for (int i=0; i< a.getIntents().size(); i++) {
             if (a.getIntents().get(i).getIntentFilter()
                     .match(intent.getAction(), resolvedType, intent.getScheme(),
-                            intent.getData(), intent.getCategories(), TAG,
-                            false, callerBlocksNullAction, null, null) >= 0) {
+                            intent.getData(), intent.getCategories(), TAG) >= 0) {
                 return true;
             }
         }
