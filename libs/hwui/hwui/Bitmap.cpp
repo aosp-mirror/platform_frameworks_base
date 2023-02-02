@@ -41,6 +41,7 @@
 #include <SkHighContrastFilter.h>
 #include <SkImageEncoder.h>
 #include <SkImagePriv.h>
+#include <SkJpegGainmapEncoder.h>
 #include <SkPixmap.h>
 #include <SkRect.h>
 #include <SkStream.h>
@@ -458,6 +459,16 @@ BitmapPalette Bitmap::computePalette(const SkImageInfo& info, const void* addr, 
 }
 
 bool Bitmap::compress(JavaCompressFormat format, int32_t quality, SkWStream* stream) {
+#ifdef __ANDROID__  // TODO: This isn't built for host for some reason?
+    if (hasGainmap() && format == JavaCompressFormat::Jpeg) {
+        SkBitmap baseBitmap = getSkBitmap();
+        SkBitmap gainmapBitmap = gainmap()->bitmap->getSkBitmap();
+        SkJpegEncoder::Options options{.fQuality = quality};
+        return SkJpegGainmapEncoder::EncodeJpegR(stream, baseBitmap.pixmap(), options,
+                                                 gainmapBitmap.pixmap(), options, gainmap()->info);
+    }
+#endif
+
     SkBitmap skbitmap;
     getSkBitmap(&skbitmap);
     return compress(skbitmap, format, quality, stream);
