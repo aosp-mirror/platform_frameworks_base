@@ -923,6 +923,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (DEBUG) Slog.v(TAG, "Adding window token: " + mToken);
             mWindowManagerInternal.addWindowToken(mToken, TYPE_WALLPAPER, mDisplayId,
                     null /* options */);
+            mWindowManagerInternal.setWallpaperShowWhenLocked(
+                    mToken, (wallpaper.mWhich & FLAG_LOCK) != 0);
             final DisplayData wpdData =
                     mWallpaperDisplayHelper.getDisplayDataOrCreate(mDisplayId);
             try {
@@ -1415,12 +1417,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         try {
                             if (connector.mEngine != null) {
                                 connector.mEngine.setWallpaperFlags(which);
+                                mWindowManagerInternal.setWallpaperShowWhenLocked(
+                                        connector.mToken, (which & FLAG_LOCK) != 0);
                             }
                         } catch (RemoteException e) {
                             Slog.e(TAG, "Failed to update wallpaper engine flags", e);
                         }
-                    }
-            );
+                    });
         }
     }
 

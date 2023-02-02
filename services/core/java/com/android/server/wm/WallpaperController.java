@@ -37,6 +37,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WALLPAPER_DRAW_PENDING_TIMEOUT;
 
 import android.annotation.Nullable;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -55,6 +56,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.window.ScreenCapture;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
@@ -119,6 +121,8 @@ class WallpaperController {
     private final FindWallpaperTargetResult mFindResults = new FindWallpaperTargetResult();
 
     private boolean mShouldOffsetWallpaperCenter;
+
+    final boolean mEnableSeparateLockScreenEngine;
 
     private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
         if ((w.mAttrs.type == TYPE_WALLPAPER)) {
@@ -249,11 +253,14 @@ class WallpaperController {
     WallpaperController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
-        mMaxWallpaperScale = service.mContext.getResources()
-                .getFloat(com.android.internal.R.dimen.config_wallpaperMaxScale);
-        mShouldOffsetWallpaperCenter = service.mContext.getResources()
-                .getBoolean(
+        Resources resources = service.mContext.getResources();
+        mMaxWallpaperScale =
+                resources.getFloat(com.android.internal.R.dimen.config_wallpaperMaxScale);
+        mShouldOffsetWallpaperCenter =
+                resources.getBoolean(
                         com.android.internal.R.bool.config_offsetWallpaperToCenterOfLargestDisplay);
+        mEnableSeparateLockScreenEngine =
+                resources.getBoolean(R.bool.config_independentLockscreenLiveWallpaper);
     }
 
     void resetLargestDisplay(Display display) {
