@@ -62,7 +62,7 @@ import javax.inject.Inject;
  * are not.
  */
 public class NotificationLogger implements StateListener {
-    private static final String TAG = "NotificationLogger";
+    static final String TAG = "NotificationLogger";
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
 
     /** The minimum delay in ms between reports of notification visibility. */
