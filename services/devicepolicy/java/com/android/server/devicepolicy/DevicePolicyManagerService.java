@@ -18435,9 +18435,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         .addExtras(extras)
                         .build();
 
-        mInjector.getNotificationManager().notifyAsUser(
+        mHandler.post(() -> mInjector.getNotificationManager().notifyAsUser(
                 null, SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED, notification,
-                UserHandle.of(getProfileParentId(profileUserId)));
+                UserHandle.of(getProfileParentId(profileUserId))));
     }
 
     private String getPersonalAppSuspensionButtonText() {
