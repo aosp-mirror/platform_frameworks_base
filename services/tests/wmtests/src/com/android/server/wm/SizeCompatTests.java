@@ -1876,6 +1876,43 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION})
+    public void testOverrideRespectRequestedOrientationIsEnabled_orientationIsRespected() {
+        // Set up a display in landscape
+        setUpDisplaySizeWithApp(2800, 1400);
+
+        final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */ false,
+                RESIZE_MODE_UNRESIZEABLE, SCREEN_ORIENTATION_PORTRAIT);
+        activity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        // Display should be rotated.
+        assertEquals(SCREEN_ORIENTATION_PORTRAIT, activity.mDisplayContent.getOrientation());
+
+        // No size compat mode
+        assertFalse(activity.inSizeCompatMode());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION})
+    public void testOverrideRespectRequestedOrientationIsEnabled_multiWindow_orientationIgnored() {
+        // Set up a display in landscape
+        setUpDisplaySizeWithApp(2800, 1400);
+
+        final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */ false,
+                RESIZE_MODE_UNRESIZEABLE, SCREEN_ORIENTATION_PORTRAIT);
+        TaskFragment taskFragment = activity.getTaskFragment();
+        spyOn(taskFragment);
+        activity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        doReturn(WINDOWING_MODE_MULTI_WINDOW).when(taskFragment).getWindowingMode();
+
+        // Display should not be rotated.
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, activity.mDisplayContent.getOrientation());
+
+        // No size compat mode
+        assertFalse(activity.inSizeCompatMode());
+    }
+
+    @Test
     public void testSplitAspectRatioForUnresizableLandscapeApps() {
         // Set up a display in portrait and ignoring orientation request.
         int screenWidth = 1400;

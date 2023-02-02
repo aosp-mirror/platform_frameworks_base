@@ -25,6 +25,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
+import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
 import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
@@ -143,6 +144,8 @@ final class LetterboxUiController {
     private final boolean mIsOverrideOrientationOnlyForCameraEnabled;
     // Corresponds to OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION
     private final boolean mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled;
+    // Corresponds to OVERRIDE_RESPECT_REQUESTED_ORIENTATION
+    private final boolean mIsOverrideRespectRequestedOrientationEnabled;
 
     // Corresponds to OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION
     private final boolean mIsOverrideCameraCompatDisableForceRotationEnabled;
@@ -272,6 +275,8 @@ final class LetterboxUiController {
                 isCompatChangeEnabled(OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
         mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION);
+        mIsOverrideRespectRequestedOrientationEnabled =
+                isCompatChangeEnabled(OVERRIDE_RESPECT_REQUESTED_ORIENTATION);
 
         mIsOverrideCameraCompatDisableForceRotationEnabled =
                 isCompatChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION);
@@ -416,6 +421,10 @@ final class LetterboxUiController {
 
     void setIsRefreshAfterRotationRequested(boolean isRequested) {
         mIsRefreshAfterRotationRequested = isRequested;
+    }
+
+    boolean isOverrideRespectRequestedOrientationEnabled() {
+        return mIsOverrideRespectRequestedOrientationEnabled;
     }
 
     /**
