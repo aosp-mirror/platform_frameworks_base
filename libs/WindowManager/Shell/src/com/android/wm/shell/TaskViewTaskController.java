@@ -183,26 +183,6 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     }
 
     /**
-     * Call when view position or size has changed. Do not call when animating.
-     */
-    public void onLocationChanged(Rect newBounds) {
-        if (mTaskToken == null) {
-            return;
-        }
-        // Sync Transactions can't operate simultaneously with shell transition collection.
-        // The transition animation (upon showing) will sync the location itself.
-        if (isUsingShellTransitions() && mTaskViewTransitions.hasPending()) return;
-
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        updateWindowBounds(wct);
-        mSyncQueue.queue(wct);
-    }
-
-    private void updateWindowBounds(WindowContainerTransaction wct) {
-        wct.setBounds(mTaskToken, mTaskViewBase.getCurrentBoundsOnScreen());
-    }
-
-    /**
      * Release this container if it is initialized.
      */
     public void release() {
@@ -394,15 +374,24 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     }
 
     /**
-     * Should be called when the client surface is changed.
+     * Sets the window bounds to {@code boundsOnScreen}.
+     * Call when view position or size has changed. Can also be called before the animation when
+     * the final bounds are known.
+     * Do not call during the animation.
      *
      * @param boundsOnScreen the on screen bounds of the surface view.
      */
-    public void surfaceChanged(Rect boundsOnScreen) {
+    public void setWindowBounds(Rect boundsOnScreen) {
         if (mTaskToken == null) {
             return;
         }
-        onLocationChanged(boundsOnScreen);
+        // Sync Transactions can't operate simultaneously with shell transition collection.
+        // The transition animation (upon showing) will sync the location itself.
+        if (isUsingShellTransitions() && mTaskViewTransitions.hasPending()) return;
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setBounds(mTaskToken, boundsOnScreen);
+        mSyncQueue.queue(wct);
     }
 
     /** Should be called when the client surface is destroyed. */
@@ -493,7 +482,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                     .setPosition(mTaskLeash, 0, 0)
                     .apply();
 
-            updateWindowBounds(wct);
+            wct.setBounds(mTaskToken, mTaskViewBase.getCurrentBoundsOnScreen());
         } else {
             // The surface has already been destroyed before the task has appeared,
             // so go ahead and hide the task entirely
