@@ -124,16 +124,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
     };
     private final ScreenDecorationsLogger mLogger;
 
-    private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
-        @Override
-        public void onFaceSensorLocationChanged() {
-            mLogger.onSensorLocationChanged();
-            if (mExecutor != null) {
-                mExecutor.execute(
-                        () -> updateOverlayProviderViews(new Integer[]{mFaceScanningViewId}));
-            }
-        }
-    };
+    private final AuthController mAuthController;
 
     private DisplayTracker mDisplayTracker;
     @VisibleForTesting
@@ -340,8 +331,21 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         mFaceScanningFactory = faceScanningFactory;
         mFaceScanningViewId = com.android.systemui.R.id.face_scanning_anim;
         mLogger = logger;
-        authController.addCallback(mAuthControllerCallback);
+        mAuthController = authController;
     }
+
+
+    private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {
+        @Override
+        public void onFaceSensorLocationChanged() {
+            mLogger.onSensorLocationChanged();
+            if (mExecutor != null) {
+                mExecutor.execute(
+                        () -> updateOverlayProviderViews(
+                                new Integer[]{mFaceScanningViewId}));
+            }
+        }
+    };
 
     @Override
     public void start() {
@@ -353,6 +357,7 @@ public class ScreenDecorations implements CoreStartable, Tunable , Dumpable {
         mExecutor = mThreadFactory.buildDelayableExecutorOnHandler(mHandler);
         mExecutor.execute(this::startOnScreenDecorationsThread);
         mDotViewController.setUiExecutor(mExecutor);
+        mAuthController.addCallback(mAuthControllerCallback);
     }
 
     private boolean isPrivacyDotEnabled() {
