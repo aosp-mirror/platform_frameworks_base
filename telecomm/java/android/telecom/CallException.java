@@ -116,17 +116,6 @@ public final class CallException extends RuntimeException implements Parcelable 
     }
 
     /**
-     * Constructor for a new CallException when only message can be specified.
-     * {@code CODE_ERROR_UNKNOWN} will be default code returned when calling {@code getCode}
-     *
-     * @param message related to why the exception was created
-     */
-    public CallException(@Nullable String message) {
-        super(getMessage(message, CODE_ERROR_UNKNOWN));
-        mMessage = message;
-    }
-
-    /**
      * Constructor for a new CallException that has a defined error code in this class
      *
      * @param message related to why the exception was created

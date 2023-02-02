@@ -41699,7 +41699,6 @@ package android.telecom {
   }
 
   public final class CallException extends java.lang.RuntimeException implements android.os.Parcelable {
-    ctor public CallException(@Nullable String);
     ctor public CallException(@Nullable String, int);
     method public int describeContents();
     method public int getCode();
