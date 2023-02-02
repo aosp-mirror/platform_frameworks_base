@@ -139,9 +139,7 @@ private fun NavControllerWrapperImpl.NavContent(allProvider: Collection<Settings
                     ) + fadeOut(animationSpec = fadeEffect)
                 },
             ) { navBackStackEntry ->
-                val page = remember(navBackStackEntry.arguments) {
-                    spp.createSettingsPage(navBackStackEntry.arguments)
-                }
+                val page = remember { spp.createSettingsPage(navBackStackEntry.arguments) }
                 page.PageWithEvent()
             }
         }
