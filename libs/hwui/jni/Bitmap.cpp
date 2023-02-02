@@ -1,5 +1,6 @@
 #undef LOG_TAG
 #define LOG_TAG "Bitmap"
+// #define LOG_NDEBUG 0
 #include "Bitmap.h"
 
 #include <hwui/Bitmap.h>
@@ -372,14 +373,32 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
     return srcPM.readPixels(dstPM);
 }
 
-static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
-                           jint dstConfigHandle, jboolean isMutable) {
+static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle, jint dstConfigHandle,
+                           jboolean isMutable) {
+    LocalScopedBitmap bitmapHolder(srcHandle);
+    if (!bitmapHolder.valid()) {
+        return NULL;
+    }
+    const Bitmap& original = bitmapHolder->bitmap();
+    const bool hasGainmap = original.hasGainmap();
     SkBitmap src;
-    reinterpret_cast<BitmapWrapper*>(srcHandle)->getSkBitmap(&src);
+    bitmapHolder->getSkBitmap(&src);
+
     if (dstConfigHandle == GraphicsJNI::hardwareLegacyBitmapConfig()) {
         sk_sp<Bitmap> bitmap(Bitmap::allocateHardwareBitmap(src));
         if (!bitmap.get()) {
             return NULL;
+        }
+        if (hasGainmap) {
+            auto gainmap = sp<uirenderer::Gainmap>::make();
+            gainmap->info = original.gainmap()->info;
+            const SkBitmap skSrcBitmap = original.gainmap()->bitmap->getSkBitmap();
+            sk_sp<Bitmap> skBitmap(Bitmap::allocateHardwareBitmap(skSrcBitmap));
+            if (!skBitmap.get()) {
+                return NULL;
+            }
+            gainmap->bitmap = std::move(skBitmap);
+            bitmap->setGainmap(std::move(gainmap.get()));
         }
         return createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(isMutable));
     }
@@ -392,6 +411,18 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
         return NULL;
     }
     auto bitmap = allocator.getStorageObjAndReset();
+    if (hasGainmap) {
+        auto gainmap = sp<uirenderer::Gainmap>::make();
+        gainmap->info = original.gainmap()->info;
+        const SkBitmap skSrcBitmap = original.gainmap()->bitmap->getSkBitmap();
+        SkBitmap skDestBitmap;
+        HeapAllocator destAllocator;
+        if (!bitmapCopyTo(&skDestBitmap, dstCT, skSrcBitmap, &destAllocator)) {
+            return NULL;
+        }
+        gainmap->bitmap = sk_sp<Bitmap>(destAllocator.getStorageObjAndReset());
+        bitmap->setGainmap(std::move(gainmap.get()));
+    }
     return createBitmap(env, bitmap, getPremulBitmapCreateFlags(isMutable));
 }
 
