@@ -39,6 +39,15 @@ public interface AppOpsCheckingServiceInterface {
     SparseIntArray getNonDefaultUidModes(int uid);
 
     /**
+     * Returns a copy of non-default app-ops with op as keys and their modes as values for a package
+     * and user.
+     * Returns an empty SparseIntArray if nothing is set.
+     * @param packageName for which we need the app-ops and their modes.
+     * @param userId for which the package is installed in.
+     */
+    SparseIntArray getNonDefaultPackageModes(String packageName, int userId);
+
+    /**
      * Returns the app-op mode for a particular app-op of a uid.
      * Returns default op mode if the op mode for particular uid and op is not set.
      * @param uid user id for which we need the mode.

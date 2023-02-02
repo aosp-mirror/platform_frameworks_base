@@ -106,6 +106,21 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     }
 
     @Override
+    public SparseIntArray getNonDefaultPackageModes(String packageName, int userId) {
+        synchronized (mLock) {
+            ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId);
+            if (packageModes == null) {
+                return new SparseIntArray();
+            }
+            SparseIntArray opModes = packageModes.get(packageName);
+            if (opModes == null) {
+                return new SparseIntArray();
+            }
+            return opModes.clone();
+        }
+    }
+
+    @Override
     public int getUidMode(int uid, int op) {
         synchronized (mLock) {
             SparseIntArray opModes = mUidModes.get(uid, null);

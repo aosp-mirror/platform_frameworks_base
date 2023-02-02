@@ -46,6 +46,13 @@ public class AppOpsCheckingServiceLoggingDecorator implements AppOpsCheckingServ
     }
 
     @Override
+    public SparseIntArray getNonDefaultPackageModes(String packageName, int userId) {
+        Log.i(LOG_TAG, "getNonDefaultPackageModes("
+                + "packageName = " + packageName + ", userId = " + userId + ") ");
+        return mService.getNonDefaultPackageModes(packageName, userId);
+    }
+
+    @Override
     public int getUidMode(int uid, int op) {
         Log.i(LOG_TAG, "getUidMode(uid = " + uid + ", op = " + op + ")");
         return mService.getUidMode(uid, op);
