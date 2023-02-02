@@ -772,7 +772,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     DisplayConnector connector =
                             targetWallpaper.connection.getDisplayConnectorOrCreate(displayId);
                     if (connector == null) return;
-                    connector.disconnectLocked();
+                    connector.disconnectLocked(targetWallpaper.connection);
                     targetWallpaper.connection.removeDisplayConnector(displayId);
                     mWallpaperDisplayHelper.removeDisplayData(displayId);
                 }
@@ -859,7 +859,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (fallbackConnection.mDisplayConnector.size() != 0) {
                 fallbackConnection.forEachDisplayConnector(connector -> {
                     if (connector.mEngine != null) {
-                        connector.disconnectLocked();
+                        connector.disconnectLocked(fallbackConnection);
                     }
                 });
                 fallbackConnection.mDisplayConnector.clear();
@@ -940,16 +940,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             t.traceEnd();
         }
 
-        void disconnectLocked() {
+        void disconnectLocked(WallpaperConnection connection) {
             if (DEBUG) Slog.v(TAG, "Removing window token: " + mToken);
             mWindowManagerInternal.removeWindowToken(mToken, false/* removeWindows */,
                     mDisplayId);
             try {
-                if (mEngine != null) {
-                    mEngine.destroy();
-                }
+                connection.mService.detach(mToken);
             } catch (RemoteException e) {
-                Slog.w(TAG, "Engine.destroy() threw a RemoteException");
+                Slog.w(TAG, "connection.mService.destroy() threw a RemoteException");
             }
             mEngine = null;
         }
@@ -1249,12 +1247,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             synchronized (mLock) {
                 final DisplayConnector connector = getDisplayConnectorOrCreate(displayId);
                 if (connector == null) {
-                    try {
-                        engine.destroy();
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Failed to destroy engine", e);
-                    }
-                    return;
+                    throw new IllegalStateException("Connector has already been destroyed");
                 }
                 connector.mEngine = engine;
                 connector.ensureStatusHandled();
@@ -3261,20 +3254,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
                 wallpaper.connection.mReply = null;
             }
-            try {
-                // It can be null if user switching happens before service connection.
-                if (wallpaper.connection.mService != null) {
-                    wallpaper.connection.mService.detach();
-                }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed detaching wallpaper service ", e);
-            }
-            try {
-                mContext.unbindService(wallpaper.connection);
-            } catch (IllegalArgumentException e) {
-                Slog.w(TAG, "Attempted to unbind unregistered service");
-            }
-            wallpaper.connection.forEachDisplayConnector(DisplayConnector::disconnectLocked);
+            wallpaper.connection.forEachDisplayConnector(
+                    connector -> connector.disconnectLocked(wallpaper.connection));
             wallpaper.connection.mService = null;
             wallpaper.connection.mDisplayConnector.clear();
 
@@ -3284,6 +3265,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mContext.getMainThreadHandler().removeCallbacks(
                     wallpaper.connection.mTryToRebindRunnable);
 
+            mContext.unbindService(wallpaper.connection);
             wallpaper.connection = null;
             if (wallpaper == mLastWallpaper) {
                 mLastWallpaper = null;
