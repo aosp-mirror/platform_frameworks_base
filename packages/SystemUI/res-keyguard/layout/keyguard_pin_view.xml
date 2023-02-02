@@ -105,6 +105,7 @@
             android:id="@+id/key1"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key2"
             androidprv:digit="1"
             androidprv:textView="@+id/pinEntry" />
 
@@ -112,6 +113,7 @@
             android:id="@+id/key2"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key3"
             androidprv:digit="2"
             androidprv:textView="@+id/pinEntry" />
 
@@ -119,6 +121,7 @@
             android:id="@+id/key3"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key4"
             androidprv:digit="3"
             androidprv:textView="@+id/pinEntry" />
 
@@ -126,6 +129,7 @@
             android:id="@+id/key4"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key5"
             androidprv:digit="4"
             androidprv:textView="@+id/pinEntry" />
 
@@ -133,6 +137,7 @@
             android:id="@+id/key5"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key6"
             androidprv:digit="5"
             androidprv:textView="@+id/pinEntry" />
 
@@ -140,6 +145,7 @@
             android:id="@+id/key6"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key7"
             androidprv:digit="6"
             androidprv:textView="@+id/pinEntry" />
 
@@ -147,13 +153,16 @@
             android:id="@+id/key7"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key8"
             androidprv:digit="7"
             androidprv:textView="@+id/pinEntry" />
+
 
         <com.android.keyguard.NumPadKey
             android:id="@+id/key8"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key9"
             androidprv:digit="8"
             androidprv:textView="@+id/pinEntry" />
 
@@ -161,34 +170,33 @@
             android:id="@+id/key9"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/delete_button"
             androidprv:digit="9"
             androidprv:textView="@+id/pinEntry" />
 
-
         <com.android.keyguard.NumPadButton
             android:id="@+id/delete_button"
+            style="@style/NumPadKey.Delete"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            style="@style/NumPadKey.Delete"
-            android:contentDescription="@string/keyboardview_keycode_delete"
-            />
+            android:accessibilityTraversalBefore="@id/key0"
+            android:contentDescription="@string/keyboardview_keycode_delete" />
 
         <com.android.keyguard.NumPadKey
             android:id="@+id/key0"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:accessibilityTraversalBefore="@id/key_enter"
             androidprv:digit="0"
             androidprv:textView="@+id/pinEntry" />
 
         <com.android.keyguard.NumPadButton
             android:id="@+id/key_enter"
+            style="@style/NumPadKey.Enter"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            style="@style/NumPadKey.Enter"
-            android:contentDescription="@string/keyboardview_keycode_enter"
-            />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            android:contentDescription="@string/keyboardview_keycode_enter" />
+</androidx.constraintlayout.widget.ConstraintLayout>
 
     <include layout="@layout/keyguard_eca"
              android:id="@+id/keyguard_selector_fade_container"
