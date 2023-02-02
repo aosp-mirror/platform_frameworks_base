@@ -340,8 +340,7 @@ class InsetsPolicy {
                 if (state == originalState) {
                     state = new InsetsState(state);
                 }
-                final InsetsSource override =
-                        new InsetsSource(state.getSource(otherProvider.getSource().getId()));
+                final InsetsSource override = new InsetsSource(otherProvider.getSource());
                 override.setFrame(otherProvider.getOverriddenFrame(windowType));
                 state.addSource(override);
             }

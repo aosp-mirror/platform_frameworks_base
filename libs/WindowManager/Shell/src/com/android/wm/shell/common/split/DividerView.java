@@ -37,6 +37,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -216,13 +217,14 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     void onInsetsChanged(InsetsState insetsState, boolean animate) {
         mSplitLayout.getDividerBounds(mTempRect);
         final InsetsSource taskBarInsetsSource =
-                insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+                insetsState.peekSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
         // Only insets the divider bar with task bar when it's expanded so that the rounded corners
         // will be drawn against task bar.
         // But there is no need to do it when IME showing because there are no rounded corners at
         // the bottom. This also avoids the problem of task bar height not changing when IME
         // floating.
-        if (!insetsState.getSourceOrDefaultVisibility(InsetsState.ITYPE_IME)
+        if (!insetsState.isSourceOrDefaultVisible(InsetsState.ITYPE_IME, WindowInsets.Type.ime())
+                && taskBarInsetsSource != null
                 && taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
             mTempRect.inset(taskBarInsetsSource.calculateVisibleInsets(mTempRect));
         }

@@ -276,9 +276,9 @@ public class InsetsPolicyTest extends WindowTestsBase {
         policy.updateBarControlTarget(mAppWindow);
         waitUntilWindowAnimatorIdle();
         assertFalse(mDisplayContent.getInsetsStateController().getRawInsetsState()
-                .getSource(ITYPE_STATUS_BAR).isVisible());
+                .isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()));
         assertFalse(mDisplayContent.getInsetsStateController().getRawInsetsState()
-                .getSource(ITYPE_NAVIGATION_BAR).isVisible());
+                .isSourceOrDefaultVisible(ITYPE_NAVIGATION_BAR, navigationBars()));
 
         policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR},
                 true /* isGestureOnSystemBar */);
@@ -293,9 +293,9 @@ public class InsetsPolicyTest extends WindowTestsBase {
         }
 
         assertTrue(mDisplayContent.getInsetsStateController().getRawInsetsState()
-                .getSource(ITYPE_STATUS_BAR).isVisible());
+                .isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()));
         assertTrue(mDisplayContent.getInsetsStateController().getRawInsetsState()
-                .getSource(ITYPE_NAVIGATION_BAR).isVisible());
+                .isSourceOrDefaultVisible(ITYPE_NAVIGATION_BAR, navigationBars()));
     }
 
     @SetupWindows(addWindows = W_ACTIVITY)
@@ -362,11 +362,11 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
         final InsetsState clientState = mAppWindow.getInsetsState();
         // The transient bar states for client should be invisible.
-        assertFalse(clientState.getSource(ITYPE_STATUS_BAR).isVisible());
-        assertFalse(clientState.getSource(ITYPE_NAVIGATION_BAR).isVisible());
+        assertFalse(clientState.isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()));
+        assertFalse(clientState.isSourceOrDefaultVisible(ITYPE_NAVIGATION_BAR, navigationBars()));
         // The original state shouldn't be modified.
-        assertTrue(state.getSource(ITYPE_STATUS_BAR).isVisible());
-        assertTrue(state.getSource(ITYPE_NAVIGATION_BAR).isVisible());
+        assertTrue(state.isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()));
+        assertTrue(state.isSourceOrDefaultVisible(ITYPE_NAVIGATION_BAR, navigationBars()));
 
         mAppWindow.setRequestedVisibleTypes(
                 navigationBars() | statusBars(), navigationBars() | statusBars());
