@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.accessibilitymenu;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityButtonController;
 import android.accessibilityservice.AccessibilityService;
 import android.content.BroadcastReceiver;
@@ -51,8 +52,12 @@ import java.util.List;
 /** @hide */
 public class AccessibilityMenuService extends AccessibilityService
         implements View.OnTouchListener {
-    private static final String TAG = "A11yMenuService";
 
+    public static final String PACKAGE_NAME = AccessibilityMenuService.class.getPackageName();
+    public static final String INTENT_TOGGLE_MENU = ".toggle_menu";
+    public static final String INTENT_HIDE_MENU = ".hide_menu";
+
+    private static final String TAG = "A11yMenuService";
     private static final long BUFFER_MILLISECONDS_TO_PREVENT_UPDATE_FAILURE = 100L;
 
     private static final int BRIGHTNESS_UP_INCREMENT_GAMMA =
@@ -74,7 +79,8 @@ public class AccessibilityMenuService extends AccessibilityService
 
     // TODO(b/136716947): Support multi-display once a11y framework side is ready.
     private DisplayManager mDisplayManager;
-    final DisplayManager.DisplayListener mDisplayListener = new DisplayManager.DisplayListener() {
+    private final DisplayManager.DisplayListener mDisplayListener =
+            new DisplayManager.DisplayListener() {
         int mRotation;
 
         @Override
@@ -95,10 +101,17 @@ public class AccessibilityMenuService extends AccessibilityService
         }
     };
 
-    final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mHideMenuReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             mA11yMenuLayout.hideMenu();
+        }
+    };
+
+    private final BroadcastReceiver mToggleMenuReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mA11yMenuLayout.toggleVisibility();
         }
     };
 
@@ -172,7 +185,19 @@ public class AccessibilityMenuService extends AccessibilityService
     protected void onServiceConnected() {
         mA11yMenuLayout = new A11yMenuOverlayLayout(this);
 
-        registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        IntentFilter hideMenuFilter = new IntentFilter();
+        hideMenuFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        hideMenuFilter.addAction(PACKAGE_NAME + INTENT_HIDE_MENU);
+
+        // Including WRITE_SECURE_SETTINGS enforces that we only listen to apps
+        // with the restricted WRITE_SECURE_SETTINGS permission who broadcast this intent.
+        registerReceiver(mHideMenuReceiver, hideMenuFilter,
+                Manifest.permission.WRITE_SECURE_SETTINGS, null,
+                Context.RECEIVER_EXPORTED);
+        registerReceiver(mToggleMenuReceiver,
+                new IntentFilter(PACKAGE_NAME + INTENT_TOGGLE_MENU),
+                Manifest.permission.WRITE_SECURE_SETTINGS, null,
+                Context.RECEIVER_EXPORTED);
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mPrefs.registerOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
@@ -260,7 +285,8 @@ public class AccessibilityMenuService extends AccessibilityService
      * @param increment The increment amount in gamma-space
      */
     private void adjustBrightness(int increment) {
-        BrightnessInfo info = getDisplay().getBrightnessInfo();
+        Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        BrightnessInfo info = display.getBrightnessInfo();
         int gamma = BrightnessUtils.convertLinearToGammaFloat(
                 info.brightness,
                 info.brightnessMinimum,
@@ -275,7 +301,7 @@ public class AccessibilityMenuService extends AccessibilityService
                 info.brightnessMinimum,
                 info.brightnessMaximum
         );
-        mDisplayManager.setBrightness(getDisplayId(), brightness);
+        mDisplayManager.setBrightness(display.getDisplayId(), brightness);
         mA11yMenuLayout.showSnackbar(
                 getString(R.string.brightness_percentage_label,
                         (gamma / (BrightnessUtils.GAMMA_SPACE_MAX / 100))));
@@ -310,7 +336,8 @@ public class AccessibilityMenuService extends AccessibilityService
 
     @Override
     public boolean onUnbind(Intent intent) {
-        unregisterReceiver(mBroadcastReceiver);
+        unregisterReceiver(mHideMenuReceiver);
+        unregisterReceiver(mToggleMenuReceiver);
         mPrefs.unregisterOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
         sInitialized = false;
         return super.onUnbind(intent);
