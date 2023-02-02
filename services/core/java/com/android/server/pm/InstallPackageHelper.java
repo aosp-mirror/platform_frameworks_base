@@ -2477,15 +2477,19 @@ final class InstallPackageHelper {
                     if (disabledPs != null) {
                         dataOwnerPkg = disabledPs.getPkg();
                     }
-                    try {
-                        PackageManagerServiceUtils.checkDowngrade(dataOwnerPkg, pkgLite);
-                    } catch (PackageManagerException e) {
-                        String errorMsg = "System app: " + packageName + " cannot be downgraded to"
-                                + " older than its preloaded version on the system image. "
-                                + e.getMessage();
-                        Slog.w(TAG, errorMsg);
-                        return Pair.create(
-                                PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE, errorMsg);
+                    if (!Build.IS_DEBUGGABLE && !dataOwnerPkg.isDebuggable()) {
+                        // Only restrict non-debuggable builds and non-debuggable version of the app
+                        try {
+                            PackageManagerServiceUtils.checkDowngrade(dataOwnerPkg, pkgLite);
+                        } catch (PackageManagerException e) {
+                            String errorMsg =
+                                    "System app: " + packageName + " cannot be downgraded to"
+                                            + " older than its preloaded version on the system"
+                                            + " image. " + e.getMessage();
+                            Slog.w(TAG, errorMsg);
+                            return Pair.create(
+                                    PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE, errorMsg);
+                        }
                     }
                 }
             }
