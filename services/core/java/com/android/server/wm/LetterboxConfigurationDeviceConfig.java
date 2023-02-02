@@ -33,6 +33,9 @@ import java.util.concurrent.Executor;
 final class LetterboxConfigurationDeviceConfig
         implements DeviceConfig.OnPropertiesChangedListener {
 
+    static final String KEY_ENABLE_CAMERA_COMPAT_TREATMENT = "enable_compat_camera_treatment";
+    private static final boolean DEFAULT_VALUE_ENABLE_CAMERA_COMPAT_TREATMENT = true;
+
     static final String KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY =
             "enable_display_rotation_immersive_app_compat_policy";
     private static final boolean DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY =
@@ -44,11 +47,18 @@ final class LetterboxConfigurationDeviceConfig
 
     @VisibleForTesting
     static final Map<String, Boolean> sKeyToDefaultValueMap = Map.of(
+            KEY_ENABLE_CAMERA_COMPAT_TREATMENT,
+            DEFAULT_VALUE_ENABLE_CAMERA_COMPAT_TREATMENT,
             KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
             DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
             KEY_ALLOW_IGNORE_ORIENTATION_REQUEST,
             DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST
     );
+
+    // Whether camera compatibility treatment is enabled.
+    // See DisplayRotationCompatPolicy for context.
+    private boolean mIsCameraCompatTreatmentEnabled =
+            DEFAULT_VALUE_ENABLE_CAMERA_COMPAT_TREATMENT;
 
     // Whether enabling rotation compat policy for immersive apps that prevents auto rotation
     // into non-optimal screen orientation while in fullscreen. This is needed because immersive
@@ -101,6 +111,8 @@ final class LetterboxConfigurationDeviceConfig
      */
     boolean getFlag(String key) {
         switch (key) {
+            case KEY_ENABLE_CAMERA_COMPAT_TREATMENT:
+                return mIsCameraCompatTreatmentEnabled;
             case KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY:
                 return mIsDisplayRotationImmersiveAppCompatPolicyEnabled;
             case KEY_ALLOW_IGNORE_ORIENTATION_REQUEST:
@@ -116,6 +128,10 @@ final class LetterboxConfigurationDeviceConfig
             throw new AssertionError("Haven't found default value for flag: " + key);
         }
         switch (key) {
+            case KEY_ENABLE_CAMERA_COMPAT_TREATMENT:
+                mIsCameraCompatTreatmentEnabled =
+                        getDeviceConfig(key, defaultValue);
+                break;
             case KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY:
                 mIsDisplayRotationImmersiveAppCompatPolicyEnabled =
                         getDeviceConfig(key, defaultValue);

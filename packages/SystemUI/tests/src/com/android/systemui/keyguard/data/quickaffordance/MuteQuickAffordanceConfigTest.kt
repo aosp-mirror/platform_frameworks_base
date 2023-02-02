@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.Context
 import android.media.AudioManager
-import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserFileManager
@@ -27,10 +26,12 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.RingerModeTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -57,13 +58,15 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     @Mock
     private lateinit var userFileManager: UserFileManager
 
+    private lateinit var testDispatcher: TestDispatcher
     private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        testScope = TestScope()
+        testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
 
         whenever(userTracker.userContext).thenReturn(context)
         whenever(userFileManager.getSharedPreferences(any(), any(), any()))
@@ -74,7 +77,10 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
                 userTracker,
                 userFileManager,
                 ringerModeTracker,
-                audioManager
+                audioManager,
+                testScope.backgroundScope,
+                testDispatcher,
+                testDispatcher,
         )
     }
 
@@ -103,17 +109,16 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `triggered - state was previously NORMAL - currently SILENT - move to previous state`() {
+    fun `triggered - state was previously NORMAL - currently SILENT - move to previous state`() = testScope.runTest {
         //given
         val ringerModeCapture = argumentCaptor<Int>()
-        val ringerModeInternal = mock<LiveData<Int>>()
-        whenever(ringerModeTracker.ringerModeInternal).thenReturn(ringerModeInternal)
-        whenever(ringerModeInternal.value).thenReturn(AudioManager.RINGER_MODE_NORMAL)
+        whenever(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_NORMAL)
         underTest.onTriggered(null)
-        whenever(ringerModeInternal.value).thenReturn(AudioManager.RINGER_MODE_SILENT)
+        whenever(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_SILENT)
 
         //when
         val result = underTest.onTriggered(null)
+        runCurrent()
         verify(audioManager, times(2)).ringerModeInternal = ringerModeCapture.capture()
 
         //then
@@ -122,15 +127,14 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `triggered - state is not SILENT - move to SILENT ringer`() {
+    fun `triggered - state is not SILENT - move to SILENT ringer`() = testScope.runTest {
         //given
         val ringerModeCapture = argumentCaptor<Int>()
-        val ringerModeInternal = mock<LiveData<Int>>()
-        whenever(ringerModeTracker.ringerModeInternal).thenReturn(ringerModeInternal)
-        whenever(ringerModeInternal.value).thenReturn(AudioManager.RINGER_MODE_NORMAL)
+        whenever(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_NORMAL)
 
         //when
         val result = underTest.onTriggered(null)
+        runCurrent()
         verify(audioManager).ringerModeInternal = ringerModeCapture.capture()
 
         //then

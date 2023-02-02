@@ -136,9 +136,9 @@ enum class ChipStateSender(
         ),
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
-            return nextState == FAR_FROM_RECEIVER ||
-                    nextState == ALMOST_CLOSE_TO_START_CAST ||
-                    nextState == TRANSFER_TO_THIS_DEVICE_TRIGGERED
+            // Since _SUCCEEDED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
         }
     },
 
@@ -158,9 +158,9 @@ enum class ChipStateSender(
         ),
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
-            return nextState == FAR_FROM_RECEIVER ||
-                    nextState == ALMOST_CLOSE_TO_END_CAST ||
-                    nextState == TRANSFER_TO_RECEIVER_TRIGGERED
+            // Since _SUCCEEDED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
         }
     },
 
@@ -173,9 +173,9 @@ enum class ChipStateSender(
         endItem = SenderEndItem.Error,
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
-            return nextState == FAR_FROM_RECEIVER ||
-                    nextState == ALMOST_CLOSE_TO_START_CAST ||
-                    nextState == TRANSFER_TO_THIS_DEVICE_TRIGGERED
+            // Since _FAILED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
         }
     },
 
@@ -188,9 +188,9 @@ enum class ChipStateSender(
         endItem = SenderEndItem.Error,
     ) {
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
-            return nextState == FAR_FROM_RECEIVER ||
-                    nextState == ALMOST_CLOSE_TO_END_CAST ||
-                    nextState == TRANSFER_TO_RECEIVER_TRIGGERED
+            // Since _FAILED is the end of a transfer sequence, we should be able to move to any
+            // state that represents the beginning of a new sequence.
+            return stateIsStartOfSequence(nextState)
         }
     },
 
@@ -210,9 +210,9 @@ enum class ChipStateSender(
         }
 
         override fun isValidNextState(nextState: ChipStateSender): Boolean {
-            return nextState == FAR_FROM_RECEIVER ||
-                    nextState.transferStatus == TransferStatus.NOT_STARTED ||
-                    nextState.transferStatus == TransferStatus.IN_PROGRESS
+            // When far away, we can go to any state that represents the start of a transfer
+            // sequence.
+            return stateIsStartOfSequence(nextState)
         }
     };
 
@@ -227,6 +227,20 @@ enum class ChipStateSender(
         return Text.Loaded(context.getString(stringResId!!, otherDeviceName))
     }
 
+    /**
+     * Returns true if moving from this state to [nextState] is a valid transition.
+     *
+     * In general, we expect a media transfer go to through a sequence of states:
+     * For push-to-receiver:
+     *   - ALMOST_CLOSE_TO_START_CAST => TRANSFER_TO_RECEIVER_TRIGGERED =>
+     *     TRANSFER_TO_RECEIVER_(SUCCEEDED|FAILED)
+     *   - ALMOST_CLOSE_TO_END_CAST => TRANSFER_TO_THIS_DEVICE_TRIGGERED =>
+     *     TRANSFER_TO_THIS_DEVICE_(SUCCEEDED|FAILED)
+     *
+     * This method should validate that the states go through approximately that sequence.
+     *
+     * See b/221265848 for more details.
+     */
     abstract fun isValidNextState(nextState: ChipStateSender): Boolean
 
     companion object {
@@ -275,6 +289,18 @@ enum class ChipStateSender(
             }
 
             return currentState.isValidNextState(desiredState)
+        }
+
+        /**
+         * Returns true if [state] represents a state at the beginning of a sequence and false
+         * otherwise.
+         */
+        private fun stateIsStartOfSequence(state: ChipStateSender): Boolean {
+            return state == FAR_FROM_RECEIVER ||
+                state.transferStatus == TransferStatus.NOT_STARTED ||
+                // It's possible to skip the NOT_STARTED phase and go immediately into the
+                // IN_PROGRESS phase.
+                state.transferStatus == TransferStatus.IN_PROGRESS
         }
     }
 }

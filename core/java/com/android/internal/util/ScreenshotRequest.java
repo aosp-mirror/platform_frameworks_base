@@ -173,6 +173,9 @@ public class ScreenshotRequest implements Parcelable {
         public Builder(
                 @WindowManager.ScreenshotType int type,
                 @WindowManager.ScreenshotSource int source) {
+            if (type != TAKE_SCREENSHOT_FULLSCREEN && type != TAKE_SCREENSHOT_PROVIDED_IMAGE) {
+                throw new IllegalArgumentException("Invalid screenshot type requested!");
+            }
             mType = type;
             mSource = source;
         }
