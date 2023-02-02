@@ -78,6 +78,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -10083,4 +10084,211 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mInternalService.sendReviewPermissionsNotification();
         verify(mMockNm, never()).notify(anyString(), anyInt(), any(Notification.class));
     }
+
+    @Test
+    public void fixSystemNotification_withOnGoingFlag_shouldBeNonDismissible()
+            throws Exception {
+        // Given: a notification from an app on the system partition has the flag
+        // FLAG_ONGOING_EVENT set
+        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
+        mService.setOngoingDismissal(true);
+        Notification n = new Notification.Builder(mContext, "test")
+                .setOngoing(true)
+                .build();
+
+        final ApplicationInfo systemAppInfo = new ApplicationInfo();
+        systemAppInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(systemAppInfo);
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, PKG, "tag", 9, 0);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should be set
+        assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
+
+        // Avoid affecting other tests
+        mService.setOngoingDismissal(false);
+    }
+
+    @Test
+    public void fixMediaNotification_withOnGoingFlag_shouldBeNonDismissible()
+            throws Exception {
+        // Given: a media notification has the flag FLAG_ONGOING_EVENT set
+        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
+        mService.setOngoingDismissal(true);
+        Notification n = new Notification.Builder(mContext, "test")
+                .setOngoing(true)
+                .setStyle(new Notification.MediaStyle()
+                        .setMediaSession(mock(MediaSession.Token.class)))
+                .build();
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, PKG, "tag", 9, 0);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should be set
+        assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
+
+        // Avoid affecting other tests
+        mService.setOngoingDismissal(false);
+    }
+
+    @Test
+    public void fixNonExemptNotification_withOnGoingFlag_shouldBeDismissible() throws Exception {
+        // Given: a non-exempt notification has the flag FLAG_ONGOING_EVENT set
+        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
+        mService.setOngoingDismissal(true);
+        Notification n = new Notification.Builder(mContext, "test")
+                .setOngoing(true)
+                .build();
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, PKG, "tag", 9, 0);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should not be set
+        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
+
+        // Avoid affecting other tests
+        mService.setOngoingDismissal(false);
+    }
+
+    @Test
+    public void fixNonExemptNotification_withNoDismissFlag_shouldBeDismissible()
+            throws Exception {
+        // Given: a non-exempt notification has the flag FLAG_NO_DISMISS set (even though this is
+        // not allowed)
+        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
+        mService.setOngoingDismissal(true);
+        Notification n = new Notification.Builder(mContext, "test")
+                .build();
+        n.flags |= Notification.FLAG_NO_DISMISS;
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, PKG, "tag", 9, 0);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should be cleared
+        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
+
+        // Avoid affecting other tests
+        mService.setOngoingDismissal(false);
+    }
+
+    @Test
+    public void fixSystemNotification_withoutOnGoingFlag_shouldBeDismissible() throws Exception {
+        // Given: a notification from an app on the system partition doesn't have the flag
+        // FLAG_ONGOING_EVENT set
+        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
+        mService.setOngoingDismissal(true);
+        Notification n = new Notification.Builder(mContext, "test")
+                .setOngoing(false)
+                .build();
+
+        final ApplicationInfo systemAppInfo = new ApplicationInfo();
+        systemAppInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(systemAppInfo);
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, PKG, "tag", 9, 0);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should not be set
+        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
+
+        // Avoid affecting other tests
+        mService.setOngoingDismissal(false);
+    }
+
+    @Test
+    public void fixSystemNotification_withoutOnGoingFlag_withNoDismissFlag_shouldBeDismissible()
+            throws Exception {
+        // Given: a notification from an app on the system partition doesn't have the flag
+        // FLAG_ONGOING_EVENT set, but has the flag FLAG_NO_DISMISS set
+        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
+        mService.setOngoingDismissal(true);
+        Notification n = new Notification.Builder(mContext, "test")
+                .setOngoing(false)
+                .build();
+        n.flags |= Notification.FLAG_NO_DISMISS;
+
+        final ApplicationInfo systemAppInfo = new ApplicationInfo();
+        systemAppInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
+        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(systemAppInfo);
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, PKG, "tag", 9, 0);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should be cleared
+        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
+
+        // Avoid affecting other tests
+        mService.setOngoingDismissal(false);
+    }
+
+    @Test
+    public void fixMediaNotification_withoutOnGoingFlag_shouldBeDismissible() throws Exception {
+        // Given: a media notification doesn't have the flag FLAG_ONGOING_EVENT set
+        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
+        mService.setOngoingDismissal(true);
+        Notification n = new Notification.Builder(mContext, "test")
+                .setOngoing(false)
+                .setStyle(new Notification.MediaStyle()
+                        .setMediaSession(mock(MediaSession.Token.class)))
+                .build();
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, PKG, "tag", 9, 0);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should not be set
+        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
+
+        // Avoid affecting other tests
+        mService.setOngoingDismissal(false);
+    }
+
+    @Test
+    public void fixMediaNotification_withoutOnGoingFlag_withNoDismissFlag_shouldBeDismissible()
+            throws Exception {
+        // Given: a media notification doesn't have the flag FLAG_ONGOING_EVENT set,
+        // but has the flag FLAG_NO_DISMISS set
+        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
+        mService.setOngoingDismissal(true);
+        Notification n = new Notification.Builder(mContext, "test")
+                .setOngoing(false)
+                .setStyle(new Notification.MediaStyle()
+                        .setMediaSession(mock(MediaSession.Token.class)))
+                .build();
+        n.flags |= Notification.FLAG_NO_DISMISS;
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, PKG, "tag", 9, 0);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should be cleared
+        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
+
+        // Avoid affecting other tests
+        mService.setOngoingDismissal(false);
+    }
+
+    @Test
+    public void fixNonExempt_Notification_withoutOnGoingFlag_shouldBeDismissible()
+            throws Exception {
+        // Given: a non-exempt notification has the flag FLAG_ONGOING_EVENT set
+        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
+        mService.setOngoingDismissal(true);
+        mService.setOngoingDismissal(true);
+        Notification n = new Notification.Builder(mContext, "test")
+                .setOngoing(false)
+                .build();
+
+        // When: fix the notification with NotificationManagerService
+        mService.fixNotification(n, PKG, "tag", 9, 0);
+
+        // Then: the notification's flag FLAG_NO_DISMISS should not be set
+        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
+
+        // Avoid affecting other tests
+        mService.setOngoingDismissal(false);
+    }
+
 }
