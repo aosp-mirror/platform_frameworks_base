@@ -596,12 +596,11 @@ object Flags {
     // 2500 - output switcher
     // TODO(b/261538825): Tracking Bug
     @JvmField
-    val OUTPUT_SWITCHER_ADVANCED_LAYOUT = unreleasedFlag(2500, "output_switcher_advanced_layout")
+    val OUTPUT_SWITCHER_ADVANCED_LAYOUT = releasedFlag(2500, "output_switcher_advanced_layout")
     @JvmField
-    val OUTPUT_SWITCHER_ROUTES_PROCESSING =
-        unreleasedFlag(2501, "output_switcher_routes_processing")
+    val OUTPUT_SWITCHER_ROUTES_PROCESSING = releasedFlag(2501, "output_switcher_routes_processing")
     @JvmField
-    val OUTPUT_SWITCHER_DEVICE_STATUS = unreleasedFlag(2502, "output_switcher_device_status")
+    val OUTPUT_SWITCHER_DEVICE_STATUS = releasedFlag(2502, "output_switcher_device_status")
 
     // TODO(b/20911786): Tracking Bug
     @JvmField
