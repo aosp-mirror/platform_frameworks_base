@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /** Common interface for all of the location-based mobile icon view models. */
@@ -124,14 +123,22 @@ constructor(
 
     private val showNetworkTypeIcon: Flow<Boolean> =
         combine(
-            iconInteractor.isDataConnected,
-            iconInteractor.isDataEnabled,
-            iconInteractor.isDefaultConnectionFailed,
-            iconInteractor.alwaysShowDataRatIcon,
-            iconInteractor.isConnected,
-        ) { dataConnected, dataEnabled, failedConnection, alwaysShow, connected ->
-            alwaysShow || (dataConnected && dataEnabled && !failedConnection && connected)
-        }
+                iconInteractor.isDataConnected,
+                iconInteractor.isDataEnabled,
+                iconInteractor.isDefaultConnectionFailed,
+                iconInteractor.alwaysShowDataRatIcon,
+                iconInteractor.isConnected,
+            ) { dataConnected, dataEnabled, failedConnection, alwaysShow, connected ->
+                alwaysShow || (dataConnected && dataEnabled && !failedConnection && connected)
+            }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                iconInteractor.tableLogBuffer,
+                columnPrefix = "",
+                columnName = "showNetworkTypeIcon",
+                initialValue = false,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val networkTypeIcon: Flow<Icon?> =
         combine(
@@ -149,14 +156,6 @@ constructor(
                 }
             }
             .distinctUntilChanged()
-            .onEach {
-                // This is done as an onEach side effect since Icon is not Diffable (yet)
-                iconInteractor.tableLogBuffer.logChange(
-                    prefix = "",
-                    columnName = "networkTypeIcon",
-                    value = it.toString(),
-                )
-            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
     override val roaming: StateFlow<Boolean> =

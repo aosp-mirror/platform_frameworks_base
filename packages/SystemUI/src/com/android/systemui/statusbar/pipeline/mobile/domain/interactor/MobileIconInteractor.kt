@@ -33,7 +33,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 interface MobileIconInteractor {
@@ -180,6 +182,16 @@ class MobileIconInteractorImpl(
                         info.resolvedNetworkType.iconGroupOverride
                     else -> mapping[info.resolvedNetworkType.lookupKey] ?: defaultGroup
                 }
+            }
+            .distinctUntilChanged()
+            .onEach {
+                // Doesn't use [logDiffsForTable] because [MobileIconGroup] can't implement the
+                // [Diffable] interface.
+                tableLogBuffer.logChange(
+                    prefix = "",
+                    columnName = "networkTypeIcon",
+                    value = it.name
+                )
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
 
