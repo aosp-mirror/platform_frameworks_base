@@ -1386,7 +1386,6 @@ public final class SurfaceControl implements Parcelable {
             synchronized (mChoreographerLock) {
                 if (mChoreographer != null) {
                     mChoreographer.invalidate();
-                    // TODO(b/266121235): Use NativeAllocationRegistry to clean up Choreographer.
                     mChoreographer = null;
                 }
             }

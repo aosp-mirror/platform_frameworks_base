@@ -27,6 +27,8 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import dalvik.annotation.optimization.FastNative;
 
+import libcore.util.NativeAllocationRegistry;
+
 import java.lang.ref.WeakReference;
 
 /**
@@ -81,10 +83,16 @@ public abstract class DisplayEventReceiver {
 
     private static native long nativeInit(WeakReference<DisplayEventReceiver> receiver,
             MessageQueue messageQueue, int vsyncSource, int eventRegistration, long layerHandle);
-    private static native void nativeDispose(long receiverPtr);
+    private static native long nativeGetDisplayEventReceiverFinalizer();
     @FastNative
     private static native void nativeScheduleVsync(long receiverPtr);
     private static native VsyncEventData nativeGetLatestVsyncEventData(long receiverPtr);
+
+    private static final NativeAllocationRegistry sNativeAllocationRegistry =
+            NativeAllocationRegistry.createMalloced(
+                    DisplayEventReceiver.class.getClassLoader(),
+                    nativeGetDisplayEventReceiverFinalizer());
+    private Runnable mFreeNativeResources;
 
     /**
      * Creates a display event receiver.
@@ -118,27 +126,16 @@ public abstract class DisplayEventReceiver {
         mMessageQueue = looper.getQueue();
         mReceiverPtr = nativeInit(new WeakReference<DisplayEventReceiver>(this), mMessageQueue,
                 vsyncSource, eventRegistration, layerHandle);
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            dispose(true);
-        } finally {
-            super.finalize();
-        }
+        mFreeNativeResources = sNativeAllocationRegistry.registerNativeAllocation(this,
+                mReceiverPtr);
     }
 
     /**
      * Disposes the receiver.
      */
     public void dispose() {
-        dispose(false);
-    }
-
-    private void dispose(boolean finalized) {
         if (mReceiverPtr != 0) {
-            nativeDispose(mReceiverPtr);
+            mFreeNativeResources.run();
             mReceiverPtr = 0;
         }
         mMessageQueue = null;
