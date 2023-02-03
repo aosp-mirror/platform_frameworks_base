@@ -133,6 +133,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int MSG_BRIGHTNESS_RAMP_DONE = 12;
     private static final int MSG_STATSD_HBM_BRIGHTNESS = 13;
     private static final int MSG_SWITCH_USER = 14;
+    private static final int MSG_BOOT_COMPLETED = 15;
 
     private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
@@ -506,6 +507,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private boolean mIsEnabled;
     private boolean mIsInTransition;
 
+    private boolean mBootCompleted;
+
     /**
      * Creates the display power controller.
      */
@@ -513,7 +516,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             DisplayPowerCallbacks callbacks, Handler handler,
             SensorManager sensorManager, DisplayBlanker blanker, LogicalDisplay logicalDisplay,
             BrightnessTracker brightnessTracker, BrightnessSetting brightnessSetting,
-            Runnable onBrightnessChangeRunnable, HighBrightnessModeMetadata hbmMetadata) {
+            Runnable onBrightnessChangeRunnable, HighBrightnessModeMetadata hbmMetadata,
+            boolean bootCompleted) {
         mLogicalDisplay = logicalDisplay;
         mDisplayId = mLogicalDisplay.getDisplayIdLocked();
         final String displayIdStr = "[" + mDisplayId + "]";
@@ -655,6 +659,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mTemporaryAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mPendingAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
+        mBootCompleted = bootCompleted;
     }
 
     private void applyReduceBrightColorsSplineAdjustment() {
@@ -1370,7 +1375,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // Initialize things the first time the power state is changed.
         if (mustInitialize) {
-            initialize(state);
+            initialize(readyToUpdateDisplayState() ? state : Display.STATE_UNKNOWN);
         }
 
         // Animate the screen state change unless already animating.
@@ -2050,7 +2055,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 }
             }
 
-            if (!reportOnly && mPowerState.getScreenState() != state) {
+            if (!reportOnly && mPowerState.getScreenState() != state
+                    && readyToUpdateDisplayState()) {
                 Trace.traceCounter(Trace.TRACE_TAG_POWER, "ScreenState", state);
                 // TODO(b/153319140) remove when we can get this from the above trace invocation
                 SystemProperties.set("debug.tracing.screen_state", String.valueOf(state));
@@ -2497,6 +2503,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBrightnessSetting.setBrightness(brightnessValue);
     }
 
+    void onBootCompleted() {
+        mHandler.obtainMessage(MSG_BOOT_COMPLETED).sendToTarget();
+    }
+
     private void updateScreenBrightnessSetting(float brightnessValue) {
         if (!isValidBrightnessValue(brightnessValue)
                 || brightnessValue == mCurrentScreenBrightnessSetting) {
@@ -2641,6 +2651,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mCallbacks.releaseSuspendBlocker(mSuspendBlockerIdProxNegative);
         }
     };
+
+    /**
+     * Indicates whether the display state is ready to update. If this is the default display, we
+     * want to update it right away so that we can draw the boot animation on it. If it is not
+     * the default display, drawing the boot animation on it would look incorrect, so we need
+     * to wait until boot is completed.
+     * @return True if the display state is ready to update
+     */
+    private boolean readyToUpdateDisplayState() {
+        return mDisplayId == Display.DEFAULT_DISPLAY || mBootCompleted;
+    }
 
     public void dump(final PrintWriter pw) {
         synchronized (mLock) {
@@ -3176,6 +3197,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
                 case MSG_SWITCH_USER:
                     handleOnSwitchUser(msg.arg1);
+                    break;
+
+                case MSG_BOOT_COMPLETED:
+                    mBootCompleted = true;
+                    updatePowerState();
                     break;
             }
         }

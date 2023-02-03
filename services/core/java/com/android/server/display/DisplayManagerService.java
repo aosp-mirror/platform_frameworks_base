@@ -434,6 +434,8 @@ public final class DisplayManagerService extends SystemService {
     private boolean mIsDocked;
     private boolean mIsDreaming;
 
+    private boolean mBootCompleted = false;
+
     private final BroadcastReceiver mIdleModeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -573,6 +575,12 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
         } else if (phase == PHASE_BOOT_COMPLETED) {
+            synchronized (mSyncRoot) {
+                mBootCompleted = true;
+                for (int i = 0; i < mDisplayPowerControllers.size(); i++) {
+                    mDisplayPowerControllers.valueAt(i).onBootCompleted();
+                }
+            }
             mDisplayModeDirector.onBootCompleted();
             mLogicalDisplayMapper.onBootCompleted();
         }
@@ -2680,7 +2688,7 @@ public final class DisplayManagerService extends SystemService {
         final DisplayPowerController displayPowerController = new DisplayPowerController(
                 mContext, mDisplayPowerCallbacks, mPowerHandler, mSensorManager,
                 mDisplayBlanker, display, mBrightnessTracker, brightnessSetting,
-                () -> handleBrightnessChange(display), hbmMetadata);
+                () -> handleBrightnessChange(display), hbmMetadata, mBootCompleted);
         mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
     }
 
