@@ -26,7 +26,7 @@ import android.graphics.MeshSpecification;
 import android.graphics.MeshSpecification.Attribute;
 import android.graphics.MeshSpecification.Varying;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.view.View;
 
@@ -65,7 +65,7 @@ public class MeshActivity extends Activity {
             vertexBuffer.put(5, 400.0f);
             vertexBuffer.rewind();
             Mesh mesh = new Mesh(
-                    meshSpec, Mesh.TRIANGLES, vertexBuffer, 3, new Rect(0, 0, 1000, 1000));
+                    meshSpec, Mesh.TRIANGLES, vertexBuffer, 3, new RectF(0, 0, 1000, 1000));
 
             canvas.drawMesh(mesh, BlendMode.COLOR, new Paint());
 
@@ -99,7 +99,7 @@ public class MeshActivity extends Activity {
             iVertexBuffer.rewind();
             indexBuffer.rewind();
             Mesh mesh2 = new Mesh(meshSpec, Mesh.TRIANGLES, iVertexBuffer, 102, indexBuffer,
-                    new Rect(0, 0, 1000, 1000));
+                    new RectF(0, 0, 1000, 1000));
             Paint paint = new Paint();
             paint.setColor(Color.RED);
             canvas.drawMesh(mesh2, BlendMode.COLOR, paint);

@@ -15611,8 +15611,8 @@ package android.graphics {
   }
 
   public class Mesh {
-    ctor public Mesh(@NonNull android.graphics.MeshSpecification, int, @NonNull java.nio.Buffer, int, @NonNull android.graphics.Rect);
-    ctor public Mesh(@NonNull android.graphics.MeshSpecification, int, @NonNull java.nio.Buffer, int, @NonNull java.nio.ShortBuffer, @NonNull android.graphics.Rect);
+    ctor public Mesh(@NonNull android.graphics.MeshSpecification, int, @NonNull java.nio.Buffer, int, @NonNull android.graphics.RectF);
+    ctor public Mesh(@NonNull android.graphics.MeshSpecification, int, @NonNull java.nio.Buffer, int, @NonNull java.nio.ShortBuffer, @NonNull android.graphics.RectF);
     method public void setColorUniform(@NonNull String, @ColorInt int);
     method public void setColorUniform(@NonNull String, @ColorLong long);
     method public void setColorUniform(@NonNull String, @NonNull android.graphics.Color);
