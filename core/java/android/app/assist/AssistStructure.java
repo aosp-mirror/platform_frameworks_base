@@ -545,6 +545,7 @@ public class AssistStructure implements Parcelable {
         int resolveViewAutofillFlags(Context context, int fillRequestFlags) {
             return (fillRequestFlags & FillRequest.FLAG_MANUAL_REQUEST) != 0
                         || context.isAutofillCompatibilityEnabled()
+                        || (fillRequestFlags & FillRequest.FLAG_PCC_DETECTION) != 0
                     ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
         }
 
