@@ -19,15 +19,14 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH_NONE
-import com.android.settingslib.graph.SignalDrawable
 import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
+import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -49,7 +48,6 @@ import org.mockito.MockitoAnnotations
 class MobileIconViewModelTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconViewModel
     private lateinit var interactor: FakeMobileIconInteractor
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var constants: ConnectivityConstants
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
 
@@ -69,15 +67,14 @@ class MobileIconViewModelTest : SysuiTestCase() {
             setNumberOfLevels(4)
             isDataConnected.value = true
         }
-        underTest =
-            MobileIconViewModel(SUB_1_ID, interactor, logger, constants, testScope.backgroundScope)
+        underTest = MobileIconViewModel(SUB_1_ID, interactor, constants, testScope.backgroundScope)
     }
 
     @Test
     fun iconId_correctLevel_notCutout() =
         testScope.runTest {
-            var latest: Int? = null
-            val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
             val expected = defaultSignal()
 
             assertThat(latest).isEqualTo(expected)
@@ -90,8 +87,8 @@ class MobileIconViewModelTest : SysuiTestCase() {
         testScope.runTest {
             interactor.setIsDefaultDataEnabled(false)
 
-            var latest: Int? = null
-            val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
             val expected = defaultSignal(level = 1, connected = false)
 
             assertThat(latest).isEqualTo(expected)
@@ -102,8 +99,8 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun `icon - uses empty state - when not in service`() =
         testScope.runTest {
-            var latest: Int? = null
-            val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
 
             interactor.isInService.value = false
 
@@ -368,7 +365,6 @@ class MobileIconViewModelTest : SysuiTestCase() {
                 MobileIconViewModel(
                     SUB_1_ID,
                     interactor,
-                    logger,
                     constants,
                     testScope.backgroundScope,
                 )
@@ -407,7 +403,6 @@ class MobileIconViewModelTest : SysuiTestCase() {
                 MobileIconViewModel(
                     SUB_1_ID,
                     interactor,
-                    logger,
                     constants,
                     testScope.backgroundScope,
                 )
@@ -466,10 +461,11 @@ class MobileIconViewModelTest : SysuiTestCase() {
         fun defaultSignal(
             level: Int = 1,
             connected: Boolean = true,
-        ): Int {
-            return SignalDrawable.getState(level, /* numLevels */ 4, !connected)
+        ): SignalIconModel {
+            return SignalIconModel(level, numberOfLevels = 4, showExclamationMark = !connected)
         }
 
-        fun emptySignal(): Int = SignalDrawable.getEmptyState(4)
+        fun emptySignal(): SignalIconModel =
+            SignalIconModel(level = 0, numberOfLevels = 4, showExclamationMark = true)
     }
 }

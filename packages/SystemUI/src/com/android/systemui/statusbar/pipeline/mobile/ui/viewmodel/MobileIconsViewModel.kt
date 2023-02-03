@@ -56,7 +56,6 @@ constructor(
                 ?: MobileIconViewModel(
                         subId,
                         interactor.createMobileConnectionInteractorForSubId(subId),
-                        logger,
                         constants,
                         scope,
                     )

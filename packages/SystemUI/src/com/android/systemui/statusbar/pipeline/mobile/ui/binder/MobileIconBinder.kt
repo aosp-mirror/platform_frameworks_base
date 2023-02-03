@@ -93,8 +93,13 @@ object MobileIconBinder {
 
                 // Set the icon for the triangle
                 launch {
-                    viewModel.iconId.distinctUntilChanged().collect { iconId ->
-                        mobileDrawable.level = iconId
+                    viewModel.icon.distinctUntilChanged().collect { icon ->
+                        mobileDrawable.level =
+                            SignalDrawable.getState(
+                                icon.level,
+                                icon.numberOfLevels,
+                                icon.showExclamationMark,
+                            )
                     }
                 }
 

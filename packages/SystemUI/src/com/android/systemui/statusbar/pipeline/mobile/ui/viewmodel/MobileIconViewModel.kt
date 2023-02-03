@@ -24,8 +24,8 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
+import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,8 +42,7 @@ import kotlinx.coroutines.flow.stateIn
 /** Common interface for all of the location-based mobile icon view models. */
 interface MobileIconViewModelCommon {
     val subscriptionId: Int
-    /** An int consumable by [SignalDrawable] for display */
-    val iconId: Flow<Int>
+    val icon: Flow<SignalIconModel>
     val contentDescription: Flow<ContentDescription>
     val roaming: Flow<Boolean>
     /** The RAT icon (LTE, 3G, 5G, etc) to be displayed. Null if we shouldn't show anything */
@@ -72,7 +71,6 @@ class MobileIconViewModel
 constructor(
     override val subscriptionId: Int,
     iconInteractor: MobileIconInteractor,
-    logger: ConnectivityPipelineLogger,
     constants: ConnectivityConstants,
     scope: CoroutineScope,
 ) : MobileIconViewModelCommon {
@@ -80,8 +78,8 @@ constructor(
     private val showExclamationMark: Flow<Boolean> =
         iconInteractor.isDefaultDataEnabled.mapLatest { !it }
 
-    override val iconId: Flow<Int> = run {
-        val initial = SignalDrawable.getEmptyState(iconInteractor.numberOfLevels.value)
+    override val icon: Flow<SignalIconModel> = run {
+        val initial = SignalIconModel.createEmptyState(iconInteractor.numberOfLevels.value)
         combine(
                 iconInteractor.level,
                 iconInteractor.numberOfLevels,
@@ -89,16 +87,15 @@ constructor(
                 iconInteractor.isInService,
             ) { level, numberOfLevels, showExclamationMark, isInService ->
                 if (!isInService) {
-                    SignalDrawable.getEmptyState(numberOfLevels)
+                    SignalIconModel.createEmptyState(numberOfLevels)
                 } else {
-                    SignalDrawable.getState(level, numberOfLevels, showExclamationMark)
+                    SignalIconModel(level, numberOfLevels, showExclamationMark)
                 }
             }
             .distinctUntilChanged()
             .logDiffsForTable(
                 iconInteractor.tableLogBuffer,
-                columnPrefix = "",
-                columnName = "iconId",
+                columnPrefix = "icon",
                 initialValue = initial,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)

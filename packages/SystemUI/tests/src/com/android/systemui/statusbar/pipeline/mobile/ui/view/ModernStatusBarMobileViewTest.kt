@@ -34,7 +34,6 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBased
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.QsMobileIconViewModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,7 +57,6 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var constants: ConnectivityConstants
 
     private lateinit var viewModel: LocationBasedMobileViewModel
@@ -74,7 +72,6 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
             MobileIconViewModel(
                 subscriptionId = 1,
                 interactor,
-                logger,
                 constants,
                 testScope.backgroundScope,
             )
