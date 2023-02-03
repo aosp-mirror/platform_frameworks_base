@@ -17,9 +17,9 @@
 package android.view;
 
 import static android.view.InsetsSource.ID_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -109,14 +109,6 @@ public class WindowLayout {
             // Ensure that windows with a non-ALWAYS display cutout mode are laid out in
             // the cutout safe zone.
             final Rect displayFrame = state.getDisplayFrame();
-            final InsetsSource statusBarSource = state.peekSource(ITYPE_STATUS_BAR);
-            if (statusBarSource != null && displayCutoutSafe.top > displayFrame.top) {
-                // Make sure that the zone we're avoiding for the cutout is at least as tall as the
-                // status bar; otherwise fullscreen apps will end up cutting halfway into the status
-                // bar.
-                displayCutoutSafeExceptMaybeBars.top =
-                        Math.max(statusBarSource.getFrame().bottom, displayCutoutSafe.top);
-            }
             if (cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES) {
                 if (displayFrame.width() < displayFrame.height()) {
                     displayCutoutSafeExceptMaybeBars.top = MIN_Y;
@@ -131,7 +123,7 @@ public class WindowLayout {
                     && (cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
                     || cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES)) {
                 final Insets systemBarsInsets = state.calculateInsets(
-                        displayFrame, WindowInsets.Type.systemBars(), requestedVisibleTypes);
+                        displayFrame, systemBars(), requestedVisibleTypes);
                 if (systemBarsInsets.left > 0) {
                     displayCutoutSafeExceptMaybeBars.left = MIN_X;
                 }
@@ -145,12 +137,11 @@ public class WindowLayout {
                     displayCutoutSafeExceptMaybeBars.bottom = MAX_Y;
                 }
             }
-            if (type == TYPE_INPUT_METHOD) {
-                final InsetsSource navSource = state.peekSource(ITYPE_NAVIGATION_BAR);
-                if (navSource != null && navSource.calculateInsets(displayFrame, true).bottom > 0) {
-                    // The IME can always extend under the bottom cutout if the navbar is there.
-                    displayCutoutSafeExceptMaybeBars.bottom = MAX_Y;
-                }
+            if (type == TYPE_INPUT_METHOD
+                    && displayCutoutSafeExceptMaybeBars.bottom != MAX_Y
+                    && state.calculateInsets(displayFrame, navigationBars(), true).bottom > 0) {
+                // The IME can always extend under the bottom cutout if the navbar is there.
+                displayCutoutSafeExceptMaybeBars.bottom = MAX_Y;
             }
             final boolean attachedInParent = attachedWindowFrame != null && !layoutInScreen;
 
