@@ -20,6 +20,9 @@ import static android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND;
 import static android.Manifest.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_BFSL;
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -7395,6 +7398,12 @@ public final class ActiveServices {
         int ret = shouldAllowFgsStartForegroundNoBindingCheckLocked(allowWhileInUse, callingPid,
                 callingUid, callingPackage, r, backgroundStartPrivileges);
 
+        // If an app (App 1) is bound by another app (App 2) that could start an FGS, then App 1
+        // is also allowed to start an FGS. We check all the binding
+        // in canBindingClientStartFgsLocked() to do this check.
+        // (Note we won't check more than 1 level of binding.)
+        // [bookmark: 61867f60-007c-408c-a2c4-e19e96056135] -- this code is referred to from
+        // OomAdjuster.
         String bindFromPackage = null;
         if (ret == REASON_DENIED) {
             bindFromPackage = canBindingClientStartFgsLocked(callingUid);
@@ -7410,10 +7419,13 @@ public final class ActiveServices {
                     .getTargetSdkVersion(callingPackage);
         } catch (PackageManager.NameNotFoundException ignored) {
         }
+        final boolean uidBfsl = (mAm.getUidProcessCapabilityLocked(callingUid)
+                & PROCESS_CAPABILITY_BFSL) != 0;
         final String debugInfo =
                 "[callingPackage: " + callingPackage
                         + "; callingUid: " + callingUid
                         + "; uidState: " + ProcessList.makeProcStateString(uidState)
+                        + "; uidBFSL: " + (uidBfsl ? "[BFSL]" : "n/a")
                         + "; intent: " + intent
                         + "; code:" + reasonCodeToString(ret)
                         + "; tempAllowListReason:<"
@@ -7452,11 +7464,15 @@ public final class ActiveServices {
         }
 
         if (ret == REASON_DENIED) {
+            final boolean uidBfsl =
+                    (mAm.getUidProcessCapabilityLocked(callingUid) & PROCESS_CAPABILITY_BFSL) != 0;
             final Integer allowedType = mAm.mProcessList.searchEachLruProcessesLOSP(false, app -> {
                 if (app.uid == callingUid) {
                     final ProcessStateRecord state = app.mState;
-                    if (state.isAllowedStartFgs()) { // Procstate <= BFGS?
-                        return getReasonCodeFromProcState(state.getCurProcState());
+                    final int procstate = state.getCurProcState();
+                    if ((procstate <= PROCESS_STATE_BOUND_TOP)
+                            || (uidBfsl && (procstate <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE))) {
+                        return getReasonCodeFromProcState(procstate);
                     } else {
                         final ActiveInstrumentation instr = app.getActiveInstrumentation();
                         if (instr != null
@@ -7684,6 +7700,8 @@ public final class ActiveServices {
         }
         final int callerTargetSdkVersion = r.mRecentCallerApplicationInfo != null
                 ? r.mRecentCallerApplicationInfo.targetSdkVersion : 0;
+
+        // TODO(short-service): Log BFSL too.
         FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                 r.appInfo.uid,
                 r.shortInstanceName,
