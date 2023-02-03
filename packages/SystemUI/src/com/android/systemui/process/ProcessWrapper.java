@@ -16,11 +16,16 @@
 
 package com.android.systemui.process;
 
+import javax.inject.Inject;
+
 /**
  * A simple wrapper that provides access to process-related details. This facilitates testing by
  * providing a mockable target around these details.
  */
 public class ProcessWrapper {
+    @Inject
+    public ProcessWrapper() {}
+
     public int getUserHandleIdentifier() {
         return android.os.Process.myUserHandle().getIdentifier();
     }
