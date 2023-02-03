@@ -1311,7 +1311,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     public boolean getUserHasTrust(int userId) {
-        return !isTrustDisabled() && mUserHasTrust.get(userId);
+        return !isTrustDisabled() && mUserHasTrust.get(userId)
+                && isUnlockingWithTrustAgentAllowed();
     }
 
     /**
@@ -1319,12 +1320,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public boolean getUserUnlockedWithBiometric(int userId) {
         BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(userId);
-        BiometricAuthenticated face = mUserFaceAuthenticated.get(userId);
         boolean fingerprintAllowed = fingerprint != null && fingerprint.mAuthenticated
                 && isUnlockingWithBiometricAllowed(fingerprint.mIsStrongBiometric);
-        boolean faceAllowed = face != null && face.mAuthenticated
+        return fingerprintAllowed || getUserUnlockedWithFace(userId);
+    }
+
+
+    /**
+     * Returns whether the user is unlocked with face.
+     */
+    public boolean getUserUnlockedWithFace(int userId) {
+        BiometricAuthenticated face = mUserFaceAuthenticated.get(userId);
+        return face != null && face.mAuthenticated
                 && isUnlockingWithBiometricAllowed(face.mIsStrongBiometric);
-        return fingerprintAllowed || faceAllowed;
     }
 
     /**
@@ -1397,6 +1405,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     public boolean isTrustUsuallyManaged(int userId) {
         Assert.isMainThread();
         return mUserTrustIsUsuallyManaged.get(userId);
+    }
+
+    private boolean isUnlockingWithTrustAgentAllowed() {
+        return isUnlockingWithBiometricAllowed(true);
     }
 
     public boolean isUnlockingWithBiometricAllowed(boolean isStrongBiometric) {
