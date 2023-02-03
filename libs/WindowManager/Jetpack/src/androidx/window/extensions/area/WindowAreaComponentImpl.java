@@ -429,6 +429,9 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private void updateRearDisplayStatusListeners(@WindowAreaStatus int windowAreaStatus) {
+        if (mRearDisplayState == INVALID_DEVICE_STATE) {
+            return;
+        }
         synchronized (mLock) {
             for (int i = 0; i < mRearDisplayStatusListeners.size(); i++) {
                 mRearDisplayStatusListeners.valueAt(i).accept(windowAreaStatus);
@@ -454,6 +457,9 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
     @GuardedBy("mLock")
     private void updateRearDisplayPresentationStatusListeners(
             @WindowAreaStatus int windowAreaStatus) {
+        if (mConcurrentDisplayState == INVALID_DEVICE_STATE) {
+            return;
+        }
         RearDisplayPresentationStatus consumerValue = new RearDisplayPresentationStatus(
                 windowAreaStatus, getRearDisplayMetrics());
         synchronized (mLock) {
