@@ -345,6 +345,7 @@ public final class RouteListingPreference implements Parcelable {
             mFlags = builder.mFlags;
             mSubText = builder.mSubText;
             mCustomSubtextMessage = builder.mCustomSubtextMessage;
+            validateCustomMessageSubtext();
         }
 
         private Item(Parcel in) {
@@ -354,6 +355,7 @@ public final class RouteListingPreference implements Parcelable {
             mFlags = in.readInt();
             mSubText = in.readInt();
             mCustomSubtextMessage = in.readCharSequence();
+            validateCustomMessageSubtext();
         }
 
         /**
@@ -466,6 +468,16 @@ public final class RouteListingPreference implements Parcelable {
             return Objects.hash(
                     mRouteId, mSelectionBehavior, mFlags, mSubText, mCustomSubtextMessage);
         }
+
+        // Internal methods.
+
+        private void validateCustomMessageSubtext() {
+            Preconditions.checkArgument(
+                    mSubText != SUBTEXT_CUSTOM || mCustomSubtextMessage != null,
+                    "The custom subtext message cannot be null if subtext is SUBTEXT_CUSTOM.");
+        }
+
+        // Internal classes.
 
         /** Builder for {@link Item}. */
         public static final class Builder {
