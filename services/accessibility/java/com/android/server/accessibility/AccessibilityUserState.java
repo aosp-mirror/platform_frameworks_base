@@ -136,6 +136,8 @@ class AccessibilityUserState {
     private int mMagnificationCapabilities = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     // Whether the following typing focus feature for magnification is enabled.
     private boolean mMagnificationFollowTypingEnabled = true;
+    // Whether the always on magnification feature is enabled.
+    private boolean mAlwaysOnMagnificationEnabled = false;
 
     /** The stroke width of the focus rectangle in pixels */
     private int mFocusStrokeWidth;
@@ -221,6 +223,7 @@ class AccessibilityUserState {
         mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
         mFocusColor = mFocusColorDefaultValue;
         mMagnificationFollowTypingEnabled = true;
+        mAlwaysOnMagnificationEnabled = false;
         mUiContrast = CONTRAST_NOT_SET;
     }
 
@@ -531,6 +534,8 @@ class AccessibilityUserState {
                 .append(String.valueOf(mIsAudioDescriptionByDefaultRequested));
         pw.append(", magnificationFollowTypingEnabled=")
                 .append(String.valueOf(mMagnificationFollowTypingEnabled));
+        pw.append(", alwaysOnMagnificationEnabled=")
+                .append(String.valueOf(mAlwaysOnMagnificationEnabled));
         pw.append("}");
         pw.println();
         pw.append("     shortcut key:{");
@@ -709,6 +714,14 @@ class AccessibilityUserState {
 
     public boolean isMagnificationFollowTypingEnabled() {
         return mMagnificationFollowTypingEnabled;
+    }
+
+    public void setAlwaysOnMagnificationEnabled(boolean enabled) {
+        mAlwaysOnMagnificationEnabled = enabled;
+    }
+
+    public boolean isAlwaysOnMagnificationEnabled() {
+        return mAlwaysOnMagnificationEnabled;
     }
 
     /**
