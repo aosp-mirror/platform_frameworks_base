@@ -3996,7 +3996,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 return;
             }
         }
-        r.run();
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // This will call into StagingManager which might trigger external callbacks
+            r.run();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
