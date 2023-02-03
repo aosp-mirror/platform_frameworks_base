@@ -19,6 +19,9 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ContentResolver;
 import android.content.pm.UserInfo;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -39,6 +42,21 @@ final class HsumBootUserInitializer {
     private final UserManagerInternal mUmi;
     private final ActivityManagerService mAms;
     private final ContentResolver mContentResolver;
+
+    private final ContentObserver mDeviceProvisionedObserver =
+            new ContentObserver(new Handler(Looper.getMainLooper())) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    // Set USER_SETUP_COMPLETE for the (headless) system user only when the device
+                    // has been set up at least once.
+                    if (isDeviceProvisioned()) {
+                        Slogf.i(TAG, "Marking USER_SETUP_COMPLETE for system user");
+                        Settings.Secure.putInt(mContentResolver,
+                                Settings.Secure.USER_SETUP_COMPLETE, 1);
+                        mContentResolver.unregisterContentObserver(mDeviceProvisionedObserver);
+                    }
+                }
+            };
 
     /** Whether this device should always have a non-removable MainUser, including at first boot. */
     private final boolean mShouldAlwaysHaveMainUser;
@@ -71,10 +89,6 @@ final class HsumBootUserInitializer {
      */
     public void init(TimingsTraceAndSlog t) {
         Slogf.i(TAG, "init())");
-
-        // TODO(b/204091126): in the long term, we need to decide who's reponsible for that,
-        // this class or the setup wizard app
-        provisionHeadlessSystemUser();
 
         if (mShouldAlwaysHaveMainUser) {
             t.traceBegin("createMainUserIfNeeded");
@@ -115,6 +129,7 @@ final class HsumBootUserInitializer {
      * apps have had the chance to set the boot user, if applicable.
      */
     public void systemRunning(TimingsTraceAndSlog t) {
+        observeDeviceProvisioning();
         unlockSystemUser(t);
 
         try {
@@ -129,17 +144,16 @@ final class HsumBootUserInitializer {
         }
     }
 
-    /* TODO(b/261791491): STOPSHIP - SUW should be responsible for this. */
-    private void provisionHeadlessSystemUser() {
+    private void observeDeviceProvisioning() {
         if (isDeviceProvisioned()) {
-            Slogf.d(TAG, "provisionHeadlessSystemUser(): already provisioned");
             return;
         }
 
-        Slogf.i(TAG, "Marking USER_SETUP_COMPLETE for system user");
-        Settings.Secure.putInt(mContentResolver, Settings.Secure.USER_SETUP_COMPLETE, 1);
-        Slogf.i(TAG, "Marking DEVICE_PROVISIONED for system user");
-        Settings.Global.putInt(mContentResolver, Settings.Global.DEVICE_PROVISIONED, 1);
+        mContentResolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
+                false,
+                mDeviceProvisionedObserver
+        );
     }
 
     private boolean isDeviceProvisioned() {
