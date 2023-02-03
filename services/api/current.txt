@@ -227,8 +227,9 @@ package com.android.server.role {
 
 package com.android.server.security {
 
-  public final class FileIntegrityLocal {
-    method public static void setUpFsVerity(@NonNull String) throws java.io.IOException;
+  public final class FileIntegrity {
+    method public static void setUpFsVerity(@NonNull java.io.File) throws java.io.IOException;
+    method public static void setUpFsVerity(@NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
   }
 
 }

@@ -18,10 +18,13 @@ package com.android.server.security;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.os.ParcelFileDescriptor;
 
 import com.android.internal.security.VerityUtils;
 
+import java.io.File;
 import java.io.IOException;
+
 
 /**
  * In-process API for server side FileIntegrity related infrastructure.
@@ -29,8 +32,8 @@ import java.io.IOException;
  * @hide
  */
 @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public final class FileIntegrityLocal {
-    private FileIntegrityLocal() {}
+public final class FileIntegrity {
+    private FileIntegrity() {}
 
     /**
      * Enables fs-verity, if supported by the filesystem.
@@ -38,7 +41,18 @@ public final class FileIntegrityLocal {
      * @hide
      */
     @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-    public static void setUpFsVerity(@NonNull String filePath) throws IOException {
-        VerityUtils.setUpFsverity(filePath);
+    public static void setUpFsVerity(@NonNull File file) throws IOException {
+        VerityUtils.setUpFsverity(file.getAbsolutePath());
+    }
+
+    /**
+     * Enables fs-verity, if supported by the filesystem.
+     * @see <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html">
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+    public static void setUpFsVerity(@NonNull ParcelFileDescriptor parcelFileDescriptor)
+            throws IOException {
+        VerityUtils.setUpFsverity(parcelFileDescriptor.getFd());
     }
 }
