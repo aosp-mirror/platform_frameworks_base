@@ -2121,7 +2121,7 @@ package android.app.search {
     method @Nullable public void query(@NonNull android.app.search.Query, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.search.SearchTarget>>);
     method public void registerEmptyQueryResultUpdateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.app.search.SearchSession.Callback);
     method public void requestEmptyQueryResultUpdate();
-    method public void unregisterEmptyQueryResultUpdateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.app.search.SearchSession.Callback);
+    method public void unregisterEmptyQueryResultUpdateCallback(@NonNull android.app.search.SearchSession.Callback);
   }
 
   public static interface SearchSession.Callback {
