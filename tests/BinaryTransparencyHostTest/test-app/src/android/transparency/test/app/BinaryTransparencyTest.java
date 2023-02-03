@@ -36,6 +36,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HexFormat;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RunWith(AndroidJUnit4.class)
@@ -110,5 +111,36 @@ public class BinaryTransparencyTest {
         assertThat(updatedPreload.digest).isNotEmpty();
         assertThat(updatedPreload.mbaStatus).isEqualTo(/* MBA_STATUS_UPDATED_PRELOAD */ 2);
         assertThat(updatedPreload.signerDigests).asList().containsNoneOf(null, "");
+    }
+
+    @Test
+    public void testCollectAllSilentInstalledMbaInfo() {
+        // Action
+        var appInfoList = mBt.collectAllSilentInstalledMbaInfo(new Bundle());
+
+        // Verify
+        assertThat(appInfoList).isNotEmpty();  // because we just installed from the host side
+
+        var expectedAppNames = Set.of("com.android.apkverity", "com.android.egg");
+        var actualAppNames = appInfoList.stream().map((appInfo) -> appInfo.packageName)
+                .collect(Collectors.toList());
+        assertThat(actualAppNames).containsAtLeastElementsIn(expectedAppNames);
+
+        var actualSplitNames = new ArrayList<String>();
+        for (var appInfo : appInfoList) {
+            Log.d(TAG, "Received " + appInfo.packageName + " as a silent install");
+            if (expectedAppNames.contains(appInfo.packageName)) {
+                assertThat(appInfo.longVersion).isGreaterThan(0);
+                assertThat(appInfo.digestAlgorithm).isGreaterThan(0);
+                assertThat(appInfo.digest).isNotEmpty();
+                assertThat(appInfo.mbaStatus).isEqualTo(/* MBA_STATUS_NEW_INSTALL */ 3);
+                assertThat(appInfo.signerDigests).asList().containsNoneOf(null, "");
+
+                if (appInfo.splitName != null) {
+                    actualSplitNames.add(appInfo.splitName);
+                }
+            }
+        }
+        assertThat(actualSplitNames).containsExactly("feature_x");  // Name of ApkVerityTestAppSplit
     }
 }

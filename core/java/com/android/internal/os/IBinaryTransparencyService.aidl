@@ -28,8 +28,6 @@ import android.os.Bundle;
 interface IBinaryTransparencyService {
     String getSignedImageInfo();
 
-    List getApexInfo();
-
     void recordMeasurementsForAllPackages();
 
     parcelable ApexInfo {
@@ -60,4 +58,5 @@ interface IBinaryTransparencyService {
     /** Test only */
     List<ApexInfo> collectAllApexInfo(boolean includeTestOnly);
     List<AppInfo> collectAllUpdatedPreloadInfo(in Bundle packagesToSkip);
+    List<AppInfo> collectAllSilentInstalledMbaInfo(in Bundle packagesToSkip);
 }
