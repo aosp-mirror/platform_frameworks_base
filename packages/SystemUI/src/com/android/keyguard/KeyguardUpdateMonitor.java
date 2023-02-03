@@ -96,6 +96,7 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
+import android.hardware.biometrics.SensorProperties;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
@@ -2984,6 +2985,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public boolean isUnlockingWithBiometricsPossible(int userId) {
         return isUnlockWithFacePossible(userId) || isUnlockWithFingerprintPossible(userId);
+    }
+
+    /**
+     * If non-strong (i.e. weak or convenience) biometrics hardware is available, not disabled, and
+     * user has enrolled templates. This does NOT check if the device is encrypted or in lockdown.
+     *
+     * @param userId User that's trying to unlock.
+     * @return {@code true} if possible.
+     */
+    public boolean isUnlockingWithNonStrongBiometricsPossible(int userId) {
+        // This assumes that there is at most one face and at most one fingerprint sensor
+        return (mFaceManager != null && !mFaceSensorProperties.isEmpty()
+                && (mFaceSensorProperties.get(0).sensorStrength != SensorProperties.STRENGTH_STRONG)
+                && isUnlockWithFacePossible(userId))
+                || (mFpm != null && !mFingerprintSensorProperties.isEmpty()
+                && (mFingerprintSensorProperties.get(0).sensorStrength
+                != SensorProperties.STRENGTH_STRONG) && isUnlockWithFingerprintPossible(userId));
     }
 
     @SuppressLint("MissingPermission")
