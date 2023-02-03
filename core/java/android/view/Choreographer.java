@@ -270,10 +270,14 @@ public final class Choreographer {
     private static final int CALLBACK_LAST = CALLBACK_COMMIT;
 
     private Choreographer(Looper looper, int vsyncSource) {
+        this(looper, vsyncSource, /* layerHandle */ 0L);
+    }
+
+    private Choreographer(Looper looper, int vsyncSource, long layerHandle) {
         mLooper = looper;
         mHandler = new FrameHandler(looper);
         mDisplayEventReceiver = USE_VSYNC
-                ? new FrameDisplayEventReceiver(looper, vsyncSource)
+                ? new FrameDisplayEventReceiver(looper, vsyncSource, layerHandle)
                 : null;
         mLastFrameTimeNanos = Long.MIN_VALUE;
 
@@ -313,6 +317,26 @@ public final class Choreographer {
     }
 
     /**
+     * Gets the choreographer associated with the SurfaceControl.
+     *
+     * @param layerHandle to which the choreographer will be attached.
+     * @param looper      the choreographer is attached on this looper.
+     *
+     * @return The choreographer for the looper which is attached
+     * to the sourced SurfaceControl::mNativeHandle.
+     * @throws IllegalStateException if the looper sourced is null.
+     * @hide
+     */
+    @NonNull
+    static Choreographer getInstanceForSurfaceControl(long layerHandle,
+            @NonNull Looper looper) {
+        if (looper == null) {
+            throw new IllegalStateException("The current thread must have a looper!");
+        }
+        return new Choreographer(looper, VSYNC_SOURCE_APP, layerHandle);
+    }
+
+    /**
      * @return The Choreographer of the main thread, if it exists, or {@code null} otherwise.
      * @hide
      */
@@ -331,6 +355,15 @@ public final class Choreographer {
 
     private void dispose() {
         mDisplayEventReceiver.dispose();
+    }
+
+    /**
+     * Dispose the DisplayEventReceiver on the Choreographer.
+     * @hide
+     */
+    @UnsupportedAppUsage
+    void invalidate() {
+        dispose();
     }
 
     /**
@@ -1166,8 +1199,8 @@ public final class Choreographer {
         private int mFrame;
         private VsyncEventData mLastVsyncEventData = new VsyncEventData();
 
-        public FrameDisplayEventReceiver(Looper looper, int vsyncSource) {
-            super(looper, vsyncSource, 0);
+        FrameDisplayEventReceiver(Looper looper, int vsyncSource, long layerHandle) {
+            super(looper, vsyncSource, /* eventRegistration */ 0, layerHandle);
         }
 
         // TODO(b/116025192): physicalDisplayId is ignored because SF only emits VSYNC events for

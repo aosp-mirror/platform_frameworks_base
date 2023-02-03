@@ -278,12 +278,29 @@ public abstract class MediaOutputBaseAdapter extends
             mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
             mSeekBar.setAlpha(1);
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
-            final Drawable backgroundDrawable = mContext.getDrawable(
-                            R.drawable.media_output_item_background)
-                    .mutate();
-            backgroundDrawable.setColorFilter(new PorterDuffColorFilter(
-                    mController.getColorItemBackground(),
-                    PorterDuff.Mode.SRC_IN));
+            final Drawable backgroundDrawable;
+            if (mController.isAdvancedLayoutSupported() && mController.isSubStatusSupported()) {
+                backgroundDrawable = mContext.getDrawable(
+                        showSeekBar ? R.drawable.media_output_item_background_active
+                                : R.drawable.media_output_item_background).mutate();
+                backgroundDrawable.setColorFilter(new PorterDuffColorFilter(
+                        showSeekBar ? mController.getColorConnectedItemBackground()
+                                : mController.getColorItemBackground(), PorterDuff.Mode.SRC_IN));
+                mIconAreaLayout.getBackground().setColorFilter(new PorterDuffColorFilter(
+                        showSeekBar ? mController.getColorConnectedItemBackground()
+                                        : mController.getColorItemBackground(),
+                        PorterDuff.Mode.SRC_IN));
+                ViewGroup.MarginLayoutParams params =
+                        (ViewGroup.MarginLayoutParams) mItemLayout.getLayoutParams();
+                params.rightMargin = mController.getItemMarginEndDefault();
+            } else {
+                backgroundDrawable = mContext.getDrawable(
+                                R.drawable.media_output_item_background)
+                        .mutate();
+                backgroundDrawable.setColorFilter(new PorterDuffColorFilter(
+                        mController.getColorItemBackground(),
+                        PorterDuff.Mode.SRC_IN));
+            }
             mItemLayout.setBackground(backgroundDrawable);
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);

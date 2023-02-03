@@ -133,7 +133,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
         // If we had a request before to show from IME (tracked with mImeRequestedShow), reaching
         // this code here means that we now got control, so we can start the animation immediately.
         // If client window is trying to control IME and IME is already visible, it is immediate.
-        if (fromIme || (mState.getSource(getId()).isVisible() && getControl() != null)) {
+        if (fromIme
+                || (mState.isSourceOrDefaultVisible(getId(), getType()) && getControl() != null)) {
             return ShowResult.SHOW_IMMEDIATELY;
         }
 

@@ -263,10 +263,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mMediaOutputController.releaseSession();
             dismiss();
         });
-        mAppButton.setOnClickListener(v -> mMediaOutputController.tryToLaunchMediaApplication());
+        mAppButton.setOnClickListener(mMediaOutputController::tryToLaunchMediaApplication);
         if (mMediaOutputController.isAdvancedLayoutSupported()) {
             mMediaMetadataSectionLayout.setOnClickListener(
-                    v -> mMediaOutputController.tryToLaunchMediaApplication());
+                    mMediaOutputController::tryToLaunchMediaApplication);
         }
     }
 

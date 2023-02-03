@@ -56,6 +56,7 @@ import android.os.Build;
 import android.platform.test.annotations.Presubmit;
 import android.view.Gravity;
 import android.view.InsetsState;
+import android.view.WindowInsets;
 
 import androidx.test.filters.SmallTest;
 
@@ -1918,16 +1919,20 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
 
         state.setDisplayFrame(displayFrame);
         if (sl > dl) {
-            state.getSource(ITYPE_CLIMATE_BAR).setFrame(dl, dt, sl, db);
+            state.getOrCreateSource(ITYPE_CLIMATE_BAR, WindowInsets.Type.statusBars())
+                    .setFrame(dl, dt, sl, db);
         }
         if (st > dt) {
-            state.getSource(ITYPE_STATUS_BAR).setFrame(dl, dt, dr, st);
+            state.getOrCreateSource(ITYPE_STATUS_BAR, WindowInsets.Type.statusBars())
+                    .setFrame(dl, dt, dr, st);
         }
         if (sr < dr) {
-            state.getSource(ITYPE_EXTRA_NAVIGATION_BAR).setFrame(sr, dt, dr, db);
+            state.getOrCreateSource(ITYPE_EXTRA_NAVIGATION_BAR, WindowInsets.Type.navigationBars())
+                    .setFrame(sr, dt, dr, db);
         }
         if (sb < db) {
-            state.getSource(ITYPE_NAVIGATION_BAR).setFrame(dl, sb, dr, db);
+            state.getOrCreateSource(ITYPE_NAVIGATION_BAR, WindowInsets.Type.navigationBars())
+                    .setFrame(dl, sb, dr, db);
         }
         // Recompute config and push to children.
         display.onRequestedOverrideConfigurationChanged(display.getConfiguration());

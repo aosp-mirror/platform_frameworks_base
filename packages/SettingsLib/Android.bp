@@ -42,7 +42,7 @@ android_library {
         "SettingsLibAdaptiveIcon",
         "SettingsLibRadioButtonPreference",
         "SettingsLibSelectorWithWidgetPreference",
-        "SettingsLibDisplayDensityUtils",
+        "SettingsLibDisplayUtils",
         "SettingsLibUtils",
         "SettingsLibEmergencyNumber",
         "SettingsLibTopIntroPreference",

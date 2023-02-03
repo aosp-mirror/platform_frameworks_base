@@ -1741,21 +1741,6 @@ public class DisplayPolicy {
     }
 
     /**
-     * Get the Navigation Bar Frame height. This dimension is the height of the navigation bar that
-     * is used for spacing to show additional buttons on the navigation bar (such as the ime
-     * switcher when ime is visible).
-     *
-     * @param rotation specifies rotation to return dimension from
-     * @return navigation bar frame height
-     */
-    private int getNavigationBarFrameHeight(int rotation) {
-        if (mNavigationBar == null) {
-            return 0;
-        }
-        return mNavigationBar.mAttrs.forRotation(rotation).height;
-    }
-
-    /**
      * Return corner radius in pixels that should be used on windows in order to cover the display.
      *
      * The radius is only valid for internal displays, since the corner radius of external displays

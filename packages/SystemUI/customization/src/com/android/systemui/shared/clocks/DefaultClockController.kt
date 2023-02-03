@@ -29,6 +29,7 @@ import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
+import com.android.systemui.plugins.ClockSettings
 import com.android.systemui.plugins.log.LogBuffer
 import java.io.PrintWriter
 import java.util.Locale
@@ -46,6 +47,7 @@ class DefaultClockController(
     ctx: Context,
     private val layoutInflater: LayoutInflater,
     private val resources: Resources,
+    private val settings: ClockSettings?,
 ) : ClockController {
     override val smallClock: DefaultClockFaceController
     override val largeClock: LargeClockFaceController
@@ -66,12 +68,14 @@ class DefaultClockController(
         smallClock =
             DefaultClockFaceController(
                 layoutInflater.inflate(R.layout.clock_default_small, parent, false)
-                    as AnimatableClockView
+                    as AnimatableClockView,
+                settings?.seedColor
             )
         largeClock =
             LargeClockFaceController(
                 layoutInflater.inflate(R.layout.clock_default_large, parent, false)
-                    as AnimatableClockView
+                    as AnimatableClockView,
+                settings?.seedColor
             )
         clocks = listOf(smallClock.view, largeClock.view)
 
@@ -91,6 +95,7 @@ class DefaultClockController(
 
     open inner class DefaultClockFaceController(
         override val view: AnimatableClockView,
+        val seedColor: Int?,
     ) : ClockFaceController {
 
         // MAGENTA is a placeholder, and will be assigned correctly in initialize
@@ -105,6 +110,9 @@ class DefaultClockController(
             }
 
         init {
+            if (seedColor != null) {
+                currentColor = seedColor
+            }
             view.setColors(currentColor, currentColor)
         }
 
@@ -132,7 +140,9 @@ class DefaultClockController(
 
         fun updateColor() {
             val color =
-                if (isRegionDark) {
+                if (seedColor != null) {
+                    seedColor
+                } else if (isRegionDark) {
                     resources.getColor(android.R.color.system_accent1_100)
                 } else {
                     resources.getColor(android.R.color.system_accent2_600)
@@ -152,7 +162,8 @@ class DefaultClockController(
 
     inner class LargeClockFaceController(
         view: AnimatableClockView,
-    ) : DefaultClockFaceController(view) {
+        seedColor: Int?,
+    ) : DefaultClockFaceController(view, seedColor) {
         override fun recomputePadding(targetRegion: Rect?) {
             // We center the view within the targetRegion instead of within the parent
             // view by computing the difference and adding that to the padding.

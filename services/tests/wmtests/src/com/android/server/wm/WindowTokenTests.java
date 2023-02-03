@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -262,7 +262,7 @@ public class WindowTokenTests extends WindowTestsBase {
     @Test
     public void testSetInsetsFrozen_notAffectImeWindowState() {
         // Pre-condition: make the IME window be controlled by IME insets provider.
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_IME).setWindowContainer(
+        mDisplayContent.getInsetsStateController().getSourceProvider(ID_IME).setWindowContainer(
                 mDisplayContent.mInputMethodWindow, null, null);
 
         // Simulate an app window to be the IME layering target, assume the app window has no

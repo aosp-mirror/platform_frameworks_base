@@ -13588,8 +13588,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // broadcasts, or the receiver is null (a sticky broadcast). Sticky broadcasts should
             // not be used generally, so we will be marking them as exported by default
             boolean requireExplicitFlagForDynamicReceivers = CompatChanges.isChangeEnabled(
-                    DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid)
-                    && mConstants.mEnforceReceiverExportedFlagRequirement;
+                    DYNAMIC_RECEIVER_EXPLICIT_EXPORT_REQUIRED, callingUid);
             // STOPSHIP(b/259139792): Allow apps that are currently targeting U and in process of
             // updating their receivers to be exempt from this requirement until their receivers
             // are flagged.

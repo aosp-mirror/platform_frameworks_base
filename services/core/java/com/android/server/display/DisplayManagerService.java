@@ -245,7 +245,7 @@ public final class DisplayManagerService extends SystemService {
     private Display.Mode mUserPreferredMode;
     // HDR conversion mode chosen by user
     @GuardedBy("mSyncRoot")
-    private HdrConversionMode mHdrConversionMode;
+    private HdrConversionMode mHdrConversionMode = null;
 
     // The synchronization root for the display manager.
     // This lock guards most of the display manager's state.
@@ -647,6 +647,7 @@ public final class DisplayManagerService extends SystemService {
             updateSettingsLocked();
             updateUserDisabledHdrTypesFromSettingsLocked();
             updateUserPreferredDisplayModeSettingsLocked();
+            updateHdrConversionModeSettingsLocked();
         }
 
         mDisplayModeDirector.setDesiredDisplayModeSpecsListener(
@@ -1806,6 +1807,31 @@ public final class DisplayManagerService extends SystemService {
         device.setUserPreferredDisplayModeLocked(modeBuilder.build());
     }
 
+    @GuardedBy("mSyncRoot")
+    private void storeHdrConversionModeLocked(HdrConversionMode hdrConversionMode) {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.HDR_CONVERSION_MODE, hdrConversionMode.getConversionMode());
+        final int preferredHdrOutputType =
+                hdrConversionMode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_FORCE
+                        ? hdrConversionMode.getPreferredHdrOutputType()
+                        : Display.HdrCapabilities.HDR_TYPE_INVALID;
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.HDR_FORCE_CONVERSION_TYPE, preferredHdrOutputType);
+    }
+
+    @GuardedBy("mSyncRoot")
+    void updateHdrConversionModeSettingsLocked() {
+        final int conversionMode = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.HDR_CONVERSION_MODE, HdrConversionMode.HDR_CONVERSION_SYSTEM);
+        final int preferredHdrOutputType = conversionMode == HdrConversionMode.HDR_CONVERSION_FORCE
+                ? Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.HDR_FORCE_CONVERSION_TYPE,
+                        Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION)
+                : Display.HdrCapabilities.HDR_TYPE_INVALID;
+        mHdrConversionMode = new HdrConversionMode(conversionMode, preferredHdrOutputType);
+        setHdrConversionModeInternal(mHdrConversionMode);
+    }
+
     // If we've never recorded stable device stats for this device before and they aren't
     // explicitly configured, go ahead and record the stable device stats now based on the status
     // of the default display at first boot.
@@ -1962,13 +1988,14 @@ public final class DisplayManagerService extends SystemService {
         int[] autoHdrOutputTypes = null;
         synchronized (mSyncRoot) {
             mHdrConversionMode = hdrConversionMode;
+            storeHdrConversionModeLocked(mHdrConversionMode);
 
             // For auto mode, all supported HDR types are allowed except the ones specifically
             // disabled by the user.
             if (hdrConversionMode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM) {
                 autoHdrOutputTypes = getEnabledAutoHdrTypesLocked();
             }
-            DisplayControl.setHdrConversionMode(hdrConversionMode.getConversionMode(),
+            mInjector.setHdrConversionMode(hdrConversionMode.getConversionMode(),
                     hdrConversionMode.getPreferredHdrOutputType(), autoHdrOutputTypes);
         }
     }
@@ -1984,7 +2011,7 @@ public final class DisplayManagerService extends SystemService {
 
     private @Display.HdrCapabilities.HdrType int[] getSupportedHdrOutputTypesInternal() {
         if (mSupportedHdrOutputType == null) {
-            mSupportedHdrOutputType = DisplayControl.getSupportedHdrOutputTypes();
+            mSupportedHdrOutputType = mInjector.getSupportedHdrOutputTypes();
         }
         return mSupportedHdrOutputType;
     }
@@ -2604,6 +2631,10 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
 
+            if (mHdrConversionMode != null) {
+                pw.println("  mHdrConversionMode=" + mHdrConversionMode);
+            }
+
             pw.println();
             final int displayStateCount = mDisplayStates.size();
             pw.println("Display States: size=" + displayStateCount);
@@ -2711,6 +2742,16 @@ public final class DisplayManagerService extends SystemService {
 
         long getDefaultDisplayDelayTimeout() {
             return WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT;
+        }
+
+        void setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
+                int[] autoHdrTypes) {
+            DisplayControl.setHdrConversionMode(conversionMode, preferredHdrOutputType,
+                    autoHdrTypes);
+        }
+
+        int[] getSupportedHdrOutputTypes() {
+            return DisplayControl.getSupportedHdrOutputTypes();
         }
     }
 

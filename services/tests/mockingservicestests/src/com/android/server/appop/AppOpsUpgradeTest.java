@@ -42,6 +42,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -51,12 +52,14 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.util.ArrayUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.server.LocalServices;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.PackageStateInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -188,6 +191,11 @@ public class AppOpsUpgradeTest {
 
         // Stub out package calls to disable AppOpsService#updatePermissionRevokedCompat
         doReturn(null).when(mPackageManager).getPackagesForUid(anyInt());
+
+        doReturn(new ArrayMap<String, PackageStateInternal>()).when(mPackageManagerInternal)
+                .getPackageStates();
+
+        doReturn(new int[] {0}).when(mUserManagerInternal).getUserIds();
     }
 
     @After

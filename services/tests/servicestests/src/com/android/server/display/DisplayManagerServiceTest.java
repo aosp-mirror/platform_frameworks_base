@@ -56,6 +56,7 @@ import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
+import android.hardware.display.HdrConversionMode;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
@@ -171,6 +172,17 @@ public class DisplayManagerServiceTest {
                }
            });
        }
+
+        @Override
+        void setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
+                int[] autoHdrTypes) {
+            return;
+        }
+
+        @Override
+        int[] getSupportedHdrOutputTypes() {
+            return new int[]{};
+        }
    }
 
     private final DisplayManagerService.Injector mBasicInjector = new BasicInjector();
@@ -240,8 +252,7 @@ public class DisplayManagerServiceTest {
         // the usage of SensorManager, which is available only after the PowerManagerService
         // is ready.
         resetConfigToIgnoreSensorManager(mContext);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
         displayManager.systemReady(false /* safeMode */);
         displayManager.windowManagerAndInputReady();
@@ -316,8 +327,7 @@ public class DisplayManagerServiceTest {
         // the usage of SensorManager, which is available only after the PowerManagerService
         // is ready.
         resetConfigToIgnoreSensorManager(mContext);
-        DisplayManagerService displayManager =
-                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
         displayManager.systemReady(false /* safeMode */);
         displayManager.windowManagerAndInputReady();
@@ -1509,6 +1519,22 @@ public class DisplayManagerServiceTest {
         assertEquals(configOne, configFromOne);
         assertEquals(configTwo, configFromTwo);
 
+    }
+
+    @Test
+    public void testHdrConversionModeEquals() {
+        assertEquals(
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_FORCE, 2),
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_FORCE, 2));
+        assertNotEquals(
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_FORCE, 2),
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_FORCE, 3));
+        assertEquals(
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM),
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM));
+        assertNotEquals(
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_FORCE, 2),
+                new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM));
     }
 
     private void testDisplayInfoFrameRateOverrideModeCompat(boolean compatChangeEnabled)

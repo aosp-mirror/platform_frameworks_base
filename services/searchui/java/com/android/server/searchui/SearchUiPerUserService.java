@@ -149,6 +149,48 @@ public class SearchUiPerUserService extends
     }
 
     /**
+     * Registers a callback for continuous updates of search targets for empty query result used for
+     * zero state.
+     */
+    @GuardedBy("mLock")
+    public void registerEmptyQueryResultUpdateCallbackLocked(@NonNull SearchSessionId sessionId,
+            @NonNull ISearchCallback callback) {
+        final SearchSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+        if (sessionInfo == null) return;
+        final boolean serviceExists = resolveService(sessionId,
+                s -> s.onRegisterEmptyQueryResultUpdateCallback(sessionId, callback));
+        if (serviceExists) {
+            sessionInfo.addCallbackLocked(callback);
+        }
+    }
+
+    /**
+     * Unregisters a callback for continuous updates of search targets for empty query result
+     * used for zero state.
+     */
+    @GuardedBy("mLock")
+    public void unregisterEmptyQueryResultUpdateCallbackLocked(@NonNull SearchSessionId sessionId,
+            @NonNull ISearchCallback callback) {
+        final SearchSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+        if (sessionInfo == null) return;
+        final boolean serviceExists = resolveService(sessionId,
+                s -> s.onUnregisterEmptyQueryResultUpdateCallback(sessionId, callback));
+        if (serviceExists) {
+            sessionInfo.removeCallbackLocked(callback);
+        }
+    }
+
+    /**
+     * Requests a new set of search targets for empty query result used for zero state.
+     */
+    @GuardedBy("mLock")
+    public void requestEmptyQueryResultUpdateLocked(@NonNull SearchSessionId sessionId) {
+        final SearchSessionInfo sessionInfo = mSessionInfos.get(sessionId);
+        if (sessionInfo == null) return;
+        resolveService(sessionId, s->s.onRequestEmptyQueryResultUpdate(sessionId));
+    }
+
+    /**
      * Notifies the service of the end of an existing search session.
      */
     @GuardedBy("mLock")
@@ -310,18 +352,7 @@ public class SearchUiPerUserService extends
         final IBinder.DeathRecipient mDeathRecipient;
 
         private final RemoteCallbackList<ISearchCallback> mCallbacks =
-                new RemoteCallbackList<ISearchCallback>() {
-                    @Override
-                    public void onCallbackDied(ISearchCallback callback) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Binder died for session Id=" + mSessionId
-                                    + " and callback=" + callback.asBinder());
-                        }
-                        if (mCallbacks.getRegisteredCallbackCount() == 0) {
-                            destroy();
-                        }
-                    }
-                };
+                new RemoteCallbackList<>();
 
         SearchSessionInfo(
                 @NonNull final SearchSessionId id,
@@ -335,6 +366,22 @@ public class SearchUiPerUserService extends
             mSearchContext = context;
             mToken = token;
             mDeathRecipient = deathRecipient;
+        }
+
+        void addCallbackLocked(ISearchCallback callback) {
+            if (DEBUG) {
+                Slog.d(TAG, "Storing callback for session Id=" + mSessionId
+                        + " and callback=" + callback.asBinder());
+            }
+            mCallbacks.register(callback);
+        }
+
+        void removeCallbackLocked(ISearchCallback callback) {
+            if (DEBUG) {
+                Slog.d(TAG, "Removing callback for session Id=" + mSessionId
+                        + " and callback=" + callback.asBinder());
+            }
+            mCallbacks.unregister(callback);
         }
 
         boolean linkToDeath() {
@@ -369,6 +416,9 @@ public class SearchUiPerUserService extends
                         + callbackCount + " callbacks.");
             }
             service.onCreateSearchSessionLocked(mSearchContext, mSessionId, token);
+            mCallbacks.broadcast(
+                    callback -> service.registerEmptyQueryResultUpdateCallbackLocked(mSessionId,
+                            callback));
         }
     }
 }

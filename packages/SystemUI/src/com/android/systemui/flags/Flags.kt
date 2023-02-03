@@ -265,11 +265,10 @@ object Flags {
     // 600- status bar
 
     // TODO(b/256614753): Tracking Bug
-    val NEW_STATUS_BAR_MOBILE_ICONS =
-        unreleasedFlag(606, "new_status_bar_mobile_icons", teamfood = true)
+    val NEW_STATUS_BAR_MOBILE_ICONS = releasedFlag(606, "new_status_bar_mobile_icons")
 
     // TODO(b/256614210): Tracking Bug
-    val NEW_STATUS_BAR_WIFI_ICON = unreleasedFlag(607, "new_status_bar_wifi_icon", teamfood = true)
+    val NEW_STATUS_BAR_WIFI_ICON = releasedFlag(607, "new_status_bar_wifi_icon")
 
     // TODO(b/256614751): Tracking Bug
     val NEW_STATUS_BAR_MOBILE_ICONS_BACKEND =
@@ -310,9 +309,7 @@ object Flags {
     val SCREEN_CONTENTS_TRANSLATION = unreleasedFlag(803, "screen_contents_translation")
 
     // 804 - monochromatic themes
-    @JvmField
-    val MONOCHROMATIC_THEMES =
-        sysPropBooleanFlag(804, "persist.sysui.monochromatic", default = false)
+    @JvmField val MONOCHROMATIC_THEME = releasedFlag(804, "monochromatic")
 
     // 900 - media
     // TODO(b/254512697): Tracking Bug
@@ -353,17 +350,17 @@ object Flags {
         unreleasedFlag(912, "media_ttt_dismiss_gesture", teamfood = true)
 
     // TODO(b/266157412): Tracking Bug
-    val MEDIA_RETAIN_SESSIONS = unreleasedFlag(913, "media_retain_sessions")
+    val MEDIA_RETAIN_SESSIONS = releasedFlag(913, "media_retain_sessions")
 
     // TODO(b/266739309): Tracking Bug
     @JvmField
-    val MEDIA_RECOMMENDATION_CARD_UPDATE = unreleasedFlag(914, "media_recommendation_card_update")
+    val MEDIA_RECOMMENDATION_CARD_UPDATE = releasedFlag(914, "media_recommendation_card_update")
 
     // TODO(b/267007629): Tracking Bug
-    val MEDIA_RESUME_PROGRESS = unreleasedFlag(915, "media_resume_progress")
+    val MEDIA_RESUME_PROGRESS = releasedFlag(915, "media_resume_progress")
 
     // TODO(b/267166152) : Tracking Bug
-    val MEDIA_RETAIN_RECOMMENDATIONS = unreleasedFlag(916, "media_retain_recommendations")
+    val MEDIA_RETAIN_RECOMMENDATIONS = releasedFlag(916, "media_retain_recommendations")
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
@@ -519,6 +516,9 @@ object Flags {
     // TODO(b/266955521): Tracking bug
     @JvmField val SCREENSHOT_DETECTION = unreleasedFlag(1303, "screenshot_detection")
 
+    // TODO(b/251205791): Tracking Bug
+    @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag(1304, "screenshot_app_clips")
+
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
     val QUICK_TAP_IN_PCC = releasedFlag(1400, "quick_tap_in_pcc")
@@ -542,6 +542,8 @@ object Flags {
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
+    // TODO(b/267162944): Tracking bug
+    @JvmField val CLIPBOARD_MINIMIZED_LAYOUT = unreleasedFlag(1702, "clipboard_data_model")
 
     // 1800 - shade container
     @JvmField
@@ -550,7 +552,7 @@ object Flags {
     @JvmField val DUAL_SHADE = releasedFlag(1801, "dual_shade")
 
     // 1900
-    @JvmField val NOTE_TASKS = unreleasedFlag(1900, "keycode_flag")
+    @JvmField val NOTE_TASKS = releasedFlag(1900, "keycode_flag")
 
     // 2000 - device controls
     @Keep @JvmField val USE_APP_PANELS = releasedFlag(2000, "use_app_panels", teamfood = true)
@@ -572,10 +574,14 @@ object Flags {
     @JvmField val UDFPS_ELLIPSE_DETECTION = releasedFlag(2201, "udfps_ellipse_detection")
 
     // 2300 - stylus
-    @JvmField val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used")
-    @JvmField val ENABLE_STYLUS_CHARGING_UI = unreleasedFlag(2301, "enable_stylus_charging_ui")
     @JvmField
-    val ENABLE_USI_BATTERY_NOTIFICATIONS = unreleasedFlag(2302, "enable_usi_battery_notifications")
+    val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used", teamfood = true)
+    @JvmField
+    val ENABLE_STYLUS_CHARGING_UI =
+        unreleasedFlag(2301, "enable_stylus_charging_ui", teamfood = true)
+    @JvmField
+    val ENABLE_USI_BATTERY_NOTIFICATIONS =
+        unreleasedFlag(2302, "enable_usi_battery_notifications", teamfood = true)
     @JvmField val ENABLE_STYLUS_EDUCATION = unreleasedFlag(2303, "enable_stylus_education")
 
     // 2400 - performance tools and debugging info

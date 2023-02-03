@@ -39,7 +39,7 @@ public final class GetCredentialRequest implements Parcelable {
      * The list of credential requests.
      */
     @NonNull
-    private final List<GetCredentialOption> mGetCredentialOptions;
+    private final List<CredentialOption> mCredentialOptions;
 
     /**
      * The top request level data.
@@ -51,8 +51,8 @@ public final class GetCredentialRequest implements Parcelable {
      * Returns the list of credential options to be requested.
      */
     @NonNull
-    public List<GetCredentialOption> getGetCredentialOptions() {
-        return mGetCredentialOptions;
+    public List<CredentialOption> getCredentialOptions() {
+        return mCredentialOptions;
     }
 
     /**
@@ -65,7 +65,7 @@ public final class GetCredentialRequest implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeTypedList(mGetCredentialOptions, flags);
+        dest.writeTypedList(mCredentialOptions, flags);
         dest.writeBundle(mData);
     }
 
@@ -76,29 +76,29 @@ public final class GetCredentialRequest implements Parcelable {
 
     @Override
     public String toString() {
-        return "GetCredentialRequest {getCredentialOption=" + mGetCredentialOptions
+        return "GetCredentialRequest {credentialOption=" + mCredentialOptions
                 + ", data=" + mData
                 + "}";
     }
 
-    private GetCredentialRequest(@NonNull List<GetCredentialOption> getCredentialOptions,
+    private GetCredentialRequest(@NonNull List<CredentialOption> credentialOptions,
             @NonNull Bundle data) {
         Preconditions.checkCollectionNotEmpty(
-                getCredentialOptions,
-                /*valueName=*/ "getCredentialOptions");
+                credentialOptions,
+                /*valueName=*/ "credentialOptions");
         Preconditions.checkCollectionElementsNotNull(
-                getCredentialOptions,
-                /*valueName=*/ "getCredentialOptions");
-        mGetCredentialOptions = getCredentialOptions;
+                credentialOptions,
+                /*valueName=*/ "credentialOptions");
+        mCredentialOptions = credentialOptions;
         mData = requireNonNull(data,
                 "data must not be null");
     }
 
     private GetCredentialRequest(@NonNull Parcel in) {
-        List<GetCredentialOption> getCredentialOptions = new ArrayList<GetCredentialOption>();
-        in.readTypedList(getCredentialOptions, GetCredentialOption.CREATOR);
-        mGetCredentialOptions = getCredentialOptions;
-        AnnotationValidations.validate(NonNull.class, null, mGetCredentialOptions);
+        List<CredentialOption> credentialOptions = new ArrayList<CredentialOption>();
+        in.readTypedList(credentialOptions, CredentialOption.CREATOR);
+        mCredentialOptions = credentialOptions;
+        AnnotationValidations.validate(NonNull.class, null, mCredentialOptions);
 
 
         Bundle data = in.readBundle();
@@ -106,8 +106,8 @@ public final class GetCredentialRequest implements Parcelable {
         AnnotationValidations.validate(NonNull.class, null, mData);
     }
 
-    public static final @NonNull Parcelable.Creator<GetCredentialRequest> CREATOR =
-            new Parcelable.Creator<GetCredentialRequest>() {
+    @NonNull public static final Parcelable.Creator<GetCredentialRequest> CREATOR =
+            new Parcelable.Creator<>() {
                 @Override
                 public GetCredentialRequest[] newArray(int size) {
                     return new GetCredentialRequest[size];
@@ -123,7 +123,7 @@ public final class GetCredentialRequest implements Parcelable {
     public static final class Builder {
 
         @NonNull
-        private List<GetCredentialOption> mGetCredentialOptions = new ArrayList<>();
+        private List<CredentialOption> mCredentialOptions = new ArrayList<>();
 
         @NonNull
         private final Bundle mData;
@@ -136,43 +136,42 @@ public final class GetCredentialRequest implements Parcelable {
         }
 
         /**
-         * Adds a specific type of {@link GetCredentialOption}.
+         * Adds a specific type of {@link CredentialOption}.
          */
         @NonNull
-        public Builder addGetCredentialOption(
-                @NonNull GetCredentialOption getCredentialOption) {
-            mGetCredentialOptions.add(requireNonNull(
-                    getCredentialOption, "getCredentialOption must not be null"));
+        public Builder addCredentialOption(@NonNull CredentialOption credentialOption) {
+            mCredentialOptions.add(requireNonNull(
+                    credentialOption, "credentialOption must not be null"));
             return this;
         }
 
         /**
-         * Sets the list of {@link GetCredentialOption}.
+         * Sets the list of {@link CredentialOption}.
          */
         @NonNull
-        public Builder setGetCredentialOptions(
-                @NonNull List<GetCredentialOption> getCredentialOptions) {
+        public Builder setCredentialOptions(
+                @NonNull List<CredentialOption> credentialOptions) {
             Preconditions.checkCollectionElementsNotNull(
-                    getCredentialOptions,
-                    /*valueName=*/ "getCredentialOptions");
-            mGetCredentialOptions = new ArrayList<>(getCredentialOptions);
+                    credentialOptions,
+                    /*valueName=*/ "credentialOptions");
+            mCredentialOptions = new ArrayList<>(credentialOptions);
             return this;
         }
 
         /**
          * Builds a {@link GetCredentialRequest}.
          *
-         * @throws IllegalArgumentException If getCredentialOptions is empty.
+         * @throws IllegalArgumentException If credentialOptions is empty.
          */
         @NonNull
         public GetCredentialRequest build() {
             Preconditions.checkCollectionNotEmpty(
-                    mGetCredentialOptions,
-                    /*valueName=*/ "getCredentialOptions");
+                    mCredentialOptions,
+                    /*valueName=*/ "credentialOptions");
             Preconditions.checkCollectionElementsNotNull(
-                    mGetCredentialOptions,
-                    /*valueName=*/ "getCredentialOptions");
-            return new GetCredentialRequest(mGetCredentialOptions, mData);
+                    mCredentialOptions,
+                    /*valueName=*/ "credentialOptions");
+            return new GetCredentialRequest(mCredentialOptions, mData);
         }
     }
 }

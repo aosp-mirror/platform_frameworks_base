@@ -418,6 +418,34 @@
                  android:permission="com.android.systemui.permission.SELF"
                  android:exported="false" />
 
+        <activity android:name=".screenshot.AppClipsTrampolineActivity"
+            android:theme="@style/AppClipsTrampolineActivity"
+            android:label="@string/screenshot_preview_description"
+            android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE"
+            android:exported="true">
+            <intent-filter android:priority="1">
+                <action android:name="android.intent.action.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".screenshot.AppClipsActivity"
+            android:theme="@style/AppClipsActivity"
+            android:process=":appclips.screenshot"
+            android:label="@string/screenshot_preview_description"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true" />
+
+        <service android:name=".screenshot.appclips.AppClipsScreenshotHelperService"
+            android:permission="com.android.systemui.permission.SELF"
+            android:exported="false" />
+
+        <service android:name=".screenshot.appclips.AppClipsService"
+            android:permission="android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE"
+            android:exported="true" />
+
         <service android:name=".screenrecord.RecordingService"
                  android:foregroundServiceType="systemExempted"/>
 

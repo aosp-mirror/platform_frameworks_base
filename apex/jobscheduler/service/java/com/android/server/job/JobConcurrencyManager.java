@@ -1282,17 +1282,20 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
-    void stopUserVisibleJobsLocked(int userId, @NonNull String packageName,
-            @JobParameters.StopReason int reason, int internalReasonCode) {
+    void markJobsForUserStopLocked(int userId, @NonNull String packageName,
+            @Nullable String debugReason) {
         for (int i = mActiveServices.size() - 1; i >= 0; --i) {
             final JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus jobStatus = jsc.getRunningJobLocked();
 
-            if (jobStatus != null && userId == jobStatus.getSourceUserId()
-                    && jobStatus.getSourcePackageName().equals(packageName)
-                    && jobStatus.isUserVisibleJob()) {
-                jsc.cancelExecutingJobLocked(reason, internalReasonCode,
-                        JobParameters.getInternalReasonCodeDescription(internalReasonCode));
+            // Normally, we handle jobs primarily using the source package and userId,
+            // however, user-visible jobs are shown as coming from the calling app, so we
+            // need to operate on the jobs from that perspective here.
+            if (jobStatus != null && userId == jobStatus.getUserId()
+                    && jobStatus.getServiceComponent().getPackageName().equals(packageName)) {
+                jsc.markForProcessDeathLocked(JobParameters.STOP_REASON_USER,
+                        JobParameters.INTERNAL_STOP_REASON_USER_UI_STOP,
+                        debugReason);
             }
         }
     }

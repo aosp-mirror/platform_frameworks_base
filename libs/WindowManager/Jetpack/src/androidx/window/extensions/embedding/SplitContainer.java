@@ -17,7 +17,8 @@
 package androidx.window.extensions.embedding;
 
 import android.app.Activity;
-import android.content.res.Configuration;
+import android.os.Binder;
+import android.os.IBinder;
 import android.util.Pair;
 import android.util.Size;
 import android.window.WindowContainerTransaction;
@@ -36,6 +37,8 @@ class SplitContainer {
     private final SplitRule mSplitRule;
     @NonNull
     private SplitAttributes mSplitAttributes;
+    @NonNull
+    private final IBinder mToken;
 
     SplitContainer(@NonNull TaskFragmentContainer primaryContainer,
             @NonNull Activity primaryActivity,
@@ -46,6 +49,7 @@ class SplitContainer {
         mSecondaryContainer = secondaryContainer;
         mSplitRule = splitRule;
         mSplitAttributes = splitAttributes;
+        mToken = new Binder("SplitContainer");
 
         if (shouldFinishPrimaryWithSecondary(splitRule)) {
             if (mPrimaryContainer.getRunningActivityCount() == 1
@@ -83,6 +87,11 @@ class SplitContainer {
         return mSplitAttributes;
     }
 
+    @NonNull
+    IBinder getToken() {
+        return mToken;
+    }
+
     /**
      * Updates the {@link SplitAttributes} to this container.
      * It is usually used when there's a folding state change or
@@ -112,7 +121,7 @@ class SplitContainer {
     @NonNull
     SplitInfo toSplitInfo() {
         return new SplitInfo(mPrimaryContainer.toActivityStack(),
-                mSecondaryContainer.toActivityStack(), mSplitAttributes);
+                mSecondaryContainer.toActivityStack(), mSplitAttributes, mToken);
     }
 
     static boolean shouldFinishPrimaryWithSecondary(@NonNull SplitRule splitRule) {

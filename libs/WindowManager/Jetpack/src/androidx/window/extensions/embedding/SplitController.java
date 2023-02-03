@@ -230,6 +230,14 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return mSplitAttributesCalculator;
     }
 
+    @Override
+    @NonNull
+    public ActivityOptions setLaunchingActivityStack(@NonNull ActivityOptions options,
+            @NonNull IBinder token) {
+        options.setLaunchTaskFragmentToken(token);
+        return options;
+    }
+
     @NonNull
     @GuardedBy("mLock")
     @VisibleForTesting
@@ -2064,6 +2072,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                     transactionRecord.apply(false /* shouldApplyIndependently */);
                     // Amend the request to let the WM know that the activity should be placed in
                     // the dedicated container.
+                    // TODO(b/229680885): skip override launching TaskFragment token by split-rule
                     options.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
                             launchedInTaskFragment.getTaskFragmentToken());
                     mCurrentIntent = intent;

@@ -402,6 +402,11 @@ public final class JobStatus {
      * running. This isn't copied over when a job is rescheduled.
      */
     public boolean startedAsExpeditedJob = false;
+    /**
+     * Whether or not this particular JobStatus instance was treated as a user-initiated job
+     * when it started running. This isn't copied over when a job is rescheduled.
+     */
+    public boolean startedAsUserInitiatedJob = false;
 
     public boolean startedWithImmediacyPrivilege = false;
 
@@ -1407,7 +1412,7 @@ public final class JobStatus {
      * @return true if this is a job whose execution should be made visible to the user.
      */
     public boolean isUserVisibleJob() {
-        return shouldTreatAsUserInitiatedJob();
+        return shouldTreatAsUserInitiatedJob() || startedAsUserInitiatedJob;
     }
 
     /**
@@ -2566,6 +2571,13 @@ public final class JobStatus {
             pw.print(mExpeditedTareApproved);
             pw.print(" (started as EJ: ");
             pw.print(startedAsExpeditedJob);
+            pw.println(")");
+        }
+        if ((getFlags() & JobInfo.FLAG_USER_INITIATED) != 0) {
+            pw.print("userInitiatedApproved: ");
+            pw.print(shouldTreatAsUserInitiatedJob());
+            pw.print(" (started as UIJ: ");
+            pw.print(startedAsUserInitiatedJob);
             pw.println(")");
         }
         pw.decreaseIndent();

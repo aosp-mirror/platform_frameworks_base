@@ -16,6 +16,11 @@
 
 package com.android.systemui.media.dialog;
 
+import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_GO_TO_APP;
+import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_NONE;
+import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_TRANSFER;
+import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED;
 import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQUIRED;
 
 import android.content.Context;
@@ -23,7 +28,6 @@ import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.media.RouteListingPreference;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
@@ -194,16 +198,29 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     updateFullItemClickListener(v -> onItemClick(v, device));
                     setSingleLineLayout(getItemTitle(device));
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-                        && mController.isSubStatusSupported() && device.hasDisabledReason()) {
-                    //update to subtext with device status
+                        && mController.isSubStatusSupported()
+                        && mController.isAdvancedLayoutSupported() && device.hasSubtext()) {
+                    boolean isActiveWithOngoingSession =
+                            device.hasOngoingSession() && currentlyConnected;
+                    if (isActiveWithOngoingSession) {
+                        //Selected device which has ongoing session, disable seekbar since we
+                        //only allow volume control on Host
+                        mSeekBar.setVolume(0);
+                        disableSeekBar();
+                        mCurrentActivePosition = position;
+                    }
                     setUpDeviceIcon(device);
-                    mSubTitleText.setText(
-                            Api34Impl.composeDisabledReason(device.getDisableReason(), mContext));
-                    updateConnectionFailedStatusIcon();
-                    updateFullItemClickListener(null);
-                    setTwoLineLayout(device, false /* bFocused */, false /* showSeekBar */,
+                    mSubTitleText.setText(device.getSubtextString());
+                    Drawable deviceStatusIcon =
+                            Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(device, mContext);
+                    if (deviceStatusIcon != null) {
+                        updateDeviceStatusIcon(deviceStatusIcon);
+                    }
+                    updateClickActionBasedOnSelectionBehavior(device);
+                    setTwoLineLayout(device, isActiveWithOngoingSession /* bFocused */,
+                            isActiveWithOngoingSession /* showSeekBar */,
                             false /* showProgressBar */, true /* showSubtitle */,
-                            true /* showStatus */);
+                            deviceStatusIcon != null /* showStatus */);
                 } else if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
                     setUpDeviceIcon(device);
                     updateConnectionFailedStatusIcon();
@@ -220,6 +237,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             false /* showEndTouchArea */);
                 } else if (mController.getSelectedMediaDevice().size() > 1
                         && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
+                    // selected device in group
                     boolean isDeviceDeselectable = isDeviceIncluded(
                             mController.getDeselectableMediaDevice(), device);
                     if (!mController.isAdvancedLayoutSupported()) {
@@ -235,6 +253,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     initSeekbar(device, isCurrentSeekbarInvisible);
                 } else if (!mController.hasAdjustVolumeUserRestriction()
                         && currentlyConnected) {
+                    // single selected device
                     if (isMutingExpectedDeviceExist
                             && !mController.isCurrentConnectedDeviceRemote()) {
                         // mark as disconnected and set special click listener
@@ -266,6 +285,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         initSeekbar(device, isCurrentSeekbarInvisible);
                     }
                 } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
+                    //groupable device
                     setUpDeviceIcon(device);
                     updateGroupableCheckBox(false, true, device);
                     if (mController.isAdvancedLayoutSupported()) {
@@ -280,7 +300,12 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 } else {
                     setUpDeviceIcon(device);
                     setSingleLineLayout(getItemTitle(device));
-                    updateFullItemClickListener(v -> onItemClick(v, device));
+                    if (mController.isAdvancedLayoutSupported()
+                            && mController.isSubStatusSupported()) {
+                        updateClickActionBasedOnSelectionBehavior(device);
+                    } else {
+                        updateFullItemClickListener(v -> onItemClick(v, device));
+                    }
                 }
             }
         }
@@ -292,9 +317,20 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     ColorStateList(states, colors));
         }
 
+        private void updateClickActionBasedOnSelectionBehavior(MediaDevice device) {
+            View.OnClickListener clickListener = Api34Impl.getClickListenerBasedOnSelectionBehavior(
+                    device, mController, v -> onItemClick(v, device));
+            updateFullItemClickListener(clickListener);
+        }
+
         private void updateConnectionFailedStatusIcon() {
             mStatusIcon.setImageDrawable(
                     mContext.getDrawable(R.drawable.media_output_status_failed));
+            mStatusIcon.setColorFilter(mController.getColorItemContent());
+        }
+
+        private void updateDeviceStatusIcon(Drawable drawable) {
+            mStatusIcon.setImageDrawable(drawable);
             mStatusIcon.setColorFilter(mController.getColorItemContent());
         }
 
@@ -411,13 +447,30 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     @RequiresApi(34)
     private static class Api34Impl {
         @DoNotInline
-        static String composeDisabledReason(
-                @RouteListingPreference.Item.SubText int reason, Context context) {
-            switch(reason) {
-                case SUBTEXT_SUBSCRIPTION_REQUIRED:
-                    return context.getString(R.string.media_output_status_require_premium);
+        static View.OnClickListener getClickListenerBasedOnSelectionBehavior(MediaDevice device,
+                MediaOutputController controller, View.OnClickListener defaultTransferListener) {
+            switch (device.getSelectionBehavior()) {
+                case SELECTION_BEHAVIOR_NONE:
+                    return null;
+                case SELECTION_BEHAVIOR_TRANSFER:
+                    return defaultTransferListener;
+                case SELECTION_BEHAVIOR_GO_TO_APP:
+                    return v -> controller.tryToLaunchInAppRoutingIntent(device.getId(), v);
             }
-            return "";
+            return null;
+        }
+
+        @DoNotInline
+        static Drawable getDeviceStatusIconBasedOnSelectionBehavior(MediaDevice device,
+                Context context) {
+            switch (device.getSubtext()) {
+                case SUBTEXT_AD_ROUTING_DISALLOWED:
+                case SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED:
+                    return context.getDrawable(R.drawable.media_output_status_failed);
+                case SUBTEXT_SUBSCRIPTION_REQUIRED:
+                    return context.getDrawable(R.drawable.media_output_status_help);
+            }
+            return null;
         }
     }
 }

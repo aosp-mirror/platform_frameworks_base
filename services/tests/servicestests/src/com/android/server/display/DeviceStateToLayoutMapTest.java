@@ -111,6 +111,14 @@ public class DeviceStateToLayoutMapTest {
         assertEquals(testLayout, configLayout);
     }
 
+    @Test
+    public void testRearDisplayLayout() {
+        Layout configLayout = mDeviceStateToLayoutMap.get(2);
+
+        assertEquals(Layout.Display.POSITION_FRONT, configLayout.getAt(0).getPosition());
+        assertEquals(Layout.Display.POSITION_REAR, configLayout.getAt(1).getPosition());
+    }
+
     ////////////////////
     // Helper Methods //
     ////////////////////

@@ -102,6 +102,7 @@ open class CloseImeToAppOnPressBackTest(flicker: FlickerTest) : BaseTest(flicker
         flicker.assertWm { this.isAppWindowOnTop(testApp) }
     }
 
+    @Presubmit
     @Test
     @IwTest(focusArea = "ime")
     override fun cujCompleted() {

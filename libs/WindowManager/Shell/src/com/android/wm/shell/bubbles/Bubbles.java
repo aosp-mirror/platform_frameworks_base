@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.bubbles;
 
+import static android.window.ScreenCapture.ScreenshotSync;
+
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.PARAMETER;
@@ -24,11 +26,13 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.app.NotificationChannel;
 import android.content.Intent;
 import android.content.pm.UserInfo;
+import android.hardware.HardwareBuffer;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
@@ -131,6 +135,18 @@ public interface Bubbles {
      * @param intent the intent to display in the bubble expanded view.
      */
     void showOrHideAppBubble(Intent intent);
+
+    /** @return true if the specified {@code taskId} corresponds to app bubble's taskId. */
+    boolean isAppBubbleTaskId(int taskId);
+
+    /**
+     * @return a {@link ScreenshotSync} after performing a screenshot that may exclude the bubble
+     * layer, if one is present. The underlying {@link ScreenshotHardwareBuffer} can be access via
+     * {@link ScreenshotSync#get()} asynchronously and care should be taken to
+     * {@link HardwareBuffer#close()} the associated
+     * {@link ScreenshotHardwareBuffer#getHardwareBuffer()} when no longer required.
+     */
+    ScreenshotSync getScreenshotExcludingBubble(int displayId);
 
     /**
      * @return a bubble that matches the provided shortcutId, if one exists.

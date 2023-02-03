@@ -22,6 +22,7 @@ import androidx.navigation.NamedNavArgument
 import com.android.settingslib.spa.framework.util.isRuntimeParam
 import com.android.settingslib.spa.framework.util.navLink
 import com.android.settingslib.spa.framework.util.normalize
+import com.android.settingslib.spa.framework.util.normalizeArgList
 
 private const val NULL_PAGE_NAME = "NULL"
 
@@ -114,9 +115,10 @@ data class SettingsPage(
 fun SettingsPageProvider.createSettingsPage(arguments: Bundle? = null): SettingsPage {
     return SettingsPage.create(
         name = name,
-        displayName = displayName,
+        displayName = displayName + parameter.normalizeArgList(arguments, eraseRuntimeValues = true)
+            .joinToString("") { arg -> "/$arg" },
         parameter = parameter,
-        arguments = arguments
+        arguments = arguments,
     )
 }
 

@@ -243,7 +243,7 @@ class TaskFragmentContainer {
 
     @NonNull
     ActivityStack toActivityStack() {
-        return new ActivityStack(collectNonFinishingActivities(), isEmpty());
+        return new ActivityStack(collectNonFinishingActivities(), isEmpty(), mToken);
     }
 
     /** Adds the activity that will be reparented to this container. */

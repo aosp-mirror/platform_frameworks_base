@@ -31,6 +31,7 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import com.android.server.display.layout.Layout;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
@@ -152,6 +153,10 @@ final class LogicalDisplay {
     // the {@link mIsEnabled} is changing, or the underlying mPrimiaryDisplayDevice is changing.
     private boolean mIsInTransition;
 
+    // Indicates the position of the display, POSITION_UNKNOWN could mean it hasn't been specified,
+    // or this is a virtual display etc.
+    private int mPosition = Layout.Display.POSITION_UNKNOWN;
+
     /**
      * The ID of the brightness throttling data that should be used. This can change e.g. in
      * concurrent displays mode in which a stricter brightness throttling policy might need to be
@@ -168,6 +173,13 @@ final class LogicalDisplay {
         mIsEnabled = true;
         mIsInTransition = false;
         mBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID;
+    }
+
+    public void setPositionLocked(int position) {
+        mPosition = position;
+    }
+    public int getPositionLocked() {
+        return mPosition;
     }
 
     /**
@@ -424,6 +436,11 @@ final class LogicalDisplay {
             mBaseDisplayInfo.roundedCorners = deviceInfo.roundedCorners;
             mBaseDisplayInfo.installOrientation = deviceInfo.installOrientation;
             mBaseDisplayInfo.displayShape = deviceInfo.displayShape;
+
+            if (mPosition == Layout.Display.POSITION_REAR) {
+                mBaseDisplayInfo.flags |= Display.FLAG_REAR;
+            }
+
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
         }
@@ -814,6 +831,7 @@ final class LogicalDisplay {
         pw.println("mIsEnabled=" + mIsEnabled);
         pw.println("mIsInTransition=" + mIsInTransition);
         pw.println("mLayerStack=" + mLayerStack);
+        pw.println("mPosition=" + mPosition);
         pw.println("mHasContent=" + mHasContent);
         pw.println("mDesiredDisplayModeSpecs={" + mDesiredDisplayModeSpecs + "}");
         pw.println("mRequestedColorMode=" + mRequestedColorMode);

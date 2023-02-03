@@ -203,8 +203,7 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
         // For now, restrict to debug users.
         return Build.isDebuggable()
                 && mDreamSupported
-                // TODO(b/257333623): Allow the Dock User to be non-SystemUser user in HSUM.
-                && (!mDreamOnlyEnabledForDockUser || mUserTracker.getUserHandle().isSystem());
+                && (!mDreamOnlyEnabledForDockUser || mUserTracker.getUserInfo().isMain());
     }
 
     @VisibleForTesting
@@ -224,7 +223,8 @@ public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
 
     private ComponentName getActiveDream() {
         try {
-            final ComponentName[] dreams = mDreamManager.getDreamComponents();
+            final ComponentName[] dreams = mDreamManager.getDreamComponentsForUser(
+                                                mUserTracker.getUserId());
             return dreams != null && dreams.length > 0 ? dreams[0] : null;
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get active dream", e);

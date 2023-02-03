@@ -16,7 +16,7 @@
 
 package android.view;
 
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -89,7 +89,7 @@ public class WindowLayout {
         if (attachedWindowFrame == null) {
             outParentFrame.set(outDisplayFrame);
             if ((pfl & PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME) != 0) {
-                final InsetsSource source = state.peekSource(ITYPE_IME);
+                final InsetsSource source = state.peekSource(ID_IME);
                 if (source != null) {
                     outParentFrame.inset(source.calculateInsets(
                             outParentFrame, false /* ignoreVisibility */));

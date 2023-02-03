@@ -19,7 +19,6 @@ import android.app.backup.BlobBackupHelper;
 import android.content.Context;
 import android.content.pm.IShortcutService;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.util.Slog;
 
 public class ShortcutBackupHelper extends BlobBackupHelper {
@@ -28,8 +27,11 @@ public class ShortcutBackupHelper extends BlobBackupHelper {
 
     private static final String KEY_USER_FILE = "shortcutuser.xml";
 
-    public ShortcutBackupHelper() {
+    private final int mUserId;
+
+    public ShortcutBackupHelper(int userId) {
         super(BLOB_VERSION, KEY_USER_FILE);
+        mUserId = userId;
     }
 
     private IShortcutService getShortcutService() {
@@ -42,7 +44,7 @@ public class ShortcutBackupHelper extends BlobBackupHelper {
         switch (key) {
             case KEY_USER_FILE:
                 try {
-                    return getShortcutService().getBackupPayload(UserHandle.USER_SYSTEM);
+                    return getShortcutService().getBackupPayload(mUserId);
                 } catch (Exception e) {
                     Slog.wtf(TAG, "Backup failed", e);
                 }
@@ -58,7 +60,7 @@ public class ShortcutBackupHelper extends BlobBackupHelper {
         switch (key) {
             case KEY_USER_FILE:
                 try {
-                    getShortcutService().applyRestore(payload, UserHandle.USER_SYSTEM);
+                    getShortcutService().applyRestore(payload, mUserId);
                 } catch (Exception e) {
                     Slog.wtf(TAG, "Restore failed", e);
                 }

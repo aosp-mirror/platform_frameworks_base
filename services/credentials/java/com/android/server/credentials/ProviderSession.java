@@ -208,4 +208,8 @@ public abstract class ProviderSession<T, R>
     /** Should be overridden to handle the selected entry from the UI. */
     protected abstract void onUiEntrySelected(String entryType, String entryId,
             ProviderPendingIntentResponse providerPendingIntentResponse);
+
+    /** Should be overridden to invoke the provider at a defined location. Helpful for
+     * situations such as metric generation. */
+    protected abstract void invokeSession();
 }

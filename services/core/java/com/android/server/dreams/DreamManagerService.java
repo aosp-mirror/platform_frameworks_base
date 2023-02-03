@@ -72,6 +72,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.input.InputManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityInterceptorCallback;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -639,8 +640,10 @@ public final class DreamManagerService extends SystemService {
     }
 
     private boolean dreamsEnabledForUser(int userId) {
-        // TODO(b/257333623): Support non-system Dock Users in HSUM.
-        return !mDreamsOnlyEnabledForDockUser || (userId == UserHandle.USER_SYSTEM);
+        if (!mDreamsOnlyEnabledForDockUser) return true;
+        if (userId < 0) return false;
+        final int mainUserId = LocalServices.getService(UserManagerInternal.class).getMainUserId();
+        return userId == mainUserId;
     }
 
     private ServiceInfo getServiceInfo(ComponentName name) {

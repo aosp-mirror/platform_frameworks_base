@@ -159,6 +159,12 @@
             android:enabled="false"
             tools:replace="android:authorities"
             android:grantUriPermissions="true" />
+
+        <activity
+            android:name="com.android.systemui.screenshot.appclips.AppClipsTrampolineActivityTest$AppClipsTrampolineActivityTestable"
+            android:exported="false"
+            android:permission="com.android.systemui.permission.SELF"
+            android:excludeFromRecents="true" />
     </application>
 
     <instrumentation android:name="android.testing.TestableInstrumentation"

@@ -1897,7 +1897,11 @@ public class JobInfo implements Parcelable {
          * <p>
          * All user-initiated jobs must have an associated notification, set via
          * {@link JobService#setNotification(JobParameters, int, Notification, int)}, and will be
-         * shown in the Task Manager when running.
+         * shown in the Task Manager when running. These jobs cannot be rescheduled by the app
+         * if the user stops the job via system provided affordance (such as the Task Manager).
+         * Thus, it is best practice and recommended to provide action buttons in the
+         * associated notification to allow the user to stop the job gracefully
+         * and allow for rescheduling.
          *
          * <p>
          * If the app doesn't hold the {@link android.Manifest.permission#RUN_LONG_JOBS} permission

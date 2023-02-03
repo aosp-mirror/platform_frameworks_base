@@ -126,7 +126,7 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
 
     @Override
     public void insetsChanged(InsetsState insetsState) {
-        mTaskbarInsetsSource = insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        mTaskbarInsetsSource = insetsState.peekSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
         updateContexts();
     }
 

@@ -29,8 +29,8 @@ import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.CredentialDescription;
+import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
-import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialRequest;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
@@ -49,8 +49,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
-import android.service.credentials.BeginCreateCredentialRequest;
-import android.service.credentials.BeginGetCredentialRequest;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfo;
 import android.text.TextUtils;
@@ -270,10 +268,10 @@ public final class CredentialManagerService
 
         // All requested credential descriptions based on the given request.
         Set<String> requestedCredentialDescriptions =
-                request.getGetCredentialOptions().stream().map(
-                        getCredentialOption -> getCredentialOption
+                request.getCredentialOptions().stream().map(
+                        credentialOption -> credentialOption
                                         .getCredentialRetrievalData()
-                                        .getString(GetCredentialOption
+                                        .getString(CredentialOption
                                                 .FLATTENED_REQUEST))
                         .collect(Collectors.toSet());
 
@@ -344,11 +342,11 @@ public final class CredentialManagerService
 
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
-                        initiateProviderSessions(
-                                session,
-                                request.getGetCredentialOptions().stream()
-                                        .map(GetCredentialOption::getType)
-                                        .collect(Collectors.toList()));
+                    initiateProviderSessions(
+                            session,
+                            request.getCredentialOptions().stream()
+                                    .map(CredentialOption::getType)
+                                    .collect(Collectors.toList()));
 
             if (providerSessions.isEmpty()) {
                 try {
@@ -364,11 +362,7 @@ public final class CredentialManagerService
             }
 
             // Iterate over all provider sessions and invoke the request
-            providerSessions.forEach(
-                    providerGetSession -> providerGetSession
-                    .getRemoteCredentialService().onBeginGetCredential(
-                    (BeginGetCredentialRequest) providerGetSession.getProviderRequest(),
-                    /*callback=*/providerGetSession));
+            providerSessions.forEach(ProviderSession::invokeSession);
             return cancelTransport;
         }
 
@@ -412,12 +406,7 @@ public final class CredentialManagerService
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(
-                    providerCreateSession -> providerCreateSession
-                            .getRemoteCredentialService()
-                            .onCreateCredential(
-                                    (BeginCreateCredentialRequest)
-                                            providerCreateSession.getProviderRequest(),
-                                    /* callback= */ providerCreateSession));
+                    ProviderSession::invokeSession);
             return cancelTransport;
         }
 
@@ -530,14 +519,7 @@ public final class CredentialManagerService
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(
-                    providerClearSession -> {
-                        providerClearSession
-                                .getRemoteCredentialService()
-                                .onClearCredentialState(
-                                        (android.service.credentials.ClearCredentialStateRequest)
-                                                providerClearSession.getProviderRequest(),
-                                        /* callback= */ providerClearSession);
-                    });
+                    ProviderSession::invokeSession);
             return cancelTransport;
         }
 

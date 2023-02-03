@@ -37,5 +37,11 @@ oneway interface ISearchUiService {
 
     void onNotifyEvent(in SearchSessionId sessionId, in Query input, in SearchTargetEvent event);
 
+    void onRegisterEmptyQueryResultUpdateCallback (in SearchSessionId sessionId, in ISearchCallback callback);
+
+    void onRequestEmptyQueryResultUpdate(in SearchSessionId sessionId);
+
+    void onUnregisterEmptyQueryResultUpdateCallback(in SearchSessionId sessionId, in ISearchCallback callback);
+
     void onDestroy(in SearchSessionId sessionId);
 }

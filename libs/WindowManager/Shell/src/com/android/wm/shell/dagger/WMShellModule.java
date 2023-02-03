@@ -21,6 +21,7 @@ import android.content.pm.LauncherApps;
 import android.os.Handler;
 import android.os.UserManager;
 import android.view.Choreographer;
+import android.view.IWindowManager;
 import android.view.WindowManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -170,14 +171,15 @@ public abstract class WMShellModule {
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
-            SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue,
+            IWindowManager wmService) {
         return new BubbleController(context, shellInit, shellCommandHandler, shellController, data,
                 null /* synchronizer */, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, userManager,
                 launcherApps, logger, taskStackListener, organizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, mainExecutor, mainHandler, bgExecutor,
-                taskViewTransitions, syncQueue);
+                taskViewTransitions, syncQueue, wmService);
     }
 
     //

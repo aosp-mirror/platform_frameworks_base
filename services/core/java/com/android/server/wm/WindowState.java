@@ -225,7 +225,6 @@ import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.Surface;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
@@ -1531,6 +1530,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 winAnimator.mDrawState = DRAW_PENDING;
                 if (mActivityRecord != null) {
                     mActivityRecord.clearAllDrawn();
+                    if (mAttrs.type == TYPE_APPLICATION_STARTING
+                            && mActivityRecord.mStartingData != null) {
+                        mActivityRecord.mStartingData.mIsDisplayed = false;
+                    }
                 }
             }
             if (!mWmService.mResizingWindows.contains(this)) {
@@ -1696,14 +1699,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Returns the insets state for the window and applies the requested visibility.
      */
     InsetsState getInsetsStateWithVisibilityOverride() {
-        final InsetsState state = new InsetsState(getInsetsState());
-        for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
-            final boolean requestedVisible = isRequestedVisible(InsetsState.toPublicType(type));
-            InsetsSource source = state.peekSource(type);
-            if (source != null && source.isVisible() != requestedVisible) {
-                source = new InsetsSource(source);
+        final InsetsState state = new InsetsState(getInsetsState(), true /* copySources */);
+        for (int i = state.sourceSize() - 1; i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            final boolean requestedVisible = isRequestedVisible(source.getType());
+            if (source.isVisible() != requestedVisible) {
                 source.setVisible(requestedVisible);
-                state.addSource(source);
             }
         }
         return state;
@@ -1882,8 +1883,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         for (int i = mProvidedInsetsSources.size() - 1; i >= 0; i--) {
-            final int type = mProvidedInsetsSources.keyAt(i);
-            if ((InsetsState.toPublicType(type) & WindowInsets.Type.navigationBars()) != 0) {
+            final InsetsSource source = mProvidedInsetsSources.valueAt(i);
+            if (source.getType() == WindowInsets.Type.navigationBars()) {
                 return true;
             }
         }
