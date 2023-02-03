@@ -717,7 +717,7 @@ public abstract class PackageManager {
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
             MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS,
-            GET_ATTRIBUTIONS,
+            GET_ATTRIBUTIONS_LONG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PackageInfoFlagsBits {}
@@ -1127,8 +1127,9 @@ public abstract class PackageManager {
     public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
     /**
-     * {@link PackageInfo} flag: return all attributions declared in the package manifest
+     * @deprecated Use {@link #GET_ATTRIBUTIONS_LONG} to avoid unintended sign extension.
      */
+    @Deprecated
     public static final int GET_ATTRIBUTIONS = 0x80000000;
 
     /** @hide */
@@ -1151,6 +1152,11 @@ public abstract class PackageManager {
      * for activation at next reboot.
      */
     public static final int MATCH_APEX = 0x40000000;
+
+    /**
+     * {@link PackageInfo} flag: return all attributions declared in the package manifest
+     */
+    public static final long GET_ATTRIBUTIONS_LONG = 0x80000000L;
 
     /**
      * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set: when

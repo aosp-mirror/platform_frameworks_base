@@ -212,7 +212,7 @@ public class PackageInfoUtils {
                 }
             }
         }
-        if ((flags & PackageManager.GET_ATTRIBUTIONS) != 0) {
+        if ((flags & PackageManager.GET_ATTRIBUTIONS_LONG) != 0) {
             int size = ArrayUtils.size(pkg.getAttributions());
             if (size > 0) {
                 info.attributions = new Attribution[size];
