@@ -50,7 +50,6 @@ import com.android.credentialmanager.common.ui.TextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ContainerCard
 import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
-import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
