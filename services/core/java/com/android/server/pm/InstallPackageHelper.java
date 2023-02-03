@@ -2425,10 +2425,10 @@ final class InstallPackageHelper {
             // will be null whereas dataOwnerPkg will contain information about the package
             // which was uninstalled while keeping its data.
             AndroidPackage dataOwnerPkg = mPm.mPackages.get(packageName);
+            PackageSetting dataOwnerPs = mPm.mSettings.getPackageLPr(packageName);
             if (dataOwnerPkg  == null) {
-                PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
-                if (ps != null) {
-                    dataOwnerPkg = ps.getPkg();
+                if (dataOwnerPs != null) {
+                    dataOwnerPkg = dataOwnerPs.getPkg();
                 }
             }
 
@@ -2456,10 +2456,29 @@ final class InstallPackageHelper {
             if (dataOwnerPkg != null && !dataOwnerPkg.isSdkLibrary()) {
                 if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags,
                         dataOwnerPkg.isDebuggable())) {
+                    // Downgrade is not permitted; a lower version of the app will not be allowed
                     try {
                         PackageManagerServiceUtils.checkDowngrade(dataOwnerPkg, pkgLite);
                     } catch (PackageManagerException e) {
                         String errorMsg = "Downgrade detected: " + e.getMessage();
+                        Slog.w(TAG, errorMsg);
+                        return Pair.create(
+                                PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE, errorMsg);
+                    }
+                } else if (dataOwnerPs.isSystem()) {
+                    // Downgrade is permitted, but system apps can't be downgraded below
+                    // the version preloaded onto the system image
+                    final PackageSetting disabledPs = mPm.mSettings.getDisabledSystemPkgLPr(
+                            dataOwnerPs);
+                    if (disabledPs != null) {
+                        dataOwnerPkg = disabledPs.getPkg();
+                    }
+                    try {
+                        PackageManagerServiceUtils.checkDowngrade(dataOwnerPkg, pkgLite);
+                    } catch (PackageManagerException e) {
+                        String errorMsg = "System app: " + packageName + " cannot be downgraded to"
+                                + " older than its preloaded version on the system image. "
+                                + e.getMessage();
                         Slog.w(TAG, errorMsg);
                         return Pair.create(
                                 PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE, errorMsg);
