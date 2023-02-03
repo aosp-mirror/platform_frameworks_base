@@ -30,6 +30,7 @@ import android.view.DisplayInfo;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.function.Consumer;
+
 /**
  * Internal class used to store all the display data relevant to the wallpapers
  */
