@@ -14894,7 +14894,10 @@ public class TelephonyManager {
 
     /**
      * The extra used with an {@link #ACTION_NETWORK_COUNTRY_CHANGED} to specify the
-     * the country code in ISO-3166-1 alpha-2 format.
+     * the country code in ISO-3166-1 alpha-2 format. This is the same country code returned by
+     * {@link #getNetworkCountryIso()}. This might be an empty string when the country code is not
+     * available.
+     *
      * <p class="note">
      * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
      */
@@ -14903,11 +14906,11 @@ public class TelephonyManager {
 
     /**
      * The extra used with an {@link #ACTION_NETWORK_COUNTRY_CHANGED} to specify the
-     * last known the country code in ISO-3166-1 alpha-2 format.
+     * last known the country code in ISO-3166-1 alpha-2 format. This might be an empty string when
+     * the country code was never available. The last known country code persists across reboot.
+     *
      * <p class="note">
      * Retrieve with {@link android.content.Intent#getStringExtra(String)}.
-     *
-     * @hide
      */
     public static final String EXTRA_LAST_KNOWN_NETWORK_COUNTRY =
             "android.telephony.extra.LAST_KNOWN_NETWORK_COUNTRY";
