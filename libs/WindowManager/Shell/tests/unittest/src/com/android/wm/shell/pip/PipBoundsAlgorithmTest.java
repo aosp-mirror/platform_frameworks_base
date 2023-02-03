@@ -300,9 +300,9 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
                 (MAX_ASPECT_RATIO + DEFAULT_ASPECT_RATIO) / 2
         };
         final Size[] minimalSizes = new Size[] {
-                new Size((int) (100 * aspectRatios[0]), 100),
-                new Size((int) (100 * aspectRatios[1]), 100),
-                new Size((int) (100 * aspectRatios[2]), 100)
+                new Size((int) (200 * aspectRatios[0]), 200),
+                new Size((int) (200 * aspectRatios[1]), 200),
+                new Size((int) (200 * aspectRatios[2]), 200)
         };
         for (int i = 0; i < aspectRatios.length; i++) {
             final float aspectRatio = aspectRatios[i];
