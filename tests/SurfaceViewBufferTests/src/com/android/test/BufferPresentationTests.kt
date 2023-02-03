@@ -15,7 +15,7 @@
  */
 package com.android.test
 
-import com.android.server.wm.flicker.traces.layers.LayersTraceSubject.Companion.assertThat
+import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.Test
@@ -37,7 +37,7 @@ class BufferPresentationTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase
                     1000 /* ms */))
         }
 
-        assertThat(trace).hasFrameSequence("SurfaceView", 1..numFrames)
+        LayersTraceSubject(trace).hasFrameSequence("SurfaceView", 1..numFrames)
     }
 
     @Test
@@ -51,7 +51,7 @@ class BufferPresentationTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase
             assertEquals(0, activity.mSurfaceProxy.waitUntilBufferDisplayed(2, 5000 /* ms */))
         }
 
-        assertThat(trace).hasFrameSequence("SurfaceView", 1..2L)
+        LayersTraceSubject(trace).hasFrameSequence("SurfaceView", 1..2L)
     }
 
     @Test
@@ -69,7 +69,7 @@ class BufferPresentationTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase
                     5000 /* ms */))
         }
 
-        assertThat(trace).hasFrameSequence("SurfaceView", 1..numFrames)
+        LayersTraceSubject(trace).hasFrameSequence("SurfaceView", 1..numFrames)
     }
 
     @Test
@@ -92,7 +92,7 @@ class BufferPresentationTests(useBlastAdapter: Boolean) : SurfaceTracingTestBase
                     5000 /* ms */))
         }
 
-        assertThat(trace).hasFrameSequence("SurfaceView", 1..numFrames)
+        LayersTraceSubject(trace).hasFrameSequence("SurfaceView", 1..numFrames)
     }
 
     @Test
