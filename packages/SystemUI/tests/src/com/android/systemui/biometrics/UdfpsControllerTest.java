@@ -71,6 +71,8 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.settingslib.udfps.UdfpsOverlayParams;
+import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -230,10 +232,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ScreenLifecycle.Observer mScreenObserver;
     private FingerprintSensorPropertiesInternal mOpticalProps;
     private FingerprintSensorPropertiesInternal mUltrasonicProps;
+    private UdfpsUtils mUdfpsUtils;
 
     @Before
     public void setUp() {
         Execution execution = new FakeExecution();
+        mUdfpsUtils = new UdfpsUtils();
 
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false))
                 .thenReturn(mUdfpsView);
@@ -305,7 +309,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController, mSystemUIDialogManager, mLatencyTracker,
                 mActivityLaunchAnimator, alternateTouchProvider, mBiometricExecutor,
                 mPrimaryBouncerInteractor, mSinglePointerTouchProcessor, mSessionTracker,
-                mAlternateBouncerInteractor, mSecureSettings);
+                mAlternateBouncerInteractor, mSecureSettings, mUdfpsUtils);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());

@@ -20,6 +20,7 @@ import android.annotation.SuppressLint
 import android.annotation.UiThread
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.Point
 import android.graphics.Rect
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_BP
 import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_KEYGUARD
@@ -46,6 +47,8 @@ import android.view.accessibility.AccessibilityManager.TouchExplorationStateChan
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.settingslib.udfps.UdfpsUtils
+import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.dump.DumpManager
@@ -101,6 +104,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         private val primaryBouncerInteractor: PrimaryBouncerInteractor,
         private val alternateBouncerInteractor: AlternateBouncerInteractor,
         private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
+        private val udfpsUtils: UdfpsUtils
 ) {
     /** The view, when [isShowing], or null. */
     var overlayView: UdfpsView? = null
@@ -239,7 +243,9 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                                 FeatureFlagUtils.SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS)) {
                     // Enroll udfps UI is handled by settings, so use empty view here
                     UdfpsFpmEmptyViewController(
-                            view.addUdfpsView(R.layout.udfps_fpm_empty_view),
+                            view.addUdfpsView(R.layout.udfps_fpm_empty_view){
+                                updateAccessibilityViewLocation(sensorBounds)
+                            },
                             statusBarStateController,
                             shadeExpansionStateManager,
                             dialogManager,
@@ -348,81 +354,18 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
      * the angle to a list of help messages which are announced if accessibility is enabled.
      *
      */
-    fun onTouchOutsideOfSensorArea(
-        touchX: Float,
-        touchY: Float,
-        sensorX: Float,
-        sensorY: Float,
-        rotation: Int
-    ) {
-
-        if (!touchExplorationEnabled) {
-            return
+    fun onTouchOutsideOfSensorArea(scaledTouch: Point) {
+        val theStr =
+            udfpsUtils.onTouchOutsideOfSensorArea(
+                touchExplorationEnabled,
+                context,
+                scaledTouch.x,
+                scaledTouch.y,
+                overlayParams
+            )
+        if (theStr != null) {
+            animationViewController?.doAnnounceForAccessibility(theStr)
         }
-        val touchHints =
-            context.resources.getStringArray(R.array.udfps_accessibility_touch_hints)
-        if (touchHints.size != 4) {
-            Log.e(TAG, "expected exactly 4 touch hints, got $touchHints.size?")
-            return
-        }
-        val theStr = onTouchOutsideOfSensorAreaImpl(touchX, touchY, sensorX, sensorY, rotation)
-        Log.v(TAG, "Announcing touch outside : " + theStr)
-        animationViewController?.doAnnounceForAccessibility(theStr)
-    }
-
-    /**
-     * This function computes the angle of touch relative to the sensor and maps
-     * the angle to a list of help messages which are announced if accessibility is enabled.
-     *
-     * There are 4 quadrants of the circle (90 degree arcs)
-     *
-     * [315, 360] && [0, 45) -> touchHints[0] = "Move Fingerprint to the left"
-     * [45,  135)            -> touchHints[1] = "Move Fingerprint down"
-     * And so on.
-     */
-    fun onTouchOutsideOfSensorAreaImpl(
-        touchX: Float,
-        touchY: Float,
-        sensorX: Float,
-        sensorY: Float,
-        rotation: Int
-    ): String {
-        val touchHints =
-            context.resources.getStringArray(R.array.udfps_accessibility_touch_hints)
-
-        val xRelativeToSensor = touchX - sensorX
-        // Touch coordinates are with respect to the upper left corner, so reverse
-        // this calculation
-        val yRelativeToSensor = sensorY - touchY
-
-        var angleInRad =
-            Math.atan2(yRelativeToSensor.toDouble(), xRelativeToSensor.toDouble())
-        // If the radians are negative, that means we are counting clockwise.
-        // So we need to add 360 degrees
-        if (angleInRad < 0.0) {
-            angleInRad += 2.0 * Math.PI
-        }
-        // rad to deg conversion
-        val degrees = Math.toDegrees(angleInRad)
-
-        val degreesPerBucket = 360.0 / touchHints.size
-        val halfBucketDegrees = degreesPerBucket / 2.0
-        // The mapping should be as follows
-        // [315, 360] && [0, 45] -> 0
-        // [45, 135]             -> 1
-        var index = (((degrees + halfBucketDegrees) % 360) / degreesPerBucket).toInt()
-        index %= touchHints.size
-
-        // A rotation of 90 degrees corresponds to increasing the index by 1.
-        if (rotation == Surface.ROTATION_90) {
-            index = (index + 1) % touchHints.size
-        }
-
-        if (rotation == Surface.ROTATION_270) {
-            index = (index + 3) % touchHints.size
-        }
-
-        return touchHints[index]
     }
 
     /** Cancel this request. */

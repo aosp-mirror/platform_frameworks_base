@@ -1,4 +1,4 @@
-package com.android.systemui.biometrics
+package com.android.settingslib.udfps
 
 import android.graphics.Rect
 import android.view.Surface

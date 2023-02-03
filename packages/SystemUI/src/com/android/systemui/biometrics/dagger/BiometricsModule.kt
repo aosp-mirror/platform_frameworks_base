@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics.dagger
 
+import com.android.settingslib.udfps.UdfpsUtils
 import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.data.repository.PromptRepositoryImpl
 import com.android.systemui.biometrics.domain.interactor.CredentialInteractor
@@ -54,6 +55,9 @@ interface BiometricsModule {
         @BiometricsBackground
         fun providesPluginExecutor(threadFactory: ThreadFactory): Executor =
             threadFactory.buildExecutorOnNewThread("biometrics")
+
+        @Provides
+        fun providesUdfpsUtils(): UdfpsUtils = UdfpsUtils()
     }
 }
 

@@ -85,6 +85,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
@@ -167,6 +168,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private BiometricPromptCredentialInteractor mBiometricPromptCredentialInteractor;
     @Mock
     private CredentialViewModel mCredentialViewModel;
+    @Mock
+    private UdfpsUtils mUdfpsUtils;
 
     @Captor
     private ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mFpAuthenticatorsRegisteredCaptor;
@@ -958,7 +961,7 @@ public class AuthControllerTest extends SysuiTestCase {
                     mPanelInteractionDetector, mUserManager, mLockPatternUtils, mUdfpsLogger,
                     mLogContextInteractor, () -> mBiometricPromptCredentialInteractor,
                     () -> mCredentialViewModel, mInteractionJankMonitor, mHandler,
-                    mBackgroundExecutor, mVibratorHelper);
+                    mBackgroundExecutor, mVibratorHelper, mUdfpsUtils);
         }
 
         @Override
