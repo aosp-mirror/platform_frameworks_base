@@ -177,6 +177,64 @@ public class SplitPresenterTest {
     }
 
     @Test
+    public void testSetAdjacentTaskFragments() {
+        final TaskFragmentContainer container0 = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container1 = mController.newContainer(mActivity, TASK_ID);
+
+        mPresenter.setAdjacentTaskFragments(mTransaction, container0.getTaskFragmentToken(),
+                container1.getTaskFragmentToken(), null /* adjacentParams */);
+        verify(mTransaction).setAdjacentTaskFragments(container0.getTaskFragmentToken(),
+                container1.getTaskFragmentToken(), null /* adjacentParams */);
+
+        // No request to set the same adjacent TaskFragments.
+        clearInvocations(mTransaction);
+        mPresenter.setAdjacentTaskFragments(mTransaction, container0.getTaskFragmentToken(),
+                container1.getTaskFragmentToken(), null /* adjacentParams */);
+
+        verify(mTransaction, never()).setAdjacentTaskFragments(any(), any(), any());
+    }
+
+    @Test
+    public void testClearAdjacentTaskFragments() {
+        final TaskFragmentContainer container0 = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container1 = mController.newContainer(mActivity, TASK_ID);
+
+        // No request to clear as it is not set by default.
+        mPresenter.clearAdjacentTaskFragments(mTransaction, container0.getTaskFragmentToken());
+        verify(mTransaction, never()).clearAdjacentTaskFragments(any());
+
+        mPresenter.setAdjacentTaskFragments(mTransaction, container0.getTaskFragmentToken(),
+                container1.getTaskFragmentToken(), null /* adjacentParams */);
+        mPresenter.clearAdjacentTaskFragments(mTransaction, container0.getTaskFragmentToken());
+        verify(mTransaction).clearAdjacentTaskFragments(container0.getTaskFragmentToken());
+
+        // No request to clear on either of the previous cleared TasKFragments.
+        clearInvocations(mTransaction);
+        mPresenter.clearAdjacentTaskFragments(mTransaction, container0.getTaskFragmentToken());
+        mPresenter.clearAdjacentTaskFragments(mTransaction, container1.getTaskFragmentToken());
+
+        verify(mTransaction, never()).clearAdjacentTaskFragments(any());
+    }
+
+    @Test
+    public void testSetCompanionTaskFragment() {
+        final TaskFragmentContainer container0 = mController.newContainer(mActivity, TASK_ID);
+        final TaskFragmentContainer container1 = mController.newContainer(mActivity, TASK_ID);
+
+        mPresenter.setCompanionTaskFragment(mTransaction, container0.getTaskFragmentToken(),
+                container1.getTaskFragmentToken());
+        verify(mTransaction).setCompanionTaskFragment(container0.getTaskFragmentToken(),
+                container1.getTaskFragmentToken());
+
+        // No request to set the same adjacent TaskFragments.
+        clearInvocations(mTransaction);
+        mPresenter.setCompanionTaskFragment(mTransaction, container0.getTaskFragmentToken(),
+                container1.getTaskFragmentToken());
+
+        verify(mTransaction, never()).setCompanionTaskFragment(any(), any());
+    }
+
+    @Test
     public void testUpdateAnimationParams() {
         final TaskFragmentContainer container = mController.newContainer(mActivity, TASK_ID);
 
