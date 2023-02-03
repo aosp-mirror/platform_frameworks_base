@@ -617,7 +617,11 @@ object Flags {
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
 
-    // 2600 - keyboard shortcut
+    // 2600 - keyboard
     // TODO(b/259352579): Tracking Bug
     @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+
+    // TODO(b/259428678): Tracking Bug
+    @JvmField
+    val KEYBOARD_BACKLIGHT_INDICATOR = unreleasedFlag(2601, "keyboard_backlight_indicator")
 }
