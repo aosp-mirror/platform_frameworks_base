@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.DisplayAddress;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -114,6 +115,7 @@ class DeviceStateToLayoutMap {
                 Slog.i(TAG, "Display layout config not found: " + configFile);
                 return;
             }
+            int leadDisplayId = Display.DEFAULT_DISPLAY;
             for (com.android.server.display.config.layout.Layout l : layouts.getLayout()) {
                 final int state = l.getState().intValue();
                 final Layout layout = createLayout(state);
@@ -124,7 +126,8 @@ class DeviceStateToLayoutMap {
                             d.isDefaultDisplay(),
                             d.isEnabled(),
                             mIdProducer,
-                            d.getBrightnessThrottlingMapId());
+                            d.getBrightnessThrottlingMapId(),
+                            leadDisplayId);
 
                     if (FRONT_STRING.equals(d.getPosition())) {
                         display.setPosition(POSITION_FRONT);
