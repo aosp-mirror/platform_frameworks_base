@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
 
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -230,6 +231,26 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      */
     public boolean isOnBackInvokedCallbackEnabled() {
         return Checker.isOnBackInvokedCallbackEnabled(mChecker.getContext());
+    }
+
+    /**
+     * Dump information about this WindowOnBackInvokedDispatcher
+     * @param prefix the prefix that will be prepended to each line of the produced output
+     * @param writer the writer that will receive the resulting text
+     */
+    public void dump(String prefix, PrintWriter writer) {
+        String innerPrefix = prefix + "    ";
+        writer.println(prefix + "WindowOnBackDispatcher:");
+        if (mAllCallbacks.isEmpty()) {
+            writer.println(prefix + "<None>");
+            return;
+        }
+
+        writer.println(innerPrefix + "Top Callback: " + getTopCallback());
+        writer.println(innerPrefix + "Callbacks: ");
+        mAllCallbacks.forEach((callback, priority) -> {
+            writer.println(innerPrefix + "  Callback: " + callback + " Priority=" + priority);
+        });
     }
 
     static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
