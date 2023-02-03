@@ -4757,6 +4757,7 @@ package android.app {
     method public int getLaunchDisplayId();
     method public boolean getLockTaskMode();
     method public int getPendingIntentBackgroundActivityStartMode();
+    method public int getPendingIntentCreatorBackgroundActivityStartMode();
     method public int getSplashScreenStyle();
     method @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed();
     method public boolean isShareIdentityEnabled();
@@ -4777,6 +4778,7 @@ package android.app {
     method public android.app.ActivityOptions setLockTaskEnabled(boolean);
     method @Deprecated public void setPendingIntentBackgroundActivityLaunchAllowed(boolean);
     method @NonNull public android.app.ActivityOptions setPendingIntentBackgroundActivityStartMode(int);
+    method @NonNull public android.app.ActivityOptions setPendingIntentCreatorBackgroundActivityStartMode(int);
     method @NonNull public android.app.ActivityOptions setShareIdentityEnabled(boolean);
     method @NonNull public android.app.ActivityOptions setSplashScreenStyle(int);
     method public android.os.Bundle toBundle();
