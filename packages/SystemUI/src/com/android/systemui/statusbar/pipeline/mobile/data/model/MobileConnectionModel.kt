@@ -94,7 +94,7 @@ data class MobileConnectionModel(
 ) : Diffable<MobileConnectionModel> {
     override fun logDiffs(prevVal: MobileConnectionModel, row: TableRowLogger) {
         if (prevVal.dataConnectionState != dataConnectionState) {
-            row.logChange(COL_CONNECTION_STATE, dataConnectionState.toString())
+            row.logChange(COL_CONNECTION_STATE, dataConnectionState.name)
         }
 
         if (prevVal.isEmergencyOnly != isEmergencyOnly) {
@@ -139,7 +139,7 @@ data class MobileConnectionModel(
     }
 
     override fun logFull(row: TableRowLogger) {
-        row.logChange(COL_CONNECTION_STATE, dataConnectionState.toString())
+        row.logChange(COL_CONNECTION_STATE, dataConnectionState.name)
         row.logChange(COL_EMERGENCY, isEmergencyOnly)
         row.logChange(COL_ROAMING, isRoaming)
         row.logChange(COL_OPERATOR, operatorAlphaShort)
