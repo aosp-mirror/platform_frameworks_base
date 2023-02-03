@@ -782,6 +782,7 @@ class UidPermissionPolicy : SchemePolicy() {
                     }
                 }
             } else {
+                val wasGrantedByLegacy = newFlags.hasBits(PermissionFlags.LEGACY_GRANTED)
                 newFlags = newFlags andInv PermissionFlags.LEGACY_GRANTED
                 val wasGrantedByImplicit = newFlags.hasBits(PermissionFlags.IMPLICIT_GRANTED)
                 val isLeanbackNotificationsPermission = newState.systemState.isLeanback &&
@@ -805,10 +806,16 @@ class UidPermissionPolicy : SchemePolicy() {
                 } else {
                     newFlags = newFlags andInv PermissionFlags.IMPLICIT_GRANTED
                 }
+                if ((wasGrantedByLegacy || wasGrantedByImplicit) && !shouldGrantByImplicit) {
+                    // The permission was granted from a compatibility grant or an implicit grant,
+                    // however this flag might still be set if the user denied this permission in
+                    // the settings. Hence upon app upgrade and when this permission is no longer
+                    // LEGACY_GRANTED or IMPLICIT_GRANTED and we revoke the permission, we want to
+                    // remove this flag so that the app can request the permission again.
+                    newFlags = newFlags andInv PermissionFlags.APP_OP_REVOKED
+                }
                 val hasImplicitFlag = newFlags.hasBits(PermissionFlags.IMPLICIT)
                 if (!isImplicitPermission && hasImplicitFlag) {
-                    // TODO: We might not want to remove the IMPLICIT flag
-                    // for NOTIFICATION_PERMISSIONS
                     newFlags = newFlags andInv PermissionFlags.IMPLICIT
                     var shouldRetainAsNearbyDevices = false
                     if (permissionName in NEARBY_DEVICES_PERMISSIONS) {
@@ -994,11 +1001,9 @@ class UidPermissionPolicy : SchemePolicy() {
         permissionName: String
     ): Boolean? {
         val permissionAllowlist = newState.systemState.permissionAllowlist
-        // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName.
-        // val apexModuleName = androidPackage.apexModuleName
         val apexModuleName = permissionAllowlist.apexPrivilegedAppAllowlists
             .firstNotNullOfOrNullIndexed { _, apexModuleName, apexAllowlist ->
-                if (packageState.packageName in apexAllowlist) apexModuleName else null
+                if (packageState.apexModuleName in apexAllowlist) apexModuleName else null
             }
         val packageName = packageState.packageName
         return when {
@@ -1190,9 +1195,7 @@ class UidPermissionPolicy : SchemePolicy() {
             // Special permission for the recents app.
             return true
         }
-        // TODO(b/261913353): STOPSHIP: Add AndroidPackage.apexModuleName.
-        // This should be androidPackage.apexModuleName instead
-        if (permission.isModule && androidPackage.packageName != null) {
+        if (permission.isModule && packageState.apexModuleName != null) {
             // Special permission granted for APKs inside APEX modules.
             return true
         }
@@ -1397,11 +1400,11 @@ class UidPermissionPolicy : SchemePolicy() {
             Manifest.permission.READ_MEDIA_VIDEO,
         )
 
-        // TODO: also add the permission NEARBY_WIFI_DEVICES to this set
         private val NEARBY_DEVICES_PERMISSIONS = indexedSetOf(
             Manifest.permission.BLUETOOTH_ADVERTISE,
             Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.BLUETOOTH_SCAN
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.NEARBY_WIFI_DEVICES
         )
 
         private val NOTIFICATIONS_PERMISSIONS = indexedSetOf(
