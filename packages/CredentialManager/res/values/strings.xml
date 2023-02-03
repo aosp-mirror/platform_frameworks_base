@@ -13,10 +13,6 @@
   <string name="string_more_options">More options</string>
   <!-- This is a label for a button that links to additional information about passkeys. [CHAR LIMIT=20] -->
   <string name="string_learn_more">Learn more</string>
-  <!-- This is a label for content description for show password icon button. -->
-  <string name="content_description_show_password">Show password</string>
-  <!-- This is a label for content description for hide password icon button. -->
-  <string name="content_description_hide_password">Hide password</string>
   <!-- This string introduces passkeys to the users for the first time they use this method. Tip: to avoid gendered language patterns, this header could be translated as if the original string were "More safety with passkeys". [CHAR LIMIT=200] -->
   <string name="passkey_creation_intro_title">Safer with passkeys</string>
   <!-- This string highlight passkey benefits related with the password. [CHAR LIMIT=200] -->
