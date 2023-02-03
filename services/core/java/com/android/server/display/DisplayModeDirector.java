@@ -561,7 +561,7 @@ public class DisplayModeDirector {
 
     /**
      * Sets the display mode switching type.
-     * @param newType
+     * @param newType new mode switching type
      */
     public void setModeSwitchingType(@DisplayManager.SwitchingType int newType) {
         synchronized (mLock) {
@@ -676,6 +676,18 @@ public class DisplayModeDirector {
         }
 
         notifyDesiredDisplayModeSpecsChangedLocked();
+    }
+
+    @GuardedBy("mLock")
+    private float getMaxRefreshRateLocked(int displayId) {
+        Display.Mode[] modes = mSupportedModesByDisplay.get(displayId);
+        float maxRefreshRate = 0f;
+        for (Display.Mode mode : modes) {
+            if (mode.getRefreshRate() > maxRefreshRate) {
+                maxRefreshRate = mode.getRefreshRate();
+            }
+        }
+        return maxRefreshRate;
     }
 
     private void notifyDesiredDisplayModeSpecsChangedLocked() {
@@ -996,25 +1008,29 @@ public class DisplayModeDirector {
         // of low priority voters. It votes [0, max(PEAK, MIN)]
         public static final int PRIORITY_USER_SETTING_PEAK_REFRESH_RATE = 7;
 
+        // To avoid delay in switching between 60HZ -> 90HZ when activating LHBM, set refresh
+        // rate to max value (same as for PRIORITY_UDFPS) on lock screen
+        public static final int PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE = 8;
+
         // LOW_POWER_MODE force display to [0, 60HZ] if Settings.Global.LOW_POWER_MODE is on.
-        public static final int PRIORITY_LOW_POWER_MODE = 8;
+        public static final int PRIORITY_LOW_POWER_MODE = 9;
 
         // PRIORITY_FLICKER_REFRESH_RATE_SWITCH votes for disabling refresh rate switching. If the
         // higher priority voters' result is a range, it will fix the rate to a single choice.
         // It's used to avoid refresh rate switches in certain conditions which may result in the
         // user seeing the display flickering when the switches occur.
-        public static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 9;
+        public static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 10;
 
         // Force display to [0, 60HZ] if skin temperature is at or above CRITICAL.
-        public static final int PRIORITY_SKIN_TEMPERATURE = 10;
+        public static final int PRIORITY_SKIN_TEMPERATURE = 11;
 
         // The proximity sensor needs the refresh rate to be locked in order to function, so this is
         // set to a high priority.
-        public static final int PRIORITY_PROXIMITY = 11;
+        public static final int PRIORITY_PROXIMITY = 12;
 
         // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
         // to function, so this needs to be the highest priority of all votes.
-        public static final int PRIORITY_UDFPS = 12;
+        public static final int PRIORITY_UDFPS = 13;
 
         // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
         // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
@@ -1117,6 +1133,8 @@ public class DisplayModeDirector {
                     return "PRIORITY_USER_SETTING_MIN_REFRESH_RATE";
                 case PRIORITY_USER_SETTING_PEAK_REFRESH_RATE:
                     return "PRIORITY_USER_SETTING_PEAK_REFRESH_RATE";
+                case PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE:
+                    return "PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE";
                 default:
                     return Integer.toString(priority);
             }
@@ -2329,6 +2347,7 @@ public class DisplayModeDirector {
 
     private class UdfpsObserver extends IUdfpsHbmListener.Stub {
         private final SparseBooleanArray mLocalHbmEnabled = new SparseBooleanArray();
+        private final SparseBooleanArray mAuthenticationPossible = new SparseBooleanArray();
 
         public void observe() {
             StatusBarManagerInternal statusBar =
@@ -2354,25 +2373,28 @@ public class DisplayModeDirector {
 
         private void updateHbmStateLocked(int displayId, boolean enabled) {
             mLocalHbmEnabled.put(displayId, enabled);
-            updateVoteLocked(displayId);
+            updateVoteLocked(displayId, enabled, Vote.PRIORITY_UDFPS);
         }
 
-        private void updateVoteLocked(int displayId) {
+        @Override
+        public void onAuthenticationPossible(int displayId, boolean isPossible) {
+            synchronized (mLock) {
+                mAuthenticationPossible.put(displayId, isPossible);
+                updateVoteLocked(displayId, isPossible,
+                        Vote.PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE);
+            }
+        }
+
+        @GuardedBy("mLock")
+        private void updateVoteLocked(int displayId, boolean enabled, int votePriority) {
             final Vote vote;
-            if (mLocalHbmEnabled.get(displayId)) {
-                Display.Mode[] modes = mSupportedModesByDisplay.get(displayId);
-                float maxRefreshRate = 0f;
-                for (Display.Mode mode : modes) {
-                    if (mode.getRefreshRate() > maxRefreshRate) {
-                        maxRefreshRate = mode.getRefreshRate();
-                    }
-                }
+            if (enabled) {
+                float maxRefreshRate = DisplayModeDirector.this.getMaxRefreshRateLocked(displayId);
                 vote = Vote.forRefreshRates(maxRefreshRate, maxRefreshRate);
             } else {
                 vote = null;
             }
-
-            DisplayModeDirector.this.updateVoteLocked(displayId, Vote.PRIORITY_UDFPS, vote);
+            DisplayModeDirector.this.updateVoteLocked(displayId, votePriority, vote);
         }
 
         void dumpLocked(PrintWriter pw) {
@@ -2382,6 +2404,13 @@ public class DisplayModeDirector {
                 final int displayId = mLocalHbmEnabled.keyAt(i);
                 final String enabled = mLocalHbmEnabled.valueAt(i) ? "enabled" : "disabled";
                 pw.println("      Display " + displayId + ": " + enabled);
+            }
+            pw.println("    mAuthenticationPossible: ");
+            for (int i = 0; i < mAuthenticationPossible.size(); i++) {
+                final int displayId = mAuthenticationPossible.keyAt(i);
+                final String isPossible = mAuthenticationPossible.valueAt(i) ? "possible"
+                        : "impossible";
+                pw.println("      Display " + displayId + ": " + isPossible);
             }
         }
     }
