@@ -1464,6 +1464,12 @@ public final class UserManagerTest {
     }
 
     private void runThenWaitForUserRemoval(Runnable runnable, int userIdToWaitUntilDeleted) {
+        if (!hasUser(userIdToWaitUntilDeleted)) {
+            runnable.run();
+            mUsersToRemove.remove(userIdToWaitUntilDeleted);
+            return;
+        }
+
         Function<Intent, Boolean> checker = intent -> {
             UserHandle userHandle = intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle.class);
             return userHandle != null && userHandle.getIdentifier() == userIdToWaitUntilDeleted;
