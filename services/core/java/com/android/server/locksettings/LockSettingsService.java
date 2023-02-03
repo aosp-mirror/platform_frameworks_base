@@ -58,6 +58,8 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.RemoteLockscreenValidationResult;
+import android.app.StartLockscreenValidationRequest;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DeviceStateCache;
@@ -118,7 +120,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
-import android.util.FeatureFlagUtils;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -2553,23 +2554,18 @@ public class LockSettingsService extends ILockSettings.Stub {
     /**
      * Starts a session to verify lock screen credentials provided by a remote device.
      */
-    public void startRemoteLockscreenValidation() {
-        if (!FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API)) {
-            throw new UnsupportedOperationException("Under development");
-        }
-        mRecoverableKeyStoreManager.startRemoteLockscreenValidation();
+    @NonNull
+    public StartLockscreenValidationRequest startRemoteLockscreenValidation() {
+        return mRecoverableKeyStoreManager.startRemoteLockscreenValidation(this);
     }
 
     /**
-     * Verifies credentials guess from a remote device.
+     * Verifies encrypted credentials guess from a remote device.
      */
-    public void validateRemoteLockscreen(@NonNull byte[] encryptedCredential) {
-        if (!FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API)) {
-            throw new UnsupportedOperationException("Under development");
-        }
-        mRecoverableKeyStoreManager.validateRemoteLockscreen(encryptedCredential);
+    @NonNull
+    public RemoteLockscreenValidationResult
+            validateRemoteLockScreen2(@NonNull byte[] encryptedCredential) {
+        return mRecoverableKeyStoreManager.validateRemoteLockscreen(encryptedCredential, this);
     }
 
     // Reading these settings needs the contacts permission
