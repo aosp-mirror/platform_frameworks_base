@@ -516,7 +516,8 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Sends current video bounds to related TV interactive app.
-     * @hide
+     *
+     * @param bounds the rectangle area for rendering the current video.
      */
     public void sendCurrentVideoBounds(@NonNull Rect bounds) {
         if (DEBUG) {
@@ -1131,7 +1132,6 @@ public class TvInteractiveAppView extends ViewGroup {
          * is called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @hide
          */
         public void onRequestCurrentVideoBounds(@NonNull String iAppServiceId) {
         }
