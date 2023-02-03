@@ -168,6 +168,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     void setWindowManager(WindowManagerService wms) {
         mTransitionController = new TransitionController(mService, wms.mTaskSnapshotController,
                 wms.mTransitionTracer);
+        mTransitionController.mIsWaitingForDisplayEnabled = !wms.mDisplayEnabled;
         mTransitionController.registerLegacyListener(wms.mActivityManagerAppTransitionNotifier);
     }
 

@@ -216,6 +216,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     final TransitionController.Logger mLogger = new TransitionController.Logger();
 
+    /**
+     * {@code false} if this transition runs purely in WMCore (meaning Shell is completely unaware
+     * of it). Currently, this happens before the display is ready since nothing can be seen yet.
+     */
+    boolean mIsPlayerEnabled = true;
+
     Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
@@ -777,7 +783,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
      * be called directly; use {@link TransitionController#finishTransition} instead.
      */
     void finishTransition() {
-        if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+        if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER) && mIsPlayerEnabled) {
             Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                     System.identityHashCode(this));
         }
@@ -1112,7 +1118,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             controller.setupStartTransaction(transaction);
         }
         buildFinishTransaction(mFinishTransaction, info.getRootLeash());
-        if (mController.getTransitionPlayer() != null) {
+        if (mController.getTransitionPlayer() != null && mIsPlayerEnabled) {
             mController.dispatchLegacyAppTransitionStarting(info, mStatusBarTransitionDelay);
             try {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
@@ -1128,11 +1134,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             } catch (RemoteException e) {
                 // If there's an exception when trying to send the mergedTransaction to the
                 // client, we should finish and apply it here so the transactions aren't lost.
-                cleanUpOnFailure();
+                postCleanupOnFailure();
             }
         } else {
-            // No player registered, so just finish/apply immediately
-            cleanUpOnFailure();
+            // No player registered or it's not enabled, so just finish/apply immediately
+            if (!mIsPlayerEnabled) {
+                mLogger.mSendTimeNs = SystemClock.uptimeNanos();
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Apply and finish immediately"
+                        + " because player is disabled for transition #%d .", mSyncId);
+            }
+            postCleanupOnFailure();
         }
         mController.mLoggerHandler.post(mLogger::logOnSend);
         mOverrideOptions = null;
@@ -1141,6 +1152,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         // Since we created root-leash but no longer reference it from core, release it now
         info.releaseAnimSurfaces();
+    }
+
+    private void postCleanupOnFailure() {
+        mController.mAtm.mH.post(() -> {
+            synchronized (mController.mAtm.mGlobalLock) {
+                cleanUpOnFailure();
+            }
+        });
     }
 
     /**

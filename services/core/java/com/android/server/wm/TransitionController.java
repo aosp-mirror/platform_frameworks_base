@@ -126,6 +126,13 @@ class TransitionController {
 
     final Handler mLoggerHandler = FgThread.getHandler();
 
+    /**
+     * {@code true} While this waits for the display to become enabled (during boot). While waiting
+     * for the display, all core-initiated transitions will be "local".
+     * Note: This defaults to false so that it doesn't interfere with unit tests.
+     */
+    boolean mIsWaitingForDisplayEnabled = false;
+
     TransitionController(ActivityTaskManagerService atm,
             TaskSnapshotController taskSnapshotController,
             TransitionTracer transitionTracer) {
@@ -486,6 +493,15 @@ class TransitionController {
     Transition requestStartTransition(@NonNull Transition transition, @Nullable Task startTask,
             @Nullable RemoteTransition remoteTransition,
             @Nullable TransitionRequestInfo.DisplayChange displayChange) {
+        if (mIsWaitingForDisplayEnabled) {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Disabling player for transition"
+                    + " #%d because display isn't enabled yet", transition.getSyncId());
+            transition.mIsPlayerEnabled = false;
+            transition.mLogger.mRequestTimeNs = SystemClock.uptimeNanos();
+            mAtm.mH.post(() -> mAtm.mWindowOrganizerController.startTransition(
+                    transition.getToken(), null));
+            return transition;
+        }
         try {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
