@@ -848,9 +848,8 @@ final class LogicalDisplay {
         }
     }
 
-    public int getLeadDisplayLocked() {
+    public int getLeadDisplayIdLocked() {
         return mLeadDisplayId;
-
     }
 
     public void dumpLocked(PrintWriter pw) {

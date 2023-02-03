@@ -614,9 +614,9 @@ public class LogicalDisplayMapperTest {
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isInTransitionLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
         assertEquals(-1, mLogicalDisplayMapper.getDisplayLocked(device1)
-                .getLeadDisplayLocked());
+                .getLeadDisplayIdLocked());
         assertEquals(0, mLogicalDisplayMapper.getDisplayLocked(device2)
-                .getLeadDisplayLocked());
+                .getLeadDisplayIdLocked());
         assertEquals("concurrent", mLogicalDisplayMapper.getDisplayLocked(device1)
                 .getBrightnessThrottlingDataIdLocked());
         assertEquals("concurrent", mLogicalDisplayMapper.getDisplayLocked(device2)

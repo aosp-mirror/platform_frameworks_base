@@ -18,6 +18,7 @@ package com.android.server.display;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -74,6 +75,7 @@ import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
+import com.android.server.display.layout.Layout;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceFactory;
@@ -194,6 +196,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // The ID of the LogicalDisplay tied to this DisplayPowerController.
     private final int mDisplayId;
+
+    // The ID of the display which this display follows for brightness purposes.
+    private int mLeadDisplayId = Layout.NO_LEAD_DISPLAY;
 
     // The unique ID of the primary display device currently tied to this logical display
     private String mUniqueDisplayId;
@@ -509,8 +514,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // DPCs following the brightness of this DPC. This is used in concurrent displays mode - there
     // is one lead display, the additional displays follow the brightness value of the lead display.
     @GuardedBy("mLock")
-    private SparseArray<DisplayPowerControllerInterface> mDisplayBrightnessFollowers =
-            new SparseArray();
+    private final SparseArray<DisplayPowerControllerInterface> mDisplayBrightnessFollowers =
+            new SparseArray<>();
 
     /**
      * Creates the display power controller.
@@ -722,6 +727,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     @Override
+    public int getLeadDisplayId() {
+        return mLeadDisplayId;
+    }
+
+    @Override
     public void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux) {
         mHbmController.onAmbientLuxChange(ambientLux);
         if (mAutomaticBrightnessController == null || nits < 0) {
@@ -739,24 +749,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     @Override
-    public void addDisplayBrightnessFollower(DisplayPowerControllerInterface follower) {
+    public void addDisplayBrightnessFollower(@NonNull DisplayPowerControllerInterface follower) {
         synchronized (mLock) {
             mDisplayBrightnessFollowers.append(follower.getDisplayId(), follower);
+            sendUpdatePowerStateLocked();
         }
-        sendUpdatePowerState();
     }
 
     @Override
-    public void clearDisplayBrightnessFollowers() {
-        SparseArray<DisplayPowerControllerInterface> followers;
+    public void removeDisplayBrightnessFollower(@NonNull DisplayPowerControllerInterface follower) {
         synchronized (mLock) {
-            followers = mDisplayBrightnessFollowers.clone();
-            mDisplayBrightnessFollowers.clear();
-        }
-        for (int i = 0; i < followers.size(); i++) {
-            DisplayPowerControllerInterface follower = followers.valueAt(i);
-            follower.setBrightnessToFollow(PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
-                    /* ambientLux= */ 0);
+            mDisplayBrightnessFollowers.remove(follower.getDisplayId());
+            mHandler.postAtTime(() -> follower.setBrightnessToFollow(
+                    PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
+                    /* ambientLux= */ 0), mClock.uptimeMillis());
         }
     }
 
@@ -851,7 +857,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * Make sure DisplayManagerService.mSyncRoot is held when this is called
      */
     @Override
-    public void onDisplayChanged(HighBrightnessModeMetadata hbmMetadata) {
+    public void onDisplayChanged(HighBrightnessModeMetadata hbmMetadata, int leadDisplayId) {
+        mLeadDisplayId = leadDisplayId;
         final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         if (device == null) {
             Slog.wtf(mTag, "Display Device is null in DisplayPowerController for display: "
@@ -2701,6 +2708,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             pw.println();
             pw.println("Display Power Controller:");
             pw.println("  mDisplayId=" + mDisplayId);
+            pw.println("  mLeadDisplayId=" + mLeadDisplayId);
             pw.println("  mLightSensor=" + mLightSensor);
 
             pw.println();
