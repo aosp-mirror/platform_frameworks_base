@@ -412,7 +412,7 @@ public class UserControllerTest {
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
-        verify(mInjector, times(0)).dismissKeyguard(any(), anyString());
+        verify(mInjector, times(0)).dismissKeyguard(any());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
         continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
         verifySystemUserVisibilityChangesNeverNotified();
@@ -433,7 +433,7 @@ public class UserControllerTest {
         mInjector.mHandler.clearAllRecordedMessages();
         // Verify that continueUserSwitch worked as expected
         continueAndCompleteUserSwitch(userState, oldUserId, newUserId);
-        verify(mInjector, times(1)).dismissKeyguard(any(), anyString());
+        verify(mInjector, times(1)).dismissKeyguard(any());
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
         continueUserSwitchAssertions(oldUserId, TEST_USER_ID, false);
         verifySystemUserVisibilityChangesNeverNotified();
@@ -1148,7 +1148,7 @@ public class UserControllerTest {
         }
 
         @Override
-        protected void dismissKeyguard(Runnable runnable, String reason) {
+        protected void dismissKeyguard(Runnable runnable) {
             runnable.run();
         }
 

@@ -2246,7 +2246,7 @@ class UserController implements Handler.Callback {
         // If there is no challenge set, dismiss the keyguard right away
         if (isUserSwitchUiEnabled && !mInjector.getKeyguardManager().isDeviceSecure(newUserId)) {
             // Wait until the keyguard is dismissed to unfreeze
-            mInjector.dismissKeyguard(runnable, "User Switch");
+            mInjector.dismissKeyguard(runnable);
         } else {
             runnable.run();
         }
@@ -3714,7 +3714,7 @@ class UserController implements Handler.Callback {
             return IStorageManager.Stub.asInterface(ServiceManager.getService("mount"));
         }
 
-        protected void dismissKeyguard(Runnable runnable, String reason) {
+        protected void dismissKeyguard(Runnable runnable) {
             final AtomicBoolean isFirst = new AtomicBoolean(true);
             final Runnable runOnce = () -> {
                 if (isFirst.getAndSet(false)) {
@@ -3738,7 +3738,7 @@ class UserController implements Handler.Callback {
                 public void onDismissCancelled() throws RemoteException {
                     mHandler.post(runOnce);
                 }
-            }, reason);
+            }, /* message= */ null);
         }
 
         boolean isUsersOnSecondaryDisplaysEnabled() {
