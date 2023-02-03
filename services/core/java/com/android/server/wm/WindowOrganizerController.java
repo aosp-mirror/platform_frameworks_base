@@ -431,6 +431,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 applyTransaction(wct, -1 /* syncId */, transition, caller);
                 mTransitionController.requestStartTransition(transition, null /* startTask */,
                         null /* remoteTransition */, null /* displayChange */);
+                transition.setAllReady();
                 return;
             }
 
@@ -469,6 +470,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                             mTransitionController.requestStartTransition(nextTransition,
                                     null /* startTask */, null /* remoteTransition */,
                                     null /* displayChange */);
+                            nextTransition.setAllReady();
                         } else {
                             nextTransition.abort();
                         }

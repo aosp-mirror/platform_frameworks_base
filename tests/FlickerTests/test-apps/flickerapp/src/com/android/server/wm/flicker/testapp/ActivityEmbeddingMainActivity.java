@@ -25,6 +25,7 @@ import android.view.View;
 
 import androidx.window.extensions.embedding.ActivityEmbeddingComponent;
 import androidx.window.extensions.embedding.EmbeddingRule;
+import androidx.window.extensions.embedding.SplitPairRule;
 import androidx.window.extensions.embedding.SplitPlaceholderRule;
 
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper;
@@ -40,20 +41,23 @@ public class ActivityEmbeddingMainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_embedding_main_layout);
+    }
 
-        initializeSplitRules();
+    /** R.id.launch_secondary_activity_button onClick */
+    public void launchSecondaryActivity(View view) {
+        initializeSplitRules(createSplitPairRules());
+        startActivity(new Intent().setComponent(
+                ActivityOptions.ActivityEmbedding.SecondaryActivity.COMPONENT));
     }
 
     /** R.id.launch_placeholder_split_button onClick */
     public void launchPlaceholderSplit(View view) {
-        startActivity(
-                new Intent().setComponent(
-                        ActivityOptions.ActivityEmbedding.PlaceholderPrimaryActivity.COMPONENT
-                )
-        );
+        initializeSplitRules(createSplitPlaceholderRules());
+        startActivity(new Intent().setComponent(
+                ActivityOptions.ActivityEmbedding.PlaceholderPrimaryActivity.COMPONENT));
     }
 
-    private void initializeSplitRules() {
+    private void initializeSplitRules(Set<EmbeddingRule> rules) {
         ActivityEmbeddingComponent embeddingComponent =
                 ActivityEmbeddingAppHelper.getActivityEmbeddingComponent();
         if (embeddingComponent == null) {
@@ -62,14 +66,28 @@ public class ActivityEmbeddingMainActivity extends Activity {
             finish();
             return;
         }
-
-        embeddingComponent.setEmbeddingRules(getSplitRules());
+        embeddingComponent.setEmbeddingRules(rules);
     }
 
-    private Set<EmbeddingRule> getSplitRules() {
+    private Set<EmbeddingRule> createSplitPairRules() {
         final Set<EmbeddingRule> rules = new ArraySet<>();
+        final SplitPairRule rule = new SplitPairRule.Builder(
+                activitiesPair -> activitiesPair.first instanceof ActivityEmbeddingMainActivity
+                        && activitiesPair.second instanceof ActivityEmbeddingSecondaryActivity,
+                activityIntentPair ->
+                        activityIntentPair.first instanceof ActivityEmbeddingMainActivity
+                                && activityIntentPair.second.getComponent().equals(ActivityOptions
+                                .ActivityEmbedding.SecondaryActivity.COMPONENT),
+                windowMetrics -> true)
+                .setSplitRatio(DEFAULT_SPLIT_RATIO)
+                .build();
+        rules.add(rule);
+        return rules;
+    }
 
-        final SplitPlaceholderRule placeholderRule = new SplitPlaceholderRule.Builder(
+    private Set<EmbeddingRule> createSplitPlaceholderRules() {
+        final Set<EmbeddingRule> rules = new ArraySet<>();
+        final SplitPlaceholderRule rule = new SplitPlaceholderRule.Builder(
                 new Intent().setComponent(
                         ActivityOptions.ActivityEmbedding.PlaceholderSecondaryActivity.COMPONENT),
                 activity -> activity instanceof ActivityEmbeddingPlaceholderPrimaryActivity,
@@ -78,7 +96,7 @@ public class ActivityEmbeddingMainActivity extends Activity {
                 windowMetrics -> true)
                 .setSplitRatio(DEFAULT_SPLIT_RATIO)
                 .build();
-        rules.add(placeholderRule);
+        rules.add(rule);
         return rules;
     }
 }

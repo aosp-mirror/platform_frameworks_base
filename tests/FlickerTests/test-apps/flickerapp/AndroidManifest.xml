@@ -179,6 +179,13 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ActivityEmbeddingSecondaryActivity"
+            android:label="ActivityEmbedding Secondary"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false"/>
+        <activity
             android:name=".ActivityEmbeddingPlaceholderPrimaryActivity"
             android:label="ActivityEmbedding Placeholder Primary"
             android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"

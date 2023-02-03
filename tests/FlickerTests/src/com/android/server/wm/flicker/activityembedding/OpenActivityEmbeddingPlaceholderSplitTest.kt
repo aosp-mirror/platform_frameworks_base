@@ -33,13 +33,13 @@ import org.junit.runners.Parameterized
  * Test opening an activity that will launch another activity as ActivityEmbedding placeholder in
  * split.
  *
- * To run this test: `atest FlickerTests:OpenActivityEmbeddingPlaceholderSplit`
+ * To run this test: `atest FlickerTests:OpenActivityEmbeddingPlaceholderSplitTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenActivityEmbeddingPlaceholderSplit(flicker: FlickerTest) :
+class OpenActivityEmbeddingPlaceholderSplitTest(flicker: FlickerTest) :
     ActivityEmbeddingTestBase(flicker) {
 
     /** {@inheritDoc} */
@@ -55,9 +55,21 @@ class OpenActivityEmbeddingPlaceholderSplit(flicker: FlickerTest) :
         }
     }
 
+    /** Main activity should become invisible after launching the placeholder primary activity. */
     @Presubmit
     @Test
-    fun mainActivityBecomesInvisible() {
+    fun mainActivityWindowBecomesInvisible() {
+        flicker.assertWm {
+            isAppWindowVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+                .then()
+                .isAppWindowInvisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
+        }
+    }
+
+    /** Main activity should become invisible after launching the placeholder primary activity. */
+    @Presubmit
+    @Test
+    fun mainActivityLayerBecomesInvisible() {
         flicker.assertLayers {
             isVisible(ActivityEmbeddingAppHelper.MAIN_ACTIVITY_COMPONENT)
                 .then()
@@ -65,76 +77,41 @@ class OpenActivityEmbeddingPlaceholderSplit(flicker: FlickerTest) :
         }
     }
 
+    /**
+     * Placeholder primary and secondary should become visible after launch. The windows are not
+     * necessarily to become visible at the same time.
+     */
     @Presubmit
     @Test
-    fun placeholderSplitBecomesVisible() {
-        flicker.assertLayers {
-            isInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
+    fun placeholderSplitWindowsBecomeVisible() {
+        flicker.assertWm {
+            notContains(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
                 .then()
-                .isVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
+                .isAppWindowInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
+                .then()
+                .isAppWindowVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
         }
-        flicker.assertLayers {
-            isInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
+        flicker.assertWm {
+            notContains(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
                 .then()
-                .isVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
+                .isAppWindowInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
+                .then()
+                .isAppWindowVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
         }
     }
 
-    /** {@inheritDoc} */
-    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
-
-    /** {@inheritDoc} */
+    /** Placeholder primary and secondary should become visible together after launch. */
     @Presubmit
     @Test
-    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun taskBarWindowIsAlwaysVisible() = super.taskBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun statusBarLayerIsVisibleAtStartAndEnd() =
-        super.statusBarLayerIsVisibleAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun statusBarLayerPositionAtStartAndEnd() = super.statusBarLayerPositionAtStartAndEnd()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun statusBarWindowIsAlwaysVisible() = super.statusBarWindowIsAlwaysVisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
-        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
-        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    fun placeholderSplitLayersBecomeVisible() {
+        flicker.assertLayers {
+            isInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
+            isInvisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
+                .then()
+                .isVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_PRIMARY_COMPONENT)
+                .isVisible(ActivityEmbeddingAppHelper.PLACEHOLDER_SECONDARY_COMPONENT)
+        }
+    }
 
     companion object {
         /**
