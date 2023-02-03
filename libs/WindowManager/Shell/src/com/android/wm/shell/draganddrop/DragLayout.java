@@ -22,6 +22,10 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM;
+import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
+import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
+import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -315,6 +319,25 @@ public class DragLayout extends LinearLayout {
                 // Switching between targets
                 mDropZoneView1.animateSwitch();
                 mDropZoneView2.animateSwitch();
+                // Announce for accessibility.
+                switch (target.type) {
+                    case TYPE_SPLIT_LEFT:
+                        mDropZoneView1.announceForAccessibility(
+                                mContext.getString(R.string.accessibility_split_left));
+                        break;
+                    case TYPE_SPLIT_RIGHT:
+                        mDropZoneView2.announceForAccessibility(
+                                mContext.getString(R.string.accessibility_split_right));
+                        break;
+                    case TYPE_SPLIT_TOP:
+                        mDropZoneView1.announceForAccessibility(
+                                mContext.getString(R.string.accessibility_split_top));
+                        break;
+                    case TYPE_SPLIT_BOTTOM:
+                        mDropZoneView2.announceForAccessibility(
+                                mContext.getString(R.string.accessibility_split_bottom));
+                        break;
+                }
             }
             mCurrentTarget = target;
         }
@@ -424,12 +447,10 @@ public class DragLayout extends LinearLayout {
     }
 
     private void animateHighlight(DragAndDropPolicy.Target target) {
-        if (target.type == DragAndDropPolicy.Target.TYPE_SPLIT_LEFT
-                || target.type == DragAndDropPolicy.Target.TYPE_SPLIT_TOP) {
+        if (target.type == TYPE_SPLIT_LEFT || target.type == TYPE_SPLIT_TOP) {
             mDropZoneView1.setShowingHighlight(true);
             mDropZoneView2.setShowingHighlight(false);
-        } else if (target.type == DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT
-                || target.type == DragAndDropPolicy.Target.TYPE_SPLIT_BOTTOM) {
+        } else if (target.type == TYPE_SPLIT_RIGHT || target.type == TYPE_SPLIT_BOTTOM) {
             mDropZoneView1.setShowingHighlight(false);
             mDropZoneView2.setShowingHighlight(true);
         }
