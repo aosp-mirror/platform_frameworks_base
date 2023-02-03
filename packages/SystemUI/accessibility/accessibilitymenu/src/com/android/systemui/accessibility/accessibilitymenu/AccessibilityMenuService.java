@@ -22,6 +22,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
@@ -37,6 +39,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+
+import androidx.preference.PreferenceManager;
 
 import com.android.settingslib.display.BrightnessUtils;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut.ShortcutId;
@@ -62,6 +66,7 @@ public class AccessibilityMenuService extends AccessibilityService
     public static final long BUTTON_CLICK_TIMEOUT = 200;
 
     private A11yMenuOverlayLayout mA11yMenuLayout;
+    private SharedPreferences mPrefs;
 
     private static boolean sInitialized = false;
 
@@ -89,6 +94,25 @@ public class AccessibilityMenuService extends AccessibilityService
             }
         }
     };
+
+    final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mA11yMenuLayout.hideMenu();
+        }
+    };
+
+    /**
+     * Update a11y menu layout when large button setting is changed.
+     */
+    private final OnSharedPreferenceChangeListener mSharedPreferenceChangeListener =
+            (SharedPreferences prefs, String key) -> {
+                {
+                    if (key.equals(getString(R.string.pref_large_buttons))) {
+                        mA11yMenuLayout.configureLayout();
+                    }
+                }
+            };
 
     // Update layout.
     private final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -147,12 +171,11 @@ public class AccessibilityMenuService extends AccessibilityService
     protected void onServiceConnected() {
         mA11yMenuLayout = new A11yMenuOverlayLayout(this);
 
-        registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                mA11yMenuLayout.hideMenu();
-            }}, new IntentFilter(Intent.ACTION_SCREEN_OFF)
-        );
+        registerReceiver(mBroadcastReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mPrefs.registerOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
+
 
         mDisplayManager = getSystemService(DisplayManager.class);
         mDisplayManager.registerDisplayListener(mDisplayListener, null);
@@ -283,6 +306,14 @@ public class AccessibilityMenuService extends AccessibilityService
 
     @Override
     public void onInterrupt() {
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        unregisterReceiver(mBroadcastReceiver);
+        mPrefs.unregisterOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
+        sInitialized = false;
+        return super.onUnbind(intent);
     }
 
     @Override

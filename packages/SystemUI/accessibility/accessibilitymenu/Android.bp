@@ -24,6 +24,7 @@ android_app {
     static_libs: [
         "androidx.coordinatorlayout_coordinatorlayout",
         "androidx.core_core",
+        "androidx.preference_preference",
         "androidx.viewpager_viewpager",
         "SettingsLibDisplayUtils",
     ],
