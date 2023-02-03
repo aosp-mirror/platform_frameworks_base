@@ -262,7 +262,7 @@ final class DeletePackageHelper {
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
             info.sendPackageRemovedBroadcasts(killApp, removedBySystem);
             info.sendSystemPackageUpdatedBroadcasts();
-            PackageMetrics.onUninstallSucceeded(info, deleteFlags, userId);
+            PackageMetrics.onUninstallSucceeded(info, deleteFlags, removeUser);
         }
 
         // Force a gc to clear up things.
