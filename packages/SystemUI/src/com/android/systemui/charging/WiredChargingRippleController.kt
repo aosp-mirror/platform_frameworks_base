@@ -72,7 +72,7 @@ class WiredChargingRippleController @Inject constructor(
         height = WindowManager.LayoutParams.MATCH_PARENT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         format = PixelFormat.TRANSLUCENT
-        type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY
+        type = WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
         fitInsetsTypes = 0 // Ignore insets from all system bars
         title = "Wired Charging Animation"
         flags = (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
