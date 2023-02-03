@@ -19,12 +19,9 @@ package com.android.settingslib.spa.framework.common
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.navigation.NamedNavArgument
+import com.android.settingslib.spa.framework.util.genPageId
 import com.android.settingslib.spa.framework.util.isRuntimeParam
 import com.android.settingslib.spa.framework.util.navLink
-import com.android.settingslib.spa.framework.util.normalize
-import com.android.settingslib.spa.framework.util.normalizeArgList
-
-private const val NULL_PAGE_NAME = "NULL"
 
 /**
  * Defines data to identify a Settings page.
@@ -46,10 +43,7 @@ data class SettingsPage(
     val arguments: Bundle? = null,
 ) {
     companion object {
-        fun createNull(): SettingsPage {
-            return create(NULL_PAGE_NAME)
-        }
-
+        // TODO: cleanup it once all its usage in Settings are switched to Spp.createSettingsPage
         fun create(
             name: String,
             displayName: String? = null,
@@ -57,22 +51,12 @@ data class SettingsPage(
             arguments: Bundle? = null
         ): SettingsPage {
             return SettingsPage(
-                id = id(name, parameter, arguments),
+                id = genPageId(name, parameter, arguments),
                 sppName = name,
                 displayName = displayName ?: name,
                 parameter = parameter,
                 arguments = arguments
             )
-        }
-
-        // The unique id of this page, which is computed by name + normalized(arguments)
-        private fun id(
-            name: String,
-            parameter: List<NamedNavArgument> = emptyList(),
-            arguments: Bundle? = null
-        ): String {
-            val normArguments = parameter.normalize(arguments, eraseRuntimeValues = true)
-            return "$name:${normArguments?.toString()}".toHashId()
         }
     }
 
@@ -85,43 +69,20 @@ data class SettingsPage(
         return sppName + parameter.navLink(arguments)
     }
 
-    fun hasRuntimeParam(): Boolean {
-        for (navArg in parameter) {
-            if (navArg.isRuntimeParam()) return true
-        }
-        return false
-    }
-
     fun isBrowsable(): Boolean {
-        return !isCreateBy(NULL_PAGE_NAME) && !hasRuntimeParam()
-    }
-
-    private fun getProvider(): SettingsPageProvider? {
-        if (!SpaEnvironmentFactory.isReady()) return null
-        val pageProviderRepository by SpaEnvironmentFactory.instance.pageProviderRepository
-        return pageProviderRepository.getProviderOrNull(sppName)
+        if (sppName == NullPageProvider.name) return false
+        for (navArg in parameter) {
+            if (navArg.isRuntimeParam()) return false
+        }
+        return true
     }
 
     fun isEnabled(): Boolean {
-        return getProvider()?.isEnabled(arguments) ?: false
+        return getPageProvider(sppName)?.isEnabled(arguments) ?: false
     }
 
     @Composable
     fun UiLayout() {
-        getProvider()?.Page(arguments)
+        getPageProvider(sppName)?.Page(arguments)
     }
-}
-
-fun SettingsPageProvider.createSettingsPage(arguments: Bundle? = null): SettingsPage {
-    return SettingsPage.create(
-        name = name,
-        displayName = displayName + parameter.normalizeArgList(arguments, eraseRuntimeValues = true)
-            .joinToString("") { arg -> "/$arg" },
-        parameter = parameter,
-        arguments = arguments,
-    )
-}
-
-fun String.toHashId(): String {
-    return this.hashCode().toUInt().toString(36)
 }
