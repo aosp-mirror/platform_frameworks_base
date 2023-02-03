@@ -147,7 +147,7 @@ public final class DataProfile implements Parcelable {
         if (mApnSetting != null) {
             return mApnSetting.getProtocol();
         }
-        return ApnSetting.PROTOCOL_IP;
+        return ApnSetting.PROTOCOL_IPV4V6;
     }
 
     /**
