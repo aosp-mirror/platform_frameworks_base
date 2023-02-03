@@ -20,16 +20,21 @@ import android.telephony.TelephonyManager.DATA_CONNECTED
 import android.telephony.TelephonyManager.DATA_CONNECTING
 import android.telephony.TelephonyManager.DATA_DISCONNECTED
 import android.telephony.TelephonyManager.DATA_DISCONNECTING
+import android.telephony.TelephonyManager.DATA_HANDOVER_IN_PROGRESS
+import android.telephony.TelephonyManager.DATA_SUSPENDED
 import android.telephony.TelephonyManager.DATA_UNKNOWN
 import android.telephony.TelephonyManager.DataState
 
 /** Internal enum representation of the telephony data connection states */
-enum class DataConnectionState(@DataState val dataState: Int) {
-    Connected(DATA_CONNECTED),
-    Connecting(DATA_CONNECTING),
-    Disconnected(DATA_DISCONNECTED),
-    Disconnecting(DATA_DISCONNECTING),
-    Unknown(DATA_UNKNOWN),
+enum class DataConnectionState {
+    Connected,
+    Connecting,
+    Disconnected,
+    Disconnecting,
+    Suspended,
+    HandoverInProgress,
+    Unknown,
+    Invalid,
 }
 
 fun @receiver:DataState Int.toDataConnectionType(): DataConnectionState =
@@ -38,6 +43,8 @@ fun @receiver:DataState Int.toDataConnectionType(): DataConnectionState =
         DATA_CONNECTING -> DataConnectionState.Connecting
         DATA_DISCONNECTED -> DataConnectionState.Disconnected
         DATA_DISCONNECTING -> DataConnectionState.Disconnecting
+        DATA_SUSPENDED -> DataConnectionState.Suspended
+        DATA_HANDOVER_IN_PROGRESS -> DataConnectionState.HandoverInProgress
         DATA_UNKNOWN -> DataConnectionState.Unknown
-        else -> throw IllegalArgumentException("unknown data state received $this")
+        else -> DataConnectionState.Invalid
     }

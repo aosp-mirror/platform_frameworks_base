@@ -41,6 +41,8 @@ import android.telephony.TelephonyManager.DATA_CONNECTED
 import android.telephony.TelephonyManager.DATA_CONNECTING
 import android.telephony.TelephonyManager.DATA_DISCONNECTED
 import android.telephony.TelephonyManager.DATA_DISCONNECTING
+import android.telephony.TelephonyManager.DATA_HANDOVER_IN_PROGRESS
+import android.telephony.TelephonyManager.DATA_SUSPENDED
 import android.telephony.TelephonyManager.DATA_UNKNOWN
 import android.telephony.TelephonyManager.ERI_OFF
 import android.telephony.TelephonyManager.ERI_ON
@@ -255,6 +257,37 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun testFlowForSubId_dataConnectionState_suspended() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+
+            val callback =
+                getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
+            callback.onDataConnectionStateChanged(DATA_SUSPENDED, 200 /* unused */)
+
+            assertThat(latest?.dataConnectionState).isEqualTo(DataConnectionState.Suspended)
+
+            job.cancel()
+        }
+
+    @Test
+    fun testFlowForSubId_dataConnectionState_handoverInProgress() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+
+            val callback =
+                getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
+            callback.onDataConnectionStateChanged(DATA_HANDOVER_IN_PROGRESS, 200 /* unused */)
+
+            assertThat(latest?.dataConnectionState)
+                .isEqualTo(DataConnectionState.HandoverInProgress)
+
+            job.cancel()
+        }
+
+    @Test
     fun testFlowForSubId_dataConnectionState_unknown() =
         runBlocking(IMMEDIATE) {
             var latest: MobileConnectionModel? = null
@@ -265,6 +298,21 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             callback.onDataConnectionStateChanged(DATA_UNKNOWN, 200 /* unused */)
 
             assertThat(latest?.dataConnectionState).isEqualTo(DataConnectionState.Unknown)
+
+            job.cancel()
+        }
+
+    @Test
+    fun testFlowForSubId_dataConnectionState_invalid() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+
+            val callback =
+                getTelephonyCallbackForType<TelephonyCallback.DataConnectionStateListener>()
+            callback.onDataConnectionStateChanged(45, 200 /* unused */)
+
+            assertThat(latest?.dataConnectionState).isEqualTo(DataConnectionState.Invalid)
 
             job.cancel()
         }
