@@ -312,9 +312,7 @@ object Flags {
     val SCREEN_CONTENTS_TRANSLATION = unreleasedFlag(803, "screen_contents_translation")
 
     // 804 - monochromatic themes
-    @JvmField
-    val MONOCHROMATIC_THEMES =
-        sysPropBooleanFlag(804, "persist.sysui.monochromatic", default = false)
+    @JvmField val MONOCHROMATIC_THEME = unreleasedFlag(804, "monochromatic", teamfood = true)
 
     // 900 - media
     // TODO(b/254512697): Tracking Bug
@@ -497,7 +495,7 @@ object Flags {
     // TODO(b/238475428): Tracking Bug
     @JvmField
     val WM_SHADE_ALLOW_BACK_GESTURE =
-        unreleasedFlag(1207, "persist.wm.debug.shade_allow_back_gesture", teamfood = false)
+        sysPropBooleanFlag(1207, "persist.wm.debug.shade_allow_back_gesture", default = false)
 
     // TODO(b/238475428): Tracking Bug
     @JvmField

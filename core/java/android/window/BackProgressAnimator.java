@@ -16,8 +16,10 @@
 
 package android.window;
 
+import android.annotation.NonNull;
 import android.util.FloatProperty;
 
+import com.android.internal.dynamicanimation.animation.DynamicAnimation;
 import com.android.internal.dynamicanimation.animation.SpringAnimation;
 import com.android.internal.dynamicanimation.animation.SpringForce;
 
@@ -121,6 +123,27 @@ public class BackProgressAnimator {
         mLastBackEvent = null;
         mCallback = null;
         mProgress = 0;
+    }
+
+    /**
+     * Animate the back progress animation from current progress to start position.
+     * This should be called when back is cancelled.
+     *
+     * @param finishCallback the callback to be invoked when the progress is reach to 0.
+     */
+    public void onBackCancelled(@NonNull Runnable finishCallback) {
+        final DynamicAnimation.OnAnimationEndListener listener =
+                new DynamicAnimation.OnAnimationEndListener() {
+            @Override
+            public void onAnimationEnd(DynamicAnimation animation, boolean canceled, float value,
+                    float velocity) {
+                mSpring.removeEndListener(this);
+                finishCallback.run();
+                reset();
+            }
+        };
+        mSpring.addEndListener(listener);
+        mSpring.animateToFinalPosition(0);
     }
 
     private void updateProgressValue(float progress) {
