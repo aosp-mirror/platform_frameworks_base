@@ -15,8 +15,10 @@
  */
 package com.android.server;
 
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ContentResolver;
+import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -30,22 +32,43 @@ import com.android.server.utils.TimingsTraceAndSlog;
  * Class responsible for booting the device in the proper user on headless system user mode.
  *
  */
-// TODO(b/204091126): STOPSHIP - provide proper APIs
-final class BootUserInitializer {
+final class HsumBootUserInitializer {
 
-    private static final String TAG = BootUserInitializer.class.getSimpleName();
+    private static final String TAG = HsumBootUserInitializer.class.getSimpleName();
 
-     // TODO(b/204091126): STOPSHIP - set to false or dynamic value
-    private static final boolean DEBUG = true;
-
+    private final UserManagerInternal mUmi;
     private final ActivityManagerService mAms;
     private final ContentResolver mContentResolver;
 
-    BootUserInitializer(ActivityManagerService am, ContentResolver contentResolver) {
-        mAms = am;
-        mContentResolver = contentResolver;
+    /** Whether this device should always have a non-removable MainUser, including at first boot. */
+    private final boolean mShouldAlwaysHaveMainUser;
+
+    /** Static factory method for creating a {@link HsumBootUserInitializer} instance. */
+    public static @Nullable HsumBootUserInitializer createInstance(ActivityManagerService am,
+            ContentResolver contentResolver, boolean shouldAlwaysHaveMainUser) {
+
+        if (!UserManager.isHeadlessSystemUserMode()) {
+            return null;
+        }
+        return new HsumBootUserInitializer(
+                LocalServices.getService(UserManagerInternal.class),
+                am, contentResolver, shouldAlwaysHaveMainUser);
     }
 
+    private HsumBootUserInitializer(UserManagerInternal umi, ActivityManagerService am,
+            ContentResolver contentResolver, boolean shouldAlwaysHaveMainUser) {
+        mUmi = umi;
+        mAms = am;
+        mContentResolver = contentResolver;
+        this.mShouldAlwaysHaveMainUser = shouldAlwaysHaveMainUser;
+    }
+
+    /**
+     * Initialize this object, and create MainUser if needed.
+     *
+     * Should be called before PHASE_SYSTEM_SERVICES_READY as services' setups may require MainUser,
+     * but probably after PHASE_LOCK_SETTINGS_READY since that may be needed for user creation.
+     */
     public void init(TimingsTraceAndSlog t) {
         Slogf.i(TAG, "init())");
 
@@ -53,17 +76,56 @@ final class BootUserInitializer {
         // this class or the setup wizard app
         provisionHeadlessSystemUser();
 
+        if (mShouldAlwaysHaveMainUser) {
+            t.traceBegin("createMainUserIfNeeded");
+            createMainUserIfNeeded();
+            t.traceEnd();
+        }
+    }
+
+    private void createMainUserIfNeeded() {
+        int mainUser = mUmi.getMainUserId();
+        if (mainUser != UserHandle.USER_NULL) {
+            Slogf.d(TAG, "Found existing MainUser, userId=%d", mainUser);
+            return;
+        }
+
+        Slogf.d(TAG, "Creating a new MainUser");
+        try {
+            final UserInfo newInitialUser = mUmi.createUserEvenWhenDisallowed(
+                    /* name= */ null, // null will appear as "Owner" in on-demand localisation
+                    UserManager.USER_TYPE_FULL_SECONDARY,
+                    UserInfo.FLAG_ADMIN | UserInfo.FLAG_MAIN,
+                    /* disallowedPackages= */ null,
+                    /* token= */ null);
+            if (newInitialUser == null) {
+                Slogf.wtf(TAG, "Initial bootable MainUser creation failed: returned null");
+            } else {
+                Slogf.i(TAG, "Successfully created MainUser, userId=%d", newInitialUser.id);
+            }
+        } catch (UserManager.CheckedUserOperationException e) {
+            Slogf.wtf(TAG, "Initial bootable MainUser creation failed", e);
+        }
+    }
+
+    /**
+     * Put the device into the correct user state: unlock the system and switch to the boot user.
+     *
+     * Should only call once PHASE_THIRD_PARTY_APPS_CAN_START is reached to ensure that privileged
+     * apps have had the chance to set the boot user, if applicable.
+     */
+    public void systemRunning(TimingsTraceAndSlog t) {
         unlockSystemUser(t);
 
         try {
             t.traceBegin("getBootUser");
-            int bootUser = LocalServices.getService(UserManagerInternal.class).getBootUser();
+            final int bootUser = mUmi.getBootUser();
             t.traceEnd();
             t.traceBegin("switchToBootUser-" + bootUser);
             switchToBootUser(bootUser);
             t.traceEnd();
         } catch (UserManager.CheckedUserOperationException e) {
-            Slogf.wtf(TAG, "Failed to created boot user", e);
+            Slogf.wtf(TAG, "Failed to switch to boot user since there isn't one.");
         }
     }
 
