@@ -18,6 +18,7 @@ package com.android.settingslib.spa.framework.common
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.NamedNavArgument
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
@@ -52,8 +53,10 @@ interface SettingsPageProvider {
     /** The [Composable] used to render this page. */
     @Composable
     fun Page(arguments: Bundle?) {
-        RegularScaffold(title = getTitle(arguments)) {
-            for (entry in buildEntry(arguments)) {
+        val title = remember { getTitle(arguments) }
+        val entries = remember { buildEntry(arguments) }
+        RegularScaffold(title) {
+            for (entry in entries) {
                 entry.UiLayout()
             }
         }

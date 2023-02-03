@@ -50,6 +50,7 @@ open class ShowImeWhenFocusingOnInputFieldTest(flicker: FlickerTest) : BaseTest(
         }
     }
 
+    @Presubmit
     @Test
     @IwTest(focusArea = "ime")
     override fun cujCompleted() {

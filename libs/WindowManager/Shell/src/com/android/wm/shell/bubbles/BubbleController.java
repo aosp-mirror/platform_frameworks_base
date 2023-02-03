@@ -68,10 +68,14 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.view.IWindowManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.window.ScreenCapture;
+import android.window.ScreenCapture.ScreenCaptureListener;
+import android.window.ScreenCapture.ScreenshotSync;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.Nullable;
@@ -143,6 +147,7 @@ public class BubbleController implements ConfigurationChangeListener {
     private final SyncTransactionQueue mSyncQueue;
     private final ShellController mShellController;
     private final ShellCommandHandler mShellCommandHandler;
+    private final IWindowManager mWmService;
 
     // Used to post to main UI thread
     private final ShellExecutor mMainExecutor;
@@ -237,7 +242,8 @@ public class BubbleController implements ConfigurationChangeListener {
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             TaskViewTransitions taskViewTransitions,
-            SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue,
+            IWindowManager wmService) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
         mShellController = shellController;
@@ -269,6 +275,7 @@ public class BubbleController implements ConfigurationChangeListener {
         mOneHandedOptional = oneHandedOptional;
         mDragAndDropController = dragAndDropController;
         mSyncQueue = syncQueue;
+        mWmService = wmService;
         shellInit.addInitCallback(this::onInit, this);
     }
 
@@ -1037,6 +1044,21 @@ public class BubbleController implements ConfigurationChangeListener {
     }
 
     /**
+     * Performs a screenshot that may exclude the bubble layer, if one is present. The screenshot
+     * can be access via the supplied {@link ScreenshotSync#get()} asynchronously.
+     *
+     * TODO(b/267324693): Implement the exclude layer functionality in screenshot.
+     */
+    public void getScreenshotExcludingBubble(int displayId,
+            Pair<ScreenCaptureListener, ScreenshotSync> screenCaptureListener) {
+        try {
+            mWmService.captureDisplay(displayId, null, screenCaptureListener.first);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to capture screenshot");
+        }
+    }
+
+    /**
      * Fills the overflow bubbles by loading them from disk.
      */
     void loadOverflowBubblesFromDisk() {
@@ -1747,6 +1769,25 @@ public class BubbleController implements ConfigurationChangeListener {
             mMainExecutor.execute(() -> {
                 BubbleController.this.showOrHideAppBubble(intent);
             });
+        }
+
+        @Override
+        public boolean isAppBubbleTaskId(int taskId) {
+            Bubble appBubble = mBubbleData.getBubbleInStackWithKey(KEY_APP_BUBBLE);
+            return appBubble != null && appBubble.getTaskId() == taskId;
+        }
+
+        @Override
+        @Nullable
+        public ScreenshotSync getScreenshotExcludingBubble(int displayId) {
+            Pair<ScreenCaptureListener, ScreenshotSync> screenCaptureListener =
+                    ScreenCapture.createSyncCaptureListener();
+
+            mMainExecutor.execute(
+                    () -> BubbleController.this.getScreenshotExcludingBubble(displayId,
+                            screenCaptureListener));
+
+            return screenCaptureListener.second;
         }
 
         @Override

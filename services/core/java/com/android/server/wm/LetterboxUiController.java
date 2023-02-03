@@ -21,8 +21,10 @@ import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
+import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
 import static android.content.pm.ActivityInfo.OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION;
@@ -41,6 +43,7 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__LETTERBOX_POSITION__BOTTOM;
@@ -136,6 +139,8 @@ final class LetterboxUiController {
     private final boolean mIsOverrideToNosensorOrientationEnabled;
     // Corresponds to OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE
     private final boolean mIsOverrideToReverseLandscapeOrientationEnabled;
+    // Corresponds to OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA
+    private final boolean mIsOverrideOrientationOnlyForCameraEnabled;
     // Corresponds to OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION
     private final boolean mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled;
 
@@ -148,6 +153,9 @@ final class LetterboxUiController {
 
     // Corresponds to OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION
     private final boolean mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled;
+
+    // Corresponds to OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS
+    private final boolean mIsOverrideEnableCompatFakeFocusEnabled;
 
     @Nullable
     private final Boolean mBooleanPropertyAllowOrientationOverride;
@@ -204,6 +212,9 @@ final class LetterboxUiController {
     @Nullable
     private final Boolean mBooleanPropertyIgnoreRequestedOrientation;
 
+    @Nullable
+    private final Boolean mBooleanPropertyFakeFocus;
+
     private boolean mIsRelauchingAfterRequestedOrientationChanged;
 
     LetterboxUiController(WindowManagerService wmService, ActivityRecord activityRecord) {
@@ -218,6 +229,10 @@ final class LetterboxUiController {
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         mLetterboxConfiguration::isPolicyForIgnoringRequestedOrientationEnabled,
                         PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION);
+        mBooleanPropertyFakeFocus =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        mLetterboxConfiguration::isCompatFakeFocusEnabled,
+                        PROPERTY_COMPAT_ENABLE_FAKE_FOCUS);
         mBooleanPropertyCameraCompatAllowForceRotation =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
@@ -253,6 +268,8 @@ final class LetterboxUiController {
                 isCompatChangeEnabled(OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE);
         mIsOverrideToNosensorOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR);
+        mIsOverrideOrientationOnlyForCameraEnabled =
+                isCompatChangeEnabled(OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA);
         mIsOverrideUseDisplayLandscapeNaturalOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION);
 
@@ -265,6 +282,9 @@ final class LetterboxUiController {
 
         mIsOverrideEnableCompatIgnoreRequestedOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION);
+
+        mIsOverrideEnableCompatFakeFocusEnabled =
+                isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS);
     }
 
     /**
@@ -360,6 +380,25 @@ final class LetterboxUiController {
     }
 
     /**
+     * Whether sending compat fake focus for split screen resumed activities is enabled. Needed
+     * because some game engines wait to get focus before drawing the content of the app which isn't
+     * guaranteed by default in multi-window modes.
+     *
+     * <p>This treatment is enabled when the following conditions are met:
+     * <ul>
+     *     <li>Flag gating the treatment is enabled
+     *     <li>Component property is NOT set to false
+     *     <li>Component property is set to true or per-app override is enabled
+     * </ul>
+     */
+    boolean shouldSendFakeFocus() {
+        return shouldEnableWithOverrideAndProperty(
+                /* gatingCondition */ mLetterboxConfiguration::isCompatFakeFocusEnabled,
+                mIsOverrideEnableCompatFakeFocusEnabled,
+                mBooleanPropertyFakeFocus);
+    }
+
+    /**
      * Sets whether an activity is relaunching after the app has called {@link
      * android.app.Activity#setRequestedOrientation}.
      */
@@ -410,6 +449,14 @@ final class LetterboxUiController {
             return candidate;
         }
 
+        DisplayContent displayContent = mActivityRecord.mDisplayContent;
+        if (mIsOverrideOrientationOnlyForCameraEnabled && displayContent != null
+                && (displayContent.mDisplayRotationCompatPolicy == null
+                        || !displayContent.mDisplayRotationCompatPolicy
+                                .isActivityEligibleForOrientationOverride(mActivityRecord))) {
+            return candidate;
+        }
+
         if (mIsOverrideToReverseLandscapeOrientationEnabled
                 && (isFixedOrientationLandscape(candidate) || mIsOverrideAnyOrientationEnabled)) {
             Slog.w(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
@@ -437,6 +484,10 @@ final class LetterboxUiController {
         }
 
         return candidate;
+    }
+
+    boolean isOverrideOrientationOnlyForCameraEnabled() {
+        return mIsOverrideOrientationOnlyForCameraEnabled;
     }
 
     /**

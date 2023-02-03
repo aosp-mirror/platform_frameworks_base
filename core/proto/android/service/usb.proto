@@ -284,7 +284,8 @@ message UsbAlsaManagerProto {
 
     optional int32 cards_parser = 1;
     repeated UsbAlsaDeviceProto alsa_devices = 2;
-    repeated UsbMidiDeviceProto midi_devices = 3;
+    reserved 3; // previously midi_devices, now unused
+    repeated UsbAlsaMidiDeviceProto alsa_midi_devices = 4;
 }
 
 message UsbAlsaDeviceProto {
@@ -299,7 +300,7 @@ message UsbAlsaDeviceProto {
     optional string address = 6;
 }
 
-message UsbMidiDeviceProto {
+message UsbAlsaMidiDeviceProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 card = 1;

@@ -46,7 +46,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static android.view.Display.STATE_UNKNOWN;
 import static android.view.Display.isSuspendedState;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
 import static android.view.Surface.ROTATION_0;
@@ -120,12 +120,10 @@ import static com.android.server.wm.DisplayContentProto.DPI;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
 import static com.android.server.wm.DisplayContentProto.ID;
-import static com.android.server.wm.DisplayContentProto.IME_INSETS_SOURCE_PROVIDER;
 import static com.android.server.wm.DisplayContentProto.IME_POLICY;
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_CONTROL_TARGET;
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_INPUT_TARGET;
 import static com.android.server.wm.DisplayContentProto.INPUT_METHOD_TARGET;
-import static com.android.server.wm.DisplayContentProto.INSETS_SOURCE_PROVIDERS;
 import static com.android.server.wm.DisplayContentProto.IS_SLEEPING;
 import static com.android.server.wm.DisplayContentProto.KEEP_CLEAR_AREAS;
 import static com.android.server.wm.DisplayContentProto.MIN_SIZE_OF_RESIZEABLE_TASK_DP;
@@ -292,6 +290,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ForceScalingMode {}
+
+    private static final InsetsState.OnTraverseCallbacks COPY_SOURCE_VISIBILITY =
+            new InsetsState.OnTraverseCallbacks() {
+                public void onIdMatch(InsetsSource source1, InsetsSource source2) {
+                    source1.setVisible(source2.isVisible());
+                }
+            };
 
     final ActivityTaskManagerService mAtmService;
 
@@ -2088,12 +2093,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mFixedRotationLaunchingApp.getFixedRotationTransformInsetsState();
             if (rotatedState != null) {
                 final InsetsState state = mInsetsStateController.getRawInsetsState();
-                for (int i = 0; i < InsetsState.SIZE; i++) {
-                    final InsetsSource source = state.peekSource(i);
-                    if (source != null) {
-                        rotatedState.setSourceVisible(i, source.isVisible());
-                    }
-                }
+                InsetsState.traverse(rotatedState, state, COPY_SOURCE_VISIBILITY);
             }
         }
         forAllWindows(dispatchInsetsChanged, true /* traverseTopToBottom */);
@@ -3377,7 +3377,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     int getInputMethodWindowVisibleHeight() {
         final InsetsState state = getInsetsStateController().getRawInsetsState();
-        final InsetsSource imeSource = state.peekSource(ITYPE_IME);
+        final InsetsSource imeSource = state.peekSource(ID_IME);
         if (imeSource == null || !imeSource.isVisible()) {
             return 0;
         }
@@ -3544,14 +3544,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mCurrentFocus.dumpDebug(proto, CURRENT_FOCUS, logLevel);
         }
         if (mInsetsStateController != null) {
-            for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {
-                final WindowContainerInsetsSourceProvider provider = mInsetsStateController
-                        .peekSourceProvider(type);
-                if (provider != null) {
-                    provider.dumpDebug(proto, type == ITYPE_IME ? IME_INSETS_SOURCE_PROVIDER :
-                            INSETS_SOURCE_PROVIDERS, logLevel);
-                }
-            }
+            mInsetsStateController.dumpDebug(proto, logLevel);
         }
         proto.write(IME_POLICY, getImePolicy());
         for (Rect r : getKeepClearAreas()) {
@@ -4038,7 +4031,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final int imePid = mInputMethodWindow.mSession.mPid;
             mAtmService.onImeWindowSetOnDisplayArea(imePid, mImeWindowsContainer);
         }
-        mInsetsStateController.getSourceProvider(ITYPE_IME).setWindowContainer(win,
+        mInsetsStateController.getSourceProvider(ID_IME).setWindowContainer(win,
                 mDisplayPolicy.getImeSourceFrameProvider(), null);
         computeImeTarget(true /* updateImeTarget */);
         updateImeControlTarget();
@@ -4287,7 +4280,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         assignWindowLayers(true /* setLayoutNeeded */);
         // 3. The z-order of IME might have been changed. Update the above insets state.
         mInsetsStateController.updateAboveInsetsState(
-                mInsetsStateController.getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
+                mInsetsStateController.getRawInsetsState().isSourceOrDefaultVisible(
+                        ID_IME, ime()));
         // 4. Update the IME control target to apply any inset change and animation.
         // 5. Reparent the IME container surface to either the input target app, or the IME window
         // parent.
@@ -4513,7 +4507,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             ProtoLog.i(WM_DEBUG_IME, "setInputMethodInputTarget %s", target);
             setImeInputTarget(target);
             mInsetsStateController.updateAboveInsetsState(mInsetsStateController
-                    .getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
+                    .getRawInsetsState().isSourceOrDefaultVisible(ID_IME, ime()));
             // Force updating the IME parent when the IME control target has been updated to the
             // remote target but updateImeParent not happen because ImeLayeringTarget and
             // ImeInputTarget are different. Then later updateImeParent would be ignored when there

@@ -110,6 +110,7 @@ import android.security.keystore.recovery.WrappedApplicationKey;
 import android.security.keystore2.AndroidKeyStoreLoadStoreParameter;
 import android.security.keystore2.AndroidKeyStoreProvider;
 import android.service.gatekeeper.IGateKeeperService;
+import android.service.notification.StatusBarNotification;
 import android.system.keystore2.Domain;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -581,6 +582,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_STARTING);
+        filter.addAction(Intent.ACTION_LOCALE_CHANGED);
         injector.getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter,
                 null, null);
 
@@ -600,6 +602,20 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mStorage);
 
         LocalServices.addService(LockSettingsInternal.class, new LocalService());
+    }
+
+    private void updateActivatedEncryptionNotifications(String reason) {
+        for (UserInfo userInfo : mUserManager.getUsers()) {
+            Context userContext = mContext.createContextAsUser(UserHandle.of(userInfo.id), 0);
+            NotificationManager nm = (NotificationManager)
+                    userContext.getSystemService(Context.NOTIFICATION_SERVICE);
+            for (StatusBarNotification notification : nm.getActiveNotifications()) {
+                if (notification.getId() == SystemMessage.NOTE_FBE_ENCRYPTED_NOTIFICATION) {
+                    maybeShowEncryptionNotificationForUser(userInfo.id, reason);
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -799,6 +815,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             } else if (Intent.ACTION_USER_STARTING.equals(intent.getAction())) {
                 final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 mStorage.prefetchUser(userHandle);
+            } else if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+                updateActivatedEncryptionNotifications("locale changed");
             }
         }
     };

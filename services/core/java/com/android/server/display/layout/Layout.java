@@ -18,6 +18,8 @@ package com.android.server.display.layout;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.server.display.layout.Layout.Display.POSITION_UNKNOWN;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Slog;
@@ -78,6 +80,22 @@ public class Layout {
     public Display createDisplayLocked(
             @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled,
             DisplayIdProducer idProducer, String brightnessThrottlingMapId) {
+        return createDisplayLocked(address, isDefault, isEnabled, idProducer,
+                brightnessThrottlingMapId, POSITION_UNKNOWN);
+    }
+
+    /**
+     * Creates a simple 1:1 LogicalDisplay mapping for the specified DisplayDevice.
+     *
+     * @param address Address of the device.
+     * @param isDefault Indicates if the device is meant to be the default display.
+     * @param isEnabled Indicates if this display is usable and can be switched on
+     * @param position Indicates the position this display is facing in this layout.
+     * @return The new layout.
+     */
+    public Display createDisplayLocked(
+            @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled,
+            DisplayIdProducer idProducer, String brightnessThrottlingMapId, int position) {
         if (contains(address)) {
             Slog.w(TAG, "Attempting to add second definition for display-device: " + address);
             return null;
@@ -95,7 +113,7 @@ public class Layout {
         // same logical display ID.
         final int logicalDisplayId = idProducer.getId(isDefault);
         final Display display = new Display(address, logicalDisplayId, isEnabled,
-                brightnessThrottlingMapId);
+                brightnessThrottlingMapId, position);
 
         mDisplays.add(display);
         return display;
@@ -204,11 +222,11 @@ public class Layout {
         private final String mBrightnessThrottlingMapId;
 
         Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled,
-                String brightnessThrottlingMapId) {
+                String brightnessThrottlingMapId, int position) {
             mAddress = address;
             mLogicalDisplayId = logicalDisplayId;
             mIsEnabled = isEnabled;
-            mPosition = POSITION_UNKNOWN;
+            mPosition = position;
             mBrightnessThrottlingMapId = brightnessThrottlingMapId;
         }
 
@@ -271,6 +289,10 @@ public class Layout {
          */
         public String getBrightnessThrottlingMapId() {
             return mBrightnessThrottlingMapId;
+        }
+
+        public int getPosition() {
+            return mPosition;
         }
     }
 }

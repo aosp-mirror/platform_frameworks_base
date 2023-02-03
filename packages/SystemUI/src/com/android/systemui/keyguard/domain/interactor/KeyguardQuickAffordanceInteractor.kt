@@ -154,7 +154,11 @@ constructor(
         val slots = repository.get().getSlotPickerRepresentations()
         val slot = slots.find { it.id == slotId } ?: return false
         val selections =
-            repository.get().getCurrentSelections().getOrDefault(slotId, emptyList()).toMutableList()
+            repository
+                .get()
+                .getCurrentSelections()
+                .getOrDefault(slotId, emptyList())
+                .toMutableList()
         val alreadySelected = selections.remove(affordanceId)
         if (!alreadySelected) {
             while (selections.size > 0 && selections.size >= slot.maxSelectedAffordances) {
@@ -203,7 +207,11 @@ constructor(
         }
 
         val selections =
-            repository.get().getCurrentSelections().getOrDefault(slotId, emptyList()).toMutableList()
+            repository
+                .get()
+                .getCurrentSelections()
+                .getOrDefault(slotId, emptyList())
+                .toMutableList()
         return if (selections.remove(affordanceId)) {
             repository
                 .get()
@@ -367,6 +375,10 @@ constructor(
                 name = Contract.FlagsTable.FLAG_NAME_WALLPAPER_FULLSCREEN_PREVIEW,
                 value = featureFlags.isEnabled(Flags.WALLPAPER_FULLSCREEN_PREVIEW),
             ),
+            KeyguardPickerFlag(
+                name = Contract.FlagsTable.FLAG_NAME_MONOCHROMATIC_THEME,
+                value = featureFlags.isEnabled(Flags.MONOCHROMATIC_THEME)
+            )
         )
     }
 

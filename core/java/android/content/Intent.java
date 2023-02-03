@@ -31,8 +31,10 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
+import android.app.StatusBarManager;
 import android.bluetooth.BluetoothDevice;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
@@ -5135,6 +5137,86 @@ public class Intent implements Parcelable, Cloneable {
      * note-taking activity should show a UI that is suitable to use with stylus input.
      */
     public static final String EXTRA_USE_STYLUS_MODE = "android.intent.extra.USE_STYLUS_MODE";
+
+    /**
+     * Activity Action: Use with startActivityForResult to start a system activity that captures
+     * content on the screen to take a screenshot and present it to the user for editing. The
+     * edited screenshot is saved on device and returned to the calling activity as a {@link Uri}
+     * through {@link #getData()}. User interaction is required to return the edited screenshot to
+     * the calling activity.
+     *
+     * <p>This intent action requires the permission
+     * {@link android.Manifest.permission#LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE}.
+     *
+     * <p>Callers should query
+     * {@link StatusBarManager#canLaunchCaptureContentActivityForNote(Activity)} before showing a UI
+     * element that allows users to trigger this flow.
+     */
+    @RequiresPermission(Manifest.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE =
+            "android.intent.action.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE";
+
+    /**
+     * An int extra used by activity started with
+     * {@link #ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE} to indicate status of the response.
+     * This extra is used along with result code set to {@link android.app.Activity#RESULT_OK}.
+     *
+     * <p>The value for this extra can be one of the following:
+     * <ul>
+     *     <li>{@link #CAPTURE_CONTENT_FOR_NOTE_SUCCESS}</li>
+     *     <li>{@link #CAPTURE_CONTENT_FOR_NOTE_FAILED}</li>
+     *     <li>{@link #CAPTURE_CONTENT_FOR_NOTE_USER_CANCELED}</li>
+     *     <li>{@link #CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED}</li>
+     *     <li>{@link #CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN}</li>
+     * </ul>
+     */
+    public static final String EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE =
+            "android.intent.extra.CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE";
+
+    /**
+     * A response code used with {@link #EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE} to indicate
+     * that the request was a success.
+     *
+     * <p>This code will only be returned after the user has interacted with the system screenshot
+     * activity to consent to sharing the data with the note.
+     *
+     * <p>The captured screenshot is returned as a {@link Uri} through {@link #getData()}.
+     */
+    public static final int CAPTURE_CONTENT_FOR_NOTE_SUCCESS = 0;
+
+    /**
+     * A response code used with {@link #EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE} to indicate
+     * that something went wrong.
+     */
+    public static final int CAPTURE_CONTENT_FOR_NOTE_FAILED = 1;
+
+    /**
+     * A response code used with {@link #EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE} to indicate
+     * that user canceled the content capture flow.
+     */
+    public static final int CAPTURE_CONTENT_FOR_NOTE_USER_CANCELED = 2;
+
+    /**
+     * A response code used with {@link #EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE} to indicate
+     * that the intent action {@link #ACTION_LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE} was started
+     * by an activity that is running in a non-supported window mode.
+     */
+    public static final int CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED = 3;
+
+    /**
+     * A response code used with {@link #EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE} to indicate
+     * that screenshot is blocked by IT admin.
+     */
+    public static final int CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN = 4;
+
+    /** @hide */
+    @IntDef(value = {
+            CAPTURE_CONTENT_FOR_NOTE_SUCCESS, CAPTURE_CONTENT_FOR_NOTE_FAILED,
+            CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPPORTED,
+            CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CaptureContentForNoteStatusCodes {}
 
     /**
      * Broadcast Action: Sent to the integrity component when a package

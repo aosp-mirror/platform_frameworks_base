@@ -240,7 +240,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
         verify(mMediaController, never()).unregisterCallback(any());
     }
 
-
     @Test
     public void stop_nearbyMediaDevicesManagerNotNull_unregistersNearbyDevicesCallback() {
         mMediaOutputController.start(mCb);
@@ -253,7 +252,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void tryToLaunchMediaApplication_nullIntent_skip() {
-        mMediaOutputController.tryToLaunchMediaApplication();
+        mMediaOutputController.tryToLaunchMediaApplication(mDialogLaunchView);
 
         verify(mCb, never()).dismissDialog();
     }

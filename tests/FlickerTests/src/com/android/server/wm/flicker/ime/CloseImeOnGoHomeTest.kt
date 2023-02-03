@@ -100,6 +100,7 @@ open class CloseImeOnGoHomeTest(flicker: FlickerTest) : BaseTest(flicker) {
         flicker.assertLayers { this.isVisible(testApp).then().isInvisible(testApp) }
     }
 
+    @Presubmit
     @Test
     @IwTest(focusArea = "ime")
     override fun cujCompleted() {

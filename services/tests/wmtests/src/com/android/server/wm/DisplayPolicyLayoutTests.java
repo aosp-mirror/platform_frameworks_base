@@ -43,6 +43,7 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.InsetsFrameProvider;
+import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
@@ -255,7 +256,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 mDisplayContent.getInsetsStateController().getRawInsetsState());
         // Exclude comparing IME insets because currently the simulated layout only focuses on the
         // insets from status bar and navigation bar.
-        realInsetsState.removeSource(InsetsState.ITYPE_IME);
+        realInsetsState.removeSource(InsetsSource.ID_IME);
         realInsetsState.removeSource(InsetsState.ITYPE_CAPTION_BAR);
 
         assertEquals(new ToStringComparatorWrapper<>(realInsetsState),
@@ -270,9 +271,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 .rotationForActivityInDifferentOrientation(eq(mWindow.mActivityRecord));
         mWindow.mAboveInsetsState.set(
                 mDisplayContent.getInsetsStateController().getRawInsetsState());
-        final Rect frame = mWindow.getInsetsState().getSource(ITYPE_STATUS_BAR).getFrame();
+        final Rect frame = mWindow.getInsetsState().peekSource(ITYPE_STATUS_BAR).getFrame();
         mDisplayContent.rotateInDifferentOrientationIfNeeded(mWindow.mActivityRecord);
-        final Rect rotatedFrame = mWindow.getInsetsState().getSource(ITYPE_STATUS_BAR).getFrame();
+        final Rect rotatedFrame = mWindow.getInsetsState().peekSource(ITYPE_STATUS_BAR).getFrame();
 
         assertEquals(DISPLAY_WIDTH, frame.width());
         assertEquals(DISPLAY_HEIGHT, rotatedFrame.width());

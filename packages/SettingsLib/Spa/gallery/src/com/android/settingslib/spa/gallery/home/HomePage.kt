@@ -18,6 +18,7 @@ package com.android.settingslib.spa.gallery.home
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -28,6 +29,7 @@ import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.dialog.AlterDialogPageProvider
+import com.android.settingslib.spa.gallery.itemList.OperateListPageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageModel
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.ChartPageProvider
@@ -50,6 +52,7 @@ object HomePageProvider : SettingsPageProvider {
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         return listOf(
             PreferenceMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            OperateListPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             ArgumentPageProvider.buildInjectEntry("foo")!!.setLink(fromPage = owner).build(),
             SliderPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             SpinnerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
@@ -71,8 +74,10 @@ object HomePageProvider : SettingsPageProvider {
 
     @Composable
     override fun Page(arguments: Bundle?) {
-        HomeScaffold(title = getTitle(arguments)) {
-            for (entry in buildEntry(arguments)) {
+        val title = remember { getTitle(arguments) }
+        val entries = remember { buildEntry(arguments) }
+        HomeScaffold(title) {
+            for (entry in entries) {
                 if (entry.owner.isCreateBy(SettingsPageProviderEnum.ARGUMENT.name)) {
                     entry.UiLayout(ArgumentPageModel.buildArgument(intParam = 0))
                 } else {

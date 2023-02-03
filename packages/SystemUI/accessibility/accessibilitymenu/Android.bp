@@ -25,8 +25,16 @@ android_app {
         "androidx.coordinatorlayout_coordinatorlayout",
         "androidx.core_core",
         "androidx.viewpager_viewpager",
-        "SettingsLib",
+        "SettingsLibDisplayUtils",
     ],
+
+    optimize: {
+        enabled: true,
+        optimize: true,
+        shrink: true,
+        shrink_resources: true,
+        proguard_compatibility: false,
+    },
 
     uses_libs: [
         "org.apache.http.legacy",

@@ -10333,8 +10333,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // TODO(b/263592337): Explore enabling compat fake focus for fullscreen, e.g. for when
     // covered with bubbles.
     boolean shouldSendCompatFakeFocus() {
-        return mWmService.mLetterboxConfiguration.isCompatFakeFocusEnabled(info)
-                && inMultiWindowMode() && !inPinnedWindowingMode() && !inFreeformWindowingMode();
+        return mLetterboxUiController.shouldSendFakeFocus() && inMultiWindowMode()
+                && !inPinnedWindowingMode() && !inFreeformWindowingMode();
     }
 
     static class Builder {

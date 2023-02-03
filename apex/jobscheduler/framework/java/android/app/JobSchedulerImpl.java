@@ -230,9 +230,10 @@ public class JobSchedulerImpl extends JobScheduler {
             android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
     @Override
-    public void stopUserVisibleJobsForUser(@NonNull String packageName, int userId) {
+    public void notePendingUserRequestedAppStop(@NonNull String packageName, int userId,
+            @Nullable String debugReason) {
         try {
-            mBinder.stopUserVisibleJobsForUser(packageName, userId);
+            mBinder.notePendingUserRequestedAppStop(packageName, userId, debugReason);
         } catch (RemoteException e) {
         }
     }

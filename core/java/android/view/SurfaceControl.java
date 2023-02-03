@@ -64,6 +64,7 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLSync;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -462,6 +463,10 @@ public final class SurfaceControl implements Parcelable {
      */
     public long mNativeObject;
     private long mNativeHandle;
+
+    private final Object mChoreographerLock = new Object();
+    @GuardedBy("mChoreographerLock")
+    private Choreographer mChoreographer;
 
     // TODO: Move width/height to native and fix locking through out.
     private final Object mLock = new Object();
@@ -1269,6 +1274,59 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Returns the associated {@link Choreographer} instance with the
+     * current instance of the SurfaceControl.
+     * Must be called from a thread that already has a {@link android.os.Looper}
+     * associated with it.
+     * If there is no {@link Choreographer} associated with the SurfaceControl then a new instance
+     * of the {@link Choreographer} is created.
+     *
+     * @hide
+     */
+    @TestApi
+    public @NonNull Choreographer getChoreographer() {
+        return getChoreographer(Looper.myLooper());
+    }
+
+    /**
+     * Returns the associated {@link Choreographer} instance with the
+     * current instance of the SurfaceControl.
+     * If there is no {@link Choreographer} associated with the SurfaceControl then a new instance
+     * of the {@link Choreographer} is created.
+     *
+     * @param looper the choreographer is attached on this looper
+     *
+     * @hide
+     */
+    @TestApi
+    public @NonNull Choreographer getChoreographer(@NonNull Looper looper) {
+        checkNotReleased();
+        synchronized (mChoreographerLock) {
+            if (mChoreographer != null) {
+                return mChoreographer;
+            }
+
+            mChoreographer = Choreographer.getInstanceForSurfaceControl(mNativeHandle, looper);
+            return mChoreographer;
+        }
+    }
+
+    /**
+     * Returns true if {@link Choreographer} is present otherwise false.
+     * To check the validity use {@link #isValid} on the SurfaceControl, a valid SurfaceControl with
+     * choreographer will have the valid Choreographer.
+     *
+     * @hide
+     */
+    @TestApi
+    @UnsupportedAppUsage
+    public boolean hasChoreographer() {
+        synchronized (mChoreographerLock) {
+            return mChoreographer != null;
+        }
+    }
+
+    /**
      * Write to a protocol buffer output stream. Protocol buffer message definition is at {@link
      * android.view.SurfaceControlProto}.
      *
@@ -1325,6 +1383,13 @@ public final class SurfaceControl implements Parcelable {
             mNativeObject = 0;
             mNativeHandle = 0;
             mCloseGuard.close();
+            synchronized (mChoreographerLock) {
+                if (mChoreographer != null) {
+                    mChoreographer.invalidate();
+                    // TODO(b/266121235): Use NativeAllocationRegistry to clean up Choreographer.
+                    mChoreographer = null;
+                }
+            }
         }
     }
 

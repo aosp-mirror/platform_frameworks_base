@@ -16,6 +16,9 @@
 
 package android.provider.settings.validators;
 
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_FORCE;
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_SYSTEM;
 import static android.media.AudioFormat.SURROUND_SOUND_ENCODING;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
@@ -26,6 +29,11 @@ import static android.provider.settings.validators.SettingsValidators.NON_NEGATI
 import static android.provider.settings.validators.SettingsValidators.PACKAGE_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PERCENTAGE_INTEGER_VALIDATOR;
 import static android.view.Display.HdrCapabilities.HDR_TYPES;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_HDR10;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_HLG;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
 import android.os.BatteryManager;
 import android.provider.Settings.Global;
@@ -346,6 +354,20 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.USER_PREFERRED_REFRESH_RATE, NON_NEGATIVE_FLOAT_VALIDATOR);
         VALIDATORS.put(Global.USER_PREFERRED_RESOLUTION_HEIGHT, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.USER_PREFERRED_RESOLUTION_WIDTH, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.HDR_CONVERSION_MODE,  new DiscreteValueValidator(
+                new String[] {
+                        String.valueOf(HDR_CONVERSION_PASSTHROUGH),
+                        String.valueOf(HDR_CONVERSION_SYSTEM),
+                        String.valueOf(HDR_CONVERSION_FORCE)
+                }));
+        VALIDATORS.put(Global.HDR_FORCE_CONVERSION_TYPE, new DiscreteValueValidator(
+                new String[] {
+                        String.valueOf(HDR_TYPE_INVALID),
+                        String.valueOf(HDR_TYPE_DOLBY_VISION),
+                        String.valueOf(HDR_TYPE_HDR10),
+                        String.valueOf(HDR_TYPE_HLG),
+                        String.valueOf(HDR_TYPE_HDR10_PLUS)
+                }));
         VALIDATORS.put(Global.RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO_ENABLED,
                        new DiscreteValueValidator(new String[]{"0", "1"}));
         VALIDATORS.put(Global.Wearable.WET_MODE_ON, BOOLEAN_VALIDATOR);

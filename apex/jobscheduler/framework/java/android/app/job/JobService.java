@@ -156,6 +156,12 @@ public abstract class JobService extends Service {
      * a future idle maintenance window.
      * </p>
      *
+     * <p class="note">
+     * Any {@link JobInfo.Builder#setUserInitiated(boolean) user-initiated job}
+     * cannot be rescheduled when the user has asked to stop the app
+     * via a system provided affordance (such as the Task Manager).
+     * In such situations, the value of {@code wantsReschedule} is always treated as {@code false}.
+     *
      * @param params The parameters identifying this job, as supplied to
      *               the job in the {@link #onStartJob(JobParameters)} callback.
      * @param wantsReschedule {@code true} if this job should be rescheduled according
@@ -219,6 +225,12 @@ public abstract class JobService extends Service {
      * <p>
      * Once this method returns (or times out), the system releases the wakelock that it is holding
      * on behalf of the job.</p>
+     *
+     * <p class="note">
+     * Any {@link JobInfo.Builder#setUserInitiated(boolean) user-initiated job}
+     * cannot be rescheduled when stopped by the user via a system provided affordance (such as
+     * the Task Manager). In such situations, the returned value from this method call is always
+     * treated as {@code false}.
      *
      * <p class="caution"><strong>Note:</strong> When a job is stopped and rescheduled via this
      * method call, the deadline constraint is excluded from the rescheduled job's constraint set.

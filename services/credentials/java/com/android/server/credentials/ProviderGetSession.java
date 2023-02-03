@@ -21,8 +21,8 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.Intent;
+import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
-import android.credentials.GetCredentialOption;
 import android.credentials.GetCredentialResponse;
 import android.credentials.ui.Entry;
 import android.credentials.ui.GetCredentialProviderData;
@@ -107,7 +107,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     ) {
         return new BeginGetCredentialRequest.Builder(callingAppInfo)
                 .setBeginGetCredentialOptions(
-                        filteredRequest.getGetCredentialOptions().stream().map(
+                        filteredRequest.getCredentialOptions().stream().map(
                                 option -> {
                                     return new BeginGetCredentialOption(
                                             option.getType(),
@@ -121,8 +121,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             List<String> providerCapabilities,
             android.credentials.GetCredentialRequest clientRequest
     ) {
-        List<GetCredentialOption> filteredOptions = new ArrayList<>();
-        for (GetCredentialOption option : clientRequest.getGetCredentialOptions()) {
+        List<CredentialOption> filteredOptions = new ArrayList<>();
+        for (CredentialOption option : clientRequest.getCredentialOptions()) {
             if (providerCapabilities.contains(option.getType())) {
                 Log.i(TAG, "In createProviderRequest - capability found : "
                         + option.getType());
@@ -135,7 +135,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         if (!filteredOptions.isEmpty()) {
             return new android.credentials.GetCredentialRequest
                     .Builder(clientRequest.getData())
-                    .setGetCredentialOptions(
+                    .setCredentialOptions(
                             filteredOptions).build();
         }
         Log.i(TAG, "In createProviderRequest - returning null");
@@ -230,6 +230,13 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
     }
 
+    @Override
+    protected void invokeSession() {
+        this.mRemoteCredentialService.onBeginGetCredential(
+                        this.getProviderRequest(),
+                        /*callback=*/this);
+    }
+
     @Override // Call from request session to data to be shown on the UI
     @Nullable protected GetCredentialProviderData prepareUiData() throws IllegalArgumentException {
         Log.i(TAG, "In prepareUiData");
@@ -300,7 +307,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     private Intent setUpFillInIntent(String type) {
         Intent intent = new Intent();
-        for (GetCredentialOption option : mCompleteRequest.getGetCredentialOptions()) {
+        for (CredentialOption option : mCompleteRequest.getCredentialOptions()) {
             if (option.getType().equals(type)) {
                 intent.putExtra(
                         CredentialProviderService

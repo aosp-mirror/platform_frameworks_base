@@ -98,6 +98,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionInfo;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
@@ -162,6 +163,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedAttribution;
 import com.android.server.policy.AppOpsPolicy;
 
@@ -383,6 +385,9 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     /** Package Manager internal. Access via {@link #getPackageManagerInternal()} */
     private @Nullable PackageManagerInternal mPackageManagerInternal;
 
+    /** User Manager internal. Access via {@link #getUserManagerInternal()} */
+    private @Nullable UserManagerInternal mUserManagerInternal;
+
     /** Interface for app-op modes.*/
     @VisibleForTesting
     AppOpsCheckingServiceInterface mAppOpsCheckingService;
@@ -523,22 +528,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 }
             }
             pkgOps = null;
-        }
-
-        public boolean isDefault() {
-            boolean areAllPackageModesDefault = true;
-            if (pkgOps != null) {
-                for (String packageName : pkgOps.keySet()) {
-                    if (!mAppOpsCheckingService.arePackageModesDefault(packageName,
-                            UserHandle.getUserId(uid))) {
-                        areAllPackageModesDefault = false;
-                        break;
-                    }
-                }
-            }
-            return (pkgOps == null || pkgOps.isEmpty())
-                    && mAppOpsCheckingService.areUidModesDefault(uid)
-                    && areAllPackageModesDefault;
         }
 
         // Functions for uid mode access and manipulation.
@@ -1076,6 +1065,17 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         synchronized (this) {
             upgradeLocked(mVersionAtBoot);
         }
+        initializeUidStates();
+
+        getUserManagerInternal().addUserLifecycleListener(
+                new UserManagerInternal.UserLifecycleListener() {
+                    @Override
+                    public void onUserCreated(UserInfo user, Object token) {
+                        initializeUserUidStates(user.id);
+                    }
+
+                    // onUserRemoved handled by #removeUser
+                });
 
         mConstants.startMonitoring(mContext.getContentResolver());
         mHistoricalRegistry.systemReady(mContext.getContentResolver());
@@ -1200,6 +1200,49 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 });
 
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+    }
+
+    /**
+     * Initialize uid state objects for state contained in the checking service.
+     */
+    private void initializeUidStates() {
+        UserManagerInternal umi = getUserManagerInternal();
+        int[] userIds = umi.getUserIds();
+        synchronized (this) {
+            for (int i = 0; i < userIds.length; i++) {
+                int userId = userIds[i];
+                initializeUserUidStatesLocked(userId);
+            }
+        }
+    }
+
+    private void initializeUserUidStates(int userId) {
+        synchronized (this) {
+            initializeUserUidStatesLocked(userId);
+        }
+    }
+
+    private void initializeUserUidStatesLocked(int userId) {
+        ArrayMap<String, ? extends PackageStateInternal> packageStates =
+                getPackageManagerInternal().getPackageStates();
+        for (int j = 0; j < packageStates.size(); j++) {
+            PackageStateInternal packageState = packageStates.valueAt(j);
+            int uid = UserHandle.getUid(userId, packageState.getAppId());
+            UidState uidState = getUidStateLocked(uid, true);
+            if (uidState.pkgOps == null) {
+                uidState.pkgOps = new ArrayMap<>();
+            }
+            String packageName = packageStates.keyAt(j);
+            Ops ops = new Ops(packageName, uidState);
+            uidState.pkgOps.put(packageName, ops);
+
+            SparseIntArray packageModes =
+                    mAppOpsCheckingService.getNonDefaultPackageModes(packageName, userId);
+            for (int k = 0; k < packageModes.size(); k++) {
+                int code = packageModes.get(k);
+                ops.put(code, new Op(uidState, packageName, code, uid));
+            }
+        }
     }
 
     /**
@@ -1687,13 +1730,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                         pkgOps.remove(ops.packageName);
                         mAppOpsCheckingService.removePackage(ops.packageName,
                                 UserHandle.getUserId(uidState.uid));
-                        if (pkgOps.isEmpty()) {
-                            uidState.pkgOps = null;
-                        }
-                        if (uidState.isDefault()) {
-                            uidState.clear();
-                            mUidStates.remove(uid);
-                        }
                     }
                 }
             }
@@ -2146,10 +2182,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                         mAppOpsCheckingService.removePackage(packageName,
                                 UserHandle.getUserId(uidState.uid));
                     }
-                }
-                if (uidState.isDefault()) {
-                    uidState.clear();
-                    mUidStates.remove(uidState.uid);
                 }
                 if (uidChanged) {
                     uidState.evalForegroundOps();
@@ -3585,6 +3617,20 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
 
         return mPackageManagerInternal;
+    }
+
+    /**
+     * @return {@link UserManagerInternal}
+     */
+    private @NonNull UserManagerInternal getUserManagerInternal() {
+        if (mUserManagerInternal == null) {
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+        }
+        if (mUserManagerInternal == null) {
+            throw new IllegalStateException("UserManagerInternal not loaded");
+        }
+
+        return mUserManagerInternal;
     }
 
     /**

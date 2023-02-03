@@ -17,8 +17,8 @@
 package com.android.server.wm;
 
 import static android.view.DisplayCutout.NO_CUTOUT;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
 import static android.view.Surface.ROTATION_0;
@@ -335,7 +335,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayPolicy.layoutWindowLw(mNavBarWindow, null, mDisplayContent.mDisplayFrames);
         displayPolicy.layoutWindowLw(mImeWindow, null, mDisplayContent.mDisplayFrames);
 
-        final InsetsSource imeSource = state.peekSource(ITYPE_IME);
+        final InsetsSource imeSource = state.peekSource(ID_IME);
         final InsetsSource navBarSource = state.peekSource(ITYPE_NAVIGATION_BAR);
 
         assertNotNull(imeSource);

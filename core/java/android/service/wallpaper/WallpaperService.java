@@ -1242,7 +1242,7 @@ public abstract class WallpaperService extends Service {
                             null /* ignoringVisibilityState */, config.isScreenRound(),
                             false /* alwaysConsumeSystemBars */, mLayout.softInputMode,
                             mLayout.flags, SYSTEM_UI_FLAG_VISIBLE, mLayout.type,
-                            config.windowConfiguration.getWindowingMode(), null /* typeSideMap */);
+                            config.windowConfiguration.getWindowingMode(), null /* idSideMap */);
 
                     if (!fixedSize) {
                         final Rect padding = mIWallpaperEngine.mDisplayPadding;

@@ -17,7 +17,7 @@
 package android.view;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
@@ -92,7 +92,7 @@ public class ImeInsetsSourceConsumerTest {
 
     @Test
     public void testImeVisibility() {
-        final InsetsSourceControl ime = new InsetsSourceControl(ITYPE_IME, WindowInsets.Type.ime(),
+        final InsetsSourceControl ime = new InsetsSourceControl(ID_IME, WindowInsets.Type.ime(),
                 mLeash, false, new Point(), Insets.NONE);
         mController.onControlsChanged(new InsetsSourceControl[] { ime });
 
@@ -121,7 +121,7 @@ public class ImeInsetsSourceConsumerTest {
             mController.show(WindowInsets.Type.ime(), true /* fromIme */, null /* statsToken */);
 
             // set control and verify visibility is applied.
-            InsetsSourceControl control = new InsetsSourceControl(ITYPE_IME,
+            InsetsSourceControl control = new InsetsSourceControl(ID_IME,
                     WindowInsets.Type.ime(), mLeash, false, new Point(), Insets.NONE);
             mController.onControlsChanged(new InsetsSourceControl[] { control });
             // IME show animation should be triggered when control becomes available.
@@ -161,7 +161,7 @@ public class ImeInsetsSourceConsumerTest {
             }
 
             // set control and verify visibility is applied.
-            InsetsSourceControl control = Mockito.spy(new InsetsSourceControl(ITYPE_IME,
+            InsetsSourceControl control = Mockito.spy(new InsetsSourceControl(ID_IME,
                     WindowInsets.Type.ime(), mLeash, false, new Point(), Insets.NONE));
             // Simulate IME source control set this flag when the target has starting window.
             control.setSkipAnimationOnce(true);

@@ -21,7 +21,7 @@ import android.hardware.display.DisplayManager
 import android.view.Display
 import java.util.concurrent.Executor
 
-class FakeDisplayTracker internal constructor(val context: Context) : DisplayTracker {
+class FakeDisplayTracker constructor(val context: Context) : DisplayTracker {
     val displayManager: DisplayManager = context.getSystemService(DisplayManager::class.java)!!
     override var defaultDisplayId: Int = Display.DEFAULT_DISPLAY
     override var allDisplays: Array<Display> = displayManager.displays

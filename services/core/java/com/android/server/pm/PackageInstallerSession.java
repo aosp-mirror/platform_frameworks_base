@@ -59,6 +59,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyEventLogger;
@@ -4495,8 +4496,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         intent.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_SUCCESS);
         intent.putExtra(PackageInstaller.EXTRA_PRE_APPROVAL, true);
         try {
+            final BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setPendingIntentBackgroundActivityLaunchAllowed(false);
             target.sendIntent(mContext, 0 /* code */, intent, null /* onFinished */,
-                    null /* handler */);
+                    null /* handler */, null /* requiredPermission */, options.toBundle());
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
@@ -4763,7 +4766,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(intent.getAction()));
         fillIn.putExtra(Intent.EXTRA_INTENT, intent);
         try {
-            target.sendIntent(context, 0, fillIn, null, null);
+            final BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setPendingIntentBackgroundActivityLaunchAllowed(false);
+            target.sendIntent(context, 0, fillIn, null /* onFinished */,
+                    null /* handler */, null /* requiredPermission */, options.toBundle());
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
@@ -4805,7 +4811,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
         try {
-            target.sendIntent(context, 0, fillIn, null, null);
+            final BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setPendingIntentBackgroundActivityLaunchAllowed(false);
+            target.sendIntent(context, 0, fillIn, null /* onFinished */,
+                    null /* handler */, null /* requiredPermission */, options.toBundle());
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
@@ -4839,7 +4848,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, "Staging Image Not Ready");
         }
         try {
-            target.sendIntent(context, 0, intent, null, null);
+            final BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setPendingIntentBackgroundActivityLaunchAllowed(false);
+            target.sendIntent(context, 0, intent, null /* onFinished */,
+                    null /* handler */, null /* requiredPermission */, options.toBundle());
         } catch (IntentSender.SendIntentException ignored) {
         }
     }

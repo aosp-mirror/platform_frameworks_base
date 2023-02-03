@@ -1315,6 +1315,13 @@
     <string name="media_transfer_this_device_name" product="tablet">This tablet</string>
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
+    <!-- Sub status indicates device need premium account. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_require_premium">Upgrade account to switch</string>
+    <!-- Sub status indicates device not support download content. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_not_support_downloads">Can\’t play downloads here</string>
+    <!-- Sub status indicates device need to wait after ad. [CHAR LIMIT=NONE] -->
+    <string name="media_output_status_try_after_ad">Try again after the ad</string>
+
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>

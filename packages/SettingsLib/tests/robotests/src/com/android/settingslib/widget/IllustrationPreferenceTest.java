@@ -215,4 +215,20 @@ public class IllustrationPreferenceTest {
 
         assertThat(mOnBindListenerAnimationView).isNull();
     }
+
+    @Test
+    public void onBindViewHolder_default_shouldNotApplyDynamicColor() {
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mPreference.isApplyDynamicColor()).isFalse();
+    }
+
+    @Test
+    public void onBindViewHolder_applyDynamicColor_shouldReturnTrue() {
+        mPreference.applyDynamicColor();
+
+        mPreference.onBindViewHolder(mViewHolder);
+
+        assertThat(mPreference.isApplyDynamicColor()).isTrue();
+    }
 }

@@ -372,7 +372,7 @@ public class DisplayLayout {
 
         // Only navigation bar
         if (hasNavigationBar) {
-            final InsetsSource extraNavBar = insetsState.getSource(ITYPE_EXTRA_NAVIGATION_BAR);
+            final InsetsSource extraNavBar = insetsState.peekSource(ITYPE_EXTRA_NAVIGATION_BAR);
             final boolean hasExtraNav = extraNavBar != null && extraNavBar.isVisible();
             int position = navigationBarPosition(res, displayWidth, displayHeight, displayRotation);
             int navBarSize =

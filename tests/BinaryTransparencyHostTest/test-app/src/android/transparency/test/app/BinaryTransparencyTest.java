@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.stream.Collectors;
@@ -56,11 +57,12 @@ public class BinaryTransparencyTest {
         assertThat(args).isNotNull();
         int number = Integer.valueOf(args.getString("apex-number"));
         assertThat(number).isGreaterThan(0);
-        var expectedApexNames = new HashSet<String>();
+        var expectedApexNames = new ArrayList<String>();
         for (var i = 0; i < number; i++) {
             String moduleName = args.getString("apex-" + Integer.toString(i));
             expectedApexNames.add(moduleName);
         }
+        assertThat(expectedApexNames).containsNoDuplicates();
 
         // Action
         var apexInfoList = mBt.collectAllApexInfo(/* includeTestOnly */ true);

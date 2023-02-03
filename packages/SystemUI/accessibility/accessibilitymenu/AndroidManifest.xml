@@ -19,11 +19,12 @@
 
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
 
-    <application>
+    <application android:supportsRtl="true">
         <service
             android:name="com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService"
             android:exported="false"
-            android:label="Accessibility Menu (System)"
+            android:label="@string/accessibility_menu_service_name"
+            android:icon="@drawable/ic_logo_app"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService"/>

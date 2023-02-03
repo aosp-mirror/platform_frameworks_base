@@ -16,12 +16,13 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
-import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
+import static android.view.WindowInsets.Type.displayCutout;
+import static android.view.WindowInsets.Type.ime;
+import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowLayout.UNSPECIFIED_LENGTH;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
@@ -40,6 +41,7 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayCutout;
 import android.view.Gravity;
+import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.WindowInsets;
 import android.view.WindowLayout;
@@ -88,9 +90,9 @@ public class WindowLayoutTests {
         mAttrs = new WindowManager.LayoutParams();
         mState = new InsetsState();
         mState.setDisplayFrame(new Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT));
-        mState.getSource(ITYPE_STATUS_BAR).setFrame(
+        mState.getOrCreateSource(ITYPE_STATUS_BAR, statusBars()).setFrame(
                 0, 0, DISPLAY_WIDTH, STATUS_BAR_HEIGHT);
-        mState.getSource(ITYPE_NAVIGATION_BAR).setFrame(
+        mState.getOrCreateSource(ITYPE_NAVIGATION_BAR, navigationBars()).setFrame(
                 0, DISPLAY_HEIGHT - NAVIGATION_BAR_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
         mState.getDisplayCutoutSafe(mDisplayCutoutSafe);
         mWindowBounds = new Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
@@ -117,14 +119,14 @@ public class WindowLayoutTests {
                 new Rect(),
                 WATERFALL_INSETS));
         mState.getDisplayCutoutSafe(mDisplayCutoutSafe);
-        mState.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(
-                0, 0, mDisplayCutoutSafe.left, DISPLAY_HEIGHT);
-        mState.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(
-                0, 0, DISPLAY_WIDTH, mDisplayCutoutSafe.top);
-        mState.getSource(ITYPE_RIGHT_DISPLAY_CUTOUT).setFrame(
-                mDisplayCutoutSafe.right, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
-        mState.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(
-                0, mDisplayCutoutSafe.bottom, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        mState.getOrCreateSource(InsetsSource.createId(null, 0, displayCutout()), displayCutout())
+                .setFrame(0, 0, mDisplayCutoutSafe.left, DISPLAY_HEIGHT);
+        mState.getOrCreateSource(InsetsSource.createId(null, 1, displayCutout()), displayCutout())
+                .setFrame(0, 0, DISPLAY_WIDTH, mDisplayCutoutSafe.top);
+        mState.getOrCreateSource(InsetsSource.createId(null, 2, displayCutout()), displayCutout())
+                .setFrame(mDisplayCutoutSafe.right, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        mState.getOrCreateSource(InsetsSource.createId(null, 3, displayCutout()), displayCutout())
+                .setFrame(0, mDisplayCutoutSafe.bottom, DISPLAY_WIDTH, DISPLAY_HEIGHT);
     }
 
     private static void assertInsetByTopBottom(int top, int bottom, Rect actual) {
@@ -266,8 +268,8 @@ public class WindowLayoutTests {
 
     @Test
     public void fitInvisibleInsets() {
-        mState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        mState.getSource(ITYPE_NAVIGATION_BAR).setVisible(false);
+        mState.setSourceVisible(ITYPE_STATUS_BAR, false);
+        mState.setSourceVisible(ITYPE_NAVIGATION_BAR, false);
         computeFrames();
 
         assertInsetByTopBottom(0, 0, mFrames.displayFrame);
@@ -277,8 +279,8 @@ public class WindowLayoutTests {
 
     @Test
     public void fitInvisibleInsetsIgnoringVisibility() {
-        mState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        mState.getSource(ITYPE_NAVIGATION_BAR).setVisible(false);
+        mState.setSourceVisible(ITYPE_STATUS_BAR, false);
+        mState.setSourceVisible(ITYPE_NAVIGATION_BAR, false);
         mAttrs.setFitInsetsIgnoringVisibility(true);
         computeFrames();
 
@@ -289,9 +291,9 @@ public class WindowLayoutTests {
 
     @Test
     public void insetParentFrameByIme() {
-        mState.getSource(InsetsState.ITYPE_IME).setVisible(true);
-        mState.getSource(InsetsState.ITYPE_IME).setFrame(
-                0, DISPLAY_HEIGHT - IME_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        mState.getOrCreateSource(ID_IME, ime())
+                .setVisible(true)
+                .setFrame(0, DISPLAY_HEIGHT - IME_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
         mAttrs.privateFlags |= PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
         computeFrames();
 
@@ -363,8 +365,8 @@ public class WindowLayoutTests {
     @Test
     public void layoutInDisplayCutoutModeDefaultWithInvisibleSystemBars() {
         addDisplayCutout();
-        mState.getSource(ITYPE_STATUS_BAR).setVisible(false);
-        mState.getSource(ITYPE_NAVIGATION_BAR).setVisible(false);
+        mState.setSourceVisible(ITYPE_STATUS_BAR, false);
+        mState.setSourceVisible(ITYPE_NAVIGATION_BAR, false);
         mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
         mAttrs.setFitInsetsTypes(0);
         computeFrames();

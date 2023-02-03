@@ -1646,6 +1646,46 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testEnqueueNotificationWithTag_nullAction_fixed() throws Exception {
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addAction(new Notification.Action.Builder(null, "one", null).build())
+                .addAction(new Notification.Action.Builder(null, "two", null).build())
+                .addAction(new Notification.Action.Builder(null, "three", null).build())
+                .build();
+        n.actions[1] = null;
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0, n, 0);
+        waitForIdle();
+
+        StatusBarNotification[] posted = mBinderService.getActiveNotifications(PKG);
+        assertThat(posted).hasLength(1);
+        assertThat(posted[0].getNotification().actions).hasLength(2);
+        assertThat(posted[0].getNotification().actions[0].title.toString()).isEqualTo("one");
+        assertThat(posted[0].getNotification().actions[1].title.toString()).isEqualTo("three");
+    }
+
+    @Test
+    public void testEnqueueNotificationWithTag_allNullActions_fixed() throws Exception {
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .addAction(new Notification.Action.Builder(null, "one", null).build())
+                .addAction(new Notification.Action.Builder(null, "two", null).build())
+                .build();
+        n.actions[0] = null;
+        n.actions[1] = null;
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", 0, n, 0);
+        waitForIdle();
+
+        StatusBarNotification[] posted = mBinderService.getActiveNotifications(PKG);
+        assertThat(posted).hasLength(1);
+        assertThat(posted[0].getNotification().actions).isNull();
+    }
+
+    @Test
     public void testCancelNonexistentNotification() throws Exception {
         mBinderService.cancelNotificationWithTag(PKG, PKG,
                 "testCancelNonexistentNotification", 0, 0);

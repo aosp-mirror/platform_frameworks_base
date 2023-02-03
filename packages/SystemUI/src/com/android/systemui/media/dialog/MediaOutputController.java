@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.dialog;
 
+import static android.media.RouteListingPreference.ACTION_TRANSFER_MEDIA;
+import static android.media.RouteListingPreference.EXTRA_ROUTE_ID;
 import static android.provider.Settings.ACTION_BLUETOOTH_SETTINGS;
 
 import android.annotation.CallbackExecutor;
@@ -24,6 +26,7 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.WallpaperColors;
 import android.bluetooth.BluetoothLeBroadcast;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -382,12 +385,29 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return mContext.getPackageManager().getLaunchIntentForPackage(mPackageName);
     }
 
-    void tryToLaunchMediaApplication() {
+    void tryToLaunchInAppRoutingIntent(String routeId, View view) {
+        ComponentName componentName = mLocalMediaManager.getLinkedItemComponentName();
+        if (componentName != null) {
+            ActivityLaunchAnimator.Controller controller =
+                    mDialogLaunchAnimator.createActivityLaunchController(view);
+            Intent launchIntent = new Intent(ACTION_TRANSFER_MEDIA);
+            launchIntent.setComponent(componentName);
+            launchIntent.putExtra(EXTRA_ROUTE_ID, routeId);
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mCallback.dismissDialog();
+            mContext.startActivity(launchIntent);
+            mActivityStarter.startActivity(launchIntent, true, controller);
+        }
+    }
+
+    void tryToLaunchMediaApplication(View view) {
+        ActivityLaunchAnimator.Controller controller =
+                mDialogLaunchAnimator.createActivityLaunchController(view);
         Intent launchIntent = getAppLaunchIntent();
         if (launchIntent != null) {
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mCallback.dismissDialog();
-            mContext.startActivity(launchIntent);
+            mActivityStarter.startActivity(launchIntent, true, controller);
         }
     }
 

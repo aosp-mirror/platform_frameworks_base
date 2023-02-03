@@ -54,11 +54,11 @@ public class SurfaceSyncGroupTest {
         final CountDownLatch finishedLatch = new CountDownLatch(1);
         SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(TAG);
         syncGroup.addSyncCompleteCallback(mExecutor, finishedLatch::countDown);
-        SyncTarget syncTarget = new SyncTarget();
+        SurfaceSyncGroup syncTarget = new SurfaceSyncGroup("FakeSyncTarget");
         syncGroup.add(syncTarget, null /* runnable */);
         syncGroup.markSyncReady();
 
-        syncTarget.onBufferReady();
+        syncTarget.markSyncReady();
 
         finishedLatch.await(5, TimeUnit.SECONDS);
         assertEquals(0, finishedLatch.getCount());
@@ -69,22 +69,22 @@ public class SurfaceSyncGroupTest {
         final CountDownLatch finishedLatch = new CountDownLatch(1);
         SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(TAG);
         syncGroup.addSyncCompleteCallback(mExecutor, finishedLatch::countDown);
-        SyncTarget syncTarget1 = new SyncTarget();
-        SyncTarget syncTarget2 = new SyncTarget();
-        SyncTarget syncTarget3 = new SyncTarget();
+        SurfaceSyncGroup syncTarget1 = new SurfaceSyncGroup("FakeSyncTarget1");
+        SurfaceSyncGroup syncTarget2 = new SurfaceSyncGroup("FakeSyncTarget2");
+        SurfaceSyncGroup syncTarget3 = new SurfaceSyncGroup("FakeSyncTarget3");
 
         syncGroup.add(syncTarget1, null /* runnable */);
         syncGroup.add(syncTarget2, null /* runnable */);
         syncGroup.add(syncTarget3, null /* runnable */);
         syncGroup.markSyncReady();
 
-        syncTarget1.onBufferReady();
+        syncTarget1.markSyncReady();
         assertNotEquals(0, finishedLatch.getCount());
 
-        syncTarget3.onBufferReady();
+        syncTarget3.markSyncReady();
         assertNotEquals(0, finishedLatch.getCount());
 
-        syncTarget2.onBufferReady();
+        syncTarget2.markSyncReady();
 
         finishedLatch.await(5, TimeUnit.SECONDS);
         assertEquals(0, finishedLatch.getCount());
@@ -94,8 +94,8 @@ public class SurfaceSyncGroupTest {
     public void testAddSyncWhenSyncComplete() {
         SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(TAG);
 
-        SyncTarget syncTarget1 = new SyncTarget();
-        SyncTarget syncTarget2 = new SyncTarget();
+        SurfaceSyncGroup syncTarget1 = new SurfaceSyncGroup("FakeSyncTarget1");
+        SurfaceSyncGroup syncTarget2 = new SurfaceSyncGroup("FakeSyncTarget2");
 
         assertTrue(syncGroup.add(syncTarget1, null /* runnable */));
         syncGroup.markSyncReady();
@@ -114,21 +114,21 @@ public class SurfaceSyncGroupTest {
         syncGroup1.addSyncCompleteCallback(mExecutor, finishedLatch1::countDown);
         syncGroup2.addSyncCompleteCallback(mExecutor, finishedLatch2::countDown);
 
-        SyncTarget syncTarget1 = new SyncTarget();
-        SyncTarget syncTarget2 = new SyncTarget();
+        SurfaceSyncGroup syncTarget1 = new SurfaceSyncGroup("FakeSyncTarget1");
+        SurfaceSyncGroup syncTarget2 = new SurfaceSyncGroup("FakeSyncTarget2");
 
         assertTrue(syncGroup1.add(syncTarget1, null /* runnable */));
         assertTrue(syncGroup2.add(syncTarget2, null /* runnable */));
         syncGroup1.markSyncReady();
         syncGroup2.markSyncReady();
 
-        syncTarget1.onBufferReady();
+        syncTarget1.markSyncReady();
 
         finishedLatch1.await(5, TimeUnit.SECONDS);
         assertEquals(0, finishedLatch1.getCount());
         assertNotEquals(0, finishedLatch2.getCount());
 
-        syncTarget2.onBufferReady();
+        syncTarget2.markSyncReady();
 
         finishedLatch2.await(5, TimeUnit.SECONDS);
         assertEquals(0, finishedLatch2.getCount());
@@ -144,8 +144,8 @@ public class SurfaceSyncGroupTest {
         syncGroup1.addSyncCompleteCallback(mExecutor, finishedLatch1::countDown);
         syncGroup2.addSyncCompleteCallback(mExecutor, finishedLatch2::countDown);
 
-        SyncTarget syncTarget1 = new SyncTarget();
-        SyncTarget syncTarget2 = new SyncTarget();
+        SurfaceSyncGroup syncTarget1 = new SurfaceSyncGroup("FakeSyncTarget1");
+        SurfaceSyncGroup syncTarget2 = new SurfaceSyncGroup("FakeSyncTarget2");
 
         assertTrue(syncGroup1.add(syncTarget1, null /* runnable */));
         assertTrue(syncGroup2.add(syncTarget2, null /* runnable */));
@@ -155,12 +155,12 @@ public class SurfaceSyncGroupTest {
 
         // Finish syncTarget2 first to test that the syncGroup is not complete until the merged sync
         // is also done.
-        syncTarget2.onBufferReady();
+        syncTarget2.markSyncReady();
         finishedLatch2.await(1, TimeUnit.SECONDS);
         // Sync did not complete yet
         assertNotEquals(0, finishedLatch2.getCount());
 
-        syncTarget1.onBufferReady();
+        syncTarget1.markSyncReady();
 
         // The first sync will still get a callback when it's sync requirements are done.
         finishedLatch1.await(5, TimeUnit.SECONDS);
@@ -180,13 +180,13 @@ public class SurfaceSyncGroupTest {
         syncGroup1.addSyncCompleteCallback(mExecutor, finishedLatch1::countDown);
         syncGroup2.addSyncCompleteCallback(mExecutor, finishedLatch2::countDown);
 
-        SyncTarget syncTarget1 = new SyncTarget();
-        SyncTarget syncTarget2 = new SyncTarget();
+        SurfaceSyncGroup syncTarget1 = new SurfaceSyncGroup("FakeSyncTarget1");
+        SurfaceSyncGroup syncTarget2 = new SurfaceSyncGroup("FakeSyncTarget2");
 
         assertTrue(syncGroup1.add(syncTarget1, null /* runnable */));
         assertTrue(syncGroup2.add(syncTarget2, null /* runnable */));
         syncGroup1.markSyncReady();
-        syncTarget1.onBufferReady();
+        syncTarget1.markSyncReady();
 
         // The first sync will still get a callback when it's sync requirements are done.
         finishedLatch1.await(5, TimeUnit.SECONDS);
@@ -194,7 +194,7 @@ public class SurfaceSyncGroupTest {
 
         syncGroup2.add(syncGroup1, null /* runnable */);
         syncGroup2.markSyncReady();
-        syncTarget2.onBufferReady();
+        syncTarget2.markSyncReady();
 
         // Verify that the second sync will receive complete since the merged sync was already
         // completed before the merge.
@@ -212,9 +212,9 @@ public class SurfaceSyncGroupTest {
         syncGroup1.addSyncCompleteCallback(mExecutor, finishedLatch1::countDown);
         syncGroup2.addSyncCompleteCallback(mExecutor, finishedLatch2::countDown);
 
-        SyncTarget syncTarget1 = new SyncTarget();
-        SyncTarget syncTarget2 = new SyncTarget();
-        SyncTarget syncTarget3 = new SyncTarget();
+        SurfaceSyncGroup syncTarget1 = new SurfaceSyncGroup("FakeSyncTarget1");
+        SurfaceSyncGroup syncTarget2 = new SurfaceSyncGroup("FakeSyncTarget2");
+        SurfaceSyncGroup syncTarget3 = new SurfaceSyncGroup("FakeSyncTarget3");
 
         assertTrue(syncGroup1.add(syncTarget1, null /* runnable */));
         assertTrue(syncGroup1.add(syncTarget2, null /* runnable */));
@@ -228,8 +228,8 @@ public class SurfaceSyncGroupTest {
 
         // Make target1 and target3 ready, but not target2. SyncGroup2 should not be ready since
         // SyncGroup2 also waits for all of SyncGroup1 to finish, which includes target2
-        syncTarget1.onBufferReady();
-        syncTarget3.onBufferReady();
+        syncTarget1.markSyncReady();
+        syncTarget3.markSyncReady();
 
         // Neither SyncGroup will be ready.
         finishedLatch1.await(1, TimeUnit.SECONDS);
@@ -238,7 +238,7 @@ public class SurfaceSyncGroupTest {
         assertEquals(1, finishedLatch1.getCount());
         assertEquals(1, finishedLatch2.getCount());
 
-        syncTarget2.onBufferReady();
+        syncTarget2.markSyncReady();
 
         // Both sync groups should be ready after target2 completed.
         finishedLatch1.await(5, TimeUnit.SECONDS);
@@ -257,13 +257,13 @@ public class SurfaceSyncGroupTest {
         syncGroup1.addSyncCompleteCallback(mExecutor, finishedLatch1::countDown);
         syncGroup2.addSyncCompleteCallback(mExecutor, finishedLatch2::countDown);
 
-        SyncTarget syncTarget1 = new SyncTarget();
-        SyncTarget syncTarget2 = new SyncTarget();
-        SyncTarget syncTarget3 = new SyncTarget();
+        SurfaceSyncGroup syncTarget1 = new SurfaceSyncGroup("FakeSyncTarget1");
+        SurfaceSyncGroup syncTarget2 = new SurfaceSyncGroup("FakeSyncTarget2");
+        SurfaceSyncGroup syncTarget3 = new SurfaceSyncGroup("FakeSyncTarget3");
 
         assertTrue(syncGroup1.add(syncTarget1, null /* runnable */));
         assertTrue(syncGroup1.add(syncTarget2, null /* runnable */));
-        syncTarget2.onBufferReady();
+        syncTarget2.markSyncReady();
 
         // Add syncTarget1 to syncGroup2 so it forces syncGroup1 into syncGroup2
         assertTrue(syncGroup2.add(syncTarget1, null /* runnable */));
@@ -272,7 +272,7 @@ public class SurfaceSyncGroupTest {
         syncGroup1.markSyncReady();
         syncGroup2.markSyncReady();
 
-        syncTarget1.onBufferReady();
+        syncTarget1.markSyncReady();
 
         // Only SyncGroup1 will be ready, but SyncGroup2 still needs its own targets to be ready.
         finishedLatch1.await(1, TimeUnit.SECONDS);
@@ -281,7 +281,7 @@ public class SurfaceSyncGroupTest {
         assertEquals(0, finishedLatch1.getCount());
         assertEquals(1, finishedLatch2.getCount());
 
-        syncTarget3.onBufferReady();
+        syncTarget3.markSyncReady();
 
         // SyncGroup2 is finished after target3 completed.
         finishedLatch2.await(1, TimeUnit.SECONDS);
@@ -302,7 +302,7 @@ public class SurfaceSyncGroupTest {
         SurfaceControl.Transaction targetTransaction = spy(new StubTransaction());
         SurfaceSyncGroup.setTransactionFactory(() -> targetTransaction);
 
-        SyncTarget syncTarget = new SyncTarget();
+        SurfaceSyncGroup syncTarget = new SurfaceSyncGroup("FakeSyncTarget");
         assertTrue(
                 syncGroup.add(syncTarget.mISurfaceSyncGroup, true /* parentSyncGroupMerge */,
                         null /* runnable */));
@@ -329,7 +329,7 @@ public class SurfaceSyncGroupTest {
         SurfaceControl.Transaction targetTransaction = spy(new StubTransaction());
         SurfaceSyncGroup.setTransactionFactory(() -> targetTransaction);
 
-        SyncTarget syncTarget = new SyncTarget();
+        SurfaceSyncGroup syncTarget = new SurfaceSyncGroup("FakeSyncTarget");
         assertTrue(syncGroup.add(syncTarget, null /* runnable */));
         syncTarget.markSyncReady();
 
@@ -344,13 +344,13 @@ public class SurfaceSyncGroupTest {
         final CountDownLatch finishedLatch = new CountDownLatch(1);
         SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(TAG);
         syncGroup.addSyncCompleteCallback(mExecutor, finishedLatch::countDown);
-        SyncTarget syncTarget = new SyncTarget();
+        SurfaceSyncGroup syncTarget = new SurfaceSyncGroup("FakeSyncTarget");
         syncGroup.add(syncTarget, null /* runnable */);
         // Add the syncTarget to the same syncGroup and ensure it doesn't crash.
         syncGroup.add(syncTarget, null /* runnable */);
         syncGroup.markSyncReady();
 
-        syncTarget.onBufferReady();
+        syncTarget.markSyncReady();
 
         try {
             finishedLatch.await(5, TimeUnit.SECONDS);
@@ -358,15 +358,5 @@ public class SurfaceSyncGroupTest {
             throw new RuntimeException(e);
         }
         assertEquals(0, finishedLatch.getCount());
-    }
-
-    private static class SyncTarget extends SurfaceSyncGroup {
-        SyncTarget() {
-            super("FakeSyncTarget");
-        }
-
-        void onBufferReady() {
-            markSyncReady();
-        }
     }
 }

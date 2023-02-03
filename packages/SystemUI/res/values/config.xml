@@ -445,6 +445,13 @@
          screenshot has been saved to work profile. If blank, a default icon will be shown. -->
     <string name="config_sceenshotWorkProfileFilesApp" translatable="false"></string>
 
+    <!-- The component name of the screenshot editing activity that provides the App Clips flow.
+         The App Clips flow includes taking a screenshot, showing user screenshot cropping activity
+         and finally letting user send the screenshot to the calling notes app. This activity
+         should not send the screenshot to the calling activity without user consent. -->
+    <string name="config_screenshotAppClipsActivityComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.screenshot.AppClipsActivity</string>
+
     <!-- Remote copy default activity.  Must handle REMOTE_COPY_ACTION intents.
      This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_remoteCopyPackage" translatable="false"></string>

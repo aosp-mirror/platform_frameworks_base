@@ -401,8 +401,9 @@ public class ServiceInfo extends ComponentInfo
      *
      *         <p>If the service isn't stopped within the timeout,
      *         {@link android.app.Service#onTimeout(int)} will be called.
-     *         If the service is still not stopped after the callback,
-     *         the app will be declared an ANR.
+     *
+     *         <p>If the service is still not stopped after the callback,
+     *         the app will be declared an ANR after a short grace period of several seconds.
      *
      *     <li>
      *         A foreground service of this type cannot be made "sticky"
@@ -418,6 +419,17 @@ public class ServiceInfo extends ComponentInfo
      *             Restrictions on background starts
      *         </a>
      * </ul>
+     *
+     * <p>Note, even though
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_SHORT_SERVICE}
+     * was added
+     * on Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it can be also used on
+     * on prior android versions (just like other new foreground service types can be used).
+     * However, because {@link android.app.Service#onTimeout(int)} did not exist on prior versions,
+     * it will never called on such versions.
+     * Because of this, developers must make sure to stop the foreground service even if
+     * {@link android.app.Service#onTimeout(int)} is not called on such versions.
      *
      * @see android.app.Service#onTimeout(int)
      */

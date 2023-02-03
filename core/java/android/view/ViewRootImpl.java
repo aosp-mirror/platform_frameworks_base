@@ -23,7 +23,7 @@ import static android.os.IInputConstants.INVALID_INPUT_EVENT_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InputDevice.SOURCE_CLASS_NONE;
-import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsSource.ID_IME;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
@@ -9040,7 +9040,7 @@ public final class ViewRootImpl implements ViewParent,
         if (mTranslator != null) {
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
         }
-        if (insetsState.getSourceOrDefaultVisibility(ITYPE_IME)) {
+        if (insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
             ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchResized",
                     getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
         }
@@ -9072,7 +9072,7 @@ public final class ViewRootImpl implements ViewParent,
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
             mTranslator.translateSourceControlsInScreenToAppWindow(activeControls);
         }
-        if (insetsState != null && insetsState.getSourceOrDefaultVisibility(ITYPE_IME)) {
+        if (insetsState != null && insetsState.isSourceOrDefaultVisible(ID_IME, Type.ime())) {
             ImeTracing.getInstance().triggerClientDump("ViewRootImpl#dispatchInsetsControlChanged",
                     getInsetsController().getHost().getInputMethodManager(), null /* icProto */);
         }
@@ -11511,33 +11511,25 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
-    private class VRISurfaceSyncGroup extends SurfaceSyncGroup {
-        VRISurfaceSyncGroup(String name) {
-            super(name);
-        }
-
-        @Override
-        public void onSyncReady() {
-            Runnable runnable = () -> {
-                mNumPausedForSync--;
-                if (!mIsInTraversal && mNumPausedForSync == 0) {
-                    scheduleTraversals();
-                }
-            };
-
-            if (Thread.currentThread() == mThread) {
-                runnable.run();
-            } else {
-                mHandler.post(runnable);
-            }
-        }
-    }
-
     @Override
     public SurfaceSyncGroup getOrCreateSurfaceSyncGroup() {
         boolean newSyncGroup = false;
         if (mActiveSurfaceSyncGroup == null) {
-            mActiveSurfaceSyncGroup = new VRISurfaceSyncGroup(mTag);
+            mActiveSurfaceSyncGroup = new SurfaceSyncGroup(mTag);
+            mActiveSurfaceSyncGroup.setAddedToSyncListener(() -> {
+                Runnable runnable = () -> {
+                    mNumPausedForSync--;
+                    if (!mIsInTraversal && mNumPausedForSync == 0) {
+                        scheduleTraversals();
+                    }
+                };
+
+                if (Thread.currentThread() == mThread) {
+                    runnable.run();
+                } else {
+                    mHandler.post(runnable);
+                }
+            });
             updateSyncInProgressCount(mActiveSurfaceSyncGroup);
             newSyncGroup = true;
         }

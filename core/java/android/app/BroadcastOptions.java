@@ -774,7 +774,15 @@ public class BroadcastOptions extends ComponentOptions {
         return this;
     }
 
-    /** @hide */
+    /**
+     * Returns if this broadcast should not run until the process is in an active process state.
+     *
+     * @return {@code true} if this broadcast should not run until the process is in an active
+     *                      process state. Otherwise, {@code false}.
+     * @see #setDeferUntilActive(boolean)
+     *
+     * @hide
+     */
     @SystemApi
     public boolean isDeferUntilActive() {
         return mIsDeferUntilActive;

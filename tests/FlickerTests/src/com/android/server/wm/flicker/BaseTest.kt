@@ -184,12 +184,12 @@ constructor(
     }
 
     open fun cujCompleted() {
-        entireScreenCovered()
-        statusBarLayerIsVisibleAtStartAndEnd()
-        statusBarLayerPositionAtStartAndEnd()
-        statusBarWindowIsAlwaysVisible()
-        visibleLayersShownMoreThanOneConsecutiveEntry()
-        visibleWindowsShownMoreThanOneConsecutiveEntry()
+        runAndIgnoreAssumptionViolation { entireScreenCovered() }
+        runAndIgnoreAssumptionViolation { statusBarLayerIsVisibleAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { statusBarLayerPositionAtStartAndEnd() }
+        runAndIgnoreAssumptionViolation { statusBarWindowIsAlwaysVisible() }
+        runAndIgnoreAssumptionViolation { visibleLayersShownMoreThanOneConsecutiveEntry() }
+        runAndIgnoreAssumptionViolation { visibleWindowsShownMoreThanOneConsecutiveEntry() }
         runAndIgnoreAssumptionViolation { taskBarLayerIsVisibleAtStartAndEnd() }
         runAndIgnoreAssumptionViolation { taskBarWindowIsAlwaysVisible() }
         runAndIgnoreAssumptionViolation { navBarLayerIsVisibleAtStartAndEnd() }

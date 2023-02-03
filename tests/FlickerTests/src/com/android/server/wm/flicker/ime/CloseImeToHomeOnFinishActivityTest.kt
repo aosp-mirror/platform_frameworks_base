@@ -79,6 +79,7 @@ open class CloseImeToHomeOnFinishActivityTest(flicker: FlickerTest) : BaseTest(f
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
     }
 
+    @Presubmit
     @Test
     @IwTest(focusArea = "ime")
     override fun cujCompleted() {

@@ -104,8 +104,6 @@ class ControlsControllerImplTest : SysuiTestCase() {
             ArgumentCaptor<ControlsBindingController.LoadCallback>
 
     @Captor
-    private lateinit var userTrackerCallbackCaptor: ArgumentCaptor<UserTracker.Callback>
-    @Captor
     private lateinit var listingCallbackCaptor:
             ArgumentCaptor<ControlsListingController.ControlsListingCallback>
 
@@ -177,10 +175,6 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 mock(DumpManager::class.java)
         )
         controller.auxiliaryPersistenceWrapper = auxiliaryPersistenceWrapper
-
-        verify(userTracker).addCallback(
-            capture(userTrackerCallbackCaptor), any()
-        )
 
         verify(listingController).addCallback(capture(listingCallbackCaptor))
     }
@@ -539,7 +533,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         reset(persistenceWrapper)
 
-        userTrackerCallbackCaptor.value.onUserChanged(otherUser, mContext)
+        controller.changeUser(UserHandle.of(otherUser))
 
         verify(persistenceWrapper).changeFileAndBackupManager(any(), any())
         verify(persistenceWrapper).readFavorites()

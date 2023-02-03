@@ -370,6 +370,7 @@
   <java-symbol type="string" name="config_controlsPackage" />
   <java-symbol type="string" name="config_screenRecorderComponent" />
   <java-symbol type="string" name="config_somnambulatorComponent" />
+  <java-symbol type="string" name="config_screenshotAppClipsServiceComponent" />
   <java-symbol type="string" name="config_screenshotServiceComponent" />
   <java-symbol type="string" name="config_screenshotErrorReceiverComponent" />
   <java-symbol type="string" name="config_slicePermissionComponent" />
@@ -1440,6 +1441,8 @@
   <java-symbol type="drawable" name="ic_feedback_downrank" />
 
   <java-symbol type="drawable" name="ic_account_circle" />
+  <java-symbol type="drawable" name="ic_dual_screen" />
+  <java-symbol type="drawable" name="ic_thermostat" />
   <java-symbol type="color" name="user_icon_1" />
   <java-symbol type="color" name="user_icon_2" />
   <java-symbol type="color" name="user_icon_3" />
@@ -2500,6 +2503,8 @@
   <java-symbol type="string" name="zen_mode_default_weekends_name" />
   <java-symbol type="string" name="zen_mode_default_events_name" />
   <java-symbol type="string" name="zen_mode_default_every_night_name" />
+  <java-symbol type="string" name="display_rotation_camera_compat_toast_after_rotation" />
+  <java-symbol type="string" name="display_rotation_camera_compat_toast_in_split_screen" />
   <java-symbol type="array" name="config_system_condition_providers" />
   <java-symbol type="string" name="muted_by" />
   <java-symbol type="string" name="zen_mode_alarm" />

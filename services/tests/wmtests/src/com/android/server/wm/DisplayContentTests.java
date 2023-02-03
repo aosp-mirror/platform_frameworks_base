@@ -1557,13 +1557,13 @@ public class DisplayContentTests extends WindowTestsBase {
         // If the visibility of insets state is changed, the rotated state should be updated too.
         final InsetsState rotatedState = app.getFixedRotationTransformInsetsState();
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
-        assertEquals(state.getSource(ITYPE_STATUS_BAR).isVisible(),
-                rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
-        state.getSource(ITYPE_STATUS_BAR).setVisible(
-                !rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+        assertEquals(state.isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()),
+                rotatedState.isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()));
+        state.setSourceVisible(ITYPE_STATUS_BAR,
+                !rotatedState.isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()));
         mDisplayContent.getInsetsStateController().notifyInsetsChanged();
-        assertEquals(state.getSource(ITYPE_STATUS_BAR).isVisible(),
-                rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+        assertEquals(state.isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()),
+                rotatedState.isSourceOrDefaultVisible(ITYPE_STATUS_BAR, statusBars()));
 
         final Rect outFrame = new Rect();
         final Rect outInsets = new Rect();

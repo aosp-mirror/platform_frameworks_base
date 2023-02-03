@@ -225,6 +225,33 @@ public class JobStatusTest {
     }
 
     @Test
+    public void testIsUserVisibleJob() {
+        JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setUserInitiated(false)
+                .build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        assertFalse(job.isUserVisibleJob());
+
+        // User-initiated jobs are always user-visible unless they've been demoted.
+        jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setUserInitiated(true)
+                .build();
+        job = createJobStatus(jobInfo);
+
+        assertTrue(job.isUserVisibleJob());
+
+        job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+        assertFalse(job.isUserVisibleJob());
+
+        job.startedAsUserInitiatedJob = true;
+        assertTrue(job.isUserVisibleJob());
+
+        job.startedAsUserInitiatedJob = false;
+        assertFalse(job.isUserVisibleJob());
+    }
+
+    @Test
     public void testMediaBackupExemption_lateConstraint() {
         final JobInfo triggerContentJob = new JobInfo.Builder(42, TEST_JOB_COMPONENT)
                 .addTriggerContentUri(new JobInfo.TriggerContentUri(IMAGES_MEDIA_URI, 0))
