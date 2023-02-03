@@ -26,6 +26,7 @@ import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyCallback.SignalStrengthsListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.log.table.Diffable
 import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Disconnected
@@ -125,8 +126,12 @@ data class MobileConnectionModel(
             row.logChange(COL_PRIMARY_LEVEL, primaryLevel)
         }
 
-        if (prevVal.dataActivityDirection != dataActivityDirection) {
-            row.logChange(COL_ACTIVITY_DIRECTION, dataActivityDirection.toString())
+        if (prevVal.dataActivityDirection.hasActivityIn != dataActivityDirection.hasActivityIn) {
+            row.logChange(COL_ACTIVITY_DIRECTION_IN, dataActivityDirection.hasActivityIn)
+        }
+
+        if (prevVal.dataActivityDirection.hasActivityOut != dataActivityDirection.hasActivityOut) {
+            row.logChange(COL_ACTIVITY_DIRECTION_OUT, dataActivityDirection.hasActivityOut)
         }
 
         if (prevVal.carrierNetworkChangeActive != carrierNetworkChangeActive) {
@@ -147,11 +152,13 @@ data class MobileConnectionModel(
         row.logChange(COL_IS_GSM, isGsm)
         row.logChange(COL_CDMA_LEVEL, cdmaLevel)
         row.logChange(COL_PRIMARY_LEVEL, primaryLevel)
-        row.logChange(COL_ACTIVITY_DIRECTION, dataActivityDirection.toString())
+        row.logChange(COL_ACTIVITY_DIRECTION_IN, dataActivityDirection.hasActivityIn)
+        row.logChange(COL_ACTIVITY_DIRECTION_OUT, dataActivityDirection.hasActivityOut)
         row.logChange(COL_CARRIER_NETWORK_CHANGE, carrierNetworkChangeActive)
         row.logChange(COL_RESOLVED_NETWORK_TYPE, resolvedNetworkType.toString())
     }
 
+    @VisibleForTesting
     companion object {
         const val COL_EMERGENCY = "EmergencyOnly"
         const val COL_ROAMING = "Roaming"
@@ -161,7 +168,8 @@ data class MobileConnectionModel(
         const val COL_CDMA_LEVEL = "CdmaLevel"
         const val COL_PRIMARY_LEVEL = "PrimaryLevel"
         const val COL_CONNECTION_STATE = "ConnectionState"
-        const val COL_ACTIVITY_DIRECTION = "DataActivity"
+        const val COL_ACTIVITY_DIRECTION_IN = "DataActivity.In"
+        const val COL_ACTIVITY_DIRECTION_OUT = "DataActivity.Out"
         const val COL_CARRIER_NETWORK_CHANGE = "CarrierNetworkChangeActive"
         const val COL_RESOLVED_NETWORK_TYPE = "NetworkType"
     }
