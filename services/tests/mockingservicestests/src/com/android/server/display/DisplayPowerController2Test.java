@@ -460,6 +460,25 @@ public final class DisplayPowerController2Test {
         verify(secondFollowerDpc.animator).animateTo(eq(brightness), anyFloat(), anyFloat());
     }
 
+    @Test
+    public void testDoesNotSetScreenStateForNonDefaultDisplayUntilBootCompleted() {
+        // We should still set screen state for the default display
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1);
+        verify(mHolder.displayPowerState).setScreenState(anyInt());
+
+        mHolder = createDisplayPowerController(42, UNIQUE_ID);
+
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1);
+        verify(mHolder.displayPowerState, never()).setScreenState(anyInt());
+
+        mHolder.dpc.onBootCompleted();
+        advanceTime(1);
+        verify(mHolder.displayPowerState).setScreenState(anyInt());
+    }
+
     private DisplayPowerControllerHolder createDisplayPowerController(int displayId,
             String uniqueId) {
         final DisplayPowerState displayPowerState = mock(DisplayPowerState.class);
@@ -487,7 +506,7 @@ public final class DisplayPowerController2Test {
                 mContextSpy, injector, mDisplayPowerCallbacksMock, mHandler,
                 mSensorManagerMock, mDisplayBlankerMock, display,
                 mBrightnessTrackerMock, brightnessSetting, () -> {},
-                hbmMetadata);
+                hbmMetadata, /* bootCompleted= */ false);
 
         return new DisplayPowerControllerHolder(dpc, displayPowerState, brightnessSetting, animator,
                 automaticBrightnessController, wakelockController);
