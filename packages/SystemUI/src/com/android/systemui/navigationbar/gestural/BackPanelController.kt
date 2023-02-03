@@ -30,6 +30,7 @@ import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
 import android.view.WindowManager
+import androidx.annotation.VisibleForTesting
 import androidx.core.os.postDelayed
 import androidx.core.view.isVisible
 import androidx.dynamicanimation.animation.DynamicAnimation
@@ -52,24 +53,24 @@ private const val ENABLE_FAILSAFE = true
 private const val PX_PER_SEC = 1000
 private const val PX_PER_MS = 1
 
+internal const val MIN_DURATION_ACTIVE_ANIMATION = 300L
 private const val MIN_DURATION_CANCELLED_ANIMATION = 200L
 private const val MIN_DURATION_COMMITTED_ANIMATION = 200L
-private const val MIN_DURATION_ACTIVE_ANIMATION = 300L
 private const val MIN_DURATION_INACTIVE_BEFORE_FLUNG_ANIMATION = 50L
 private const val MIN_DURATION_CONSIDERED_AS_FLING = 100L
 
 private const val FAILSAFE_DELAY_MS = 350L
 private const val POP_ON_FLING_DELAY = 160L
 
-private val VIBRATE_ACTIVATED_EFFECT =
+internal val VIBRATE_ACTIVATED_EFFECT =
         VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
 
-private val VIBRATE_DEACTIVATED_EFFECT =
+internal val VIBRATE_DEACTIVATED_EFFECT =
         VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
 
 private const val DEBUG = false
 
-class BackPanelController private constructor(
+class BackPanelController internal constructor(
         context: Context,
         private val windowManager: WindowManager,
         private val viewConfiguration: ViewConfiguration,
@@ -114,8 +115,10 @@ class BackPanelController private constructor(
         }
     }
 
-    private var params: EdgePanelParams = EdgePanelParams(resources)
-    private var currentState: GestureState = GestureState.GONE
+    @VisibleForTesting
+    internal var params: EdgePanelParams = EdgePanelParams(resources)
+    @VisibleForTesting
+    internal var currentState: GestureState = GestureState.GONE
     private var previousState: GestureState = GestureState.GONE
 
     // Screen attributes
@@ -159,7 +162,7 @@ class BackPanelController private constructor(
 
     private val failsafeRunnable = Runnable { onFailsafe() }
 
-    private enum class GestureState {
+    internal enum class GestureState {
         /* Arrow is off the screen and invisible */
         GONE,
 
