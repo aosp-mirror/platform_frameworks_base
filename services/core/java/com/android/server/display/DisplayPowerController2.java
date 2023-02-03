@@ -73,6 +73,7 @@ import com.android.server.display.brightness.BrightnessUtils;
 import com.android.server.display.brightness.DisplayBrightnessController;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
+import com.android.server.display.layout.Layout;
 import com.android.server.display.state.DisplayStateController;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
@@ -178,6 +179,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     // The ID of the LogicalDisplay tied to this DisplayPowerController2.
     private final int mDisplayId;
+
+    // The ID of the display which this display follows for brightness purposes.
+    private int mLeadDisplayId = Layout.NO_LEAD_DISPLAY;
 
     // The unique ID of the primary display device currently tied to this logical display
     private String mUniqueDisplayId;
@@ -694,7 +698,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
      * Make sure DisplayManagerService.mSyncRoot lock is held when this is called
      */
     @Override
-    public void onDisplayChanged(HighBrightnessModeMetadata hbmMetadata) {
+    public void onDisplayChanged(HighBrightnessModeMetadata hbmMetadata, int leadDisplayId) {
+        mLeadDisplayId = leadDisplayId;
         final DisplayDevice device = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         if (device == null) {
             Slog.wtf(mTag, "Display Device is null in DisplayPowerController2 for display: "
@@ -2149,6 +2154,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     }
 
     @Override
+    public int getLeadDisplayId() {
+        return mLeadDisplayId;
+    }
+
+    @Override
     public void setBrightnessToFollow(float leadDisplayBrightness, float nits, float ambientLux) {
         mHbmController.onAmbientLuxChange(ambientLux);
         if (mAutomaticBrightnessController == null || nits < 0) {
@@ -2218,21 +2228,17 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     public void addDisplayBrightnessFollower(DisplayPowerControllerInterface follower) {
         synchronized (mLock) {
             mDisplayBrightnessFollowers.append(follower.getDisplayId(), follower);
+            sendUpdatePowerStateLocked();
         }
-        sendUpdatePowerState();
     }
 
     @Override
-    public void clearDisplayBrightnessFollowers() {
-        SparseArray<DisplayPowerControllerInterface> followers;
+    public void removeDisplayBrightnessFollower(DisplayPowerControllerInterface follower) {
         synchronized (mLock) {
-            followers = mDisplayBrightnessFollowers.clone();
-            mDisplayBrightnessFollowers.clear();
-        }
-        for (int i = 0; i < followers.size(); i++) {
-            DisplayPowerControllerInterface follower = followers.valueAt(i);
-            follower.setBrightnessToFollow(PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
-                    /* ambientLux= */ 0);
+            mDisplayBrightnessFollowers.remove(follower.getDisplayId());
+            mHandler.postAtTime(() -> follower.setBrightnessToFollow(
+                    PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
+                    /* ambientLux= */ 0), mClock.uptimeMillis());
         }
     }
 
@@ -2242,6 +2248,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             pw.println();
             pw.println("Display Power Controller:");
             pw.println("  mDisplayId=" + mDisplayId);
+            pw.println("  mLeadDisplayId=" + mLeadDisplayId);
             pw.println("  mLightSensor=" + mLightSensor);
 
             pw.println();

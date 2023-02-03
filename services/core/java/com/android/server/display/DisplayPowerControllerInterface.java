@@ -32,13 +32,18 @@ public interface DisplayPowerControllerInterface {
 
     /**
      * Notified when the display is changed.
-     * We use this to apply any changes that might be needed
-     * when displays get swapped on foldable devices.
-     * We also pass the High brightness mode metadata like
-     * remaining time and hbm events for the corresponding
-     * physical display, to update the values correctly.
+     *
+     * We use this to apply any changes that might be needed when displays get swapped on foldable
+     * devices, when layouts change, etc.
+     *
+     * Must be called while holding the SyncRoot lock.
+     *
+     * @param hbmInfo The high brightness mode metadata, like
+     *                remaining time and hbm events, for the corresponding
+     *                physical display, to make sure we stay within the safety margins.
+     * @param leadDisplayId The display who is considered our "leader" for things like brightness.
      */
-    void onDisplayChanged(HighBrightnessModeMetadata hbmInfo);
+    void onDisplayChanged(HighBrightnessModeMetadata hbmInfo, int leadDisplayId);
 
     /**
      * Unregisters all listeners and interrupts all running threads; halting future work.
@@ -169,6 +174,16 @@ public interface DisplayPowerControllerInterface {
     int getDisplayId();
 
     /**
+     * Get the ID of the display that is the leader of this DPC.
+     *
+     * Note that this is different than the display associated with the DPC. The leader is another
+     * display which we follow for things like brightness.
+     *
+     * Must be called while holding the SyncRoot lock.
+     */
+    int getLeadDisplayId();
+
+    /**
      * Set the brightness to follow if this is an additional display in a set of concurrent
      * displays.
      * @param leadDisplayBrightness The brightness of the lead display in the set of concurrent
@@ -187,7 +202,8 @@ public interface DisplayPowerControllerInterface {
     void addDisplayBrightnessFollower(DisplayPowerControllerInterface follower);
 
     /**
-     * Clear all the additional displays following the brightness value of this display.
+     * Removes the given display from the list of brightness followers.
+     * @param follower The DPC to remove from the followers list
      */
-    void clearDisplayBrightnessFollowers();
+    void removeDisplayBrightnessFollower(DisplayPowerControllerInterface follower);
 }
