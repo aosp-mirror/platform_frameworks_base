@@ -228,7 +228,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testGetRelBoundsForPosition_expandContainers() {
-        final TaskContainer.TaskProperties taskProperties = getTaskProperty();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties();
         final SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(new SplitAttributes.SplitType.ExpandContainersSplitType())
                 .build();
@@ -248,7 +248,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testGetRelBoundsForPosition_expandContainers_isRelativeToParent() {
-        final TaskContainer.TaskProperties taskProperties = getTaskProperty(
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties(
                 new Rect(100, 100, 500, 1000));
         final SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(new SplitAttributes.SplitType.ExpandContainersSplitType())
@@ -273,7 +273,7 @@ public class SplitPresenterTest {
                 false /* splitHorizontally */);
         final Rect secondaryBounds = getSplitBounds(false /* isPrimary */,
                 false /* splitHorizontally */);
-        final TaskContainer.TaskProperties taskProperties = getTaskProperty();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties();
         SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(SplitAttributes.SplitType.RatioSplitType.splitEqually())
                 .setLayoutDirection(SplitAttributes.LayoutDirection.LEFT_TO_RIGHT)
@@ -339,7 +339,7 @@ public class SplitPresenterTest {
         // Offset TaskBounds to 100, 100. The returned rel bounds shouldn't be affected.
         final Rect taskBounds = new Rect(TASK_BOUNDS);
         taskBounds.offset(100, 100);
-        final TaskContainer.TaskProperties taskProperties = getTaskProperty(taskBounds);
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties(taskBounds);
         SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(SplitAttributes.SplitType.RatioSplitType.splitEqually())
                 .setLayoutDirection(SplitAttributes.LayoutDirection.LEFT_TO_RIGHT)
@@ -400,7 +400,7 @@ public class SplitPresenterTest {
                 true /* splitHorizontally */);
         final Rect secondaryBounds = getSplitBounds(false /* isPrimary */,
                 true /* splitHorizontally */);
-        final TaskContainer.TaskProperties taskProperties = getTaskProperty();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties();
         SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(SplitAttributes.SplitType.RatioSplitType.splitEqually())
                 .setLayoutDirection(SplitAttributes.LayoutDirection.TOP_TO_BOTTOM)
@@ -442,7 +442,7 @@ public class SplitPresenterTest {
                 false /* splitHorizontally */);
         final Rect secondaryBounds = getSplitBounds(false /* isPrimary */,
                 false /* splitHorizontally */);
-        final TaskContainer.TaskProperties taskProperties = getTaskProperty();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties();
         final SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(new SplitAttributes.SplitType.HingeSplitType(
                         SplitAttributes.SplitType.RatioSplitType.splitEqually()
@@ -506,7 +506,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testGetRelBoundsForPosition_fallbackToExpandContainers() {
-        final TaskContainer.TaskProperties taskProperties = getTaskProperty();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties();
         final SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(new SplitAttributes.SplitType.HingeSplitType(
                         new SplitAttributes.SplitType.ExpandContainersSplitType()
@@ -528,7 +528,7 @@ public class SplitPresenterTest {
 
     @Test
     public void testGetRelBoundsForPosition_useHingeSplitType() {
-        final TaskContainer.TaskProperties taskProperties = getTaskProperty();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties();
         final SplitAttributes splitAttributes = new SplitAttributes.Builder()
                 .setSplitType(new SplitAttributes.SplitType.HingeSplitType(
                         new SplitAttributes.SplitType.ExpandContainersSplitType()
@@ -581,13 +581,13 @@ public class SplitPresenterTest {
                 splitContainer, mActivity, secondaryActivity, null /* secondaryIntent */));
         verify(mPresenter, never()).expandTaskFragment(any(), any());
 
-        splitContainer.setSplitAttributes(SPLIT_ATTRIBUTES);
+        splitContainer.updateCurrentSplitAttributes(SPLIT_ATTRIBUTES);
         doReturn(createActivityInfoWithMinDimensions()).when(secondaryActivity).getActivityInfo();
         assertEquals(RESULT_EXPAND_FAILED_NO_TF_INFO, mPresenter.expandSplitContainerIfNeeded(
                 mTransaction, splitContainer, mActivity, secondaryActivity,
                 null /* secondaryIntent */));
 
-        splitContainer.setSplitAttributes(SPLIT_ATTRIBUTES);
+        splitContainer.updateCurrentSplitAttributes(SPLIT_ATTRIBUTES);
         primaryTf.setInfo(mTransaction, createMockTaskFragmentInfo(primaryTf, mActivity));
         secondaryTf.setInfo(mTransaction,
                 createMockTaskFragmentInfo(secondaryTf, secondaryActivity));
@@ -597,7 +597,7 @@ public class SplitPresenterTest {
         verify(mPresenter).expandTaskFragment(mTransaction, primaryTf.getTaskFragmentToken());
         verify(mPresenter).expandTaskFragment(mTransaction, secondaryTf.getTaskFragmentToken());
 
-        splitContainer.setSplitAttributes(SPLIT_ATTRIBUTES);
+        splitContainer.updateCurrentSplitAttributes(SPLIT_ATTRIBUTES);
         clearInvocations(mPresenter);
 
         assertEquals(RESULT_EXPANDED, mPresenter.expandSplitContainerIfNeeded(mTransaction,
@@ -639,37 +639,35 @@ public class SplitPresenterTest {
                 .setFinishPrimaryWithSecondary(DEFAULT_FINISH_PRIMARY_WITH_SECONDARY)
                 .setDefaultSplitAttributes(SPLIT_ATTRIBUTES)
                 .build();
-        final TaskContainer.TaskProperties taskProperties = getTaskProperty();
+        final TaskContainer.TaskProperties taskProperties = getTaskProperties();
 
         assertEquals(SPLIT_ATTRIBUTES, mPresenter.computeSplitAttributes(taskProperties,
-                splitPairRule, null /* minDimensionsPair */));
+                splitPairRule, SPLIT_ATTRIBUTES,  null /* minDimensionsPair */));
 
         final Pair<Size, Size> minDimensionsPair = new Pair<>(
                 new Size(TASK_BOUNDS.width(), TASK_BOUNDS.height()), null);
 
         assertEquals(EXPAND_CONTAINERS_ATTRIBUTES, mPresenter.computeSplitAttributes(taskProperties,
-                splitPairRule, minDimensionsPair));
+                splitPairRule, SPLIT_ATTRIBUTES, minDimensionsPair));
 
         taskProperties.getConfiguration().windowConfiguration.setBounds(new Rect(
                 TASK_BOUNDS.left + 1, TASK_BOUNDS.top + 1, TASK_BOUNDS.right + 1,
                 TASK_BOUNDS.bottom + 1));
 
         assertEquals(EXPAND_CONTAINERS_ATTRIBUTES, mPresenter.computeSplitAttributes(taskProperties,
-                splitPairRule, null /* minDimensionsPair */));
+                splitPairRule, SPLIT_ATTRIBUTES, null /* minDimensionsPair */));
 
         final SplitAttributes splitAttributes = new SplitAttributes.Builder()
-                .setSplitType(
-                        new SplitAttributes.SplitType.HingeSplitType(
-                                SplitAttributes.SplitType.RatioSplitType.splitEqually()
-                        )
-                ).build();
+                .setSplitType(new SplitAttributes.SplitType.HingeSplitType(
+                        SplitAttributes.SplitType.RatioSplitType.splitEqually()))
+                .build();
         final Function<SplitAttributesCalculatorParams, SplitAttributes> calculator =
                 params -> splitAttributes;
 
         mController.setSplitAttributesCalculator(calculator);
 
         assertEquals(splitAttributes, mPresenter.computeSplitAttributes(taskProperties,
-                splitPairRule, null /* minDimensionsPair */));
+                splitPairRule, SPLIT_ATTRIBUTES, null /* minDimensionsPair */));
     }
 
     @Test
@@ -696,14 +694,15 @@ public class SplitPresenterTest {
         doReturn(activityConfig).when(mActivityResources).getConfiguration();
         doReturn(new ActivityInfo()).when(activity).getActivityInfo();
         doReturn(mock(IBinder.class)).when(activity).getActivityToken();
+        doReturn(TASK_ID).when(activity).getTaskId();
         return activity;
     }
 
-    private static TaskContainer.TaskProperties getTaskProperty() {
-        return getTaskProperty(TASK_BOUNDS);
+    private static TaskContainer.TaskProperties getTaskProperties() {
+        return getTaskProperties(TASK_BOUNDS);
     }
 
-    private static TaskContainer.TaskProperties getTaskProperty(@NonNull Rect taskBounds) {
+    private static TaskContainer.TaskProperties getTaskProperties(@NonNull Rect taskBounds) {
         final Configuration configuration = new Configuration();
         configuration.windowConfiguration.setBounds(taskBounds);
         return new TaskContainer.TaskProperties(DEFAULT_DISPLAY, configuration);

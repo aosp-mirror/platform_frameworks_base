@@ -179,7 +179,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final Pair<Size, Size> minDimensionsPair = getActivityIntentMinDimensionsPair(
                 primaryActivity, secondaryIntent);
         final SplitAttributes splitAttributes = computeSplitAttributes(taskProperties, rule,
-                minDimensionsPair);
+                rule.getDefaultSplitAttributes(), minDimensionsPair);
         final Rect primaryRelBounds = getRelBoundsForPosition(POSITION_START, taskProperties,
                 splitAttributes);
         final TaskFragmentContainer primaryContainer = prepareContainerForActivity(wct,
@@ -225,7 +225,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         final Pair<Size, Size> minDimensionsPair = getActivitiesMinDimensionsPair(primaryActivity,
                 secondaryActivity);
         final SplitAttributes splitAttributes = computeSplitAttributes(taskProperties, rule,
-                minDimensionsPair);
+                rule.getDefaultSplitAttributes(), minDimensionsPair);
         final Rect primaryRelBounds = getRelBoundsForPosition(POSITION_START, taskProperties,
                 splitAttributes);
         final TaskFragmentContainer primaryContainer = prepareContainerForActivity(wct,
@@ -334,11 +334,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     /**
      * Updates the positions of containers in an existing split.
      * @param splitContainer The split container to be updated.
-     * @param updatedContainer The task fragment that was updated and caused this split update.
      * @param wct WindowContainerTransaction that this update should be performed with.
      */
     void updateSplitContainer(@NonNull SplitContainer splitContainer,
-            @NonNull TaskFragmentContainer updatedContainer,
             @NonNull WindowContainerTransaction wct) {
         // Getting the parent configuration using the updated container - it will have the recent
         // value.
@@ -348,8 +346,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         if (activity == null) {
             return;
         }
-        final TaskProperties taskProperties = getTaskProperties(updatedContainer);
-        final SplitAttributes splitAttributes = splitContainer.getSplitAttributes();
+        final TaskContainer taskContainer = splitContainer.getTaskContainer();
+        final TaskProperties taskProperties = taskContainer.getTaskProperties();
+        final SplitAttributes splitAttributes = splitContainer.getCurrentSplitAttributes();
         final Rect primaryRelBounds = getRelBoundsForPosition(POSITION_START, taskProperties,
                 splitAttributes);
         final Rect secondaryRelBounds = getRelBoundsForPosition(POSITION_END, taskProperties,
@@ -370,7 +369,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
             // When placeholder is shown in split, we should keep the focus on the primary.
             wct.requestFocusOnTaskFragment(primaryContainer.getTaskFragmentToken());
         }
-        final TaskContainer taskContainer = updatedContainer.getTaskContainer();
         final int windowingMode = taskContainer.getWindowingModeForSplitTaskFragment(
                 primaryRelBounds);
         updateTaskFragmentWindowingModeIfRegistered(wct, primaryContainer, windowingMode);
@@ -515,9 +513,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         // Expand the splitContainer if minimum dimensions are not satisfied.
         final TaskContainer taskContainer = splitContainer.getTaskContainer();
         final SplitAttributes splitAttributes = sanitizeSplitAttributes(
-                taskContainer.getTaskProperties(), splitContainer.getSplitAttributes(),
+                taskContainer.getTaskProperties(), splitContainer.getCurrentSplitAttributes(),
                 minDimensionsPair);
-        splitContainer.setSplitAttributes(splitAttributes);
+        splitContainer.updateCurrentSplitAttributes(splitAttributes);
         if (!shouldShowSplit(splitAttributes)) {
             // If the client side hasn't received TaskFragmentInfo yet, we can't change TaskFragment
             // bounds. Return failure to create a new SplitContainer which fills task bounds.
@@ -540,7 +538,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     static boolean shouldShowSplit(@NonNull SplitContainer splitContainer) {
-        return shouldShowSplit(splitContainer.getSplitAttributes());
+        return shouldShowSplit(splitContainer.getCurrentSplitAttributes());
     }
 
     static boolean shouldShowSplit(@NonNull SplitAttributes splitAttributes) {
@@ -549,12 +547,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
 
     @NonNull
     SplitAttributes computeSplitAttributes(@NonNull TaskProperties taskProperties,
-            @NonNull SplitRule rule, @Nullable Pair<Size, Size> minDimensionsPair) {
+            @NonNull SplitRule rule, @NonNull SplitAttributes defaultSplitAttributes,
+            @Nullable Pair<Size, Size> minDimensionsPair) {
         final Configuration taskConfiguration = taskProperties.getConfiguration();
         final WindowMetrics taskWindowMetrics = getTaskWindowMetrics(taskConfiguration);
         final Function<SplitAttributesCalculatorParams, SplitAttributes> calculator =
                 mController.getSplitAttributesCalculator();
-        final SplitAttributes defaultSplitAttributes = rule.getDefaultSplitAttributes();
         final boolean areDefaultConstraintsSatisfied = rule.checkParentMetrics(taskWindowMetrics);
         if (calculator == null) {
             if (!areDefaultConstraintsSatisfied) {
@@ -954,11 +952,6 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     private static boolean isFoldingAreaHorizontal(@NonNull FoldingFeature foldingFeature) {
         final Rect bounds = foldingFeature.getBounds();
         return bounds.width() > bounds.height();
-    }
-
-    @NonNull
-    static TaskProperties getTaskProperties(@NonNull TaskFragmentContainer container) {
-        return container.getTaskContainer().getTaskProperties();
     }
 
     @NonNull
