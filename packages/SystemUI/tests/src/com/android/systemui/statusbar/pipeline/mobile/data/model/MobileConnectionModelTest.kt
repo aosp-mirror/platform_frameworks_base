@@ -19,7 +19,8 @@ package com.android.systemui.statusbar.pipeline.mobile.data.model
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableRowLogger
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_ACTIVITY_DIRECTION
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_ACTIVITY_DIRECTION_IN
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_ACTIVITY_DIRECTION_OUT
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_CARRIER_NETWORK_CHANGE
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_CDMA_LEVEL
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_CONNECTION_STATE
@@ -54,7 +55,19 @@ class MobileConnectionModelTest : SysuiTestCase() {
         assertThat(logger.changes)
             .contains(Pair(COL_CONNECTION_STATE, connection.dataConnectionState.toString()))
         assertThat(logger.changes)
-            .contains(Pair(COL_ACTIVITY_DIRECTION, connection.dataActivityDirection.toString()))
+            .contains(
+                Pair(
+                    COL_ACTIVITY_DIRECTION_IN,
+                    connection.dataActivityDirection.hasActivityIn.toString(),
+                )
+            )
+        assertThat(logger.changes)
+            .contains(
+                Pair(
+                    COL_ACTIVITY_DIRECTION_OUT,
+                    connection.dataActivityDirection.hasActivityOut.toString(),
+                )
+            )
         assertThat(logger.changes)
             .contains(
                 Pair(COL_CARRIER_NETWORK_CHANGE, connection.carrierNetworkChangeActive.toString())
