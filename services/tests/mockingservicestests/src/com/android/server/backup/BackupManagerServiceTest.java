@@ -63,6 +63,7 @@ import com.android.server.SystemService;
 import com.android.server.backup.utils.RandomAccessFileUtils;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -611,6 +612,50 @@ public class BackupManagerServiceTest {
 
         mService.dump(mFileDescriptorStub, mPrintWriterMock, new String[0]);
 
+        verify(mSystemUserBackupManagerService, never()).dump(any(), any(), any());
+        verify(mNonSystemUserBackupManagerService, never()).dump(any(), any(), any());
+    }
+
+    @Test
+    public void testDumpForOneUser_callerDoesNotHaveInteractAcrossUsersFullPermission_ignored() {
+        mService.setBackupServiceActive(NON_SYSTEM_USER, true);
+        simulateUserUnlocked(NON_SYSTEM_USER);
+
+        doThrow(new SecurityException())
+                .when(mContextMock)
+                .enforceCallingOrSelfPermission(
+                        eq(Manifest.permission.INTERACT_ACROSS_USERS_FULL), anyString());
+
+        String[] args = new String[]{"--user", Integer.toString(NON_SYSTEM_USER)};
+        Assert.assertThrows(SecurityException.class,
+                () -> mService.dumpWithoutCheckingPermission(mFileDescriptorStub, mPrintWriterMock,
+                        args));
+
+        verify(mNonSystemUserBackupManagerService, never()).dump(any(), any(), any());
+    }
+
+    @Test
+    public void
+            testDumpForOneUser_callerHasInteractAcrossUsersFullPermission_dumpsOnlySpecifiedUser() {
+        mService.setBackupServiceActive(NON_SYSTEM_USER, true);
+        simulateUserUnlocked(NON_SYSTEM_USER);
+
+        String[] args = new String[]{"--user", Integer.toString(UserHandle.USER_SYSTEM)};
+        mService.dumpWithoutCheckingPermission(mFileDescriptorStub, mPrintWriterMock, args);
+
+        verify(mSystemUserBackupManagerService).dump(any(), any(), any());
+    }
+
+    @Test
+    public void testDumpForAllUsers_callerHasInteractAcrossUsersFullPermission_dumpsAllUsers() {
+        mService.setBackupServiceActive(NON_SYSTEM_USER, true);
+        simulateUserUnlocked(NON_SYSTEM_USER);
+
+        String[] args = new String[]{"users"};
+        mService.dumpWithoutCheckingPermission(mFileDescriptorStub, mPrintWriterMock, args);
+
+        // Check that dump() invocations are not called on user's Backup service,
+        // as 'dumpsys backup users' only list users for whom Backup service is running.
         verify(mSystemUserBackupManagerService, never()).dump(any(), any(), any());
         verify(mNonSystemUserBackupManagerService, never()).dump(any(), any(), any());
     }
