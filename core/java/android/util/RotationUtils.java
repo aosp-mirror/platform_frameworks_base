@@ -27,6 +27,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.view.Surface;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 
@@ -244,5 +245,24 @@ public class RotationUtils {
             default:
                 throw new IllegalArgumentException("Unknown rotation: " + rotation);
         }
+    }
+
+    /**
+     * Reverses the rotation direction around the Z axis. Note that this method assumes all
+     * rotations are relative to {@link Surface.ROTATION_0}.
+     *
+     * @param rotation the original rotation.
+     * @return the new rotation that should be applied.
+     */
+    @Surface.Rotation
+    public static int reverseRotationDirectionAroundZAxis(@Surface.Rotation int rotation) {
+        // Flipping 270 and 90 has the same effect as changing the direction which rotation is
+        // applied.
+        if (rotation == Surface.ROTATION_90) {
+            rotation = Surface.ROTATION_270;
+        } else if (rotation == Surface.ROTATION_270) {
+            rotation = Surface.ROTATION_90;
+        }
+        return rotation;
     }
 }

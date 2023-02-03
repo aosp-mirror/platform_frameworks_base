@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
@@ -48,8 +49,11 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
     private final int[] mRearDisplayDeviceStates;
     @NonNull
     private final int[] mReverseRotationAroundZAxisStates;
+    @GuardedBy("this")
     @NonNull
     private final List<Consumer<DeviceState>> mDeviceStateCallbacks = new ArrayList<>();
+
+    private final boolean mMatchBuiltInDisplayOrientationToDefaultDisplay;
 
     @Nullable
     private DeviceState mLastDeviceState;
@@ -72,20 +76,19 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
                 .getIntArray(R.array.config_rearDisplayDeviceStates);
         mReverseRotationAroundZAxisStates = context.getResources()
                 .getIntArray(R.array.config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis);
+        mMatchBuiltInDisplayOrientationToDefaultDisplay = context.getResources()
+                .getBoolean(R.bool
+                        .config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay);
 
         if (mDeviceStateManager != null) {
             mDeviceStateManager.registerCallback(new HandlerExecutor(handler), this);
         }
     }
 
-    void unregisterFromDeviceStateManager() {
-        if (mDeviceStateManager != null) {
-            mDeviceStateManager.unregisterCallback(this);
-        }
-    }
-
     void registerDeviceStateCallback(@NonNull Consumer<DeviceState> callback) {
-        mDeviceStateCallbacks.add(callback);
+        synchronized (this) {
+            mDeviceStateCallbacks.add(callback);
+        }
     }
 
     /**
@@ -93,6 +96,15 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
      */
     boolean shouldReverseRotationDirectionAroundZAxis() {
         return ArrayUtils.contains(mReverseRotationAroundZAxisStates, mCurrentState);
+    }
+
+    /**
+     * @return true if non-default built-in displays should match the default display's rotation.
+     */
+    boolean shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay() {
+        // TODO(b/265991392): This should come from display_settings.xml once it's easier to
+        //  extend with complex configurations.
+        return mMatchBuiltInDisplayOrientationToDefaultDisplay;
     }
 
     @Override
@@ -115,8 +127,10 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
         if (mLastDeviceState == null || !mLastDeviceState.equals(deviceState)) {
             mLastDeviceState = deviceState;
 
-            for (Consumer<DeviceState> callback : mDeviceStateCallbacks) {
-                callback.accept(mLastDeviceState);
+            synchronized (this) {
+                for (Consumer<DeviceState> callback : mDeviceStateCallbacks) {
+                    callback.accept(mLastDeviceState);
+                }
             }
         }
     }

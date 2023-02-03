@@ -595,7 +595,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     final FixedRotationTransitionListener mFixedRotationTransitionListener =
             new FixedRotationTransitionListener();
 
-    private final DeviceStateController mDeviceStateController;
+    @VisibleForTesting
+    final DeviceStateController mDeviceStateController;
     private final PhysicalDisplaySwitchTransitionLauncher mDisplaySwitchTransitionLauncher;
     final RemoteDisplayChangeController mRemoteDisplayChangeController;
 
@@ -1091,7 +1092,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param display May not be null.
      * @param root {@link RootWindowContainer}
      */
-    DisplayContent(Display display, RootWindowContainer root) {
+    DisplayContent(Display display, RootWindowContainer root,
+            @NonNull DeviceStateController deviceStateController) {
         super(root.mWindowManager, "DisplayContent", FEATURE_ROOT);
         if (mWmService.mRoot.getDisplayContent(display.getDisplayId()) != null) {
             throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
@@ -1151,11 +1153,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mWmService.mAtmService.getRecentTasks().getInputListener());
         }
 
-        mDeviceStateController = new DeviceStateController(mWmService.mContext, mWmService.mH);
+        mDeviceStateController = deviceStateController;
 
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
         mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address,
-                mDeviceStateController);
+                mDeviceStateController, root.getDisplayRotationCoordinator());
 
         final Consumer<DeviceStateController.DeviceState> deviceStateConsumer =
                 (@NonNull DeviceStateController.DeviceState newFoldState) -> {
@@ -3326,7 +3328,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mTransitionController.unregisterLegacyListener(mFixedRotationTransitionListener);
             handleAnimatingStoppedAndTransition();
             mWmService.stopFreezingDisplayLocked();
-            mDeviceStateController.unregisterFromDeviceStateManager();
+            mDisplayRotation.removeDefaultDisplayRotationChangedCallback();
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
             mPointerEventDispatcher.dispose();
