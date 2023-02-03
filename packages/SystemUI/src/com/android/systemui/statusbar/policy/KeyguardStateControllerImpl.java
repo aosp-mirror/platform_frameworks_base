@@ -438,6 +438,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         }
 
         @Override
+        public void onLockedOutStateChanged(BiometricSourceType biometricSourceType) {
+            update(false /* updateAlways */);
+        }
+
+        @Override
         public void onKeyguardVisibilityChanged(boolean visible) {
             update(false /* updateAlways */);
         }
