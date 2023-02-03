@@ -2011,6 +2011,74 @@ public class DisplayModeDirectorTest {
                 eq(lightSensorTwo), anyInt(), any(Handler.class));
     }
 
+    @Test
+    public void testAuthenticationPossibleSetsPhysicalRateRangesToMax() throws RemoteException {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[]{60.0f, 90.0f}, 0);
+        // don't call director.start(createMockSensorManager());
+        // DisplayObserver will reset mSupportedModesByDisplay
+        director.onBootCompleted();
+        ArgumentCaptor<IUdfpsHbmListener> captor =
+                ArgumentCaptor.forClass(IUdfpsHbmListener.class);
+        verify(mStatusBarMock).setUdfpsHbmListener(captor.capture());
+
+        captor.getValue().onAuthenticationPossible(DISPLAY_ID, true);
+
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE);
+        assertThat(vote.refreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(vote.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+    }
+
+    @Test
+    public void testAuthenticationPossibleUnsetsVote() throws RemoteException {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[]{60.0f, 90.0f}, 0);
+        director.start(createMockSensorManager());
+        director.onBootCompleted();
+        ArgumentCaptor<IUdfpsHbmListener> captor =
+                ArgumentCaptor.forClass(IUdfpsHbmListener.class);
+        verify(mStatusBarMock).setUdfpsHbmListener(captor.capture());
+        captor.getValue().onAuthenticationPossible(DISPLAY_ID, true);
+        captor.getValue().onAuthenticationPossible(DISPLAY_ID, false);
+
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE);
+        assertNull(vote);
+    }
+
+    @Test
+    public void testUdfpsRequestSetsPhysicalRateRangesToMax() throws RemoteException {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[]{60.0f, 90.0f}, 0);
+        // don't call director.start(createMockSensorManager());
+        // DisplayObserver will reset mSupportedModesByDisplay
+        director.onBootCompleted();
+        ArgumentCaptor<IUdfpsHbmListener> captor =
+                ArgumentCaptor.forClass(IUdfpsHbmListener.class);
+        verify(mStatusBarMock).setUdfpsHbmListener(captor.capture());
+
+        captor.getValue().onHbmEnabled(DISPLAY_ID);
+
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_UDFPS);
+        assertThat(vote.refreshRateRange.min).isWithin(FLOAT_TOLERANCE).of(90);
+        assertThat(vote.refreshRateRange.max).isWithin(FLOAT_TOLERANCE).of(90);
+    }
+
+    @Test
+    public void testUdfpsRequestUnsetsUnsetsVote() throws RemoteException {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[]{60.0f, 90.0f}, 0);
+        director.start(createMockSensorManager());
+        director.onBootCompleted();
+        ArgumentCaptor<IUdfpsHbmListener> captor =
+                ArgumentCaptor.forClass(IUdfpsHbmListener.class);
+        verify(mStatusBarMock).setUdfpsHbmListener(captor.capture());
+        captor.getValue().onHbmEnabled(DISPLAY_ID);
+        captor.getValue().onHbmEnabled(DISPLAY_ID);
+
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_UDFPS);
+        assertNull(vote);
+    }
+
     private Temperature getSkinTemp(@Temperature.ThrottlingStatus int status) {
         return new Temperature(30.0f, Temperature.TYPE_SKIN, "test_skin_temp", status);
     }
