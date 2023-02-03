@@ -1842,6 +1842,22 @@ interface ITelephony {
             String gid2, String plmn, String spn, String carrierPrivilegeRules, String apn);
 
     /**
+     * Forcibly sets a package as a carrier provisioning package.
+     *
+     * This override is ephemeral, and will disappear upon phone process restart (including
+     * device reboot).
+     *
+     * WARNING: This API is meant for testing purposes only. This enables automated testing for
+     * cases where the carrier service package is used as a permissioning gate for features such as
+     * restricted carrier network access (restricted APNs and Merged Carrier Wifi)
+     *
+     * @param carrierServicePackage The package that should be marked as the carrier service
+     *     package, or {@code null} to disable the override.
+     */
+    void setCarrierServicePackageOverride(int subId, String carrierServicePackage,
+                String callingPackage);
+
+    /**
      * A test API to return installed carrier id list version.
      */
     int getCarrierIdListVersion(int subId);
