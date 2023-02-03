@@ -1863,6 +1863,14 @@ package android.net {
 
 }
 
+package android.net.wifi.sharedconnectivity.app {
+
+  public class SharedConnectivityManager {
+    method public void setService(@Nullable android.os.IInterface);
+  }
+
+}
+
 package android.os {
 
   public final class BatteryStatsManager {
