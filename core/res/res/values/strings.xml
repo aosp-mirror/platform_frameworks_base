@@ -861,6 +861,12 @@
     <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
     <string name="managed_profile_label">Switch to work profile</string>
 
+    <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
+    <string name="user_owner_app_label">Switch to personal <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
+
+    <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
+    <string name="managed_profile_app_label">Switch to work <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
+
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_contacts">Contacts</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
