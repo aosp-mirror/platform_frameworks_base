@@ -685,6 +685,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private boolean mInstantExpanding;
     private boolean mAnimateAfterExpanding;
     private boolean mIsFlinging;
+    private boolean mLastFlingWasExpanding;
     private String mViewName;
     private float mInitialExpandY;
     private float mInitialExpandX;
@@ -2142,6 +2143,7 @@ public final class NotificationPanelViewController implements Dumpable {
     @VisibleForTesting
     void flingToHeight(float vel, boolean expand, float target,
             float collapseSpeedUpFactor, boolean expandBecauseOfFalsing) {
+        mLastFlingWasExpanding = expand;
         mHeadsUpTouchHelper.notifyFling(!expand);
         mKeyguardStateController.notifyPanelFlingStart(!expand /* flingingToDismiss */);
         setClosingWithAlphaFadeout(!expand && !isOnKeyguard() && getFadeoutAlpha() == 1.0f);
@@ -2531,7 +2533,7 @@ public final class NotificationPanelViewController implements Dumpable {
         }
         // defer touches on QQS to shade while shade is collapsing. Added margin for error
         // as sometimes the qsExpansionFraction can be a tiny value instead of 0 when in QQS.
-        if (!mSplitShadeEnabled
+        if (!mSplitShadeEnabled && !mLastFlingWasExpanding
                 && computeQsExpansionFraction() <= 0.01 && getExpandedFraction() < 1.0) {
             mShadeLog.logMotionEvent(event,
                     "handleQsTouch: shade touched while collapsing, QS tracking disabled");
