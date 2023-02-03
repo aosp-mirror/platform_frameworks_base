@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.Weather;
 
 import java.util.TimeZone;
 
@@ -56,6 +57,11 @@ public class KeyguardUpdateMonitorCallback {
      * Called when time format changes.
      */
     public void onTimeFormatChanged(String timeFormat) { }
+
+    /**
+     * Called when receive new weather data.
+     */
+    public void onWeatherDataChanged(Weather data) { }
 
     /**
      * Called when the carrier PLMN or SPN changes.

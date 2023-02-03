@@ -20,6 +20,7 @@ import android.view.View
 import com.android.internal.annotations.Keep
 import com.android.systemui.plugins.annotations.ProvidesInterface
 import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.statusbar.Weather
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -111,6 +112,9 @@ interface ClockEvents {
 
     /** Call whenever the color palette should update */
     fun onColorPaletteChanged(resources: Resources) {}
+
+    /** Call whenever the weather data should update */
+    fun onWeatherDataChanged(data: Weather) {}
 }
 
 /** Methods which trigger various clock animations */

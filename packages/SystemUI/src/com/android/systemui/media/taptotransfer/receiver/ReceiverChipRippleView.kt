@@ -34,7 +34,7 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
 
     init {
         setupShader(RippleShader.RippleShape.CIRCLE)
-        setRippleFill(true)
+        setupRippleFadeParams()
         setSparkleStrength(0f)
         isStarted = false
     }
@@ -72,7 +72,7 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         animator.removeAllUpdateListeners()
 
         // Only show the outline as ripple expands and disappears when animation ends.
-        setRippleFill(false)
+        removeRippleFill()
 
         val startingPercentage = calculateStartingPercentage(newHeight)
         animator.duration = EXPAND_TO_FULL_DURATION
@@ -101,6 +101,32 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
         val ratio = rippleShader.currentHeight / newHeight
         val remainingPercentage = (1 - ratio).toDouble().pow(1 / 3.toDouble()).toFloat()
         return 1 - remainingPercentage
+    }
+
+    private fun setupRippleFadeParams() {
+        with(rippleShader) {
+            // No fade out for the base ring.
+            baseRingFadeParams.fadeOutStart = 1f
+            baseRingFadeParams.fadeOutEnd = 1f
+
+            // No fade in and outs for the center fill, as we always draw it.
+            centerFillFadeParams.fadeInStart = 0f
+            centerFillFadeParams.fadeInEnd = 0f
+            centerFillFadeParams.fadeOutStart = 1f
+            centerFillFadeParams.fadeOutEnd = 1f
+        }
+    }
+
+    private fun removeRippleFill() {
+        with(rippleShader) {
+            baseRingFadeParams.fadeOutStart = RippleShader.DEFAULT_BASE_RING_FADE_OUT_START
+            baseRingFadeParams.fadeOutEnd = RippleShader.DEFAULT_FADE_OUT_END
+
+            centerFillFadeParams.fadeInStart = RippleShader.DEFAULT_FADE_IN_START
+            centerFillFadeParams.fadeInEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_IN_END
+            centerFillFadeParams.fadeOutStart = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_START
+            centerFillFadeParams.fadeOutEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_END
+        }
     }
 
     companion object {

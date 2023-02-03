@@ -181,6 +181,9 @@ object CustomizationProviderContract {
         /** Flag denoting whether the Wallpaper preview should use the full screen UI. */
         const val FLAG_NAME_WALLPAPER_FULLSCREEN_PREVIEW = "wallpaper_fullscreen_preview"
 
+        /** Flag denoting whether the Monochromatic Theme is enabled. */
+        const val FLAG_NAME_MONOCHROMATIC_THEME = "is_monochromatic_theme_enabled"
+
         object Columns {
             /** String. Unique ID for the flag. */
             const val NAME = "name"
