@@ -234,18 +234,8 @@ public class FeatureFlagsDebug implements FeatureFlags {
         if (result == null) {
             result = readBooleanFlagOverride(flag.getId());
         }
-        boolean hasServerOverride = mServerFlagReader.hasOverride(
-                flag.getNamespace(), flag.getName());
 
-        // Only check for teamfood if the default is false
-        // and there is no server override.
-        if (!hasServerOverride
-                && !defaultValue
-                && result == null
-                && !flag.getName().equals(Flags.TEAMFOOD.getName())
-                && flag.getTeamfood()) {
-            return isEnabled(Flags.TEAMFOOD);
-        }
+        // No teamfood on this branch! Normally we would check that here.
 
         return result == null ? mServerFlagReader.readServerOverride(
                 flag.getNamespace(), flag.getName(), defaultValue) : result;
@@ -493,7 +483,7 @@ public class FeatureFlagsDebug implements FeatureFlags {
         @Nullable
         private ParcelableFlag<?> toParcelableFlag(Flag<?> f) {
             boolean enabled;
-            boolean teamfood = f.getTeamfood();
+            boolean teamfood = false;  // No teamfood on this branch!
             boolean overridden;
 
             if (f instanceof ReleasedFlag) {
