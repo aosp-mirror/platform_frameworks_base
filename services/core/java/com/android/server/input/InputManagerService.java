@@ -32,7 +32,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.database.ContentObserver;
 import android.graphics.PointF;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
@@ -78,8 +77,6 @@ import android.os.VibrationEffect;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
@@ -147,8 +144,6 @@ public class InputManagerService extends IInputManager.Stub
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
     private static final String PORT_ASSOCIATIONS_PATH = "etc/input-port-associations.xml";
 
-    // Feature flag name for the deep press feature
-    private static final String DEEP_PRESS_ENABLED = "deep_press_enabled";
     // Feature flag name for the strategy to be used in VelocityTracker
     private static final String VELOCITYTRACKER_STRATEGY_PROPERTY = "velocitytracker_strategy";
 
@@ -307,6 +302,9 @@ public class InputManagerService extends IInputManager.Stub
     @GuardedBy("mInputMonitors")
     final Map<IBinder, GestureMonitorSpyWindow> mInputMonitors = new HashMap<>();
 
+    // Watches for settings changes and updates the native side appropriately.
+    private final InputSettingsObserver mSettingsObserver;
+
     // Manages Keyboard layouts for Physical keyboards
     private final KeyboardLayoutManager mKeyboardLayoutManager;
 
@@ -428,6 +426,7 @@ public class InputManagerService extends IInputManager.Stub
         mContext = injector.getContext();
         mHandler = new InputManagerHandler(injector.getLooper());
         mNative = injector.getNativeService(this);
+        mSettingsObserver = new InputSettingsObserver(mContext, mHandler, mNative);
         mKeyboardLayoutManager = new KeyboardLayoutManager(mContext, mNative, mDataStore,
                 injector.getLooper());
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper());
@@ -493,39 +492,7 @@ public class InputManagerService extends IInputManager.Stub
         // Add ourselves to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
-        registerMousePointerSpeedSettingObserver();
-        registerTouchpadPointerSpeedSettingObserver();
-        registerTouchpadNaturalScrollingEnabledObserver();
-        registerTouchpadTapToClickEnabledObserver();
-        registerTouchpadRightClickZoneEnabledObserver();
-        registerShowTouchesSettingObserver();
-        registerAccessibilityLargePointerSettingObserver();
-        registerLongPressTimeoutObserver();
-        registerMaximumObscuringOpacityForTouchSettingObserver();
-
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                updateMousePointerSpeedFromSettings();
-                updateTouchpadPointerSpeedFromSettings();
-                updateTouchpadNaturalScrollingEnabledFromSettings();
-                updateTouchpadTapToClickEnabledFromSettings();
-                updateTouchpadRightClickZoneEnabledFromSettings();
-                updateShowTouchesFromSettings();
-                updateAccessibilityLargePointerFromSettings();
-                updateDeepPressStatusFromSettings("user switched");
-            }
-        }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
-
-        updateMousePointerSpeedFromSettings();
-        updateTouchpadPointerSpeedFromSettings();
-        updateTouchpadNaturalScrollingEnabledFromSettings();
-        updateTouchpadTapToClickEnabledFromSettings();
-        updateTouchpadRightClickZoneEnabledFromSettings();
-        updateShowTouchesFromSettings();
-        updateAccessibilityLargePointerFromSettings();
-        updateDeepPressStatusFromSettings("just booted");
-        updateMaximumObscuringOpacityForTouchFromSettings();
+        mSettingsObserver.registerAndUpdate();
     }
 
     // TODO(BT) Pass in parameter for bluetooth system
@@ -1349,11 +1316,6 @@ public class InputManagerService extends IInputManager.Stub
         setPointerSpeedUnchecked(speed);
     }
 
-    private void updateMousePointerSpeedFromSettings() {
-        int speed = getMousePointerSpeedSetting();
-        setPointerSpeedUnchecked(speed);
-    }
-
     private void setPointerSpeedUnchecked(int speed) {
         speed = Math.min(Math.max(speed, InputManager.MIN_POINTER_SPEED),
                 InputManager.MAX_POINTER_SPEED);
@@ -1368,194 +1330,6 @@ public class InputManagerService extends IInputManager.Stub
     private void setPointerIconVisible(boolean visible, int displayId) {
         updateAdditionalDisplayInputProperties(displayId,
                 properties -> properties.pointerIconVisible = visible);
-    }
-
-    private void registerMousePointerSpeedSettingObserver() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.POINTER_SPEED), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateMousePointerSpeedFromSettings();
-                    }
-                }, UserHandle.USER_ALL);
-    }
-
-    private int getMousePointerSpeedSetting() {
-        int speed = InputManager.DEFAULT_POINTER_SPEED;
-        try {
-            speed = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.POINTER_SPEED, UserHandle.USER_CURRENT);
-        } catch (SettingNotFoundException ignored) {
-        }
-        return speed;
-    }
-
-    private void registerTouchpadPointerSpeedSettingObserver() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.TOUCHPAD_POINTER_SPEED), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateTouchpadPointerSpeedFromSettings();
-                    }
-                }, UserHandle.USER_ALL);
-    }
-
-    private void updateTouchpadPointerSpeedFromSettings() {
-        int speed = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.TOUCHPAD_POINTER_SPEED, InputManager.DEFAULT_POINTER_SPEED,
-                UserHandle.USER_CURRENT);
-        speed = Math.min(Math.max(speed, InputManager.MIN_POINTER_SPEED),
-                InputManager.MAX_POINTER_SPEED);
-        mNative.setTouchpadPointerSpeed(speed);
-    }
-
-    private void registerTouchpadNaturalScrollingEnabledObserver() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.TOUCHPAD_NATURAL_SCROLLING), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateTouchpadNaturalScrollingEnabledFromSettings();
-                    }
-                }, UserHandle.USER_ALL);
-    }
-
-    private void updateTouchpadNaturalScrollingEnabledFromSettings() {
-        int setting = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.TOUCHPAD_NATURAL_SCROLLING, 0, UserHandle.USER_CURRENT);
-        mNative.setTouchpadNaturalScrollingEnabled(setting != 0);
-    }
-
-    private void registerTouchpadTapToClickEnabledObserver() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.TOUCHPAD_TAP_TO_CLICK), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateTouchpadTapToClickEnabledFromSettings();
-                    }
-                }, UserHandle.USER_ALL);
-    }
-
-    private void updateTouchpadTapToClickEnabledFromSettings() {
-        int setting = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.TOUCHPAD_TAP_TO_CLICK, 0, UserHandle.USER_CURRENT);
-        mNative.setTouchpadTapToClickEnabled(setting != 0);
-    }
-
-    private void registerTouchpadRightClickZoneEnabledObserver() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateTouchpadRightClickZoneEnabledFromSettings();
-                    }
-                }, UserHandle.USER_ALL);
-    }
-
-    private void updateTouchpadRightClickZoneEnabledFromSettings() {
-        int setting = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, 0, UserHandle.USER_CURRENT);
-        mNative.setTouchpadRightClickZoneEnabled(setting != 0);
-    }
-
-    private void updateShowTouchesFromSettings() {
-        int setting = getShowTouchesSetting(0);
-        mNative.setShowTouches(setting != 0);
-    }
-
-    private void registerShowTouchesSettingObserver() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.SHOW_TOUCHES), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateShowTouchesFromSettings();
-                    }
-                }, UserHandle.USER_ALL);
-    }
-
-    private void updateAccessibilityLargePointerFromSettings() {
-        final int accessibilityConfig = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
-                0, UserHandle.USER_CURRENT);
-        PointerIcon.setUseLargeIcons(accessibilityConfig == 1);
-        mNative.reloadPointerIcons();
-    }
-
-    private void registerAccessibilityLargePointerSettingObserver() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateAccessibilityLargePointerFromSettings();
-                    }
-                }, UserHandle.USER_ALL);
-    }
-
-    private void updateDeepPressStatusFromSettings(String reason) {
-        // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value
-        final int timeout = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.LONG_PRESS_TIMEOUT, ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT,
-                UserHandle.USER_CURRENT);
-        final boolean featureEnabledFlag =
-                DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
-                        DEEP_PRESS_ENABLED, true /* default */);
-        final boolean enabled =
-                featureEnabledFlag && timeout <= ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
-        Log.i(TAG,
-                (enabled ? "Enabling" : "Disabling") + " motion classifier because " + reason
-                + ": feature " + (featureEnabledFlag ? "enabled" : "disabled")
-                + ", long press timeout = " + timeout);
-        mNative.setMotionClassifierEnabled(enabled);
-    }
-
-    private void registerLongPressTimeoutObserver() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LONG_PRESS_TIMEOUT), true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateDeepPressStatusFromSettings("timeout changed");
-                    }
-                }, UserHandle.USER_ALL);
-    }
-
-    private void registerMaximumObscuringOpacityForTouchSettingObserver() {
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH),
-                /* notifyForDescendants */ true,
-                new ContentObserver(mHandler) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        updateMaximumObscuringOpacityForTouchFromSettings();
-                    }
-                }, UserHandle.USER_ALL);
-    }
-
-    private void updateMaximumObscuringOpacityForTouchFromSettings() {
-        InputManager im = Objects.requireNonNull(mContext.getSystemService(InputManager.class));
-        final float opacity = im.getMaximumObscuringOpacityForTouch();
-        if (opacity < 0 || opacity > 1) {
-            Log.e(TAG, "Invalid maximum obscuring opacity " + opacity
-                    + ", it should be >= 0 and <= 1, rejecting update.");
-            return;
-        }
-        mNative.setMaximumObscuringOpacityForTouch(opacity);
-    }
-
-    private int getShowTouchesSetting(int defaultValue) {
-        int result = defaultValue;
-        try {
-            result = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.SHOW_TOUCHES, UserHandle.USER_CURRENT);
-        } catch (SettingNotFoundException snfe) {
-        }
-        return result;
     }
 
     /**
