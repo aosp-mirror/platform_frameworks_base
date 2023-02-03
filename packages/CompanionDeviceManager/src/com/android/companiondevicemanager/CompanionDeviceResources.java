@@ -88,7 +88,7 @@ final class CompanionDeviceResources {
         final Map<String, Integer> map = new ArrayMap<>();
         map.put(DEVICE_PROFILE_WATCH, R.string.summary_watch_single_device);
         map.put(DEVICE_PROFILE_GLASSES, R.string.summary_glasses_single_device);
-        map.put(null, R.string.summary_generic);
+        map.put(null, R.string.summary_generic_single_device);
 
         SUMMARIES = unmodifiableMap(map);
     }
