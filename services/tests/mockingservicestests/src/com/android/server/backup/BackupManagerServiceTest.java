@@ -38,7 +38,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
-import android.annotation.UserIdInt;
 import android.app.backup.BackupManager;
 import android.app.backup.ISelectBackupTransportCallback;
 import android.app.job.JobScheduler;
@@ -59,10 +58,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.backup.utils.RandomAccessFileUtils;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,6 +75,7 @@ import org.mockito.quality.Strictness;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -85,16 +87,12 @@ public class BackupManagerServiceTest {
             "class");
     private static final int NON_SYSTEM_USER = UserHandle.USER_SYSTEM + 1;
 
-    @UserIdInt
-    private int mUserId;
     @Mock
     private UserBackupManagerService mSystemUserBackupManagerService;
     @Mock
     private UserBackupManagerService mNonSystemUserBackupManagerService;
     @Mock
     private Context mContextMock;
-    @Mock
-    private PrintWriter mPrintWriterMock;
     @Mock
     private UserManager mUserManagerMock;
     @Mock
@@ -104,6 +102,7 @@ public class BackupManagerServiceTest {
 
     private BackupManagerServiceTestable mService;
     private BackupManagerService.Lifecycle mServiceLifecycle;
+    private FakePrintWriter mFakePrintWriter;
     private static File sTestDir;
     private MockitoSession mSession;
 
@@ -114,6 +113,7 @@ public class BackupManagerServiceTest {
                                 this)
                         .strictness(Strictness.LENIENT)
                         .spyStatic(UserBackupManagerService.class)
+                        .spyStatic(DumpUtils.class)
                         .startMocking();
         doReturn(mSystemUserBackupManagerService).when(
                 () -> UserBackupManagerService.createAndInitializeService(
@@ -122,8 +122,7 @@ public class BackupManagerServiceTest {
                 () -> UserBackupManagerService.createAndInitializeService(eq(NON_SYSTEM_USER),
                         any(), any(), any()));
 
-        mUserId = UserHandle.USER_SYSTEM;
-
+        when(mNonSystemUserBackupManagerService.getUserId()).thenReturn(NON_SYSTEM_USER);
         when(mUserManagerMock.getUserInfo(UserHandle.USER_SYSTEM)).thenReturn(mUserInfoMock);
         when(mUserManagerMock.getUserInfo(NON_SYSTEM_USER)).thenReturn(mUserInfoMock);
         // Null main user means there is no main user on the device.
@@ -139,6 +138,8 @@ public class BackupManagerServiceTest {
 
         when(mContextMock.getSystemService(Context.JOB_SCHEDULER_SERVICE))
                 .thenReturn(mock(JobScheduler.class));
+
+        mFakePrintWriter = new FakePrintWriter();
     }
 
     @After
@@ -552,7 +553,8 @@ public class BackupManagerServiceTest {
                     }
                 };
 
-        mService.selectBackupTransportAsyncForUser(mUserId, TRANSPORT_COMPONENT_NAME, listener);
+        mService.selectBackupTransportAsyncForUser(
+                UserHandle.USER_SYSTEM, TRANSPORT_COMPONENT_NAME, listener);
 
         assertEquals(BackupManager.ERROR_BACKUP_NOT_ALLOWED, (int) future.get(5, TimeUnit.SECONDS));
     }
@@ -560,9 +562,10 @@ public class BackupManagerServiceTest {
     @Test
     public void selectBackupTransportAsyncForUser_beforeUserUnlockedWithNullListener_doesNotThrow()
             throws Exception {
-        createBackupManagerServiceAndUnlockSystemUser();
+        mService = new BackupManagerServiceTestable(mContextMock);
 
-        mService.selectBackupTransportAsyncForUser(mUserId, TRANSPORT_COMPONENT_NAME, null);
+        mService.selectBackupTransportAsyncForUser(
+                UserHandle.USER_SYSTEM, TRANSPORT_COMPONENT_NAME, null);
 
         // No crash.
     }
@@ -570,13 +573,11 @@ public class BackupManagerServiceTest {
     @Test
     public void selectBackupTransportAsyncForUser_beforeUserUnlockedListenerThrowing_doesNotThrow()
             throws Exception {
-        createBackupManagerServiceAndUnlockSystemUser();
-
+        mService = new BackupManagerServiceTestable(mContextMock);
         ISelectBackupTransportCallback.Stub listener =
                 new ISelectBackupTransportCallback.Stub() {
                     @Override
-                    public void onSuccess(String transportName) {
-                    }
+                    public void onSuccess(String transportName) {}
 
                     @Override
                     public void onFailure(int reason) throws RemoteException {
@@ -584,55 +585,91 @@ public class BackupManagerServiceTest {
                     }
                 };
 
-        mService.selectBackupTransportAsyncForUser(mUserId, TRANSPORT_COMPONENT_NAME, listener);
+        mService.selectBackupTransportAsyncForUser(
+                UserHandle.USER_SYSTEM, TRANSPORT_COMPONENT_NAME, listener);
 
         // No crash.
     }
 
     @Test
-    public void dump_callerDoesNotHaveDumpPermission_ignored() {
+    public void dump_callerDoesNotHaveDumpOrUsageStatsPermission_ignored() {
+        mockDumpPermissionsGranted(false);
         createBackupManagerServiceAndUnlockSystemUser();
-        when(mContextMock.checkCallingOrSelfPermission(
-                Manifest.permission.DUMP)).thenReturn(
-                PackageManager.PERMISSION_DENIED);
+        when(mContextMock.checkCallingOrSelfPermission(Manifest.permission.DUMP))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
 
-        mService.dump(mFileDescriptorStub, mPrintWriterMock, new String[0]);
+        mService.dump(mFileDescriptorStub, mFakePrintWriter, new String[0]);
 
         verify(mSystemUserBackupManagerService, never()).dump(any(), any(), any());
         verify(mNonSystemUserBackupManagerService, never()).dump(any(), any(), any());
     }
 
     @Test
-    public void dump_callerDoesNotHavePackageUsageStatsPermission_ignored() {
-        createBackupManagerServiceAndUnlockSystemUser();
-        when(mContextMock.checkCallingOrSelfPermission(
-                Manifest.permission.PACKAGE_USAGE_STATS)).thenReturn(
-                PackageManager.PERMISSION_DENIED);
-
-        mService.dump(mFileDescriptorStub, mPrintWriterMock, new String[0]);
-
-        verify(mSystemUserBackupManagerService, never()).dump(any(), any(), any());
-        verify(mNonSystemUserBackupManagerService, never()).dump(any(), any(), any());
-    }
-
-    /**
-     * Test that {@link BackupManagerService#dump(FileDescriptor, PrintWriter, String[])} dumps
-     * system user information before non-system user information.
-     */
-    @Test
-    public void testDump_systemUserFirst() {
+    public void dump_forOneUser_callerDoesNotHaveInteractAcrossUsersFullPermission_ignored() {
+        mockDumpPermissionsGranted(true);
         createBackupManagerServiceAndUnlockSystemUser();
         mService.setBackupServiceActive(NON_SYSTEM_USER, true);
         simulateUserUnlocked(NON_SYSTEM_USER);
+        doThrow(new SecurityException())
+                .when(mContextMock)
+                .enforceCallingOrSelfPermission(
+                        eq(Manifest.permission.INTERACT_ACROSS_USERS_FULL), anyString());
+
+        String[] args = new String[] {"--user", Integer.toString(NON_SYSTEM_USER)};
+        Assert.assertThrows(
+                SecurityException.class,
+                () -> mService.dump(mFileDescriptorStub, mFakePrintWriter, args));
+
+        verify(mNonSystemUserBackupManagerService, never()).dump(any(), any(), any());
+    }
+
+    @Test
+    public void dump_forOneUser_callerHasInteractAcrossUsersFullPermission_dumpsSpecifiedUser() {
+        mockDumpPermissionsGranted(true);
+        createBackupManagerServiceAndUnlockSystemUser();
+        mService.setBackupServiceActive(NON_SYSTEM_USER, true);
+        simulateUserUnlocked(NON_SYSTEM_USER);
+
+        String[] args = new String[] {"--user", Integer.toString(UserHandle.USER_SYSTEM)};
+        mService.dump(mFileDescriptorStub, mFakePrintWriter, args);
+
+        verify(mSystemUserBackupManagerService).dump(any(), any(), any());
+    }
+
+    @Test
+    public void dump_users_callerHasInteractAcrossUsersFullPermission_dumpsUsers() {
+        mockDumpPermissionsGranted(true);
+        createBackupManagerServiceAndUnlockSystemUser();
+        mService.setBackupServiceActive(NON_SYSTEM_USER, true);
+        simulateUserUnlocked(NON_SYSTEM_USER);
+
+        String[] args = new String[] {"users"};
+        mService.dump(mFileDescriptorStub, mFakePrintWriter, args);
+
+        // Check that dump() invocations are not called on user's Backup service,
+        // as 'dumpsys backup users' only list users for whom Backup service is running.
+        verify(mSystemUserBackupManagerService, never()).dump(any(), any(), any());
+        verify(mNonSystemUserBackupManagerService, never()).dump(any(), any(), any());
+        assertThat(mFakePrintWriter.mPrintedSoFar)
+                .isEqualTo("Backup Manager is running for users: 0 1");
+    }
+
+    @Test
+    public void dump_allUsers_dumpsSystemUserFirst() {
+        mockDumpPermissionsGranted(true);
+        createBackupManagerServiceAndUnlockSystemUser();
+        mService.setBackupServiceActive(NON_SYSTEM_USER, true);
+        simulateUserUnlocked(NON_SYSTEM_USER);
+
         String[] args = new String[0];
-        mService.dumpWithoutCheckingPermission(mFileDescriptorStub, mPrintWriterMock, args);
+        mService.dump(mFileDescriptorStub, mFakePrintWriter, args);
 
         InOrder inOrder =
                 inOrder(mSystemUserBackupManagerService, mNonSystemUserBackupManagerService);
         inOrder.verify(mSystemUserBackupManagerService)
-                .dump(mFileDescriptorStub, mPrintWriterMock, args);
+                .dump(mFileDescriptorStub, mFakePrintWriter, args);
         inOrder.verify(mNonSystemUserBackupManagerService)
-                .dump(mFileDescriptorStub, mPrintWriterMock, args);
+                .dump(mFileDescriptorStub, mFakePrintWriter, args);
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -753,6 +790,11 @@ public class BackupManagerServiceTest {
         return new File(sTestDir, "rememberActivated-" + userId);
     }
 
+    private static void mockDumpPermissionsGranted(boolean granted) {
+        doReturn(granted)
+                .when(() -> DumpUtils.checkDumpAndUsageStatsPermission(any(), any(), any()));
+    }
+
     private static class BackupManagerServiceTestable extends BackupManagerService {
         static boolean sBackupDisabled = false;
         static int sCallingUserId = -1;
@@ -801,6 +843,19 @@ public class BackupManagerServiceTest {
         @Override
         protected void postToHandler(Runnable runnable) {
             runnable.run();
+        }
+    }
+
+    private static class FakePrintWriter extends PrintWriter {
+        String mPrintedSoFar = "";
+
+        FakePrintWriter() {
+            super(Writer.nullWriter());
+        }
+
+        @Override
+        public void print(String s) {
+            mPrintedSoFar = mPrintedSoFar + s;
         }
     }
 }
