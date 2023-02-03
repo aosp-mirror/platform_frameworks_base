@@ -80,6 +80,7 @@ public class SettingsToPropertiesMapper {
     @VisibleForTesting
     static final String[] sDeviceConfigScopes = new String[] {
         DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+        DeviceConfig.NAMESPACE_CAMERA_NATIVE,
         DeviceConfig.NAMESPACE_CONFIGURATION,
         DeviceConfig.NAMESPACE_CONNECTIVITY,
         DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
