@@ -76,7 +76,7 @@ public final class UserTypeDetails {
     private final @UserInfoFlag int mBaseType;
 
     // TODO(b/143784345): Update doc/name when we clean up UserInfo.
-    /** The {@link UserInfo.UserInfoFlag}s that all users of this type will automatically have. */
+    /** The {@link UserInfoFlag}s to apply by default to newly created users of this type. */
     private final @UserInfoFlag int mDefaultUserInfoPropertyFlags;
 
     /**
@@ -224,7 +224,7 @@ public final class UserTypeDetails {
     }
 
     // TODO(b/143784345): Update comment when UserInfo is reorganized.
-    /** The {@link UserInfo.UserInfoFlag}s that all users of this type will automatically have. */
+    /** The {@link UserInfoFlag}s to apply by default to newly created users of this type. */
     public int getDefaultUserInfoFlags() {
         return mDefaultUserInfoPropertyFlags | mBaseType;
     }
@@ -526,6 +526,7 @@ public final class UserTypeDetails {
             Preconditions.checkArgument(hasValidPropertyFlags(),
                     "UserTypeDetails " + mName + " has invalid flags: "
                             + Integer.toHexString(mDefaultUserInfoPropertyFlags));
+            checkSystemAndMainUserPreconditions();
             if (hasBadge()) {
                 Preconditions.checkArgument(mBadgeLabels != null && mBadgeLabels.length != 0,
                         "UserTypeDetails " + mName + " has badge but no badgeLabels.");
@@ -578,14 +579,24 @@ public final class UserTypeDetails {
         // TODO(b/143784345): Refactor this when we clean up UserInfo.
         private boolean hasValidPropertyFlags() {
             final int forbiddenMask =
-                    UserInfo.FLAG_PRIMARY |
-                    UserInfo.FLAG_ADMIN |
                     UserInfo.FLAG_INITIALIZED |
                     UserInfo.FLAG_QUIET_MODE |
                     UserInfo.FLAG_FULL |
                     UserInfo.FLAG_SYSTEM |
                     UserInfo.FLAG_PROFILE;
             return (mDefaultUserInfoPropertyFlags & forbiddenMask) == 0;
+        }
+
+        private void checkSystemAndMainUserPreconditions() {
+            // Primary must be synonymous with System.
+            Preconditions.checkArgument(
+                    ((mBaseType & UserInfo.FLAG_SYSTEM) != 0) ==
+                            ((mDefaultUserInfoPropertyFlags & UserInfo.FLAG_PRIMARY) != 0),
+                    "UserTypeDetails " + mName + " cannot be SYSTEM xor PRIMARY.");
+            // At most one MainUser is ever allowed at a time.
+            Preconditions.checkArgument(
+                    ((mDefaultUserInfoPropertyFlags & UserInfo.FLAG_MAIN) == 0) || mMaxAllowed == 1,
+                    "UserTypeDetails " + mName + " must not sanction more than one MainUser.");
         }
     }
 

@@ -4064,22 +4064,22 @@ public class UserManagerService extends IUserManager.Stub {
 
     @GuardedBy({"mPackagesLock"})
     private void fallbackToSingleUserLP() {
-        int flags = UserInfo.FLAG_SYSTEM | UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_ADMIN
-                | UserInfo.FLAG_PRIMARY;
         // Create the system user
-        String systemUserType = isDefaultHeadlessSystemUserMode()
+        final String systemUserType = isDefaultHeadlessSystemUserMode()
                 ? UserManager.USER_TYPE_SYSTEM_HEADLESS
                 : UserManager.USER_TYPE_FULL_SYSTEM;
-        flags |= mUserTypes.get(systemUserType).getDefaultUserInfoFlags();
-        UserInfo system = new UserInfo(UserHandle.USER_SYSTEM, null, null, flags, systemUserType);
-        UserData userData = putUserInfo(system);
+        final int flags = mUserTypes.get(systemUserType).getDefaultUserInfoFlags()
+                | UserInfo.FLAG_INITIALIZED;
+        final UserInfo system = new UserInfo(UserHandle.USER_SYSTEM,
+                /* name= */ null, /* iconPath= */ null, flags, systemUserType);
+        final UserData userData = putUserInfo(system);
         userData.userProperties = new UserProperties(
                 mUserTypes.get(userData.info.userType).getDefaultUserPropertiesReference());
         mNextSerialNumber = MIN_USER_ID;
         mUserVersion = USER_VERSION;
         mUserTypeVersion = UserTypeFactory.getUserTypeVersion();
 
-        Bundle restrictions = new Bundle();
+        final Bundle restrictions = new Bundle();
         try {
             final String[] defaultFirstUserRestrictions = mContext.getResources().getStringArray(
                     com.android.internal.R.array.config_defaultFirstUserRestrictions);

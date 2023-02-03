@@ -985,7 +985,7 @@ package android.content.pm {
     method public boolean isInitialized();
     method public boolean isMain();
     method public boolean isManagedProfile();
-    method public boolean isPrimary();
+    method @Deprecated public boolean isPrimary();
     method public boolean isProfile();
     method public boolean isQuietModeEnabled();
     method public boolean isRestricted();
@@ -1002,7 +1002,7 @@ package android.content.pm {
     field public static final int FLAG_INITIALIZED = 16; // 0x10
     field public static final int FLAG_MAIN = 16384; // 0x4000
     field @Deprecated public static final int FLAG_MANAGED_PROFILE = 32; // 0x20
-    field public static final int FLAG_PRIMARY = 1; // 0x1
+    field @Deprecated public static final int FLAG_PRIMARY = 1; // 0x1
     field public static final int FLAG_PROFILE = 4096; // 0x1000
     field public static final int FLAG_QUIET_MODE = 128; // 0x80
     field @Deprecated public static final int FLAG_RESTRICTED = 8; // 0x8
