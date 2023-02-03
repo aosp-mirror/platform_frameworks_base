@@ -32,7 +32,7 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION;
 import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED_ROUTE;
-import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_NONE;
+import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_TRANSFER;
 import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
 import static android.media.RouteListingPreference.Item.SUBTEXT_CUSTOM;
 import static android.media.RouteListingPreference.Item.SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED;
@@ -209,7 +209,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     @RouteListingPreference.Item.SubText
     public int getSelectionBehavior() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && mItem != null
-                ? mItem.getSelectionBehavior() : SELECTION_BEHAVIOR_NONE;
+                ? mItem.getSelectionBehavior() : SELECTION_BEHAVIOR_TRANSFER;
     }
 
     /**

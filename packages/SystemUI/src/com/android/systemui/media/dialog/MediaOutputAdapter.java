@@ -54,6 +54,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
     private static final String TAG = "MediaOutputAdapter";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final float DEVICE_DISCONNECTED_ALPHA = 0.5f;
+    private static final float DEVICE_CONNECTED_ALPHA = 1f;
 
     public MediaOutputAdapter(MediaOutputController controller) {
         super(controller);
@@ -201,26 +203,48 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         && mController.isSubStatusSupported()
                         && mController.isAdvancedLayoutSupported() && device.hasSubtext()) {
                     boolean isActiveWithOngoingSession =
-                            device.hasOngoingSession() && currentlyConnected;
-                    if (isActiveWithOngoingSession) {
-                        //Selected device which has ongoing session, disable seekbar since we
-                        //only allow volume control on Host
-                        mSeekBar.setVolume(0);
-                        disableSeekBar();
+                            (device.hasOngoingSession() && currentlyConnected);
+                    boolean isHost = mController.isVolumeControlEnabled(device)
+                            && isActiveWithOngoingSession;
+                    if (isHost) {
                         mCurrentActivePosition = position;
+                        updateTitleIcon(R.drawable.media_output_icon_volume,
+                                mController.getColorItemContent());
+                        mSubTitleText.setText(device.getSubtextString());
+                        updateTwoLineLayoutContentAlpha(DEVICE_CONNECTED_ALPHA);
+                        updateEndClickAreaAsSessionEditing(device);
+                        setTwoLineLayout(device, null /* title */, true /* bFocused */,
+                                true /* showSeekBar */, false /* showProgressBar */,
+                                true /* showSubtitle */, false /* showStatus */,
+                                true /* showEndTouchArea */, false /* isFakeActive */);
+                        initSeekbar(device, isCurrentSeekbarInvisible);
+                    } else {
+                        if (isActiveWithOngoingSession) {
+                            //Selected device which has ongoing session, disable seekbar since we
+                            //only allow volume control on Host
+                            initSeekbar(device, isCurrentSeekbarInvisible);
+                            mCurrentActivePosition = position;
+                        }
+                        setUpDeviceIcon(device);
+                        mSubTitleText.setText(device.getSubtextString());
+                        Drawable deviceStatusIcon =
+                                isActiveWithOngoingSession ? mContext.getDrawable(
+                                        R.drawable.media_output_status_session)
+                                        : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
+                                                device,
+                                                mContext);
+                        if (deviceStatusIcon != null) {
+                            updateDeviceStatusIcon(deviceStatusIcon);
+                        }
+                        updateTwoLineLayoutContentAlpha(
+                                updateClickActionBasedOnSelectionBehavior(device)
+                                        ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
+                        setTwoLineLayout(device, isActiveWithOngoingSession /* bFocused */,
+                                isActiveWithOngoingSession /* showSeekBar */,
+                                false /* showProgressBar */, true /* showSubtitle */,
+                                deviceStatusIcon != null /* showStatus */,
+                                isActiveWithOngoingSession /* isFakeActive */);
                     }
-                    setUpDeviceIcon(device);
-                    mSubTitleText.setText(device.getSubtextString());
-                    Drawable deviceStatusIcon =
-                            Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(device, mContext);
-                    if (deviceStatusIcon != null) {
-                        updateDeviceStatusIcon(deviceStatusIcon);
-                    }
-                    updateClickActionBasedOnSelectionBehavior(device);
-                    setTwoLineLayout(device, isActiveWithOngoingSession /* bFocused */,
-                            isActiveWithOngoingSession /* showSeekBar */,
-                            false /* showProgressBar */, true /* showSubtitle */,
-                            deviceStatusIcon != null /* showStatus */);
                 } else if (device.getState() == MediaDeviceState.STATE_CONNECTING_FAILED) {
                     setUpDeviceIcon(device);
                     updateConnectionFailedStatusIcon();
@@ -228,7 +252,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     updateFullItemClickListener(v -> onItemClick(v, device));
                     setTwoLineLayout(device, false /* bFocused */, false /* showSeekBar */,
                             false /* showProgressBar */, true /* showSubtitle */,
-                            true /* showStatus */);
+                            true /* showStatus */, false /*isFakeActive*/);
                 } else if (device.getState() == MediaDeviceState.STATE_GROUPING) {
                     setUpDeviceIcon(device);
                     updateProgressBarColor();
@@ -317,10 +341,35 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     ColorStateList(states, colors));
         }
 
-        private void updateClickActionBasedOnSelectionBehavior(MediaDevice device) {
+        private void updateTwoLineLayoutContentAlpha(float alphaValue) {
+            mSubTitleText.setAlpha(alphaValue);
+            mTitleIcon.setAlpha(alphaValue);
+            mTwoLineTitleText.setAlpha(alphaValue);
+            mStatusIcon.setAlpha(alphaValue);
+        }
+
+        private void updateEndClickAreaAsSessionEditing(MediaDevice device) {
+            mEndClickIcon.setOnClickListener(null);
+            mEndTouchArea.setOnClickListener(null);
+            updateEndClickAreaColor(mController.getColorSeekbarProgress());
+            mEndClickIcon.setColorFilter(mController.getColorItemContent());
+            mEndClickIcon.setOnClickListener(
+                    v -> mController.tryToLaunchInAppRoutingIntent(device.getId(), v));
+            mEndTouchArea.setOnClickListener(v -> mCheckBox.performClick());
+        }
+
+        public void updateEndClickAreaColor(int color) {
+            if (mController.isAdvancedLayoutSupported()) {
+                mEndTouchArea.getBackground().setColorFilter(
+                        new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
+            }
+        }
+
+        private boolean updateClickActionBasedOnSelectionBehavior(MediaDevice device) {
             View.OnClickListener clickListener = Api34Impl.getClickListenerBasedOnSelectionBehavior(
                     device, mController, v -> onItemClick(v, device));
             updateFullItemClickListener(clickListener);
+            return clickListener != null;
         }
 
         private void updateConnectionFailedStatusIcon() {
@@ -457,7 +506,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 case SELECTION_BEHAVIOR_GO_TO_APP:
                     return v -> controller.tryToLaunchInAppRoutingIntent(device.getId(), v);
             }
-            return null;
+            return defaultTransferListener;
         }
 
         @DoNotInline
