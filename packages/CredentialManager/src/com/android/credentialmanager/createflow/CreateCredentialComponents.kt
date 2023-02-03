@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,12 +28,17 @@ import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
@@ -48,6 +55,7 @@ import com.android.credentialmanager.common.ui.TextOnSurface
 import com.android.credentialmanager.common.ui.TextSecondary
 import com.android.credentialmanager.common.ui.TextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ContainerCard
+import com.android.credentialmanager.common.ui.ToggleVisibilityButton
 import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
@@ -851,12 +859,38 @@ fun PrimaryCreateOptionRow(
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(top = 16.dp, start = 5.dp),
                         )
-                        TextSecondary(
+                        Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 16.dp,
+                                                                       start = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            val visualTransformation = remember { PasswordVisualTransformation() }
                             // This subtitle would never be null for create password
-                            text = requestDisplayInfo.subtitle ?: "",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                        )
+                            val originalPassword by remember {
+                                mutableStateOf(requestDisplayInfo.subtitle ?: "")
+                            }
+                            val displayedPassword = remember {
+                                mutableStateOf(
+                                    visualTransformation.filter(
+                                        AnnotatedString(originalPassword)
+                                    ).text.text
+                                )
+                            }
+                            TextSecondary(
+                                text = displayedPassword.value,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                            )
+
+                            ToggleVisibilityButton(modifier = Modifier.padding(start = 4.dp)
+                                .height(24.dp).width(24.dp), onToggle = {
+                                if (it) {
+                                    displayedPassword.value = originalPassword
+                                } else {
+                                    displayedPassword.value = visualTransformation.filter(
+                                        AnnotatedString(originalPassword)
+                                    ).text.text
+                                }
+                            })
+                        }
                     }
                     CredentialType.UNKNOWN -> {
                         if (requestDisplayInfo.subtitle != null) {
