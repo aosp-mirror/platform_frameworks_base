@@ -277,6 +277,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return false;
     }
 
+    /** @return whether `wc` is a descendent of a transient-hide window. */
+    boolean isInTransientHide(@NonNull WindowContainer wc) {
+        if (mTransientLaunches == null) return false;
+        for (int i = 0; i < mTransientLaunches.size(); ++i) {
+            if (wc.isDescendantOf(mTransientLaunches.valueAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     boolean isTransientLaunch(@NonNull ActivityRecord activity) {
         return mTransientLaunches != null && mTransientLaunches.containsKey(activity);
     }
@@ -825,6 +836,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         && ar.isVisible()) {
                     // Transient launch was committed, so report enteringAnimation
                     ar.mEnteringAnimation = true;
+                    // Since transient launches don't automatically take focus, make sure we
+                    // synchronize focus since we committed to the launch.
+                    if (ar.isTopRunningActivity()) {
+                        ar.moveFocusableActivityToTop("transitionFinished");
+                    }
                 }
                 continue;
             }

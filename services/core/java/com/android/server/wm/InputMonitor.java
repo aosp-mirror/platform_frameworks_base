@@ -405,8 +405,12 @@ final class InputMonitor {
             // Apply recents input consumer when the focusing window is in recents animation.
             final boolean shouldApplyRecentsInputConsumer = (recentsAnimationController != null
                     && recentsAnimationController.shouldApplyInputConsumer(focus.mActivityRecord))
-                    // Shell transitions doesn't use RecentsAnimationController
-                    || getWeak(mActiveRecentsActivity) != null && focus.inTransition();
+                    // Shell transitions doesn't use RecentsAnimationController but we still
+                    // have carryover legacy logic that relies on the consumer.
+                    || (getWeak(mActiveRecentsActivity) != null && focus.inTransition()
+                            // only take focus from the recents activity to avoid intercepting
+                            // events before the gesture officially starts.
+                            && focus.isActivityTypeHomeOrRecents());
             if (shouldApplyRecentsInputConsumer) {
                 if (mInputFocus != recentsAnimationInputConsumer.mWindowHandle.token) {
                     requestFocus(recentsAnimationInputConsumer.mWindowHandle.token,

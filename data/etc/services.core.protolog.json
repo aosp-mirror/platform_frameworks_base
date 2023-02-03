@@ -1771,6 +1771,12 @@
       "group": "WM_DEBUG_KEEP_SCREEN_ON",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-464564167": {
+      "message": "Current transition prevents automatic focus change",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-463348344": {
       "message": "Removing and adding activity %s to root task at top callers=%s",
       "level": "INFO",
@@ -2064,12 +2070,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/SurfaceAnimator.java"
-    },
-    "-206549078": {
-      "message": "Not moving display (displayId=%d) to top. Top focused displayId=%d. Reason: config_perDisplayFocusEnabled",
-      "level": "INFO",
-      "group": "WM_DEBUG_FOCUS_LIGHT",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-203358733": {
       "message": "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW %s",

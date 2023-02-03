@@ -88,6 +88,7 @@ public class RemoteTransitionCompat {
                 final ArrayList<WindowContainerToken> pausingTasks = new ArrayList<>();
                 WindowContainerToken pipTask = null;
                 WindowContainerToken recentsTask = null;
+                int recentsTaskId = -1;
                 for (int i = apps.length - 1; i >= 0; --i) {
                     final ActivityManager.RunningTaskInfo taskInfo = apps[i].taskInfo;
                     if (apps[i].mode == MODE_CLOSING) {
@@ -106,8 +107,10 @@ public class RemoteTransitionCompat {
                         // This task is for recents, keep it on top.
                         t.setLayer(apps[i].leash, info.getChanges().size() * 3 - i);
                         recentsTask = taskInfo.token;
+                        recentsTaskId = taskInfo.taskId;
                     } else if (taskInfo != null && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
                         recentsTask = taskInfo.token;
+                        recentsTaskId = taskInfo.taskId;
                     }
                 }
                 // Also make all the wallpapers opaque since we want the visible from the start
@@ -116,7 +119,7 @@ public class RemoteTransitionCompat {
                 }
                 t.apply();
                 mRecentsSession.setup(controller, info, finishedCallback, pausingTasks, pipTask,
-                        recentsTask, leashMap, mToken,
+                        recentsTask, recentsTaskId, leashMap, mToken,
                         (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0);
                 recents.onAnimationStart(mRecentsSession, apps, wallpapers, new Rect(0, 0, 0, 0),
                         new Rect());
@@ -154,6 +157,7 @@ public class RemoteTransitionCompat {
         private ArrayList<WindowContainerToken> mPausingTasks = null;
         private WindowContainerToken mPipTask = null;
         private WindowContainerToken mRecentsTask = null;
+        private int mRecentsTaskId = 0;
         private TransitionInfo mInfo = null;
         private ArrayList<SurfaceControl> mOpeningLeashes = null;
         private boolean mOpeningHome = false;
@@ -167,8 +171,8 @@ public class RemoteTransitionCompat {
         void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
                 IRemoteTransitionFinishedCallback finishCB,
                 ArrayList<WindowContainerToken> pausingTasks, WindowContainerToken pipTask,
-                WindowContainerToken recentsTask, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
-                IBinder transition, boolean keyguardLocked) {
+                WindowContainerToken recentsTask, int recentsTaskId, ArrayMap<SurfaceControl,
+                SurfaceControl> leashMap, IBinder transition, boolean keyguardLocked) {
             if (mInfo != null) {
                 throw new IllegalStateException("Trying to run a new recents animation while"
                         + " recents is already active.");
@@ -179,6 +183,7 @@ public class RemoteTransitionCompat {
             mPausingTasks = pausingTasks;
             mPipTask = pipTask;
             mRecentsTask = recentsTask;
+            mRecentsTaskId = recentsTaskId;
             mLeashMap = leashMap;
             mTransition = transition;
             mKeyguardLocked = keyguardLocked;
@@ -296,6 +301,15 @@ public class RemoteTransitionCompat {
         }
 
         @Override public void setInputConsumerEnabled(boolean enabled) {
+            if (enabled) {
+                // transient launches don't receive focus automatically. Since we are taking over
+                // the gesture now, take focus explicitly.
+                try {
+                    ActivityTaskManager.getService().setFocusedTask(mRecentsTaskId);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to set focused task", e);
+                }
+            }
             if (mWrapped != null) mWrapped.setInputConsumerEnabled(enabled);
         }
 
