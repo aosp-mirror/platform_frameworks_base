@@ -24634,7 +24634,7 @@ package android.media {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.RouteListingPreference.Item> CREATOR;
     field public static final int FLAG_ONGOING_SESSION = 1; // 0x1
     field public static final int FLAG_ONGOING_SESSION_MANAGED = 2; // 0x2
-    field public static final int FLAG_SUGGESTED_ROUTE = 4; // 0x4
+    field public static final int FLAG_SUGGESTED = 4; // 0x4
     field public static final int SELECTION_BEHAVIOR_GO_TO_APP = 2; // 0x2
     field public static final int SELECTION_BEHAVIOR_NONE = 0; // 0x0
     field public static final int SELECTION_BEHAVIOR_TRANSFER = 1; // 0x1
