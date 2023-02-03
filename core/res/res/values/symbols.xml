@@ -4926,4 +4926,7 @@
   <java-symbol type="array" name="config_displayShapeArray" />
 
   <java-symbol type="bool" name="config_stopSystemPackagesByDefault"/>
+
+  <!-- Whether to show weather on the lockscreen by default. -->
+  <java-symbol type="bool" name="config_lockscreenWeatherEnabledByDefault" />
 </resources>
