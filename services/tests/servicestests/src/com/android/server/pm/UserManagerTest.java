@@ -302,7 +302,7 @@ public final class UserManagerTest {
     @MediumTest
     @Test
     public void testRemoveUserByHandle_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> removeUser(null));
+        assertThrows(IllegalArgumentException.class, () -> mUserManager.removeUser(null));
     }
 
     @MediumTest
