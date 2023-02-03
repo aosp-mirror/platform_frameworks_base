@@ -80,7 +80,10 @@ public class InstallStart extends Activity {
         final int originatingUid = getOriginatingUid(sourceInfo);
         boolean isTrustedSource = false;
         if (sourceInfo != null && sourceInfo.isPrivilegedApp()) {
-            isTrustedSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false);
+            isTrustedSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false) || (
+                    originatingUid != Process.INVALID_UID && checkPermission(
+                            Manifest.permission.INSTALL_PACKAGES, -1 /* pid */, originatingUid)
+                            == PackageManager.PERMISSION_GRANTED);
         }
 
         if (!isTrustedSource && originatingUid != Process.INVALID_UID) {
