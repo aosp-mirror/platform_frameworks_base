@@ -41,6 +41,7 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
@@ -63,9 +64,10 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
 
     public TvPipBoundsAlgorithm(Context context,
             @NonNull TvPipBoundsState tvPipBoundsState,
-            @NonNull PipSnapAlgorithm pipSnapAlgorithm) {
+            @NonNull PipSnapAlgorithm pipSnapAlgorithm,
+            @NonNull PipSizeSpecHandler pipSizeSpecHandler) {
         super(context, tvPipBoundsState, pipSnapAlgorithm,
-                new PipKeepClearAlgorithmInterface() {});
+                new PipKeepClearAlgorithmInterface() {}, pipSizeSpecHandler);
         this.mTvPipBoundsState = tvPipBoundsState;
         this.mKeepClearAlgorithm = new TvPipKeepClearAlgorithm();
         reloadResources(context);
@@ -370,7 +372,8 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             if (mTvPipBoundsState.getTvFixedPipOrientation() == ORIENTATION_HORIZONTAL) {
                 expandedSize = mTvPipBoundsState.getTvExpandedSize();
             } else {
-                int maxHeight = displayLayout.height() - (2 * mScreenEdgeInsets.y)
+                int maxHeight = displayLayout.height()
+                        - (2 * mPipSizeSpecHandler.getScreenEdgeInsets().y)
                         - pipDecorations.top - pipDecorations.bottom;
                 float aspectRatioHeight = mFixedExpandedWidthInPx / expandedRatio;
 
@@ -393,7 +396,8 @@ public class TvPipBoundsAlgorithm extends PipBoundsAlgorithm {
             if (mTvPipBoundsState.getTvFixedPipOrientation() == ORIENTATION_VERTICAL) {
                 expandedSize = mTvPipBoundsState.getTvExpandedSize();
             } else {
-                int maxWidth = displayLayout.width() - (2 * mScreenEdgeInsets.x)
+                int maxWidth = displayLayout.width()
+                        - (2 * mPipSizeSpecHandler.getScreenEdgeInsets().x)
                         - pipDecorations.left - pipDecorations.right;
                 float aspectRatioWidth = mFixedExpandedHeightInPx * expandedRatio;
                 if (maxWidth > aspectRatioWidth) {

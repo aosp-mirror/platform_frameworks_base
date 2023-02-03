@@ -77,6 +77,7 @@ import com.android.wm.shell.pip.phone.PhonePipKeepClearAlgorithm;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -338,6 +339,7 @@ public abstract class WMShellModule {
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PhonePipKeepClearAlgorithm pipKeepClearAlgorithm,
             PipBoundsState pipBoundsState,
+            PipSizeSpecHandler pipSizeSpecHandler,
             PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController,
@@ -354,17 +356,18 @@ public abstract class WMShellModule {
         return Optional.ofNullable(PipController.create(
                 context, shellInit, shellCommandHandler, shellController,
                 displayController, pipAnimationController, pipAppOpsListener, pipBoundsAlgorithm,
-                pipKeepClearAlgorithm, pipBoundsState, pipMotionHelper, pipMediaController,
-                phonePipMenuController, pipTaskOrganizer, pipTransitionState, pipTouchHandler,
-                pipTransitionController, windowManagerShellWrapper, taskStackListener,
-                pipParamsChangedForwarder, displayInsetsController, oneHandedController,
-                mainExecutor));
+                pipKeepClearAlgorithm, pipBoundsState, pipSizeSpecHandler, pipMotionHelper,
+                pipMediaController, phonePipMenuController, pipTaskOrganizer, pipTransitionState,
+                pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
+                taskStackListener, pipParamsChangedForwarder, displayInsetsController,
+                oneHandedController, mainExecutor));
     }
 
     @WMSingleton
     @Provides
-    static PipBoundsState providePipBoundsState(Context context) {
-        return new PipBoundsState(context);
+    static PipBoundsState providePipBoundsState(Context context,
+            PipSizeSpecHandler pipSizeSpecHandler) {
+        return new PipBoundsState(context, pipSizeSpecHandler);
     }
 
     @WMSingleton
@@ -381,11 +384,18 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
+    static PipSizeSpecHandler providePipSizeSpecHelper(Context context) {
+        return new PipSizeSpecHandler(context);
+    }
+
+    @WMSingleton
+    @Provides
     static PipBoundsAlgorithm providesPipBoundsAlgorithm(Context context,
             PipBoundsState pipBoundsState, PipSnapAlgorithm pipSnapAlgorithm,
-            PhonePipKeepClearAlgorithm pipKeepClearAlgorithm) {
+            PhonePipKeepClearAlgorithm pipKeepClearAlgorithm,
+            PipSizeSpecHandler pipSizeSpecHandler) {
         return new PipBoundsAlgorithm(context, pipBoundsState, pipSnapAlgorithm,
-                pipKeepClearAlgorithm);
+                pipKeepClearAlgorithm, pipSizeSpecHandler);
     }
 
     // Handler is used by Icon.loadDrawableAsync
@@ -409,13 +419,14 @@ public abstract class WMShellModule {
             PhonePipMenuController menuPhoneController,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState,
+            PipSizeSpecHandler pipSizeSpecHandler,
             PipTaskOrganizer pipTaskOrganizer,
             PipMotionHelper pipMotionHelper,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTouchHandler(context, shellInit, menuPhoneController, pipBoundsAlgorithm,
-                pipBoundsState, pipTaskOrganizer, pipMotionHelper,
+                pipBoundsState, pipSizeSpecHandler, pipTaskOrganizer, pipMotionHelper,
                 floatingContentCoordinator, pipUiEventLogger, mainExecutor);
     }
 
