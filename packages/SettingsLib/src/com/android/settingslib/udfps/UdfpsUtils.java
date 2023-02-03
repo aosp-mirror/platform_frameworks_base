@@ -131,7 +131,7 @@ public class UdfpsUtils {
         // Touch coordinates are with respect to the upper left corner, so reverse
         // this calculation
         float yRelativeToSensor = sensorY - touchY;
-        var angleInRad = Math.atan2(yRelativeToSensor, xRelativeToSensor);
+        double angleInRad = Math.atan2(yRelativeToSensor, xRelativeToSensor);
         // If the radians are negative, that means we are counting clockwise.
         // So we need to add 360 degrees
         if (angleInRad < 0.0) {
