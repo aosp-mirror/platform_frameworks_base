@@ -16,10 +16,10 @@
 
 package com.android.systemui.navigationbar.gestural;
 
-import static android.view.InputDevice.SOURCE_TOUCHPAD;
-import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
+import static android.view.InputDevice.SOURCE_MOUSE;
 import static android.view.MotionEvent.AXIS_GESTURE_X_OFFSET;
 import static android.view.MotionEvent.AXIS_GESTURE_Y_OFFSET;
+import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -57,14 +57,9 @@ public class MotionEventsHandlerTest extends SysuiTestCase {
     @Test
     public void onTouchEvent_touchScreen_hasCorrectDisplacements() {
         MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 100, 100, 0);
-        // TODO: change to use classification after gesture library is ported.
-        down.setSource(SOURCE_TOUCHSCREEN);
         MotionEvent move1 = MotionEvent.obtain(0, 1, MotionEvent.ACTION_MOVE, 150, 125, 0);
-        move1.setSource(SOURCE_TOUCHSCREEN);
         MotionEvent move2 = MotionEvent.obtain(0, 2, MotionEvent.ACTION_MOVE, 200, 150, 0);
-        move2.setSource(SOURCE_TOUCHSCREEN);
         MotionEvent up = MotionEvent.obtain(0, 3, MotionEvent.ACTION_UP, 250, 175, 0);
-        up.setSource(SOURCE_TOUCHSCREEN);
 
         mMotionEventsHandler.onMotionEvent(down);
         mMotionEventsHandler.onMotionEvent(move1);
@@ -90,8 +85,8 @@ public class MotionEventsHandlerTest extends SysuiTestCase {
         downPointerProperties[0].id = 1;
         downPointerProperties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
         MotionEvent down = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 1,
-                downPointerProperties, downPointerCoords, 0, 0, 1.0f, 1.0f, 0, 0,
-                SOURCE_TOUCHPAD, 0);
+                downPointerProperties, downPointerCoords, 0, 0, 1.0f, 1.0f, 0, 0, SOURCE_MOUSE,
+                0, 0, CLASSIFICATION_MULTI_FINGER_SWIPE);
 
         MotionEvent.PointerCoords[] movePointerCoords1 = new MotionEvent.PointerCoords[1];
         movePointerCoords1[0] = new MotionEvent.PointerCoords();
@@ -103,8 +98,8 @@ public class MotionEventsHandlerTest extends SysuiTestCase {
         movePointerProperties1[0].id = 1;
         movePointerProperties1[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
         MotionEvent move1 = MotionEvent.obtain(0, 1, MotionEvent.ACTION_MOVE, 1,
-                movePointerProperties1, movePointerCoords1, 0, 0, 1.0f, 1.0f, 0, 0, SOURCE_TOUCHPAD,
-                0);
+                movePointerProperties1, movePointerCoords1, 0, 0, 1.0f, 1.0f, 0, 0, SOURCE_MOUSE,
+                0, 0, CLASSIFICATION_MULTI_FINGER_SWIPE);
 
         MotionEvent.PointerCoords[] movePointerCoords2 = new MotionEvent.PointerCoords[1];
         movePointerCoords2[0] = new MotionEvent.PointerCoords();
@@ -116,8 +111,8 @@ public class MotionEventsHandlerTest extends SysuiTestCase {
         movePointerProperties2[0].id = 1;
         movePointerProperties2[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
         MotionEvent move2 = MotionEvent.obtain(0, 2, MotionEvent.ACTION_MOVE, 1,
-                movePointerProperties2, movePointerCoords2, 0, 0, 1.0f, 1.0f, 0, 0, SOURCE_TOUCHPAD,
-                0);
+                movePointerProperties2, movePointerCoords2, 0, 0, 1.0f, 1.0f, 0, 0, SOURCE_MOUSE,
+                0, 0, CLASSIFICATION_MULTI_FINGER_SWIPE);
 
         MotionEvent.PointerCoords[] upPointerCoords = new MotionEvent.PointerCoords[1];
         upPointerCoords[0] = new MotionEvent.PointerCoords();
@@ -129,7 +124,8 @@ public class MotionEventsHandlerTest extends SysuiTestCase {
         upPointerProperties2[0].id = 1;
         upPointerProperties2[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
         MotionEvent up = MotionEvent.obtain(0, 2, MotionEvent.ACTION_UP, 1,
-                upPointerProperties2, upPointerCoords, 0, 0, 1.0f, 1.0f, 0, 0, SOURCE_TOUCHPAD, 0);
+                upPointerProperties2, upPointerCoords, 0, 0, 1.0f, 1.0f, 0, 0, SOURCE_MOUSE,
+                0, 0, CLASSIFICATION_MULTI_FINGER_SWIPE);
 
         mMotionEventsHandler.onMotionEvent(down);
         mMotionEventsHandler.onMotionEvent(move1);
