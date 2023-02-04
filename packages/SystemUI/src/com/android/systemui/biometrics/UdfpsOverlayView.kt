@@ -25,6 +25,7 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.FrameLayout
+import com.android.settingslib.udfps.UdfpsOverlayParams
 
 private const val TAG = "UdfpsOverlayView"
 private const val POINT_SIZE = 10f

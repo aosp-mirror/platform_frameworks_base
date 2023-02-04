@@ -8,6 +8,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
+
 import com.google.android.collect.Sets;
 
 import org.junit.Before;
@@ -29,7 +30,7 @@ public class WeaverBasedSyntheticPasswordTests extends SyntheticPasswordTests {
     // sequentially, starting at slot 0.
     @Test
     public void testFrpWeaverSlotNotReused() {
-        final int userId = 10;
+        final int userId = SECONDARY_USER_ID;
         final int frpWeaverSlot = 0;
 
         setDeviceProvisioned(false);
@@ -45,7 +46,7 @@ public class WeaverBasedSyntheticPasswordTests extends SyntheticPasswordTests {
     // it's here as a control for testFrpWeaverSlotNotReused().
     @Test
     public void testFrpWeaverSlotReused() {
-        final int userId = 10;
+        final int userId = SECONDARY_USER_ID;
         final int frpWeaverSlot = 0;
 
         setDeviceProvisioned(true);

@@ -45,11 +45,13 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.window.ITaskFragmentOrganizer;
+import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentInfo;
 import android.window.TaskFragmentOrganizer;
 
@@ -299,35 +301,44 @@ public class TaskFragmentTest extends WindowTestsBase {
 
     @Test
     public void testEmbeddedTaskFragmentEnterPip_singleActivity_resetOrganizerOverrideConfig() {
-        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
-                .setOrganizer(mOrganizer)
-                .setFragmentToken(new Binder())
-                .setCreateParentTask()
-                .createActivityCount(1)
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment taskFragment0 = createTaskFragmentWithEmbeddedActivity(task, mOrganizer);
+        final TaskFragment taskFragment1 = new TaskFragmentBuilder(mAtm)
+                .setParentTask(task)
                 .build();
-        final Task task = taskFragment.getTask();
-        final ActivityRecord activity = taskFragment.getTopMostActivity();
+        final ActivityRecord activity = taskFragment0.getTopMostActivity();
         final Rect taskFragmentBounds = new Rect(0, 0, 300, 1000);
         task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        taskFragment.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        taskFragment.setBounds(taskFragmentBounds);
+        taskFragment0.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        taskFragment0.setBounds(taskFragmentBounds);
+        taskFragment0.setAdjacentTaskFragment(taskFragment1);
+        taskFragment0.setCompanionTaskFragment(taskFragment1);
+        taskFragment0.setAnimationParams(new TaskFragmentAnimationParams.Builder()
+                .setAnimationBackgroundColor(Color.GREEN)
+                .build());
 
         assertEquals(taskFragmentBounds, activity.getBounds());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, activity.getWindowingMode());
+        assertEquals(taskFragment1, taskFragment0.getAdjacentTaskFragment());
+        assertEquals(taskFragment1, taskFragment0.getCompanionTaskFragment());
+        assertNotEquals(TaskFragmentAnimationParams.DEFAULT, taskFragment0.getAnimationParams());
 
         // Move activity to pinned root task.
         mRootWindowContainer.moveActivityToPinnedRootTask(activity,
                 null /* launchIntoPipHostActivity */, "test");
 
         // Ensure taskFragment requested config is reset.
-        assertEquals(taskFragment, activity.getOrganizedTaskFragment());
+        assertEquals(taskFragment0, activity.getOrganizedTaskFragment());
         assertEquals(task, activity.getTask());
         assertTrue(task.inPinnedWindowingMode());
-        assertTrue(taskFragment.inPinnedWindowingMode());
+        assertTrue(taskFragment0.inPinnedWindowingMode());
         final Rect taskBounds = task.getBounds();
-        assertEquals(taskBounds, taskFragment.getBounds());
+        assertEquals(taskBounds, taskFragment0.getBounds());
         assertEquals(taskBounds, activity.getBounds());
-        assertEquals(Configuration.EMPTY, taskFragment.getRequestedOverrideConfiguration());
+        assertEquals(Configuration.EMPTY, taskFragment0.getRequestedOverrideConfiguration());
+        assertNull(taskFragment0.getAdjacentTaskFragment());
+        assertNull(taskFragment0.getCompanionTaskFragment());
+        assertEquals(TaskFragmentAnimationParams.DEFAULT, taskFragment0.getAnimationParams());
         // Because the whole Task is entering PiP, no need to record for future reparent.
         assertNull(activity.mLastTaskFragmentOrganizerBeforePip);
     }
@@ -335,18 +346,8 @@ public class TaskFragmentTest extends WindowTestsBase {
     @Test
     public void testEmbeddedTaskFragmentEnterPip_multiActivities_notifyOrganizer() {
         final Task task = createTask(mDisplayContent);
-        final TaskFragment taskFragment0 = new TaskFragmentBuilder(mAtm)
-                .setParentTask(task)
-                .setOrganizer(mOrganizer)
-                .setFragmentToken(new Binder())
-                .createActivityCount(1)
-                .build();
-        final TaskFragment taskFragment1 = new TaskFragmentBuilder(mAtm)
-                .setParentTask(task)
-                .setOrganizer(mOrganizer)
-                .setFragmentToken(new Binder())
-                .createActivityCount(1)
-                .build();
+        final TaskFragment taskFragment0 = createTaskFragmentWithEmbeddedActivity(task, mOrganizer);
+        final TaskFragment taskFragment1 = createTaskFragmentWithEmbeddedActivity(task, mOrganizer);
         final ActivityRecord activity0 = taskFragment0.getTopMostActivity();
         final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
         activity0.setVisibility(true /* visible */, false /* deferHidingClient */);

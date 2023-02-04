@@ -159,7 +159,6 @@ public class DisplayModeDirector {
         mSupportedModesByDisplay = new SparseArray<>();
         mDefaultModeByDisplay = new SparseArray<>();
         mAppRequestObserver = new AppRequestObserver();
-        mDisplayObserver = new DisplayObserver(context, handler);
         mDeviceConfig = injector.getDeviceConfig();
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mSettingsObserver = new SettingsObserver(context, handler);
@@ -170,6 +169,7 @@ public class DisplayModeDirector {
                 updateVoteLocked(displayId, priority, vote);
             }
         };
+        mDisplayObserver = new DisplayObserver(context, handler, ballotBox);
         mSensorObserver = new SensorObserver(context, ballotBox, injector);
         mSkinThermalStatusObserver = new SkinThermalStatusObserver(injector, ballotBox);
         mHbmObserver = new HbmObserver(injector, ballotBox, BackgroundThread.getHandler(),
@@ -1186,26 +1186,29 @@ public class DisplayModeDirector {
         // rest of low priority voters. It votes [0, max(PEAK, MIN)]
         public static final int PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE = 7;
 
+        // For concurrent displays we want to limit refresh rate on all displays
+        public static final int PRIORITY_LAYOUT_LIMITED_FRAME_RATE = 8;
+
         // LOW_POWER_MODE force the render frame rate to [0, 60HZ] if
         // Settings.Global.LOW_POWER_MODE is on.
-        public static final int PRIORITY_LOW_POWER_MODE = 8;
+        public static final int PRIORITY_LOW_POWER_MODE = 9;
 
         // PRIORITY_FLICKER_REFRESH_RATE_SWITCH votes for disabling refresh rate switching. If the
         // higher priority voters' result is a range, it will fix the rate to a single choice.
         // It's used to avoid refresh rate switches in certain conditions which may result in the
         // user seeing the display flickering when the switches occur.
-        public static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 9;
+        public static final int PRIORITY_FLICKER_REFRESH_RATE_SWITCH = 10;
 
         // Force display to [0, 60HZ] if skin temperature is at or above CRITICAL.
-        public static final int PRIORITY_SKIN_TEMPERATURE = 10;
+        public static final int PRIORITY_SKIN_TEMPERATURE = 11;
 
         // The proximity sensor needs the refresh rate to be locked in order to function, so this is
         // set to a high priority.
-        public static final int PRIORITY_PROXIMITY = 11;
+        public static final int PRIORITY_PROXIMITY = 12;
 
         // The Under-Display Fingerprint Sensor (UDFPS) needs the refresh rate to be locked in order
         // to function, so this needs to be the highest priority of all votes.
-        public static final int PRIORITY_UDFPS = 12;
+        public static final int PRIORITY_UDFPS = 13;
 
         // Whenever a new priority is added, remember to update MIN_PRIORITY, MAX_PRIORITY, and
         // APP_REQUEST_REFRESH_RATE_RANGE_PRIORITY_CUTOFF, as well as priorityToString.
@@ -1657,10 +1660,12 @@ public class DisplayModeDirector {
         // calling into us already holding its own lock.
         private final Context mContext;
         private final Handler mHandler;
+        private final BallotBox mBallotBox;
 
-        DisplayObserver(Context context, Handler handler) {
+        DisplayObserver(Context context, Handler handler, BallotBox ballotBox) {
             mContext = context;
             mHandler = handler;
+            mBallotBox = ballotBox;
         }
 
         public void observe() {
@@ -1689,7 +1694,9 @@ public class DisplayModeDirector {
 
         @Override
         public void onDisplayAdded(int displayId) {
-            updateDisplayModes(displayId);
+            DisplayInfo displayInfo = getDisplayInfo(displayId);
+            updateDisplayModes(displayId, displayInfo);
+            updateLayoutLimitedFrameRate(displayId, displayInfo);
         }
 
         @Override
@@ -1698,23 +1705,41 @@ public class DisplayModeDirector {
                 mSupportedModesByDisplay.remove(displayId);
                 mDefaultModeByDisplay.remove(displayId);
             }
+            updateLayoutLimitedFrameRate(displayId, null);
         }
 
         @Override
         public void onDisplayChanged(int displayId) {
-            updateDisplayModes(displayId);
+            DisplayInfo displayInfo = getDisplayInfo(displayId);
+            updateDisplayModes(displayId, displayInfo);
+            updateLayoutLimitedFrameRate(displayId, displayInfo);
         }
 
-        private void updateDisplayModes(int displayId) {
+        @Nullable
+        private DisplayInfo getDisplayInfo(int displayId) {
             Display d = mContext.getSystemService(DisplayManager.class).getDisplay(displayId);
             if (d == null) {
                 // We can occasionally get a display added or changed event for a display that was
                 // subsequently removed, which means this returns null. Check this case and bail
                 // out early; if it gets re-attached we'll eventually get another call back for it.
-                return;
+                return null;
             }
             DisplayInfo info = new DisplayInfo();
             d.getDisplayInfo(info);
+            return info;
+        }
+
+        private void updateLayoutLimitedFrameRate(int displayId, @Nullable DisplayInfo info) {
+            Vote vote = info != null && info.layoutLimitedRefreshRate != null
+                    ? Vote.forPhysicalRefreshRates(info.layoutLimitedRefreshRate.min,
+                    info.layoutLimitedRefreshRate.max) : null;
+            mBallotBox.vote(displayId, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE, vote);
+        }
+
+        private void updateDisplayModes(int displayId, @Nullable DisplayInfo info) {
+            if (info == null) {
+                return;
+            }
             boolean changed = false;
             synchronized (mLock) {
                 if (!Arrays.equals(mSupportedModesByDisplay.get(displayId), info.supportedModes)) {

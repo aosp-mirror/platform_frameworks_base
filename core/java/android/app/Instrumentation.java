@@ -2324,10 +2324,13 @@ public class Instrumentation {
                 mUiAutomation.connect(flags);
                 return mUiAutomation;
             }
+            final long startUptime = SystemClock.uptimeMillis();
             try {
                 mUiAutomation.connectWithTimeout(flags, CONNECT_TIMEOUT_MILLIS);
                 return mUiAutomation;
             } catch (TimeoutException e) {
+                final long waited = SystemClock.uptimeMillis() - startUptime;
+                Log.e(TAG, "Unable to connect to UiAutomation. Waited for " + waited + " ms", e);
                 mUiAutomation.destroy();
                 mUiAutomation = null;
             }

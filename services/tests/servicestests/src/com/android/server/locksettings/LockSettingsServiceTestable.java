@@ -30,6 +30,7 @@ import android.os.RemoteException;
 import android.os.storage.IStorageManager;
 import android.security.KeyStore;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
+import android.service.gatekeeper.IGateKeeperService;
 
 import com.android.internal.widget.LockscreenCredential;
 import com.android.server.ServiceThread;
@@ -40,7 +41,7 @@ import java.io.FileNotFoundException;
 
 public class LockSettingsServiceTestable extends LockSettingsService {
 
-    private static class MockInjector extends LockSettingsService.Injector {
+    public static class MockInjector extends LockSettingsService.Injector {
 
         private LockSettingsStorage mLockSettingsStorage;
         private KeyStore mKeyStore;
@@ -51,6 +52,9 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         private RecoverableKeyStoreManager mRecoverableKeyStoreManager;
         private UserManagerInternal mUserManagerInternal;
         private DeviceStateCache mDeviceStateCache;
+
+        public boolean mIsHeadlessSystemUserMode = false;
+        public boolean mIsMainUserPermanentAdmin = false;
 
         public MockInjector(Context context, LockSettingsStorage storage, KeyStore keyStore,
                 IActivityManager activityManager,
@@ -140,19 +144,22 @@ public class LockSettingsServiceTestable extends LockSettingsService {
             return mock(ManagedProfilePasswordCache.class);
         }
 
+        @Override
+        public boolean isHeadlessSystemUserMode() {
+            return mIsHeadlessSystemUserMode;
+        }
+
+        @Override
+        public boolean isMainUserPermanentAdmin() {
+            return mIsMainUserPermanentAdmin;
+        }
     }
 
-    public MockInjector mInjector;
-
-    protected LockSettingsServiceTestable(Context context,
-            LockSettingsStorage storage, FakeGateKeeperService gatekeeper, KeyStore keystore,
-            IStorageManager storageManager, IActivityManager mActivityManager,
-            SyntheticPasswordManager spManager, IAuthSecret authSecretService,
-            FakeGsiService gsiService, RecoverableKeyStoreManager recoverableKeyStoreManager,
-            UserManagerInternal userManagerInternal, DeviceStateCache deviceStateCache) {
-        super(new MockInjector(context, storage, keystore, mActivityManager,
-                storageManager, spManager, gsiService, recoverableKeyStoreManager,
-                userManagerInternal, deviceStateCache));
+    protected LockSettingsServiceTestable(
+            LockSettingsService.Injector injector,
+            IGateKeeperService gatekeeper,
+            IAuthSecret authSecretService) {
+        super(injector);
         mGateKeeperService = gatekeeper;
         mAuthSecretService = authSecretService;
     }
@@ -198,5 +205,11 @@ public class LockSettingsServiceTestable extends LockSettingsService {
     protected boolean isCredentialSharableWithParent(int userId) {
         UserInfo userInfo = mUserManager.getUserInfo(userId);
         return userInfo.isCloneProfile() || userInfo.isManagedProfile();
+    }
+
+    void clearAuthSecret() {
+        synchronized (mHeadlessAuthSecretLock) {
+            mAuthSecret = null;
+        }
     }
 }

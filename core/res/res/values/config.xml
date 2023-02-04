@@ -983,6 +983,13 @@
     <integer-array name="config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis">
     </integer-array>
 
+    <!-- Boolean indicating whether secondary built-in displays should have their orientation
+         match the active default display. This config assumes that the secondary display only
+         requires swapping ROTATION_90 and ROTATION_270.
+         TODO(b/265991392): This should eventually be configured and parsed in
+          display_settings.xml -->
+    <bool name="config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay">true</bool>
+
     <!-- Indicate available ColorDisplayManager.COLOR_MODE_xxx. -->
     <integer-array name="config_availableColorModes">
         <!-- Example:
@@ -4110,16 +4117,6 @@
     -->
     <string-array translatable="false" name="config_convert_to_emergency_number_map" />
 
-    <!-- An array of packages for which notifications cannot be blocked.
-         Should only be used for core device functionality that must not be
-         rendered inoperative for safety reasons, like the phone dialer and
-         SMS handler. -->
-    <string-array translatable="false" name="config_nonBlockableNotificationPackages">
-        <item>com.android.dialer</item>
-        <item>com.android.messaging</item>
-        <item>com.android.cellbroadcastreceiver.module</item>
-    </string-array>
-
     <!-- An array of packages that can make sound on the ringer stream in priority-only DND
      mode -->
     <string-array translatable="false" name="config_priorityOnlyDndExemptPackages">
@@ -4176,11 +4173,18 @@
     <bool name="config_quickSettingsSupported">true</bool>
 
     <!-- The component name, flattened to a string, for the default autofill service
-         to  enabled for an user. This service must be trusted, as it can be activated
+         to  enabled for a user. This service must be trusted, as it can be activated
          without explicit consent of the user. If no autofill service with the
           specified name exists on the device, autofill will be disabled by default.
     -->
     <string name="config_defaultAutofillService" translatable="false"></string>
+
+    <!-- The component name, flattened to a string, for the default field classification service
+         to  enabled for a user. This service must be trusted, as it can be activated
+         without explicit consent of the user. If no field classification service with the
+         specified name exists on the device, field classification will be disabled by default.
+    -->
+    <string name="config_defaultFieldClassificationService" translatable="false"></string>
 
     <!-- The package name for the OEM custom system textclassifier service.
          This service must be trusted, as it can be activated without explicit consent of the user.
@@ -6272,4 +6276,7 @@
         "stopped" during initial boot of a device, or after an OTA update. Stopped state of
         an app is not changed during subsequent reboots.  -->
     <bool name="config_stopSystemPackagesByDefault">false</bool>
+
+    <!-- Whether to show weather on the lock screen by default. -->
+    <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
 </resources>

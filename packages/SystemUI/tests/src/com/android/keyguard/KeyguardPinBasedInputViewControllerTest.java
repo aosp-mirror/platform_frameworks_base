@@ -120,4 +120,10 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     public void testGetInitialMessageResId() {
         assertThat(mKeyguardPinViewController.getInitialMessageResId()).isNotEqualTo(0);
     }
+
+    @Test
+    public void testMessageIsSetWhenReset() {
+        mKeyguardPinViewController.resetState();
+        verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_pin);
+    }
 }

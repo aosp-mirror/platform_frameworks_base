@@ -742,9 +742,6 @@ public final class CachedAppOptimizer {
                         "compactApp " + app.mOptRecord.getReqCompactSource().name() + " "
                                 + app.mOptRecord.getReqCompactProfile().name() + " " + processName);
             }
-            Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, ATRACE_COMPACTION_TRACK,
-                    "compactApp " + app.mOptRecord.getReqCompactSource().name() + " "
-                            + app.mOptRecord.getReqCompactProfile().name() + " " + processName);
             app.mOptRecord.setHasPendingCompact(true);
             app.mOptRecord.setForceCompact(force);
             mPendingCompactionProcesses.add(app);
@@ -1820,7 +1817,8 @@ public final class CachedAppOptimizer {
                     try {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                                 "Compact " + resolvedAction.name() + ": " + name
-                                        + " lastOomAdjReason: " + oomAdjReason);
+                                        + " lastOomAdjReason: " + oomAdjReason
+                                        + " source: " + compactSource.name());
                         long zramUsedKbBefore = getUsedZramMemory();
                         long startCpuTime = threadCpuTimeNs();
                         mProcessDependencies.performCompaction(resolvedAction, pid);

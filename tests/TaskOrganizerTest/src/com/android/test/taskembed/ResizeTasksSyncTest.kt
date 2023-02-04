@@ -23,7 +23,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
 import com.android.server.wm.flicker.monitor.LayersTraceMonitor
 import com.android.server.wm.flicker.monitor.withSFTracing
-import com.android.server.wm.flicker.traces.layers.LayersTraceSubject.Companion.assertThat
+import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -90,13 +90,13 @@ class ResizeTasksSyncTest {
         secondBounds.offsetTo(0, 0)
 
         // verify buffer size should be changed to expected values.
-        assertThat(trace).layer(FIRST_ACTIVITY, frame.toLong()).also {
+        LayersTraceSubject(trace).layer(FIRST_ACTIVITY, frame.toLong()).also {
             val firstTaskSize = Point(firstBounds.width(), firstBounds.height())
             it.hasLayerSize(firstTaskSize)
             it.hasBufferSize(firstTaskSize)
         }
 
-        assertThat(trace).layer(SECOND_ACTIVITY, frame.toLong()).also {
+        LayersTraceSubject(trace).layer(SECOND_ACTIVITY, frame.toLong()).also {
             val secondTaskSize = Point(secondBounds.width(), secondBounds.height())
             it.hasLayerSize(secondTaskSize)
             it.hasBufferSize(secondTaskSize)

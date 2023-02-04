@@ -378,8 +378,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // window, as we'll be skipping the addView in handleResumeActivity(), and
             // the token will not be updated as for a new window.
             getAttributes().token = preservedWindow.getAttributes().token;
-            mProxyOnBackInvokedDispatcher.setActualDispatcher(
-                    preservedWindow.getOnBackInvokedDispatcher());
+            final ViewRootImpl viewRoot = mDecor.getViewRootImpl();
+            if (viewRoot != null) {
+                // Clear the old callbacks and attach to the new window.
+                viewRoot.getOnBackInvokedDispatcher().clear();
+                onViewRootImplSet(viewRoot);
+            }
         }
         // Even though the device doesn't support picture-in-picture mode,
         // an user can force using it through developer options.

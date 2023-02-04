@@ -16,7 +16,7 @@
 package com.android.test
 
 import android.graphics.Point
-import com.android.server.wm.flicker.traces.layers.LayersTraceSubject.Companion.assertThat
+import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
 import com.android.test.SurfaceViewBufferTestBase.Companion.Transform
 import junit.framework.Assert.assertEquals
 import org.junit.Assume.assumeFalse
@@ -69,8 +69,8 @@ class InverseDisplayTransformTests(useBlastAdapter: Boolean) :
         }
 
         // verify buffer size is reset to default buffer size
-        assertThat(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
-        assertThat(trace).layer("SurfaceView", 2).doesNotExist()
-        assertThat(trace).layer("SurfaceView", 3).hasBufferSize(rotatedBufferSize)
+        LayersTraceSubject(trace).layer("SurfaceView", 1).hasBufferSize(defaultBufferSize)
+        LayersTraceSubject(trace).layer("SurfaceView", 2).doesNotExist()
+        LayersTraceSubject(trace).layer("SurfaceView", 3).hasBufferSize(rotatedBufferSize)
     }
 }

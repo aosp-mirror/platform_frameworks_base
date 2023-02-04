@@ -24,6 +24,7 @@ import androidx.compose.runtime.ProvidedValue
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import com.android.settingslib.spa.framework.compose.LocalNavController
+import com.android.settingslib.spa.framework.util.genEntryId
 
 private const val INJECT_ENTRY_NAME = "INJECT"
 private const val ROOT_ENTRY_NAME = "ROOT"
@@ -188,7 +189,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
         val page = fromPage ?: owner
         val isEnabled = page.isEnabled()
         return SettingsEntry(
-            id = id(),
+            id = genEntryId(name, owner, fromPage, toPage),
             name = name,
             owner = owner,
             displayName = displayName,
@@ -272,11 +273,6 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
     fun setUiLayoutFn(fn: UiLayerRenderer): SettingsEntryBuilder {
         this.uiLayoutFn = fn
         return this
-    }
-
-    // The unique id of this entry, which is computed by name + owner + fromPage + toPage.
-    private fun id(): String {
-        return "$name:${owner.id}(${fromPage?.id}-${toPage?.id})".toHashId()
     }
 
     companion object {

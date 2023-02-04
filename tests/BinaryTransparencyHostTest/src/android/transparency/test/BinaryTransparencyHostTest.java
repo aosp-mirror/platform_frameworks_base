@@ -18,6 +18,7 @@ package android.transparency.test;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -76,6 +77,28 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
         } finally {
             // No need to wait until job complete, since we can't verifying very meaningfully.
             cancelPendingJob();
+            uninstallPackage("com.android.egg");
+        }
+    }
+
+    @Test
+    public void testCollectAllSilentInstalledMbaInfo() throws Exception {
+        try {
+            new InstallMultiple()
+                .addFile("ApkVerityTestApp.apk")
+                .addFile("ApkVerityTestAppSplit.apk")
+                .run();
+            updatePreloadApp();
+            assertNotNull(getDevice().getAppPackageInfo("com.android.apkverity"));
+            assertNotNull(getDevice().getAppPackageInfo("com.android.egg"));
+
+            assertTrue(getDevice().setProperty("debug.transparency.bg-install-apps",
+                        "com.android.apkverity,com.android.egg"));
+            runDeviceTest("testCollectAllSilentInstalledMbaInfo");
+        } finally {
+            // No need to wait until job complete, since we can't verifying very meaningfully.
+            cancelPendingJob();
+            uninstallPackage("com.android.apkverity");
             uninstallPackage("com.android.egg");
         }
     }
@@ -170,5 +193,14 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
 
         result = getDevice().executeShellV2Command("pm install " + path);
         assertTrue(result.getStatus() == CommandStatus.SUCCESS);
+    }
+
+    private class InstallMultiple extends BaseInstallMultiple<InstallMultiple> {
+        InstallMultiple() {
+            super(getDevice(), getBuild());
+            // Needed since in getMockBackgroundInstalledPackages, getPackageInfo runs as the caller
+            // uid. This also makes it consistent with installPackage's behavior.
+            addArg("--force-queryable");
+        }
     }
 }

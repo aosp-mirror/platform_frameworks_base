@@ -146,8 +146,8 @@ public class SafeActivityOptions {
                 .setLaunchRootTask(options.getLaunchRootTask())
                 .setPendingIntentBackgroundActivityStartMode(
                         options.getPendingIntentBackgroundActivityStartMode())
-                .setIgnorePendingIntentCreatorForegroundState(
-                        options.getIgnorePendingIntentCreatorForegroundState());
+                .setPendingIntentCreatorBackgroundActivityStartMode(
+                        options.getPendingIntentCreatorBackgroundActivityStartMode());
     }
 
     /**

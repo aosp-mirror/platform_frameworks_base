@@ -20,6 +20,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -316,21 +317,10 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
     }
 
     @Test
-    public void testGetBootUser_Headless_UserCreatedIfOnlySystemUserExists() throws Exception {
+    public void testGetBootUser_Headless_ThrowsIfOnlySystemUserExists() throws Exception {
         setSystemUserHeadless(true);
 
-        int bootUser = mUmi.getBootUser();
-
-        assertWithMessage("getStartingUser")
-                .that(bootUser).isNotEqualTo(UserHandle.USER_SYSTEM);
-
-        UserData newUser = mUsers.get(bootUser);
-        assertWithMessage("New boot user is a full user")
-                .that(newUser.info.isFull()).isTrue();
-        assertWithMessage("New boot user is an admin user")
-                .that(newUser.info.isAdmin()).isTrue();
-        assertWithMessage("New boot user is the main user")
-                .that(newUser.info.isMain()).isTrue();
+        assertThrows(UserManager.CheckedUserOperationException.class, () -> mUmi.getBootUser());
     }
 
     private void mockCurrentUser(@UserIdInt int userId) {

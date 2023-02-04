@@ -171,8 +171,9 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             getHost().collapsePanels();
         };
 
-        Dialog dialog = mController.createScreenRecordDialog(mContext, mFlags,
+        final Dialog dialog = mController.createScreenRecordDialog(mContext, mFlags,
                 mDialogLaunchAnimator, mActivityStarter, onStartRecordingClicked);
+
         ActivityStarter.OnDismissAction dismissAction = () -> {
             if (shouldAnimateFromView) {
                 mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(

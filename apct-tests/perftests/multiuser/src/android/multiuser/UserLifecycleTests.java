@@ -286,7 +286,7 @@ public class UserLifecycleTests {
      * this test can be removed.
      */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void startUser_startOnceBefore() throws RemoteException {
+    public void startUser_startedOnceBefore() throws RemoteException {
         startUser_measuresAfterFirstIterations(/* numberOfIterationsToSkip */1);
     }
 
@@ -340,7 +340,7 @@ public class UserLifecycleTests {
      * The next iterations take the expected time to start a user.
      */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void startUser_startTwiceBefore() throws RemoteException {
+    public void startUser_startedTwiceBefore() throws RemoteException {
         final int userId = createUserNoFlags();
 
         //TODO(b/266681181) Reduce iteration number by 1 after investigation and possible fix.
@@ -411,7 +411,7 @@ public class UserLifecycleTests {
      * The next iterations take the expected time to start a user.
      */
     @Test(timeout = TIMEOUT_MAX_TEST_TIME_MS)
-    public void startAndUnlockUser_startTwiceBefore() throws RemoteException {
+    public void startAndUnlockUser_startedTwiceBefore() throws RemoteException {
         final int userId = createUserNoFlags();
 
         //TODO(b/266681181) Reduce iteration number by 1 after investigation and possible fix.

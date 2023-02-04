@@ -195,7 +195,11 @@ void PointerController::setPresentation(Presentation presentation) {
         return;
     }
 
-    if (presentation == Presentation::POINTER) {
+    if (presentation == Presentation::POINTER || presentation == Presentation::STYLUS_HOVER) {
+        // For now, we support stylus hover using the mouse cursor implementation.
+        // TODO: Add proper support for stylus hover icons.
+        mCursorController.setStylusHoverMode(presentation == Presentation::STYLUS_HOVER);
+
         mCursorController.getAdditionalMouseResources();
         clearSpotsLocked();
     }
@@ -249,7 +253,8 @@ void PointerController::reloadPointerResources() {
 
     if (mCursorController.resourcesLoaded()) {
         bool getAdditionalMouseResources = false;
-        if (mLocked.presentation == PointerController::Presentation::POINTER) {
+        if (mLocked.presentation == PointerController::Presentation::POINTER ||
+            mLocked.presentation == PointerController::Presentation::STYLUS_HOVER) {
             getAdditionalMouseResources = true;
         }
         mCursorController.reloadPointerResources(getAdditionalMouseResources);
@@ -260,7 +265,8 @@ void PointerController::setDisplayViewport(const DisplayViewport& viewport) {
     std::scoped_lock lock(getLock());
 
     bool getAdditionalMouseResources = false;
-    if (mLocked.presentation == PointerController::Presentation::POINTER) {
+    if (mLocked.presentation == PointerController::Presentation::POINTER ||
+        mLocked.presentation == PointerController::Presentation::STYLUS_HOVER) {
         getAdditionalMouseResources = true;
     }
     mCursorController.setDisplayViewport(viewport, getAdditionalMouseResources);

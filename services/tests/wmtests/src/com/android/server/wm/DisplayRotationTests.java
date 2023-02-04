@@ -1135,7 +1135,7 @@ public class DisplayRotationTests {
             mDeviceStateController = mock(DeviceStateController.class);
             mTarget = new DisplayRotation(sMockWm, mMockDisplayContent, mMockDisplayAddress,
                     mMockDisplayPolicy, mMockDisplayWindowSettings, mMockContext, new Object(),
-                    mDeviceStateController) {
+                    mDeviceStateController, mock(DisplayRotationCoordinator.class)) {
                 @Override
                 DisplayRotationImmersiveAppCompatPolicy initImmersiveAppCompatPolicy(
                         WindowManagerService service, DisplayContent displayContent) {

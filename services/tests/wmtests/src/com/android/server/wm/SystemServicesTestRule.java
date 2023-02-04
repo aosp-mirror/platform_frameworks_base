@@ -352,6 +352,7 @@ public class SystemServicesTestRule implements TestRule {
         mAtmService.setWindowManager(mWmService);
         mWmService.mDisplayEnabled = true;
         mWmService.mDisplayReady = true;
+        mAtmService.getTransitionController().mIsWaitingForDisplayEnabled = false;
         // Set configuration for default display
         mWmService.getDefaultDisplayContentLocked().reconfigureDisplayLocked();
 

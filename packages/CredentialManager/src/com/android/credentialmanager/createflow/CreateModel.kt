@@ -21,6 +21,8 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityState
+import com.android.credentialmanager.common.CredentialType
+import java.time.Instant
 
 data class CreateCredentialUiState(
   val enabledProviders: List<EnabledProviderInfo>,
@@ -68,18 +70,18 @@ open class EntryInfo (
 )
 
 class CreateOptionInfo(
-  providerId: String,
-  entryKey: String,
-  entrySubkey: String,
-  pendingIntent: PendingIntent?,
-  fillInIntent: Intent?,
-  val userProviderDisplayName: String?,
-  val profileIcon: Drawable?,
-  val passwordCount: Int?,
-  val passkeyCount: Int?,
-  val totalCredentialCount: Int?,
-  val lastUsedTimeMillis: Long?,
-  val footerDescription: String?,
+    providerId: String,
+    entryKey: String,
+    entrySubkey: String,
+    pendingIntent: PendingIntent?,
+    fillInIntent: Intent?,
+    val userProviderDisplayName: String?,
+    val profileIcon: Drawable?,
+    val passwordCount: Int?,
+    val passkeyCount: Int?,
+    val totalCredentialCount: Int?,
+    val lastUsedTime: Instant?,
+    val footerDescription: String?,
 ) : EntryInfo(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
 
 class RemoteInfo(
@@ -93,7 +95,7 @@ class RemoteInfo(
 data class RequestDisplayInfo(
   val title: String,
   val subtitle: String?,
-  val type: String,
+  val type: CredentialType,
   val appName: String,
   val typeIcon: Drawable,
 )

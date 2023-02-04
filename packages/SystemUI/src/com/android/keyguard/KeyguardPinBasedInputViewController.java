@@ -131,6 +131,7 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
 
     @Override
     void resetState() {
+        mMessageAreaController.setMessage(getInitialMessageResId());
         mView.setPasswordEntryEnabled(true);
     }
 

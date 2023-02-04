@@ -240,11 +240,13 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak, jobject
     return reinterpret_cast<jlong>(receiver.get());
 }
 
-static void nativeDispose(JNIEnv* env, jclass clazz, jlong receiverPtr) {
-    NativeDisplayEventReceiver* receiver =
-            reinterpret_cast<NativeDisplayEventReceiver*>(receiverPtr);
+static void release(NativeDisplayEventReceiver* receiver) {
     receiver->dispose();
     receiver->decStrong(gDisplayEventReceiverClassInfo.clazz); // drop reference held by the object
+}
+
+static jlong nativeGetDisplayEventReceiverFinalizer(JNIEnv*, jclass) {
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&release));
 }
 
 static void nativeScheduleVsync(JNIEnv* env, jclass clazz, jlong receiverPtr) {
@@ -274,7 +276,8 @@ static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         {"nativeInit", "(Ljava/lang/ref/WeakReference;Landroid/os/MessageQueue;IIJ)J",
          (void*)nativeInit},
-        {"nativeDispose", "(J)V", (void*)nativeDispose},
+        {"nativeGetDisplayEventReceiverFinalizer", "()J",
+         (void*)nativeGetDisplayEventReceiverFinalizer},
         // @FastNative
         {"nativeScheduleVsync", "(J)V", (void*)nativeScheduleVsync},
         {"nativeGetLatestVsyncEventData", "(J)Landroid/view/DisplayEventReceiver$VsyncEventData;",

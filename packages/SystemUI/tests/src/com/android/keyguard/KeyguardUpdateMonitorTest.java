@@ -685,9 +685,33 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // WHEN fingerprint is locked out
         fingerprintErrorLockedOut();
 
-        // THEN unlocking with fingeprint is not allowed
+        // THEN unlocking with fingerprint is not allowed
         Assert.assertFalse(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
                 BiometricSourceType.FINGERPRINT));
+    }
+
+    @Test
+    public void trustAgentHasTrust() {
+        // WHEN user has trust
+        mKeyguardUpdateMonitor.onTrustChanged(true, true, getCurrentUser(), 0, null);
+
+        // THEN user is considered as "having trust" and bouncer can be skipped
+        Assert.assertTrue(mKeyguardUpdateMonitor.getUserHasTrust(getCurrentUser()));
+        Assert.assertTrue(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()));
+    }
+
+    @Test
+    public void trustAgentHasTrust_fingerprintLockout() {
+        // GIVEN user has trust
+        mKeyguardUpdateMonitor.onTrustChanged(true, true, getCurrentUser(), 0, null);
+        Assert.assertTrue(mKeyguardUpdateMonitor.getUserHasTrust(getCurrentUser()));
+
+        // WHEN fingerprint is locked out
+        fingerprintErrorLockedOut();
+
+        // THEN user is NOT considered as "having trust" and bouncer cannot be skipped
+        Assert.assertFalse(mKeyguardUpdateMonitor.getUserHasTrust(getCurrentUser()));
+        Assert.assertFalse(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()));
     }
 
     @Test
@@ -2182,7 +2206,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // GIVEN active unlock triggers on biometric failures
         when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.BIOMETRIC_FAIL))
                 .thenReturn(true);
 
         // WHEN fingerprint fails
@@ -2205,7 +2229,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // GIVEN active unlock triggers on biometric failures
         when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.BIOMETRIC_FAIL))
                 .thenReturn(true);
 
         // WHEN face fails & bypass is not allowed
@@ -2229,7 +2253,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // GIVEN active unlock triggers on biometric failures
         when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.BIOMETRIC_FAIL))
                 .thenReturn(true);
 
         // WHEN face fails & bypass is not allowed
@@ -2251,7 +2275,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // GIVEN active unlock triggers on biometric failures
         when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.BIOMETRIC_FAIL))
                 .thenReturn(true);
 
         // WHEN face fails & on the bouncer

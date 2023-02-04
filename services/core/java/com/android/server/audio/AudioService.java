@@ -3647,11 +3647,12 @@ public class AudioService extends IAudioService.Stub
         synchronized (VolumeStreamState.class) {
             List<Integer> streamsToMute = new ArrayList<>();
             for (int stream = 0; stream < mStreamStates.length; stream++) {
-                if (streamAlias == mStreamVolumeAlias[stream]) {
+                VolumeStreamState vss = mStreamStates[stream];
+                if (streamAlias == mStreamVolumeAlias[stream] && vss.isMutable()) {
                     if (!(readCameraSoundForced()
-                            && (mStreamStates[stream].getStreamType()
+                            && (vss.getStreamType()
                                     == AudioSystem.STREAM_SYSTEM_ENFORCED))) {
-                        boolean changed = mStreamStates[stream].mute(state, /* apply= */ false);
+                        boolean changed = vss.mute(state, /* apply= */ false);
                         if (changed) {
                             streamsToMute.add(stream);
                         }
@@ -8479,7 +8480,7 @@ public class AudioService extends IAudioService.Stub
                     }
                     mVolumeGroupState.updateVolumeIndex(groupIndex, device);
                     // Only propage mute of stream when applicable
-                    if (mIndexMin == 0 || isCallStream(mStreamType)) {
+                    if (isMutable()) {
                         // For call stream, align mute only when muted, not when index is set to 0
                         mVolumeGroupState.mute(
                                 forceMuteState ? mIsMuted : groupIndex == 0 || mIsMuted);
@@ -8529,6 +8530,12 @@ public class AudioService extends IAudioService.Stub
         @GuardedBy("VolumeStreamState.class")
         public boolean isFullyMuted() {
             return mIsMuted || mIsMutedInternally;
+        }
+
+
+        private boolean isMutable() {
+            return isStreamAffectedByMute(mStreamType)
+                    && (mIndexMin == 0 || isCallStream(mStreamType));
         }
 
         /**

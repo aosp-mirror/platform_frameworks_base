@@ -1386,7 +1386,6 @@ public final class SurfaceControl implements Parcelable {
             synchronized (mChoreographerLock) {
                 if (mChoreographer != null) {
                     mChoreographer.invalidate();
-                    // TODO(b/266121235): Use NativeAllocationRegistry to clean up Choreographer.
                     mChoreographer = null;
                 }
             }
@@ -1757,7 +1756,7 @@ public final class SurfaceControl implements Parcelable {
      * Information about the min and max refresh rate DM would like to set the display to.
      * @hide
      */
-    public static final class RefreshRateRange {
+    public static final class RefreshRateRange implements Parcelable {
         public static final String TAG = "RefreshRateRange";
 
         // The tolerance within which we consider something approximately equals.
@@ -1826,6 +1825,35 @@ public final class SurfaceControl implements Parcelable {
             this.min = other.min;
             this.max = other.max;
         }
+
+        /**
+         * Writes the RefreshRateRange to parce
+         *
+         * @param dest parcel to write the transaction to
+         */
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, @WriteFlags int flags) {
+            dest.writeFloat(min);
+            dest.writeFloat(max);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final @NonNull Creator<RefreshRateRange> CREATOR =
+                new Creator<RefreshRateRange>() {
+                    @Override
+                    public RefreshRateRange createFromParcel(Parcel in) {
+                        return new RefreshRateRange(in.readFloat(), in.readFloat());
+                    }
+
+                    @Override
+                    public RefreshRateRange[] newArray(int size) {
+                        return new RefreshRateRange[size];
+                    }
+                };
     }
 
     /**
@@ -2476,10 +2504,10 @@ public final class SurfaceControl implements Parcelable {
      * {@link Transaction#setTrustedPresentationCallback(SurfaceControl,
      * TrustedPresentationThresholds, Executor, Consumer)}
      */
-    public static class TrustedPresentationThresholds {
-        private float mMinAlpha;
-        private float mMinFractionRendered;
-        private int mStabilityRequirementMs;
+    public static final class TrustedPresentationThresholds {
+        private final float mMinAlpha;
+        private final float mMinFractionRendered;
+        private final int mStabilityRequirementMs;
 
         /**
          * Creates a TrustedPresentationThresholds that's used when calling

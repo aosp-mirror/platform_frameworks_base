@@ -6237,7 +6237,7 @@ public abstract class Context {
      *
      * @param permission The name of the permission being checked.
      * @param pid The process ID being checked against.  Must be > 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      *
      * @return {@link PackageManager#PERMISSION_GRANTED} if the given
@@ -6327,7 +6327,7 @@ public abstract class Context {
      *
      * @param permission The name of the permission being checked.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param message A message to include in the exception if it is thrown.
      *
@@ -6471,7 +6471,7 @@ public abstract class Context {
      *
      * @param uri The uri that is being checked.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param modeFlags The access modes to check.
      *
@@ -6499,7 +6499,7 @@ public abstract class Context {
      *
      * @param uris The list of URIs that is being checked.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param modeFlags The access modes to check for the list of uris
      *
@@ -6625,7 +6625,7 @@ public abstract class Context {
      * @param writePermission The permission that provides overall write
      * access, or null to not do this check.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param modeFlags The access modes to check.
      *
@@ -6649,7 +6649,7 @@ public abstract class Context {
      *
      * @param uri The uri that is being checked.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param modeFlags The access modes to enforce.
      * @param message A message to include in the exception if it is thrown.
@@ -6708,7 +6708,7 @@ public abstract class Context {
      * @param writePermission The permission that provides overall write
      * access, or null to not do this check.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param modeFlags The access modes to enforce.
      * @param message A message to include in the exception if it is thrown.

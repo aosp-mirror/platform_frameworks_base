@@ -53,6 +53,7 @@ public:
     void fade(PointerControllerInterface::Transition transition);
     void unfade(PointerControllerInterface::Transition transition);
     void setDisplayViewport(const DisplayViewport& viewport, bool getAdditionalMouseResources);
+    void setStylusHoverMode(bool stylusHoverMode);
 
     void updatePointerIcon(PointerIconStyle iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
@@ -74,6 +75,7 @@ private:
 
     struct Locked {
         DisplayViewport viewport;
+        bool stylusHoverMode;
 
         size_t animationFrameIndex;
         nsecs_t lastFrameUpdatedTime;
@@ -92,6 +94,7 @@ private:
         std::map<PointerIconStyle, PointerAnimation> animationResources;
 
         PointerIconStyle requestedPointerType;
+        PointerIconStyle resolvedPointerType;
 
         int32_t buttonState;
 

@@ -595,7 +595,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     final FixedRotationTransitionListener mFixedRotationTransitionListener =
             new FixedRotationTransitionListener();
 
-    private final DeviceStateController mDeviceStateController;
+    @VisibleForTesting
+    final DeviceStateController mDeviceStateController;
     private final PhysicalDisplaySwitchTransitionLauncher mDisplaySwitchTransitionLauncher;
     final RemoteDisplayChangeController mRemoteDisplayChangeController;
 
@@ -1091,7 +1092,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * @param display May not be null.
      * @param root {@link RootWindowContainer}
      */
-    DisplayContent(Display display, RootWindowContainer root) {
+    DisplayContent(Display display, RootWindowContainer root,
+            @NonNull DeviceStateController deviceStateController) {
         super(root.mWindowManager, "DisplayContent", FEATURE_ROOT);
         if (mWmService.mRoot.getDisplayContent(display.getDisplayId()) != null) {
             throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
@@ -1151,11 +1153,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mWmService.mAtmService.getRecentTasks().getInputListener());
         }
 
-        mDeviceStateController = new DeviceStateController(mWmService.mContext, mWmService.mH);
+        mDeviceStateController = deviceStateController;
 
         mDisplayPolicy = new DisplayPolicy(mWmService, this);
         mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address,
-                mDeviceStateController);
+                mDeviceStateController, root.getDisplayRotationCoordinator());
 
         final Consumer<DeviceStateController.DeviceState> deviceStateConsumer =
                 (@NonNull DeviceStateController.DeviceState newFoldState) -> {
@@ -1730,7 +1732,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             // The orientation source may not be the top if it uses SCREEN_ORIENTATION_BEHIND.
             final ActivityRecord topCandidate = !r.isVisibleRequested() ? topRunningActivity() : r;
-            if (handleTopActivityLaunchingInDifferentOrientation(
+            if (topCandidate != null && handleTopActivityLaunchingInDifferentOrientation(
                     topCandidate, r, true /* checkOpening */)) {
                 // Display orientation should be deferred until the top fixed rotation is finished.
                 return false;
@@ -2163,6 +2165,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
             }, true /* traverseTopToBottom */);
             mPinnedTaskController.startSeamlessRotationIfNeeded(transaction, oldRotation, rotation);
+            if (!mDisplayRotation.hasSeamlessRotatingWindow()) {
+                // Make sure DisplayRotation#isRotatingSeamlessly() will return false.
+                mDisplayRotation.cancelSeamlessRotation();
+            }
         }
 
         mWmService.mDisplayManagerInternal.performTraversal(transaction);
@@ -3322,7 +3328,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mTransitionController.unregisterLegacyListener(mFixedRotationTransitionListener);
             handleAnimatingStoppedAndTransition();
             mWmService.stopFreezingDisplayLocked();
-            mDeviceStateController.unregisterFromDeviceStateManager();
+            mDisplayRotation.removeDefaultDisplayRotationChangedCallback();
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
             mPointerEventDispatcher.dispose();
@@ -3804,6 +3810,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows,
             int topFocusedDisplayId) {
+        // Don't re-assign focus automatically away from a should-keep-focus app window.
+        // `findFocusedWindow` will always grab the transient-launch app since it is "on top" which
+        // would create a mismatch, so just early-out here.
+        if (mCurrentFocus != null && mTransitionController.shouldKeepFocus(mCurrentFocus)
+                // This is only keeping focus, so don't early-out if the focused-app has been
+                // explicitly changed (eg. via setFocusedTask).
+                && mFocusedApp != null && mCurrentFocus.isDescendantOf(mFocusedApp)
+                && mCurrentFocus.isVisible() && mCurrentFocus.isFocusable()) {
+            ProtoLog.v(WM_DEBUG_FOCUS, "Current transition prevents automatic focus change");
+            return false;
+        }
         WindowState newFocus = findFocusedWindowIfNeeded(topFocusedDisplayId);
         if (mCurrentFocus == newFocus) {
             return false;
@@ -4927,7 +4944,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInsetsStateController.getImeSourceProvider().checkShowImePostLayout();
 
         mLastHasContent = mTmpApplySurfaceChangesTransactionState.displayHasContent;
-        if (!mWmService.mDisplayFrozen) {
+        if (!mWmService.mDisplayFrozen && !mDisplayRotation.isRotatingSeamlessly()) {
             mWmService.mDisplayManagerInternal.setDisplayProperties(mDisplayId,
                     mLastHasContent,
                     mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,

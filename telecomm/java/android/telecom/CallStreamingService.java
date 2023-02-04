@@ -79,7 +79,7 @@ public abstract class CallStreamingService extends Service {
                     break;
                 case MSG_CALL_STREAMING_CHANGED_CHANGED:
                     int state = (int) msg.obj;
-                    mCall.setStreamingState(state);
+                    mCall.requestStreamingState(state);
                     CallStreamingService.this.onCallStreamingStateChanged(state);
                     break;
                 default:

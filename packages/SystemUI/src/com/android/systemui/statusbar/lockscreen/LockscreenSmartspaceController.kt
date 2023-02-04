@@ -31,10 +31,12 @@ import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS
 import android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS
+import android.provider.Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
@@ -83,6 +85,7 @@ constructor(
         private val statusBarStateController: StatusBarStateController,
         private val deviceProvisionedController: DeviceProvisionedController,
         private val bypassController: KeyguardBypassController,
+        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
         private val execution: Execution,
         @Main private val uiExecutor: Executor,
         @Background private val bgExecutor: Executor,
@@ -176,9 +179,9 @@ constructor(
         }
         if (weatherTarget != null) {
             val weatherData = Weather.fromBundle(weatherTarget.baseAction.extras)
+            keyguardUpdateMonitor.sendWeatherData(weatherData)
         }
     }
-
 
     private val userTrackerCallback = object : UserTracker.Callback {
         override fun onUserChanged(newUser: Int, userContext: Context) {
@@ -241,6 +244,17 @@ constructor(
 
         return featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED) &&
                 datePlugin != null && weatherPlugin != null
+    }
+
+    fun isWeatherEnabled(): Boolean {
+       execution.assertIsMainThread()
+       val defaultValue = context.getResources().getBoolean(
+               com.android.internal.R.bool.config_lockscreenWeatherEnabledByDefault)
+       val showWeather = secureSettings.getIntForUser(
+           LOCK_SCREEN_WEATHER_ENABLED,
+           if (defaultValue) 1 else 0,
+           userTracker.userId) == 1
+       return showWeather
     }
 
     private fun updateBypassEnabled() {

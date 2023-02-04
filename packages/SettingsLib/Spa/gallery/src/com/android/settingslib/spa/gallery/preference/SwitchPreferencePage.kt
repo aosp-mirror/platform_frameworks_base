@@ -43,7 +43,7 @@ private const val TITLE = "Sample SwitchPreference"
 
 object SwitchPreferencePageProvider : SettingsPageProvider {
     override val name = "SwitchPreference"
-    val owner = createSettingsPage()
+    private val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val entryList = mutableListOf<SettingsEntry>()

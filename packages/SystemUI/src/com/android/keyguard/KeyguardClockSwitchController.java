@@ -106,6 +106,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             updateDoubleLineClock();
         }
     };
+    private final ContentObserver mShowWeatherObserver = new ContentObserver(null) {
+        @Override
+        public void onChange(boolean change) {
+            setWeatherVisibility();
+        }
+    };
 
     private final KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener
             mKeyguardUnlockAnimationListener =
@@ -216,7 +222,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 UserHandle.USER_ALL
         );
 
+        mSecureSettings.registerContentObserverForUser(
+                Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
+                false, /* notifyForDescendants */
+                mShowWeatherObserver,
+                UserHandle.USER_ALL
+        );
+
         updateDoubleLineClock();
+        setWeatherVisibility();
 
         mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 mKeyguardUnlockAnimationListener);
@@ -446,6 +460,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         if (!mCanShowDoubleLineClock) {
             mUiExecutor.execute(() -> displayClock(KeyguardClockSwitch.SMALL, /* animate */ true));
+        }
+    }
+
+    private void setWeatherVisibility() {
+        if (mWeatherView != null) {
+            mUiExecutor.execute(
+                    () -> mWeatherView.setVisibility(
+                        mSmartspaceController.isWeatherEnabled() ? View.VISIBLE : View.GONE));
         }
     }
 

@@ -18,6 +18,8 @@ package com.android.server.display;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.server.display.layout.Layout.NO_LEAD_DISPLAY;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -639,7 +641,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                         && !nextDeviceInfo.address.equals(deviceInfo.address)) {
                     layout.createDisplayLocked(nextDeviceInfo.address,
                             /* isDefault= */ true, /* isEnabled= */ true, mIdProducer,
-                            /* brightnessThrottlingMapId= */ null);
+                            /* brightnessThrottlingMapId= */ null, DEFAULT_DISPLAY);
                     applyLayoutLocked();
                     return;
                 }
@@ -991,15 +993,22 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             }
 
             newDisplay.setPositionLocked(displayLayout.getPosition());
+            newDisplay.setLeadDisplayLocked(displayLayout.getLeadDisplayId());
+            setLayoutLimitedRefreshRate(newDisplay, device, displayLayout);
             setEnabledLocked(newDisplay, displayLayout.isEnabled());
             newDisplay.setBrightnessThrottlingDataIdLocked(
                     displayLayout.getBrightnessThrottlingMapId() == null
                             ? DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID
                             : displayLayout.getBrightnessThrottlingMapId());
         }
-
     }
 
+    private void setLayoutLimitedRefreshRate(@NonNull LogicalDisplay logicalDisplay,
+            @NonNull DisplayDevice device, @NonNull Layout.Display display) {
+        DisplayDeviceConfig config = device.getDisplayDeviceConfig();
+        DisplayInfo info = logicalDisplay.getDisplayInfoLocked();
+        info.layoutLimitedRefreshRate = config.getRefreshRange(display.getRefreshRateZoneId());
+    }
 
     /**
      * Creates a new logical display for the specified device and display Id and adds it to the list
@@ -1070,7 +1079,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         layout.createDisplayLocked(info.address, /* isDefault= */ true, /* isEnabled= */ true,
-                mIdProducer, /* brightnessThrottlingMapId= */ null);
+                mIdProducer, /* brightnessThrottlingMapId= */ null, NO_LEAD_DISPLAY);
     }
 
     private int assignLayerStackLocked(int displayId) {
