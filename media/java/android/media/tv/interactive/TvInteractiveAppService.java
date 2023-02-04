@@ -896,10 +896,10 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Called when an advertisement buffer is consumed.
-         * @hide
+         *
+         * @param buffer The {@link AdBuffer} that was consumed.
          */
-        public void onAdBufferConsumed(AdBuffer buffer) {
-
+        public void onAdBufferConsumed(@NonNull AdBuffer buffer) {
         }
 
         /**
@@ -1919,10 +1919,11 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Notifies when the advertisement buffer is filled and ready to be read.
-         * @hide
+         *
+         * @param buffer The {@link AdBuffer} to be received
          */
         @CallSuper
-        public void notifyAdBuffer(AdBuffer buffer) {
+        public void notifyAdBuffer(@NonNull AdBuffer buffer) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override

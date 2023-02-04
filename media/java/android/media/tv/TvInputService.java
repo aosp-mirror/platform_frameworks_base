@@ -1005,9 +1005,10 @@ public abstract class TvInputService extends Service {
 
         /**
          * Notifies the advertisement buffer is consumed.
-         * @hide
+         *
+         * @param buffer the {@link AdBuffer} that was consumed.
          */
-        public void notifyAdBufferConsumed(AdBuffer buffer) {
+        public void notifyAdBufferConsumed(@NonNull AdBuffer buffer) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1320,10 +1321,11 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Called when advertisement buffer is ready.
-         * @hide
+         * Called when an advertisement buffer is ready for playback.
+         *
+         * @param buffer The {@link AdBuffer} that became ready for playback.
          */
-        public void onAdBuffer(AdBuffer buffer) {
+        public void onAdBuffer(@NonNull AdBuffer buffer) {
         }
 
         /**
