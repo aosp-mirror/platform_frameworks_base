@@ -1003,10 +1003,7 @@ class UidPermissionPolicy : SchemePolicy() {
         permissionName: String
     ): Boolean? {
         val permissionAllowlist = newState.systemState.permissionAllowlist
-        val apexModuleName = permissionAllowlist.apexPrivilegedAppAllowlists
-            .firstNotNullOfOrNullIndexed { _, apexModuleName, apexAllowlist ->
-                if (packageState.apexModuleName in apexAllowlist) apexModuleName else null
-            }
+        val apexModuleName = packageState.apexModuleName
         val packageName = packageState.packageName
         return when {
             packageState.isVendor -> permissionAllowlist.getVendorPrivilegedAppAllowlistState(
