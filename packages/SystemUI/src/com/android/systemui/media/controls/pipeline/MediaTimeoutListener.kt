@@ -40,7 +40,7 @@ val PAUSED_MEDIA_TIMEOUT =
 
 @VisibleForTesting
 val RESUME_MEDIA_TIMEOUT =
-    SystemProperties.getLong("debug.sysui.media_timeout_resume", TimeUnit.DAYS.toMillis(3))
+    SystemProperties.getLong("debug.sysui.media_timeout_resume", TimeUnit.DAYS.toMillis(2))
 
 /** Controller responsible for keeping track of playback states and expiring inactive streams. */
 @SysUISingleton

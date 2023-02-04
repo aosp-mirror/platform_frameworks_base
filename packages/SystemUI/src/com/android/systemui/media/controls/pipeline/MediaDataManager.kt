@@ -67,6 +67,7 @@ import com.android.systemui.media.controls.models.recommendation.EXTRA_VALUE_TRI
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaDataProvider
 import com.android.systemui.media.controls.resume.MediaResumeListener
+import com.android.systemui.media.controls.resume.ResumeMediaBrowser
 import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.controls.util.MediaFlags
@@ -1431,6 +1432,22 @@ class MediaDataManager(
             notifyMediaDataLoaded(key = pkg, oldKey = pkg, info = updated)
         }
         logger.logActiveConvertedToResume(updated.appUid, pkg, updated.instanceId)
+
+        // Limit total number of resume controls
+        val resumeEntries = mediaEntries.filter { (key, data) -> data.resumption }
+        val numResume = resumeEntries.size
+        if (numResume > ResumeMediaBrowser.MAX_RESUMPTION_CONTROLS) {
+            resumeEntries
+                .toList()
+                .sortedBy { (key, data) -> data.lastActive }
+                .subList(0, numResume - ResumeMediaBrowser.MAX_RESUMPTION_CONTROLS)
+                .forEach { (key, data) ->
+                    Log.d(TAG, "Removing excess control $key")
+                    mediaEntries.remove(key)
+                    notifyMediaDataRemoved(key)
+                    logger.logMediaRemoved(data.appUid, data.packageName, data.instanceId)
+                }
+        }
     }
 
     fun setMediaResumptionEnabled(isEnabled: Boolean) {
