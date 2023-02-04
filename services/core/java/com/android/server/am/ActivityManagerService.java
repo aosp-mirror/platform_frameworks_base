@@ -38,6 +38,8 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.StopUserOnSwitch;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
+import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_CREATED;
+import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
@@ -177,6 +179,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.BindServiceEventListener;
 import android.app.ActivityManagerInternal.BroadcastEventListener;
 import android.app.ActivityManagerInternal.ForegroundServiceStateListener;
+import android.app.ActivityManagerInternal.MediaProjectionTokenEvent;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
 import android.app.AnrController;
@@ -1506,6 +1509,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     private final SparseIntArray mUidNetworkBlockedReasons = new SparseIntArray();
 
     final AppRestrictionController mAppRestrictionController;
+
+    /**
+     * The collection of the MediaProjection tokens per UID, for the apps that are allowed to
+     * start FGS with the type "mediaProjection"; this permission is granted via the request over
+     * the call to {@link android.media.project.MediaProjectionManager#createScreenCaptureIntent()}.
+     *
+     * <p>Note, the "token" here is actually an instance of
+     * {@link android.media.projection.IMediaProjection}.</p>
+     */
+    @GuardedBy("mMediaProjectionTokenMap")
+    private final SparseArray<ArraySet<IBinder>> mMediaProjectionTokenMap = new SparseArray();
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
         final ProcessRecord mApp;
@@ -18734,6 +18748,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int uid, int pid) {
             ActivityManagerService.this.logFgsApiEnd(apiType, uid, pid);
         }
+
+        @Override
+        public void notifyMediaProjectionEvent(int uid, @NonNull IBinder projectionToken,
+                @MediaProjectionTokenEvent int event) {
+            ActivityManagerService.this.notifyMediaProjectionEvent(uid, projectionToken, event);
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {
@@ -19965,6 +19985,43 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (Exception e) {
             pw.printf("Non-numeric argument at index %d: %s\n", index, arg);
             return invalidValue;
+        }
+    }
+
+    private void notifyMediaProjectionEvent(int uid, @NonNull IBinder projectionToken,
+            @MediaProjectionTokenEvent int event) {
+        synchronized (mMediaProjectionTokenMap) {
+            final int index = mMediaProjectionTokenMap.indexOfKey(uid);
+            ArraySet<IBinder> tokens;
+            if (event == MEDIA_PROJECTION_TOKEN_EVENT_CREATED) {
+                if (index < 0) {
+                    tokens = new ArraySet();
+                    mMediaProjectionTokenMap.put(uid, tokens);
+                } else {
+                    tokens = mMediaProjectionTokenMap.valueAt(index);
+                }
+                tokens.add(projectionToken);
+            } else if (event == MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED && index >= 0) {
+                tokens = mMediaProjectionTokenMap.valueAt(index);
+                tokens.remove(projectionToken);
+                if (tokens.isEmpty()) {
+                    mMediaProjectionTokenMap.removeAt(index);
+                }
+            }
+        }
+    }
+
+    /**
+     * @return {@code true} if the MediaProjectionManagerService has created a media projection
+     *         for the given {@code uid} because the user has granted the permission;
+     *         it doesn't necessarily mean it has started the projection.
+     *
+     * <p>It doesn't check the {@link AppOpsManager#OP_PROJECT_MEDIA}.</p>
+     */
+    boolean isAllowedMediaProjectionNoOpCheck(int uid) {
+        synchronized (mMediaProjectionTokenMap) {
+            final int index = mMediaProjectionTokenMap.indexOfKey(uid);
+            return index >= 0 && !mMediaProjectionTokenMap.valueAt(index).isEmpty();
         }
     }
 }
