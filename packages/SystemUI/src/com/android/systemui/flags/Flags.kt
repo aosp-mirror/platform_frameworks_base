@@ -342,8 +342,7 @@ object Flags {
     @JvmField val UMO_TURBULENCE_NOISE = unreleasedFlag(909, "umo_turbulence_noise")
 
     // TODO(b/263272731): Tracking Bug
-    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE =
-        unreleasedFlag(910, "media_ttt_receiver_success_ripple", teamfood = true)
+    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag(910, "media_ttt_receiver_success_ripple")
 
     // TODO(b/263512203): Tracking Bug
     val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator", teamfood = true)
