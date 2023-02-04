@@ -18,6 +18,7 @@ package com.android.systemui.biometrics
 
 import android.annotation.RawRes
 import android.content.Context
+import android.content.Context.FINGERPRINT_SERVICE
 import android.content.res.Configuration
 import android.hardware.fingerprint.FingerprintManager
 import android.view.DisplayInfo
@@ -66,16 +67,11 @@ open class AuthBiometricFingerprintIconController(
                 R.dimen.biometric_dialog_fingerprint_icon_width),
                 context.resources.getDimensionPixelSize(
                         R.dimen.biometric_dialog_fingerprint_icon_height))
-        var sideFps = false
-        (context.getSystemService(Context.FINGERPRINT_SERVICE)
-                as FingerprintManager?)?.let { fpm ->
-            for (prop in fpm.sensorPropertiesInternal) {
-                if (prop.isAnySidefpsType) {
-                    sideFps = true
-                }
-            }
-        }
-        isSideFps = sideFps
+        isSideFps =
+            (context.getSystemService(FINGERPRINT_SERVICE) as FingerprintManager?)?.let { fpm ->
+                fpm.sensorPropertiesInternal.any { it.isAnySidefpsType }
+            } ?: false
+        preloadAssets(context)
         val displayInfo = DisplayInfo()
         context.display?.getDisplayInfo(displayInfo)
         if (isSideFps && getRotationFromDefault(displayInfo.rotation) == Surface.ROTATION_180) {
@@ -327,6 +323,40 @@ open class AuthBiometricFingerprintIconController(
             }
         }
         else -> null
+    }
+
+    private fun preloadAssets(context: Context) {
+        if (isSideFps) {
+            cacheLottieAssetsInContext(
+                context,
+                R.raw.biometricprompt_fingerprint_to_error_landscape,
+                R.raw.biometricprompt_folded_base_bottomright,
+                R.raw.biometricprompt_folded_base_default,
+                R.raw.biometricprompt_folded_base_topleft,
+                R.raw.biometricprompt_landscape_base,
+                R.raw.biometricprompt_portrait_base_bottomright,
+                R.raw.biometricprompt_portrait_base_topleft,
+                R.raw.biometricprompt_symbol_error_to_fingerprint_landscape,
+                R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_bottomright,
+                R.raw.biometricprompt_symbol_error_to_fingerprint_portrait_topleft,
+                R.raw.biometricprompt_symbol_error_to_success_landscape,
+                R.raw.biometricprompt_symbol_error_to_success_portrait_bottomright,
+                R.raw.biometricprompt_symbol_error_to_success_portrait_topleft,
+                R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_bottomright,
+                R.raw.biometricprompt_symbol_fingerprint_to_error_portrait_topleft,
+                R.raw.biometricprompt_symbol_fingerprint_to_success_landscape,
+                R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_bottomright,
+                R.raw.biometricprompt_symbol_fingerprint_to_success_portrait_topleft
+            )
+        } else {
+            cacheLottieAssetsInContext(
+                context,
+                R.raw.fingerprint_dialogue_error_to_fingerprint_lottie,
+                R.raw.fingerprint_dialogue_error_to_success_lottie,
+                R.raw.fingerprint_dialogue_fingerprint_to_error_lottie,
+                R.raw.fingerprint_dialogue_fingerprint_to_success_lottie
+            )
+        }
     }
 
     override fun onFoldUpdated(isFolded: Boolean) {
