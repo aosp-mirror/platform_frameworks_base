@@ -1161,6 +1161,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return false;
         }
 
+        if ((displayContent.mDisplay.getFlags() & Display.FLAG_REAR) != 0) {
+            Slog.w(TAG, "Launch on display check: activity launch is not allowed on rear display");
+            return false;
+        }
+
         // Check if the caller has enough privileges to embed activities and launch to private
         // displays.
         final int startAnyPerm = mService.checkPermission(INTERNAL_SYSTEM_WINDOW, callingPid,
