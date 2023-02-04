@@ -1743,6 +1743,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
+    static class TestTransitionController extends TransitionController {
+        TestTransitionController(ActivityTaskManagerService atms) {
+            super(atms);
+            mTaskSnapshotController = mock(TaskSnapshotController.class);
+            mTransitionTracer = mock(TransitionTracer.class);
+        }
+    }
+
     static class TestTransitionPlayer extends ITransitionPlayer.Stub {
         final TransitionController mController;
         final WindowOrganizerController mOrganizer;
