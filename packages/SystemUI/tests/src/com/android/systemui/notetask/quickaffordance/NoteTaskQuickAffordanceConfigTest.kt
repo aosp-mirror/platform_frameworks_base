@@ -27,7 +27,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.LockScreenState
 import com.android.systemui.notetask.NoteTaskController
-import com.android.systemui.util.mockito.whenever
+import com.android.systemui.notetask.NoteTaskController.ShowNoteTaskUiEvent
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -53,7 +53,6 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(noteTaskController.showNoteTask()).then {}
     }
 
     private fun createUnderTest(isEnabled: Boolean) =
@@ -96,6 +95,7 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
 
         underTest.onTriggered(expandable = null)
 
-        verify(noteTaskController).showNoteTask()
+        verify(noteTaskController)
+            .showNoteTask(uiEvent = ShowNoteTaskUiEvent.NOTE_OPENED_VIA_KEYGUARD_QUICK_AFFORDANCE)
     }
 }
