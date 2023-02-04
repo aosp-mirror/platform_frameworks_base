@@ -388,7 +388,6 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.SCHEDULE_EXACT_ALARM),
                 new RegularPermission(Manifest.permission.USE_EXACT_ALARM),
                 new AppOpPermission(AppOpsManager.OP_ACTIVATE_VPN),
-                new AppOpPermission(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN),
             }, false)
     );
 
