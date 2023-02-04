@@ -275,7 +275,8 @@ public class SplitControllerTest {
 
         assertNotNull(tf);
         assertNotNull(taskContainer);
-        assertEquals(TASK_BOUNDS, taskContainer.getConfiguration().windowConfiguration.getBounds());
+        assertEquals(TASK_BOUNDS, taskContainer.getTaskProperties().getConfiguration()
+                .windowConfiguration.getBounds());
     }
 
     @Test
@@ -288,7 +289,7 @@ public class SplitControllerTest {
         doReturn(true).when(tf).isEmpty();
         doReturn(true).when(mSplitController).launchPlaceholderIfNecessary(mTransaction,
                 mActivity, false /* isOnCreated */);
-        doNothing().when(mSplitPresenter).updateSplitContainer(any(), any(), any());
+        doNothing().when(mSplitPresenter).updateSplitContainer(any(), any());
 
         mSplitController.updateContainer(mTransaction, tf);
 
@@ -341,7 +342,7 @@ public class SplitControllerTest {
 
         mSplitController.updateContainer(mTransaction, tf);
 
-        verify(mSplitPresenter, never()).updateSplitContainer(any(), any(), any());
+        verify(mSplitPresenter, never()).updateSplitContainer(any(), any());
 
         // Verify if the top active split is updated if both of its containers are not finished.
         doReturn(false).when(mSplitController)
@@ -349,7 +350,7 @@ public class SplitControllerTest {
 
         mSplitController.updateContainer(mTransaction, tf);
 
-        verify(mSplitPresenter).updateSplitContainer(splitContainer, tf, mTransaction);
+        verify(mSplitPresenter).updateSplitContainer(splitContainer, mTransaction);
     }
 
     @Test
@@ -366,14 +367,14 @@ public class SplitControllerTest {
         doReturn(false).when(taskContainer).isVisible();
         mSplitController.updateContainer(mTransaction, taskFragmentContainer);
 
-        verify(mSplitPresenter, never()).updateSplitContainer(any(), any(), any());
+        verify(mSplitPresenter, never()).updateSplitContainer(any(), any());
 
         // Update the split when the Task is visible.
         doReturn(true).when(taskContainer).isVisible();
         mSplitController.updateContainer(mTransaction, taskFragmentContainer);
 
         verify(mSplitPresenter).updateSplitContainer(taskContainer.mSplitContainers.get(0),
-                taskFragmentContainer, mTransaction);
+                mTransaction);
     }
 
     @Test

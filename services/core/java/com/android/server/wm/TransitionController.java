@@ -126,6 +126,13 @@ class TransitionController {
 
     final Handler mLoggerHandler = FgThread.getHandler();
 
+    /**
+     * {@code true} While this waits for the display to become enabled (during boot). While waiting
+     * for the display, all core-initiated transitions will be "local".
+     * Note: This defaults to false so that it doesn't interfere with unit tests.
+     */
+    boolean mIsWaitingForDisplayEnabled = false;
+
     TransitionController(ActivityTaskManagerService atm,
             TaskSnapshotController taskSnapshotController,
             TransitionTracer transitionTracer) {
@@ -353,11 +360,37 @@ class TransitionController {
     }
 
     /**
+     * During transient-launch, the "behind" app should retain focus during the transition unless
+     * something takes focus from it explicitly (eg. by calling ATMS.setFocusedTask or by another
+     * transition interrupting this one.
+     *
+     * The rules around this are basically: if there is exactly one active transition and `wc` is
+     * the "behind" of a transient launch, then it can retain focus.
+     */
+    boolean shouldKeepFocus(@NonNull WindowContainer wc) {
+        if (mCollectingTransition != null) {
+            if (!mPlayingTransitions.isEmpty()) return false;
+            return mCollectingTransition.isInTransientHide(wc);
+        } else if (mPlayingTransitions.size() == 1) {
+            return mPlayingTransitions.get(0).isInTransientHide(wc);
+        }
+        return false;
+    }
+
+    /**
+     * @return {@code true} if {@param ar} is part of a transient-launch activity in the
+     * collecting transition.
+     */
+    boolean isTransientCollect(@NonNull ActivityRecord ar) {
+        return mCollectingTransition != null && mCollectingTransition.isTransientLaunch(ar);
+    }
+
+    /**
      * @return {@code true} if {@param ar} is part of a transient-launch activity in an active
      * transition.
      */
     boolean isTransientLaunch(@NonNull ActivityRecord ar) {
-        if (mCollectingTransition != null && mCollectingTransition.isTransientLaunch(ar)) {
+        if (isTransientCollect(ar)) {
             return true;
         }
         for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
@@ -460,6 +493,15 @@ class TransitionController {
     Transition requestStartTransition(@NonNull Transition transition, @Nullable Task startTask,
             @Nullable RemoteTransition remoteTransition,
             @Nullable TransitionRequestInfo.DisplayChange displayChange) {
+        if (mIsWaitingForDisplayEnabled) {
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Disabling player for transition"
+                    + " #%d because display isn't enabled yet", transition.getSyncId());
+            transition.mIsPlayerEnabled = false;
+            transition.mLogger.mRequestTimeNs = SystemClock.uptimeNanos();
+            mAtm.mH.post(() -> mAtm.mWindowOrganizerController.startTransition(
+                    transition.getToken(), null));
+            return transition;
+        }
         try {
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);

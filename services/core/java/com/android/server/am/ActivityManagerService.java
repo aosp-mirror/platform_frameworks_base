@@ -5874,6 +5874,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mProcessList.getUidProcStateLOSP(uid);
     }
 
+    @GuardedBy("this")
+    int getUidProcessCapabilityLocked(int uid) {
+        return mProcessList.getUidProcessCapabilityLOSP(uid);
+    }
+
     // =========================================================
     // PROCESS INFO
     // =========================================================

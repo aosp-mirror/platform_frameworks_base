@@ -1103,6 +1103,17 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final long ALWAYS_SANDBOX_DISPLAY_APIS = 185004937L; // buganizer id
 
     /**
+     * This change id excludes the packages it is applied to from ignoreOrientationRequest behaviour
+     * that can be enabled by the device manufacturers for the com.android.server.wm.DisplayArea
+     * or for the whole display.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_RESPECT_REQUESTED_ORIENTATION = 236283604L; // buganizer id
+
+    /**
      * This change id excludes the packages it is applied to from the camera compat force rotation
      * treatment. See com.android.server.wm.DisplayRotationCompatPolicy for context.
      * @hide
@@ -1136,34 +1147,6 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @Disabled
     public static final long OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
             264301586L; // buganizer id
-
-    /**
-     * This change id forces the packages it is applied to sandbox {@link android.view.View} API to
-     * an activity bounds for:
-     *
-     * <p>{@link android.view.View#getLocationOnScreen},
-     * {@link android.view.View#getWindowVisibleDisplayFrame},
-     * {@link android.view.View}#getWindowDisplayFrame,
-     * {@link android.view.View}#getBoundsOnScreen.
-     *
-     * <p>For {@link android.view.View#getWindowVisibleDisplayFrame} and
-     * {@link android.view.View}#getWindowDisplayFrame this sandboxing is happening indirectly
-     * through
-     * {@link android.view.ViewRootImpl}#getWindowVisibleDisplayFrame,
-     * {@link android.view.ViewRootImpl}#getDisplayFrame respectively.
-     *
-     * <p>Some applications assume that they occupy the whole screen and therefore use the display
-     * coordinates in their calculations as if an activity is  positioned in the top-left corner of
-     * the screen, with left coordinate equal to 0. This may not be the case of applications in
-     * multi-window and in letterbox modes. This can lead to shifted or out of bounds UI elements in
-     * case the activity is Letterboxed or is in multi-window mode.
-     * @hide
-     */
-    @ChangeId
-    @Overridable
-    @Disabled
-    @TestApi
-    public static final long OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS = 237531167L; // buganizer id
 
     /**
      * This change id is the gatekeeper for all treatments that force a given min aspect ratio.

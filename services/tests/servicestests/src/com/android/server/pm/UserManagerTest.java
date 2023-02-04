@@ -72,6 +72,7 @@ public final class UserManagerTest {
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // 30 years
 
     private static final int SWITCH_USER_TIMEOUT_SECONDS = 40; // 40 seconds
+    private static final int REMOVE_USER_TIMEOUT_SECONDS = 40; // 40 seconds
 
     // Packages which are used during tests.
     private static final String[] PACKAGES = new String[] {
@@ -302,7 +303,7 @@ public final class UserManagerTest {
     @MediumTest
     @Test
     public void testRemoveUserByHandle_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> removeUser(null));
+        assertThrows(IllegalArgumentException.class, () -> mUserManager.removeUser(null));
     }
 
     @MediumTest
@@ -1464,6 +1465,12 @@ public final class UserManagerTest {
     }
 
     private void runThenWaitForUserRemoval(Runnable runnable, int userIdToWaitUntilDeleted) {
+        if (!hasUser(userIdToWaitUntilDeleted)) {
+            runnable.run();
+            mUsersToRemove.remove(userIdToWaitUntilDeleted);
+            return;
+        }
+
         Function<Intent, Boolean> checker = intent -> {
             UserHandle userHandle = intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle.class);
             return userHandle != null && userHandle.getIdentifier() == userIdToWaitUntilDeleted;
@@ -1472,6 +1479,7 @@ public final class UserManagerTest {
         BlockingBroadcastReceiver blockingBroadcastReceiver = BlockingBroadcastReceiver.create(
                 mContext, Intent.ACTION_USER_REMOVED, checker);
 
+        blockingBroadcastReceiver.setTimeout(REMOVE_USER_TIMEOUT_SECONDS);
         blockingBroadcastReceiver.register();
 
         try (blockingBroadcastReceiver) {

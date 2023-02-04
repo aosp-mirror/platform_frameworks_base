@@ -182,7 +182,6 @@ public class PersistentDataBlockService extends SystemService {
     public void onStart() {
         // Do init on a separate thread, will join in PHASE_ACTIVITY_MANAGER_READY
         SystemServerInitThreadPool.submit(() -> {
-            mAllowedUid = getAllowedUid();
             enforceChecksumValidity();
             formatIfOemUnlockEnabled();
             publishBinderService(Context.PERSISTENT_DATA_BLOCK_SERVICE, mService);
@@ -202,6 +201,8 @@ public class PersistentDataBlockService extends SystemService {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("Service " + TAG + " init interrupted", e);
             }
+            // The user responsible for FRP should exist by now.
+            mAllowedUid = getAllowedUid();
             LocalServices.addService(PersistentDataBlockManagerInternal.class, mInternalService);
         }
         super.onBootPhase(phase);

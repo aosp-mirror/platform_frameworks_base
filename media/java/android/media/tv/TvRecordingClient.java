@@ -575,7 +575,7 @@ public class TvRecordingClient {
                 Log.w(TAG, "onError - session not created");
                 return;
             }
-            if (mCallback == null) {
+            if (mCallback != null) {
                 mCallback.onError(error);
             }
             if (mTvIAppView != null) {

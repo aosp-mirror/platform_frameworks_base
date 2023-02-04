@@ -267,7 +267,7 @@ public class KeyValueBackupTaskTest  {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
         mBackupEligibilityRules = new BackupEligibilityRules(mPackageManager,
-                LocalServices.getService(PackageManagerInternal.class), USER_ID,
+                LocalServices.getService(PackageManagerInternal.class), USER_ID, mContext,
                 BACKUP_DESTINATION);
     }
 

@@ -265,15 +265,9 @@ public abstract class BackupAgent extends ContextWrapper {
     public void onCreate() {
     }
 
-    /**
-     * Provided as a convenience for agent implementations that need an opportunity
-     * to do one-time initialization before the actual backup or restore operation
-     * is begun with information about the calling user.
-     * <p>
-     *
-     * @hide
-     */
+    /** @hide */
     public void onCreate(UserHandle user) {
+        mUser = user;
         onCreate();
     }
 
@@ -284,7 +278,6 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     @Deprecated
     public void onCreate(UserHandle user, @BackupDestination int backupDestination) {
-        mUser = user;
         mBackupDestination = backupDestination;
 
         onCreate(user);
@@ -295,7 +288,6 @@ public abstract class BackupAgent extends ContextWrapper {
     */
     public void onCreate(UserHandle user, @BackupDestination int backupDestination,
             @OperationType int operationType) {
-        mUser = user;
         mBackupDestination = backupDestination;
         mLogger = new BackupRestoreEventLogger(operationType);
 

@@ -16,7 +16,11 @@
 package com.android.systemui.biometrics
 
 import android.content.Context
+import android.graphics.Rect
 import android.util.AttributeSet
+import android.view.View
+import android.view.ViewGroup
+import com.android.systemui.R
 
 /**
  * View corresponding with udfps_fpm_empty_view.xml
@@ -32,4 +36,13 @@ class UdfpsFpmEmptyView(
     private val fingerprintDrawable: UdfpsFpDrawable = UdfpsFpDrawable(context)
 
     override fun getDrawable(): UdfpsDrawable = fingerprintDrawable
+
+    fun updateAccessibilityViewLocation(sensorBounds: Rect) {
+        val fingerprintAccessibilityView: View = findViewById(R.id.udfps_enroll_accessibility_view)
+        val params: ViewGroup.LayoutParams = fingerprintAccessibilityView.layoutParams
+        params.width = sensorBounds.width()
+        params.height = sensorBounds.height()
+        fingerprintAccessibilityView.layoutParams = params
+        fingerprintAccessibilityView.requestLayout()
+    }
 }

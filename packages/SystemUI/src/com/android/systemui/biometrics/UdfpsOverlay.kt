@@ -32,6 +32,7 @@ import android.view.MotionEvent
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main

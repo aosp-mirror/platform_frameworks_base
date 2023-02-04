@@ -436,6 +436,34 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void subStatusSupported_onBindViewHolder_bindHostDeviceWithOngoingSession_verifyView() {
+        when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
+        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+        when(mMediaOutputController.isVolumeControlEnabled(mMediaDevice1)).thenReturn(true);
+        when(mMediaDevice1.hasSubtext()).thenReturn(true);
+        when(mMediaDevice1.getSubtext()).thenReturn(SUBTEXT_CUSTOM);
+        when(mMediaDevice1.getSubtextString()).thenReturn(TEST_CUSTOM_SUBTEXT);
+        when(mMediaDevice1.hasOngoingSession()).thenReturn(true);
+        when(mMediaDevice1.getSelectionBehavior()).thenReturn(SELECTION_BEHAVIOR_GO_TO_APP);
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
+        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
+
+        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mEndClickIcon.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mViewHolder.mSubTitleText.getText().toString()).isEqualTo(TEST_CUSTOM_SUBTEXT);
+        assertThat(mViewHolder.mTwoLineTitleText.getText().toString()).isEqualTo(
+                TEST_DEVICE_NAME_1);
+        assertThat(mViewHolder.mContainerLayout.hasOnClickListeners()).isFalse();
+    }
+
+    @Test
     public void subStatusSupported_onBindViewHolder_bindDeviceRequirePremium_verifyView() {
         String deviceStatus = (String) mContext.getText(
                 R.string.media_output_status_require_premium);
@@ -505,7 +533,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
         assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.GONE);
+        assertThat(mViewHolder.mStatusIcon.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mSubTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mTwoLineTitleText.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mViewHolder.mSubTitleText.getText().toString()).isEqualTo(TEST_CUSTOM_SUBTEXT);

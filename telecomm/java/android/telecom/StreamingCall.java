@@ -172,7 +172,7 @@ public final class StreamingCall implements Parcelable {
      * to request holding, unholding and disconnecting this {@code StreamingCall}.
      * @param state The current streaming state of the call.
      */
-    public void setStreamingState(@StreamingCallState int state) {
+    public void requestStreamingState(@StreamingCallState int state) {
         mAdapter.setStreamingState(state);
     }
 }

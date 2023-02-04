@@ -2,7 +2,6 @@
 
 package com.android.credentialmanager.createflow
 
-import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -37,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
@@ -50,7 +50,6 @@ import com.android.credentialmanager.common.ui.TextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ContainerCard
 import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
-import com.android.credentialmanager.jetpack.developer.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -288,11 +287,11 @@ fun ProviderSelectionCard(
                 text = stringResource(
                     R.string.choose_provider_title,
                     when (requestDisplayInfo.type) {
-                        TYPE_PUBLIC_KEY_CREDENTIAL ->
+                        CredentialType.PASSKEY ->
                             stringResource(R.string.passkeys)
-                        TYPE_PASSWORD_CREDENTIAL ->
+                        CredentialType.PASSWORD ->
                             stringResource(R.string.passwords)
-                        else -> stringResource(R.string.sign_in_info)
+                        CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
                     }),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 24.dp)
@@ -398,11 +397,11 @@ fun MoreOptionsSelectionCard(
                         stringResource(
                             R.string.save_credential_to_title,
                             when (requestDisplayInfo.type) {
-                                TYPE_PUBLIC_KEY_CREDENTIAL ->
+                                CredentialType.PASSKEY ->
                                     stringResource(R.string.passkey)
-                                TYPE_PASSWORD_CREDENTIAL ->
+                                CredentialType.PASSWORD ->
                                     stringResource(R.string.password)
-                                else -> stringResource(R.string.sign_in_info)
+                                CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
                             }),
                         style = MaterialTheme.typography.titleMedium,
                     )
@@ -571,15 +570,15 @@ fun CreationSelectionCard(
             )
             TextOnSurface(
                 text = when (requestDisplayInfo.type) {
-                    TYPE_PUBLIC_KEY_CREDENTIAL -> stringResource(
+                    CredentialType.PASSKEY -> stringResource(
                         R.string.choose_create_option_passkey_title,
                         requestDisplayInfo.appName
                     )
-                    TYPE_PASSWORD_CREDENTIAL -> stringResource(
+                    CredentialType.PASSWORD -> stringResource(
                         R.string.choose_create_option_password_title,
                         requestDisplayInfo.appName
                     )
-                    else -> stringResource(
+                    CredentialType.UNKNOWN -> stringResource(
                         R.string.choose_create_option_sign_in_title,
                         requestDisplayInfo.appName
                     )
@@ -828,7 +827,7 @@ fun PrimaryCreateOptionRow(
             Column() {
                 // TODO: Add the function to hide/view password when the type is create password
                 when (requestDisplayInfo.type) {
-                    TYPE_PUBLIC_KEY_CREDENTIAL -> {
+                    CredentialType.PASSKEY -> {
                         TextOnSurfaceVariant(
                             text = requestDisplayInfo.title,
                             style = MaterialTheme.typography.titleLarge,
@@ -846,7 +845,7 @@ fun PrimaryCreateOptionRow(
                             modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
                         )
                     }
-                    TYPE_PASSWORD_CREDENTIAL -> {
+                    CredentialType.PASSWORD -> {
                         TextOnSurfaceVariant(
                             text = requestDisplayInfo.title,
                             style = MaterialTheme.typography.titleLarge,
@@ -859,7 +858,7 @@ fun PrimaryCreateOptionRow(
                             modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
                         )
                     }
-                    else -> {
+                    CredentialType.UNKNOWN -> {
                         if (requestDisplayInfo.subtitle != null) {
                             TextOnSurfaceVariant(
                                 text = requestDisplayInfo.title,
@@ -917,8 +916,8 @@ fun MoreOptionsInfoRow(
                         modifier = Modifier.padding(start = 5.dp),
                     )
                 }
-                if (requestDisplayInfo.type == TYPE_PUBLIC_KEY_CREDENTIAL ||
-                    requestDisplayInfo.type == TYPE_PASSWORD_CREDENTIAL) {
+                if (requestDisplayInfo.type == CredentialType.PASSKEY ||
+                    requestDisplayInfo.type == CredentialType.PASSWORD) {
                     if (createOptionInfo.passwordCount != null &&
                         createOptionInfo.passkeyCount != null
                     ) {

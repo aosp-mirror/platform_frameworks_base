@@ -16,6 +16,10 @@
 
 package com.android.server.locksettings;
 
+import static android.content.pm.UserInfo.FLAG_FULL;
+import static android.content.pm.UserInfo.FLAG_MAIN;
+import static android.content.pm.UserInfo.FLAG_PRIMARY;
+
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
@@ -27,9 +31,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -247,6 +251,15 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
     @Test
     public void testUnlockUserKeyIfUnsecuredPassesPrimaryUserAuthSecret() throws RemoteException {
+        initSpAndSetCredential(PRIMARY_USER_ID, newPassword(null));
+        reset(mAuthSecretService);
+        mLocalService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
+        verify(mAuthSecretService).setPrimaryUserCredential(any(byte[].class));
+    }
+
+    @Test
+    public void testUnlockUserKeyIfUnsecuredPassesPrimaryUserAuthSecretIfPasswordIsCleared()
+            throws RemoteException {
         LockscreenCredential password = newPassword("password");
         initSpAndSetCredential(PRIMARY_USER_ID, password);
         mService.setLockCredential(nonePassword(), password, PRIMARY_USER_ID);
@@ -254,6 +267,56 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         reset(mAuthSecretService);
         mLocalService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
         verify(mAuthSecretService).setPrimaryUserCredential(any(byte[].class));
+    }
+
+    private void setupHeadlessTest() {
+        mInjector.mIsHeadlessSystemUserMode = true;
+        mInjector.mIsMainUserPermanentAdmin = true;
+        mPrimaryUserInfo.flags &= ~(FLAG_FULL | FLAG_PRIMARY);
+        mSecondaryUserInfo.flags |= FLAG_MAIN;
+        mService.initializeSyntheticPassword(PRIMARY_USER_ID);
+        mService.initializeSyntheticPassword(SECONDARY_USER_ID);
+        mService.initializeSyntheticPassword(TERTIARY_USER_ID);
+        reset(mAuthSecretService);
+    }
+
+    @Test
+    public void testHeadlessSystemUserDoesNotPassAuthSecret() throws RemoteException {
+        setupHeadlessTest();
+        mLocalService.unlockUserKeyIfUnsecured(PRIMARY_USER_ID);
+        verify(mAuthSecretService, never()).setPrimaryUserCredential(any(byte[].class));
+    }
+
+    @Test
+    public void testHeadlessSecondaryUserPassesAuthSecret() throws RemoteException {
+        setupHeadlessTest();
+        mLocalService.unlockUserKeyIfUnsecured(SECONDARY_USER_ID);
+        verify(mAuthSecretService).setPrimaryUserCredential(any(byte[].class));
+    }
+
+    @Test
+    public void testHeadlessTertiaryUserPassesSameAuthSecret() throws RemoteException {
+        setupHeadlessTest();
+        mLocalService.unlockUserKeyIfUnsecured(SECONDARY_USER_ID);
+        var captor = ArgumentCaptor.forClass(byte[].class);
+        verify(mAuthSecretService).setPrimaryUserCredential(captor.capture());
+        var value = captor.getValue();
+        reset(mAuthSecretService);
+        mLocalService.unlockUserKeyIfUnsecured(TERTIARY_USER_ID);
+        verify(mAuthSecretService).setPrimaryUserCredential(eq(value));
+    }
+
+    @Test
+    public void testHeadlessTertiaryUserPassesSameAuthSecretAfterReset() throws RemoteException {
+        setupHeadlessTest();
+        mLocalService.unlockUserKeyIfUnsecured(SECONDARY_USER_ID);
+        var captor = ArgumentCaptor.forClass(byte[].class);
+        verify(mAuthSecretService).setPrimaryUserCredential(captor.capture());
+        var value = captor.getValue();
+        mService.clearAuthSecret();
+        reset(mAuthSecretService);
+        mLocalService.unlockUserKeyIfUnsecured(TERTIARY_USER_ID);
+        verify(mAuthSecretService).setPrimaryUserCredential(eq(value));
     }
 
     @Test

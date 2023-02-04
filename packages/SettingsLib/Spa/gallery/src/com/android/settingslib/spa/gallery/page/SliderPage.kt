@@ -42,7 +42,7 @@ private const val TITLE = "Sample Slider"
 
 object SliderPageProvider : SettingsPageProvider {
     override val name = "Slider"
-    val owner = createSettingsPage()
+    private val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val entryList = mutableListOf<SettingsEntry>()

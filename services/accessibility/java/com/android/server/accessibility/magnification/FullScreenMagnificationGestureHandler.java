@@ -992,9 +992,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 mFullScreenMagnificationController.getPersistedScale(mDisplayId),
                 MIN_SCALE, MAX_SCALE);
 
-        final float scale = MathUtils.constrain(Math.max(currentScale + 1.0f, persistedScale),
-                MIN_SCALE, MAX_SCALE);
-
+        final boolean isActivated = mFullScreenMagnificationController.isActivated(mDisplayId);
+        final float scale = isActivated ? (currentScale + 1.0f) : persistedScale;
         zoomToScale(scale, centerX, centerY);
     }
 

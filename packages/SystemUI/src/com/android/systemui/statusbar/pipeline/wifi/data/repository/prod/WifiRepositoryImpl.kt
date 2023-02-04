@@ -95,7 +95,7 @@ constructor(
             .logDiffsForTable(
                 wifiTableLogBuffer,
                 columnPrefix = "",
-                columnName = "isWifiEnabled",
+                columnName = "isEnabled",
                 initialValue = wifiManager.isWifiEnabled,
             )
             .stateIn(
@@ -141,7 +141,7 @@ constructor(
             .logDiffsForTable(
                 wifiTableLogBuffer,
                 columnPrefix = "",
-                columnName = "isWifiDefault",
+                columnName = "isDefault",
                 initialValue = false,
             )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
@@ -212,7 +212,7 @@ constructor(
             .distinctUntilChanged()
             .logDiffsForTable(
                 wifiTableLogBuffer,
-                columnPrefix = "wifiNetwork",
+                columnPrefix = "",
                 initialValue = WIFI_NETWORK_DEFAULT,
             )
             // There will be multiple wifi icons in different places that will frequently

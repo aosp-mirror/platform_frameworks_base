@@ -19,9 +19,10 @@ package com.android.settingslib.spa.framework.util
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.framework.common.NullPageProvider
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
-import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
+import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
 import com.google.common.truth.Truth
 import org.junit.Before
@@ -40,7 +41,7 @@ class SpaIntentTest {
 
     @Test
     fun testCreateIntent() {
-        val nullPage = SettingsPage.createNull()
+        val nullPage = NullPageProvider.createSettingsPage()
         Truth.assertThat(nullPage.createIntent()).isNull()
         Truth.assertThat(SettingsEntryBuilder.createInject(nullPage).build().createIntent())
             .isNull()

@@ -38,6 +38,8 @@ MouseCursorController::MouseCursorController(PointerControllerContext& context)
       : mContext(context) {
     std::scoped_lock lock(mLock);
 
+    mLocked.stylusHoverMode = false;
+
     mLocked.animationFrameIndex = 0;
     mLocked.lastFrameUpdatedTime = 0;
 
@@ -47,7 +49,8 @@ MouseCursorController::MouseCursorController(PointerControllerContext& context)
     mLocked.pointerAlpha = 0.0f; // pointer is initially faded
     mLocked.pointerSprite = mContext.getSpriteController()->createSprite();
     mLocked.updatePointerIcon = false;
-    mLocked.requestedPointerType = mContext.getPolicy()->getDefaultPointerIconId();
+    mLocked.requestedPointerType = PointerIconStyle::TYPE_NOT_SPECIFIED;
+    mLocked.resolvedPointerType = PointerIconStyle::TYPE_NOT_SPECIFIED;
 
     mLocked.resourcesLoaded = false;
 
@@ -181,6 +184,15 @@ void MouseCursorController::unfade(PointerControllerInterface::Transition transi
     } else {
         mLocked.pointerFadeDirection = 1;
         startAnimationLocked();
+    }
+}
+
+void MouseCursorController::setStylusHoverMode(bool stylusHoverMode) {
+    std::scoped_lock lock(mLock);
+
+    if (mLocked.stylusHoverMode != stylusHoverMode) {
+        mLocked.stylusHoverMode = stylusHoverMode;
+        mLocked.updatePointerIcon = true;
     }
 }
 
@@ -339,7 +351,7 @@ bool MouseCursorController::doFadingAnimationLocked(nsecs_t timestamp) REQUIRES(
 
 bool MouseCursorController::doBitmapAnimationLocked(nsecs_t timestamp) REQUIRES(mLock) {
     std::map<PointerIconStyle, PointerAnimation>::const_iterator iter =
-            mLocked.animationResources.find(mLocked.requestedPointerType);
+            mLocked.animationResources.find(mLocked.resolvedPointerType);
     if (iter == mLocked.animationResources.end()) {
         return false;
     }
@@ -381,14 +393,23 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
     }
 
     if (mLocked.updatePointerIcon) {
-        if (mLocked.requestedPointerType == mContext.getPolicy()->getDefaultPointerIconId()) {
+        mLocked.resolvedPointerType = mLocked.requestedPointerType;
+        const PointerIconStyle defaultPointerIconId =
+                mContext.getPolicy()->getDefaultPointerIconId();
+        if (mLocked.resolvedPointerType == PointerIconStyle::TYPE_NOT_SPECIFIED) {
+            mLocked.resolvedPointerType = mLocked.stylusHoverMode
+                    ? mContext.getPolicy()->getDefaultStylusIconId()
+                    : defaultPointerIconId;
+        }
+
+        if (mLocked.resolvedPointerType == defaultPointerIconId) {
             mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
         } else {
             std::map<PointerIconStyle, SpriteIcon>::const_iterator iter =
-                    mLocked.additionalMouseResources.find(mLocked.requestedPointerType);
+                    mLocked.additionalMouseResources.find(mLocked.resolvedPointerType);
             if (iter != mLocked.additionalMouseResources.end()) {
                 std::map<PointerIconStyle, PointerAnimation>::const_iterator anim_iter =
-                        mLocked.animationResources.find(mLocked.requestedPointerType);
+                        mLocked.animationResources.find(mLocked.resolvedPointerType);
                 if (anim_iter != mLocked.animationResources.end()) {
                     mLocked.animationFrameIndex = 0;
                     mLocked.lastFrameUpdatedTime = systemTime(SYSTEM_TIME_MONOTONIC);
@@ -396,7 +417,7 @@ void MouseCursorController::updatePointerLocked() REQUIRES(mLock) {
                 }
                 mLocked.pointerSprite->setIcon(iter->second);
             } else {
-                ALOGW("Can't find the resource for icon id %d", mLocked.requestedPointerType);
+                ALOGW("Can't find the resource for icon id %d", mLocked.resolvedPointerType);
                 mLocked.pointerSprite->setIcon(mLocked.pointerIcon);
             }
         }

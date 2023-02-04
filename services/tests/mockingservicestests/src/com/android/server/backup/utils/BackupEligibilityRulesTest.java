@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.compat.testing.PlatformCompatChangeRule;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -35,6 +36,7 @@ import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.os.Process;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -64,11 +66,17 @@ public class BackupEligibilityRulesTest {
     private static final Signature SIGNATURE_2 = generateSignature((byte) 2);
     private static final Signature SIGNATURE_3 = generateSignature((byte) 3);
     private static final Signature SIGNATURE_4 = generateSignature((byte) 4);
+    private static final int NON_SYSTEM_USER = 10;
 
     @Rule public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     @Mock private PackageManagerInternal mMockPackageManagerInternal;
-    @Mock private PackageManager mPackageManager;
+    @Mock
+    private PackageManager mPackageManager;
+    @Mock
+    private Context mContext;
+    @Mock
+    private UserManager mUserManager;
 
     private BackupEligibilityRules mBackupEligibilityRules;
     private int mUserId;
@@ -78,6 +86,7 @@ public class BackupEligibilityRulesTest {
         MockitoAnnotations.initMocks(this);
 
         mUserId = UserHandle.USER_SYSTEM;
+        mockContextForFullUser();
         mBackupEligibilityRules = getBackupEligibilityRules(BackupDestination.CLOUD);
     }
 
@@ -92,6 +101,70 @@ public class BackupEligibilityRulesTest {
         boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
 
         assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    public void appIsEligibleForBackup_systemUid_nonSystemUser_notAllowedPackage_returnsFalse()
+            throws Exception {
+        setUpForNonSystemUser();
+
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+        applicationInfo.uid = Process.SYSTEM_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
+
+        assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    public void appIsEligibleForBackup_systemUid_nonSystemUser_allowedPackage_returnsTrue()
+            throws Exception {
+        setUpForNonSystemUser();
+
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+        applicationInfo.uid = Process.SYSTEM_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = UserBackupManagerService.WALLPAPER_PACKAGE;
+
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
+
+        assertThat(isEligible).isTrue();
+    }
+
+    @Test
+    public void appIsEligibleForBackup_systemUid_profileUser_notAllowedPackage_returnsFalse()
+            throws Exception {
+        setUpForProfileUser();
+
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+        applicationInfo.uid = Process.SYSTEM_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
+
+        assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    public void appIsEligibleForBackup_systemUid_profileUser_allowedPackage_returnsTrue()
+            throws Exception {
+        setUpForProfileUser();
+
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
+        applicationInfo.uid = Process.SYSTEM_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
+
+        boolean isEligible = mBackupEligibilityRules.appIsEligibleForBackup(applicationInfo);
+
+        assertThat(isEligible).isTrue();
     }
 
     @Test
@@ -790,7 +863,7 @@ public class BackupEligibilityRulesTest {
     private BackupEligibilityRules getBackupEligibilityRules(
             @BackupDestination int backupDestination) {
         return new BackupEligibilityRules(mPackageManager, mMockPackageManagerInternal, mUserId,
-                backupDestination);
+                mContext, backupDestination);
     }
 
     private static Signature generateSignature(byte i) {
@@ -812,5 +885,27 @@ public class BackupEligibilityRulesTest {
     private static Property getAdbBackupProperty(boolean allowAdbBackup) {
         return new Property(PackageManager.PROPERTY_ALLOW_ADB_BACKUP, allowAdbBackup,
                 TEST_PACKAGE_NAME, /* className */ "");
+    }
+
+    private void setUpForNonSystemUser() {
+        mUserId = NON_SYSTEM_USER;
+        mockContextForFullUser();
+        mBackupEligibilityRules = getBackupEligibilityRules(BackupDestination.CLOUD);
+    }
+
+    private void setUpForProfileUser() {
+        mUserId = NON_SYSTEM_USER;
+        mockContextForProfile();
+        mBackupEligibilityRules = getBackupEligibilityRules(BackupDestination.CLOUD);
+    }
+
+    private void mockContextForProfile() {
+        when(mUserManager.isProfile()).thenReturn(true);
+        when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
+    }
+
+    private void mockContextForFullUser() {
+        when(mUserManager.isProfile()).thenReturn(false);
+        when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
     }
 }

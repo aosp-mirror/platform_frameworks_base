@@ -77,6 +77,12 @@ final class LogicalDisplay {
     private final int mDisplayId;
     private final int mLayerStack;
 
+    // Indicates which display leads this logical display, in terms of brightness or other
+    // properties.
+    // {@link Layout.NO_LEAD_DISPLAY} means that this display is not lead by any others, and could
+    // be a leader itself.
+    private int mLeadDisplayId = Layout.NO_LEAD_DISPLAY;
+
     private int mDisplayGroupId = Display.INVALID_DISPLAY_GROUP;
 
     /**
@@ -150,7 +156,7 @@ final class LogicalDisplay {
 
     // Indicates the display is part of a transition from one device-state ({@link
     // DeviceStateManager}) to another. Being a "part" of a transition means that either
-    // the {@link mIsEnabled} is changing, or the underlying mPrimiaryDisplayDevice is changing.
+    // the {@link mIsEnabled} is changing, or the underlying mPrimaryDisplayDevice is changing.
     private boolean mIsInTransition;
 
     // Indicates the position of the display, POSITION_UNKNOWN could mean it hasn't been specified,
@@ -826,6 +832,26 @@ final class LogicalDisplay {
                 brightnessThrottlingDataId;
     }
 
+    /**
+     * Sets the display of which this display is a follower, regarding brightness or other
+     * properties. If set to {@link Layout#NO_LEAD_DISPLAY}, this display does not follow any
+     * others, and has the potential to be a lead display to others.
+     *
+     * A display cannot be a leader or follower of itself, and there cannot be cycles.
+     * A display cannot be both a leader and a follower, ie, there must not be any chains.
+     *
+     * @param displayId logical display id
+     */
+    public void setLeadDisplayLocked(int displayId) {
+        if (mDisplayId != mLeadDisplayId && mDisplayId != displayId) {
+            mLeadDisplayId = displayId;
+        }
+    }
+
+    public int getLeadDisplayIdLocked() {
+        return mLeadDisplayId;
+    }
+
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mIsEnabled=" + mIsEnabled);
@@ -845,6 +871,7 @@ final class LogicalDisplay {
         pw.println("mFrameRateOverrides=" + Arrays.toString(mFrameRateOverrides));
         pw.println("mPendingFrameRateOverrideUids=" + mPendingFrameRateOverrideUids);
         pw.println("mBrightnessThrottlingDataId=" + mBrightnessThrottlingDataId);
+        pw.println("mLeadDisplayId=" + mLeadDisplayId);
     }
 
     @Override

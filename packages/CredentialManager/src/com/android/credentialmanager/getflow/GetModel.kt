@@ -19,6 +19,9 @@ package com.android.credentialmanager.getflow
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import com.android.credentialmanager.common.CredentialType
+
+import java.time.Instant
 
 data class ProviderInfo(
   /**
@@ -62,13 +65,13 @@ class CredentialEntryInfo(
   pendingIntent: PendingIntent?,
   fillInIntent: Intent?,
   /** Type of this credential used for sorting. Not localized so must not be directly displayed. */
-  val credentialType: String,
+  val credentialType: CredentialType,
   /** Localized type value of this credential used for display purpose. */
   val credentialTypeDisplayName: String,
   val userName: String,
   val displayName: String?,
   val icon: Drawable?,
-  val lastUsedTimeMillis: Long?,
+  val lastUsedTimeMillis: Instant?,
 ) : EntryInfo(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
 
 class AuthenticationEntryInfo(

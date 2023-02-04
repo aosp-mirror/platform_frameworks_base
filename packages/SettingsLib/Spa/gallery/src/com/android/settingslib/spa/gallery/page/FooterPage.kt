@@ -37,7 +37,7 @@ private const val TITLE = "Sample Footer"
 
 object FooterPageProvider : SettingsPageProvider {
     override val name = "Footer"
-    val owner = createSettingsPage()
+    private val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val entryList = mutableListOf<SettingsEntry>()

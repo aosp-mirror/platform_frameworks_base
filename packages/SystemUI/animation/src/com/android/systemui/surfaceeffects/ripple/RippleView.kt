@@ -117,15 +117,6 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         rippleShader.color = ColorUtils.setAlphaComponent(color, alpha)
     }
 
-    /**
-     * Set whether the ripple should remain filled as the ripple expands.
-     *
-     * See [RippleShader.rippleFill].
-     */
-    fun setRippleFill(rippleFill: Boolean) {
-        rippleShader.rippleFill = rippleFill
-    }
-
     /** Set the intensity of the sparkles. */
     fun setSparkleStrength(strength: Float) {
         rippleShader.sparkleStrength = strength

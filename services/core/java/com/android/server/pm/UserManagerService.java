@@ -5049,6 +5049,8 @@ public class UserManagerService extends IUserManager.Stub {
         //...then external ones
         Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
         addedIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        // In HSUM, MainUser might be created before PHASE_ACTIVITY_MANAGER_READY has been sent.
+        addedIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
         // Also, add the UserHandle for mainline modules which can't use the @hide
         // EXTRA_USER_HANDLE.
@@ -6758,18 +6760,6 @@ public class UserManagerService extends IUserManager.Stub {
         return mLocalService.isUserInitialized(userId);
     }
 
-    /**
-     * Creates a new user, intended to be the initial user on a device in headless system user mode.
-     */
-    private UserInfo createInitialUserForHsum() throws UserManager.CheckedUserOperationException {
-        final int flags = UserInfo.FLAG_ADMIN | UserInfo.FLAG_MAIN;
-
-        // Null name will be replaced with "Owner" on-demand to allow for localisation.
-        return createUserInternalUnchecked(/* name= */ null, UserManager.USER_TYPE_FULL_SECONDARY,
-                flags, UserHandle.USER_NULL, /* preCreate= */ false,
-                /* disallowedPackages= */ null, /* token= */ null);
-    }
-
     private class LocalService extends UserManagerInternal {
         @Override
         public void setDevicePolicyUserRestrictions(@UserIdInt int originatingUserId,
@@ -7249,15 +7239,9 @@ public class UserManagerService extends IUserManager.Stub {
                         }
                     }
                 }
-                // No switchable users. Create the initial user.
-                final UserInfo newInitialUser = createInitialUserForHsum();
-                if (newInitialUser == null) {
-                    throw new UserManager.CheckedUserOperationException(
-                            "Initial user creation failed", USER_OPERATION_ERROR_UNKNOWN);
-                }
-                Slogf.i(LOG_TAG,
-                        "No switchable users. Boot user is new user %d", newInitialUser.id);
-                return newInitialUser.id;
+                // No switchable users found. Uh oh!
+                throw new UserManager.CheckedUserOperationException(
+                        "No switchable users found", USER_OPERATION_ERROR_UNKNOWN);
             }
             // Not HSUM, return system user.
             return UserHandle.USER_SYSTEM;
@@ -7437,14 +7421,14 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * Returns true, when user has {@link UserInfo#FLAG_MAIN} and system property
-     * {@link com.android.internal.R.bool.isMainUserPermanentAdmin} is true.
+     * {@link com.android.internal.R.bool#config_isMainUserPermanentAdmin} is true.
      */
     private boolean isNonRemovableMainUser(UserInfo userInfo) {
         return userInfo.isMain() && isMainUserPermanentAdmin();
     }
 
     /**
-     * Returns true, when {@link com.android.internal.R.bool.isMainUserPermanentAdmin} is true.
+     * Returns true if {@link com.android.internal.R.bool#config_isMainUserPermanentAdmin} is true.
      * If the main user is a permanent admin user it can't be deleted
      * or downgraded to non-admin status.
      */

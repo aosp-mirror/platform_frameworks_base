@@ -310,6 +310,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardLockedStateListener;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
+import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.DumpUtils;
@@ -3776,6 +3777,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Make sure the last requested orientation has been applied.
         updateRotationUnchecked(false, false);
+
+        synchronized (mGlobalLock) {
+            mAtmService.getTransitionController().mIsWaitingForDisplayEnabled = false;
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Notified TransitionController "
+                    + "that the display is ready.");
+        }
     }
 
     private boolean checkBootAnimationCompleteLocked() {

@@ -24,7 +24,9 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITIO
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.hardware.display.DisplayManager;
@@ -289,6 +291,14 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(FRAME_RATE_VOTE_NONE, overrideWindow.mFrameRateVote);
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+
+        // If there will be display size change when switching from preferred mode to default mode,
+        // then keep the current preferred mode during animating.
+        mDisplayInfo = spy(mDisplayInfo);
+        final Mode defaultMode = new Mode(4321 /* width */, 1234 /* height */, LOW_REFRESH_RATE);
+        doReturn(defaultMode).when(mDisplayInfo).getDefaultMode();
+        mPolicy = new RefreshRatePolicy(mWm, mDisplayInfo, mDenylist);
+        assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(overrideWindow));
     }
 
     @Test

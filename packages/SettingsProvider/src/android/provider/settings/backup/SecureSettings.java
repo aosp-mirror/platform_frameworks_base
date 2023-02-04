@@ -130,6 +130,7 @@ public class SecureSettings {
         Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS,
         Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO,
         Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
+        Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS,
         Settings.Secure.VR_DISPLAY_MODE,
         Settings.Secure.NOTIFICATION_BADGING,
         Settings.Secure.NOTIFICATION_DISMISS_RTL,
@@ -227,6 +228,7 @@ public class SecureSettings {
         Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME,
         Settings.Secure.CUSTOM_BUGREPORT_HANDLER_APP,
-        Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER
+        Settings.Secure.CUSTOM_BUGREPORT_HANDLER_USER,
+        Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED
     };
 }

@@ -20,7 +20,11 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NamedNavArgument
+import com.android.settingslib.spa.framework.util.genPageId
+import com.android.settingslib.spa.framework.util.normalizeArgList
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
+
+private const val NULL_PAGE_NAME = "NULL"
 
 /**
  * An SettingsPageProvider which is used to create Settings page instances.
@@ -61,4 +65,25 @@ interface SettingsPageProvider {
             }
         }
     }
+}
+
+fun SettingsPageProvider.createSettingsPage(arguments: Bundle? = null): SettingsPage {
+    return SettingsPage(
+        id = genPageId(name, parameter, arguments),
+        sppName = name,
+        displayName = displayName + parameter.normalizeArgList(arguments, eraseRuntimeValues = true)
+            .joinToString("") { arg -> "/$arg" },
+        parameter = parameter,
+        arguments = arguments,
+    )
+}
+
+object NullPageProvider : SettingsPageProvider {
+    override val name = NULL_PAGE_NAME
+}
+
+fun getPageProvider(sppName: String): SettingsPageProvider? {
+    if (!SpaEnvironmentFactory.isReady()) return null
+    val pageProviderRepository by SpaEnvironmentFactory.instance.pageProviderRepository
+    return pageProviderRepository.getProviderOrNull(sppName)
 }

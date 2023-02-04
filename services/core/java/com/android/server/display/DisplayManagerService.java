@@ -142,6 +142,7 @@ import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 import com.android.server.display.DisplayDeviceConfig.SensorData;
+import com.android.server.display.layout.Layout;
 import com.android.server.display.utils.SensorUtils;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.wm.SurfaceAnimationThread;
@@ -1665,12 +1666,37 @@ public final class DisplayManagerService extends SystemService {
                 return;
             }
 
-            // TODO (b/265793751): Set this DPC as a follower of the default DPC if needed,
-            // clear this DPC's followers if it's not a lead display
+            final int leadDisplayId = display.getLeadDisplayIdLocked();
+            updateDisplayPowerControllerLeaderLocked(dpc, leadDisplayId);
 
             final String uniqueId = device.getUniqueId();
             HighBrightnessModeMetadata hbmMetadata = mHighBrightnessModeMetadataMap.get(uniqueId);
-            dpc.onDisplayChanged(hbmMetadata);
+            dpc.onDisplayChanged(hbmMetadata, leadDisplayId);
+        }
+    }
+
+    private void updateDisplayPowerControllerLeaderLocked(DisplayPowerControllerInterface dpc,
+            int leadDisplayId) {
+        if (dpc.getLeadDisplayId() == leadDisplayId) {
+            // Lead display hasn't changed, nothing to do.
+            return;
+        }
+
+        // If it has changed, then we need to unregister from the previous leader if there was one.
+        final int prevLeaderId = dpc.getLeadDisplayId();
+        if (prevLeaderId != Layout.NO_LEAD_DISPLAY) {
+            final DisplayPowerControllerInterface prevLeader =
+                    mDisplayPowerControllers.get(prevLeaderId);
+            if (prevLeader != null) {
+                prevLeader.removeDisplayBrightnessFollower(dpc);
+            }
+        }
+
+        // And then, if it's following, register it with the new one.
+        if (leadDisplayId != Layout.NO_LEAD_DISPLAY) {
+            final DisplayPowerControllerInterface newLead =
+                    mDisplayPowerControllers.get(leadDisplayId);
+            newLead.addDisplayBrightnessFollower(dpc);
         }
     }
 
@@ -1734,9 +1760,13 @@ public final class DisplayManagerService extends SystemService {
                         + display.getDisplayIdLocked());
                 return;
             }
+
+            final int leadDisplayId = display.getLeadDisplayIdLocked();
+            updateDisplayPowerControllerLeaderLocked(dpc, leadDisplayId);
+
             final String uniqueId = device.getUniqueId();
             HighBrightnessModeMetadata hbmMetadata = mHighBrightnessModeMetadataMap.get(uniqueId);
-            dpc.onDisplayChanged(hbmMetadata);
+            dpc.onDisplayChanged(hbmMetadata, leadDisplayId);
         }
     }
 

@@ -551,7 +551,7 @@ public class UserBackupManagerService {
         mPackageManagerBinder = AppGlobals.getPackageManager();
         mActivityManager = ActivityManager.getService();
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mScheduledBackupEligibility = getEligibilityRules(mPackageManager, userId,
+        mScheduledBackupEligibility = getEligibilityRules(mPackageManager, userId, mContext,
                 BackupDestination.CLOUD);
 
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -4118,13 +4118,14 @@ public class UserBackupManagerService {
 
     public BackupEligibilityRules getEligibilityRulesForOperation(
             @BackupDestination int backupDestination) {
-        return getEligibilityRules(mPackageManager, mUserId, backupDestination);
+        return getEligibilityRules(mPackageManager, mUserId, mContext, backupDestination);
     }
 
     private static BackupEligibilityRules getEligibilityRules(PackageManager packageManager,
-            int userId, @BackupDestination int backupDestination) {
+            int userId, Context context, @BackupDestination int backupDestination) {
         return new BackupEligibilityRules(packageManager,
-                LocalServices.getService(PackageManagerInternal.class), userId, backupDestination);
+                LocalServices.getService(PackageManagerInternal.class), userId, context,
+                backupDestination);
     }
 
     /** Prints service state for 'dumpsys backup'. */

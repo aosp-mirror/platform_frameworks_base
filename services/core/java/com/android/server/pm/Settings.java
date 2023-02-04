@@ -120,7 +120,7 @@ import com.android.server.pm.resolution.ComponentResolver;
 import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationPersistence;
-import com.android.server.security.FileIntegrityLocal;
+import com.android.server.security.FileIntegrity;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
@@ -2714,8 +2714,8 @@ public final class Settings implements Watchable, Snappable {
             }
 
             try {
-                FileIntegrityLocal.setUpFsVerity(mSettingsFilename.getAbsolutePath());
-                FileIntegrityLocal.setUpFsVerity(mSettingsReserveCopyFilename.getAbsolutePath());
+                FileIntegrity.setUpFsVerity(mSettingsFilename);
+                FileIntegrity.setUpFsVerity(mSettingsReserveCopyFilename);
             } catch (IOException e) {
                 Slog.e(TAG, "Failed to verity-protect settings", e);
             }

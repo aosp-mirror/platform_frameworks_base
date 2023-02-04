@@ -40,7 +40,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemProperties;
@@ -163,36 +162,6 @@ public class BinaryTransparencyServiceTest {
         Assert.assertEquals(
                 SystemProperties.get(BinaryTransparencyService.SYSPROP_NAME_VBETA_DIGEST,
                         BinaryTransparencyService.VBMETA_DIGEST_UNAVAILABLE), result);
-    }
-
-    @Test
-    public void getApexInfo_postInitialize_returnsValidEntries() throws RemoteException {
-        prepApexInfo();
-        List result = mTestInterface.getApexInfo();
-        Assert.assertNotNull("Apex info map should not be null", result);
-        // TODO(265244016): When PackageManagerInternal is a mock, it's harder to keep the
-        // `measurePackage` working in unit test. Disable it for now. We may need more refactoring
-        // or cover this in integration tests.
-        // Assert.assertFalse("Apex info map should not be empty", result.isEmpty());
-    }
-
-    @Test
-    public void getApexInfo_postInitialize_returnsActualApexs()
-            throws RemoteException, PackageManager.NameNotFoundException {
-        prepApexInfo();
-        List resultList = mTestInterface.getApexInfo();
-
-        PackageManager pm = mContext.getPackageManager();
-        Assert.assertNotNull(pm);
-        List<Bundle> castedResult = (List<Bundle>) resultList;
-        for (Bundle resultBundle : castedResult) {
-            String packageName = resultBundle.getString(
-                    BinaryTransparencyService.BUNDLE_PACKAGE_NAME);
-            Assert.assertNotNull("Package name for APEX should not be null", packageName);
-            Assert.assertTrue(packageName + "is not an APEX!",
-                    resultBundle.getBoolean(
-                            BinaryTransparencyService.BUNDLE_PACKAGE_IS_APEX));
-        }
     }
 
     @Test

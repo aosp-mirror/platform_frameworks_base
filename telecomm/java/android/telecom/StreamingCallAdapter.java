@@ -25,7 +25,7 @@ import com.android.internal.telecom.IStreamingCallAdapter;
  * Telecom. When Telecom binds to a {@link CallStreamingService}, an instance of this class is given
  * to the general streaming app through which it can manipulate the streaming calls. Whe the general
  * streaming app is notified of new ongoing streaming calls, it can execute
- * {@link StreamingCall#setStreamingState(int)} for the ongoing streaming calls the user on the
+ * {@link StreamingCall#requestStreamingState(int)} for the ongoing streaming calls the user on the
  * receiver side would like to hold, unhold and disconnect.
  *
  * @hide

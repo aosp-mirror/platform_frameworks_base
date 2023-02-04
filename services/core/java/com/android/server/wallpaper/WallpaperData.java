@@ -30,7 +30,7 @@ import android.app.WallpaperManager.SetWallpaperFlags;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
-import android.util.ArrayMap;
+import android.util.SparseArray;
 
 import java.io.File;
 
@@ -115,7 +115,7 @@ class WallpaperData {
      * A map to keep track of the dimming set by different applications. The key is the calling
      * UID and the value is the dim amount.
      */
-    ArrayMap<Integer, Float> mUidToDimAmount = new ArrayMap<>();
+    SparseArray<Float> mUidToDimAmount = new SparseArray<>();
 
     /**
      * Whether we need to extract the wallpaper colors again to calculate the dark hints

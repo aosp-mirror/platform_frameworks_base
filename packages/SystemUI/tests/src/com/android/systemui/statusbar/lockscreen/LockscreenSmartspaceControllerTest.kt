@@ -32,6 +32,7 @@ import android.provider.Settings
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -102,6 +103,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var keyguardBypassController: KeyguardBypassController
+
+    @Mock
+    private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     @Mock
     private lateinit var deviceProvisionedController: DeviceProvisionedController
@@ -223,6 +227,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 statusBarStateController,
                 deviceProvisionedController,
                 keyguardBypassController,
+                keyguardUpdateMonitor,
                 execution,
                 executor,
                 bgExecutor,

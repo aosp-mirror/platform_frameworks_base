@@ -49,7 +49,7 @@ class SettingsEntryRepository(private val sppRepository: SettingsPageProviderRep
         entryMap = mutableMapOf()
         pageWithEntryMap = mutableMapOf()
 
-        val nullPage = SettingsPage.createNull()
+        val nullPage = NullPageProvider.createSettingsPage()
         val entryQueue = LinkedList<SettingsEntry>()
         for (page in sppRepository.getAllRootPages()) {
             val rootEntry =

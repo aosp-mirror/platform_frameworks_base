@@ -583,6 +583,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         verify(mKeyguardSecurityViewFlipperController).clearViews();
         verify(mKeyguardSecurityViewFlipperController).getSecurityView(any(SecurityMode.class),
                 any(KeyguardSecurityCallback.class));
+        verify(mView).reset();
+        verify(mKeyguardSecurityViewFlipperController).reset();
     }
 
     @Test

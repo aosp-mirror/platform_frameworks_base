@@ -16,7 +16,6 @@
 
 package com.android.credentialmanager.getflow
 
-import android.credentials.Credential
 import android.text.TextUtils
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -59,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
@@ -71,7 +71,6 @@ import com.android.credentialmanager.common.ui.TextSecondary
 import com.android.credentialmanager.common.ui.TextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ContainerCard
 import com.android.credentialmanager.common.ui.TransparentBackgroundEntry
-import com.android.credentialmanager.jetpack.developer.PublicKeyCredential
 import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
@@ -171,7 +170,7 @@ fun PrimarySelectionCard(
                     ) {
                         if (sortedUserNameToCredentialEntryList.first()
                                 .sortedCredentialEntryList.first().credentialType
-                            == PublicKeyCredential.TYPE_PUBLIC_KEY_CREDENTIAL
+                            == CredentialType.PASSKEY
                         ) R.string.get_dialog_title_use_passkey_for
                         else R.string.get_dialog_title_use_sign_in_for
                     } else if (
@@ -534,7 +533,7 @@ fun CredentialEntryRow(
                 )
                 TextSecondary(
                     text = if (
-                        credentialEntryInfo.credentialType == Credential.TYPE_PASSWORD_CREDENTIAL) {
+                        credentialEntryInfo.credentialType == CredentialType.PASSWORD) {
                         "••••••••••••"
                     } else {
                         if (TextUtils.isEmpty(credentialEntryInfo.displayName))

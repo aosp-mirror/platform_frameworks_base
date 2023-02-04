@@ -147,6 +147,7 @@ public abstract class MediaOutputBaseAdapter extends
         final ImageView mStatusIcon;
         final CheckBox mCheckBox;
         final ViewGroup mEndTouchArea;
+        final ImageView mEndClickIcon;
         @VisibleForTesting
         MediaOutputSeekbar mSeekBar;
         private String mDeviceId;
@@ -168,11 +169,13 @@ public abstract class MediaOutputBaseAdapter extends
             mCheckBox = view.requireViewById(R.id.check_box);
             mEndTouchArea = view.requireViewById(R.id.end_action_area);
             if (mController.isAdvancedLayoutSupported()) {
+                mEndClickIcon = view.requireViewById(R.id.media_output_item_end_click_icon);
                 mVolumeValueText = view.requireViewById(R.id.volume_value);
                 mIconAreaLayout = view.requireViewById(R.id.icon_area);
             } else {
                 mVolumeValueText = null;
                 mIconAreaLayout = null;
+                mEndClickIcon = null;
             }
             initAnimator();
         }
@@ -218,20 +221,7 @@ public abstract class MediaOutputBaseAdapter extends
                                 .mutate();
                 mItemLayout.setBackground(backgroundDrawable);
                 if (showSeekBar) {
-                    final ClipDrawable clipDrawable =
-                            (ClipDrawable) ((LayerDrawable) mSeekBar.getProgressDrawable())
-                                    .findDrawableByLayerId(android.R.id.progress);
-                    final GradientDrawable progressDrawable =
-                            (GradientDrawable) clipDrawable.getDrawable();
-                    if (mController.isAdvancedLayoutSupported()) {
-                        progressDrawable.setCornerRadii(
-                                new float[]{0, 0, mController.getActiveRadius(),
-                                        mController.getActiveRadius(),
-                                        mController.getActiveRadius(),
-                                        mController.getActiveRadius(), 0, 0});
-                    } else {
-                        progressDrawable.setCornerRadius(mController.getActiveRadius());
-                    }
+                    updateSeekbarProgressBackground();
                 }
             }
             mItemLayout.getBackground().setColorFilter(new PorterDuffColorFilter(
@@ -265,14 +255,15 @@ public abstract class MediaOutputBaseAdapter extends
         }
 
         void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
-                boolean showProgressBar, boolean showSubtitle, boolean showStatus) {
+                boolean showProgressBar, boolean showSubtitle, boolean showStatus,
+                boolean isFakeActive) {
             setTwoLineLayout(device, null, bFocused, showSeekBar, showProgressBar, showSubtitle,
-                    showStatus);
+                    showStatus, false, isFakeActive);
         }
 
-        private void setTwoLineLayout(MediaDevice device, CharSequence title, boolean bFocused,
+        void setTwoLineLayout(MediaDevice device, CharSequence title, boolean bFocused,
                 boolean showSeekBar, boolean showProgressBar, boolean showSubtitle,
-                boolean showStatus) {
+                boolean showStatus , boolean showEndTouchArea, boolean isFakeActive) {
             mTitleText.setVisibility(View.GONE);
             mTwoLineLayout.setVisibility(View.VISIBLE);
             mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
@@ -287,12 +278,21 @@ public abstract class MediaOutputBaseAdapter extends
                         showSeekBar ? mController.getColorConnectedItemBackground()
                                 : mController.getColorItemBackground(), PorterDuff.Mode.SRC_IN));
                 mIconAreaLayout.getBackground().setColorFilter(new PorterDuffColorFilter(
-                        showSeekBar ? mController.getColorConnectedItemBackground()
+                        showProgressBar || isFakeActive
+                                ? mController.getColorConnectedItemBackground()
+                                : showSeekBar ? mController.getColorSeekbarProgress()
                                         : mController.getColorItemBackground(),
                         PorterDuff.Mode.SRC_IN));
+                if (showSeekBar) {
+                    updateSeekbarProgressBackground();
+                }
+                //update end click area by isActive
+                mEndTouchArea.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
+                mEndClickIcon.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
                 ViewGroup.MarginLayoutParams params =
                         (ViewGroup.MarginLayoutParams) mItemLayout.getLayoutParams();
-                params.rightMargin = mController.getItemMarginEndDefault();
+                params.rightMargin = showEndTouchArea ? mController.getItemMarginEndSelectable()
+                        : mController.getItemMarginEndDefault();
             } else {
                 backgroundDrawable = mContext.getDrawable(
                                 R.drawable.media_output_item_background)
@@ -310,6 +310,23 @@ public abstract class MediaOutputBaseAdapter extends
                             bFocused ? com.android.internal.R.string.config_headlineFontFamilyMedium
                                     : com.android.internal.R.string.config_headlineFontFamily),
                     Typeface.NORMAL));
+        }
+
+        void updateSeekbarProgressBackground() {
+            final ClipDrawable clipDrawable =
+                    (ClipDrawable) ((LayerDrawable) mSeekBar.getProgressDrawable())
+                            .findDrawableByLayerId(android.R.id.progress);
+            final GradientDrawable progressDrawable =
+                    (GradientDrawable) clipDrawable.getDrawable();
+            if (mController.isAdvancedLayoutSupported()) {
+                progressDrawable.setCornerRadii(
+                        new float[]{0, 0, mController.getActiveRadius(),
+                                mController.getActiveRadius(),
+                                mController.getActiveRadius(),
+                                mController.getActiveRadius(), 0, 0});
+            } else {
+                progressDrawable.setCornerRadius(mController.getActiveRadius());
+            }
         }
 
         void initSeekbar(MediaDevice device, boolean isCurrentSeekbarInvisible) {
