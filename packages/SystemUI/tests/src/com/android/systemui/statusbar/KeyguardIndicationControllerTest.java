@@ -620,6 +620,82 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onBiometricHelp_coEx_fpFailure_faceAlreadyUnlocked() {
+        createController();
+
+        // GIVEN face has already unlocked the device
+        when(mKeyguardUpdateMonitor.getUserUnlockedWithFace(anyInt())).thenReturn(true);
+
+        String message = "A message";
+        mController.setVisible(true);
+
+        // WHEN there's a fingerprint not recognized message
+        mController.getKeyguardCallback().onBiometricHelp(
+                BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                message,
+                BiometricSourceType.FINGERPRINT);
+
+        // THEN show sequential messages such as: 'Unlocked by face' and
+        // 'Swipe up to open'
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                mContext.getString(R.string.keyguard_face_successful_unlock));
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void onBiometricHelp_coEx_fpFailure_trustAgentAlreadyUnlocked() {
+        createController();
+
+        // GIVEN trust agent has already unlocked the device
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+
+        String message = "A message";
+        mController.setVisible(true);
+
+        // WHEN there's a fingerprint not recognized message
+        mController.getKeyguardCallback().onBiometricHelp(
+                BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                message,
+                BiometricSourceType.FINGERPRINT);
+
+        // THEN show sequential messages such as: 'Kept unlocked by TrustAgent' and
+        // 'Swipe up to open'
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                mContext.getString(R.string.keyguard_indication_trust_unlocked));
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
+    public void onBiometricHelp_coEx_fpFailure_trustAgentUnlocked_emptyTrustGrantedMessage() {
+        createController();
+
+        // GIVEN trust agent has already unlocked the device & trust granted message is empty
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+        mController.showTrustGrantedMessage(false, "");
+
+        String message = "A message";
+        mController.setVisible(true);
+
+        // WHEN there's a fingerprint not recognized message
+        mController.getKeyguardCallback().onBiometricHelp(
+                BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED,
+                message,
+                BiometricSourceType.FINGERPRINT);
+
+        // THEN show action to unlock (ie: 'Swipe up to open')
+        verifyNoMessage(INDICATION_TYPE_BIOMETRIC_MESSAGE);
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
+    }
+
+    @Test
     public void transientIndication_visibleWhenDozing_unlessSwipeUp_fromError() {
         createController();
         String message = mContext.getString(R.string.keyguard_unlock);

@@ -37,6 +37,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.TriConsumer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.io.PrintWriter;
@@ -83,13 +84,10 @@ public class PipBoundsState {
     private int mStashedState = STASH_TYPE_NONE;
     private int mStashOffset;
     private @Nullable PipReentryState mPipReentryState;
+    private final @Nullable PipSizeSpecHandler mPipSizeSpecHandler;
     private @Nullable ComponentName mLastPipComponentName;
     private int mDisplayId = Display.DEFAULT_DISPLAY;
     private final @NonNull DisplayLayout mDisplayLayout = new DisplayLayout();
-    /** The current minimum edge size of PIP. */
-    private int mMinEdgeSize;
-    /** The preferred minimum (and default) size specified by apps. */
-    private @Nullable Size mOverrideMinSize;
     private final @NonNull MotionBoundsState mMotionBoundsState = new MotionBoundsState();
     private boolean mIsImeShowing;
     private int mImeHeight;
@@ -122,9 +120,10 @@ public class PipBoundsState {
     private @Nullable TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
     private List<Consumer<Rect>> mOnPipExclusionBoundsChangeCallbacks = new ArrayList<>();
 
-    public PipBoundsState(@NonNull Context context) {
+    public PipBoundsState(@NonNull Context context, PipSizeSpecHandler pipSizeSpecHandler) {
         mContext = context;
         reloadResources();
+        mPipSizeSpecHandler = pipSizeSpecHandler;
     }
 
     /** Reloads the resources. */
@@ -323,20 +322,10 @@ public class PipBoundsState {
         mPipReentryState = null;
     }
 
-    /** Set the PIP minimum edge size. */
-    public void setMinEdgeSize(int minEdgeSize) {
-        mMinEdgeSize = minEdgeSize;
-    }
-
-    /** Returns the PIP's current minimum edge size. */
-    public int getMinEdgeSize() {
-        return mMinEdgeSize;
-    }
-
     /** Sets the preferred size of PIP as specified by the activity in PIP mode. */
     public void setOverrideMinSize(@Nullable Size overrideMinSize) {
-        final boolean changed = !Objects.equals(overrideMinSize, mOverrideMinSize);
-        mOverrideMinSize = overrideMinSize;
+        final boolean changed = !Objects.equals(overrideMinSize, getOverrideMinSize());
+        mPipSizeSpecHandler.setOverrideMinSize(overrideMinSize);
         if (changed && mOnMinimalSizeChangeCallback != null) {
             mOnMinimalSizeChangeCallback.run();
         }
@@ -345,13 +334,12 @@ public class PipBoundsState {
     /** Returns the preferred minimal size specified by the activity in PIP. */
     @Nullable
     public Size getOverrideMinSize() {
-        return mOverrideMinSize;
+        return mPipSizeSpecHandler.getOverrideMinSize();
     }
 
     /** Returns the minimum edge size of the override minimum size, or 0 if not set. */
     public int getOverrideMinEdgeSize() {
-        if (mOverrideMinSize == null) return 0;
-        return Math.min(mOverrideMinSize.getWidth(), mOverrideMinSize.getHeight());
+        return mPipSizeSpecHandler.getOverrideMinEdgeSize();
     }
 
     /** Get the state of the bounds in motion. */
@@ -581,11 +569,8 @@ public class PipBoundsState {
         pw.println(innerPrefix + "mLastPipComponentName=" + mLastPipComponentName);
         pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
         pw.println(innerPrefix + "mDisplayId=" + mDisplayId);
-        pw.println(innerPrefix + "mDisplayLayout=" + mDisplayLayout);
         pw.println(innerPrefix + "mStashedState=" + mStashedState);
         pw.println(innerPrefix + "mStashOffset=" + mStashOffset);
-        pw.println(innerPrefix + "mMinEdgeSize=" + mMinEdgeSize);
-        pw.println(innerPrefix + "mOverrideMinSize=" + mOverrideMinSize);
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);

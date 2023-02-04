@@ -8774,8 +8774,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @UnsupportedAppUsage
-    @TestApi
-    public void getBoundsOnScreen(@NonNull Rect outRect, boolean clipToParent) {
+    public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
         if (mAttachInfo == null) {
             return;
         }
@@ -8783,7 +8782,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         getBoundsToScreenInternal(position, clipToParent);
         outRect.set(Math.round(position.left), Math.round(position.top),
                 Math.round(position.right), Math.round(position.bottom));
-        mAttachInfo.mViewRootImpl.applyViewBoundsSandboxingIfNeeded(outRect);
     }
 
     /**
@@ -15588,8 +15586,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @UnsupportedAppUsage
-    @TestApi
-    public void getWindowDisplayFrame(@NonNull Rect outRect) {
+    public void getWindowDisplayFrame(Rect outRect) {
         if (mAttachInfo != null) {
             mAttachInfo.mViewRootImpl.getDisplayFrame(outRect);
             return;
@@ -25786,11 +25783,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         getLocationInWindow(outLocation);
 
         final AttachInfo info = mAttachInfo;
-
-        // Need to offset the outLocation with the window bounds, but only if "Sandboxing View
-        // Bounds APIs" is disabled. If this override is enabled, it sandboxes {@link outLocation}
-        // within activity bounds.
-        if (info != null && !info.mViewRootImpl.isViewBoundsSandboxingEnabled()) {
+        if (info != null) {
             outLocation[0] += info.mWindowLeft;
             outLocation[1] += info.mWindowTop;
         }

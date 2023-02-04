@@ -85,7 +85,7 @@ object Flags {
     // TODO(b/259217907)
     @JvmField
     val NOTIFICATION_GROUP_DISMISSAL_ANIMATION =
-        unreleasedFlag(259217907, "notification_group_dismissal_animation", teamfood = true)
+        releasedFlag(259217907, "notification_group_dismissal_animation")
 
     // TODO(b/257506350): Tracking Bug
     @JvmField val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
@@ -476,7 +476,7 @@ object Flags {
 
     // TODO(b/254512728): Tracking Bug
     @JvmField
-    val NEW_BACK_AFFORDANCE = unreleasedFlag(1203, "new_back_affordance", teamfood = false)
+    val NEW_BACK_AFFORDANCE = unreleasedFlag(1203, "new_back_affordance", teamfood = true)
 
     // TODO(b/255854141): Tracking Bug
     @JvmField
@@ -510,8 +510,7 @@ object Flags {
     // 1300 - screenshots
     // TODO(b/254513155): Tracking Bug
     @JvmField
-    val SCREENSHOT_WORK_PROFILE_POLICY =
-        unreleasedFlag(1301, "screenshot_work_profile_policy", teamfood = true)
+    val SCREENSHOT_WORK_PROFILE_POLICY = releasedFlag(1301, "screenshot_work_profile_policy")
 
     // TODO(b/264916608): Tracking Bug
     @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata")
@@ -532,13 +531,16 @@ object Flags {
     val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
 
     // TODO(b/266983432) Tracking Bug
-    val SHARESHEET_CUSTOM_ACTIONS = unreleasedFlag(1501, "sharesheet_custom_actions")
+    val SHARESHEET_CUSTOM_ACTIONS =
+        unreleasedFlag(1501, "sharesheet_custom_actions", teamfood = true)
 
     // TODO(b/266982749) Tracking Bug
-    val SHARESHEET_RESELECTION_ACTION = unreleasedFlag(1502, "sharesheet_reselection_action")
+    val SHARESHEET_RESELECTION_ACTION =
+        unreleasedFlag(1502, "sharesheet_reselection_action", teamfood = true)
 
     // TODO(b/266983474) Tracking Bug
-    val SHARESHEET_IMAGE_AND_TEXT_PREVIEW = unreleasedFlag(1503, "sharesheet_image_text_preview")
+    val SHARESHEET_IMAGE_AND_TEXT_PREVIEW =
+        unreleasedFlag(1503, "sharesheet_image_text_preview", teamfood = true)
 
     // 1600 - accessibility
     @JvmField
@@ -580,7 +582,7 @@ object Flags {
     @JvmField val UDFPS_ELLIPSE_DETECTION = unreleasedFlag(2202, "udfps_ellipse_detection")
 
     // 2300 - stylus
-    @JvmField val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used")
+    @JvmField val TRACK_STYLUS_EVER_USED = releasedFlag(2300, "track_stylus_ever_used")
     @JvmField val ENABLE_STYLUS_CHARGING_UI = unreleasedFlag(2301, "enable_stylus_charging_ui")
     @JvmField
     val ENABLE_USI_BATTERY_NOTIFICATIONS = unreleasedFlag(2302, "enable_usi_battery_notifications")
