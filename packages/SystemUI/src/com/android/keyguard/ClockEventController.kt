@@ -48,7 +48,7 @@ import com.android.systemui.plugins.ClockTickRate
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.shared.regionsampling.RegionSampler
-import com.android.systemui.plugins.Weather
+import com.android.systemui.plugins.WeatherData
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -291,10 +291,8 @@ constructor(
                 clock?.events?.onTimeFormatChanged(DateFormat.is24HourFormat(context))
             }
 
-            override fun onWeatherDataChanged(data: Weather?) {
-                if (data != null) {
-                    clock?.events?.onWeatherDataChanged(data)
-                }
+            override fun onWeatherDataChanged(data: WeatherData) {
+                clock?.events?.onWeatherDataChanged(data)
             }
         }
 

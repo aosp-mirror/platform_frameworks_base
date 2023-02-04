@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.lockscreen
 
+import android.app.smartspace.SmartspaceAction
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
 import android.app.smartspace.SmartspaceSession.OnTargetsAvailableListener
@@ -26,6 +27,7 @@ import android.content.pm.UserInfo
 import android.database.ContentObserver
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
@@ -43,6 +45,7 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener
 import com.android.systemui.settings.UserTracker
@@ -54,6 +57,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.util.concurrency.FakeExecution
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argThat
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.SecureSettings
@@ -69,6 +73,7 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.util.Optional
@@ -76,6 +81,13 @@ import java.util.concurrent.Executor
 
 @SmallTest
 class LockscreenSmartspaceControllerTest : SysuiTestCase() {
+    companion object {
+        const val SMARTSPACE_TIME_TOO_EARLY = 1000L
+        const val SMARTSPACE_TIME_JUST_RIGHT = 4000L
+        const val SMARTSPACE_TIME_TOO_LATE = 9000L
+        const val SMARTSPACE_CREATION_TIME = 1234L
+        const val SMARTSPACE_EXPIRY_TIME = 5678L
+    }
     @Mock
     private lateinit var featureFlags: FeatureFlags
     @Mock
@@ -224,6 +236,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 smartspaceManager,
                 activityStarter,
                 falsingManager,
+                clock,
                 secureSettings,
                 userTracker,
                 contentResolver,
@@ -529,6 +542,190 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testSessionListener_ifWeatherExtraMissing_thenWeatherDataNotSent() {
+        connectSession()
+        clock.setCurrentTimeMillis(SMARTSPACE_TIME_JUST_RIGHT)
+        // WHEN we receive a list of targets
+        val targets = listOf(
+                makeTarget(1, userHandlePrimary, isSensitive = true),
+                makeTarget(2, userHandlePrimary, featureType = SmartspaceTarget.FEATURE_WEATHER)
+
+        )
+        sessionListener.onTargetsAvailable(targets)
+        verify(keyguardUpdateMonitor, times(0)).sendWeatherData(any())
+    }
+
+    @Test
+    fun testSessionListener_ifWeatherExtraIsMissingValues_thenWeatherDataNotSent() {
+        connectSession()
+
+        clock.setCurrentTimeMillis(SMARTSPACE_TIME_JUST_RIGHT)
+        // WHEN we receive a list of targets
+        val targets = listOf(
+                makeTarget(1, userHandlePrimary, isSensitive = true),
+                makeWeatherTargetWithExtras(
+                        id = 2,
+                        userHandle = userHandlePrimary,
+                        description = null,
+                        state = WeatherData.WeatherStateIcon.SUNNY.id,
+                        temperature = "32",
+                        useCelsius = null)
+
+        )
+
+        sessionListener.onTargetsAvailable(targets)
+
+        verify(keyguardUpdateMonitor, times(0)).sendWeatherData(any())
+    }
+
+    @Test
+    fun testSessionListener_ifTooEarly_thenWeatherDataNotSent() {
+        connectSession()
+
+        clock.setCurrentTimeMillis(SMARTSPACE_TIME_TOO_EARLY)
+        // WHEN we receive a list of targets
+        val targets = listOf(
+                makeWeatherTargetWithExtras(
+                        id = 1,
+                        userHandle = userHandleManaged,
+                        description = "Sunny",
+                        state = WeatherData.WeatherStateIcon.SUNNY.id,
+                        temperature = "32",
+                        useCelsius = false)
+        )
+        sessionListener.onTargetsAvailable(targets)
+        verify(keyguardUpdateMonitor, times(0)).sendWeatherData(any())
+    }
+
+    @Test
+    fun testSessionListener_ifOnTime_thenWeatherDataSent() {
+        connectSession()
+
+        clock.setCurrentTimeMillis(SMARTSPACE_TIME_JUST_RIGHT)
+        // WHEN we receive a list of targets
+        val targets = listOf(
+                makeWeatherTargetWithExtras(
+                        id = 1,
+                        userHandle = userHandleManaged,
+                        description = "Snow Showers",
+                        state = WeatherData.WeatherStateIcon.SNOW_SHOWERS_SNOW.id,
+                        temperature = "-1",
+                        useCelsius = false)
+        )
+        sessionListener.onTargetsAvailable(targets)
+        verify(keyguardUpdateMonitor).sendWeatherData(argThat { w ->
+            w.description == "Snow Showers" &&
+                    w.state == WeatherData.WeatherStateIcon.SNOW_SHOWERS_SNOW &&
+                    w.temperature == -1 && !w.useCelsius
+        })
+    }
+
+    @Test
+    fun testSessionListener_ifTooLate_thenWeatherDataNotSent() {
+        connectSession()
+
+        clock.setCurrentTimeMillis(SMARTSPACE_TIME_TOO_LATE)
+        // WHEN we receive a list of targets
+        val targets = listOf(
+                makeWeatherTargetWithExtras(
+                        id = 1,
+                        userHandle = userHandleManaged,
+                        description = "Sunny",
+                        state = WeatherData.WeatherStateIcon.SUNNY.id,
+                        temperature = "72",
+                        useCelsius = false)
+        )
+        sessionListener.onTargetsAvailable(targets)
+        verify(keyguardUpdateMonitor, times(0)).sendWeatherData(any())
+    }
+
+    @Test
+    fun testSessionListener_onlyFirstWeatherDataSent() {
+        connectSession()
+
+        clock.setCurrentTimeMillis(SMARTSPACE_TIME_JUST_RIGHT)
+        // WHEN we receive a list of targets
+        val targets = listOf(
+                makeWeatherTargetWithExtras(
+                        id = 1,
+                        userHandle = userHandleManaged,
+                        description = "Sunny",
+                        state = WeatherData.WeatherStateIcon.SUNNY.id,
+                        temperature = "72",
+                        useCelsius = false),
+                makeWeatherTargetWithExtras(
+                        id = 2,
+                        userHandle = userHandleManaged,
+                        description = "Showers",
+                        state = WeatherData.WeatherStateIcon.SHOWERS_RAIN.id,
+                        temperature = "62",
+                        useCelsius = true)
+        )
+        sessionListener.onTargetsAvailable(targets)
+        verify(keyguardUpdateMonitor).sendWeatherData(argThat { w ->
+            w.description == "Sunny" &&
+                    w.state == WeatherData.WeatherStateIcon.SUNNY &&
+                    w.temperature == 72 && !w.useCelsius
+        })
+    }
+
+    @Test
+    fun testSessionListener_ifDecouplingEnabled_weatherDataUpdates() {
+        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
+        connectSession()
+
+        clock.setCurrentTimeMillis(SMARTSPACE_TIME_JUST_RIGHT)
+        // WHEN we receive a list of targets
+        val targets = listOf(
+                makeTarget(1, userHandlePrimary, isSensitive = true),
+                makeTarget(2, userHandlePrimary),
+                makeTarget(3, userHandleManaged),
+                makeWeatherTargetWithExtras(
+                        id = 4,
+                        userHandle = userHandlePrimary,
+                        description = "Flurries",
+                        state = WeatherData.WeatherStateIcon.FLURRIES.id,
+                        temperature = "0",
+                        useCelsius = true)
+        )
+
+        sessionListener.onTargetsAvailable(targets)
+
+        verify(keyguardUpdateMonitor).sendWeatherData(argThat { w ->
+            w.description == "Flurries" &&
+                    w.state == WeatherData.WeatherStateIcon.FLURRIES &&
+                    w.temperature == 0 && w.useCelsius
+        })
+    }
+
+    @Test
+    fun testSessionListener_ifDecouplingDisabled_weatherDataUpdates() {
+        `when`(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(false)
+        connectSession()
+
+        clock.setCurrentTimeMillis(SMARTSPACE_TIME_JUST_RIGHT)
+        // WHEN we receive a list of targets
+        val targets = listOf(
+                makeWeatherTargetWithExtras(
+                        id = 1,
+                        userHandle = userHandlePrimary,
+                        description = "Sunny",
+                        state = WeatherData.WeatherStateIcon.SUNNY.id,
+                        temperature = "32",
+                        useCelsius = false),
+                makeTarget(2, userHandlePrimary, isSensitive = true)
+        )
+
+        sessionListener.onTargetsAvailable(targets)
+
+        verify(keyguardUpdateMonitor).sendWeatherData(argThat { w ->
+            w.description == "Sunny" &&
+                    w.state == WeatherData.WeatherStateIcon.SUNNY &&
+                    w.temperature == 32 && !w.useCelsius
+        })
+    }
+
+    @Test
     fun testSettingsAreReloaded() {
         // GIVEN a connected session where the privacy settings later flip to false
         connectSession()
@@ -740,7 +937,7 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         return userInfo
     }
 
-    fun makeTarget(
+    private fun makeTarget(
         id: Int,
         userHandle: UserHandle,
         isSensitive: Boolean = false,
@@ -752,6 +949,38 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 userHandle)
                 .setSensitive(isSensitive)
                 .setFeatureType(featureType)
+                .build()
+    }
+
+    private fun makeWeatherTargetWithExtras(
+            id: Int,
+            userHandle: UserHandle,
+            description: String?,
+            state: Int?,
+            temperature: String?,
+            useCelsius: Boolean?
+    ): SmartspaceTarget {
+        val mockWeatherBundle = mock(Bundle::class.java).apply {
+            `when`(getString(WeatherData.DESCRIPTION_KEY)).thenReturn(description)
+            if (state != null)
+                `when`(getInt(eq(WeatherData.STATE_KEY), any())).thenReturn(state)
+            `when`(getString(WeatherData.TEMPERATURE_KEY)).thenReturn(temperature)
+            `when`(containsKey(WeatherData.USE_CELSIUS_KEY)).thenReturn(useCelsius != null)
+            if (useCelsius != null)
+                `when`(getBoolean(WeatherData.USE_CELSIUS_KEY)).thenReturn(useCelsius)
+        }
+
+        val mockBaseAction = mock(SmartspaceAction::class.java)
+        `when`(mockBaseAction.extras).thenReturn(mockWeatherBundle)
+        return SmartspaceTarget.Builder(
+                "targetWithWeatherExtras$id",
+                ComponentName("testpackage", "testclass$id"),
+                userHandle)
+                .setSensitive(false)
+                .setFeatureType(SmartspaceTarget.FEATURE_WEATHER)
+                .setBaseAction(mockBaseAction)
+                .setExpiryTimeMillis(SMARTSPACE_EXPIRY_TIME)
+                .setCreationTimeMillis(SMARTSPACE_CREATION_TIME)
                 .build()
     }
 

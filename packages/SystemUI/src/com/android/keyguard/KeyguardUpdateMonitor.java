@@ -148,7 +148,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
 import com.android.systemui.log.SessionTracker;
-import com.android.systemui.plugins.Weather;
+import com.android.systemui.plugins.WeatherData;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -3285,12 +3285,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     /**
      * @param data the weather data (temp, conditions, unit) for weather clock to use
      */
-    public void sendWeatherData(Weather data) {
+    public void sendWeatherData(WeatherData data) {
         mHandler.post(()-> {
             handleWeatherDataUpdate(data); });
     }
 
-    private void handleWeatherDataUpdate(Weather data) {
+    private void handleWeatherDataUpdate(WeatherData data) {
         Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
