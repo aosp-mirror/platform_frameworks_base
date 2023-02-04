@@ -3888,7 +3888,7 @@ public final class ProcessList {
         return runList;
     }
 
-    @GuardedBy(anyOf = {"mService", "mProfileLock"})
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     int getLruSizeLOSP() {
         return mLruProcesses.size();
     }
@@ -3896,7 +3896,7 @@ public final class ProcessList {
     /**
      * Return the reference to the LRU list, call this function for read-only access
      */
-    @GuardedBy(anyOf = {"mService", "mProfileLock"})
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     ArrayList<ProcessRecord> getLruProcessesLOSP() {
         return mLruProcesses;
     }
@@ -3904,7 +3904,7 @@ public final class ProcessList {
     /**
      * Return the reference to the LRU list, call this function for read/write access
      */
-    @GuardedBy({"mService", "mProfileLock"})
+    @GuardedBy({"mService", "mProcLock"})
     ArrayList<ProcessRecord> getLruProcessesLSP() {
         return mLruProcesses;
     }
@@ -3913,12 +3913,12 @@ public final class ProcessList {
      * For test only
      */
     @VisibleForTesting
-    @GuardedBy({"mService", "mProfileLock"})
+    @GuardedBy({"mService", "mProcLock"})
     void setLruProcessServiceStartLSP(int pos) {
         mLruProcessServiceStart = pos;
     }
 
-    @GuardedBy(anyOf = {"mService", "mProfileLock"})
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     int getLruProcessServiceStartLOSP() {
         return mLruProcessServiceStart;
     }
@@ -3931,7 +3931,7 @@ public final class ProcessList {
      *                       to most recent used ProcessRecord.
      * @param callback The callback interface to accept the current ProcessRecord.
      */
-    @GuardedBy(anyOf = {"mService", "mProfileLock"})
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     void forEachLruProcessesLOSP(boolean iterateForward,
             @NonNull Consumer<ProcessRecord> callback) {
         if (iterateForward) {
@@ -3956,7 +3956,7 @@ public final class ProcessList {
      *                 a non-null object, the search will be halted and this object will be used
      *                 as the return value of this search function.
      */
-    @GuardedBy(anyOf = {"mService", "mProfileLock"})
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     <R> R searchEachLruProcessesLOSP(boolean iterateForward,
             @NonNull Function<ProcessRecord, R> callback) {
         if (iterateForward) {
@@ -3977,17 +3977,17 @@ public final class ProcessList {
         return null;
     }
 
-    @GuardedBy(anyOf = {"mService", "mProfileLock"})
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     boolean isInLruListLOSP(ProcessRecord app) {
         return mLruProcesses.contains(app);
     }
 
-    @GuardedBy(anyOf = {"mService", "mProfileLock"})
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     int getLruSeqLOSP() {
         return mLruSeq;
     }
 
-    @GuardedBy(anyOf = {"mService", "mProfileLock"})
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     MyProcessMap getProcessNamesLOSP() {
         return mProcessNames;
     }
