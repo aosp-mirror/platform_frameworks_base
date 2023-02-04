@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.OnTriggeredResult
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.PickerScreenState
 import com.android.systemui.notetask.NoteTaskController
+import com.android.systemui.notetask.NoteTaskController.ShowNoteTaskUiEvent
 import com.android.systemui.notetask.NoteTaskEnabledKey
 import javax.inject.Inject
 import kotlinx.coroutines.flow.flowOf
@@ -64,7 +65,9 @@ constructor(
         }
 
     override fun onTriggered(expandable: Expandable?): OnTriggeredResult {
-        noteTaskController.showNoteTask()
+        noteTaskController.showNoteTask(
+            uiEvent = ShowNoteTaskUiEvent.NOTE_OPENED_VIA_KEYGUARD_QUICK_AFFORDANCE
+        )
         return OnTriggeredResult.Handled
     }
 }
