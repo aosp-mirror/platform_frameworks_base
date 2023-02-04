@@ -836,9 +836,9 @@ public class LogicalDisplayMapperTest {
         assertTrue(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
 
         assertEquals(POSITION_UNKNOWN,
-                mLogicalDisplayMapper.getDisplayLocked(device1).getPositionLocked());
+                mLogicalDisplayMapper.getDisplayLocked(device1).getDevicePositionLocked());
         assertEquals(POSITION_REAR,
-                mLogicalDisplayMapper.getDisplayLocked(device2).getPositionLocked());
+                mLogicalDisplayMapper.getDisplayLocked(device2).getDevicePositionLocked());
     }
 
     /////////////////
