@@ -2108,7 +2108,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             // Use normal animations.
             return false;
-        } else if (mMixedHandler != null && hasDisplayChange(info)) {
+        } else if (mMixedHandler != null && Transitions.hasDisplayChange(info)) {
             // A display-change has been un-expectedly inserted into the transition. Redirect
             // handling to the mixed-handler to deal with splitting it up.
             if (mMixedHandler.animatePendingSplitWithDisplayChange(transition, info,
@@ -2149,15 +2149,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 finishCallback, mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token,
                 mRootTaskInfo.token);
         return true;
-    }
-
-    private boolean hasDisplayChange(TransitionInfo info) {
-        boolean has = false;
-        for (int iC = 0; iC < info.getChanges().size() && !has; ++iC) {
-            final TransitionInfo.Change change = info.getChanges().get(iC);
-            has = change.getMode() == TRANSIT_CHANGE && (change.getFlags() & FLAG_IS_DISPLAY) != 0;
-        }
-        return has;
     }
 
     /** Called to clean-up state and do house-keeping after the animation is done. */
