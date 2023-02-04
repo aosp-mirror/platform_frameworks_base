@@ -316,7 +316,7 @@ object Flags {
 
     // 900 - media
     // TODO(b/254512697): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER = releasedFlag(900, "media_tap_to_transfer")
+    val MEDIA_TAP_TO_TRANSFER = unreleasedFlag(900, "media_tap_to_transfer")
 
     // TODO(b/254512502): Tracking Bug
     val MEDIA_SESSION_ACTIONS = unreleasedFlag(901, "media_session_actions")
@@ -342,15 +342,13 @@ object Flags {
     @JvmField val UMO_TURBULENCE_NOISE = unreleasedFlag(909, "umo_turbulence_noise")
 
     // TODO(b/263272731): Tracking Bug
-    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE =
-        unreleasedFlag(910, "media_ttt_receiver_success_ripple", teamfood = true)
+    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = unreleasedFlag(910, "media_ttt_receiver_success_ripple")
 
     // TODO(b/263512203): Tracking Bug
     val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator", teamfood = true)
 
     // TODO(b/265813373): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE =
-        unreleasedFlag(912, "media_ttt_dismiss_gesture", teamfood = true)
+    val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE = unreleasedFlag(912, "media_ttt_dismiss_gesture")
 
     // TODO(b/266157412): Tracking Bug
     val MEDIA_RETAIN_SESSIONS = unreleasedFlag(913, "media_retain_sessions")
