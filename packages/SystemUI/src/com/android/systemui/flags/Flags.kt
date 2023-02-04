@@ -541,6 +541,10 @@ object Flags {
     val SHARESHEET_IMAGE_AND_TEXT_PREVIEW =
         unreleasedFlag(1503, "sharesheet_image_text_preview", teamfood = true)
 
+    // TODO(b/267355521) Tracking Bug
+    val SHARESHEET_SCROLLABLE_IMAGE_PREVIEW =
+        unreleasedFlag(1504, "sharesheet_scrollable_image_preview")
+
     // 1600 - accessibility
     @JvmField
     val A11Y_FLOATING_MENU_FLING_SPRING_ANIMATIONS =
