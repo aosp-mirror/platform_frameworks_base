@@ -208,9 +208,7 @@ object Flags {
         unreleasedFlag(226, "enable_wallet_contextual_loyalty_cards", teamfood = false)
 
     // TODO(b/242908637): Tracking Bug
-    @JvmField
-    val WALLPAPER_FULLSCREEN_PREVIEW =
-        unreleasedFlag(227, "wallpaper_fullscreen_preview", teamfood = true)
+    @JvmField val WALLPAPER_FULLSCREEN_PREVIEW = releasedFlag(227, "wallpaper_fullscreen_preview")
 
     /** Whether the long-press gesture to open wallpaper picker is enabled. */
     // TODO(b/266242192): Tracking Bug
