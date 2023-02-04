@@ -49,6 +49,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +64,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner.class)
+@Ignore("TODO(b/226641572): this test is broken and it cannot use ExtendedMockitoTestCase as it "
+        + "uses TestableDeviceConfigRule, which creates its own mockito session")
 public final class CachedAppOptimizerTest {
 
     private ServiceThread mThread;
