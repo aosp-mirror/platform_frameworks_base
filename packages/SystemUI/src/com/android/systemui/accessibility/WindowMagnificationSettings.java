@@ -398,13 +398,12 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mChangeModeButton = mSettingView.findViewById(R.id.magnifier_full_button);
 
         mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
-
-        mZoomSeekbar.setOnSeekBarChangeListener(new ZoomSeekbarChangeListener());
-
         float scale = mSecureSettings.getFloatForUser(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 0,
                 UserHandle.USER_CURRENT);
         setSeekbarProgress(scale);
+        mZoomSeekbar.setOnSeekBarChangeListener(new ZoomSeekbarChangeListener());
+
         mAllowDiagonalScrollingSwitch =
                 (Switch) mSettingView.findViewById(R.id.magnifier_horizontal_lock_switch);
         mAllowDiagonalScrollingSwitch.setChecked(mAllowDiagonalScrolling);
