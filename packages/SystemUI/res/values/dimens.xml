@@ -1409,6 +1409,9 @@
     <dimen name="padding_above_predefined_icon_for_small">4dp</dimen>
     <dimen name="padding_between_suppressed_layout_items">8dp</dimen>
 
+    <!-- Seekbar with icon buttons -->
+    <dimen name="seekbar_icon_size">24dp</dimen>
+
     <!-- Accessibility floating menu -->
     <dimen name="accessibility_floating_menu_elevation">3dp</dimen>
     <dimen name="accessibility_floating_menu_stroke_width">1dp</dimen>
