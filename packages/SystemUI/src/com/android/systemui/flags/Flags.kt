@@ -208,9 +208,7 @@ object Flags {
         unreleasedFlag(226, "enable_wallet_contextual_loyalty_cards", teamfood = false)
 
     // TODO(b/242908637): Tracking Bug
-    @JvmField
-    val WALLPAPER_FULLSCREEN_PREVIEW =
-        unreleasedFlag(227, "wallpaper_fullscreen_preview", teamfood = true)
+    @JvmField val WALLPAPER_FULLSCREEN_PREVIEW = releasedFlag(227, "wallpaper_fullscreen_preview")
 
     /** Whether the long-press gesture to open wallpaper picker is enabled. */
     // TODO(b/266242192): Tracking Bug
@@ -339,8 +337,7 @@ object Flags {
     @JvmField val UMO_TURBULENCE_NOISE = releasedFlag(909, "umo_turbulence_noise")
 
     // TODO(b/263272731): Tracking Bug
-    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE =
-        unreleasedFlag(910, "media_ttt_receiver_success_ripple", teamfood = true)
+    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag(910, "media_ttt_receiver_success_ripple")
 
     // TODO(b/263512203): Tracking Bug
     val MEDIA_EXPLICIT_INDICATOR = releasedFlag(911, "media_explicit_indicator")
@@ -510,7 +507,7 @@ object Flags {
     val SCREENSHOT_WORK_PROFILE_POLICY = releasedFlag(1301, "screenshot_work_profile_policy")
 
     // TODO(b/264916608): Tracking Bug
-    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata")
+    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata", teamfood = true)
 
     // TODO(b/266955521): Tracking bug
     @JvmField val SCREENSHOT_DETECTION = unreleasedFlag(1303, "screenshot_detection")
@@ -528,7 +525,7 @@ object Flags {
 
     // 1500 - chooser aka sharesheet
     // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
+    val CHOOSER_UNBUNDLED = releasedFlag(1500, "chooser_unbundled")
 
     // TODO(b/266983432) Tracking Bug
     val SHARESHEET_CUSTOM_ACTIONS =
@@ -599,12 +596,11 @@ object Flags {
     // 2500 - output switcher
     // TODO(b/261538825): Tracking Bug
     @JvmField
-    val OUTPUT_SWITCHER_ADVANCED_LAYOUT = unreleasedFlag(2500, "output_switcher_advanced_layout")
+    val OUTPUT_SWITCHER_ADVANCED_LAYOUT = releasedFlag(2500, "output_switcher_advanced_layout")
     @JvmField
-    val OUTPUT_SWITCHER_ROUTES_PROCESSING =
-        unreleasedFlag(2501, "output_switcher_routes_processing")
+    val OUTPUT_SWITCHER_ROUTES_PROCESSING = releasedFlag(2501, "output_switcher_routes_processing")
     @JvmField
-    val OUTPUT_SWITCHER_DEVICE_STATUS = unreleasedFlag(2502, "output_switcher_device_status")
+    val OUTPUT_SWITCHER_DEVICE_STATUS = releasedFlag(2502, "output_switcher_device_status")
 
     // TODO(b/20911786): Tracking Bug
     @JvmField
