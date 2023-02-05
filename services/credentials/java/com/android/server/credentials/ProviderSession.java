@@ -38,16 +38,14 @@ public abstract class ProviderSession<T, R>
         implements RemoteCredentialService.ProviderCallbacks<R> {
 
     private static final String TAG = "ProviderSession";
-    // Key to be used as an entry key for a remote entry
-    protected static final String REMOTE_ENTRY_KEY = "remote_entry_key";
 
     @NonNull protected final Context mContext;
     @NonNull protected final ComponentName mComponentName;
-    @NonNull protected final CredentialProviderInfo mProviderInfo;
-    @NonNull protected final RemoteCredentialService mRemoteCredentialService;
+    @Nullable protected final CredentialProviderInfo mProviderInfo;
+    @Nullable protected final RemoteCredentialService mRemoteCredentialService;
     @NonNull protected final int mUserId;
     @NonNull protected Status mStatus = Status.NOT_STARTED;
-    @NonNull protected final ProviderInternalCallback mCallbacks;
+    @Nullable protected final ProviderInternalCallback mCallbacks;
     @Nullable protected Credential mFinalCredentialResponse;
     @NonNull protected final T mProviderRequest;
     @Nullable protected R mProviderResponse;
@@ -109,9 +107,9 @@ public abstract class ProviderSession<T, R>
 
     protected ProviderSession(@NonNull Context context, @NonNull CredentialProviderInfo info,
             @NonNull T providerRequest,
-            @NonNull ProviderInternalCallback callbacks,
+            @Nullable ProviderInternalCallback callbacks,
             @NonNull int userId,
-            @NonNull RemoteCredentialService remoteCredentialService) {
+            @Nullable RemoteCredentialService remoteCredentialService) {
         mContext = context;
         mProviderInfo = info;
         mProviderRequest = providerRequest;
@@ -165,7 +163,7 @@ public abstract class ProviderSession<T, R>
         return mComponentName;
     }
 
-    @NonNull
+    @Nullable
     protected RemoteCredentialService getRemoteCredentialService() {
         return mRemoteCredentialService;
     }
