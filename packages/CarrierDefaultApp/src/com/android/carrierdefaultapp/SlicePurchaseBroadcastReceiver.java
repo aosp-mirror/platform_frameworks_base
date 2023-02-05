@@ -317,7 +317,7 @@ public class SlicePurchaseBroadcastReceiver extends BroadcastReceiver{
                         .setContentTitle(res.getString(
                                 R.string.performance_boost_notification_title))
                         .setContentText(String.format(res.getString(
-                                R.string.performance_boost_notification_detail), carrier, carrier))
+                                R.string.performance_boost_notification_detail), carrier))
                         .setSmallIcon(R.drawable.ic_performance_boost)
                         .setContentIntent(createContentIntent(context, intent, 1))
                         .setDeleteIntent(intent.getParcelableExtra(
