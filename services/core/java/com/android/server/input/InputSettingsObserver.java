@@ -21,7 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputSettings;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -32,7 +32,6 @@ import android.view.PointerIcon;
 import android.view.ViewConfiguration;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 /** Observes settings changes and propagates them to the native side. */
@@ -111,9 +110,9 @@ class InputSettingsObserver extends ContentObserver {
 
     private int getPointerSpeedValue(String settingName) {
         int speed = Settings.System.getIntForUser(mContext.getContentResolver(),
-                settingName, InputManager.DEFAULT_POINTER_SPEED, UserHandle.USER_CURRENT);
-        return Math.min(Math.max(speed, InputManager.MIN_POINTER_SPEED),
-                InputManager.MAX_POINTER_SPEED);
+                settingName, InputSettings.DEFAULT_POINTER_SPEED, UserHandle.USER_CURRENT);
+        return Math.min(Math.max(speed, InputSettings.MIN_POINTER_SPEED),
+                InputSettings.MAX_POINTER_SPEED);
     }
 
     private void updateMousePointerSpeed() {
@@ -170,8 +169,7 @@ class InputSettingsObserver extends ContentObserver {
     }
 
     private void updateMaximumObscuringOpacityForTouch() {
-        InputManager im = Objects.requireNonNull(mContext.getSystemService(InputManager.class));
-        final float opacity = im.getMaximumObscuringOpacityForTouch();
+        final float opacity = InputSettings.getMaximumObscuringOpacityForTouch(mContext);
         if (opacity < 0 || opacity > 1) {
             Log.e(TAG, "Invalid maximum obscuring opacity " + opacity
                     + ", it should be >= 0 and <= 1, rejecting update.");

@@ -1480,8 +1480,11 @@ package android.hardware.input {
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void removeKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
     method public void removeUniqueIdAssociation(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void setCurrentKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setMaximumObscuringOpacityForTouch(@FloatRange(from=0, to=1) float);
     field public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L; // 0x96aec7eL
+  }
+
+  public class InputSettings {
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, @FloatRange(from=0, to=1) float);
   }
 
 }
