@@ -165,7 +165,16 @@ public final class ProviderCreateSession extends ProviderSession<
     private void onUpdateResponse(BeginCreateCredentialResponse response) {
         Log.i(TAG, "updateResponse with save entries");
         mProviderResponse = response;
-        updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED);
+        if (isEmptyResponse(response)) {
+            updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
+        } else {
+            updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED);
+        }
+    }
+
+    private boolean isEmptyResponse(BeginCreateCredentialResponse response) {
+        return (response.getCreateEntries() == null || response.getCreateEntries().isEmpty())
+                && response.getRemoteCreateEntry() == null;
     }
 
     @Override
@@ -280,7 +289,7 @@ public final class ProviderCreateSession extends ProviderSession<
             ProviderPendingIntentResponse pendingIntentResponse) {
         if (pendingIntentResponse == null) {
             Log.i(TAG, "pendingIntentResponse is null");
-            return new CreateCredentialException(CreateCredentialException.TYPE_NO_CREDENTIAL);
+            return new CreateCredentialException(CreateCredentialException.TYPE_NO_CREATE_OPTIONS);
         }
         if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
             CreateCredentialException exception = PendingIntentResultHandler
@@ -292,7 +301,7 @@ public final class ProviderCreateSession extends ProviderSession<
         } else if (PendingIntentResultHandler.isCancelledResponse(pendingIntentResponse)) {
             return new CreateCredentialException(CreateCredentialException.TYPE_USER_CANCELED);
         } else {
-            return new CreateCredentialException(CreateCredentialException.TYPE_NO_CREDENTIAL);
+            return new CreateCredentialException(CreateCredentialException.TYPE_NO_CREATE_OPTIONS);
         }
         return null;
     }

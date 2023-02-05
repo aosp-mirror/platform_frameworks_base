@@ -144,6 +144,11 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         finishSession(/*propagateCancellation=*/false);
     }
 
+    @Override
+    public void onUiSelectorInvocationFailure() {
+        Log.i(TAG, "onUiSelectorInvocationFailure");
+    }
+
     protected void finishSession(boolean propagateCancellation) {
         Log.i(TAG, "finishing session");
         if (propagateCancellation) {
