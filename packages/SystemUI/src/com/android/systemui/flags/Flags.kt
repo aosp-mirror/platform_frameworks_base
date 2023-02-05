@@ -208,9 +208,7 @@ object Flags {
         unreleasedFlag(226, "enable_wallet_contextual_loyalty_cards", teamfood = false)
 
     // TODO(b/242908637): Tracking Bug
-    @JvmField
-    val WALLPAPER_FULLSCREEN_PREVIEW =
-        unreleasedFlag(227, "wallpaper_fullscreen_preview", teamfood = true)
+    @JvmField val WALLPAPER_FULLSCREEN_PREVIEW = releasedFlag(227, "wallpaper_fullscreen_preview")
 
     /** Whether the long-press gesture to open wallpaper picker is enabled. */
     // TODO(b/266242192): Tracking Bug
@@ -342,8 +340,7 @@ object Flags {
     @JvmField val UMO_TURBULENCE_NOISE = unreleasedFlag(909, "umo_turbulence_noise")
 
     // TODO(b/263272731): Tracking Bug
-    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE =
-        unreleasedFlag(910, "media_ttt_receiver_success_ripple", teamfood = true)
+    val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag(910, "media_ttt_receiver_success_ripple")
 
     // TODO(b/263512203): Tracking Bug
     val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator", teamfood = true)
@@ -513,7 +510,7 @@ object Flags {
     val SCREENSHOT_WORK_PROFILE_POLICY = releasedFlag(1301, "screenshot_work_profile_policy")
 
     // TODO(b/264916608): Tracking Bug
-    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata")
+    @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata", teamfood = true)
 
     // TODO(b/266955521): Tracking bug
     @JvmField val SCREENSHOT_DETECTION = unreleasedFlag(1303, "screenshot_detection")
@@ -528,7 +525,7 @@ object Flags {
 
     // 1500 - chooser aka sharesheet
     // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
+    val CHOOSER_UNBUNDLED = releasedFlag(1500, "chooser_unbundled")
 
     // TODO(b/266983432) Tracking Bug
     val SHARESHEET_CUSTOM_ACTIONS =
@@ -541,6 +538,10 @@ object Flags {
     // TODO(b/266983474) Tracking Bug
     val SHARESHEET_IMAGE_AND_TEXT_PREVIEW =
         unreleasedFlag(1503, "sharesheet_image_text_preview", teamfood = true)
+
+    // TODO(b/267355521) Tracking Bug
+    val SHARESHEET_SCROLLABLE_IMAGE_PREVIEW =
+        unreleasedFlag(1504, "sharesheet_scrollable_image_preview")
 
     // 1600 - accessibility
     @JvmField

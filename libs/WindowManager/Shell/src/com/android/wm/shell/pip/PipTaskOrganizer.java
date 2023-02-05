@@ -62,6 +62,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.Display;
@@ -1568,7 +1569,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // Similar to auto-enter-pip transition, we use content overlay when there is no
             // source rect hint to enter PiP use bounds animation.
             if (sourceHintRect == null) {
-                animator.setColorContentOverlay(mContext);
+                if (SystemProperties.getBoolean(
+                        "persist.wm.debug.enable_pip_app_icon_overlay", false)) {
+                    animator.setAppIconContentOverlay(
+                            mContext, currentBounds, mTaskInfo.topActivityInfo);
+                } else {
+                    animator.setColorContentOverlay(mContext);
+                }
             } else {
                 final TaskSnapshot snapshot = PipUtils.getTaskSnapshot(
                         mTaskInfo.launchIntoPipHostTaskId, false /* isLowResolution */);
