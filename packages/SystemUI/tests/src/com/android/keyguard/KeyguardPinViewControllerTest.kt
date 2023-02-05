@@ -27,11 +27,14 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.policy.DevicePostureController
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -71,6 +74,9 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     private val falsingCollector: FalsingCollector = FalsingCollectorFake()
     @Mock lateinit var postureController: DevicePostureController
 
+    @Mock lateinit var featureFlags: FeatureFlags
+    @Mock lateinit var passwordTextView: PasswordTextView
+
     lateinit var pinViewController: KeyguardPinViewController
 
     @Before
@@ -82,6 +88,9 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
                 keyguardMessageAreaControllerFactory.create(any(KeyguardMessageArea::class.java))
             )
             .thenReturn(keyguardMessageAreaController)
+        `when`(keyguardPinView.passwordTextViewId).thenReturn(R.id.pinEntry)
+        `when`(keyguardPinView.findViewById<PasswordTextView>(R.id.pinEntry))
+            .thenReturn(passwordTextView)
         `when`(keyguardPinView.resources).thenReturn(context.resources)
         pinViewController =
             KeyguardPinViewController(
@@ -95,7 +104,8 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
                 liftToActivateListener,
                 mEmergencyButtonController,
                 falsingCollector,
-                postureController
+                postureController,
+                featureFlags
             )
     }
 
@@ -111,5 +121,13 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         Mockito.`when`(keyguardMessageAreaController.message).thenReturn("Unlock to continue.")
         pinViewController.startAppearAnimation()
         verify(keyguardMessageAreaController, Mockito.never()).setMessage(anyString(), anyBoolean())
+    }
+
+    @Test
+    fun startAppearAnimation_withAutoPinConfirmation() {
+        `when`(featureFlags.isEnabled(Flags.AUTO_PIN_CONFIRMATION)).thenReturn(true)
+        `when`(lockPatternUtils.isAutoPinConfirmEnabled(anyInt())).thenReturn(true)
+        pinViewController.startAppearAnimation()
+        verify(passwordTextView).setIsPinHinting(true, true)
     }
 }
