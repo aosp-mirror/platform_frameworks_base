@@ -708,7 +708,8 @@ public class UserControllerTest {
     public void testStartProfile_fullUserFails() {
         setUpUser(TEST_USER_ID1, 0);
         assertThrows(IllegalArgumentException.class,
-                () -> mUserController.startProfile(TEST_USER_ID1));
+                () -> mUserController.startProfile(TEST_USER_ID1, /* evenWhenDisabled= */ false,
+                        /* unlockListener= */ null));
 
         verifyUserNeverAssignedToDisplay();
     }
@@ -725,7 +726,8 @@ public class UserControllerTest {
     public void testStartProfile_disabledProfileFails() {
         setUpUser(TEST_USER_ID1, UserInfo.FLAG_PROFILE | UserInfo.FLAG_DISABLED, /* preCreated= */
                 false, UserManager.USER_TYPE_PROFILE_MANAGED);
-        assertThat(mUserController.startProfile(TEST_USER_ID1)).isFalse();
+        assertThat(mUserController.startProfile(TEST_USER_ID1, /* evenWhenDisabled=*/ false,
+                /* unlockListener= */ null)).isFalse();
 
         verifyUserNeverAssignedToDisplay();
     }
@@ -906,7 +908,8 @@ public class UserControllerTest {
 
     private void setUpAndStartProfileInBackground(int userId) throws Exception {
         setUpUser(userId, UserInfo.FLAG_PROFILE, false, UserManager.USER_TYPE_PROFILE_MANAGED);
-        assertThat(mUserController.startProfile(userId)).isTrue();
+        assertThat(mUserController.startProfile(userId, /* evenWhenDisabled=*/ false,
+                /* unlockListener= */ null)).isTrue();
 
         verify(mInjector.mLockPatternUtilsMock, times(1)).unlockUserKeyIfUnsecured(userId);
         mUserStates.put(userId, mUserController.getStartedUserState(userId));

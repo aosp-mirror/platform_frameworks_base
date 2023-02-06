@@ -16851,13 +16851,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean startProfile(@UserIdInt int userId) {
-        return mUserController.startProfile(userId);
+        return mUserController.startProfile(userId, /* evenWhenDisabled= */ false,
+                /* unlockListener= */ null);
     }
 
     @Override
     public boolean startProfileWithListener(@UserIdInt int userId,
             @Nullable IProgressListener unlockListener) {
-        return mUserController.startProfile(userId, unlockListener);
+        return mUserController.startProfile(userId, /* evenWhenDisabled= */ false, unlockListener);
     }
 
     @Override
@@ -18455,6 +18456,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // If it's PROCESS_STATE_IMPORTANT_FOREGROUND, then we allow it only wheen the UID
             // has a SHORT_FGS.
             return mOomAdjuster.hasUidShortForegroundService(uid);
+        }
+
+        @Override
+        public boolean startProfileEvenWhenDisabled(@UserIdInt int userId) {
+            return mUserController.startProfile(userId, /* evenWhenDisabled= */ true,
+                    /* unlockListener= */ null);
         }
     }
 

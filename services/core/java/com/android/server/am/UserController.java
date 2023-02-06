@@ -55,6 +55,7 @@ import static com.android.server.pm.UserManagerInternal.userStartModeToString;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -1463,18 +1464,24 @@ class UserController implements Handler.Callback {
     }
 
     /**
-     * Starts a user only if it's a profile, with a more relaxed permission requirement:
-     * {@link android.Manifest.permission#MANAGE_USERS} or
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
-     * To be called from ActivityManagerService.
-     * @param userId the id of the user to start.
-     * @return true if the operation was successful.
+     * Starts a {@link UserManager#isProfile() profile user}.
+     *
+     * <p>To be called from {@link com.android.server.am.ActivityManagerService}.
+     *
+     * @param userId the id of the profile user to start.
+     * @param evenWhenDisabled whether the profile should be started if it's not enabled yet
+     *        (most callers should pass {@code false}, except when starting the profile while it's
+     *        being provisioned).
+     * @param unlockListener listener to be informed when the profile has started and unlocked.
+     *
+     * @return {@code true} if the operation was successful.
+     *
+     * @throws IllegalArgumentException if the user doesn't exist or is not a profile.
      */
-    boolean startProfile(@UserIdInt int userId) {
-        return startProfile(userId, /* unlockListener= */ null);
-    }
-
-    boolean startProfile(@UserIdInt int userId, @Nullable IProgressListener unlockListener) {
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    boolean startProfile(@UserIdInt int userId, boolean evenWhenDisabled,
+            @Nullable IProgressListener unlockListener) {
         if (mInjector.checkCallingPermission(android.Manifest.permission.MANAGE_USERS)
                 == PackageManager.PERMISSION_DENIED && mInjector.checkCallingPermission(
                 android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
@@ -1489,8 +1496,8 @@ class UserController implements Handler.Callback {
             throw new IllegalArgumentException("User " + userId + " is not a profile");
         }
 
-        if (!userInfo.isEnabled()) {
-            Slogf.w(TAG, "Cannot start disabled profile #" + userId);
+        if (!userInfo.isEnabled() && !evenWhenDisabled) {
+            Slogf.w(TAG, "Cannot start disabled profile #%d", userId);
             return false;
         }
 

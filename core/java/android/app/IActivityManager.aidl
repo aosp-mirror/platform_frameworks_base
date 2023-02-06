@@ -93,7 +93,7 @@ interface IActivityManager {
     // below block of transactions.
 
     // Since these transactions are also called from native code, these must be kept in sync with
-    // the ones in frameworks/native/libs/binder/include/binder/IActivityManager.h
+    // the ones in frameworks/native/libs/binder/include_activitymanager/binder/ActivityManager.h
     // =============== Beginning of transactions used on native side as well ======================
     ParcelFileDescriptor openContentUri(in String uriString);
     void registerUidObserver(in IUidObserver observer, int which, int cutpoint,
@@ -485,8 +485,18 @@ interface IActivityManager {
 
     // Start of L transactions
     String getTagForIntentSender(in IIntentSender sender, in String prefix);
+
+    /**
+      * Starts a user in the background (i.e., while another user is running in the foreground).
+      *
+      * Notice that a background user is "invisible" and cannot launch activities. Starting on
+      * Android U, all users started with this method are invisible, even profiles (prior to Android
+      * U, profiles started with this method would be visible if its parent was the current user) -
+      * if you want to start a profile visible, you should call {@code startProfile()} instead.
+      */
     @UnsupportedAppUsage
     boolean startUserInBackground(int userid);
+
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isInLockTaskMode();
     @UnsupportedAppUsage

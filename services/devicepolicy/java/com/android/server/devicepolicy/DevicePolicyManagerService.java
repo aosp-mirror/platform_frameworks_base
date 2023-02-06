@@ -18970,7 +18970,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             setUserSetupComplete(userInfo.id);
 
-            startUser(userInfo.id, callerPackage);
+            startProfileForSetup(userInfo.id, callerPackage);
             maybeMigrateAccount(
                     userInfo.id, caller.getUserId(), provisioningParams.getAccountToMigrate(),
                     provisioningParams.isKeepingAccountOnMigration(), callerPackage);
@@ -19201,8 +19201,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 mContext.getContentResolver(), USER_SETUP_COMPLETE, 1, userId);
     }
 
-    private void startUser(@UserIdInt int userId, String callerPackage)
+    private void startProfileForSetup(@UserIdInt int userId, String callerPackage)
             throws IllegalStateException {
+        Slogf.i(LOG_TAG, "Starting profile %d as requested by package %s", userId, callerPackage);
         final long startTime = SystemClock.elapsedRealtime();
         final UserUnlockedBlockingReceiver unlockedReceiver = new UserUnlockedBlockingReceiver(
                 userId);
@@ -19213,7 +19214,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 /* broadcastPermission = */ null,
                 /* scheduler= */ null);
         try {
-            if (!mInjector.getIActivityManager().startUserInBackground(userId)) {
+            // Must call startProfileEvenWhenDisabled(), as profile is not enabled yet
+            if (!mInjector.getActivityManagerInternal().startProfileEvenWhenDisabled(userId)) {
                 throw new ServiceSpecificException(ERROR_STARTING_PROFILE_FAILED,
                         String.format("Unable to start user %d in background", userId));
             }
@@ -19226,9 +19228,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     DevicePolicyEnums.PLATFORM_PROVISIONING_START_PROFILE_MS,
                     startTime,
                     callerPackage);
-        } catch (RemoteException e) {
-            // Shouldn't happen.
-            Slogf.wtf(LOG_TAG, "Error starting user", e);
         } finally {
             mContext.unregisterReceiver(unlockedReceiver);
         }
