@@ -21,8 +21,6 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS;
@@ -100,6 +98,7 @@ import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
+import android.view.WindowInsets;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -943,7 +942,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
 
-        if (containsType(result.mTransientBarTypes, ITYPE_STATUS_BAR)) {
+        if ((result.mTransientBarTypes & WindowInsets.Type.statusBars()) != 0) {
             showTransientUnchecked();
         }
         mCommandQueueCallbacks.onSystemBarAttributesChanged(mDisplayId, result.mAppearance,

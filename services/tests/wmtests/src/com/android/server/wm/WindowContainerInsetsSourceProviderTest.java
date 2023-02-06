@@ -170,10 +170,10 @@ public class WindowContainerInsetsSourceProviderTest extends WindowTestsBase {
         final WindowState target = createWindow(null, TYPE_APPLICATION, "target");
         statusBar.getFrame().set(0, 0, 500, 100);
         mProvider.setWindowContainer(statusBar, null, null);
-        mProvider.updateControlForFakeTarget(target);
+        mProvider.updateFakeControlTarget(target);
         assertNotNull(mProvider.getControl(target));
         assertNull(mProvider.getControl(target).getLeash());
-        mProvider.updateControlForFakeTarget(null);
+        mProvider.updateFakeControlTarget(null);
         assertNull(mProvider.getControl(target));
     }
 

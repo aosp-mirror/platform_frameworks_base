@@ -18,8 +18,6 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.inputmethodservice.InputMethodService.BACK_DISPOSITION_DEFAULT;
 import static android.inputmethodservice.InputMethodService.IME_INVISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -158,7 +156,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowTransient() {
-        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        int types = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
         mCommandQueue.showTransient(DEFAULT_DISPLAY, types, true /* isGestureOnSystemBar */);
         waitForIdleSync();
         verify(mCallbacks).showTransient(eq(DEFAULT_DISPLAY), eq(types), eq(true));
@@ -166,7 +164,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testShowTransientForSecondaryDisplay() {
-        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        int types = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
         mCommandQueue.showTransient(SECONDARY_DISPLAY, types, true /* isGestureOnSystemBar */);
         waitForIdleSync();
         verify(mCallbacks).showTransient(eq(SECONDARY_DISPLAY), eq(types), eq(true));
@@ -174,7 +172,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testAbortTransient() {
-        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        int types = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
         mCommandQueue.abortTransient(DEFAULT_DISPLAY, types);
         waitForIdleSync();
         verify(mCallbacks).abortTransient(eq(DEFAULT_DISPLAY), eq(types));
@@ -182,7 +180,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testAbortTransientForSecondaryDisplay() {
-        int[] types = new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR};
+        int types = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
         mCommandQueue.abortTransient(SECONDARY_DISPLAY, types);
         waitForIdleSync();
         verify(mCallbacks).abortTransient(eq(SECONDARY_DISPLAY), eq(types));

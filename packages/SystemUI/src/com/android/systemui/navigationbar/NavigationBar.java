@@ -30,7 +30,6 @@ import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_RIGHT_GESTURES;
-import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
@@ -85,7 +84,6 @@ import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.InsetsFrameProvider;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -97,6 +95,7 @@ import android.view.ViewRootImpl.SurfaceChangedCallback;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -1150,12 +1149,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     @Override
-    public void showTransient(int displayId, @InternalInsetsType int[] types,
-            boolean isGestureOnSystemBar) {
+    public void showTransient(int displayId, @InsetsType int types, boolean isGestureOnSystemBar) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, ITYPE_NAVIGATION_BAR)) {
+        if ((types & WindowInsets.Type.navigationBars()) == 0) {
             return;
         }
         if (!mTransientShown) {
@@ -1166,11 +1164,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     @Override
-    public void abortTransient(int displayId, @InternalInsetsType int[] types) {
+    public void abortTransient(int displayId, @InsetsType int types) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, ITYPE_NAVIGATION_BAR)) {
+        if ((types & WindowInsets.Type.navigationBars()) == 0) {
             return;
         }
         clearTransient();

@@ -53,7 +53,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.Pair;
 import android.util.SparseArray;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -371,22 +370,22 @@ public class CommandQueue extends IStatusBar.Stub implements
                 String packageName, LetterboxDetails[] letterboxDetails) { }
 
         /**
-         * @see IStatusBar#showTransient(int, int[], boolean).
+         * @see IStatusBar#showTransient(int, int, boolean).
          */
-        default void showTransient(int displayId, @InternalInsetsType int[] types) { }
+        default void showTransient(int displayId, @InsetsType int types) { }
 
         /**
-         * @see IStatusBar#showTransient(int, int[], boolean).
+         * @see IStatusBar#showTransient(int, int, boolean).
          */
-        default void showTransient(int displayId, @InternalInsetsType int[] types,
+        default void showTransient(int displayId, @InsetsType int types,
                 boolean isGestureOnSystemBar) {
             showTransient(displayId, types);
         }
 
         /**
-         * @see IStatusBar#abortTransient(int, int[]).
+         * @see IStatusBar#abortTransient(int, int).
          */
-        default void abortTransient(int displayId, @InternalInsetsType int[] types) { }
+        default void abortTransient(int displayId, @InsetsType int types) { }
 
         /**
          * Called to notify System UI that a warning about the device going to sleep
@@ -1131,17 +1130,23 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void showTransient(int displayId, int[] types, boolean isGestureOnSystemBar) {
+    public void showTransient(int displayId, int types, boolean isGestureOnSystemBar) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_SHOW_TRANSIENT, displayId, isGestureOnSystemBar ? 1 : 0,
-                    types).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = displayId;
+            args.argi2 = types;
+            args.argi3 = isGestureOnSystemBar ? 1 : 0;
+            mHandler.obtainMessage(MSG_SHOW_TRANSIENT, args).sendToTarget();
         }
     }
 
     @Override
-    public void abortTransient(int displayId, int[] types) {
+    public void abortTransient(int displayId, int types) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_ABORT_TRANSIENT, displayId, 0, types).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = displayId;
+            args.argi2 = types;
+            mHandler.obtainMessage(MSG_ABORT_TRANSIENT, args).sendToTarget();
         }
     }
 
@@ -1644,17 +1649,21 @@ public class CommandQueue extends IStatusBar.Stub implements
                     args.recycle();
                     break;
                 case MSG_SHOW_TRANSIENT: {
-                    final int displayId = msg.arg1;
-                    final int[] types = (int[]) msg.obj;
-                    final boolean isGestureOnSystemBar = msg.arg2 != 0;
+                    args = (SomeArgs) msg.obj;
+                    final int displayId = args.argi1;
+                    final int types = args.argi2;
+                    final boolean isGestureOnSystemBar = args.argi3 != 0;
+                    args.recycle();
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showTransient(displayId, types, isGestureOnSystemBar);
                     }
                     break;
                 }
                 case MSG_ABORT_TRANSIENT: {
-                    final int displayId = msg.arg1;
-                    final int[] types = (int[]) msg.obj;
+                    args = (SomeArgs) msg.obj;
+                    final int displayId = args.argi1;
+                    final int types = args.argi2;
+                    args.recycle();
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).abortTransient(displayId, types);
                     }
