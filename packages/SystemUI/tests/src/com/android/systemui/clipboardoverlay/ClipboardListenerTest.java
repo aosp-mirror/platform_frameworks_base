@@ -51,6 +51,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import java.util.ArrayList;
+
 import javax.inject.Provider;
 
 @SmallTest
@@ -184,6 +186,33 @@ public class ClipboardListenerTest extends SysuiTestCase {
     public void test_userSetupIncomplete_showsToast() {
         Settings.Secure.putInt(
                 mContext.getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0);
+
+        mClipboardListener.start();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN, 0, mSampleSource);
+        verify(mClipboardToast, times(1)).showCopiedToast();
+        verifyZeroInteractions(mOverlayControllerProvider);
+    }
+
+    @Test
+    public void test_nullClipData_showsNothing() {
+        when(mClipboardManager.getPrimaryClip()).thenReturn(null);
+
+        mClipboardListener.start();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verifyZeroInteractions(mUiEventLogger);
+        verifyZeroInteractions(mClipboardToast);
+        verifyZeroInteractions(mOverlayControllerProvider);
+    }
+
+    @Test
+    public void test_emptyClipData_showsToast() {
+        ClipDescription description = new ClipDescription("Test", new String[0]);
+        ClipData noItems = new ClipData(description, new ArrayList<>());
+        when(mClipboardManager.getPrimaryClip()).thenReturn(noItems);
 
         mClipboardListener.start();
         mClipboardListener.onPrimaryClipChanged();

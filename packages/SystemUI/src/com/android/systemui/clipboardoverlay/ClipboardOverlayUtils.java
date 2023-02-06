@@ -65,6 +65,23 @@ class ClipboardOverlayUtils {
         return false;
     }
 
+    public Optional<RemoteAction> getAction(CharSequence text, TextLinks textLinks, String source) {
+        return getActions(text, textLinks).stream().filter(remoteAction -> {
+            ComponentName component = remoteAction.getActionIntent().getIntent().getComponent();
+            return component != null && !TextUtils.equals(source, component.getPackageName());
+        }).findFirst();
+    }
+
+    private ArrayList<RemoteAction> getActions(CharSequence text, TextLinks textLinks) {
+        ArrayList<RemoteAction> actions = new ArrayList<>();
+        for (TextLinks.TextLink link : textLinks.getLinks()) {
+            TextClassification classification = mTextClassifier.classifyText(
+                    text, link.getStart(), link.getEnd(), null);
+            actions.addAll(classification.getActions());
+        }
+        return actions;
+    }
+
     public Optional<RemoteAction> getAction(ClipData.Item item, String source) {
         return getActions(item).stream().filter(remoteAction -> {
             ComponentName component = remoteAction.getActionIntent().getIntent().getComponent();
