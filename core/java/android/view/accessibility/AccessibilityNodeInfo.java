@@ -1817,13 +1817,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </p>
      *
      * @see AccessibilityEvent#getContentChangeTypes for all content change types.
-     * @param minDurationBetweenContentChanges the minimum duration between content change events.
+     * @param duration the minimum duration between content change events.
      *                                         Negative duration would be treated as zero.
      */
-    public void setMinDurationBetweenContentChanges(
-            @NonNull Duration minDurationBetweenContentChanges) {
+    public void setMinDurationBetweenContentChanges(@NonNull Duration duration) {
         enforceNotSealed();
-        mMinDurationBetweenContentChanges = minDurationBetweenContentChanges.toMillis();
+        mMinDurationBetweenContentChanges = duration.toMillis();
     }
 
     /**
