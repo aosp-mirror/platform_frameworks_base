@@ -7654,7 +7654,7 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
-        <service android:name="com.android.server.healthconnect.storage.AutoDeleteService"
+        <service android:name="com.android.server.healthconnect.HealthConnectDailyService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
