@@ -62,6 +62,9 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
             if (page == null || pageWithEntryMap.containsKey(page.id)) continue
             val spp = sppRepository.getProviderOrNull(page.sppName) ?: continue
             val newEntries = spp.buildEntry(page.arguments)
+            // The page id could be existed already, if there are 2+ pages go to the same one.
+            // For now, override the previous ones, which means only the last from-page is kept.
+            // TODO: support multiple from-pages if necessary.
             pageWithEntryMap[page.id] = SettingsPageWithEntry(
                 page = page,
                 entries = newEntries,
