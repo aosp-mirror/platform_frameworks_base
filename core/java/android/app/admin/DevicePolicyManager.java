@@ -3914,6 +3914,16 @@ public class DevicePolicyManager {
     public static final int EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION =  4;
 
     /**
+     * Exempt an app from all power-related restrictions, including app standby and doze.
+     * In addition, the app will be able to start foreground services from the background,
+     * and the user will not be able to stop foreground services run by the app.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_POWER_RESTRICTIONS =  5;
+
+    /**
      * Exemptions to platform restrictions, given to an application through
      * {@link #setApplicationExemptions(String, Set)}.
      *
@@ -3924,7 +3934,8 @@ public class DevicePolicyManager {
             EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
             EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
             EXEMPT_FROM_HIBERNATION,
-            EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION
+            EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
+            EXEMPT_FROM_POWER_RESTRICTIONS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationExemptionConstants {}

@@ -206,6 +206,8 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR = 1;
     private static final boolean DEFAULT_FGS_ALLOW_OPT_OUT = false;
 
+    private static final boolean DEFAULT_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED = true;
+
     /**
      * The extra delays we're putting to service restarts, based on current memory pressure.
      */
@@ -341,6 +343,12 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final String KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT =
             "deferred_fgs_notification_exclusion_time_for_short";
+
+    /**
+     * Default value for mFlagSystemExemptPowerRestrictionEnabled.
+     */
+    private static final String KEY_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED =
+            "system_exempt_power_restrictions_enabled";
 
     /**
      * Default value for mPushMessagingOverQuotaBehavior if not explicitly set in
@@ -616,6 +624,13 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile long mFgsNotificationDeferralExclusionTimeForShort =
             mFgsNotificationDeferralExclusionTime;
+
+    // Indicates whether the system-applied exemption from all power restrictions is enabled.
+    // When the exemption is enabled, any app which has the OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS
+    // app op will be exempt from all power-related restrictions, including app standby
+    // and doze. In addition, the app will be able to start foreground services from the background,
+    // and the user will not be able to stop foreground services run by the app.
+    volatile boolean mFlagSystemExemptPowerRestrictionsEnabled = true;
 
     /**
      * When server pushing message is over the quote, select one of the temp allow list type as
@@ -1038,6 +1053,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT:
                                 updateFgsNotificationDeferralExclusionTimeForShort();
+                                break;
+                            case KEY_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED:
+                                updateSystemExemptPowerRestrictionsEnabled();
                                 break;
                             case KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR:
                                 updatePushMessagingOverQuotaBehavior();
@@ -1488,6 +1506,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT,
                 /*default value*/ 2 * 60 * 1000L);
+    }
+
+    private void updateSystemExemptPowerRestrictionsEnabled() {
+        mFlagSystemExemptPowerRestrictionsEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED,
+                DEFAULT_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED);
     }
 
     private void updatePushMessagingOverQuotaBehavior() {
@@ -2056,6 +2081,9 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("="); pw.println(mFgsNotificationDeferralExclusionTime);
         pw.print("  "); pw.print(KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT);
         pw.print("="); pw.println(mFgsNotificationDeferralExclusionTimeForShort);
+
+        pw.print("  "); pw.print(KEY_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED);
+        pw.print("="); pw.println(mFlagSystemExemptPowerRestrictionsEnabled);
 
         pw.print("  "); pw.print(KEY_SHORT_FGS_TIMEOUT_DURATION);
         pw.print("="); pw.println(mShortFgsTimeoutDuration);

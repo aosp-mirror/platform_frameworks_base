@@ -72,6 +72,7 @@ import static android.os.PowerExemptionManager.REASON_PROFILE_OWNER;
 import static android.os.PowerExemptionManager.REASON_ROLE_DIALER;
 import static android.os.PowerExemptionManager.REASON_ROLE_EMERGENCY;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_EXEMPT_APP_OP;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
 import static android.os.PowerExemptionManager.getExemptionReasonForStatsd;
@@ -2855,6 +2856,7 @@ public final class AppRestrictionController {
     int getPotentialSystemExemptionReason(int uid, String pkg) {
         final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
         final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
+        final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
         final int userId = UserHandle.getUserId(uid);
         if (isSystemModule(pkg)) {
             return REASON_SYSTEM_MODULE;
@@ -2868,6 +2870,11 @@ public final class AppRestrictionController {
             return REASON_DPO_PROTECTED_APP;
         } else if (appStandbyInternal.isActiveDeviceAdmin(pkg, userId)) {
             return REASON_ACTIVE_DEVICE_ADMIN;
+        } else if (mActivityManagerService.mConstants.mFlagSystemExemptPowerRestrictionsEnabled
+                && appOpsManager.checkOpNoThrow(
+                AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS, uid, pkg)
+                == AppOpsManager.MODE_ALLOWED) {
+            return REASON_SYSTEM_EXEMPT_APP_OP;
         }
         return REASON_DENIED;
     }
