@@ -161,7 +161,7 @@ constructor(
                 routeInfo.name.toString()
             }
         val icon =
-            MediaTttUtils.getIconInfoFromPackageName(context, packageName) {
+            MediaTttUtils.getIconInfoFromPackageName(context, packageName, isReceiver = false) {
                 logger.logPackageNotFound(packageName)
             }
 

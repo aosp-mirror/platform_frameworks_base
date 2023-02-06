@@ -354,7 +354,11 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 
         val view = getChipView()
         assertThat(view.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
-        assertThat(view.getAppIconView().contentDescription).isEqualTo(APP_NAME)
+        assertThat(view.getAppIconView().contentDescription)
+            .isEqualTo(context.getString(
+                R.string.media_transfer_receiver_content_description_with_app_name,
+                APP_NAME,
+            ))
     }
 
     @Test
