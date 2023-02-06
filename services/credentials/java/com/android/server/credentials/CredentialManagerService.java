@@ -194,7 +194,6 @@ public final class CredentialManagerService
     }
 
 
-
     @GuardedBy("mLock")
     private List<CredentialManagerServiceImpl> getOrConstructSystemServiceListLock(
             int resolvedUserId) {
@@ -338,7 +337,8 @@ public final class CredentialManagerService
                             callingUid,
                             callback,
                             request,
-                            constructCallingAppInfo(callingPackage, userId));
+                            constructCallingAppInfo(callingPackage, userId),
+                            CancellationSignal.fromTransport(cancelTransport));
 
             List<ProviderSession> providerSessions;
 
@@ -404,8 +404,6 @@ public final class CredentialManagerService
                                     + e.getMessage());
                 }
             }
-
-            // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(ProviderSession::invokeSession);
 
             return cancelTransport;
@@ -430,7 +428,8 @@ public final class CredentialManagerService
                             callingUid,
                             request,
                             callback,
-                            constructCallingAppInfo(callingPackage, userId));
+                            constructCallingAppInfo(callingPackage, userId),
+                            CancellationSignal.fromTransport(cancelTransport));
 
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
@@ -450,8 +449,7 @@ public final class CredentialManagerService
             }
 
             // Iterate over all provider sessions and invoke the request
-            providerSessions.forEach(
-                    ProviderSession::invokeSession);
+            providerSessions.forEach(ProviderSession::invokeSession);
             return cancelTransport;
         }
 
@@ -542,7 +540,8 @@ public final class CredentialManagerService
                             callingUid,
                             callback,
                             request,
-                            constructCallingAppInfo(callingPackage, userId));
+                            constructCallingAppInfo(callingPackage, userId),
+                            CancellationSignal.fromTransport(cancelTransport));
 
             // Initiate all provider sessions
             // TODO: Determine if provider needs to have clear capability in their manifest
@@ -563,8 +562,7 @@ public final class CredentialManagerService
             }
 
             // Iterate over all provider sessions and invoke the request
-            providerSessions.forEach(
-                    ProviderSession::invokeSession);
+            providerSessions.forEach(ProviderSession::invokeSession);
             return cancelTransport;
         }
 

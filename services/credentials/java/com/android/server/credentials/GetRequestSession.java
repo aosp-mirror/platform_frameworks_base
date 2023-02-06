@@ -25,6 +25,7 @@ import android.credentials.GetCredentialResponse;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
+import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfo;
@@ -43,8 +44,9 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
 
     public GetRequestSession(Context context, int userId, int callingUid,
             IGetCredentialCallback callback, GetCredentialRequest request,
-            CallingAppInfo callingAppInfo) {
-        super(context, userId, callingUid, request, callback, RequestInfo.TYPE_GET, callingAppInfo);
+            CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal) {
+        super(context, userId, callingUid, request, callback, RequestInfo.TYPE_GET,
+                callingAppInfo, cancellationSignal);
     }
 
     /**
@@ -102,6 +104,12 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
     }
 
     private void respondToClientWithResponseAndFinish(GetCredentialResponse response) {
+        if (isSessionCancelled()) {
+            // TODO: Differentiate btw cancelled and false
+            logApiCalled(RequestType.GET_CREDENTIALS, /* isSuccessful */ false);
+            finishSession(/*propagateCancellation=*/true);
+            return;
+        }
         try {
             mClientCallback.onResponse(response);
             logApiCalled(RequestType.GET_CREDENTIALS, /* isSuccessful */ true);
@@ -109,18 +117,22 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
             Log.i(TAG, "Issue while responding to client with a response : " + e.getMessage());
             logApiCalled(RequestType.GET_CREDENTIALS, /* isSuccessful */ false);
         }
-        finishSession();
+        finishSession(/*propagateCancellation=*/false);
     }
 
     private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
+        if (isSessionCancelled()) {
+            logApiCalled(RequestType.GET_CREDENTIALS, /* isSuccessful */ false);
+            finishSession(/*propagateCancellation=*/true);
+            return;
+        }
         try {
             mClientCallback.onError(errorType, errorMsg);
         } catch (RemoteException e) {
             Log.i(TAG, "Issue while responding to client with error : " + e.getMessage());
-
         }
         logApiCalled(RequestType.GET_CREDENTIALS, /* isSuccessful */ false);
-        finishSession();
+        finishSession(/*propagateCancellation=*/false);
     }
 
     @Override
