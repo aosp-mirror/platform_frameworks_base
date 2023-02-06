@@ -2156,4 +2156,30 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return configuration != null
                 && configuration.windowConfiguration.getWindowingMode() == WINDOWING_MODE_PINNED;
     }
+
+    @Override
+    public ActivityOptions setLaunchingActivityStack(@NonNull ActivityOptions options,
+            @NonNull IBinder token) {
+        throw new UnsupportedOperationException(
+                "setLaunchingActivityStack is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public void finishActivityStacks(@NonNull Set<IBinder> activityStackTokens) {
+        throw new UnsupportedOperationException(
+                "finishActivityStacks is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public void invalidateTopVisibleSplitAttributes() {
+        throw new UnsupportedOperationException(
+                "invalidateTopVisibleSplitAttributes is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public void updateSplitAttributes(@NonNull IBinder splitInfoToken,
+            @NonNull SplitAttributes splitAttributes) {
+        throw new UnsupportedOperationException(
+                "updateSplitAttributes is not supported in API_VERSION=2");
+    }
 }
