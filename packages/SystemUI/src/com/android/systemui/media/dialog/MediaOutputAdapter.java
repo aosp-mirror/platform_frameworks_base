@@ -204,7 +204,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         && mController.isAdvancedLayoutSupported() && device.hasSubtext()) {
                     boolean isActiveWithOngoingSession =
                             (device.hasOngoingSession() && currentlyConnected);
-                    boolean isHost = mController.isVolumeControlEnabled(device)
+                    boolean isHost = device.isHostForOngoingSession()
                             && isActiveWithOngoingSession;
                     if (isHost) {
                         mCurrentActivePosition = position;

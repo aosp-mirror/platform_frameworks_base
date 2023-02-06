@@ -440,6 +440,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
         when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         when(mMediaOutputController.isVolumeControlEnabled(mMediaDevice1)).thenReturn(true);
+        when(mMediaDevice1.isHostForOngoingSession()).thenReturn(true);
         when(mMediaDevice1.hasSubtext()).thenReturn(true);
         when(mMediaDevice1.getSubtext()).thenReturn(SUBTEXT_CUSTOM);
         when(mMediaDevice1.getSubtextString()).thenReturn(TEST_CUSTOM_SUBTEXT);
