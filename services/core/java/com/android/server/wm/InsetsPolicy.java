@@ -635,6 +635,12 @@ class InsetsPolicy {
         final SparseArray<InsetsSourceControl> controlsReady = new SparseArray<>();
         final InsetsSourceControl[] controls =
                 mStateController.getControlsForDispatch(mDummyControlTarget);
+        if (controls == null) {
+            if (callback != null) {
+                DisplayThread.getHandler().post(callback);
+            }
+            return;
+        }
         for (InsetsSourceControl control : controls) {
             if (isTransient(control.getType()) && control.getLeash() != null) {
                 typesReady |= control.getType();
