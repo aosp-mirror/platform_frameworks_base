@@ -39,7 +39,6 @@ import android.app.StatusBarManager;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.res.Resources;
-import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.view.InsetsAnimationControlCallbacks;
 import android.view.InsetsAnimationControlImpl;
@@ -242,7 +241,7 @@ class InsetsPolicy {
 
         startAnimation(false /* show */, () -> {
             synchronized (mDisplayContent.mWmService.mGlobalLock) {
-                final ArrayMap<Integer, WindowContainerInsetsSourceProvider> providers =
+                final SparseArray<WindowContainerInsetsSourceProvider> providers =
                         mStateController.getSourceProviders();
                 for (int i = providers.size() - 1; i >= 0; i--) {
                     final WindowContainerInsetsSourceProvider provider = providers.valueAt(i);
@@ -345,8 +344,8 @@ class InsetsPolicy {
             }
         }
 
-        final ArrayMap<Integer, WindowContainerInsetsSourceProvider> providers = mStateController
-                .getSourceProviders();
+        final SparseArray<WindowContainerInsetsSourceProvider> providers =
+                mStateController.getSourceProviders();
         final int windowType = attrs.type;
         for (int i = providers.size() - 1; i >= 0; i--) {
             final WindowContainerInsetsSourceProvider otherProvider = providers.valueAt(i);

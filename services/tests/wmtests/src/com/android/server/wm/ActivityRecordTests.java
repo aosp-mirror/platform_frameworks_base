@@ -3177,7 +3177,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void testImeInsetsFrozenFlag_resetWhenReportedToBeImeInputTarget() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
 
-        mDisplayContent.getInsetsStateController().getSourceProvider(ID_IME).setWindowContainer(
+        mDisplayContent.getInsetsStateController().getImeSourceProvider().setWindowContainer(
                 mImeWindow, null, null);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
@@ -3222,7 +3222,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final WindowState app1 = createWindow(null, TYPE_APPLICATION, "app1");
         final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
 
-        mDisplayContent.getInsetsStateController().getSourceProvider(ID_IME).setWindowContainer(
+        mDisplayContent.getInsetsStateController().getImeSourceProvider().setWindowContainer(
                 mImeWindow, null, null);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
@@ -3288,7 +3288,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         makeWindowVisibleAndDrawn(app1, app2);
 
         final InsetsStateController controller = mDisplayContent.getInsetsStateController();
-        controller.getSourceProvider(ID_IME).setWindowContainer(
+        controller.getImeSourceProvider().setWindowContainer(
                 ime, null, null);
         ime.getControllableInsetProvider().setServerVisible(true);
 

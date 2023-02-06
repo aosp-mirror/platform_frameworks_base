@@ -163,19 +163,20 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         InsetsStateController controller = mDisplayContent.getInsetsStateController();
         controller.onPostLayout();
 
-        InsetsSourceProvider statusBarProvider = controller.getSourceProvider(ITYPE_STATUS_BAR);
+        InsetsSourceProvider statusBarProvider = controller.peekSourceProvider(ITYPE_STATUS_BAR);
         assertEquals(new Rect(0, 0, 500, 100), statusBarProvider.getSource().getFrame());
         assertEquals(Insets.of(0, 100, 0, 0),
                 statusBarProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
                         false /* ignoreVisibility */));
 
-        InsetsSourceProvider topGesturesProvider = controller.getSourceProvider(ITYPE_TOP_GESTURES);
+        InsetsSourceProvider topGesturesProvider = controller.peekSourceProvider(
+                ITYPE_TOP_GESTURES);
         assertEquals(new Rect(0, 0, 500, 100), topGesturesProvider.getSource().getFrame());
         assertEquals(Insets.of(0, 100, 0, 0),
                 topGesturesProvider.getSource().calculateInsets(new Rect(0, 0, 500, 500),
                         false /* ignoreVisibility */));
 
-        InsetsSourceProvider navigationBarProvider = controller.getSourceProvider(
+        InsetsSourceProvider navigationBarProvider = controller.peekSourceProvider(
                 ITYPE_NAVIGATION_BAR);
         assertNotEquals(new Rect(0, 0, 500, 100), navigationBarProvider.getSource().getFrame());
     }
@@ -194,7 +195,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mDisplayContent.getInsetsStateController().onPostLayout();
 
         InsetsSourceProvider provider =
-                mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR);
+                mDisplayContent.getInsetsStateController().peekSourceProvider(ITYPE_STATUS_BAR);
         // In the new flexible insets setup, the insets frame should always respect the window
         // layout result.
         assertEquals(new Rect(0, 0, 500, 100), provider.getSource().getFrame());
