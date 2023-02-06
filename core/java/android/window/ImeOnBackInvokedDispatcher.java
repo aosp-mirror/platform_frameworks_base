@@ -82,8 +82,13 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
             @NonNull OnBackInvokedCallback callback) {
         final Bundle bundle = new Bundle();
         // Always invoke back for ime without checking the window focus.
+        // We use strong reference in the binder wrapper to avoid accidentally GC the callback.
+        // This is necessary because the callback is sent to and registered from
+        // the app process, which may treat the IME callback as weakly referenced. This will not
+        // cause a memory leak because the app side already clears the reference correctly.
         final IOnBackInvokedCallback iCallback =
-                new WindowOnBackInvokedDispatcher.OnBackInvokedCallbackWrapper(callback);
+                new WindowOnBackInvokedDispatcher.OnBackInvokedCallbackWrapper(
+                        callback, false /* useWeakRef */);
         bundle.putBinder(RESULT_KEY_CALLBACK, iCallback.asBinder());
         bundle.putInt(RESULT_KEY_PRIORITY, priority);
         bundle.putInt(RESULT_KEY_ID, callback.hashCode());
