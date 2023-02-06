@@ -17,24 +17,15 @@
 package android.media;
 
 import android.annotation.NonNull;
-import android.hardware.cas.DestinationBuffer;
 import android.hardware.cas.IDescrambler;
 import android.hardware.cas.ScramblingControl;
-import android.hardware.cas.SharedBuffer;
-import android.hardware.cas.SubSample;
 import android.hardware.cas.V1_0.IDescramblerBase;
-import android.hardware.common.Ashmem;
-import android.hardware.common.NativeHandle;
 import android.media.MediaCasException.UnsupportedCasException;
 import android.os.IHwBinder;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
-import android.os.SharedMemory;
-import android.system.ErrnoException;
 import android.util.Log;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -52,6 +43,7 @@ import java.util.ArrayList;
 public final class MediaDescrambler implements AutoCloseable {
     private static final String TAG = "MediaDescrambler";
     private DescramblerWrapper mIDescrambler;
+    private boolean mIsAidlHal;
 
     private interface DescramblerWrapper {
 
@@ -68,43 +60,7 @@ public final class MediaDescrambler implements AutoCloseable {
         void setMediaCasSession(byte[] sessionId) throws RemoteException;
 
         void release() throws RemoteException;
-    }
-    ;
-
-    private long getSubsampleInfo(
-            int numSubSamples,
-            int[] numBytesOfClearData,
-            int[] numBytesOfEncryptedData,
-            SubSample[] subSamples) {
-        long totalSize = 0;
-
-        for (int i = 0; i < numSubSamples; i++) {
-            totalSize += numBytesOfClearData[i];
-            subSamples[i].numBytesOfClearData = numBytesOfClearData[i];
-            totalSize += numBytesOfEncryptedData[i];
-            subSamples[i].numBytesOfEncryptedData = numBytesOfEncryptedData[i];
-        }
-        return totalSize;
-    }
-
-    private ParcelFileDescriptor createSharedMemory(ByteBuffer buffer, String name)
-            throws RemoteException {
-        byte[] source = buffer.array();
-        if (source.length == 0) {
-            return null;
-        }
-        ParcelFileDescriptor fd = null;
-        try {
-            SharedMemory ashmem = SharedMemory.create(name == null ? "" : name, source.length);
-            ByteBuffer ptr = ashmem.mapReadWrite();
-            ptr.put(buffer);
-            ashmem.unmap(ptr);
-            fd = ashmem.getFdDup();
-            return fd;
-        } catch (ErrnoException | IOException e) {
-            throw new RemoteException(e);
-        }
-    }
+    };
 
     private class AidlDescrambler implements DescramblerWrapper {
 
@@ -125,47 +81,17 @@ public final class MediaDescrambler implements AutoCloseable {
                 @NonNull ByteBuffer dst,
                 @NonNull MediaCodec.CryptoInfo cryptoInfo)
                 throws RemoteException {
-            SubSample[] subSamples = new SubSample[cryptoInfo.numSubSamples];
-            long totalLength =
-                    getSubsampleInfo(
-                            cryptoInfo.numSubSamples,
-                            cryptoInfo.numBytesOfClearData,
-                            cryptoInfo.numBytesOfEncryptedData,
-                            subSamples);
-            SharedBuffer srcBuffer = new SharedBuffer();
-            DestinationBuffer dstBuffer;
-            srcBuffer.heapBase = new Ashmem();
-            srcBuffer.heapBase.fd = createSharedMemory(src, "Descrambler Source Buffer");
-            srcBuffer.heapBase.size = src.array().length;
-            if (dst == null) {
-                dstBuffer = DestinationBuffer.nonsecureMemory(srcBuffer);
-            } else {
-                ParcelFileDescriptor pfd =
-                        createSharedMemory(dst, "Descrambler Destination Buffer");
-                NativeHandle nh = new NativeHandle();
-                nh.fds = new ParcelFileDescriptor[] {pfd};
-                nh.ints = new int[] {1}; // Mark 1 since source buffer also uses it?
-                dstBuffer = DestinationBuffer.secureMemory(nh);
-            }
-            @ScramblingControl int control = cryptoInfo.key[0];
-
-            return mAidlDescrambler.descramble(
-                    (byte) control,
-                    subSamples,
-                    srcBuffer,
-                    src.position(),
-                    dstBuffer,
-                    dst.position());
+            throw new RemoteException("Not supported");
         }
 
         @Override
         public boolean requiresSecureDecoderComponent(@NonNull String mime) throws RemoteException {
-            return mAidlDescrambler.requiresSecureDecoderComponent(mime);
+            throw new RemoteException("Not supported");
         }
 
         @Override
         public void setMediaCasSession(byte[] sessionId) throws RemoteException {
-            mAidlDescrambler.setMediaCasSession(sessionId);
+            throw new RemoteException("Not supported");
         }
 
         @Override
@@ -267,10 +193,12 @@ public final class MediaDescrambler implements AutoCloseable {
             if (MediaCas.getService() != null) {
                 mIDescrambler =
                         new AidlDescrambler(MediaCas.getService().createDescrambler(CA_system_id));
+                mIsAidlHal = true;
             } else if (MediaCas.getServiceHidl() != null) {
                 mIDescrambler =
                         new HidlDescrambler(
                                 MediaCas.getServiceHidl().createDescrambler(CA_system_id));
+                mIsAidlHal = false;
             }
         } catch(Exception e) {
             Log.e(TAG, "Failed to create descrambler: " + e);
@@ -280,6 +208,15 @@ public final class MediaDescrambler implements AutoCloseable {
                 throw new UnsupportedCasException("Unsupported CA_system_id " + CA_system_id);
             }
         }
+    }
+
+    /**
+     * Check if the underlying HAL is AIDL. Used only for CTS.
+     *
+     * @hide
+     */
+    public boolean isAidlHal() {
+        return mIsAidlHal;
     }
 
     IHwBinder getBinder() {
