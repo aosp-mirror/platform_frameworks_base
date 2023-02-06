@@ -1248,7 +1248,7 @@
     <!-- Default value for led color when battery is medium charged -->
     <integer name="config_notificationsBatteryMediumARGB">0xFFFFFF00</integer>
 
-    <!-- Default value for led color when battery is fully charged -->
+    <!-- Default value for led color when battery is fully or nearly fully charged -->
     <integer name="config_notificationsBatteryFullARGB">0xFF00FF00</integer>
 
     <!-- Default value for LED on time when the battery is low on charge in miliseconds -->
@@ -1262,6 +1262,9 @@
 
     <!-- Default value for LED off time when the battery is low on charge in miliseconds -->
     <integer name="config_notificationsBatteryLedOff">2875</integer>
+
+    <!-- Battery level percent that is treated as nearly full. -->
+    <integer name="config_notificationsBatteryNearlyFullLevel">90</integer>
 
     <!-- If true, only colorized CallStyle notifications will apply custom colors -->
     <bool name="config_callNotificationActionColorsRequireColorized">true</bool>
