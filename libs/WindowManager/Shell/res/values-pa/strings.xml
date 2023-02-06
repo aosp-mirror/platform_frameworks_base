@@ -84,16 +84,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ਕਿਸੇ ਐਪ ਦੀ ਜਗ੍ਹਾ ਬਦਲਣ ਲਈ ਉਸ ਦੇ ਬਾਹਰ ਡਬਲ ਟੈਪ ਕਰੋ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ਸਮਝ ਲਿਆ"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ਹੋਰ ਜਾਣਕਾਰੀ ਲਈ ਵਿਸਤਾਰ ਕਰੋ।"</string>
-    <!-- no translation found for letterbox_restart_dialog_title (8543049527871033505) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_description (6096946078246557848) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_cancel (1342209132692537805) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_restart (8529976234412442973) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_checkbox_title (5252918008140768386) -->
-    <skip />
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"ਕੀ ਬਿਹਤਰ ਦ੍ਰਿਸ਼ ਲਈ ਐਪ ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰਨਾ ਹੈ?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"ਤੁਸੀਂ ਐਪ ਨੂੰ ਮੁੜ-ਸ਼ੁਰੂ ਕਰ ਸਕਦੇ ਹੋ ਤਾਂ ਜੋ ਇਹ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਬਿਹਤਰ ਦਿਸੇ, ਪਰ ਤੁਸੀਂ ਆਪਣੀ ਪ੍ਰਗਤੀ ਜਾਂ ਕਿਸੇ ਅਣਰੱਖਿਅਤ ਤਬਦੀਲੀ ਨੂੰ ਗੁਆ ਸਕਦੇ ਹੋ"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ਰੱਦ ਕਰੋ"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"ਮੁੜ-ਸ਼ੁਰੂ ਕਰੋ"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ਵੱਡਾ ਕਰੋ"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ਛੋਟਾ ਕਰੋ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ਬੰਦ ਕਰੋ"</string>
