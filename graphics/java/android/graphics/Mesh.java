@@ -76,7 +76,7 @@ public class Mesh {
      * @param bounds       bounds of the mesh object.
      */
     public Mesh(@NonNull MeshSpecification meshSpec, @Mode int mode,
-            @NonNull Buffer vertexBuffer, int vertexCount, @NonNull Rect bounds) {
+            @NonNull Buffer vertexBuffer, int vertexCount, @NonNull RectF bounds) {
         if (mode != TRIANGLES && mode != TRIANGLE_STRIP) {
             throw new IllegalArgumentException("Invalid value passed in for mode parameter");
         }
@@ -110,7 +110,7 @@ public class Mesh {
      */
     public Mesh(@NonNull MeshSpecification meshSpec, @Mode int mode,
             @NonNull Buffer vertexBuffer, int vertexCount, @NonNull ShortBuffer indexBuffer,
-            @NonNull Rect bounds) {
+            @NonNull RectF bounds) {
         if (mode != TRIANGLES && mode != TRIANGLE_STRIP) {
             throw new IllegalArgumentException("Invalid value passed in for mode parameter");
         }
@@ -364,13 +364,13 @@ public class Mesh {
     private static native long nativeGetFinalizer();
 
     private static native long nativeMake(long meshSpec, int mode, Buffer vertexBuffer,
-            boolean isDirect, int vertexCount, int vertexOffset, int left, int top, int right,
-            int bottom);
+            boolean isDirect, int vertexCount, int vertexOffset, float left, float top, float right,
+            float bottom);
 
     private static native long nativeMakeIndexed(long meshSpec, int mode, Buffer vertexBuffer,
             boolean isVertexDirect, int vertexCount, int vertexOffset, ShortBuffer indexBuffer,
-            boolean isIndexDirect, int indexCount, int indexOffset, int left, int top, int right,
-            int bottom);
+            boolean isIndexDirect, int indexCount, int indexOffset, float left, float top,
+            float right, float bottom);
 
     private static native void nativeUpdateUniforms(long builder, String uniformName, float value1,
             float value2, float value3, float value4, int count);
