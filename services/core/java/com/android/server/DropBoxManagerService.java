@@ -693,7 +693,7 @@ public final class DropBoxManagerService extends SystemService {
                 out.append(file.getPath()).append("\n");
             }
 
-            if ((entry.flags & DropBoxManager.IS_TEXT) != 0 && (doPrint || !doFile)) {
+            if ((entry.flags & DropBoxManager.IS_TEXT) != 0 && doPrint) {
                 DropBoxManager.Entry dbe = null;
                 InputStreamReader isr = null;
                 try {
@@ -717,17 +717,6 @@ public final class DropBoxManagerService extends SystemService {
                             }
                         }
                         if (!newline) out.append("\n");
-                    } else {
-                        String text = dbe.getText(70);
-                        out.append("    ");
-                        if (text == null) {
-                            out.append("[null]");
-                        } else {
-                            boolean truncated = (text.length() == 70);
-                            out.append(text.trim().replace('\n', '/'));
-                            if (truncated) out.append(" ...");
-                        }
-                        out.append("\n");
                     }
                 } catch (IOException e) {
                     out.append("*** ").append(e.toString()).append("\n");
