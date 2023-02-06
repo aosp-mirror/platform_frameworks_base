@@ -1126,7 +1126,17 @@ public final class MediaCas implements AutoCloseable {
         int sessionResourceHandle = getSessionResourceHandle();
 
         try {
-            if (mICasHidl != null) {
+            if (mICas != null) {
+                byte[] sessionId = mICas.openSessionDefault();
+                Session session = createFromSessionId(sessionId);
+                Log.d(TAG, "Write Stats Log for succeed to Open Session.");
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS,
+                        mUserId,
+                        mCasSystemId,
+                        FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS__STATE__SUCCEEDED);
+                return session;
+            } else if (mICasHidl != null) {
                 OpenSessionCallback cb = new OpenSessionCallback();
                 mICasHidl.openSession(cb);
                 MediaCasException.throwExceptionIfNeeded(cb.mStatus);
