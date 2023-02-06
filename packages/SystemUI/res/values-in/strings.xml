@@ -91,8 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Batas bawah <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Batas kiri <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Batas kanan <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Screenshot dengan profil kerja disimpan di aplikasi <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Disimpan di <xliff:g id="APP">%1$s</xliff:g> di profil kerja"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"File"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> mendeteksi screenshot ini."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dan aplikasi terbuka lainnya mendeteksi screenshot ini."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Perekam Layar"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses perekaman layar"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifikasi yang sedang berjalan untuk sesi rekaman layar"</string>
@@ -800,10 +802,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Pilih aplikasi untuk menambahkan kontrol"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kontrol ditambahkan.}other{# kontrol ditambahkan.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Dihapus"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Tambahkan <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"Jika Anda menambahkannya, <xliff:g id="APPNAME">%s</xliff:g> dapat menambahkan kontrol dan konten ke panel ini. Di beberapa aplikasi, Anda dapat memilih kontrol yang akan muncul di sini."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Difavoritkan"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Difavoritkan, posisi <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Batal difavoritkan"</string>
@@ -854,6 +854,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Buka <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Putar <xliff:g id="SONG_NAME">%1$s</xliff:g> oleh <xliff:g id="ARTIST_NAME">%2$s</xliff:g> dari <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Putar <xliff:g id="SONG_NAME">%1$s</xliff:g> dari <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Untuk Anda"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Urungkan"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Dekatkan untuk memutar di <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Untuk memutar di sini, dekatkan ke <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
@@ -870,8 +871,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Error, coba lagi"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Tambahkan kontrol"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Edit kontrol"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Tambahkan aplikasi"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Tambahkan output"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grup"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 perangkat dipilih"</string>
@@ -887,6 +887,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speaker &amp; Layar"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Perangkat yang Disarankan"</string>
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Memerlukan akun premium"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cara kerja siaran"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Siaran"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Orang di dekat Anda dengan perangkat Bluetooth yang kompatibel dapat mendengarkan media yang sedang Anda siarkan"</string>
@@ -1032,6 +1033,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Kebijakan kantor mengizinkan Anda melakukan panggilan telepon hanya dari profil kerja"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Beralih ke profil kerja"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Tutup"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Setelan layar kunci"</string>
 </resources>
