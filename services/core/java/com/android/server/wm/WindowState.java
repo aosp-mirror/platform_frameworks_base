@@ -2081,7 +2081,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final ActivityRecord atoken = mActivityRecord;
         return isDrawn() && isVisibleByPolicy()
                 && ((!isParentWindowHidden() && (atoken == null || atoken.isVisibleRequested()))
-                        || isAnimating(TRANSITION | PARENTS));
+                        || isAnimationRunningSelfOrParent());
     }
 
     /**
@@ -2324,7 +2324,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean isObscuringDisplay() {
         Task task = getTask();
-        if (task != null && task.getRootTask() != null && !task.getRootTask().fillsParent()) {
+        if (task != null && !task.fillsParent()) {
             return false;
         }
         return isOpaqueDrawn() && fillsDisplay();
@@ -2589,7 +2589,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     }
                 }
                 final boolean isAnimating = allowExitAnimation
-                        && (mAnimatingExit || isExitAnimationRunningSelfOrParent());
+                        && (mAnimatingExit || isAnimationRunningSelfOrParent());
                 final boolean lastWindowIsStartingWindow = startingWindow && mActivityRecord != null
                         && mActivityRecord.isLastWindow(this);
                 // We delay the removal of a window if it has a showing surface that can be used to run
@@ -4986,7 +4986,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return false;
     }
 
-    boolean isExitAnimationRunningSelfOrParent() {
+    boolean isAnimationRunningSelfOrParent() {
         return inTransitionSelfOrParent()
                 || isAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION);
     }
@@ -5002,7 +5002,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return true;
         }
         // Exit animation is running.
-        if (isExitAnimationRunningSelfOrParent()) {
+        if (isAnimationRunningSelfOrParent()) {
             ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "shouldWaitAnimatingExit: isAnimating: %s",
                     this);
             return false;
