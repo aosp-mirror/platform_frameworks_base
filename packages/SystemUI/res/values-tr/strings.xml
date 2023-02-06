@@ -91,8 +91,15 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Alt sınır yüzde <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Sol sınır yüzde <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Sağ sınır yüzde <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"İş profilindeki ekran görüntüleri <xliff:g id="APP">%1$s</xliff:g> uygulamasına kaydedilir"</string>
+    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
+    <skip />
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Dosyalar"</string>
+    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
+    <skip />
+    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
+    <skip />
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekran Kaydedicisi"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran kaydı işleniyor"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekran kaydı oturumu için devam eden bildirim"</string>
@@ -339,12 +346,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Yüzünüz tanındı. Kilit açma simgesine basın."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Cihazın kilidini yüzünüzle açtınız"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Yüzünüz tanındı"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Sola taşı"</item>
-    <item msgid="5558598599408514296">"Aşağı taşı"</item>
-    <item msgid="4844142668312841831">"Sağa taşı"</item>
-    <item msgid="5640521437931460125">"Yukarı taşı"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Tekrar denemek için yukarı kaydırın"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC\'yi kullanmak için kilidi açın"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Bu cihaz, kuruluşunuza ait"</string>
@@ -832,10 +833,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Denetim eklemek için uygulama seçin"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kontrol eklendi.}other{# kontrol eklendi.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Kaldırıldı"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> eklensin mi?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"<xliff:g id="APPNAME">%s</xliff:g> uygulamasını eklerseniz bu panele kontrol ve içerik ekleyebilir. Bazı uygulamalarda, burada hangi kontrollerin görüneceğini seçebilirsiniz."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Favoriler listesine eklendi"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Favorilere eklendi, konum: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Favorilerden kaldırıldı"</string>
@@ -886,6 +885,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> uygulamasını aç"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> uygulamasından <xliff:g id="ARTIST_NAME">%2$s</xliff:g>, <xliff:g id="SONG_NAME">%1$s</xliff:g> şarkısını çal"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> uygulamasından <xliff:g id="SONG_NAME">%1$s</xliff:g> şarkısını çal"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Sizin İçin"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Geri al"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> cihazında oynatmak için yaklaşın"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Burada oynatmak için <xliff:g id="DEVICENAME">%1$s</xliff:g> cihazına yaklaşın"</string>
@@ -902,8 +902,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Hata, yeniden deneyin"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Denetim ekle"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Denetimleri düzenle"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Uygulama ekle"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Çıkışlar ekleyin"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grup"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 cihaz seçildi"</string>
@@ -919,7 +918,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"%%<xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Hoparlörler ve Ekranlar"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Önerilen Cihazlar"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Premium hesap gerekiyor"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Yayınlamanın işleyiş şekli"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Anons"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Yakınınızda ve uyumlu Bluetooth cihazları olan kişiler yayınladığınız medya içeriğini dinleyebilir"</string>
@@ -1031,6 +1029,8 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera kapalı"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofon kapalı"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera ve mikrofon kapalı"</string>
+    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
+    <skip />
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# bildirim}other{# bildirim}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Not alma"</string>
@@ -1046,6 +1046,10 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Tek seferlik erişim izni ver"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"İzin verme"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Cihaz günlükleri, cihazınızda olanları kaydeder. Uygulamalar, sorunları bulup düzeltmek için bu günlükleri kullanabilir.\n\nBazı günlükler hassas bilgiler içerebileceği için yalnızca güvendiğiniz uygulamaların tüm cihaz günlüklerine erişmesine izin verin. \n\nBu uygulamanın tüm cihaz günlüklerine erişmesine izin vermeseniz de kendi günlüklerine erişmeye devam edebilir. Ayrıca, cihaz üreticiniz de cihazınızdaki bazı günlüklere veya bilgilere erişmeye devam edebilir."</string>
+    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> uygulamasını aç"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Uygulama kurulmuş olmalıdır"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Cüzdan\'a en az bir kart eklenmelidir"</string>
@@ -1058,7 +1062,7 @@
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Daha iyi selfie çekmek için telefonu açın"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Daha iyi bir selfie için ön ekrana geçilsin mi?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Daha yüksek çözünürlüğe sahip daha büyük bir fotoğraf için arka yüz kamerasını kullanın."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ * Bu ekran kapatılacak"</b></string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Bu ekran kapatılacak"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Katlanabilir cihaz açılıyor"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Katlanabilir cihaz döndürülüyor"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> pil kaldı"</string>
@@ -1069,6 +1073,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"İşletme politikanız yalnızca iş profilinden telefon araması yapmanıza izin veriyor"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"İş profiline geç"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Kapat"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Kilit ekranı ayarları"</string>
 </resources>

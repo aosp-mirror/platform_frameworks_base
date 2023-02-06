@@ -91,8 +91,12 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Bottom boundary <xliff:g id="PERCENT">%1$d</xliff:g> per cent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Left boundary <xliff:g id="PERCENT">%1$d</xliff:g> per cent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Right boundary <xliff:g id="PERCENT">%1$d</xliff:g> per cent"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Work screenshots are saved in the <xliff:g id="APP">%1$s</xliff:g> app"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Saved in <xliff:g id="APP">%1$s</xliff:g> in the work profile"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> detected this screenshot."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> and other open apps detected this screenshot."</string>
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Screen Recorder"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processing screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ongoing notification for a screen record session"</string>
@@ -339,12 +343,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Face recognised. Press the unlock icon to open."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Unlocked by face"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Face recognised"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Move left"</item>
-    <item msgid="5558598599408514296">"Move down"</item>
-    <item msgid="4844142668312841831">"Move right"</item>
-    <item msgid="5640521437931460125">"Move up"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Swipe up to try again"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Unlock to use NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"This device belongs to your organisation"</string>
@@ -884,6 +882,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Open <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Play <xliff:g id="SONG_NAME">%1$s</xliff:g> by <xliff:g id="ARTIST_NAME">%2$s</xliff:g> from <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Play <xliff:g id="SONG_NAME">%1$s</xliff:g> from <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"For you"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Undo"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Move closer to play on <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"To play here, move closer to <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
@@ -916,7 +915,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers &amp; displays"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Suggested devices"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Requires premium account"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"How broadcasting works"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"People near you with compatible Bluetooth devices can listen to the media that you\'re broadcasting"</string>
@@ -1028,6 +1026,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Camera is off"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mic is off"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Camera and mic are off"</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant is listening"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notification}other{# notifications}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Notetaking"</string>
@@ -1043,6 +1042,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Allow one-time access"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Don’t allow"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Device logs record what happens on your device. Apps can use these logs to find and fix issues.\n\nSome logs may contain sensitive info, so only allow apps that you trust to access all device logs. \n\nIf you don’t allow this app to access all device logs, it can still access its own logs. Your device manufacturer may still be able to access some logs or info on your device."</string>
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Learn more"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Learn more at <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Open <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• The app is set up"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• At least one card has been added to Wallet"</string>
@@ -1066,6 +1067,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Your work policy allows you to make phone calls only from the work profile"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Switch to work profile"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Close"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Lock screen settings"</string>
 </resources>

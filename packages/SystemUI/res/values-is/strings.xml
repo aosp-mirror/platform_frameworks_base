@@ -91,8 +91,15 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Neðri mörk <xliff:g id="PERCENT">%1$d</xliff:g> prósent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Vinstri mörk <xliff:g id="PERCENT">%1$d</xliff:g> prósent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Hægri mörk <xliff:g id="PERCENT">%1$d</xliff:g> prósent"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Vinnuskjámyndir eru vistaðar í forritinu <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
+    <skip />
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Skrár"</string>
+    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
+    <skip />
+    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
+    <skip />
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Skjáupptaka"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Vinnur úr skjáupptöku"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Áframhaldandi tilkynning fyrir skjáupptökulotu"</string>
@@ -339,12 +346,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Andlitið var greint. Ýttu á opnunartáknið til að opna."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Opnað með andliti"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Andlitið var greint"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Færa til vinstri"</item>
-    <item msgid="5558598599408514296">"Færa niður"</item>
-    <item msgid="4844142668312841831">"Færa til hægri"</item>
-    <item msgid="5640521437931460125">"Færa upp"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Strjúktu upp til að reyna aftur"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Taktu úr lás til að nota NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Þetta tæki tilheyrir fyrirtækinu þínu"</string>
@@ -832,10 +833,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Veldu forrit til að bæta við stýringum"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# stýringu bætt við.}one{# stýringu bætt við.}other{# stýringum bætt við.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Fjarlægt"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Viltu bæta <xliff:g id="APPNAME">%s</xliff:g> við?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"Þegar þú bætir <xliff:g id="APPNAME">%s</xliff:g> við getur það bætt stýringum og efni við þetta svæði. Í sumum forritum geturðu valið hvaða stýringar birtast hér."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Eftirlæti"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Eftirlæti, staða <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Fjarlægt úr eftirlæti"</string>
@@ -886,6 +885,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Opna <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Spila <xliff:g id="SONG_NAME">%1$s</xliff:g> með <xliff:g id="ARTIST_NAME">%2$s</xliff:g> í <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Spila <xliff:g id="SONG_NAME">%1$s</xliff:g> í <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Fyrir þig"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Afturkalla"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Færðu nær til að spila í <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Farðu nær <xliff:g id="DEVICENAME">%1$s</xliff:g> til að spila hér"</string>
@@ -902,8 +902,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Villa, reyndu aftur"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Bæta við stýringum"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Breyta stýringum"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Bæta við forriti"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Bæta við úttaki"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Hópur"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 tæki valið"</string>
@@ -919,7 +918,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Hátalarar og skjáir"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Tillögur að tækjum"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Krefst úrvalsreiknings"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Svona virkar útsending"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Útsending"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Fólk nálægt þér með samhæf Bluetooth-tæki getur hlustað á efnið sem þú sendir út"</string>
@@ -1031,6 +1029,8 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Slökkt er á myndavél"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Slökkt er á hljóðnema"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Slökkt á myndavél og hljóðnema"</string>
+    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
+    <skip />
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# tilkynning}one{# tilkynning}other{# tilkynningar}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Glósugerð"</string>
@@ -1046,6 +1046,10 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Leyfa aðgang í eitt skipti"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Ekki leyfa"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Annálar tækisins skrá það sem gerist í tækinu. Forrit geta notað þessa annála til að finna og lagfæra vandamál.\n\nTilteknir annálar innihalda viðkvæmar upplýsingar og því skaltu einungis veita forritum sem þú treystir aðgang að öllum annálum tækisins. \n\nEf þú veitir þessu forriti ekki aðgang að öllum annálum tækisins hefur það áfram aðgang að eigin annálum. Framleiðandi tækisins getur þó hugsanlega opnað tiltekna annála eða upplýsingar í tækinu."</string>
+    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Opna <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Forritið er uppsett"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Að minnsta kosti einu korti var bætt við Veski"</string>
@@ -1069,6 +1073,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Vinnureglur gera þér aðeins kleift að hringja símtöl úr vinnusniði"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Skipta yfir í vinnusnið"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Loka"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Stillingar fyrir lásskjá"</string>
 </resources>
