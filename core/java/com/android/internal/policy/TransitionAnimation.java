@@ -50,6 +50,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.os.SystemProperties;
 import android.util.Slog;
+import android.view.InflateException;
 import android.view.SurfaceControl;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
@@ -1264,7 +1265,7 @@ public class TransitionAnimation {
     public static Animation loadAnimationSafely(Context context, int resId, String tag) {
         try {
             return AnimationUtils.loadAnimation(context, resId);
-        } catch (Resources.NotFoundException e) {
+        } catch (Resources.NotFoundException | InflateException e) {
             Slog.w(tag, "Unable to load animation resource", e);
             return null;
         }
