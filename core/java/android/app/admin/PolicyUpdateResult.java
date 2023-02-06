@@ -44,6 +44,9 @@ public final class PolicyUpdateResult {
     /**
      * Result code to indicate that the policy has not been enforced or has changed because another
      * admin has set a conflicting policy on the device.
+     *
+     * <p>The system will automatically try to enforce the policy when it can without additional
+     * calls from the admin.
      */
     public static final int RESULT_FAILURE_CONFLICTING_ADMIN_POLICY = 1;
 
@@ -56,6 +59,18 @@ public final class PolicyUpdateResult {
     public static final int RESULT_POLICY_CLEARED = 2;
 
     /**
+     * Result code to indicate that the policy set by the admin has not been enforced because the
+     * local storage has reached its max limit.
+     */
+    public static final int RESULT_FAILURE_STORAGE_LIMIT_REACHED = 3;
+
+    /**
+     * Result code to indicate that the policy set by the admin has not been enforced because of a
+     * permanent hardware limitation/issue.
+     */
+    public static final int RESULT_FAILURE_HARDWARE_LIMITATION = 4;
+
+    /**
      * Reason codes for {@link #getResultCode()}.
      *
      * @hide
@@ -65,7 +80,9 @@ public final class PolicyUpdateResult {
             RESULT_FAILURE_UNKNOWN,
             RESULT_SUCCESS,
             RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
-            RESULT_POLICY_CLEARED
+            RESULT_POLICY_CLEARED,
+            RESULT_FAILURE_STORAGE_LIMIT_REACHED,
+            RESULT_FAILURE_HARDWARE_LIMITATION
     })
     public @interface ResultCode {}
 

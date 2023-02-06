@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.BooleanPolicyValue;
+import android.app.admin.DevicePolicyIdentifiers;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IntegerPolicyValue;
 import android.app.admin.IntentFilterPolicyKey;
@@ -73,7 +74,7 @@ final class PolicyDefinition<V> {
             List.of(new BooleanPolicyValue(true), new BooleanPolicyValue(false)));
 
     static PolicyDefinition<Boolean> AUTO_TIMEZONE = new PolicyDefinition<>(
-            new NoArgsPolicyKey(DevicePolicyManager.AUTO_TIMEZONE_POLICY),
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY),
             // auto timezone is disabled by default, hence enabling it is more restrictive.
             TRUE_MORE_RESTRICTIVE,
             POLICY_FLAG_GLOBAL_ONLY_POLICY,
@@ -86,7 +87,7 @@ final class PolicyDefinition<V> {
     // when reading the policies from xml.
     static final PolicyDefinition<Integer> GENERIC_PERMISSION_GRANT =
             new PolicyDefinition<>(
-                    new PackagePermissionPolicyKey(DevicePolicyManager.PERMISSION_GRANT_POLICY),
+                    new PackagePermissionPolicyKey(DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY),
                     // TODO: is this really the best mechanism, what makes denied more
                     //  restrictive than
                     //  granted?
@@ -113,13 +114,13 @@ final class PolicyDefinition<V> {
         }
         return GENERIC_PERMISSION_GRANT.createPolicyDefinition(
                 new PackagePermissionPolicyKey(
-                        DevicePolicyManager.PERMISSION_GRANT_POLICY,
+                        DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY,
                         packageName,
                         permissionName));
     }
 
     static PolicyDefinition<LockTaskPolicy> LOCK_TASK = new PolicyDefinition<>(
-            new NoArgsPolicyKey(DevicePolicyManager.LOCK_TASK_POLICY),
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.LOCK_TASK_POLICY),
             new TopPriority<>(List.of(
                     // TODO(b/258166155): add correct device lock role name
                     EnforcingAdmin.getRoleAuthorityOf("DeviceLock"),
@@ -131,7 +132,8 @@ final class PolicyDefinition<V> {
 
     static PolicyDefinition<Set<String>> USER_CONTROLLED_DISABLED_PACKAGES =
             new PolicyDefinition<>(
-                    new NoArgsPolicyKey(DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES_POLICY),
+                    new NoArgsPolicyKey(
+                            DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY),
                     new StringSetUnion(),
                     (Set<String> value, Context context, Integer userId, PolicyKey policyKey) ->
                             PolicyEnforcerCallbacks.setUserControlDisabledPackages(value, userId),
@@ -143,7 +145,7 @@ final class PolicyDefinition<V> {
     static PolicyDefinition<ComponentName> GENERIC_PERSISTENT_PREFERRED_ACTIVITY =
             new PolicyDefinition<>(
                     new IntentFilterPolicyKey(
-                            DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY),
+                            DevicePolicyIdentifiers.PERSISTENT_PREFERRED_ACTIVITY_POLICY),
             new TopPriority<>(List.of(
                     // TODO(b/258166155): add correct device lock role name
                     EnforcingAdmin.getRoleAuthorityOf("DeviceLock"),
@@ -163,7 +165,8 @@ final class PolicyDefinition<V> {
         }
         return GENERIC_PERSISTENT_PREFERRED_ACTIVITY.createPolicyDefinition(
                 new IntentFilterPolicyKey(
-                        DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY, intentFilter));
+                        DevicePolicyIdentifiers.PERSISTENT_PREFERRED_ACTIVITY_POLICY,
+                        intentFilter));
     }
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
@@ -172,7 +175,7 @@ final class PolicyDefinition<V> {
     static PolicyDefinition<Boolean> GENERIC_PACKAGE_UNINSTALL_BLOCKED =
             new PolicyDefinition<>(
                     new PackagePolicyKey(
-                            DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY),
+                            DevicePolicyIdentifiers.PACKAGE_UNINSTALL_BLOCKED_POLICY),
                     TRUE_MORE_RESTRICTIVE,
                     POLICY_FLAG_LOCAL_ONLY_POLICY,
                     PolicyEnforcerCallbacks::setUninstallBlocked,
@@ -189,7 +192,7 @@ final class PolicyDefinition<V> {
         }
         return GENERIC_PACKAGE_UNINSTALL_BLOCKED.createPolicyDefinition(
                 new PackagePolicyKey(
-                        DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY, packageName));
+                        DevicePolicyIdentifiers.PACKAGE_UNINSTALL_BLOCKED_POLICY, packageName));
     }
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
@@ -198,7 +201,7 @@ final class PolicyDefinition<V> {
     static PolicyDefinition<Bundle> GENERIC_APPLICATION_RESTRICTIONS =
             new PolicyDefinition<>(
                     new PackagePolicyKey(
-                            DevicePolicyManager.APPLICATION_RESTRICTIONS_POLICY),
+                            DevicePolicyIdentifiers.APPLICATION_RESTRICTIONS_POLICY),
                     // Don't need to take in a resolution mechanism since its never used, but might
                     // need some refactoring to not always assume a non-null mechanism.
                     new MostRecent<>(),
@@ -220,11 +223,11 @@ final class PolicyDefinition<V> {
         }
         return GENERIC_APPLICATION_RESTRICTIONS.createPolicyDefinition(
                 new PackagePolicyKey(
-                        DevicePolicyManager.APPLICATION_RESTRICTIONS_POLICY, packageName));
+                        DevicePolicyIdentifiers.APPLICATION_RESTRICTIONS_POLICY, packageName));
     }
 
     static PolicyDefinition<Long> RESET_PASSWORD_TOKEN = new PolicyDefinition<>(
-            new NoArgsPolicyKey(DevicePolicyManager.RESET_PASSWORD_TOKEN_POLICY),
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.RESET_PASSWORD_TOKEN_POLICY),
             // Don't need to take in a resolution mechanism since its never used, but might
             // need some refactoring to not always assume a non-null mechanism.
             new MostRecent<>(),
@@ -234,18 +237,20 @@ final class PolicyDefinition<V> {
             new LongPolicySerializer());
 
     private static final Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
-            DevicePolicyManager.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
-            DevicePolicyManager.PERMISSION_GRANT_POLICY, GENERIC_PERMISSION_GRANT,
-            DevicePolicyManager.LOCK_TASK_POLICY, LOCK_TASK,
-            DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES_POLICY,
+            DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
+            DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY, GENERIC_PERMISSION_GRANT,
+            DevicePolicyIdentifiers.LOCK_TASK_POLICY, LOCK_TASK,
+            DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY,
             USER_CONTROLLED_DISABLED_PACKAGES,
-            DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY,
+            DevicePolicyIdentifiers.PERSISTENT_PREFERRED_ACTIVITY_POLICY,
             GENERIC_PERSISTENT_PREFERRED_ACTIVITY,
-            DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY, GENERIC_PACKAGE_UNINSTALL_BLOCKED,
-            DevicePolicyManager.APPLICATION_RESTRICTIONS_POLICY, GENERIC_APPLICATION_RESTRICTIONS,
-            DevicePolicyManager.RESET_PASSWORD_TOKEN_POLICY, RESET_PASSWORD_TOKEN
+            DevicePolicyIdentifiers.PACKAGE_UNINSTALL_BLOCKED_POLICY,
+            GENERIC_PACKAGE_UNINSTALL_BLOCKED,
+            DevicePolicyIdentifiers.APPLICATION_RESTRICTIONS_POLICY,
+            GENERIC_APPLICATION_RESTRICTIONS,
+            DevicePolicyIdentifiers.RESET_PASSWORD_TOKEN_POLICY,
+            RESET_PASSWORD_TOKEN
     );
-
 
     private final PolicyKey mPolicyKey;
     private final ResolutionMechanism<V> mResolutionMechanism;

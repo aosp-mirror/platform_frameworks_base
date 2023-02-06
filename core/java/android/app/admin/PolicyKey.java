@@ -39,8 +39,7 @@ import java.util.Objects;
  *
  * @hide
  */
-// This is ok as the constructor is hidden and all subclasses have implemented
-// Parcelable.
+// This is ok as the constructor is hidden and all subclasses have implemented Parcelable.
 @SuppressLint({"ParcelNotFinal", "ParcelCreator"})
 @SystemApi
 public abstract class PolicyKey implements Parcelable {

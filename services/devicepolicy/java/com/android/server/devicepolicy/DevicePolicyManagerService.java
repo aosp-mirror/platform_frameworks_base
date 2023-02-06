@@ -37,6 +37,7 @@ import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_AFFILIATED;
 import static android.app.admin.DeviceAdminReceiver.ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
+import static android.app.admin.DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY;
 import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
 import static android.app.admin.DevicePolicyManager.ACTION_MANAGED_PROFILE_PROVISIONED;
@@ -44,7 +45,6 @@ import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEV
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 import static android.app.admin.DevicePolicyManager.ACTION_SYSTEM_UPDATE_POLICY_CHANGED;
-import static android.app.admin.DevicePolicyManager.AUTO_TIMEZONE_POLICY;
 import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_BLOCK_UNINSTALL;
 import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;

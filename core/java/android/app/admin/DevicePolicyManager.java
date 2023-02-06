@@ -4029,58 +4029,6 @@ public class DevicePolicyManager {
         return MTE_NOT_CONTROLLED_BY_POLICY;
     }
 
-    // TODO: Expose this as a public API
-    /**
-     * @hide
-     */
-    public static final String AUTO_TIMEZONE_POLICY = "autoTimezone";
-
-    // TODO: Expose this as a public API
-    /**
-     * @hide
-     */
-    public static final String PERMISSION_GRANT_POLICY = "permissionGrant";
-
-
-    // TODO: Expose this as a public API
-    /**
-     * @hide
-     */
-    public static final String LOCK_TASK_POLICY = "lockTask";
-
-    // TODO: Expose this as a public API
-    /**
-     * @hide
-     */
-    public static final String USER_CONTROL_DISABLED_PACKAGES_POLICY =
-            "userControlDisabledPackages";
-
-
-    // TODO: Expose this as a public API
-    /**
-     * @hide
-     */
-    public static final String PERSISTENT_PREFERRED_ACTIVITY_POLICY =
-            "persistentPreferredActivity";
-
-    // TODO: Expose this as a public API
-    /**
-     * @hide
-     */
-    public static final String PACKAGE_UNINSTALL_BLOCKED_POLICY = "packageUninstallBlocked";
-
-    // TODO: Expose this as a public API
-    /**
-     * @hide
-     */
-    public static final String APPLICATION_RESTRICTIONS_POLICY = "applicationRestrictions";
-
-    // TODO: Expose this as a public API
-    /**
-     * @hide
-     */
-    public static final String RESET_PASSWORD_TOKEN_POLICY = "resetPasswordToken";
-
     /**
      * This object is a single place to tack on invalidation and disable calls.  All
      * binder caches in this class derive from this Config, so all can be invalidated or
