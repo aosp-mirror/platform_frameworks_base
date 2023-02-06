@@ -6,6 +6,10 @@
     <string name="string_continue" msgid="1346732695941131882">"ສືບຕໍ່"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ຕົວເລືອກເພີ່ມເຕີມ"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ສຶກສາເພີ່ມເຕີມ"</string>
+    <!-- no translation found for content_description_show_password (3283502010388521607) -->
+    <skip />
+    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
+    <skip />
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ປອດໄພຂຶ້ນດ້ວຍກະແຈຜ່ານ"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ໂດຍການໃຊ້ກະແຈຜ່ານ, ທ່ານບໍ່ຈຳເປັນຕ້ອງສ້າງ ຫຼື ຈື່ລະຫັດຜ່ານທີ່ຊັບຊ້ອນ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ກະແຈຜ່ານແມ່ນກະແຈດິຈິຕອນທີ່ໄດ້ຖືກເຂົ້າລະຫັດໄວ້ເຊິ່ງທ່ານສ້າງຂຶ້ນໂດຍໃຊ້ລາຍນິ້ວມື, ໃບໜ້າ ຫຼື ການລັອກໜ້າຈໍຂອງທ່ານ"</string>

@@ -5,30 +5,24 @@
     <string name="string_cancel" msgid="6369133483981306063">"Cancelar"</string>
     <string name="string_continue" msgid="1346732695941131882">"Continuar"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Máis opcións"</string>
-    <!-- no translation found for string_learn_more (4541600451688392447) -->
+    <string name="string_learn_more" msgid="4541600451688392447">"Máis información"</string>
+    <!-- no translation found for content_description_show_password (3283502010388521607) -->
+    <skip />
+    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
     <skip />
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Máis protección coas claves de acceso"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Cunha clave de acceso, non é necesario que crees ou lembres contrasinais complexos"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"As claves de acceso son claves dixitais encriptadas que creas usando a túa impresión dixital, a túa cara ou o teu bloqueo de pantalla"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"As claves de acceso gárdanse nun xestor de contrasinais para que poidas iniciar sesión noutros dispositivos"</string>
-    <!-- no translation found for more_about_passkeys_title (7797903098728837795) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_title (2497513482056606668) -->
-    <skip />
-    <!-- no translation found for passwordless_technology_detail (6853928846532955882) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_title (6751970819265298039) -->
-    <skip />
-    <!-- no translation found for public_key_cryptography_detail (6937631710280562213) -->
-    <skip />
-    <!-- no translation found for improved_account_security_title (1069841917893513424) -->
-    <skip />
-    <!-- no translation found for improved_account_security_detail (9123750251551844860) -->
-    <skip />
-    <!-- no translation found for seamless_transition_title (5335622196351371961) -->
-    <skip />
-    <!-- no translation found for seamless_transition_detail (4475509237171739843) -->
-    <skip />
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Máis información sobre as claves de acceso"</string>
+    <string name="passwordless_technology_title" msgid="2497513482056606668">"Tecnoloxía sen contrasinais"</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"As claves de acceso permítenche iniciar sesión sen depender de contrasinais. Tan só tes que usar a impresión dixital, o recoñecemento facial, o PIN ou o padrón de desbloqueo para verificar a túa identidade e crear unha clave de acceso."</string>
+    <string name="public_key_cryptography_title" msgid="6751970819265298039">"Criptografía das claves públicas"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Segundo os estándares da Alianza FIDO (con Google, Apple, Microsoft…) e o W3C, as claves de acceso usan pares de claves criptográficas. A diferenza do nome de usuario e contrasinal, créase un par de claves público-privado para unha aplicación ou sitio web. A clave privada, que confirma a identidade, almacénase de xeito seguro no dispositivo ou xestor de contrasinais. A pública compártese co servidor da aplicación ou sitio web. Coas claves vinculadas, podes rexistrarte e conectarte ao momento."</string>
+    <string name="improved_account_security_title" msgid="1069841917893513424">"Mellora na seguranza das contas"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"Cada clave está vinculada de xeito exclusivo coa aplicación ou o sitio web para o que foi creada, de tal forma que nunca poidas iniciar sesión nunha aplicación ou un sitio web fraudulentos por erro. Ademais, como os servidores só gardan as claves públicas, resulta moito máis difícil piratear."</string>
+    <string name="seamless_transition_title" msgid="5335622196351371961">"Transición fluída"</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"Durante este percorrido cara a un futuro sen contrasinais, estes seguirán estando dispoñibles a canda as claves de acceso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolle onde queres gardar: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecciona un xestor de contrasinais para gardar a túa información e iniciar sesión máis rápido a próxima vez"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Queres crear unha clave de acceso para <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
