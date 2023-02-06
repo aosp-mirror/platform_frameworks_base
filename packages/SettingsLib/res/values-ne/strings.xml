@@ -540,6 +540,12 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"यो फोन"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"यो ट्याब्लेट"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"यो फोन"</string>
+    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <skip />
+    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <skip />
+    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"जोड्ने क्रममा समस्या भयो। यन्त्रलाई निष्क्रिय पारेर फेरि अन गर्नुहोस्"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"तारयुक्त अडियो यन्त्र"</string>
     <string name="help_label" msgid="3528360748637781274">"मद्दत र प्रतिक्रिया"</string>
@@ -666,4 +672,8 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"पूर्वानुमानयुक्त ब्याक एनिमेसनहरू"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"पूर्वानुमानयुक्त ब्याक एनिमेसनका हकमा सिस्टम एनिमेसनहरू लागू गर्नुहोस्।"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"यो सेटिङले पूर्वानुमानयुक्त जेस्चर एनिमेसनका हकमा सिस्टम एनिमेनसहरू लागू गर्छ। म्यानिफेस्ट फाइलमा हरेक एपका हकमा enableOnBackInvokedCallback सेट गरी TRUE बनाएपछि मात्र यो सेटिङ अन गर्न मिल्छ।"</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
 </resources>
