@@ -64,7 +64,7 @@ class CredentialManagerRepo(
         requestInfo = intent.extras?.getParcelable(
             RequestInfo.EXTRA_REQUEST_INFO,
             RequestInfo::class.java
-        ) ?: testCreatePasswordRequestInfo()
+        ) ?: testGetRequestInfo()
 
         providerEnabledList = when (requestInfo.type) {
             RequestInfo.TYPE_CREATE ->

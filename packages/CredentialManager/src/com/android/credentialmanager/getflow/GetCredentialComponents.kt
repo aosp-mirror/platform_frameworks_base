@@ -22,7 +22,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -60,12 +59,10 @@ import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
-import com.android.credentialmanager.common.material.ModalBottomSheetLayout
-import com.android.credentialmanager.common.material.ModalBottomSheetValue
-import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.ConfirmButton
 import com.android.credentialmanager.common.ui.Entry
+import com.android.credentialmanager.common.ui.ModalBottomSheet
 import com.android.credentialmanager.common.ui.TextOnSurface
 import com.android.credentialmanager.common.ui.TextSecondary
 import com.android.credentialmanager.common.ui.TextOnSurfaceVariant
@@ -79,16 +76,9 @@ fun GetCredentialScreen(
     viewModel: GetCredentialViewModel,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
-    val state = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Expanded,
-        skipHalfExpanded = true
-    )
     val uiState = viewModel.uiState
     if (uiState.currentScreenState != GetScreenState.REMOTE_ONLY) {
-        ModalBottomSheetLayout(
-            sheetBackgroundColor = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.background(Color.Transparent),
-            sheetState = state,
+        ModalBottomSheet(
             sheetContent = {
                 // Hide the sheet content as opposed to the whole bottom sheet to maintain the scrim
                 // background color even when the content should be hidden while waiting for
@@ -128,14 +118,8 @@ fun GetCredentialScreen(
                     }
                 }
             },
-            scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
-            sheetShape = EntryShape.TopRoundedCorner,
-        ) {}
-        LaunchedEffect(state.currentValue) {
-            if (state.currentValue == ModalBottomSheetValue.Hidden) {
-                viewModel.onCancel()
-            }
-        }
+            onDismiss = viewModel::onCancel,
+        )
     } else {
         SnackBarScreen(
             onClick = viewModel::onMoreOptionOnSnackBarSelected,
