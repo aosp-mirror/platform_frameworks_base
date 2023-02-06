@@ -43,7 +43,6 @@ public final class AdResponse implements Parcelable {
     public static final int RESPONSE_TYPE_FINISHED = 2;
     public static final int RESPONSE_TYPE_STOPPED = 3;
     public static final int RESPONSE_TYPE_ERROR = 4;
-    /** @hide */
     public static final int RESPONSE_TYPE_BUFFERING = 5;
 
     public static final @NonNull Parcelable.Creator<AdResponse> CREATOR =

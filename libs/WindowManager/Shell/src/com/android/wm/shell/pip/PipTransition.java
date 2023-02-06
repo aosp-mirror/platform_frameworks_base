@@ -50,6 +50,7 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
+import android.os.SystemProperties;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -792,7 +793,13 @@ public class PipTransition extends PipTransitionController {
             if (sourceHintRect == null) {
                 // We use content overlay when there is no source rect hint to enter PiP use bounds
                 // animation.
-                animator.setColorContentOverlay(mContext);
+                if (SystemProperties.getBoolean(
+                        "persist.wm.debug.enable_pip_app_icon_overlay", false)) {
+                    animator.setAppIconContentOverlay(
+                            mContext, currentBounds, taskInfo.topActivityInfo);
+                } else {
+                    animator.setColorContentOverlay(mContext);
+                }
             }
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
             animator = mPipAnimationController.getAnimator(taskInfo, leash, destinationBounds,

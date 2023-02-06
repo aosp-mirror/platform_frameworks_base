@@ -4907,6 +4907,8 @@
   <java-symbol type="string" name="concurrent_display_notification_thermal_content"/>
   <java-symbol type="string" name="device_state_notification_turn_off_button"/>
   <java-symbol type="bool" name="config_independentLockscreenLiveWallpaper"/>
+  <java-symbol type="integer" name="config_deviceStateConcurrentRearDisplay" />
+  <java-symbol type="string" name="config_rearDisplayPhysicalAddress" />
 
   <!-- For app language picker -->
   <java-symbol type="string" name="system_locale_title" />
@@ -4926,6 +4928,7 @@
   <java-symbol type="array" name="config_displayShapeArray" />
 
   <java-symbol type="bool" name="config_stopSystemPackagesByDefault"/>
+  <java-symbol type="string" name="config_wearServiceComponent" />
 
   <!-- Whether to show weather on the lockscreen by default. -->
   <java-symbol type="bool" name="config_lockscreenWeatherEnabledByDefault" />

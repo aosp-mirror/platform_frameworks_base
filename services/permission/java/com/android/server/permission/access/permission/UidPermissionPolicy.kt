@@ -196,7 +196,9 @@ class UidPermissionPolicy : SchemePolicy() {
 
         val changedPermissionNames = IndexedSet<String>()
         trimPermissions(packageName, changedPermissionNames)
-        trimPermissionStates(appId)
+        if (appId in newState.systemState.appIds) {
+            trimPermissionStates(appId)
+        }
         changedPermissionNames.forEachIndexed { _, permissionName ->
             evaluatePermissionStateForAllPackages(permissionName, null)
         }
@@ -1001,10 +1003,7 @@ class UidPermissionPolicy : SchemePolicy() {
         permissionName: String
     ): Boolean? {
         val permissionAllowlist = newState.systemState.permissionAllowlist
-        val apexModuleName = permissionAllowlist.apexPrivilegedAppAllowlists
-            .firstNotNullOfOrNullIndexed { _, apexModuleName, apexAllowlist ->
-                if (packageState.apexModuleName in apexAllowlist) apexModuleName else null
-            }
+        val apexModuleName = packageState.apexModuleName
         val packageName = packageState.packageName
         return when {
             packageState.isVendor -> permissionAllowlist.getVendorPrivilegedAppAllowlistState(
@@ -1071,7 +1070,7 @@ class UidPermissionPolicy : SchemePolicy() {
         state: AccessState = newState,
         action: (PackageState) -> Unit
     ) {
-        val packageNames = state.systemState.appIds[appId]
+        val packageNames = state.systemState.appIds[appId]!!
         packageNames.forEachIndexed { _, packageName ->
             val packageState = state.systemState.packageStates[packageName]!!
             if (packageState.androidPackage != null) {
