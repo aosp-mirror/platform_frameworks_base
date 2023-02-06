@@ -144,18 +144,11 @@ public class PackageInstallerActivity extends AlertActivity {
 
             final CharSequence existingUpdateOwnerLabel = getExistingUpdateOwnerLabel();
             final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mCallingPackage);
-            if (!TextUtils.isEmpty(existingUpdateOwnerLabel)) {
-                if (mPendingUserActionReason == PackageInstaller.REASON_OWNERSHIP_CHANGED) {
-                    viewToEnable.setText(
-                            getString(R.string.install_confirm_question_update_owner_changed,
-                                    existingUpdateOwnerLabel, requestedUpdateOwnerLabel));
-                } else if (mPendingUserActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP
-                        || mPendingUserActionReason
-                        == PackageInstaller.REASON_CONFIRM_PACKAGE_CHANGE) {
-                    viewToEnable.setText(
-                            getString(R.string.install_confirm_question_update_owner_reminder,
-                                    existingUpdateOwnerLabel, requestedUpdateOwnerLabel));
-                }
+            if (!TextUtils.isEmpty(existingUpdateOwnerLabel)
+                    && mPendingUserActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP) {
+                viewToEnable.setText(
+                        getString(R.string.install_confirm_question_update_owner_reminder,
+                                existingUpdateOwnerLabel, requestedUpdateOwnerLabel));
             }
 
             mOk.setText(R.string.update);
