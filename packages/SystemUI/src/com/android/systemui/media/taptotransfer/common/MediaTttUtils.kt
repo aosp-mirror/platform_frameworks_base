@@ -44,25 +44,37 @@ class MediaTttUtils {
          * @param appPackageName the package name of the app playing the media.
          * @param onPackageNotFoundException a function run if a
          * [PackageManager.NameNotFoundException] occurs.
+         * @param isReceiver indicates whether the icon is displayed in a receiver view.
          */
         fun getIconInfoFromPackageName(
             context: Context,
             appPackageName: String?,
+            isReceiver: Boolean,
             onPackageNotFoundException: () -> Unit,
         ): IconInfo {
             if (appPackageName != null) {
                 val packageManager = context.packageManager
                 try {
+                    val appName =
+                        packageManager
+                            .getApplicationInfo(
+                                appPackageName,
+                                PackageManager.ApplicationInfoFlags.of(0),
+                            )
+                            .loadLabel(packageManager)
+                            .toString()
                     val contentDescription =
-                        ContentDescription.Loaded(
-                            packageManager
-                                .getApplicationInfo(
-                                    appPackageName,
-                                    PackageManager.ApplicationInfoFlags.of(0)
+                        if (isReceiver) {
+                            ContentDescription.Loaded(
+                                context.getString(
+                                    R.string
+                                        .media_transfer_receiver_content_description_with_app_name,
+                                    appName
                                 )
-                                .loadLabel(packageManager)
-                                .toString()
-                        )
+                            )
+                        } else {
+                            ContentDescription.Loaded(appName)
+                        }
                     return IconInfo(
                         contentDescription,
                         MediaTttIcon.Loaded(packageManager.getApplicationIcon(appPackageName)),
@@ -74,7 +86,15 @@ class MediaTttUtils {
                 }
             }
             return IconInfo(
-                ContentDescription.Resource(R.string.media_output_dialog_unknown_launch_app_name),
+                if (isReceiver) {
+                    ContentDescription.Resource(
+                        R.string.media_transfer_receiver_content_description_unknown_app
+                    )
+                } else {
+                    ContentDescription.Resource(
+                        R.string.media_output_dialog_unknown_launch_app_name
+                    )
+                },
                 MediaTttIcon.Resource(R.drawable.ic_cast),
                 tintAttr = android.R.attr.textColorPrimary,
                 isAppIcon = false
