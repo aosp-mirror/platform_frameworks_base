@@ -81,6 +81,10 @@ class AnrController {
                     Slog.e(TAG_WM, "Unknown app appToken:" + applicationHandle.name
                             + ". Dropping notifyNoFocusedWindowAnr request");
                     return;
+                } else if (activity.mAppStopped) {
+                    Slog.d(TAG_WM, "App is in stopped state:" + applicationHandle.name
+                            + ". Dropping notifyNoFocusedWindowAnr request");
+                    return;
                 }
 
                 // App is unresponsive, but we are actively trying to give focus to a window.
