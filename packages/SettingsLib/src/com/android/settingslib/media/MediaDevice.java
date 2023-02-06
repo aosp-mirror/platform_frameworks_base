@@ -31,7 +31,7 @@ import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION;
-import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED_ROUTE;
+import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED;
 import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_TRANSFER;
 import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
 import static android.media.RouteListingPreference.Item.SUBTEXT_CUSTOM;
@@ -551,7 +551,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     private static class Api34Impl {
         @DoNotInline
         static boolean isSuggestedDevice(RouteListingPreference.Item item) {
-            return item != null && (item.getFlags() & FLAG_SUGGESTED_ROUTE) != 0;
+            return item != null && (item.getFlags() & FLAG_SUGGESTED) != 0;
         }
 
         @DoNotInline

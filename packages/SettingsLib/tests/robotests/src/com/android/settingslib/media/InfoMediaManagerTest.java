@@ -259,8 +259,10 @@ public class InfoMediaManagerTest {
         ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT",
                 Build.VERSION_CODES.UPSIDE_DOWN_CAKE);
         final List<RouteListingPreference.Item> preferenceItemList = new ArrayList<>();
-        RouteListingPreference.Item item1 = new RouteListingPreference.Item.Builder(
-                TEST_ID_4).setFlags(RouteListingPreference.Item.FLAG_SUGGESTED_ROUTE).build();
+        RouteListingPreference.Item item1 =
+                new RouteListingPreference.Item.Builder(TEST_ID_4)
+                        .setFlags(RouteListingPreference.Item.FLAG_SUGGESTED)
+                        .build();
         RouteListingPreference.Item item2 = new RouteListingPreference.Item.Builder(
                 TEST_ID_3).build();
         preferenceItemList.add(item1);

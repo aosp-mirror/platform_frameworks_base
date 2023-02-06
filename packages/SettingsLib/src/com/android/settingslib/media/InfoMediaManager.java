@@ -635,8 +635,8 @@ public class InfoMediaManager extends MediaManager {
             List<RouteListingPreference.Item> finalizedItemList = new ArrayList<>();
             List<RouteListingPreference.Item> itemList = routeListingPreference.getItems();
             for (RouteListingPreference.Item item : itemList) {
-                //Put suggested devices on the top first before further organization
-                if (item.getFlags() == RouteListingPreference.Item.FLAG_SUGGESTED_ROUTE) {
+                // Put suggested devices on the top first before further organization
+                if (item.getFlags() == RouteListingPreference.Item.FLAG_SUGGESTED) {
                     finalizedItemList.add(0, item);
                 } else {
                     finalizedItemList.add(item);

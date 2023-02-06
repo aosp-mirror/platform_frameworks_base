@@ -59,14 +59,14 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         implements
         RemoteCredentialService.ProviderCallbacks<BeginGetCredentialResponse> {
     private static final String TAG = "ProviderGetSession";
-
-    // Key to be used as an entry key for a credential entry
-    private static final String CREDENTIAL_ENTRY_KEY = "credential_key";
-
     // Key to be used as the entry key for an action entry
     private static final String ACTION_ENTRY_KEY = "action_key";
     // Key to be used as the entry key for the authentication entry
     private static final String AUTHENTICATION_ACTION_ENTRY_KEY = "authentication_action_key";
+    // Key to be used as an entry key for a remote entry
+    private static final String REMOTE_ENTRY_KEY = "remote_entry_key";
+    // Key to be used as an entry key for a credential entry
+    private static final String CREDENTIAL_ENTRY_KEY = "credential_key";
 
     @NonNull
     private final Map<String, CredentialEntry> mUiCredentialEntries = new HashMap<>();
@@ -101,23 +101,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         return null;
     }
 
-    private static BeginGetCredentialRequest constructQueryPhaseRequest(
-            android.credentials.GetCredentialRequest filteredRequest,
-            CallingAppInfo callingAppInfo
-    ) {
-        return new BeginGetCredentialRequest.Builder(callingAppInfo)
-                .setBeginGetCredentialOptions(
-                        filteredRequest.getCredentialOptions().stream().map(
-                                option -> {
-                                    return new BeginGetCredentialOption(
-                                            option.getType(),
-                                            option.getCandidateQueryData());
-                                }).collect(Collectors.toList()))
-                .build();
-    }
-
     @Nullable
-    private static android.credentials.GetCredentialRequest filterOptions(
+    protected static android.credentials.GetCredentialRequest filterOptions(
             List<String> providerCapabilities,
             android.credentials.GetCredentialRequest clientRequest
     ) {
@@ -140,6 +125,21 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
         Log.i(TAG, "In createProviderRequest - returning null");
         return null;
+    }
+
+    private static BeginGetCredentialRequest constructQueryPhaseRequest(
+            android.credentials.GetCredentialRequest filteredRequest,
+            CallingAppInfo callingAppInfo
+    ) {
+        return new BeginGetCredentialRequest.Builder(callingAppInfo)
+                .setBeginGetCredentialOptions(
+                        filteredRequest.getCredentialOptions().stream().map(
+                                option -> {
+                                    return new BeginGetCredentialOption(
+                                            option.getType(),
+                                            option.getCandidateQueryData());
+                                }).collect(Collectors.toList()))
+                .build();
     }
 
     public ProviderGetSession(Context context,
@@ -232,9 +232,9 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     @Override
     protected void invokeSession() {
-        this.mRemoteCredentialService.onBeginGetCredential(
-                        this.getProviderRequest(),
-                        /*callback=*/this);
+        if (mRemoteCredentialService != null) {
+            mRemoteCredentialService.onBeginGetCredential(mProviderRequest, this);
+        }
     }
 
     @Override // Call from request session to data to be shown on the UI
@@ -379,6 +379,28 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         invokeCallbackOnInternalInvalidState();
     }
 
+    @Nullable
+    protected GetCredentialException maybeGetPendingIntentException(
+            ProviderPendingIntentResponse pendingIntentResponse) {
+        if (pendingIntentResponse == null) {
+            Log.i(TAG, "pendingIntentResponse is null");
+            return null;
+        }
+        if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
+            GetCredentialException exception = PendingIntentResultHandler
+                    .extractGetCredentialException(pendingIntentResponse.getResultData());
+            if (exception != null) {
+                Log.i(TAG, "Pending intent contains provider exception");
+                return exception;
+            }
+        } else if (PendingIntentResultHandler.isCancelledResponse(pendingIntentResponse)) {
+            return new GetCredentialException(GetCredentialException.TYPE_USER_CANCELED);
+        } else {
+            return new GetCredentialException(GetCredentialException.TYPE_NO_CREDENTIAL);
+        }
+        return null;
+    }
+
     private void onAuthenticationEntrySelected(
             @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
         //TODO: Other provider intent statuses
@@ -429,28 +451,6 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     private void onUpdateEmptyResponse() {
         updateStatusAndInvokeCallback(Status.NO_CREDENTIALS);
-    }
-
-    @Nullable
-    private GetCredentialException maybeGetPendingIntentException(
-            ProviderPendingIntentResponse pendingIntentResponse) {
-        if (pendingIntentResponse == null) {
-            Log.i(TAG, "pendingIntentResponse is null");
-            return null;
-        }
-        if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
-            GetCredentialException exception = PendingIntentResultHandler
-                    .extractGetCredentialException(pendingIntentResponse.getResultData());
-            if (exception != null) {
-                Log.i(TAG, "Pending intent contains provider exception");
-                return exception;
-            }
-        } else if (PendingIntentResultHandler.isCancelledResponse(pendingIntentResponse)) {
-            return new GetCredentialException(GetCredentialException.TYPE_USER_CANCELED);
-        } else {
-            return new GetCredentialException(GetCredentialException.TYPE_NO_CREDENTIAL);
-        }
-        return null;
     }
 
     /**

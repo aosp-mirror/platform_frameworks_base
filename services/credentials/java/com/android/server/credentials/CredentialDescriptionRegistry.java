@@ -19,35 +19,72 @@ package com.android.server.credentials;
 import android.credentials.CredentialDescription;
 import android.credentials.RegisterCredentialDescriptionRequest;
 import android.credentials.UnregisterCredentialDescriptionRequest;
+import android.service.credentials.CredentialEntry;
 import android.util.SparseArray;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 /** Contains information on what CredentialProvider has what provisioned Credential. */
-public class CredentialDescriptionRegistry {
+public final class CredentialDescriptionRegistry {
 
     private static final int MAX_ALLOWED_CREDENTIAL_DESCRIPTIONS = 128;
     private static final int MAX_ALLOWED_ENTRIES_PER_PROVIDER = 16;
-    private static SparseArray<CredentialDescriptionRegistry> sCredentialDescriptionSessionPerUser;
+    @GuardedBy("sLock")
+    private static final SparseArray<CredentialDescriptionRegistry>
+            sCredentialDescriptionSessionPerUser;
+    private static final ReentrantLock sLock;
 
     static {
         sCredentialDescriptionSessionPerUser = new SparseArray<>();
+        sLock = new ReentrantLock();
     }
 
-    // TODO(b/265992655): add a way to update CredentialRegistry when a user is removed.
-    /** Get and/or create a {@link  CredentialDescription} for the given user id. */
-    public static CredentialDescriptionRegistry forUser(int userId) {
-        CredentialDescriptionRegistry session =
-                sCredentialDescriptionSessionPerUser.get(userId, null);
+    /** Represents the results of a given query into the registry. */
+    public static final class FilterResult {
+        final String mPackageName;
+        final List<CredentialEntry> mCredentialEntries;
 
-        if (session == null) {
-            session = new CredentialDescriptionRegistry();
-            sCredentialDescriptionSessionPerUser.put(userId, session);
+        private FilterResult(String packageName,
+                List<CredentialEntry> credentialEntries) {
+            mPackageName = packageName;
+            mCredentialEntries = credentialEntries;
         }
-        return session;
+    }
+
+    /** Get and/or create a {@link  CredentialDescription} for the given user id. */
+    @GuardedBy("sLock")
+    public static CredentialDescriptionRegistry forUser(int userId) {
+        sLock.lock();
+        try {
+            CredentialDescriptionRegistry session =
+                    sCredentialDescriptionSessionPerUser.get(userId, null);
+
+            if (session == null) {
+                session = new CredentialDescriptionRegistry();
+                sCredentialDescriptionSessionPerUser.put(userId, session);
+            }
+            return session;
+        } finally {
+            sLock.unlock();
+        }
+    }
+
+    /** Clears an existing session for a given user identifier. */
+    @GuardedBy("sLock")
+    public static void clearUserSession(int userId) {
+        sLock.lock();
+        try {
+            sCredentialDescriptionSessionPerUser.remove(userId);
+        } finally {
+            sLock.unlock();
+        }
     }
 
     private Map<String, Set<CredentialDescription>> mCredentialDescriptions;
@@ -74,7 +111,7 @@ public class CredentialDescriptionRegistry {
             int size = mCredentialDescriptions.get(callingPackageName).size();
             mCredentialDescriptions.get(callingPackageName)
                     .addAll(descriptions);
-            mTotalDescriptionCount += size - mCredentialDescriptions.get(callingPackageName).size();
+            mTotalDescriptionCount += mCredentialDescriptions.get(callingPackageName).size() - size;
         }
 
     }
@@ -93,21 +130,33 @@ public class CredentialDescriptionRegistry {
         }
     }
 
+    /** Returns package names and entries of a CredentialProviders that can satisfy a given
+     * {@link CredentialDescription}. */
+    public Set<FilterResult> getFilteredResultForProvider(String packageName,
+            List<String> flatRequestStrings) {
+        Set<FilterResult> result = new HashSet<>();
+        Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
+        for (CredentialDescription containedDescription: currentSet) {
+            if (flatRequestStrings.contains(containedDescription.getFlattenedRequestString())) {
+                result.add(new FilterResult(packageName, containedDescription
+                        .getCredentialEntries()));
+            }
+        }
+        return result;
+    }
+
     /** Returns package names of CredentialProviders that can satisfy a given
      * {@link CredentialDescription}. */
-    public Set<String> filterCredentials(String flatRequestString) {
-
+    public Set<String> getMatchingProviders(Set<String> flatRequestString) {
         Set<String> result = new HashSet<>();
-
-        for (String componentName: mCredentialDescriptions.keySet()) {
-            Set<CredentialDescription> currentSet = mCredentialDescriptions.get(componentName);
-            for (CredentialDescription containedDescription: currentSet) {
-                if (flatRequestString.equals(containedDescription.getFlattenedRequestString())) {
-                    result.add(componentName);
+        for (String packageName: mCredentialDescriptions.keySet()) {
+            Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
+            for (CredentialDescription containedDescription : currentSet) {
+                if (flatRequestString.contains(containedDescription.getFlattenedRequestString())) {
+                    result.add(packageName);
                 }
             }
         }
-
         return result;
     }
 

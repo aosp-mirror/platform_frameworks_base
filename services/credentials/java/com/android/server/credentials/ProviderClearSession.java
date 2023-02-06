@@ -118,8 +118,8 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
 
     @Override
     protected void invokeSession() {
-        this.mRemoteCredentialService.onClearCredentialState(
-                this.getProviderRequest(),
-                /*callback=*/this);
+        if (mRemoteCredentialService != null) {
+            mRemoteCredentialService.onClearCredentialState(mProviderRequest, this);
+        }
     }
 }

@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telecom.VideoProfile;
+import android.telephony.CallState;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyCallRouting;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
@@ -78,7 +79,9 @@ public final class ImsCallProfile implements Parcelable {
     public static final int SERVICE_TYPE_EMERGENCY = 2;
 
     /**
-     * Call type none
+     * This value is returned if there is no valid IMS call type defined for the call. For example,
+     * if an ongoing call is circuit-switched and {@link CallState#getImsCallType()} is called, this
+     * value will be returned.
      */
     public static final int CALL_TYPE_NONE = 0;
     /**
