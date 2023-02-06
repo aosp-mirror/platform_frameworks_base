@@ -29,6 +29,7 @@ import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
@@ -56,6 +57,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var lockPatternUtils: LockPatternUtils
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var dumpManager: DumpManager
     private lateinit var userRepository: FakeUserRepository
 
     private lateinit var testDispatcher: TestDispatcher
@@ -85,6 +87,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
                 scope = testScope.backgroundScope,
                 backgroundDispatcher = testDispatcher,
                 looper = testableLooper!!.looper,
+                dumpManager = dumpManager,
             )
     }
 

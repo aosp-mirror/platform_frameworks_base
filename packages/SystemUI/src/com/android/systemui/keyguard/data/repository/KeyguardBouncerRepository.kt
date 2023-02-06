@@ -162,7 +162,7 @@ constructor(
     private val _isAlternateBouncerVisible = MutableStateFlow(false)
     override val isAlternateBouncerVisible = _isAlternateBouncerVisible.asStateFlow()
     override var lastAlternateBouncerVisibleTime: Long = NOT_VISIBLE
-    private val _isAlternateBouncerUIAvailable = MutableStateFlow<Boolean>(false)
+    private val _isAlternateBouncerUIAvailable = MutableStateFlow(false)
     override val isAlternateBouncerUIAvailable: StateFlow<Boolean> =
         _isAlternateBouncerUIAvailable.asStateFlow()
 
@@ -289,6 +289,9 @@ constructor(
             .launchIn(applicationScope)
         resourceUpdateRequests
             .logDiffsForTable(buffer, "", "ResourceUpdateRequests", false)
+            .launchIn(applicationScope)
+        isAlternateBouncerUIAvailable
+            .logDiffsForTable(buffer, "", "IsAlternateBouncerUIAvailable", false)
             .launchIn(applicationScope)
     }
 

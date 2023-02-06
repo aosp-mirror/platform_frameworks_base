@@ -23,6 +23,7 @@ import android.content.IntentFilter
 import android.os.Looper
 import android.os.UserHandle
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.Dumpable
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -31,7 +32,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.user.data.repository.UserRepository
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -81,7 +84,18 @@ constructor(
     @Application scope: CoroutineScope,
     @Background backgroundDispatcher: CoroutineDispatcher,
     @Main looper: Looper,
-) : BiometricSettingsRepository {
+    dumpManager: DumpManager,
+) : BiometricSettingsRepository, Dumpable {
+
+    init {
+        dumpManager.registerDumpable(this)
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<String?>) {
+        pw.println("isFingerprintEnrolled=${isFingerprintEnrolled.value}")
+        pw.println("isStrongBiometricAllowed=${isStrongBiometricAllowed.value}")
+        pw.println("isFingerprintEnabledByDevicePolicy=${isFingerprintEnabledByDevicePolicy.value}")
+    }
 
     /** UserId of the current selected user. */
     private val selectedUserId: Flow<Int> =
