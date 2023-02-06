@@ -1033,10 +1033,33 @@ class ActivityStarter {
             return err;
         }
 
-        boolean abort = !mSupervisor.checkStartAnyActivityPermission(intent, aInfo, resultWho,
-                requestCode, callingPid, callingUid, callingPackage, callingFeatureId,
-                request.ignoreTargetSecurity, inTask != null, callerApp, resultRecord,
-                resultRootTask);
+        boolean abort;
+        try {
+            abort = !mSupervisor.checkStartAnyActivityPermission(intent, aInfo, resultWho,
+                    requestCode, callingPid, callingUid, callingPackage, callingFeatureId,
+                    request.ignoreTargetSecurity, inTask != null, callerApp, resultRecord,
+                    resultRootTask);
+        } catch (SecurityException e) {
+            // Return activity not found for the explicit intent if the caller can't see the target
+            // to prevent the disclosure of package existence.
+            final Intent originalIntent = request.ephemeralIntent;
+            if (originalIntent != null && (originalIntent.getComponent() != null
+                    || originalIntent.getPackage() != null)) {
+                final String targetPackageName = originalIntent.getComponent() != null
+                        ? originalIntent.getComponent().getPackageName()
+                        : originalIntent.getPackage();
+                if (mService.getPackageManagerInternalLocked()
+                        .filterAppAccess(targetPackageName, callingUid, userId)) {
+                    if (resultRecord != null) {
+                        resultRecord.sendResult(INVALID_UID, resultWho, requestCode,
+                                RESULT_CANCELED, null /* data */, null /* dataGrants */);
+                    }
+                    SafeActivityOptions.abort(options);
+                    return ActivityManager.START_CLASS_NOT_FOUND;
+                }
+            }
+            throw e;
+        }
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
         abort |= !mService.getPermissionPolicyInternal().checkStartActivity(intent, callingUid,
