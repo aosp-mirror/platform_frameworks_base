@@ -8619,7 +8619,8 @@ public class NotificationManagerService extends SystemService {
                         r.getImportance(),
                         r.getRankingScore(),
                         r.isConversation(),
-                        r.getProposedImportance());
+                        r.getProposedImportance(),
+                        r.hasSensitiveContent());
                 extractorDataBefore.put(r.getKey(), extractorData);
                 mRankingHelper.extractSignals(r);
             }
@@ -9915,7 +9916,8 @@ public class NotificationManagerService extends SystemService {
                             ? RANKING_UNCHANGED
                             : (record.getRankingScore() > 0 ?  RANKING_PROMOTED : RANKING_DEMOTED),
                     record.getNotification().isBubbleNotification(),
-                    record.getProposedImportance()
+                    record.getProposedImportance(),
+                    record.hasSensitiveContent()
             );
             rankings.add(ranking);
         }

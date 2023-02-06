@@ -211,6 +211,7 @@ public final class NotificationRecord {
     // are sorted.
     private boolean mPendingLogUpdate = false;
     private int mProposedImportance = IMPORTANCE_UNSPECIFIED;
+    private boolean mSensitiveContent = false;
 
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
@@ -503,6 +504,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mProposedImportance="
                 + NotificationListenerService.Ranking.importanceToString(mProposedImportance));
         pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
+        pw.println(prefix + "mSensitiveContent=" + mSensitiveContent);
         pw.println(prefix + "mIntercept=" + mIntercept);
         pw.println(prefix + "mHidden==" + mHidden);
         pw.println(prefix + "mGlobalSortKey=" + mGlobalSortKey);
@@ -747,6 +749,12 @@ public final class NotificationRecord {
                             Adjustment.KEY_IMPORTANCE_PROPOSAL,
                             Integer.toString(mProposedImportance));
                 }
+                if (signals.containsKey(Adjustment.KEY_SENSITIVE_CONTENT)) {
+                    mSensitiveContent = signals.getBoolean(Adjustment.KEY_SENSITIVE_CONTENT);
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            Adjustment.KEY_SENSITIVE_CONTENT,
+                            Boolean.toString(mSensitiveContent));
+                }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
                 }
@@ -881,6 +889,13 @@ public final class NotificationRecord {
 
     public int getProposedImportance() {
         return mProposedImportance;
+    }
+
+    /**
+     * @return true if the notification contains sensitive content detected by the assistant.
+     */
+    public boolean hasSensitiveContent() {
+        return mSensitiveContent;
     }
 
     public float getRankingScore() {
