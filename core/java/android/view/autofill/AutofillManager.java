@@ -19,6 +19,7 @@ package android.view.autofill;
 import static android.service.autofill.FillRequest.FLAG_IME_SHOWING;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
+import static android.service.autofill.FillRequest.FLAG_PCC_DETECTION;
 import static android.service.autofill.FillRequest.FLAG_RESET_FILL_DIALOG_STATE;
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
@@ -1310,6 +1311,22 @@ public final class AutofillManager {
         // Skip if the fill request has been performed for a view.
         if (mIsFillRequested.get()) {
             return;
+        }
+
+        // Start session with PCC flag to get assist structure and send field classification request
+        // to PCC classification service.
+        if (AutofillFeatureFlags.isAutofillPccClassificationEnabled()) {
+            synchronized (mLock) {
+                final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+                if (clientAdded){
+                    startSessionLocked(/* id= */ AutofillId.NO_AUTOFILL_ID,
+                        /* bounds= */ null, /* value= */ null, /* flags= */ FLAG_PCC_DETECTION);
+                } else {
+                    if (sVerbose) {
+                        Log.v(TAG, "not starting session: no service client");
+                    }
+                }
+            }
         }
 
         if (mIsFillDialogEnabled
