@@ -1998,7 +1998,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_FONT_WEIGHT_ADJUSTMENT;
         }
 
-        if (!publicOnly && mGrammaticalGender != delta.mGrammaticalGender) {
+        if (mGrammaticalGender != delta.mGrammaticalGender) {
             changed |= ActivityInfo.CONFIG_GRAMMATICAL_GENDER;
         }
         return changed;
