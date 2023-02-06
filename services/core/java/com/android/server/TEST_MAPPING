@@ -42,7 +42,23 @@
         },
         {
             "name": "BinaryTransparencyHostTest",
-            "file_patterns": ["BinaryTransparencyService\\.java"]
+            "file_patterns": [
+                "BinaryTransparencyService\\.java"
+            ]
+        },
+        {
+            "name": "CtsMediaProjectionTestCases",
+            "options": [
+                {
+                    "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "androidx.test.filters.FlakyTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                }
+            ]
         }
     ],
     "presubmit-large": [
