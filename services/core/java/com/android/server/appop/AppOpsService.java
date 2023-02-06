@@ -154,6 +154,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
@@ -967,7 +968,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     public void publish() {
         ServiceManager.addService(Context.APP_OPS_SERVICE, asBinder());
         LocalServices.addService(AppOpsManagerInternal.class, mAppOpsManagerInternal);
-        LocalServices.addService(AppOpsManagerLocal.class, new AppOpsManagerLocalImpl());
+        LocalManagerRegistry.addManager(AppOpsManagerLocal.class, new AppOpsManagerLocalImpl());
     }
 
     /** Handler for work when packages are removed or updated */
