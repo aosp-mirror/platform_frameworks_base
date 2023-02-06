@@ -111,6 +111,9 @@ interface MobileIconInteractor {
 
     /** Based on [CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL], either 4 or 5 */
     val numberOfLevels: StateFlow<Int>
+
+    /** See [MobileIconsInteractor.isForceHidden]. */
+    val isForceHidden: Flow<Boolean>
 }
 
 /** Interactor for a single mobile connection. This connection _should_ have one subscription ID */
@@ -126,6 +129,7 @@ class MobileIconInteractorImpl(
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
     defaultDataSubId: StateFlow<Int>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
+    override val isForceHidden: Flow<Boolean>,
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
     private val connectionInfo = connectionRepository.connectionInfo

@@ -17,9 +17,11 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
@@ -39,6 +41,7 @@ class MobileIconsViewModel
 constructor(
     val subscriptionIdsFlow: StateFlow<List<Int>>,
     private val interactor: MobileIconsInteractor,
+    private val airplaneModeInteractor: AirplaneModeInteractor,
     private val logger: ConnectivityPipelineLogger,
     private val constants: ConnectivityConstants,
     @Application private val scope: CoroutineScope,
@@ -56,6 +59,7 @@ constructor(
                 ?: MobileIconViewModel(
                         subId,
                         interactor.createMobileConnectionInteractorForSubId(subId),
+                        airplaneModeInteractor,
                         constants,
                         scope,
                     )
@@ -73,10 +77,12 @@ constructor(
         subIdsToRemove.forEach { mobileIconSubIdCache.remove(it) }
     }
 
+    @SysUISingleton
     class Factory
     @Inject
     constructor(
         private val interactor: MobileIconsInteractor,
+        private val airplaneModeInteractor: AirplaneModeInteractor,
         private val logger: ConnectivityPipelineLogger,
         private val constants: ConnectivityConstants,
         @Application private val scope: CoroutineScope,
@@ -86,6 +92,7 @@ constructor(
             return MobileIconsViewModel(
                 subscriptionIdsFlow,
                 interactor,
+                airplaneModeInteractor,
                 logger,
                 constants,
                 scope,

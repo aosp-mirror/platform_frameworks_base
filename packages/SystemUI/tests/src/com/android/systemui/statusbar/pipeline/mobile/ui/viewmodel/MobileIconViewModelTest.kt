@@ -24,10 +24,13 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
+import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +51,8 @@ import org.mockito.MockitoAnnotations
 class MobileIconViewModelTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconViewModel
     private lateinit var interactor: FakeMobileIconInteractor
+    private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
+    private lateinit var airplaneModeInteractor: AirplaneModeInteractor
     @Mock private lateinit var constants: ConnectivityConstants
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
 
@@ -57,6 +62,15 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(constants.hasDataCapabilities).thenReturn(true)
+
+        airplaneModeRepository = FakeAirplaneModeRepository()
+        airplaneModeInteractor =
+            AirplaneModeInteractor(
+                airplaneModeRepository,
+                FakeConnectivityRepository(),
+            )
+
         interactor = FakeMobileIconInteractor(tableLogBuffer)
         interactor.apply {
             setLevel(1)
@@ -67,8 +81,88 @@ class MobileIconViewModelTest : SysuiTestCase() {
             setNumberOfLevels(4)
             isDataConnected.value = true
         }
-        underTest = MobileIconViewModel(SUB_1_ID, interactor, constants, testScope.backgroundScope)
+        createAndSetViewModel()
     }
+
+    @Test
+    fun isVisible_notDataCapable_alwaysFalse() =
+        testScope.runTest {
+            // Create a new view model here so the constants are properly read
+            whenever(constants.hasDataCapabilities).thenReturn(false)
+            createAndSetViewModel()
+
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isVisible_notAirplane_notForceHidden_true() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            airplaneModeRepository.setIsAirplaneMode(false)
+            interactor.isForceHidden.value = false
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isVisible_airplane_false() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            airplaneModeRepository.setIsAirplaneMode(true)
+            interactor.isForceHidden.value = false
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isVisible_forceHidden_false() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            airplaneModeRepository.setIsAirplaneMode(false)
+            interactor.isForceHidden.value = true
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isVisible_respondsToUpdates() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            airplaneModeRepository.setIsAirplaneMode(false)
+            interactor.isForceHidden.value = false
+
+            assertThat(latest).isTrue()
+
+            airplaneModeRepository.setIsAirplaneMode(true)
+            assertThat(latest).isFalse()
+
+            airplaneModeRepository.setIsAirplaneMode(false)
+            assertThat(latest).isTrue()
+
+            interactor.isForceHidden.value = true
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
 
     @Test
     fun iconId_correctLevel_notCutout() =
@@ -361,13 +455,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         testScope.runTest {
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(false)
-            underTest =
-                MobileIconViewModel(
-                    SUB_1_ID,
-                    interactor,
-                    constants,
-                    testScope.backgroundScope,
-                )
+            createAndSetViewModel()
 
             var inVisible: Boolean? = null
             val inJob = underTest.activityInVisible.onEach { inVisible = it }.launchIn(this)
@@ -399,13 +487,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         testScope.runTest {
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(true)
-            underTest =
-                MobileIconViewModel(
-                    SUB_1_ID,
-                    interactor,
-                    constants,
-                    testScope.backgroundScope,
-                )
+            createAndSetViewModel()
 
             var inVisible: Boolean? = null
             val inJob = underTest.activityInVisible.onEach { inVisible = it }.launchIn(this)
@@ -453,6 +535,16 @@ class MobileIconViewModelTest : SysuiTestCase() {
             outJob.cancel()
             containerJob.cancel()
         }
+
+    private fun createAndSetViewModel() {
+        underTest = MobileIconViewModel(
+            SUB_1_ID,
+            interactor,
+            airplaneModeInteractor,
+            constants,
+            testScope.backgroundScope,
+        )
+    }
 
     companion object {
         private const val SUB_1_ID = 1

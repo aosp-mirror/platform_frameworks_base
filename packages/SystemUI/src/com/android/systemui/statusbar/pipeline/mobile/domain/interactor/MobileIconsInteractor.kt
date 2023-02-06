@@ -32,6 +32,8 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConn
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
+import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.util.CarrierConfigTracker
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -45,8 +47,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 
@@ -91,6 +93,10 @@ interface MobileIconsInteractor {
     val isDefaultConnectionFailed: StateFlow<Boolean>
     /** True once the user has been set up */
     val isUserSetup: StateFlow<Boolean>
+
+    /** True if we're configured to force-hide the mobile icons and false otherwise. */
+    val isForceHidden: Flow<Boolean>
+
     /**
      * Vends out a [MobileIconInteractor] tracking the [MobileConnectionRepository] for the given
      * subId. Will throw if the ID is invalid
@@ -108,6 +114,7 @@ constructor(
     private val carrierConfigTracker: CarrierConfigTracker,
     private val logger: ConnectivityPipelineLogger,
     @MobileSummaryLog private val tableLogger: TableLogBuffer,
+    connectivityRepository: ConnectivityRepository,
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
 ) : MobileIconsInteractor {
@@ -291,6 +298,11 @@ constructor(
 
     override val isUserSetup: StateFlow<Boolean> = userSetupRepo.isUserSetupFlow
 
+    override val isForceHidden: Flow<Boolean> =
+        connectivityRepository.forceHiddenSlots
+            .map { it.contains(ConnectivitySlot.MOBILE) }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
     /** Vends out new [MobileIconInteractor] for a particular subId */
     override fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor =
         MobileIconInteractorImpl(
@@ -303,6 +315,7 @@ constructor(
             defaultMobileIconGroup,
             defaultDataSubId,
             isDefaultConnectionFailed,
+            isForceHidden,
             mobileConnectionsRepo.getRepoForSubId(subId),
         )
 

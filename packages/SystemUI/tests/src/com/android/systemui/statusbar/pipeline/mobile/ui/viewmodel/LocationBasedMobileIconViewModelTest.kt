@@ -21,10 +21,13 @@ import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModelTest.Companion.defaultSignal
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
+import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -46,6 +49,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     private lateinit var qsIcon: QsMobileIconViewModel
     private lateinit var keyguardIcon: KeyguardMobileIconViewModel
     private lateinit var interactor: FakeMobileIconInteractor
+    private lateinit var airplaneModeInteractor: AirplaneModeInteractor
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var constants: ConnectivityConstants
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
@@ -56,6 +60,11 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        airplaneModeInteractor =
+            AirplaneModeInteractor(
+                FakeAirplaneModeRepository(),
+                FakeConnectivityRepository(),
+            )
         interactor = FakeMobileIconInteractor(tableLogBuffer)
         interactor.apply {
             setLevel(1)
@@ -66,7 +75,14 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
             setNumberOfLevels(4)
             isDataConnected.value = true
         }
-        commonImpl = MobileIconViewModel(SUB_1_ID, interactor, constants, testScope.backgroundScope)
+        commonImpl =
+            MobileIconViewModel(
+                SUB_1_ID,
+                interactor,
+                airplaneModeInteractor,
+                constants,
+                testScope.backgroundScope,
+            )
 
         homeIcon = HomeMobileIconViewModel(commonImpl, statusBarPipelineFlags)
         qsIcon = QsMobileIconViewModel(commonImpl, statusBarPipelineFlags)
