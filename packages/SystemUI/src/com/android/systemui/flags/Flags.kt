@@ -346,8 +346,7 @@ object Flags {
     val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator", teamfood = true)
 
     // TODO(b/265813373): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE =
-        unreleasedFlag(912, "media_ttt_dismiss_gesture", teamfood = true)
+    val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE = releasedFlag(912, "media_ttt_dismiss_gesture")
 
     // TODO(b/266157412): Tracking Bug
     val MEDIA_RETAIN_SESSIONS = unreleasedFlag(913, "media_retain_sessions")
