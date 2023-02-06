@@ -342,6 +342,18 @@ final class AccessibilityController {
         // Not relevant for the window observer.
     }
 
+    void onWMTransition(int displayId, @WindowManager.TransitionType int type) {
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".onAppWindowTransition",
+                    FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + "; type=" + type);
+        }
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.onWMTransition(displayId, type);
+        }
+        // Not relevant for the window observer.
+    }
+
     void onWindowTransition(WindowState windowState, int transition) {
         if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK
                 | FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK)) {
@@ -704,6 +716,28 @@ final class AccessibilityController {
                     case WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN: {
                         mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
                     }
+                }
+            }
+        }
+
+        void onWMTransition(int displayId, @WindowManager.TransitionType int type) {
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".onWMTransition",
+                        FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + "; type=" + type);
+            }
+            if (DEBUG_WINDOW_TRANSITIONS) {
+                Slog.i(LOG_TAG, "Window transition: " + WindowManager.transitTypeToString(type)
+                        + " displayId: " + displayId);
+            }
+            final boolean magnifying = mMagnifedViewport.isMagnifying();
+            if (magnifying) {
+                // All opening/closing situations.
+                switch (type) {
+                    case WindowManager.TRANSIT_OPEN:
+                    case WindowManager.TRANSIT_TO_FRONT:
+                    case WindowManager.TRANSIT_CLOSE:
+                    case WindowManager.TRANSIT_TO_BACK:
+                        mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
                 }
             }
         }
