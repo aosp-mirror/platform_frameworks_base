@@ -443,6 +443,8 @@ public class InfoMediaManager extends MediaManager {
         dispatchDeviceListAdded();
     }
 
+    // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
+    @SuppressWarnings("NewApi")
     private void buildAllRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAllRoutes()) {
             if (DEBUG) {
@@ -462,6 +464,8 @@ public class InfoMediaManager extends MediaManager {
         return infos;
     }
 
+    // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
+    @SuppressWarnings("NewApi")
     private synchronized void buildAvailableRoutes() {
         for (MediaRoute2Info route : getAvailableRoutes(mPackageName)) {
             if (DEBUG) {
@@ -512,6 +516,8 @@ public class InfoMediaManager extends MediaManager {
         }
     }
 
+    // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
+    @SuppressWarnings("NewApi")
     @VisibleForTesting
     void addMediaDevice(MediaRoute2Info route) {
         //TODO(b/258141461): Attach flag and disable reason in MediaDevice

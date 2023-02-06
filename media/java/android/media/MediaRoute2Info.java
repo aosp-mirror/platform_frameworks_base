@@ -108,133 +108,148 @@ public final class MediaRoute2Info implements Parcelable {
     public static final int PLAYBACK_VOLUME_VARIABLE = 1;
 
     /** @hide */
-    @IntDef({
-            TYPE_UNKNOWN, TYPE_BUILTIN_SPEAKER, TYPE_WIRED_HEADSET,
-            TYPE_WIRED_HEADPHONES, TYPE_BLUETOOTH_A2DP, TYPE_HDMI, TYPE_USB_DEVICE,
-            TYPE_USB_ACCESSORY, TYPE_DOCK, TYPE_USB_HEADSET, TYPE_HEARING_AID, TYPE_BLE_HEADSET,
-            TYPE_REMOTE_TV, TYPE_REMOTE_SPEAKER, TYPE_GROUP})
+    @IntDef(
+            prefix = {"TYPE_"},
+            value = {
+                TYPE_UNKNOWN,
+                TYPE_BUILTIN_SPEAKER,
+                TYPE_WIRED_HEADSET,
+                TYPE_WIRED_HEADPHONES,
+                TYPE_BLUETOOTH_A2DP,
+                TYPE_HDMI,
+                TYPE_USB_DEVICE,
+                TYPE_USB_ACCESSORY,
+                TYPE_DOCK,
+                TYPE_USB_HEADSET,
+                TYPE_HEARING_AID,
+                TYPE_BLE_HEADSET,
+                TYPE_REMOTE_TV,
+                TYPE_REMOTE_SPEAKER,
+                TYPE_REMOTE_AUDIO_VIDEO_RECEIVER,
+                TYPE_GROUP
+            })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Type {}
 
     /**
-     * The default route type indicating the type is unknown.
+     * Indicates the route's type is unknown or undefined.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_UNKNOWN = 0;
 
     /**
-     * A route type describing the speaker system (i.e. a mono speaker or stereo speakers) built
-     * in a device.
+     * Indicates the route is the speaker system (i.e. a mono speaker or stereo speakers) built into
+     * the device.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_BUILTIN_SPEAKER = AudioDeviceInfo.TYPE_BUILTIN_SPEAKER;
 
     /**
-     * A route type describing a headset, which is the combination of a headphones and microphone.
+     * Indicates the route is a headset, which is the combination of a headphones and a microphone.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_WIRED_HEADSET = AudioDeviceInfo.TYPE_WIRED_HEADSET;
 
     /**
-     * A route type describing a pair of wired headphones.
+     * Indicates the route is a pair of wired headphones.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_WIRED_HEADPHONES = AudioDeviceInfo.TYPE_WIRED_HEADPHONES;
 
     /**
-     * A route type indicating the presentation of the media is happening
-     * on a bluetooth device such as a bluetooth speaker.
+     * Indicates the route is a bluetooth device, such as a bluetooth speaker or headphones.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_BLUETOOTH_A2DP = AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
 
     /**
-     * A route type describing an HDMI connection.
+     * Indicates the route is an HDMI connection.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_HDMI = AudioDeviceInfo.TYPE_HDMI;
 
     /**
-     * A route type describing a USB audio device.
+     * Indicates the route is a USB audio device.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_USB_DEVICE = AudioDeviceInfo.TYPE_USB_DEVICE;
 
     /**
-     * A route type describing a USB audio device in accessory mode.
+     * Indicates the route is a USB audio device in accessory mode.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_USB_ACCESSORY = AudioDeviceInfo.TYPE_USB_ACCESSORY;
 
     /**
-     * A route type describing the audio device associated with a dock.
+     * Indicates the route is the audio device associated with a dock.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_DOCK = AudioDeviceInfo.TYPE_DOCK;
 
     /**
-     * A device type describing a USB audio headset.
+     * Indicates the route is a USB audio headset.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_USB_HEADSET = AudioDeviceInfo.TYPE_USB_HEADSET;
 
     /**
-     * A route type describing a Hearing Aid.
+     * Indicates the route is a hearing aid.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_HEARING_AID = AudioDeviceInfo.TYPE_HEARING_AID;
 
     /**
-     * A route type describing a BLE HEADSET.
+     * Indicates the route is a Bluetooth Low Energy (BLE) HEADSET.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_BLE_HEADSET = AudioDeviceInfo.TYPE_BLE_HEADSET;
 
     /**
-     * A route type indicating the presentation of the media is happening on a TV.
+     * Indicates the route is a remote TV.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_REMOTE_TV = 1001;
 
     /**
-     * A route type indicating the presentation of the media is happening on a speaker.
+     * Indicates the route is a remote speaker.
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
      *
      * @see #getType
-     * @hide
      */
     public static final int TYPE_REMOTE_SPEAKER = 1002;
 
     /**
-     * A route type indicating the presentation of the media is happening on multiple devices.
+     * Indicates the route is a remote Audio/Video Receiver (AVR).
+     *
+     * <p>A remote device uses a routing protocol managed by the application, as opposed to the
+     * routing being done by the system.
      *
      * @see #getType
-     * @hide
+     */
+    public static final int TYPE_REMOTE_AUDIO_VIDEO_RECEIVER = 1003;
+
+    /**
+     * Indicates the route is a group of devices.
+     *
+     * @see #getType
      */
     public static final int TYPE_GROUP = 2000;
 
@@ -436,16 +451,23 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * Gets the type of this route.
+     * Returns the type of this route.
      *
-     * @return The type of this route:
-     * {@link #TYPE_UNKNOWN},
-     * {@link #TYPE_BUILTIN_SPEAKER}, {@link #TYPE_WIRED_HEADSET}, {@link #TYPE_WIRED_HEADPHONES},
-     * {@link #TYPE_BLUETOOTH_A2DP}, {@link #TYPE_HDMI}, {@link #TYPE_DOCK},
-     * {@Link #TYPE_USB_DEVICE}, {@link #TYPE_USB_ACCESSORY}, {@link #TYPE_USB_HEADSET}
-     * {@link #TYPE_HEARING_AID},
-     * {@link #TYPE_REMOTE_TV}, {@link #TYPE_REMOTE_SPEAKER}, {@link #TYPE_GROUP}.
-     * @hide
+     * @see #TYPE_UNKNOWN
+     * @see #TYPE_BUILTIN_SPEAKER
+     * @see #TYPE_WIRED_HEADSET
+     * @see #TYPE_WIRED_HEADPHONES
+     * @see #TYPE_BLUETOOTH_A2DP
+     * @see #TYPE_HDMI
+     * @see #TYPE_DOCK
+     * @see #TYPE_USB_DEVICE
+     * @see #TYPE_USB_ACCESSORY
+     * @see #TYPE_USB_HEADSET
+     * @see #TYPE_HEARING_AID
+     * @see #TYPE_REMOTE_TV
+     * @see #TYPE_REMOTE_SPEAKER
+     * @see #TYPE_REMOTE_AUDIO_VIDEO_RECEIVER
+     * @see #TYPE_GROUP
      */
     @Type
     public int getType() {
@@ -657,6 +679,7 @@ public final class MediaRoute2Info implements Parcelable {
         pw.println(indent + "mId=" + mId);
         pw.println(indent + "mName=" + mName);
         pw.println(indent + "mFeatures=" + mFeatures);
+        pw.println(indent + "mType=" + getDeviceTypeString(mType));
         pw.println(indent + "mIsSystem=" + mIsSystem);
         pw.println(indent + "mIconUri=" + mIconUri);
         pw.println(indent + "mDescription=" + mDescription);
@@ -785,6 +808,42 @@ public final class MediaRoute2Info implements Parcelable {
         dest.writeString(mProviderId);
         dest.writeBoolean(mIsVisibilityRestricted);
         dest.writeString8Array(mAllowedPackages.toArray(new String[0]));
+    }
+
+    private static String getDeviceTypeString(@Type int deviceType) {
+        switch (deviceType) {
+            case TYPE_BUILTIN_SPEAKER:
+                return "BUILTIN_SPEAKER";
+            case TYPE_WIRED_HEADSET:
+                return "WIRED_HEADSET";
+            case TYPE_WIRED_HEADPHONES:
+                return "WIRED_HEADPHONES";
+            case TYPE_BLUETOOTH_A2DP:
+                return "BLUETOOTH_A2DP";
+            case TYPE_HDMI:
+                return "HDMI";
+            case TYPE_DOCK:
+                return "DOCK";
+            case TYPE_USB_DEVICE:
+                return "USB_DEVICE";
+            case TYPE_USB_ACCESSORY:
+                return "USB_ACCESSORY";
+            case TYPE_USB_HEADSET:
+                return "USB_HEADSET";
+            case TYPE_HEARING_AID:
+                return "HEARING_AID";
+            case TYPE_REMOTE_TV:
+                return "REMOTE_TV";
+            case TYPE_REMOTE_SPEAKER:
+                return "REMOTE_SPEAKER";
+            case TYPE_REMOTE_AUDIO_VIDEO_RECEIVER:
+                return "REMOTE_AUDIO_VIDEO_RECEIVER";
+            case TYPE_GROUP:
+                return "GROUP";
+            case TYPE_UNKNOWN:
+            default:
+                return TextUtils.formatSimple("UNKNOWN(%d)", deviceType);
+        }
     }
 
     /**
@@ -932,7 +991,8 @@ public final class MediaRoute2Info implements Parcelable {
 
         /**
          * Sets the route's type.
-         * @hide
+         *
+         * @see MediaRoute2Info#getType()
          */
         @NonNull
         public Builder setType(@Type int type) {

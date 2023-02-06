@@ -114,6 +114,8 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         setType(info);
     }
 
+    // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
+    @SuppressWarnings("NewApi")
     private void setType(MediaRoute2Info info) {
         if (info == null) {
             mType = MediaDeviceType.TYPE_BLUETOOTH_DEVICE;
@@ -335,6 +337,8 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      *
      * @return true if the RouteInfo equals TYPE_BLE_HEADSET.
      */
+    // MediaRoute2Info.getType was made public on API 34, but exists since API 30.
+    @SuppressWarnings("NewApi")
     public boolean isBLEDevice() {
         return mRouteInfo.getType() == TYPE_BLE_HEADSET;
     }
