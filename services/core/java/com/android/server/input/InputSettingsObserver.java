@@ -103,9 +103,9 @@ class InputSettingsObserver extends ContentObserver {
         mObservers.get(uri).accept("setting changed");
     }
 
-    private boolean getBoolean(String settingName) {
+    private boolean getBoolean(String settingName, boolean defaultValue) {
         final int setting = Settings.System.getIntForUser(mContext.getContentResolver(),
-                settingName, 0, UserHandle.USER_CURRENT);
+                settingName, defaultValue ? 1 : 0, UserHandle.USER_CURRENT);
         return setting != 0;
     }
 
@@ -127,20 +127,21 @@ class InputSettingsObserver extends ContentObserver {
 
     private void updateTouchpadNaturalScrollingEnabled() {
         mNative.setTouchpadNaturalScrollingEnabled(
-                getBoolean(Settings.System.TOUCHPAD_NATURAL_SCROLLING));
+                getBoolean(Settings.System.TOUCHPAD_NATURAL_SCROLLING, true));
     }
 
     private void updateTouchpadTapToClickEnabled() {
-        mNative.setTouchpadTapToClickEnabled(getBoolean(Settings.System.TOUCHPAD_TAP_TO_CLICK));
+        mNative.setTouchpadTapToClickEnabled(
+                getBoolean(Settings.System.TOUCHPAD_TAP_TO_CLICK, true));
     }
 
     private void updateTouchpadRightClickZoneEnabled() {
         mNative.setTouchpadRightClickZoneEnabled(
-                getBoolean(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE));
+                getBoolean(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, false));
     }
 
     private void updateShowTouches() {
-        mNative.setShowTouches(getBoolean(Settings.System.SHOW_TOUCHES));
+        mNative.setShowTouches(getBoolean(Settings.System.SHOW_TOUCHES, false));
     }
 
     private void updateAccessibilityLargePointer() {
