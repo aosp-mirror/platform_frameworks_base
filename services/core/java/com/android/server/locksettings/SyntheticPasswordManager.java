@@ -510,40 +510,35 @@ class SyntheticPasswordManager {
         return null;
     }
 
-    public synchronized void initWeaverService() {
+    private synchronized boolean isWeaverAvailable() {
         if (mWeaver != null) {
-            return;
+            return true;
         }
 
+        // Re-initialize weaver in case there was a transient error preventing access to it.
         IWeaver weaver = getWeaverService();
         if (weaver == null) {
-            return;
+            return false;
         }
 
-        // Get the config
-        WeaverConfig weaverConfig = null;
+        final WeaverConfig weaverConfig;
         try {
             weaverConfig = weaver.getConfig();
         } catch (RemoteException | ServiceSpecificException e) {
             Slog.e(TAG, "Failed to get weaver config", e);
+            return false;
         }
         if (weaverConfig == null || weaverConfig.slots <= 0) {
-            Slog.e(TAG, "Failed to initialize weaver config");
-            return;
+            Slog.e(TAG, "Invalid weaver config");
+            return false;
         }
 
         mWeaver = weaver;
         mWeaverConfig = weaverConfig;
         mPasswordSlotManager.refreshActiveSlots(getUsedWeaverSlots());
         Slog.i(TAG, "Weaver service initialized");
-    }
 
-    private synchronized boolean isWeaverAvailable() {
-        if (mWeaver == null) {
-            //Re-initializing weaver in case there was a transient error preventing access to it.
-            initWeaverService();
-        }
-        return mWeaver != null && mWeaverConfig.slots > 0;
+        return true;
     }
 
     /**

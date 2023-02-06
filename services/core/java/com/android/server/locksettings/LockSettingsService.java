@@ -852,7 +852,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 .hasSystemFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN);
         migrateOldData();
         getGateKeeperService();
-        mSpManager.initWeaverService();
         getAuthSecretHal();
         mDeviceProvisionedObserver.onSystemReady();
 
