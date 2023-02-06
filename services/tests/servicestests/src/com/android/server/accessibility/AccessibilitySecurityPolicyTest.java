@@ -113,6 +113,7 @@ public class AccessibilitySecurityPolicyTest {
             AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED,
             AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY,
             AccessibilityEvent.TYPE_VIEW_CONTEXT_CLICKED,
+            AccessibilityEvent.TYPE_VIEW_TARGETED_BY_SCROLL,
     };
 
     private AccessibilitySecurityPolicy mA11ySecurityPolicy;

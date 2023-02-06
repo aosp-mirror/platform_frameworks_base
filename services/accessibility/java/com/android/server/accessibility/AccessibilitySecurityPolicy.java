@@ -78,7 +78,8 @@ public class AccessibilitySecurityPolicy {
             | AccessibilityEvent.TYPE_VIEW_SCROLLED
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
             | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
-            | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
+            | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY
+            | AccessibilityEvent.TYPE_VIEW_TARGETED_BY_SCROLL;
 
     /**
      * Methods that should find their way into separate modules, but are still in AMS
