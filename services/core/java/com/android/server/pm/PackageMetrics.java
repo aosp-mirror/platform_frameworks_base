@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 /**
- * Metrics class for reporting stats to logging infrastructures like Westworld
+ * Metrics class for reporting stats to logging infrastructures like statsd
  */
 final class PackageMetrics {
     public static final int STEP_PREPARE = 1;
