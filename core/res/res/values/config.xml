@@ -2078,7 +2078,7 @@
     <integer name="config_audio_ring_vol_default">5</integer>
 
     <!-- Enable sound dose computation and warnings -->
-    <bool name="config_audio_csd_enabled_default">false</bool>
+    <bool name="config_audio_csd_enabled_default">true</bool>
 
     <!-- The default value for whether head tracking for
          spatial audio is enabled for a newly connected audio device -->
