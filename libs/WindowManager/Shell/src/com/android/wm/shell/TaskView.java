@@ -173,7 +173,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      */
     public void onLocationChanged() {
         getBoundsOnScreen(mTmpRect);
-        mTaskViewTaskController.onLocationChanged(mTmpRect);
+        mTaskViewTaskController.setWindowBounds(mTmpRect);
     }
 
     /**
@@ -198,7 +198,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     public void surfaceChanged(@androidx.annotation.NonNull SurfaceHolder holder, int format,
             int width, int height) {
         getBoundsOnScreen(mTmpRect);
-        mTaskViewTaskController.surfaceChanged(mTmpRect);
+        mTaskViewTaskController.setWindowBounds(mTmpRect);
     }
 
     @Override
