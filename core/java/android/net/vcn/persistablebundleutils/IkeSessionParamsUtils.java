@@ -93,6 +93,7 @@ public final class IkeSessionParamsUtils {
         IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_REKEY_MOBILITY);
         IKE_OPTIONS.add(IKE_OPTION_AUTOMATIC_ADDRESS_FAMILY_SELECTION);
         IKE_OPTIONS.add(IKE_OPTION_AUTOMATIC_NATT_KEEPALIVES);
+        IKE_OPTIONS.add(IkeSessionParams.IKE_OPTION_AUTOMATIC_KEEPALIVE_ON_OFF);
     }
 
     /**
