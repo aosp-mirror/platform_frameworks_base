@@ -48,7 +48,7 @@ import com.android.systemui.plugins.ClockTickRate
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.shared.regionsampling.RegionSampler
-import com.android.systemui.statusbar.Weather
+import com.android.systemui.plugins.Weather
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
