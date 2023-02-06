@@ -26,8 +26,6 @@
     <string name="install_done" msgid="5987363587661783896">"Application installée."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Voulez-vous installer cette application?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Voulez-vous mettre à jour cette application?"</string>
-    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Les mises à jour pour cette application sont actuellement gérées par <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nEn effectuant une mise à jour, vous recevrez plutôt les futures mises à jour de la part de <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Les mises à jour de cette application sont actuellement gérées par <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nVoulez-vous installer cette mise à jour de la part de <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Application non installée."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"L\'installation du paquet a été bloquée."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"L\'application n\'a pas été installée, car le paquet entre en conflit avec un paquet existant."</string>
@@ -70,8 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"Désinstallation de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> en cours…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Désinstallation terminée."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"L\'application <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> a bien été désinstallée"</string>
-    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
-    <skip />
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Le clone de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> a été supprimé"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Échec de la désinstallation."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"La désinstallation de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> n\'a pas réussi."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Suppression du clone <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>

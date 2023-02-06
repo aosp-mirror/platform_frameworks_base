@@ -26,8 +26,6 @@
     <string name="install_done" msgid="5987363587661783896">"යෙදුම ස්ථාපනය කර ඇත."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"මෙම යෙදුම ස්ථාපනය කිරීමට ඔබට අවශ්‍යද?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ඔබට මෙම යෙදුම යාවත්කාලීන කිරීමට අවශ්‍යද?"</string>
-    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"මෙම යෙදුම වෙත යාවත්කාලීන කිරීම් දැනට <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> විසින් කළමනාකරණය කරනු ලැබේ.\n\nයාවත්කාලීන කිරීමෙන්, ඔබට <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> වෙතින් අනාගත යාවත්කාලීන ලැබෙනු ඇත."</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"මෙම යෙදුම වෙත යාවත්කාලීන කිරීම් දැනට <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> විසින් කළමනාකරණය කරනු ලැබේ.\n\nඔබට <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> වෙතින් මෙම යාවත්කාලීනය ස්ථාපනය කිරීමට අවශ්‍ය ද?"</string>
     <string name="install_failed" msgid="5777824004474125469">"යෙදුම ස්ථාපනය කර නැත."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"මෙම පැකේජය ස්ථාපනය කිරීම අවහිර කරන ලදි."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"පැකේජය දැනට පවතින පැකේජයක් සමග ගැටෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>
@@ -70,8 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> අස්ථාපනය කරමින්…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"අස්ථාපනය කිරීම අවසානයි."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> අස්ථාපනය කරන ලදී"</string>
-    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
-    <skip />
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ක්ලෝනය මකන ලදි"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"අස්ථාපනය කිරිම අසාර්ථක විය."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> අස්ථාපනය කිරීම සාර්ථකයි."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ක්ලෝනය මකමින්…"</string>
