@@ -229,17 +229,12 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     void onDisplayAdded(@NonNull Display display) {
-        if (mInstalled) {
-            resetStreamStateForDisplay(display.getDisplayId());
-            enableFeaturesForDisplay(display);
-        }
+        enableFeaturesForDisplayIfInstalled(display);
+
     }
 
     void onDisplayRemoved(int displayId) {
-        if (mInstalled) {
-            disableFeaturesForDisplay(displayId);
-            resetStreamStateForDisplay(displayId);
-        }
+        disableFeaturesForDisplayIfInstalled(displayId);
     }
 
     @Override
@@ -479,6 +474,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
         final Context displayContext = mContext.createDisplayContext(display);
         final int displayId = display.getDisplayId();
+        if (mAms.isDisplayProxyed(displayId)) {
+            return;
+        }
         if (!mServiceDetectsGestures.contains(displayId)) {
             mServiceDetectsGestures.put(displayId, false);
         }
@@ -611,6 +609,18 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         final EventStreamTransformation eventStreamTransformation = mEventHandler.get(displayId);
         if (eventStreamTransformation != null) {
             mEventHandler.remove(displayId);
+        }
+    }
+    void enableFeaturesForDisplayIfInstalled(Display display) {
+        if (mInstalled) {
+            resetStreamStateForDisplay(display.getDisplayId());
+            enableFeaturesForDisplay(display);
+        }
+    }
+    void disableFeaturesForDisplayIfInstalled(int displayId) {
+        if (mInstalled) {
+            disableFeaturesForDisplay(displayId);
+            resetStreamStateForDisplay(displayId);
         }
     }
 
