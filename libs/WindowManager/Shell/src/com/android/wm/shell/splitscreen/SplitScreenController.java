@@ -583,9 +583,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     }
 
     private void startIntentsWithLegacyTransition(PendingIntent pendingIntent1,
-            @Nullable Bundle options1, PendingIntent pendingIntent2,
-            @Nullable Bundle options2, @SplitPosition int splitPosition,
-            float splitRatio, RemoteAnimationAdapter adapter, InstanceId instanceId) {
+            @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
+            PendingIntent pendingIntent2, @Nullable ShortcutInfo shortcutInfo2,
+            @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
+            RemoteAnimationAdapter adapter, InstanceId instanceId) {
         Intent fillInIntent1 = null;
         Intent fillInIntent2 = null;
         final String packageName1 = SplitScreenUtils.getPackageName(pendingIntent1);
@@ -605,9 +606,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                         Toast.LENGTH_SHORT).show();
             }
         }
-        mStageCoordinator.startIntentsWithLegacyTransition(pendingIntent1, fillInIntent1, options1,
-                pendingIntent2, fillInIntent2, options2, splitPosition, splitRatio, adapter,
-                instanceId);
+        mStageCoordinator.startIntentsWithLegacyTransition(pendingIntent1, fillInIntent1,
+                shortcutInfo1, options1, pendingIntent2, fillInIntent2, shortcutInfo2, options2,
+                splitPosition, splitRatio, adapter, instanceId);
     }
 
     @Override
@@ -1037,13 +1038,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
         @Override
         public void startIntentsWithLegacyTransition(PendingIntent pendingIntent1,
-                @Nullable Bundle options1, PendingIntent pendingIntent2, @Nullable Bundle options2,
-                @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
-                InstanceId instanceId) {
+                @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
+                PendingIntent pendingIntent2, @Nullable ShortcutInfo shortcutInfo2,
+                @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
+                RemoteAnimationAdapter adapter, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startIntentsWithLegacyTransition",
                     (controller) ->
-                        controller.startIntentsWithLegacyTransition(
-                                pendingIntent1, options1, pendingIntent2, options2, splitPosition,
+                        controller.startIntentsWithLegacyTransition(pendingIntent1, shortcutInfo1,
+                                options1, pendingIntent2, shortcutInfo2, options2, splitPosition,
                                 splitRatio, adapter, instanceId)
                     );
         }
