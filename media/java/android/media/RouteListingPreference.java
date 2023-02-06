@@ -259,7 +259,7 @@ public final class RouteListingPreference implements Parcelable {
         @IntDef(
                 flag = true,
                 prefix = {"FLAG_"},
-                value = {FLAG_ONGOING_SESSION, FLAG_SUGGESTED_ROUTE, FLAG_ONGOING_SESSION_MANAGED})
+                value = {FLAG_ONGOING_SESSION, FLAG_SUGGESTED, FLAG_ONGOING_SESSION_MANAGED})
         public @interface Flags {}
 
         /**
@@ -292,7 +292,7 @@ public final class RouteListingPreference implements Parcelable {
          * number supported by the UI, the routes listed first in {@link
          * RouteListingPreference#getItems()} will take priority.
          */
-        public static final int FLAG_SUGGESTED_ROUTE = 1 << 2;
+        public static final int FLAG_SUGGESTED = 1 << 2;
 
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
@@ -399,7 +399,7 @@ public final class RouteListingPreference implements Parcelable {
          * Returns the flags associated to the route that corresponds to this item.
          *
          * @see #FLAG_ONGOING_SESSION
-         * @see #FLAG_SUGGESTED_ROUTE
+         * @see #FLAG_SUGGESTED
          */
         @Flags
         public int getFlags() {
