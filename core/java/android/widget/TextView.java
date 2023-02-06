@@ -6502,7 +6502,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean hasGesturePreviewHighlight() {
-        return mGesturePreviewHighlightStart > 0;
+        return mGesturePreviewHighlightStart >= 0;
     }
 
     /**
