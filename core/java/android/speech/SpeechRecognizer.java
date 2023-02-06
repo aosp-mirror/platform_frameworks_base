@@ -113,6 +113,17 @@ public class SpeechRecognizer {
     public static final String RESULTS_ALTERNATIVES = "results_alternatives";
 
     /**
+     * Key used to receive an ArrayList&lt;{@link RecognitionPart}&gt; object from the
+     * {@link Bundle} passed to the {@link RecognitionListener#onResults(Bundle)} and
+     * {@link RecognitionListener#onSegmentResults(Bundle)} methods.
+     *
+     * <p> A single {@link SpeechRecognizer} result is represented as a {@link String}. Each word of
+     * the resulting String, as well as any potential adjacent punctuation, is represented by a
+     * {@link RecognitionPart} item from the ArrayList retrieved by this key.
+     */
+    public static final String RECOGNITION_PARTS = "recognition_parts";
+
+    /**
      * The reason speech recognition failed.
      *
      * @hide
