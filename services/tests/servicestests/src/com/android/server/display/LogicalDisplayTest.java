@@ -26,11 +26,14 @@ import static org.mockito.Mockito.when;
 
 import android.app.PropertyInvalidatedCache;
 import android.graphics.Point;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.server.display.layout.Layout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +50,7 @@ public class LogicalDisplayTest {
 
     private LogicalDisplay mLogicalDisplay;
     private DisplayDevice mDisplayDevice;
+    private DisplayDeviceRepository mDeviceRepo;
     private final DisplayDeviceInfo mDisplayDeviceInfo = new DisplayDeviceInfo();
 
     @Before
@@ -66,7 +70,7 @@ public class LogicalDisplayTest {
         // Disable binder caches in this process.
         PropertyInvalidatedCache.disableForTestMode();
 
-        DisplayDeviceRepository repo = new DisplayDeviceRepository(
+        mDeviceRepo = new DisplayDeviceRepository(
                 new DisplayManagerService.SyncRoot(),
                 new PersistentDataStore(new PersistentDataStore.Injector() {
                     @Override
@@ -82,8 +86,8 @@ public class LogicalDisplayTest {
                     @Override
                     public void finishWrite(OutputStream os, boolean success) {}
                 }));
-        repo.onDisplayDeviceEvent(mDisplayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED);
-        mLogicalDisplay.updateLocked(repo);
+        mDeviceRepo.onDisplayDeviceEvent(mDisplayDevice, DisplayAdapter.DISPLAY_DEVICE_EVENT_ADDED);
+        mLogicalDisplay.updateLocked(mDeviceRepo);
     }
 
     @Test
@@ -136,5 +140,30 @@ public class LogicalDisplayTest {
         mLogicalDisplay.configureDisplayLocked(t, mDisplayDevice, false);
         verify(t).setDisplayFlags(any(), eq(SurfaceControl.DISPLAY_RECEIVES_INPUT));
         reset(t);
+    }
+
+    @Test
+    public void testRearDisplaysArePresentationDisplaysThatDestroyContentOnRemoval() {
+        // Assert that the display isn't a presentation display by default, with a default remove
+        // mode
+        assertEquals(0, mLogicalDisplay.getDisplayInfoLocked().flags);
+        assertEquals(Display.REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY,
+                mLogicalDisplay.getDisplayInfoLocked().removeMode);
+
+        // Update position and test to see that it's been updated to a rear, presentation display
+        // that destroys content on removal
+        mLogicalDisplay.setDevicePositionLocked(Layout.Display.POSITION_REAR);
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        assertEquals(Display.FLAG_REAR | Display.FLAG_PRESENTATION,
+                mLogicalDisplay.getDisplayInfoLocked().flags);
+        assertEquals(Display.REMOVE_MODE_DESTROY_CONTENT,
+                mLogicalDisplay.getDisplayInfoLocked().removeMode);
+
+        // And then check the unsetting the position resets both
+        mLogicalDisplay.setDevicePositionLocked(Layout.Display.POSITION_UNKNOWN);
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        assertEquals(0, mLogicalDisplay.getDisplayInfoLocked().flags);
+        assertEquals(Display.REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY,
+                mLogicalDisplay.getDisplayInfoLocked().removeMode);
     }
 }
