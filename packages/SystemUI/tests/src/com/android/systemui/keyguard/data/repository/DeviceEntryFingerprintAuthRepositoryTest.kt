@@ -22,6 +22,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +45,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(JUnit4::class)
 class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var dumpManager: DumpManager
     @Captor private lateinit var callbackCaptor: ArgumentCaptor<KeyguardUpdateMonitorCallback>
 
     private lateinit var testScope: TestScope
@@ -59,6 +61,7 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
             DeviceEntryFingerprintAuthRepositoryImpl(
                 keyguardUpdateMonitor,
                 testScope.backgroundScope,
+                dumpManager,
             )
     }
 
