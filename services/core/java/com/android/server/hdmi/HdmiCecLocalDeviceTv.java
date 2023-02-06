@@ -1232,7 +1232,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void launchRoutingControl(boolean routingForBootup) {
         assertRunOnServiceThread();
         // Seq #24
-        if (getActivePortId() != Constants.INVALID_PORT_ID) {
+        if (getActivePortId() != Constants.INVALID_PORT_ID
+                && getActivePortId() != Constants.CEC_SWITCH_HOME) {
             if (!routingForBootup && !isProhibitMode()) {
                 int newPath = mService.portIdToPath(getActivePortId());
                 setActivePath(newPath);
