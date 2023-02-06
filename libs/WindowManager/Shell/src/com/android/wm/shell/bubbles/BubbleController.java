@@ -1058,6 +1058,11 @@ public class BubbleController implements ConfigurationChangeListener {
         }
     }
 
+    /** Sets the app bubble's taskId which is cached for SysUI. */
+    public void setAppBubbleTaskId(int taskId) {
+        mImpl.mCachedState.setAppBubbleTaskId(taskId);
+    }
+
     /**
      * Fills the overflow bubbles by loading them from disk.
      */
@@ -1636,6 +1641,7 @@ public class BubbleController implements ConfigurationChangeListener {
             private HashSet<String> mSuppressedBubbleKeys = new HashSet<>();
             private HashMap<String, String> mSuppressedGroupToNotifKeys = new HashMap<>();
             private HashMap<String, Bubble> mShortcutIdToBubble = new HashMap<>();
+            private int mAppBubbleTaskId = INVALID_TASK_ID;
 
             private ArrayList<Bubble> mTmpBubbles = new ArrayList<>();
 
@@ -1667,10 +1673,20 @@ public class BubbleController implements ConfigurationChangeListener {
 
                 mSuppressedBubbleKeys.clear();
                 mShortcutIdToBubble.clear();
+                mAppBubbleTaskId = INVALID_TASK_ID;
                 for (Bubble b : mTmpBubbles) {
                     mShortcutIdToBubble.put(b.getShortcutId(), b);
                     updateBubbleSuppressedState(b);
+
+                    if (KEY_APP_BUBBLE.equals(b.getKey())) {
+                        mAppBubbleTaskId = b.getTaskId();
+                    }
                 }
+            }
+
+            /** Sets the app bubble's taskId which is cached for SysUI. */
+            synchronized void setAppBubbleTaskId(int taskId) {
+                mAppBubbleTaskId = taskId;
             }
 
             /**
@@ -1722,6 +1738,8 @@ public class BubbleController implements ConfigurationChangeListener {
                 for (String key : mSuppressedGroupToNotifKeys.keySet()) {
                     pw.println("   suppressing: " + key);
                 }
+
+                pw.print("mAppBubbleTaskId: " + mAppBubbleTaskId);
             }
         }
 
@@ -1773,8 +1791,7 @@ public class BubbleController implements ConfigurationChangeListener {
 
         @Override
         public boolean isAppBubbleTaskId(int taskId) {
-            Bubble appBubble = mBubbleData.getBubbleInStackWithKey(KEY_APP_BUBBLE);
-            return appBubble != null && appBubble.getTaskId() == taskId;
+            return mCachedState.mAppBubbleTaskId == taskId;
         }
 
         @Override
