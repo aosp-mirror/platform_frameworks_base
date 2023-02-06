@@ -235,6 +235,7 @@ public class ProviderRegistryGetSession extends ProviderSession<GetCredentialReq
                         -> filterResult.mCredentialEntries.stream())
                 .collect(Collectors.toList());
         setStatus(Status.CREDENTIALS_RECEIVED);
+        // TODO(use metric later)
     }
 
     @Nullable
