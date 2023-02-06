@@ -563,18 +563,6 @@ public class LocaleStore {
         String id = locale.toLanguageTag();
         LocaleInfo result;
         if (!sLocaleCache.containsKey(id)) {
-            // Locale preferences can modify the language tag to current system languages, so we
-            // need to check the input locale without extra u extension except numbering system.
-            Locale filteredLocale = new Locale.Builder()
-                    .setLocale(locale.stripExtensions())
-                    .setUnicodeLocaleKeyword("nu", locale.getUnicodeLocaleType("nu"))
-                    .build();
-            if (sLocaleCache.containsKey(filteredLocale.toLanguageTag())) {
-                result = new LocaleInfo(locale);
-                // This locale is included in supported locales, so set translated be true here.
-                result.mIsTranslated = true;
-                return result;
-            }
             result = new LocaleInfo(locale);
             sLocaleCache.put(id, result);
         } else {
