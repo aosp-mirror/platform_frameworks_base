@@ -488,31 +488,65 @@ public class SyncManager {
      * migrated already.
      */
     private void migrateSyncJobNamespaceIfNeeded() {
-        if (mSyncStorageEngine.isJobNamespaceMigrated()) {
+        final boolean namespaceMigrated = mSyncStorageEngine.isJobNamespaceMigrated();
+        final boolean attributionFixed = mSyncStorageEngine.isJobAttributionFixed();
+        if (namespaceMigrated && attributionFixed) {
             return;
         }
         final JobScheduler jobSchedulerDefaultNamespace =
                 mContext.getSystemService(JobScheduler.class);
-        final List<JobInfo> pendingJobs = jobSchedulerDefaultNamespace.getAllPendingJobs();
-        // Wait until we've confirmed that all syncs have been migrated to the new namespace
-        // before we persist successful migration to our status file. This is done to avoid
+        if (!namespaceMigrated) {
+            final List<JobInfo> pendingJobs = jobSchedulerDefaultNamespace.getAllPendingJobs();
+            // Wait until we've confirmed that all syncs have been migrated to the new namespace
+            // before we persist successful migration to our status file. This is done to avoid
+            // internal consistency issues if the devices reboots right after SyncManager has
+            // done the migration on its side but before JobScheduler has finished persisting
+            // the updated jobs to disk. If JobScheduler hasn't persisted the update to disk,
+            // then nothing that happened afterwards should have been persisted either, so there's
+            // no concern over activity happening after the migration causing issues.
+            boolean allSyncsMigrated = true;
+            for (int i = pendingJobs.size() - 1; i >= 0; --i) {
+                final JobInfo job = pendingJobs.get(i);
+                final SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
+                if (op != null) {
+                    // This is a sync. Move it over to SyncManager's namespace.
+                    mJobScheduler.scheduleAsPackage(job,
+                            op.owningPackage, op.target.userId, op.wakeLockName());
+                    jobSchedulerDefaultNamespace.cancel(job.getId());
+                    allSyncsMigrated = false;
+                }
+            }
+            mSyncStorageEngine.setJobNamespaceMigrated(allSyncsMigrated);
+        }
+
+        // Fix attribution for any syncs that were previously scheduled using
+        // JobScheduler.schedule() instead of JobScheduler.scheduleAsPackage().
+        final List<JobInfo> namespacedJobs = LocalServices.getService(JobSchedulerInternal.class)
+                .getSystemScheduledOwnJobs(mJobScheduler.getNamespace());
+        // Wait until we've confirmed that all syncs have been proper attribution
+        // before we persist attribution state to our status file. This is done to avoid
         // internal consistency issues if the devices reboots right after SyncManager has
-        // done the migration on its side but before JobScheduler has finished persisting
+        // rescheduled the job on its side but before JobScheduler has finished persisting
         // the updated jobs to disk. If JobScheduler hasn't persisted the update to disk,
         // then nothing that happened afterwards should have been persisted either, so there's
         // no concern over activity happening after the migration causing issues.
-        boolean allSyncsMigrated = true;
-        for (int i = pendingJobs.size() - 1; i >= 0; --i) {
-            final JobInfo job = pendingJobs.get(i);
+        // This case is done to fix issues for a subset of test devices.
+        // TODO: remove this attribution check/fix code
+        boolean allSyncsAttributed = true;
+        for (int i = namespacedJobs.size() - 1; i >= 0; --i) {
+            final JobInfo job = namespacedJobs.get(i);
             final SyncOperation op = SyncOperation.maybeCreateFromJobExtras(job.getExtras());
             if (op != null) {
-                // This is a sync. Move it over to SyncManager's namespace.
-                mJobScheduler.schedule(job);
-                jobSchedulerDefaultNamespace.cancel(job.getId());
-                allSyncsMigrated = false;
+                // This is a sync. Make sure it's properly attributed to the app
+                // instead of the system.
+                // Since the job ID stays the same, scheduleAsPackage will replace the scheduled
+                // job, so we don't need to call cancel as well.
+                mJobScheduler.scheduleAsPackage(job,
+                        op.owningPackage, op.target.userId, op.wakeLockName());
+                allSyncsAttributed = false;
             }
         }
-        mSyncStorageEngine.setJobNamespaceMigrated(allSyncsMigrated);
+        mSyncStorageEngine.setJobAttributionFixed(allSyncsAttributed);
     }
 
     private synchronized void verifyJobScheduler() {
