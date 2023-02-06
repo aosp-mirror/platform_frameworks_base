@@ -955,6 +955,20 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION;
 
     /**
+     * If enabled, when starting an application, the system will wait for a
+     * {@link ActivityManagerService#finishAttachApplication} from the app before scheduling
+     * Broadcasts or Services to it.
+     */
+    private static final String KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION =
+            "enable_wait_for_finish_attach_application";
+
+    private static final boolean DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION = true;
+
+    /** @see #KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION */
+    public volatile boolean mEnableWaitForFinishAttachApplication =
+            DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION;
+
+    /**
      * If a "short service" doesn't finish within this after the timeout (
      * {@link #KEY_SHORT_FGS_TIMEOUT_DURATION}), then we'll declare an ANR.
      * i.e. if the timeout is 60 seconds, and this ANR extra duration is 5 seconds, then
@@ -1125,6 +1139,10 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_TOP_TO_FGS_GRACE_DURATION:
                                 updateTopToFgsGraceDuration();
+                                break;
+                            case KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION:
+                                updateEnableWaitForFinishAttachApplication();
+                                break;
                             default:
                                 break;
                         }
@@ -1840,6 +1858,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
     }
 
+    private void updateEnableWaitForFinishAttachApplication() {
+        mEnableWaitForFinishAttachApplication = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION,
+                DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION);
+    }
+
     @NeverCompile // Avoid size overhead of debugging code.
     void dump(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER SETTINGS (dumpsys activity settings) "
@@ -2027,5 +2052,7 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  CUR_TRIM_EMPTY_PROCESSES="); pw.println(CUR_TRIM_EMPTY_PROCESSES);
         pw.print("  CUR_TRIM_CACHED_PROCESSES="); pw.println(CUR_TRIM_CACHED_PROCESSES);
         pw.print("  OOMADJ_UPDATE_QUICK="); pw.println(OOMADJ_UPDATE_QUICK);
+        pw.print("  ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION=");
+        pw.println(mEnableWaitForFinishAttachApplication);
     }
 }

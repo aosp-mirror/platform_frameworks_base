@@ -1243,7 +1243,7 @@ public class OomAdjuster {
         for (int i = numLru - 1; i >= 0; i--) {
             ProcessRecord app = lruList.get(i);
             final ProcessStateRecord state = app.mState;
-            if (!app.isKilledByAm() && app.getThread() != null) {
+            if (!app.isKilledByAm() && app.getThread() != null && !app.isPendingFinishAttach()) {
                 // We don't need to apply the update for the process which didn't get computed
                 if (state.getCompletedAdjSeq() == mAdjSeq) {
                     applyOomAdjLSP(app, true, now, nowElapsed, oomAdjReason);

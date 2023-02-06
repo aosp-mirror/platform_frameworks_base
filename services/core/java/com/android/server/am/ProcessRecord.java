@@ -175,6 +175,12 @@ class ProcessRecord implements WindowProcessListener {
     private boolean mPendingStart;
 
     /**
+     * Process finish attach application is pending.
+     */
+    @GuardedBy("mService")
+    private boolean mPendingFinishAttach;
+
+    /**
      * Seq no. Indicating the latest process start associated with this process record.
      */
     @GuardedBy("mService")
@@ -199,6 +205,11 @@ class ProcessRecord implements WindowProcessListener {
      * When the process is started. (before zygote fork)
      */
     private volatile long mStartElapsedTime;
+
+    /**
+     * When the process was sent the bindApplication request
+     */
+    private volatile long mBindApplicationTime;
 
     /**
      * This will be same as {@link #uid} usually except for some apps used during factory testing.
@@ -698,6 +709,16 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     @GuardedBy("mService")
+    void setPendingFinishAttach(boolean pendingFinishAttach) {
+        mPendingFinishAttach = pendingFinishAttach;
+    }
+
+    @GuardedBy("mService")
+    boolean isPendingFinishAttach() {
+        return mPendingFinishAttach;
+    }
+
+    @GuardedBy("mService")
     long getStartSeq() {
         return mStartSeq;
     }
@@ -738,6 +759,14 @@ class ProcessRecord implements WindowProcessListener {
 
     long getStartElapsedTime() {
         return mStartElapsedTime;
+    }
+
+    long getBindApplicationTime() {
+        return mBindApplicationTime;
+    }
+
+    void setBindApplicationTime(long bindApplicationTime) {
+        mBindApplicationTime = bindApplicationTime;
     }
 
     int getStartUid() {

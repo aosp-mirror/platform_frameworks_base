@@ -2514,7 +2514,7 @@ public final class ProcessList {
     }
 
     @GuardedBy("mService")
-    private String isProcStartValidLocked(ProcessRecord app, long expectedStartSeq) {
+    String isProcStartValidLocked(ProcessRecord app, long expectedStartSeq) {
         StringBuilder sb = null;
         if (app.isKilledByAm()) {
             if (sb == null) sb = new StringBuilder();
