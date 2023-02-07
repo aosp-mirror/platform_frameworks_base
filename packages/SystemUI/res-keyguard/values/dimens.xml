@@ -69,6 +69,10 @@
 
     <!-- The size of the dots in the PIN unlock method. -->
     <dimen name="password_dot_size">9dp</dimen>
+
+    <!-- The size of the shape in the PIN unlock method. -->
+    <dimen name="password_shape_size">34dp</dimen>
+
     <!-- The size of PIN text in the PIN unlock method. -->
     <integer name="scaled_password_text_size">40</integer>
 
@@ -139,4 +143,9 @@
 
     <!-- Translation y for appear animation -->
     <dimen name="keyguard_host_view_translation_y">80dp</dimen>
+
+    <!-- Attributes for placeholder dots in 6 digit PIN view -->
+    <dimen name="default_dot_diameter">34dp</dimen>
+    <dimen name="default_dot_spacing">0dp</dimen>
+
 </resources>

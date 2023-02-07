@@ -95,7 +95,6 @@ class NumPadAnimator {
         mHeight = height;
         mStartRadius = height / 2f;
         mEndRadius = height / 4f;
-        mBackground.setCornerRadius(mStartRadius);
         mExpandAnimator.setFloatValues(mStartRadius, mEndRadius);
         mContractAnimator.setFloatValues(mEndRadius, mStartRadius);
     }
