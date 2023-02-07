@@ -108,6 +108,8 @@ public class SoundDoseHelper {
     private static final String PERSIST_CSD_RECORD_SEPARATOR_CHAR = "|";
     private static final String PERSIST_CSD_RECORD_SEPARATOR = "\\|";
 
+    private static final long GLOBAL_TIME_OFFSET_UNINITIALIZED = -1;
+
     private final EventLogger mLogger = new EventLogger(AudioService.LOG_NB_EVENTS_SOUND_DOSE,
             "CSD updates");
 
@@ -167,6 +169,11 @@ public class SoundDoseHelper {
     private float mNextCsdWarning = 1.0f;
     @GuardedBy("mCsdStateLock")
     private final List<SoundDoseRecord> mDoseRecords = new ArrayList<>();
+
+    // time in seconds reported by System.currentTimeInMillis used as an offset to convert between
+    // boot time and global time
+    @GuardedBy("mCsdStateLock")
+    private long mGlobalTimeOffsetInSecs = GLOBAL_TIME_OFFSET_UNINITIALIZED;
 
     private final Context mContext;
 
@@ -590,16 +597,24 @@ public class SoundDoseHelper {
             Log.v(TAG, "Initializing sound dose");
 
             synchronized (mCsdStateLock) {
+                if (mGlobalTimeOffsetInSecs == GLOBAL_TIME_OFFSET_UNINITIALIZED) {
+                    mGlobalTimeOffsetInSecs = System.currentTimeMillis() / 1000L;
+                }
+
+                float prevCsd = mCurrentCsd;
                 // Restore persisted values
                 mCurrentCsd = parseGlobalSettingFloat(
                         Settings.Global.AUDIO_SAFE_CSD_CURRENT_VALUE, /* defaultValue= */0.f);
-                mNextCsdWarning = parseGlobalSettingFloat(
-                        Settings.Global.AUDIO_SAFE_CSD_NEXT_WARNING, /* defaultValue= */1.f);
-                final List<SoundDoseRecord> records = persistedStringToRecordList(
-                        mSettings.getGlobalString(mAudioService.getContentResolver(),
-                                Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS));
-                if (records != null) {
-                    mDoseRecords.addAll(records);
+                if (mCurrentCsd != prevCsd) {
+                    mNextCsdWarning = parseGlobalSettingFloat(
+                            Settings.Global.AUDIO_SAFE_CSD_NEXT_WARNING, /* defaultValue= */1.f);
+                    final List<SoundDoseRecord> records = persistedStringToRecordList(
+                            mSettings.getGlobalString(mAudioService.getContentResolver(),
+                                    Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS),
+                            mGlobalTimeOffsetInSecs);
+                    if (records != null) {
+                        mDoseRecords.addAll(records);
+                    }
                 }
             }
 
@@ -774,8 +789,13 @@ public class SoundDoseHelper {
         mLogger.enqueue(SoundDoseEvent.getDoseUpdateEvent(currentCsd, totalDuration));
     }
 
+    @SuppressWarnings("GuardedBy")  // avoid limitation with intra-procedural analysis of lambdas
     private void onPersistSoundDoseRecords() {
         synchronized (mCsdStateLock) {
+            if (mGlobalTimeOffsetInSecs == GLOBAL_TIME_OFFSET_UNINITIALIZED) {
+                mGlobalTimeOffsetInSecs = System.currentTimeMillis() / 1000L;
+            }
+
             mSettings.putGlobalString(mAudioService.getContentResolver(),
                     Settings.Global.AUDIO_SAFE_CSD_CURRENT_VALUE,
                     Float.toString(mCurrentCsd));
@@ -785,28 +805,41 @@ public class SoundDoseHelper {
             mSettings.putGlobalString(mAudioService.getContentResolver(),
                     Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS,
                     mDoseRecords.stream().map(
-                            SoundDoseHelper::recordToPersistedString).collect(
+                            record -> SoundDoseHelper.recordToPersistedString(record,
+                                    mGlobalTimeOffsetInSecs)).collect(
                             Collectors.joining(PERSIST_CSD_RECORD_SEPARATOR_CHAR)));
         }
     }
 
-    private static String recordToPersistedString(SoundDoseRecord record) {
-        return record.timestamp
+    private static String recordToPersistedString(SoundDoseRecord record,
+            long globalTimeOffsetInSecs) {
+        return convertToGlobalTime(record.timestamp, globalTimeOffsetInSecs)
                 + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.duration
                 + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.value
                 + PERSIST_CSD_RECORD_FIELD_SEPARATOR + record.averageMel;
     }
 
-    private static List<SoundDoseRecord> persistedStringToRecordList(String records) {
+    private static long convertToGlobalTime(long bootTimeInSecs, long globalTimeOffsetInSecs) {
+        return bootTimeInSecs + globalTimeOffsetInSecs;
+    }
+
+    private static long convertToBootTime(long globalTimeInSecs, long globalTimeOffsetInSecs) {
+        return globalTimeInSecs - globalTimeOffsetInSecs;
+    }
+
+    private static List<SoundDoseRecord> persistedStringToRecordList(String records,
+            long globalTimeOffsetInSecs) {
         if (records == null || records.isEmpty()) {
             return null;
         }
         return Arrays.stream(TextUtils.split(records, PERSIST_CSD_RECORD_SEPARATOR)).map(
-                SoundDoseHelper::persistedStringToRecord).filter(Objects::nonNull).collect(
+                record -> SoundDoseHelper.persistedStringToRecord(record,
+                        globalTimeOffsetInSecs)).filter(Objects::nonNull).collect(
                 Collectors.toList());
     }
 
-    private static SoundDoseRecord persistedStringToRecord(String record) {
+    private static SoundDoseRecord persistedStringToRecord(String record,
+            long globalTimeOffsetInSecs) {
         if (record == null || record.isEmpty()) {
             return null;
         }
@@ -818,7 +851,8 @@ public class SoundDoseHelper {
 
         final SoundDoseRecord sdRecord = new SoundDoseRecord();
         try {
-            sdRecord.timestamp = Long.parseLong(fields[0]);
+            sdRecord.timestamp = convertToBootTime(Long.parseLong(fields[0]),
+                    globalTimeOffsetInSecs);
             sdRecord.duration = Integer.parseInt(fields[1]);
             sdRecord.value = Float.parseFloat(fields[2]);
             sdRecord.averageMel = Float.parseFloat(fields[3]);
