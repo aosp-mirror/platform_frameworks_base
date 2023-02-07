@@ -26,6 +26,7 @@ import android.credentials.CreateCredentialResponse;
 import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
 import android.credentials.ui.ProviderPendingIntentResponse;
+import android.os.Bundle;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.CallingAppInfo;
@@ -74,15 +75,31 @@ public final class ProviderCreateSession extends ProviderSession<
                         createRequestSession.mClientAppInfo);
         if (providerCreateRequest != null) {
             BeginCreateCredentialRequest providerBeginCreateRequest =
-                    new BeginCreateCredentialRequest(
-                            providerCreateRequest.getCallingAppInfo(),
-                            providerCreateRequest.getType(),
-                            createRequestSession.mClientRequest.getCandidateQueryData());
+                    constructQueryPhaseRequest(createRequestSession.mClientRequest.getType(),
+                            createRequestSession.mClientRequest.getCandidateQueryData(),
+                            createRequestSession.mClientAppInfo,
+                            createRequestSession
+                                    .mClientRequest.alwaysSendAppInfoToProvider());
             return new ProviderCreateSession(context, providerInfo, createRequestSession, userId,
                     remoteCredentialService, providerBeginCreateRequest, providerCreateRequest);
         }
         Log.i(TAG, "Unable to create provider session");
         return null;
+    }
+
+    private static BeginCreateCredentialRequest constructQueryPhaseRequest(
+            String type, Bundle candidateQueryData, CallingAppInfo callingAppInfo,
+            boolean propagateToProvider) {
+        if (propagateToProvider) {
+            return new BeginCreateCredentialRequest(
+                    type,
+                    candidateQueryData
+            );
+        }
+        return new BeginCreateCredentialRequest(
+                type,
+                candidateQueryData,
+                callingAppInfo);
     }
 
     @Nullable

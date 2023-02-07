@@ -17,6 +17,7 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -38,7 +39,7 @@ import java.util.Objects;
  */
 @SuppressLint("ParcelNotFinal")
 public class BeginCreateCredentialRequest implements Parcelable {
-    private final @NonNull CallingAppInfo mCallingAppInfo;
+    private final @Nullable CallingAppInfo mCallingAppInfo;
     private final @NonNull String mType;
     private final @NonNull Bundle mData;
 
@@ -49,13 +50,23 @@ public class BeginCreateCredentialRequest implements Parcelable {
      * null or empty.
      * @throws NullPointerException If {@code data} is null.
      */
-    public BeginCreateCredentialRequest(@NonNull CallingAppInfo callingAppInfo,
-            @NonNull String type, @NonNull Bundle data) {
-        mCallingAppInfo = Objects.requireNonNull(callingAppInfo,
-                "callingAppInfo must not be null");
+    public BeginCreateCredentialRequest(@NonNull String type, @NonNull Bundle data,
+            @Nullable CallingAppInfo callingAppInfo) {
         mType = Preconditions.checkStringNotEmpty(type,
                 "type must not be null or empty");
         mData = Objects.requireNonNull(data, "data must not be null");
+        mCallingAppInfo = callingAppInfo;
+    }
+
+    /**
+     * Constructs a new instance without {@link CallingAppInfo}.
+     *
+     * @throws IllegalArgumentException If {{@code type} string is
+     * null or empty.
+     * @throws NullPointerException If {@code data} is null.
+     */
+    public BeginCreateCredentialRequest(@NonNull String type, @NonNull Bundle data) {
+        this(type, data, /*callingAppInfo=*/null);
     }
 
     private BeginCreateCredentialRequest(@NonNull Parcel in) {
@@ -90,7 +101,7 @@ public class BeginCreateCredentialRequest implements Parcelable {
     }
 
     /** Returns the info pertaining to the calling app. */
-    @NonNull
+    @Nullable
     public CallingAppInfo getCallingAppInfo() {
         return mCallingAppInfo;
     }
