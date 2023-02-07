@@ -1447,10 +1447,7 @@ public final class UiAutomation {
      *
      * @param command The command to execute.
      * @return File descriptors (out, in, err) to the standard output/input/error streams.
-     *
-     * @hide
      */
-    @TestApi
     @SuppressLint("ArrayReturn") // For consistency with other APIs
     public @NonNull ParcelFileDescriptor[] executeShellCommandRwe(@NonNull String command) {
         return executeShellCommandInternal(command, true /* includeStderr */);
