@@ -221,7 +221,7 @@ public class PackageInfo implements Parcelable {
     /**
      * Array of all {@link android.R.styleable#AndroidManifestAttribution
      * &lt;attribution&gt;} tags included under &lt;manifest&gt;, or null if there were none. This
-     * is only filled if the flag {@link PackageManager#GET_ATTRIBUTIONS} was set.
+     * is only filled if the flag {@link PackageManager#GET_ATTRIBUTIONS_LONG} was set.
      */
     @SuppressWarnings({"ArrayReturn", "NullableCollection"})
     public @Nullable Attribution[] attributions;

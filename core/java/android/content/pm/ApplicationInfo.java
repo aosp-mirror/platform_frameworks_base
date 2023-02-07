@@ -2576,7 +2576,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * Returns whether attributions provided by the application are meant to be user-visible.
      * Defaults to false if application info is retrieved without
-     * {@link PackageManager#GET_ATTRIBUTIONS}.
+     * {@link PackageManager#GET_ATTRIBUTIONS_LONG}.
      */
     public boolean areAttributionsUserVisible() {
         return (privateFlagsExt & PRIVATE_FLAG_EXT_ATTRIBUTIONS_ARE_USER_VISIBLE) != 0;
