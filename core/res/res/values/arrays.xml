@@ -210,8 +210,7 @@
     <!-- Device state identifiers and strings for system notifications. The string arrays must have
          the same length and order as the identifier array. -->
     <integer-array name="device_state_notification_state_identifiers">
-        <!-- TODO(b/267231269) change to concurrent display identifier when ready -->
-        <item>-1</item>
+        <item>@integer/config_deviceStateConcurrentRearDisplay</item>
     </integer-array>
     <string-array name="device_state_notification_names">
         <item>@string/concurrent_display_notification_name</item>
