@@ -667,7 +667,7 @@ public class AlarmManager {
      * than supplying a PendingIntent to be sent when the alarm time is reached, this variant
      * supplies an {@link OnAlarmListener} instance that will be invoked at that time.
      * <p>
-     * The OnAlarmListener {@link OnAlarmListener#onAlarm() onAlarm()} method will be
+     * The OnAlarmListener's {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      * invoked via the specified target Executor.
      *
      * <p>
@@ -919,8 +919,19 @@ public class AlarmManager {
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
      *
+     * <p>The behavior of this API when {@code windowMillis < 0} is undefined.
+     *
+     * @deprecated Better alternative APIs exist for setting an alarm with this method:
+     * <ul>
+     *     <li>For alarms with {@code windowMillis > 0}, use
+     *     {@link #setWindow(int, long, long, String, Executor, WorkSource, OnAlarmListener)}</li>
+     *     <li>For alarms with {@code windowMillis = 0}, use
+     *     {@link #setExact(int, long, String, Executor, WorkSource, OnAlarmListener)}</li>
+     * </ul>
+     *
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
