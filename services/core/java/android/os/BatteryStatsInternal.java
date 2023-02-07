@@ -104,8 +104,18 @@ public abstract class BatteryStatsInternal {
 
     /**
      * Reports any activity that could potentially have caused the CPU to wake up.
-     * Accepts a timestamp to allow the reporter to report it before or after the event.
+     * Accepts a timestamp to allow free ordering between the event and its reporting.
+     * @param subsystem The subsystem this activity should be attributed to.
+     * @param elapsedMillis The time when this activity happened in the elapsed timebase.
+     * @param uids The uid (or uids) that should be blamed for this activity.
      */
     public abstract void noteCpuWakingActivity(@CpuWakeupSubsystem int subsystem,
             long elapsedMillis, @NonNull int... uids);
+
+    /**
+     * Reports a sound trigger recognition event that may have woken up the CPU.
+     * @param elapsedMillis The time when the event happened in the elapsed timebase.
+     * @param uid The uid that requested this trigger.
+     */
+    public abstract void noteWakingSoundTrigger(long elapsedMillis, int uid);
 }
