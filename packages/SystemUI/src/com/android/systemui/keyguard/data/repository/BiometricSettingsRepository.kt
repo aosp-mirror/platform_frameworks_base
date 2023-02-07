@@ -20,6 +20,8 @@ import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED
 import android.content.Context
 import android.content.IntentFilter
+import android.hardware.biometrics.BiometricManager
+import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback
 import android.os.Looper
 import android.os.UserHandle
 import com.android.internal.widget.LockPatternUtils
@@ -42,10 +44,12 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 
@@ -59,6 +63,15 @@ import kotlinx.coroutines.flow.transformLatest
 interface BiometricSettingsRepository {
     /** Whether any fingerprints are enrolled for the current user. */
     val isFingerprintEnrolled: StateFlow<Boolean>
+
+    /** Whether face authentication is enrolled for the current user. */
+    val isFaceEnrolled: Flow<Boolean>
+
+    /**
+     * Whether face authentication is enabled/disabled based on system settings like device policy,
+     * biometrics setting.
+     */
+    val isFaceAuthenticationEnabled: Flow<Boolean>
 
     /**
      * Whether the current user is allowed to use a strong biometric for device entry based on
@@ -83,6 +96,7 @@ constructor(
     devicePolicyManager: DevicePolicyManager,
     @Application scope: CoroutineScope,
     @Background backgroundDispatcher: CoroutineDispatcher,
+    biometricManager: BiometricManager?,
     @Main looper: Looper,
     dumpManager: DumpManager,
 ) : BiometricSettingsRepository, Dumpable {
@@ -101,9 +115,15 @@ constructor(
     private val selectedUserId: Flow<Int> =
         userRepository.selectedUserInfo.map { it.id }.distinctUntilChanged()
 
+    private val devicePolicyChangedForAllUsers =
+        broadcastDispatcher.broadcastFlow(
+            filter = IntentFilter(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
+            user = UserHandle.ALL
+        )
+
     override val isFingerprintEnrolled: StateFlow<Boolean> =
         selectedUserId
-            .flatMapLatest {
+            .flatMapLatest { currentUserId ->
                 conflatedCallbackFlow {
                     val callback =
                         object : AuthController.Callback {
@@ -112,7 +132,7 @@ constructor(
                                 userId: Int,
                                 hasEnrollments: Boolean
                             ) {
-                                if (sensorBiometricType.isFingerprint) {
+                                if (sensorBiometricType.isFingerprint && userId == currentUserId) {
                                     trySendWithFailureLogging(
                                         hasEnrollments,
                                         TAG,
@@ -131,6 +151,77 @@ constructor(
                 initialValue =
                     authController.isFingerprintEnrolled(userRepository.getSelectedUserInfo().id)
             )
+
+    override val isFaceEnrolled: Flow<Boolean> =
+        selectedUserId.flatMapLatest { selectedUserId: Int ->
+            conflatedCallbackFlow {
+                val callback =
+                    object : AuthController.Callback {
+                        override fun onEnrollmentsChanged(
+                            sensorBiometricType: BiometricType,
+                            userId: Int,
+                            hasEnrollments: Boolean
+                        ) {
+                            // TODO(b/242022358), use authController.isFaceAuthEnrolled after
+                            //  ag/20176811 is available.
+                            if (
+                                sensorBiometricType == BiometricType.FACE &&
+                                    userId == selectedUserId
+                            ) {
+                                trySendWithFailureLogging(
+                                    hasEnrollments,
+                                    TAG,
+                                    "Face enrollment changed"
+                                )
+                            }
+                        }
+                    }
+                authController.addCallback(callback)
+                trySendWithFailureLogging(
+                    authController.isFaceAuthEnrolled(selectedUserId),
+                    TAG,
+                    "Initial value of face auth enrollment"
+                )
+                awaitClose { authController.removeCallback(callback) }
+            }
+        }
+
+    override val isFaceAuthenticationEnabled: Flow<Boolean>
+        get() =
+            combine(isFaceEnabledByBiometricsManager, isFaceEnabledByDevicePolicy) {
+                biometricsManagerSetting,
+                devicePolicySetting ->
+                biometricsManagerSetting && devicePolicySetting
+            }
+
+    private val isFaceEnabledByDevicePolicy: Flow<Boolean> =
+        combine(selectedUserId, devicePolicyChangedForAllUsers) { userId, _ ->
+                devicePolicyManager.isFaceDisabled(userId)
+            }
+            .onStart {
+                emit(devicePolicyManager.isFaceDisabled(userRepository.getSelectedUserInfo().id))
+            }
+            .flowOn(backgroundDispatcher)
+            .distinctUntilChanged()
+
+    private val isFaceEnabledByBiometricsManager =
+        conflatedCallbackFlow {
+                val callback =
+                    object : IBiometricEnabledOnKeyguardCallback.Stub() {
+                        override fun onChanged(enabled: Boolean, userId: Int) {
+                            trySendWithFailureLogging(
+                                enabled,
+                                TAG,
+                                "biometricsEnabled state changed"
+                            )
+                        }
+                    }
+                biometricManager?.registerEnabledOnKeyguardCallback(callback)
+                awaitClose {}
+            }
+            // This is because the callback is binder-based and we want to avoid multiple callbacks
+            // being registered.
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isStrongBiometricAllowed: StateFlow<Boolean> =
         selectedUserId
@@ -169,17 +260,8 @@ constructor(
     override val isFingerprintEnabledByDevicePolicy: StateFlow<Boolean> =
         selectedUserId
             .flatMapLatest { userId ->
-                broadcastDispatcher
-                    .broadcastFlow(
-                        filter = IntentFilter(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                        user = UserHandle.ALL
-                    )
-                    .transformLatest {
-                        emit(
-                            (devicePolicyManager.getKeyguardDisabledFeatures(null, userId) and
-                                DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT) == 0
-                        )
-                    }
+                devicePolicyChangedForAllUsers
+                    .transformLatest { emit(devicePolicyManager.isFingerprintDisabled(userId)) }
                     .flowOn(backgroundDispatcher)
                     .distinctUntilChanged()
             }
@@ -187,13 +269,21 @@ constructor(
                 scope,
                 started = SharingStarted.Eagerly,
                 initialValue =
-                    devicePolicyManager.getKeyguardDisabledFeatures(
-                        null,
+                    devicePolicyManager.isFingerprintDisabled(
                         userRepository.getSelectedUserInfo().id
-                    ) and DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT == 0
+                    )
             )
 
     companion object {
         private const val TAG = "BiometricsRepositoryImpl"
     }
 }
+
+private fun DevicePolicyManager.isFaceDisabled(userId: Int): Boolean =
+    isNotActive(userId, DevicePolicyManager.KEYGUARD_DISABLE_FACE)
+
+private fun DevicePolicyManager.isFingerprintDisabled(userId: Int): Boolean =
+    isNotActive(userId, DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT)
+
+private fun DevicePolicyManager.isNotActive(userId: Int, policy: Int): Boolean =
+    (getKeyguardDisabledFeatures(null, userId) and policy) == 0

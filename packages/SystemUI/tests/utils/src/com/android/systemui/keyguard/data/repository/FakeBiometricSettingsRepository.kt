@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +26,14 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
 
     private val _isFingerprintEnrolled = MutableStateFlow<Boolean>(false)
     override val isFingerprintEnrolled: StateFlow<Boolean> = _isFingerprintEnrolled.asStateFlow()
+
+    private val _isFaceEnrolled = MutableStateFlow(false)
+    override val isFaceEnrolled: Flow<Boolean>
+        get() = _isFaceEnrolled
+
+    private val _isFaceAuthEnabled = MutableStateFlow(false)
+    override val isFaceAuthenticationEnabled: Flow<Boolean>
+        get() = _isFaceAuthEnabled
 
     private val _isStrongBiometricAllowed = MutableStateFlow(false)
     override val isStrongBiometricAllowed = _isStrongBiometricAllowed.asStateFlow()
@@ -43,5 +52,13 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
 
     fun setFingerprintEnabledByDevicePolicy(isFingerprintEnabledByDevicePolicy: Boolean) {
         _isFingerprintEnabledByDevicePolicy.value = isFingerprintEnabledByDevicePolicy
+    }
+
+    fun setFaceEnrolled(isFaceEnrolled: Boolean) {
+        _isFaceEnrolled.value = isFaceEnrolled
+    }
+
+    fun setIsFaceAuthEnabled(enabled: Boolean) {
+        _isFaceAuthEnabled.value = enabled
     }
 }
