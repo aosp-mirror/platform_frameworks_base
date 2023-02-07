@@ -92,6 +92,7 @@ import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1210,6 +1211,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
     }
 
+    // TODO(b/188595497): Remove after migrating to shell.
     /** @see RecentsAnimationController#attachNavigationBarToApp */
     private void handleLegacyRecentsStartBehavior(DisplayContent dc, TransitionInfo info) {
         if ((mFlags & TRANSIT_FLAG_IS_RECENTS) == 0) {
@@ -1290,8 +1292,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // Place the nav bar on top of anything else in the top activity.
             t.setLayer(navSurfaceControl, Integer.MAX_VALUE);
         }
-        if (mController.mStatusBar != null) {
-            mController.mStatusBar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, false);
+        final StatusBarManagerInternal bar = dc.getDisplayPolicy().getStatusBarManagerInternal();
+        if (bar != null) {
+            bar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, false);
         }
     }
 
@@ -1305,12 +1308,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mRecentsDisplayId = DEFAULT_DISPLAY;
         }
 
-        if (mController.mStatusBar != null) {
-            mController.mStatusBar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, true);
-        }
-
         final DisplayContent dc =
                 mController.mAtm.mRootWindowContainer.getDisplayContent(mRecentsDisplayId);
+        final StatusBarManagerInternal bar = dc.getDisplayPolicy().getStatusBarManagerInternal();
+        if (bar != null) {
+            bar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, true);
+        }
         final WindowState navWindow = dc.getDisplayPolicy().getNavigationBar();
         if (navWindow == null) return;
         navWindow.setSurfaceTranslationY(0);

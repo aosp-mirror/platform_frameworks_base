@@ -106,10 +106,8 @@ public class TransitionTests extends WindowTestsBase {
     private BLASTSyncEngine mSyncEngine;
 
     private Transition createTestTransition(int transitType) {
-        TransitionTracer tracer = mock(TransitionTracer.class);
-        final TransitionController controller = new TransitionController(
-                mock(ActivityTaskManagerService.class), mock(TaskSnapshotController.class),
-                mock(TransitionTracer.class));
+        final TransitionController controller = new TestTransitionController(
+                mock(ActivityTaskManagerService.class));
 
         mSyncEngine = createTestBLASTSyncEngine();
         final Transition t = new Transition(transitType, 0 /* flags */, controller, mSyncEngine);
@@ -780,8 +778,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testTimeout() {
-        final TransitionController controller = new TransitionController(mAtm,
-                mock(TaskSnapshotController.class), mock(TransitionTracer.class));
+        final TransitionController controller = new TestTransitionController(mAtm);
         final BLASTSyncEngine sync = new BLASTSyncEngine(mWm);
         final CountDownLatch latch = new CountDownLatch(1);
         // When the timeout is reached, it will finish the sync-group and notify transaction ready.
@@ -1062,9 +1059,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testIntermediateVisibility() {
-        final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
-        final TransitionController controller = new TransitionController(mAtm, snapshotController,
-                mock(TransitionTracer.class));
+        final TransitionController controller = new TestTransitionController(mAtm);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
@@ -1135,10 +1130,8 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testTransientLaunch() {
-        final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
         final ArrayList<ActivityRecord> enteringAnimReports = new ArrayList<>();
-        final TransitionController controller = new TransitionController(mAtm, snapshotController,
-                mock(TransitionTracer.class)) {
+        final TransitionController controller = new TestTransitionController(mAtm) {
             @Override
             protected void dispatchLegacyAppTransitionFinished(ActivityRecord ar) {
                 if (ar.mEnteringAnimation) {
@@ -1147,6 +1140,7 @@ public class TransitionTests extends WindowTestsBase {
                 super.dispatchLegacyAppTransitionFinished(ar);
             }
         };
+        final TaskSnapshotController snapshotController = controller.mTaskSnapshotController;
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
@@ -1211,9 +1205,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testNotReadyPushPop() {
-        final TaskSnapshotController snapshotController = mock(TaskSnapshotController.class);
-        final TransitionController controller = new TransitionController(mAtm, snapshotController,
-                mock(TransitionTracer.class));
+        final TransitionController controller = new TestTransitionController(mAtm);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
