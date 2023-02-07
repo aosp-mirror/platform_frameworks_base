@@ -186,6 +186,18 @@ public final class AccessibilityManager {
      */
     public static final int ACCESSIBILITY_SHORTCUT_KEY = 1;
 
+    /** @hide */
+    public static final int FLASH_REASON_CALL = 1;
+
+    /** @hide */
+    public static final int FLASH_REASON_ALARM = 2;
+
+    /** @hide */
+    public static final int FLASH_REASON_NOTIFICATION = 3;
+
+    /** @hide */
+    public static final int FLASH_REASON_PREVIEW = 4;
+
     /**
      * Annotations for the shortcut type.
      * @hide
@@ -208,6 +220,19 @@ public final class AccessibilityManager {
             FLAG_CONTENT_CONTROLS
     })
     public @interface ContentFlag {}
+
+    /**
+     * Annotations for reason of Flash notification.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "FLASH_REASON_" }, value = {
+            FLASH_REASON_CALL,
+            FLASH_REASON_ALARM,
+            FLASH_REASON_NOTIFICATION,
+            FLASH_REASON_PREVIEW
+    })
+    public @interface FlashNotificationReason {}
 
     /**
      * Use this flag to indicate the content of a UI that times out contains icons.
@@ -315,6 +340,13 @@ public final class AccessibilityManager {
      * Map from a view's accessibility id to the list of request preparers set for that view
      */
     private SparseArray<List<AccessibilityRequestPreparer>> mRequestPreparerLists;
+
+    /**
+     * Binder for flash notification.
+     *
+     * @see #startFlashNotificationSequence(Context, int)
+     */
+    private final Binder mBinder = new Binder();
 
     /**
      * Listener for the system accessibility state. To listen for changes to the
@@ -2093,6 +2125,95 @@ public final class AccessibilityManager {
             return service.unregisterProxyForDisplay(proxy.getDisplayId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start sequence (infinite) type of flash notification. Use
+     * {@code Context.getOpPackageName()} as the identifier of this flash notification.
+     * The notification can be cancelled later by calling {@link #stopFlashNotificationSequence}
+     * with same {@code Context.getOpPackageName()}.
+     * If the binder associated with this {@link AccessibilityManager} instance dies then the
+     * sequence will stop automatically. It is strongly recommended to call
+     * {@link #stopFlashNotificationSequence} within a reasonable amount of time after calling
+     * this method.
+     *
+     * @param context The context in which this manager operates.
+     * @param reason The triggering reason of flash notification.
+     * @return {@code true} if flash notification works properly.
+     * @hide
+     */
+    public boolean startFlashNotificationSequence(@NonNull Context context,
+            @FlashNotificationReason int reason) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.startFlashNotificationSequence(context.getOpPackageName(),
+                    reason, mBinder);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while start flash notification sequence", re);
+            return false;
+        }
+    }
+
+    /**
+     * Stop sequence (infinite) type of flash notification. The flash notification with
+     * {@code Context.getOpPackageName()} as identifier will be stopped if exist.
+     * It is strongly recommended to call this method within a reasonable amount of time after
+     * calling {@link #startFlashNotificationSequence} method.
+     *
+     * @param context The context in which this manager operates.
+     * @return {@code true} if flash notification stops properly.
+     * @hide
+     */
+    public boolean stopFlashNotificationSequence(@NonNull Context context) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.stopFlashNotificationSequence(context.getOpPackageName());
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while stop flash notification sequence", re);
+            return false;
+        }
+    }
+
+    /**
+     * Start event (finite) type of flash notification.
+     *
+     * @param context The context in which this manager operates.
+     * @param reason The triggering reason of flash notification.
+     * @param reasonPkg The package that trigger the flash notification.
+     * @return {@code true} if flash notification works properly.
+     * @hide
+     */
+    public boolean startFlashNotificationEvent(@NonNull Context context,
+            @FlashNotificationReason int reason, @Nullable String reasonPkg) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.startFlashNotificationEvent(context.getOpPackageName(),
+                    reason, reasonPkg);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while start flash notification event", re);
+            return false;
         }
     }
 
