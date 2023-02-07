@@ -503,6 +503,13 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-android-os-unit-testable-src",
+    srcs: [
+        "core/java/android/os/DdmSyncState.java",
+    ],
+}
+
+filegroup {
     name: "framework-networkstack-shared-srcs",
     srcs: [
         // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
