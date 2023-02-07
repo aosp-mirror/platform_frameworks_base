@@ -45,18 +45,15 @@ import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
-import com.android.credentialmanager.common.material.ModalBottomSheetLayout
-import com.android.credentialmanager.common.material.ModalBottomSheetValue
-import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.ConfirmButton
 import com.android.credentialmanager.common.ui.Entry
+import com.android.credentialmanager.common.ui.ModalBottomSheet
 import com.android.credentialmanager.common.ui.TextOnSurface
 import com.android.credentialmanager.common.ui.TextSecondary
 import com.android.credentialmanager.common.ui.TextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ContainerCard
 import com.android.credentialmanager.common.ui.ToggleVisibilityButton
-import com.android.credentialmanager.ui.theme.EntryShape
 import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,13 +62,7 @@ fun CreateCredentialScreen(
     viewModel: CreateCredentialViewModel,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
-    val state = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Expanded,
-        skipHalfExpanded = true
-    )
-    ModalBottomSheetLayout(
-        sheetBackgroundColor = MaterialTheme.colorScheme.surface,
-        sheetState = state,
+    ModalBottomSheet(
         sheetContent = {
             val uiState = viewModel.uiState
             // Hide the sheet content as opposed to the whole bottom sheet to maintain the scrim
@@ -153,14 +144,8 @@ fun CreateCredentialScreen(
                 }
             }
         },
-        scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
-        sheetShape = EntryShape.TopRoundedCorner,
-    ) {}
-    LaunchedEffect(state.currentValue) {
-        if (state.currentValue == ModalBottomSheetValue.Hidden) {
-            viewModel.onCancel()
-        }
-    }
+        onDismiss = viewModel::onCancel
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
