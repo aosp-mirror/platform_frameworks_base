@@ -219,6 +219,7 @@ public class SecureSettings {
         Settings.Secure.ASSIST_LONG_PRESS_HOME_ENABLED,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_PROGRAM_INFO,
         Settings.Secure.BLUETOOTH_LE_BROADCAST_CODE,
-        Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME
+        Settings.Secure.BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME,
+        Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED
     };
 }
