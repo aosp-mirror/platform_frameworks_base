@@ -565,6 +565,11 @@ class SurfaceAnimator {
     public static final int ANIMATION_TYPE_STARTING_REVEAL = 1 << 7;
 
     /**
+     * Animation when a back gesture animation is applied to a window container.
+     * @hide
+     */
+    public static final int ANIMATION_TYPE_PREDICT_BACK = 1 << 8;
+    /**
      * Bitmask to include all animation types. This is NOT an {@link AnimationType}
      * @hide
      */
@@ -583,7 +588,8 @@ class SurfaceAnimator {
             ANIMATION_TYPE_WINDOW_ANIMATION,
             ANIMATION_TYPE_INSETS_CONTROL,
             ANIMATION_TYPE_TOKEN_TRANSFORM,
-            ANIMATION_TYPE_STARTING_REVEAL
+            ANIMATION_TYPE_STARTING_REVEAL,
+            ANIMATION_TYPE_PREDICT_BACK
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface AnimationType {}
@@ -602,6 +608,7 @@ class SurfaceAnimator {
             case ANIMATION_TYPE_INSETS_CONTROL: return "insets_animation";
             case ANIMATION_TYPE_TOKEN_TRANSFORM: return "token_transform";
             case ANIMATION_TYPE_STARTING_REVEAL: return "starting_reveal";
+            case ANIMATION_TYPE_PREDICT_BACK: return "predict_back";
             default: return "unknown type:" + type;
         }
     }
