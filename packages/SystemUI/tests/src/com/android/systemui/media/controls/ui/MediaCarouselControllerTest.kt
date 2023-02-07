@@ -21,12 +21,20 @@ import android.content.res.Configuration
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.MathUtils.abs
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
@@ -49,6 +57,9 @@ import javax.inject.Provider
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -90,11 +101,15 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var mediaCarousel: MediaScrollView
     @Mock lateinit var pageIndicator: PageIndicator
     @Mock lateinit var mediaFlags: MediaFlags
+    @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
     @Captor
     lateinit var configListener: ArgumentCaptor<ConfigurationController.ConfigurationListener>
     @Captor lateinit var newConfig: ArgumentCaptor<Configuration>
     @Captor lateinit var visualStabilityCallback: ArgumentCaptor<OnReorderingAllowedListener>
+    @Captor lateinit var keyguardCallback: ArgumentCaptor<KeyguardUpdateMonitorCallback>
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -102,6 +117,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        transitionRepository = FakeKeyguardTransitionRepository()
         mediaCarouselController =
             MediaCarouselController(
                 context,
@@ -119,11 +135,14 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 logger,
                 debugLogger,
                 mediaFlags,
+                keyguardUpdateMonitor,
+                KeyguardTransitionInteractor(repository = transitionRepository),
             )
         verify(configurationController).addCallback(capture(configListener))
         verify(mediaDataManager).addListener(capture(listener))
         verify(visualStabilityProvider)
             .addPersistentReorderingAllowedListener(capture(visualStabilityCallback))
+        verify(keyguardUpdateMonitor).registerCallback(capture(keyguardCallback))
         whenever(mediaControlPanelFactory.get()).thenReturn(panel)
         whenever(panel.mediaViewController).thenReturn(mediaViewController)
         whenever(mediaDataManager.smartspaceMediaData).thenReturn(smartspaceMediaData)
@@ -740,4 +759,41 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertTrue(MediaPlayerData.visiblePlayerKeys().elementAt(0).isSsMediaRec)
         assertFalse(MediaPlayerData.visiblePlayerKeys().elementAt(0).data.active)
     }
+
+    @Test
+    fun testOnLockDownMode_hideMediaCarousel() {
+        whenever(keyguardUpdateMonitor.isUserInLockdown(context.userId)).thenReturn(true)
+        mediaCarouselController.mediaCarousel = mediaCarousel
+
+        keyguardCallback.value.onStrongAuthStateChanged(context.userId)
+
+        verify(mediaCarousel).visibility = View.GONE
+    }
+
+    @Test
+    fun testLockDownModeOff_showMediaCarousel() {
+        whenever(keyguardUpdateMonitor.isUserInLockdown(context.userId)).thenReturn(false)
+        whenever(keyguardUpdateMonitor.isUserUnlocked(context.userId)).thenReturn(true)
+        mediaCarouselController.mediaCarousel = mediaCarousel
+
+        keyguardCallback.value.onStrongAuthStateChanged(context.userId)
+
+        verify(mediaCarousel).visibility = View.VISIBLE
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun testKeyguardGone_showMediaCarousel() =
+        runTest(UnconfinedTestDispatcher()) {
+            mediaCarouselController.mediaCarousel = mediaCarousel
+
+            val job = mediaCarouselController.listenForAnyStateToGoneKeyguardTransition(this)
+            transitionRepository.sendTransitionStep(
+                TransitionStep(to = KeyguardState.GONE, transitionState = TransitionState.FINISHED)
+            )
+
+            verify(mediaCarousel).visibility = View.VISIBLE
+
+            job.cancel()
+        }
 }
