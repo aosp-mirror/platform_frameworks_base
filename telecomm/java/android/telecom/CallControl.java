@@ -76,7 +76,10 @@ public final class CallControl {
     }
 
     /**
-     * Request Telecom set the call state to active.
+     * Request Telecom set the call state to active. This method should be called when either an
+     * outgoing call is ready to go active or a held call is ready to go active again. For incoming
+     * calls that are ready to be answered, use
+     * {@link CallControl#answer(int, Executor, OutcomeReceiver)}.
      *
      * @param executor The {@link Executor} on which the {@link OutcomeReceiver} callback
      *                 will be called on.
@@ -96,6 +99,43 @@ public final class CallControl {
             try {
                 mServerInterface.setActive(mCallId,
                         new CallControlResultReceiver("setActive", executor, callback));
+
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        } else {
+            throw new IllegalStateException(INTERFACE_ERROR_MSG);
+        }
+    }
+
+    /**
+     * Request Telecom answer an incoming call.  For outgoing calls and calls that have been placed
+     * on hold, use {@link CallControl#setActive(Executor, OutcomeReceiver)}.
+     *
+     * @param videoState to report to Telecom. Telecom will store VideoState in the event another
+     *                   service/device requests it in order to continue the call on another screen.
+     * @param executor   The {@link Executor} on which the {@link OutcomeReceiver} callback
+     *                   will be called on.
+     * @param callback   that will be completed on the Telecom side that details success or failure
+     *                   of the requested operation.
+     *
+     *                   {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
+     *                   switched the call state to active
+     *
+     *                   {@link OutcomeReceiver#onError} will be called if Telecom has failed to set
+     *                   the call state to active.  A {@link CallException} will be passed
+     *                   that details why the operation failed.
+     */
+    public void answer(@android.telecom.CallAttributes.CallType int videoState,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Void, CallException> callback) {
+        validateVideoState(videoState);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        if (mServerInterface != null) {
+            try {
+                mServerInterface.answer(videoState, mCallId,
+                        new CallControlResultReceiver("answer", executor, callback));
 
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
@@ -343,4 +383,13 @@ public final class CallControl {
         }
     }
 
+    /** @hide */
+    private void validateVideoState(@android.telecom.CallAttributes.CallType int videoState) {
+        if (videoState != CallAttributes.AUDIO_CALL && videoState != CallAttributes.VIDEO_CALL) {
+            throw new IllegalArgumentException(TextUtils.formatSimple(
+                    "The VideoState argument passed in, %d , is not a valid VideoState. The "
+                            + "VideoState choices are limited to CallAttributes.AUDIO_CALL or"
+                            + "CallAttributes.VIDEO_CALL", videoState));
+        }
+    }
 }
