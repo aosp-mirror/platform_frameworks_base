@@ -578,6 +578,13 @@ import java.util.TimeZone;
  *     <li> {@link #ACTION_SHUTDOWN}
  * </ul>
  *
+ * <p class="note"><strong>Note: </strong>If your app targets Android 11
+ * (API level 30) or higher, registering broadcast such as
+ * {@link #ACTION_PACKAGES_SUSPENDED} that includes package details in the
+ * extras receives a filtered list of apps or nothing. Learn more about how to
+ * <a href="/training/basics/intents/package-visibility">manage package visibility</a>.
+ * </p>
+ *
  * <h3>Standard Categories</h3>
  *
  * <p>These are the current standard categories that can be used to further
