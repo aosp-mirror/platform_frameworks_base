@@ -333,7 +333,7 @@ public abstract class MediaOutputBaseAdapter extends
             if (!mController.isVolumeControlEnabled(device)) {
                 disableSeekBar();
             } else {
-                enableSeekBar();
+                enableSeekBar(device);
             }
             mSeekBar.setMaxVolume(device.getMaxVolume());
             final int currentVolume = device.getCurrentVolume();
@@ -368,13 +368,6 @@ public abstract class MediaOutputBaseAdapter extends
             }
             if (mIsInitVolumeFirstTime) {
                 mIsInitVolumeFirstTime = false;
-            }
-            if (mController.isAdvancedLayoutSupported()) {
-                updateIconAreaClickListener((v) -> {
-                    mSeekBar.resetVolume();
-                    mController.adjustVolume(device, 0);
-                    updateMutedVolumeIcon();
-                });
             }
             mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -556,11 +549,21 @@ public abstract class MediaOutputBaseAdapter extends
         protected void disableSeekBar() {
             mSeekBar.setEnabled(false);
             mSeekBar.setOnTouchListener((v, event) -> true);
+            if (mController.isAdvancedLayoutSupported()) {
+                updateIconAreaClickListener(null);
+            }
         }
 
-        private void enableSeekBar() {
+        private void enableSeekBar(MediaDevice device) {
             mSeekBar.setEnabled(true);
             mSeekBar.setOnTouchListener((v, event) -> false);
+            if (mController.isAdvancedLayoutSupported()) {
+                updateIconAreaClickListener((v) -> {
+                    mSeekBar.resetVolume();
+                    mController.adjustVolume(device, 0);
+                    updateMutedVolumeIcon();
+                });
+            }
         }
 
         protected void setUpDeviceIcon(MediaDevice device) {
