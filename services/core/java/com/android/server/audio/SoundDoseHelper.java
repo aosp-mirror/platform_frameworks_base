@@ -595,9 +595,12 @@ public class SoundDoseHelper {
                         Settings.Global.AUDIO_SAFE_CSD_CURRENT_VALUE, /* defaultValue= */0.f);
                 mNextCsdWarning = parseGlobalSettingFloat(
                         Settings.Global.AUDIO_SAFE_CSD_NEXT_WARNING, /* defaultValue= */1.f);
-                mDoseRecords.addAll(persistedStringToRecordList(
+                final List<SoundDoseRecord> records = persistedStringToRecordList(
                         mSettings.getGlobalString(mAudioService.getContentResolver(),
-                                Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS)));
+                                Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS));
+                if (records != null) {
+                    mDoseRecords.addAll(records);
+                }
             }
 
             reset();
