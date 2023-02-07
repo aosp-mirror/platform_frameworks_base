@@ -21,7 +21,6 @@ import android.app.ITransientNotificationCallback;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -162,11 +161,10 @@ public interface StatusBarManagerInternal {
             LetterboxDetails[] letterboxDetails);
 
     /** @see com.android.internal.statusbar.IStatusBar#showTransient */
-    void showTransient(int displayId, @InternalInsetsType int[] types,
-            boolean isGestureOnSystemBar);
+    void showTransient(int displayId, @InsetsType int types, boolean isGestureOnSystemBar);
 
     /** @see com.android.internal.statusbar.IStatusBar#abortTransient */
-    void abortTransient(int displayId, @InternalInsetsType int[] types);
+    void abortTransient(int displayId, @InsetsType int types);
 
     /**
      * @see com.android.internal.statusbar.IStatusBar#showToast(String, IBinder, CharSequence,

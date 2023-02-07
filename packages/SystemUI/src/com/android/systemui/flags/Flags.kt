@@ -68,7 +68,7 @@ object Flags {
     @JvmField val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
 
     // TODO(b/254512538): Tracking Bug
-    val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply", teamfood = true)
+    val INSTANT_VOICE_REPLY = releasedFlag(111, "instant_voice_reply")
 
     // TODO(b/254512425): Tracking Bug
     val NOTIFICATION_MEMORY_MONITOR_ENABLED =
@@ -525,7 +525,7 @@ object Flags {
 
     // 1500 - chooser aka sharesheet
     // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = releasedFlag(1500, "chooser_unbundled")
+    val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
 
     // TODO(b/266983432) Tracking Bug
     val SHARESHEET_CUSTOM_ACTIONS =

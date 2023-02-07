@@ -1136,6 +1136,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 // client, we should finish and apply it here so the transactions aren't lost.
                 postCleanupOnFailure();
             }
+            final AccessibilityController accessibilityController =
+                    dc.mWmService.mAccessibilityController;
+            if (accessibilityController.hasCallbacks()) {
+                accessibilityController.onWMTransition(dc.getDisplayId(), mType);
+            }
         } else {
             // No player registered or it's not enabled, so just finish/apply immediately
             if (!mIsPlayerEnabled) {

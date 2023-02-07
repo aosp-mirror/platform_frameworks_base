@@ -39,6 +39,10 @@
                 }
             ],
             "file_patterns": ["BinaryTransparencyService\\.java"]
+        },
+        {
+            "name": "BinaryTransparencyHostTest",
+            "file_patterns": ["BinaryTransparencyService\\.java"]
         }
     ],
     "presubmit-large": [
@@ -68,12 +72,6 @@
                 }
             ],
             "file_patterns": ["ClipboardService\\.java"]
-        }
-    ],
-    "postsubmit": [
-        {
-            "name": "BinaryTransparencyHostTest",
-            "file_patterns": ["BinaryTransparencyService\\.java"]
         }
     ]
 }

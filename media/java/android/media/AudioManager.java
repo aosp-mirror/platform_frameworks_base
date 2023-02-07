@@ -1422,7 +1422,7 @@ public class AudioManager {
     public int getVolumeGroupIdForAttributes(@NonNull AudioAttributes attributes) {
         Preconditions.checkNotNull(attributes, "Audio Attributes must not be null");
         return AudioProductStrategy.getVolumeGroupIdForAudioAttributes(attributes,
-                /* fallbackOnDefault= */ false);
+                /* fallbackOnDefault= */ true);
     }
 
     /**

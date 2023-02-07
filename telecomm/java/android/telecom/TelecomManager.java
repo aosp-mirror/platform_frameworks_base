@@ -951,6 +951,23 @@ public class TelecomManager {
     public static final String EXTRA_CALL_SOURCE = "android.telecom.extra.CALL_SOURCE";
 
     /**
+     * Intent action to trigger "switch to managed profile" dialog for call in SystemUI
+     *
+     * @hide
+     */
+    public static final String ACTION_SHOW_SWITCH_TO_WORK_PROFILE_FOR_CALL_DIALOG =
+            "android.telecom.action.SHOW_SWITCH_TO_WORK_PROFILE_FOR_CALL_DIALOG";
+
+    /**
+     * Extra specifying the managed profile user id.
+     * This is used with {@link TelecomManager#ACTION_SHOW_SWITCH_TO_WORK_PROFILE_FOR_CALL_DIALOG}
+     *
+     * @hide
+     */
+    public static final String EXTRA_MANAGED_PROFILE_USER_ID =
+            "android.telecom.extra.MANAGED_PROFILE_USER_ID";
+
+    /**
      * Indicating the call is initiated via emergency dialer's shortcut button.
      *
      * @hide

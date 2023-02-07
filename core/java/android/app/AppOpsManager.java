@@ -1432,14 +1432,14 @@ public class AppOpsManager {
                     .APP_OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION;
 
     /**
-     * Hide foreground service stop button in quick settings.
+     * Allows an application to start an activity while running in the background.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final int OP_SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON =
-            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON;
+    public static final int OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION =
+            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION;
 
     /**
      * Allows an application to capture bugreport directly without consent dialog when using the
@@ -2027,14 +2027,14 @@ public class AppOpsManager {
             "android:system_exempt_from_fgs_bg_start_while_in_use_permission_restriction";
 
     /**
-     * Hide foreground service stop button in quick settings.
+     * Allows an application to start an activity while running in the background.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final String OPSTR_SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON =
-            "android:system_exempt_from_fgs_stop_button";
+    public static final String OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION =
+            "android:system_exempt_from_activity_bg_start_restriction";
 
     /**
      * Allows an application to capture bugreport directly without consent dialog when using the
@@ -2562,9 +2562,9 @@ public class AppOpsManager {
                 OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
                 "SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION")
                 .build(),
-        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON,
-                OPSTR_SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON,
-                "SYSTEM_EXEMPT_FROM_FGS_STOP_BUTTON").build(),
+        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
+                OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
+                "SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION").build(),
         new AppOpInfo.Builder(
                 OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
                 OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,

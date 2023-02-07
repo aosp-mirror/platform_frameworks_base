@@ -18,10 +18,6 @@ package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsSource.ID_IME;
-import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.WindowInsets.Type.displayCutout;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.mandatorySystemGestures;
@@ -38,10 +34,11 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets;
+import android.view.WindowInsets.Type.InsetsType;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.inputmethod.InputMethodManagerInternal;
@@ -49,7 +46,6 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Manages global window inset state in the system represented by {@link InsetsState}.
@@ -60,14 +56,11 @@ class InsetsStateController {
     private final InsetsState mState = new InsetsState();
     private final DisplayContent mDisplayContent;
 
-    private final ArrayMap<Integer, WindowContainerInsetsSourceProvider> mProviders =
-            new ArrayMap<>();
-    private final ArrayMap<InsetsControlTarget, ArrayList<Integer>> mControlTargetTypeMap =
-            new ArrayMap<>();
-    private final SparseArray<InsetsControlTarget> mTypeControlTargetMap = new SparseArray<>();
-
-    /** @see #onControlFakeTargetChanged */
-    private final SparseArray<InsetsControlTarget> mTypeFakeControlTargetMap = new SparseArray<>();
+    private final SparseArray<WindowContainerInsetsSourceProvider> mProviders = new SparseArray<>();
+    private final ArrayMap<InsetsControlTarget, ArrayList<InsetsSourceProvider>>
+            mControlTargetProvidersMap = new ArrayMap<>();
+    private final SparseArray<InsetsControlTarget> mIdControlTargetMap = new SparseArray<>();
+    private final SparseArray<InsetsControlTarget> mIdFakeControlTargetMap = new SparseArray<>();
 
     private final ArraySet<InsetsControlTarget> mPendingControlChanged = new ArraySet<>();
 
@@ -92,15 +85,8 @@ class InsetsStateController {
         }
     };
 
-    private final Function<Integer, WindowContainerInsetsSourceProvider> mSourceProviderFunc;
-
     InsetsStateController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
-        mSourceProviderFunc = id -> (id == ID_IME)
-                ? new ImeInsetsSourceProvider(mState.getOrCreateSource(
-                        id, ime()), this, mDisplayContent)
-                : new WindowContainerInsetsSourceProvider(mState.getOrCreateSource(
-                        id, InsetsState.toPublicType(id)), this, mDisplayContent);
     }
 
     InsetsState getRawInsetsState() {
@@ -108,39 +94,55 @@ class InsetsStateController {
     }
 
     @Nullable InsetsSourceControl[] getControlsForDispatch(InsetsControlTarget target) {
-        ArrayList<Integer> controlled = mControlTargetTypeMap.get(target);
+        final ArrayList<InsetsSourceProvider> controlled = mControlTargetProvidersMap.get(target);
         if (controlled == null) {
             return null;
         }
         final int size = controlled.size();
         final InsetsSourceControl[] result = new InsetsSourceControl[size];
         for (int i = 0; i < size; i++) {
-            result[i] = mProviders.get(controlled.get(i)).getControl(target);
+            result[i] = controlled.get(i).getControl(target);
         }
         return result;
     }
 
-    ArrayMap<Integer, WindowContainerInsetsSourceProvider> getSourceProviders() {
+    SparseArray<WindowContainerInsetsSourceProvider> getSourceProviders() {
         return mProviders;
     }
 
     /**
      * @return The provider of a specific source ID.
      */
-    WindowContainerInsetsSourceProvider getSourceProvider(int id) {
-        return mProviders.computeIfAbsent(id, mSourceProviderFunc);
+    WindowContainerInsetsSourceProvider getOrCreateSourceProvider(int id, @InsetsType int type) {
+        WindowContainerInsetsSourceProvider provider = mProviders.get(id);
+        if (provider != null) {
+            return provider;
+        }
+        final InsetsSource source = mState.getOrCreateSource(id, type);
+        provider = id == ID_IME
+                ? new ImeInsetsSourceProvider(source, this, mDisplayContent)
+                : new WindowContainerInsetsSourceProvider(source, this, mDisplayContent);
+        mProviders.put(id, provider);
+        return provider;
     }
 
     ImeInsetsSourceProvider getImeSourceProvider() {
-        return (ImeInsetsSourceProvider) getSourceProvider(ID_IME);
+        return (ImeInsetsSourceProvider) getOrCreateSourceProvider(ID_IME, ime());
+    }
+
+    void removeSourceProvider(int id) {
+        if (id != ID_IME) {
+            mState.removeSource(id);
+            mProviders.remove(id);
+        }
     }
 
     /**
-     * @return The provider of a specific type or null if we don't have it.
+     * @return The provider of a source ID or null if we don't have it.
      */
     @Nullable
-    WindowContainerInsetsSourceProvider peekSourceProvider(@InternalInsetsType int type) {
-        return mProviders.get(type);
+    WindowContainerInsetsSourceProvider peekSourceProvider(int id) {
+        return mProviders.get(id);
     }
 
     /**
@@ -208,8 +210,16 @@ class InsetsStateController {
         }
     }
 
-    boolean isFakeTarget(@InternalInsetsType int type, InsetsControlTarget target) {
-        return mTypeFakeControlTargetMap.get(type) == target;
+    @InsetsType int getFakeControllingTypes(InsetsControlTarget target) {
+        @InsetsType int types = 0;
+        for (int i = mProviders.size() - 1; i >= 0; i--) {
+            final InsetsSourceProvider provider = mProviders.valueAt(i);
+            final InsetsControlTarget fakeControlTarget = provider.getFakeControlTarget();
+            if (target == fakeControlTarget) {
+                types |= provider.getSource().getType();
+            }
+        }
+        return types;
     }
 
     void onImeControlTargetChanged(@Nullable InsetsControlTarget imeTarget) {
@@ -217,7 +227,7 @@ class InsetsStateController {
         // Make sure that we always have a control target for the IME, even if the IME target is
         // null. Otherwise there is no leash that will hide it and IME becomes "randomly" visible.
         InsetsControlTarget target = imeTarget != null ? imeTarget : mEmptyImeControlTarget;
-        onControlChanged(ID_IME, target);
+        onControlTargetChanged(getImeSourceProvider(), target, false /* fake */);
         ProtoLog.d(WM_DEBUG_IME, "onImeControlTargetChanged %s",
                 target != null ? target.getWindow() : "null");
         notifyPendingInsetsControlChanged();
@@ -235,101 +245,88 @@ class InsetsStateController {
             @Nullable InsetsControlTarget fakeStatusControlling,
             @Nullable InsetsControlTarget navControlling,
             @Nullable InsetsControlTarget fakeNavControlling) {
-        onControlChanged(ITYPE_STATUS_BAR, statusControlling);
-        onControlChanged(ITYPE_NAVIGATION_BAR, navControlling);
-        onControlChanged(ITYPE_CLIMATE_BAR, statusControlling);
-        onControlChanged(ITYPE_EXTRA_NAVIGATION_BAR, navControlling);
-        onControlFakeTargetChanged(ITYPE_STATUS_BAR, fakeStatusControlling);
-        onControlFakeTargetChanged(ITYPE_NAVIGATION_BAR, fakeNavControlling);
-        onControlFakeTargetChanged(ITYPE_CLIMATE_BAR, fakeStatusControlling);
-        onControlFakeTargetChanged(ITYPE_EXTRA_NAVIGATION_BAR, fakeNavControlling);
+        for (int i = mProviders.size() - 1; i >= 0; i--) {
+            final InsetsSourceProvider provider = mProviders.valueAt(i);
+            final @InsetsType int type = provider.getSource().getType();
+            if (type == WindowInsets.Type.statusBars()) {
+                onControlTargetChanged(provider, statusControlling, false /* fake */);
+                onControlTargetChanged(provider, fakeStatusControlling, true /* fake */);
+            } else if (type == WindowInsets.Type.navigationBars()) {
+                onControlTargetChanged(provider, navControlling, false /* fake */);
+                onControlTargetChanged(provider, fakeNavControlling, true /* fake */);
+            }
+        }
         notifyPendingInsetsControlChanged();
     }
 
     void notifyControlRevoked(@NonNull InsetsControlTarget previousControlTarget,
             InsetsSourceProvider provider) {
-        removeFromControlMaps(previousControlTarget, provider.getSource().getId(),
-                false /* fake */);
+        removeFromControlMaps(previousControlTarget, provider, false /* fake */);
     }
 
-    private void onControlChanged(@InternalInsetsType int type,
-            @Nullable InsetsControlTarget target) {
-        final InsetsControlTarget previous = mTypeControlTargetMap.get(type);
-        if (target == previous) {
-            return;
-        }
-        final WindowContainerInsetsSourceProvider provider = mProviders.get(type);
-        if (provider == null) {
+    private void onControlTargetChanged(InsetsSourceProvider provider,
+            @Nullable InsetsControlTarget target, boolean fake) {
+        final InsetsControlTarget lastTarget = fake
+                ? mIdFakeControlTargetMap.get(provider.getSource().getId())
+                : mIdControlTargetMap.get(provider.getSource().getId());
+        if (target == lastTarget) {
             return;
         }
         if (!provider.isControllable()) {
             return;
         }
-        provider.updateControlForTarget(target, false /* force */);
-        target = provider.getControlTarget();
-        if (previous != null) {
-            removeFromControlMaps(previous, type, false /* fake */);
-            mPendingControlChanged.add(previous);
+        if (fake) {
+            // The fake target updated here will be used to pretend to the app that it's still under
+            // control of the bars while it's not really, but we still need to find out the apps
+            // intentions around showing/hiding. For example, when the transient bars are showing,
+            // and the fake target requests to show system bars, the transient state will be
+            // aborted.
+            provider.updateFakeControlTarget(target);
+        } else {
+            provider.updateControlForTarget(target, false /* force */);
+
+            // Get control target again in case the provider didn't accept the one we passed to it.
+            target = provider.getControlTarget();
+            if (target == lastTarget) {
+                return;
+            }
+        }
+        if (lastTarget != null) {
+            removeFromControlMaps(lastTarget, provider, fake);
+            mPendingControlChanged.add(lastTarget);
         }
         if (target != null) {
-            addToControlMaps(target, type, false /* fake */);
+            addToControlMaps(target, provider, fake);
             mPendingControlChanged.add(target);
         }
     }
 
-    /**
-     * The fake target saved here will be used to pretend to the app that it's still under control
-     * of the bars while it's not really, but we still need to find out the apps intentions around
-     * showing/hiding. For example, when the transient bars are showing, and the fake target
-     * requests to show system bars, the transient state will be aborted.
-     */
-    void onControlFakeTargetChanged(@InternalInsetsType int type,
-            @Nullable InsetsControlTarget fakeTarget) {
-        final InsetsControlTarget previous = mTypeFakeControlTargetMap.get(type);
-        if (fakeTarget == previous) {
-            return;
-        }
-        final WindowContainerInsetsSourceProvider provider = mProviders.get(type);
-        if (provider == null) {
-            return;
-        }
-        provider.updateControlForFakeTarget(fakeTarget);
-        if (previous != null) {
-            removeFromControlMaps(previous, type, true /* fake */);
-            mPendingControlChanged.add(previous);
-        }
-        if (fakeTarget != null) {
-            addToControlMaps(fakeTarget, type, true /* fake */);
-            mPendingControlChanged.add(fakeTarget);
-        }
-    }
-
     private void removeFromControlMaps(@NonNull InsetsControlTarget target,
-            @InternalInsetsType int type, boolean fake) {
-        final ArrayList<Integer> array = mControlTargetTypeMap.get(target);
+            InsetsSourceProvider provider, boolean fake) {
+        final ArrayList<InsetsSourceProvider> array = mControlTargetProvidersMap.get(target);
         if (array == null) {
             return;
         }
-        array.remove((Integer) type);
+        array.remove(provider);
         if (array.isEmpty()) {
-            mControlTargetTypeMap.remove(target);
+            mControlTargetProvidersMap.remove(target);
         }
         if (fake) {
-            mTypeFakeControlTargetMap.remove(type);
+            mIdFakeControlTargetMap.remove(provider.getSource().getId());
         } else {
-            mTypeControlTargetMap.remove(type);
+            mIdControlTargetMap.remove(provider.getSource().getId());
         }
     }
 
     private void addToControlMaps(@NonNull InsetsControlTarget target,
-            @InternalInsetsType int type, boolean fake) {
-        final ArrayList<Integer> array = mControlTargetTypeMap.computeIfAbsent(target,
-                key -> new ArrayList<>());
-        array.add(type);
+            InsetsSourceProvider provider, boolean fake) {
+        final ArrayList<InsetsSourceProvider> array = mControlTargetProvidersMap.computeIfAbsent(
+                target, key -> new ArrayList<>());
+        array.add(provider);
         if (fake) {
-            mTypeFakeControlTargetMap.put(type, target);
+            mIdFakeControlTargetMap.put(provider.getSource().getId(), target);
         } else {
-            mTypeControlTargetMap.put(type, target);
+            mIdControlTargetMap.put(provider.getSource().getId(), target);
         }
     }
 
@@ -351,7 +348,7 @@ class InsetsStateController {
             for (int i = mPendingControlChanged.size() - 1; i >= 0; i--) {
                 final InsetsControlTarget controlTarget = mPendingControlChanged.valueAt(i);
                 controlTarget.notifyInsetsControlChanged();
-                if (mControlTargetTypeMap.containsKey(controlTarget)) {
+                if (mControlTargetProvidersMap.containsKey(controlTarget)) {
                     // We only collect targets who get controls, not lose controls.
                     newControlTargets.add(controlTarget);
                 }
@@ -377,10 +374,25 @@ class InsetsStateController {
         prefix = prefix + "  ";
         mState.dump(prefix, pw);
         pw.println(prefix + "Control map:");
-        for (int i = mTypeControlTargetMap.size() - 1; i >= 0; i--) {
+        for (int i = mControlTargetProvidersMap.size() - 1; i >= 0; i--) {
+            final InsetsControlTarget controlTarget = mControlTargetProvidersMap.keyAt(i);
             pw.print(prefix + "  ");
-            pw.println(InsetsState.typeToString(mTypeControlTargetMap.keyAt(i)) + " -> "
-                    + mTypeControlTargetMap.valueAt(i));
+            pw.print(controlTarget);
+            pw.println(":");
+            final ArrayList<InsetsSourceProvider> providers = mControlTargetProvidersMap.valueAt(i);
+            for (int j = providers.size() - 1; j >= 0; j--) {
+                final InsetsSourceProvider provider = providers.get(j);
+                if (provider != null) {
+                    pw.print(prefix + "    ");
+                    if (controlTarget == provider.getFakeControlTarget()) {
+                        pw.print("(fake) ");
+                    }
+                    pw.println(provider.getControl(controlTarget));
+                }
+            }
+        }
+        if (mControlTargetProvidersMap.isEmpty()) {
+            pw.print(prefix + "  none");
         }
         pw.println(prefix + "InsetsSourceProviders:");
         for (int i = mProviders.size() - 1; i >= 0; i--) {

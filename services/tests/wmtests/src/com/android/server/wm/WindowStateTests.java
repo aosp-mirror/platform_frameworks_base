@@ -437,13 +437,15 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState app = mAppWindow;
         statusBar.mHasSurface = true;
         assertTrue(statusBar.isVisible());
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
+        mDisplayContent.getInsetsStateController()
+                .getOrCreateSourceProvider(ITYPE_STATUS_BAR, statusBars())
                 .setWindowContainer(statusBar, null /* frameProvider */,
                         null /* imeFrameProvider */);
         mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
                 app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
         app.setRequestedVisibleTypes(0, statusBars());
-        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
+        mDisplayContent.getInsetsStateController()
+                .getOrCreateSourceProvider(ITYPE_STATUS_BAR, statusBars())
                 .updateClientVisibility(app);
         waitUntilHandlersIdle();
         assertFalse(statusBar.isVisible());
@@ -1169,8 +1171,8 @@ public class WindowStateTests extends WindowTestsBase {
         mNotificationShadeWindow.setHasSurface(true);
         mNotificationShadeWindow.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
         assertTrue(mNotificationShadeWindow.canBeImeTarget());
-        mDisplayContent.getInsetsStateController().getSourceProvider(ID_IME).setWindowContainer(
-                mImeWindow, null, null);
+        mDisplayContent.getInsetsStateController().getOrCreateSourceProvider(ID_IME, ime())
+                .setWindowContainer(mImeWindow, null, null);
 
         mDisplayContent.computeImeTarget(true);
         assertEquals(mNotificationShadeWindow, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));

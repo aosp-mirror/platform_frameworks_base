@@ -113,6 +113,7 @@ class SettingsEntryRepositoryTest {
 
     @Test
     fun testGetEntryPath() {
+        SpaEnvironmentFactory.reset(spaEnvironment)
         assertThat(
             entryRepository.getEntryPathWithDisplayName(
                 genEntryId("Layer2Entry1", SppLayer2.createSettingsPage())

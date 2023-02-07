@@ -30,7 +30,6 @@ import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
-import static android.provider.DeviceConfig.NAMESPACE_AUTO_PIN_CONFIRMATION;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
@@ -1729,8 +1728,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (newCredential.isPattern()) {
             setBoolean(LockPatternUtils.PATTERN_EVER_CHOSEN_KEY, true, userHandle);
         }
-        if (DeviceConfig.getBoolean(NAMESPACE_AUTO_PIN_CONFIRMATION,
-                "enable_auto_pin_confirmation", /* defaultValue= */ false)) {
+        if (LockPatternUtils.isAutoPinConfirmFeatureAvailable()) {
             if (newCredential.isPin()) {
                 setLong(LockPatternUtils.PIN_LENGTH, newCredential.size(), userHandle);
             }

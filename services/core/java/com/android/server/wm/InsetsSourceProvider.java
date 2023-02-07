@@ -164,7 +164,7 @@ abstract class InsetsSourceProvider {
             // TODO: Ideally, we should wait for the animation to finish so previous window can
             // animate-out as new one animates-in.
             mWindowContainer.cancelAnimation();
-            mWindowContainer.getProvidedInsetsSources().remove(mSource.getId());
+            mWindowContainer.getInsetsSourceProviders().remove(mSource.getId());
             mSeamlessRotating = false;
         }
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "InsetsSource setWin %s for type %s",
@@ -180,7 +180,7 @@ abstract class InsetsSourceProvider {
             mSource.setInsetsRoundedCornerFrame(false);
             mSourceFrame.setEmpty();
         } else {
-            mWindowContainer.getProvidedInsetsSources().put(mSource.getId(), mSource);
+            mWindowContainer.getInsetsSourceProviders().put(mSource.getId(), this);
             if (mControllable) {
                 mWindowContainer.setControllableInsetProvider(this);
                 if (mPendingControlTarget != null) {
@@ -189,13 +189,6 @@ abstract class InsetsSourceProvider {
                 }
             }
         }
-    }
-
-    /**
-     * @return Whether there is a window container which backs this source.
-     */
-    boolean hasWindowContainer() {
-        return mWindowContainer != null;
     }
 
     /**
@@ -363,9 +356,9 @@ abstract class InsetsSourceProvider {
     }
 
     /**
-     * @see InsetsStateController#onControlFakeTargetChanged(int, InsetsControlTarget)
+     * @see InsetsStateController#onControlTargetChanged
      */
-    void updateControlForFakeTarget(@Nullable InsetsControlTarget fakeTarget) {
+    void updateFakeControlTarget(@Nullable InsetsControlTarget fakeTarget) {
         if (fakeTarget == mFakeControlTarget) {
             return;
         }
@@ -570,6 +563,10 @@ abstract class InsetsSourceProvider {
         return mControlTarget;
     }
 
+    InsetsControlTarget getFakeControlTarget() {
+        return mFakeControlTarget;
+    }
+
     boolean isClientVisible() {
         return mClientVisible;
     }
@@ -609,15 +606,15 @@ abstract class InsetsSourceProvider {
         }
         if (mControlTarget != null) {
             pw.print(prefix + "mControlTarget=");
-            pw.println(mControlTarget.getWindow());
+            pw.println(mControlTarget);
         }
         if (mPendingControlTarget != null) {
             pw.print(prefix + "mPendingControlTarget=");
-            pw.println(mPendingControlTarget.getWindow());
+            pw.println(mPendingControlTarget);
         }
         if (mFakeControlTarget != null) {
             pw.print(prefix + "mFakeControlTarget=");
-            pw.println(mFakeControlTarget.getWindow());
+            pw.println(mFakeControlTarget);
         }
     }
 

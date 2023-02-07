@@ -214,11 +214,11 @@ oneway interface IStatusBar
      * bar and navigation bar which are temporarily visible to the user.
      *
      * @param displayId the ID of the display to notify.
-     * @param types the internal insets types of the bars are about to show transiently.
+     * @param types the insets types of the bars are about to show transiently.
      * @param isGestureOnSystemBar whether the gesture to show the transient bar was a gesture on
      *        one of the bars itself.
      */
-    void showTransient(int displayId, in int[] types, boolean isGestureOnSystemBar);
+    void showTransient(int displayId, int types, boolean isGestureOnSystemBar);
 
     /**
      * Notifies System UI to abort the transient state of system bars, which prevents the bars being
@@ -226,9 +226,9 @@ oneway interface IStatusBar
      * bars again.
      *
      * @param displayId the ID of the display to notify.
-     * @param types the internal insets types of the bars are about to abort the transient state.
+     * @param types the insets types of the bars are about to abort the transient state.
      */
-    void abortTransient(int displayId, in int[] types);
+    void abortTransient(int displayId, int types);
 
     /**
      * Show a warning that the device is about to go to sleep due to user inactivity.

@@ -161,7 +161,11 @@ final class LogicalDisplay {
 
     // Indicates the position of the display, POSITION_UNKNOWN could mean it hasn't been specified,
     // or this is a virtual display etc.
-    private int mPosition = Layout.Display.POSITION_UNKNOWN;
+    private int mDevicePosition = Layout.Display.POSITION_UNKNOWN;
+
+    // Indicates that something other than the primary display device info has changed and needs to
+    // be handled in the next update.
+    private boolean mDirty = false;
 
     /**
      * The ID of the brightness throttling data that should be used. This can change e.g. in
@@ -181,11 +185,14 @@ final class LogicalDisplay {
         mBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID;
     }
 
-    public void setPositionLocked(int position) {
-        mPosition = position;
+    public void setDevicePositionLocked(int position) {
+        if (mDevicePosition != position) {
+            mDevicePosition = position;
+            mDirty = true;
+        }
     }
-    public int getPositionLocked() {
-        return mPosition;
+    public int getDevicePositionLocked() {
+        return mDevicePosition;
     }
 
     /**
@@ -343,9 +350,11 @@ final class LogicalDisplay {
         // logical display that they are sharing.  (eg. Adjust size for pixel-perfect
         // mirroring over HDMI.)
         DisplayDeviceInfo deviceInfo = mPrimaryDisplayDevice.getDisplayDeviceInfoLocked();
-        if (!Objects.equals(mPrimaryDisplayDeviceInfo, deviceInfo)) {
+        if (!Objects.equals(mPrimaryDisplayDeviceInfo, deviceInfo) || mDirty) {
             mBaseDisplayInfo.layerStack = mLayerStack;
             mBaseDisplayInfo.flags = 0;
+            // Displays default to moving content to the primary display when removed
+            mBaseDisplayInfo.removeMode = Display.REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY;
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_SUPPORTS_PROTECTED_BUFFERS;
             }
@@ -443,12 +452,20 @@ final class LogicalDisplay {
             mBaseDisplayInfo.installOrientation = deviceInfo.installOrientation;
             mBaseDisplayInfo.displayShape = deviceInfo.displayShape;
 
-            if (mPosition == Layout.Display.POSITION_REAR) {
+            if (mDevicePosition == Layout.Display.POSITION_REAR) {
+                // A rear display is meant to host a specific experience that is essentially
+                // a presentation to another user or users other than the main user since they
+                // can't actually see that display. Given that, it's a suitable display for
+                // presentations but the content should be destroyed rather than moved to a non-rear
+                // display when the rear display is removed.
                 mBaseDisplayInfo.flags |= Display.FLAG_REAR;
+                mBaseDisplayInfo.flags |= Display.FLAG_PRESENTATION;
+                mBaseDisplayInfo.removeMode = Display.REMOVE_MODE_DESTROY_CONTENT;
             }
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
+            mDirty = false;
         }
     }
 
@@ -857,7 +874,7 @@ final class LogicalDisplay {
         pw.println("mIsEnabled=" + mIsEnabled);
         pw.println("mIsInTransition=" + mIsInTransition);
         pw.println("mLayerStack=" + mLayerStack);
-        pw.println("mPosition=" + mPosition);
+        pw.println("mPosition=" + mDevicePosition);
         pw.println("mHasContent=" + mHasContent);
         pw.println("mDesiredDisplayModeSpecs={" + mDesiredDisplayModeSpecs + "}");
         pw.println("mRequestedColorMode=" + mRequestedColorMode);

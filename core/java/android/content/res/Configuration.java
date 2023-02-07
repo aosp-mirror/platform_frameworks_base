@@ -1107,7 +1107,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         } else {
             sb.append("?mcc");
         }
-        if (mnc != 0) {
+        if (mnc != MNC_ZERO) {
             sb.append(mnc);
             sb.append("mnc");
         } else {

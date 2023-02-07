@@ -3069,7 +3069,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 getOutPrintWriter().printf("Success: user %d is already being removed\n", userId);
                 return 0;
             case UserManager.REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN:
-                getOutPrintWriter().printf("Error: user %d is a permanent admin main user\n",
+                getErrPrintWriter().printf("Error: user %d is a permanent admin main user\n",
                         userId);
                 return 1;
             default:

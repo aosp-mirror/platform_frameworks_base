@@ -681,7 +681,7 @@ public class LockPatternUtils {
      * @return true, if deviceConfig flag is set to true or the flag is not propagated and
      * defaultValue is true.
      */
-    public boolean isAutoPinConfirmFeatureAvailable() {
+    public static boolean isAutoPinConfirmFeatureAvailable() {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTO_PIN_CONFIRMATION,
                 FLAG_ENABLE_AUTO_PIN_CONFIRMATION,
