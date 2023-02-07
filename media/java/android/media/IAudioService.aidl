@@ -629,12 +629,13 @@ interface IAudioService {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
     int[] getActiveAssistantServiceUids();
 
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING,android.Manifest.permission.BLUETOOTH_PRIVILEGED})")
     void registerDeviceVolumeDispatcherForAbsoluteVolume(boolean register,
             in IAudioDeviceVolumeDispatcher cb,
             in String packageName,
             in AudioDeviceAttributes device, in List<VolumeInfo> volumes,
-            boolean handlesvolumeAdjustment);
+            boolean handlesvolumeAdjustment,
+            int volumeBehavior);
 
     AudioHalVersionInfo getHalVersion();
 
