@@ -25,22 +25,20 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/** This test fails because of b/264261596 */
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class EnterPipToOtherOrientationTestCfArm(flicker: FlickerTest) :
-    EnterPipToOtherOrientationTest(flicker) {
+class ExitPipToAppViaIntentTestCfArm(flicker: FlickerTest) : ExitPipToAppViaIntentTest(flicker) {
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
-         * navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring repetitions, screen orientation
+         * and navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
+        fun getParams(): List<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
                 supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
             )

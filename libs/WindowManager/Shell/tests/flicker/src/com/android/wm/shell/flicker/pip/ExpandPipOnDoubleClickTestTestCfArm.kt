@@ -28,13 +28,14 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ExitPipViaIntentTestCfArm(flicker: FlickerTest) : ExitPipViaIntentTest(flicker) {
+class ExpandPipOnDoubleClickTestTestCfArm(flicker: FlickerTest) :
+    ExpandPipOnDoubleClickTest(flicker) {
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.nonRotationTests] for configuring repetitions, screen orientation
-         * and navigation modes.
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

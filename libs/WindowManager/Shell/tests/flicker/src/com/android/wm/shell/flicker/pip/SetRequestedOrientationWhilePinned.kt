@@ -46,7 +46,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class SetRequestedOrientationWhilePinnedTest(flicker: FlickerTest) : PipTransition(flicker) {
+open class SetRequestedOrientationWhilePinned(flicker: FlickerTest) : PipTransition(flicker) {
     private val startingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_0)
     private val endingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_90)
 
@@ -71,9 +71,7 @@ open class SetRequestedOrientationWhilePinnedTest(flicker: FlickerTest) : PipTra
                     .withStatusBarVisible()
                     .waitForAndVerify()
             }
-            teardown {
-                pipApp.exit(wmHelper)
-            }
+            teardown { pipApp.exit(wmHelper) }
             transitions {
                 // Launch the activity back into fullscreen and ensure that it is now in landscape
                 pipApp.launchViaIntent(wmHelper)

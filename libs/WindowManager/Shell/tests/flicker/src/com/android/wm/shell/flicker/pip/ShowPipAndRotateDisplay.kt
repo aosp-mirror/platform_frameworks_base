@@ -57,7 +57,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class PipRotationTest(flicker: FlickerTest) : PipTransition(flicker) {
+open class ShowPipAndRotateDisplay(flicker: FlickerTest) : PipTransition(flicker) {
     private val testApp = SimpleAppHelper(instrumentation)
     private val screenBoundsStart = WindowUtils.getDisplayBounds(flicker.scenario.startRotation)
     private val screenBoundsEnd = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)

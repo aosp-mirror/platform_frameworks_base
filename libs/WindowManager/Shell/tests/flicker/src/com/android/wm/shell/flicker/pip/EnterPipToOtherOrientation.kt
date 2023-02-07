@@ -67,7 +67,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(flicker) {
+open class EnterPipToOtherOrientation(flicker: FlickerTest) : PipTransition(flicker) {
     private val testApp = FixedOrientationAppHelper(instrumentation)
     private val startingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_90)
     private val endingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_0)
@@ -179,8 +179,7 @@ open class EnterPipToOtherOrientationTest(flicker: FlickerTest) : PipTransition(
     fun pipAppLayerPlusLetterboxCoversFullScreenOnStartTablet() {
         Assume.assumeFalse(tapl.isTablet)
         flicker.assertLayersStart {
-            visibleRegion(pipApp.or(ComponentNameMatcher.LETTERBOX))
-                .coversExactly(startingBounds)
+            visibleRegion(pipApp.or(ComponentNameMatcher.LETTERBOX)).coversExactly(startingBounds)
         }
     }
 

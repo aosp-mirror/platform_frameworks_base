@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class PipKeyboardTest(flicker: FlickerTest) : PipTransition(flicker) {
+open class MovePipOnImeVisibilityChangeTest(flicker: FlickerTest) : PipTransition(flicker) {
     private val imeApp = ImeAppHelper(instrumentation)
 
     @Before

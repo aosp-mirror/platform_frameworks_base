@@ -19,6 +19,7 @@ package com.android.wm.shell.flicker.pip
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -27,7 +28,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class PipRotationTestCfArm(flicker: FlickerTest) : PipRotationTest(flicker) {
+open class ClosePipWithDismissButtonTestCfArm(flicker: FlickerTest) :
+    ClosePipWithDismissButtonTest(flicker) {
     companion object {
         /**
          * Creates the test configurations.
@@ -37,8 +39,10 @@ class PipRotationTestCfArm(flicker: FlickerTest) : PipRotationTest(flicker) {
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.rotationTests()
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
         }
     }
 }

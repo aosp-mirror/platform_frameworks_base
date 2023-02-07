@@ -20,10 +20,8 @@ import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,7 +52,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ExitPipWithSwipeDownTest(flicker: FlickerTest) : ExitPipTransition(flicker) {
+open class ClosePipBySwipingDownTest(flicker: FlickerTest) : ClosePipTransition(flicker) {
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)
@@ -95,21 +93,5 @@ open class ExitPipWithSwipeDownTest(flicker: FlickerTest) : ExitPipTransition(fl
     @Test
     fun focusDoesNotChange() {
         flicker.assertEventLog { this.focusDoesNotChange() }
-    }
-
-    companion object {
-        /**
-         * Creates the test configurations.
-         *
-         * See [FlickerTestFactory.nonRotationTests] for configuring repetitions, screen orientation
-         * and navigation modes.
-         */
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun getParams(): List<FlickerTest> {
-            return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
-            )
-        }
     }
 }

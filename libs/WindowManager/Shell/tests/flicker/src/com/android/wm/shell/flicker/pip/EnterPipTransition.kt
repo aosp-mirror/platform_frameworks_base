@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,51 +17,20 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
-import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
-import org.junit.FixMethodOrder
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/**
- * Test entering pip from an app by interacting with the app UI
- *
- * To run this test: `atest WMShellFlickerTests:EnterPipTest`
- *
- * Actions:
- * ```
- *     Launch an app in full screen
- *     Press an "enter pip" button to put [pipApp] in pip mode
- * ```
- * Notes:
- * ```
- *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
- *        are inherited from [PipTransition]
- *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
- *        including configuring navigation mode, initial orientation and ensuring no
- *        apps are running before setup
- * ```
- */
-@RequiresDevice
-@RunWith(Parameterized::class)
-@Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class EnterPipTest(flicker: FlickerTest) : PipTransition(flicker) {
-
+abstract class EnterPipTransition(flicker: FlickerTest) : PipTransition(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             setup { pipApp.launchViaIntent(wmHelper) }
             teardown { pipApp.exit(wmHelper) }
-            transitions { pipApp.clickEnterPipButton(wmHelper) }
         }
 
     /** Checks [pipApp] window remains visible throughout the animation */
@@ -101,7 +70,7 @@ open class EnterPipTest(flicker: FlickerTest) : PipTransition(flicker) {
     @Presubmit
     @Test
     open fun pipLayerOrOverlayRemainInsideVisibleBounds() {
-        flicker.assertLayersVisibleRegion(pipApp.or(ComponentNameMatcher.PIP_CONTENT_OVERLAY) ) {
+        flicker.assertLayersVisibleRegion(pipApp.or(ComponentNameMatcher.PIP_CONTENT_OVERLAY)) {
             coversAtMost(displayBounds)
         }
     }
@@ -129,7 +98,7 @@ open class EnterPipTest(flicker: FlickerTest) : PipTransition(flicker) {
         }
     }
 
-    /** Checks [ComponentMatcher.LAUNCHER] layer remains visible throughout the animation */
+    /** Checks [ComponentNameMatcher.LAUNCHER] layer remains visible throughout the animation */
     @Presubmit
     @Test
     fun launcherLayerBecomesVisible() {

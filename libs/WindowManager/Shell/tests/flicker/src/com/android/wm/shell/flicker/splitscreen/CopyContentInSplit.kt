@@ -116,7 +116,6 @@ class CopyContentInSplit(flicker: FlickerTest) : SplitScreenBase(flicker) {
     /** {@inheritDoc} */
     @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
-
     /** {@inheritDoc} */
     @Presubmit
     @Test

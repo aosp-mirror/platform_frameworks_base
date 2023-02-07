@@ -28,7 +28,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterPipTestCfArm(flicker: FlickerTest) : EnterPipTest(flicker) {
+class ClosePipBySwipingDownTestCfArm(flicker: FlickerTest) : ClosePipBySwipingDownTest(flicker) {
     companion object {
         /**
          * Creates the test configurations.
