@@ -359,7 +359,8 @@ public final class CredentialManagerService
 
             List<ProviderSession> providerSessions;
 
-            if (isCredentialDescriptionApiEnabled()) {
+            // TODO(b/268143699): temporarily disable the flag due to bug.
+            if (false) {
                 List<CredentialOption> optionsThatRequireActiveCredentials =
                         request.getCredentialOptions().stream()
                                 .filter(
