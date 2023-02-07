@@ -146,6 +146,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
+        if (mController.isAdvancedLayoutSupported()
+                && position >= mController.getMediaItemList().size()) {
+            Log.d(TAG, "Incorrect position for item type: " + position);
+            return MediaItem.MediaItemType.TYPE_GROUP_DIVIDER;
+        }
         return mController.isAdvancedLayoutSupported()
                 ? mController.getMediaItemList().get(position).getMediaItemType()
                 : super.getItemViewType(position);
