@@ -45,6 +45,9 @@ final class LetterboxConfigurationDeviceConfig
             "allow_ignore_orientation_request";
     private static final boolean DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST = true;
 
+    static final String KEY_ENABLE_COMPAT_FAKE_FOCUS = "enable_compat_fake_focus";
+    private static final boolean DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS = true;
+
     @VisibleForTesting
     static final Map<String, Boolean> sKeyToDefaultValueMap = Map.of(
             KEY_ENABLE_CAMERA_COMPAT_TREATMENT,
@@ -52,7 +55,9 @@ final class LetterboxConfigurationDeviceConfig
             KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
             DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
             KEY_ALLOW_IGNORE_ORIENTATION_REQUEST,
-            DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST
+            DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST,
+            KEY_ENABLE_COMPAT_FAKE_FOCUS,
+            DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS
     );
 
     // Whether camera compatibility treatment is enabled.
@@ -71,6 +76,11 @@ final class LetterboxConfigurationDeviceConfig
     // Whether enabling ignoreOrientationRequest is allowed on the device.
     private boolean mIsAllowIgnoreOrientationRequest =
             DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST;
+
+    // Whether sending compat fake focus for split screen resumed activities is enabled. This is
+    // needed because some game engines wait to get focus before drawing the content of the app
+    // which isn't guaranteed by default in multi-window modes.
+    private boolean mIsCompatFakeFocusAllowed = DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS;
 
     // Set of active device configs that need to be updated in
     // DeviceConfig.OnPropertiesChangedListener#onPropertiesChanged.
@@ -117,6 +127,8 @@ final class LetterboxConfigurationDeviceConfig
                 return mIsDisplayRotationImmersiveAppCompatPolicyEnabled;
             case KEY_ALLOW_IGNORE_ORIENTATION_REQUEST:
                 return mIsAllowIgnoreOrientationRequest;
+            case KEY_ENABLE_COMPAT_FAKE_FOCUS:
+                return mIsCompatFakeFocusAllowed;
             default:
                 throw new AssertionError("Unexpected flag name: " + key);
         }
@@ -138,6 +150,10 @@ final class LetterboxConfigurationDeviceConfig
                 break;
             case KEY_ALLOW_IGNORE_ORIENTATION_REQUEST:
                 mIsAllowIgnoreOrientationRequest =
+                        getDeviceConfig(key, defaultValue);
+                break;
+            case KEY_ENABLE_COMPAT_FAKE_FOCUS:
+                mIsCompatFakeFocusAllowed =
                         getDeviceConfig(key, defaultValue);
                 break;
             default:
