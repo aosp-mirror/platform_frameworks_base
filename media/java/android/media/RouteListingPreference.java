@@ -259,7 +259,7 @@ public final class RouteListingPreference implements Parcelable {
         @IntDef(
                 flag = true,
                 prefix = {"FLAG_"},
-                value = {FLAG_ONGOING_SESSION, FLAG_SUGGESTED, FLAG_ONGOING_SESSION_MANAGED})
+                value = {FLAG_ONGOING_SESSION, FLAG_ONGOING_SESSION_MANAGED, FLAG_SUGGESTED})
         public @interface Flags {}
 
         /**
@@ -423,6 +423,7 @@ public final class RouteListingPreference implements Parcelable {
          * Returns the flags associated to the route that corresponds to this item.
          *
          * @see #FLAG_ONGOING_SESSION
+         * @see #FLAG_ONGOING_SESSION_MANAGED
          * @see #FLAG_SUGGESTED
          */
         @Flags
