@@ -1269,6 +1269,13 @@ static jobject Bitmap_extractGainmap(JNIEnv* env, jobject, jlong bitmapHandle) {
     return Gainmap_extractFromBitmap(env, bitmapHolder->bitmap());
 }
 
+static void Bitmap_setGainmap(JNIEnv*, jobject, jlong bitmapHandle, jlong gainmapPtr) {
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    if (!bitmapHolder.valid()) return;
+    uirenderer::Gainmap* gainmap = reinterpret_cast<uirenderer::Gainmap*>(gainmapPtr);
+    bitmapHolder->bitmap().setGainmap(sp<uirenderer::Gainmap>::fromExisting(gainmap));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gBitmapMethods[] = {
@@ -1320,6 +1327,7 @@ static const JNINativeMethod gBitmapMethods[] = {
         {"nativeIsSRGBLinear", "(J)Z", (void*)Bitmap_isSRGBLinear},
         {"nativeSetImmutable", "(J)V", (void*)Bitmap_setImmutable},
         {"nativeExtractGainmap", "(J)Landroid/graphics/Gainmap;", (void*)Bitmap_extractGainmap},
+        {"nativeSetGainmap", "(JJ)V", (void*)Bitmap_setGainmap},
 
         // ------------ @CriticalNative ----------------
         {"nativeIsImmutable", "(J)Z", (void*)Bitmap_isImmutable},
