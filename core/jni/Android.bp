@@ -332,7 +332,6 @@ cc_library_shared {
                 "libdl",
                 "libdl_android",
                 "libtimeinstate",
-                "libtflite",
                 "server_configurable_flags",
                 "libimage_io",
                 "libjpegdecoder",
