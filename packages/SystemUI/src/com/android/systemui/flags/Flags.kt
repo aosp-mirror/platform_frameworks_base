@@ -95,7 +95,7 @@ object Flags {
         unreleasedFlag(259395680, "simplified_appear_fraction", teamfood = true)
 
     // TODO(b/257315550): Tracking Bug
-    val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when", teamfood = true)
+    val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
 
     // TODO(b/260335638): Tracking Bug
     @JvmField
