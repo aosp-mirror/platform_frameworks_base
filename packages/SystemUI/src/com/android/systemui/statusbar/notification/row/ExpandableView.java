@@ -51,6 +51,8 @@ import java.util.List;
  */
 public abstract class ExpandableView extends FrameLayout implements Dumpable, Roundable {
     private static final String TAG = "ExpandableView";
+    /** whether the dump() for this class should include verbose details */
+    protected static final boolean DUMP_VERBOSE = false;
 
     private RoundableState mRoundableState = null;
     protected OnHeightChangedListener mOnHeightChangedListener;
@@ -824,6 +826,14 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
             } else {
                 viewState.dump(pw, args);
                 pw.println();
+            }
+            if (DUMP_VERBOSE) {
+                pw.println("mClipTopAmount: " + mClipTopAmount);
+                pw.println("mClipBottomAmount " + mClipBottomAmount);
+                pw.println("mClipToActualHeight: " + mClipToActualHeight);
+                pw.println("mExtraWidthForClipping: " + mExtraWidthForClipping);
+                pw.println("mMinimumHeightForClipping: " + mMinimumHeightForClipping);
+                pw.println("getClipBounds(): " + getClipBounds());
             }
         });
     }
