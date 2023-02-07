@@ -4434,7 +4434,8 @@ public class ActivityManager {
                     "device does not support users on secondary displays");
         }
         try {
-            return getService().startUserInBackgroundVisibleOnDisplay(userId, displayId);
+            return getService().startUserInBackgroundVisibleOnDisplay(userId, displayId,
+                    /* unlockProgressListener= */ null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
