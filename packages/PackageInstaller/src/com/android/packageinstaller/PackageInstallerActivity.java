@@ -246,26 +246,28 @@ public class PackageInstallerActivity extends AlertActivity {
 
     @Override
     public void onActivityResult(int request, int result, Intent data) {
-        if (request == REQUEST_TRUST_EXTERNAL_SOURCE && result == RESULT_OK) {
-            // The user has just allowed this package to install other packages (via Settings).
-            mAllowUnknownSources = true;
-
+        if (request == REQUEST_TRUST_EXTERNAL_SOURCE) {
             // Log the fact that the app is requesting an install, and is now allowed to do it
             // (before this point we could only log that it's requesting an install, but isn't
             // allowed to do it yet).
             String appOpStr =
                     AppOpsManager.permissionToOp(Manifest.permission.REQUEST_INSTALL_PACKAGES);
-            mAppOpsManager.noteOpNoThrow(appOpStr, mOriginatingUid, mOriginatingPackage,
-                    mCallingAttributionTag,
+            int appOpMode = mAppOpsManager.noteOpNoThrow(appOpStr, mOriginatingUid,
+                    mOriginatingPackage, mCallingAttributionTag,
                     "Successfully started package installation activity");
-
-            DialogFragment currentDialog =
-                    (DialogFragment) getFragmentManager().findFragmentByTag("dialog");
-            if (currentDialog != null) {
-                currentDialog.dismissAllowingStateLoss();
+            if (appOpMode == AppOpsManager.MODE_ALLOWED) {
+                // The user has just allowed this package to install other packages
+                // (via Settings).
+                mAllowUnknownSources = true;
+                DialogFragment currentDialog =
+                        (DialogFragment) getFragmentManager().findFragmentByTag("dialog");
+                if (currentDialog != null) {
+                    currentDialog.dismissAllowingStateLoss();
+                }
+                initiateInstall();
+            } else {
+                finish();
             }
-
-            initiateInstall();
         } else {
             finish();
         }
