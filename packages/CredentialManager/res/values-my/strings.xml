@@ -6,6 +6,10 @@
     <string name="string_continue" msgid="1346732695941131882">"ရှေ့ဆက်ရန်"</string>
     <string name="string_more_options" msgid="7990658711962795124">"နောက်ထပ်ရွေးစရာများ"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ပိုမိုလေ့လာရန်"</string>
+    <!-- no translation found for content_description_show_password (3283502010388521607) -->
+    <skip />
+    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
+    <skip />
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"လျှို့ဝှက်ကီးများဖြင့် ပိုလုံခြုံသည်"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"လျှို့ဝှက်ကီးများဖြင့် ရှုပ်ထွေးသောစကားဝှက်များကို ပြုလုပ်ရန် (သို့) မှတ်မိရန် မလိုပါ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"လျှို့ဝှက်ကီးများမှာ သင်၏လက်ဗွေ၊ မျက်နှာ (သို့) ဖန်သားပြင်လော့ခ်သုံး၍ ပြုလုပ်ထားသော အသွင်ဝှက်ထားသည့် ဒစ်ဂျစ်တယ်ကီးများ ဖြစ်သည်"</string>
