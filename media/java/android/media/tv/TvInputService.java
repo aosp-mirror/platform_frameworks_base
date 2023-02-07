@@ -1025,6 +1025,31 @@ public abstract class TvInputService extends Service {
             });
         }
 
+        /**
+         * Sends the raw data from the received TV message as well as the type of message received.
+         *
+         * @param type The of message that was sent, such as
+         * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The data sent with the message.
+         */
+        public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+                @NonNull Bundle data) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTvMessage");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTvMessage(type, data);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTvMessage", e);
+                    }
+                }
+            });
+        }
+
         private void notifyTimeShiftStartPositionChanged(final long timeMs) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -1458,6 +1483,17 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Called when the application enables or disables the detection of the specified message
+         * type.
+         * @param type The {@link TvInputManager.TvMessageType} of message that was sent.
+         * @param enabled {@code true} if TV message detection is enabled,
+         *                {@code false} otherwise.
+         */
+        public void onSetTvMessageEnabled(@NonNull @TvInputManager.TvMessageType String type,
+                boolean enabled){
+        }
+
+        /**
          * Called when the application requests to play a given recorded TV program.
          *
          * @param recordedProgramUri The URI of a recorded TV program.
@@ -1806,6 +1842,13 @@ public abstract class TvInputService extends Service {
          */
         void setInteractiveAppNotificationEnabled(boolean enabled) {
             onSetInteractiveAppNotificationEnabled(enabled);
+        }
+
+        /**
+         * Calls {@link #onSetTvMessageEnabled(String, boolean)}.
+         */
+        void setTvMessageEnabled(String type, boolean enabled) {
+            onSetTvMessageEnabled(type, enabled);
         }
 
         /**
@@ -2275,27 +2318,6 @@ public abstract class TvInputService extends Service {
                     }
                 }
             });
-        }
-
-        /**
-         * Informs the application of the raw data from the TV message.
-         * @param type The {@link TvInputManager.TvMessageType} of message that was sent.
-         * @param data The data sent with the message.
-         * @hide
-         */
-        public void notifyTvMessage(@TvInputManager.TvMessageType String type, Bundle data) {
-        }
-
-        /**
-         * Called when the application enables or disables the detection of the specified message
-         * type.
-         * @param type The {@link TvInputManager.TvMessageType} of message that was sent.
-         * @param enabled {@code true} if you want to enable TV message detecting
-         *                {@code false} otherwise.
-         * @hide
-         */
-        public void onSetTvMessageEnabled(@TvInputManager.TvMessageType String type,
-                boolean enabled) {
         }
 
         /**
