@@ -109,7 +109,7 @@ public class ProviderRegistryGetSession extends ProviderSession<GetCredentialReq
 
         // Populate the credential entries
         for (CredentialEntry credentialEntry : credentialEntries) {
-            String entryId = generateEntryId();
+            String entryId = generateUniqueId();
             mUiCredentialEntries.put(entryId, credentialEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
             credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,

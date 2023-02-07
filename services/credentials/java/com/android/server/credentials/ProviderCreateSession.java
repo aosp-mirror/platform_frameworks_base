@@ -229,7 +229,7 @@ public final class ProviderCreateSession extends ProviderSession<
 
         // Populate the save entries
         for (CreateEntry createEntry : saveEntries) {
-            String entryId = generateEntryId();
+            String entryId = generateUniqueId();
             mUiSaveEntries.put(entryId, createEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
             uiSaveEntries.add(new Entry(SAVE_ENTRY_KEY, entryId, createEntry.getSlice(),

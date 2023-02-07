@@ -145,7 +145,7 @@ public abstract class ProviderSession<T, R>
         return Status.CANCELED;
     }
 
-    protected String generateEntryId() {
+    protected static String generateUniqueId() {
         return UUID.randomUUID().toString();
     }
 
