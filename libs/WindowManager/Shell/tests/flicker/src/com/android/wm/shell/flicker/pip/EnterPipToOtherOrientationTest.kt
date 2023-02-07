@@ -30,7 +30,7 @@ import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions.Pip.ACTION_ENTER_PIP
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_PORTRAIT
