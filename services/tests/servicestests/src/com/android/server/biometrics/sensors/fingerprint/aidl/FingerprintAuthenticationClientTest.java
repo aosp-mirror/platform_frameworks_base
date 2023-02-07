@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
+import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
@@ -364,6 +365,16 @@ public class FingerprintAuthenticationClientTest {
         showHideOverlay(c -> c.onLockoutPermanent());
     }
 
+    @Test
+    public void testPowerPressForwardsErrorMessage() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClient();
+
+        client.onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_VENDOR,
+                BiometricFingerprintConstants.BIOMETRIC_ERROR_POWER_PRESSED);
+
+        verify(mClientMonitorCallbackConverter).onError(anyInt(), anyInt(),
+                eq(BiometricFingerprintConstants.BIOMETRIC_ERROR_POWER_PRESSED), eq(0));
+    }
     private void showHideOverlay(Consumer<FingerprintAuthenticationClient> block)
             throws RemoteException {
         final FingerprintAuthenticationClient client = createClient();

@@ -26,7 +26,7 @@ import android.graphics.MeshSpecification;
 import android.graphics.MeshSpecification.Attribute;
 import android.graphics.MeshSpecification.Varying;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.view.View;
 
@@ -109,9 +109,9 @@ public class MeshLargeActivity extends Activity {
             }
             vertexBuffer.rewind();
             indexBuffer.rewind();
-            Mesh mesh = Mesh.makeIndexed(
+            Mesh mesh = new Mesh(
                     meshSpec, Mesh.TRIANGLES, vertexBuffer, numTriangles + 2, indexBuffer,
-                    new Rect(0, 0, 1000, 1000)
+                    new RectF(0, 0, 1000, 1000)
             );
             mesh.setFloatUniform("test", 1.0f, 2.0f);
             Paint paint = new Paint();

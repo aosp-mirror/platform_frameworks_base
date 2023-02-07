@@ -280,8 +280,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         assertFalse(mDisplayContent.getInsetsStateController().getRawInsetsState()
                 .isSourceOrDefaultVisible(ITYPE_NAVIGATION_BAR, navigationBars()));
 
-        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR},
-                true /* isGestureOnSystemBar */);
+        policy.showTransient(navigationBars() | statusBars(), true /* isGestureOnSystemBar */);
         waitUntilWindowAnimatorIdle();
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
@@ -308,11 +307,11 @@ public class InsetsPolicyTest extends WindowTestsBase {
         spyOn(policy);
         doNothing().when(policy).startAnimation(anyBoolean(), any());
         policy.updateBarControlTarget(mAppWindow);
-        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR},
+        policy.showTransient(navigationBars() | statusBars(),
                 true /* isGestureOnSystemBar */);
         waitUntilWindowAnimatorIdle();
-        assertTrue(policy.isTransient(ITYPE_STATUS_BAR));
-        assertFalse(policy.isTransient(ITYPE_NAVIGATION_BAR));
+        assertTrue(policy.isTransient(statusBars()));
+        assertFalse(policy.isTransient(navigationBars()));
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
 
@@ -344,7 +343,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         spyOn(policy);
         doNothing().when(policy).startAnimation(anyBoolean(), any());
         policy.updateBarControlTarget(mAppWindow);
-        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR},
+        policy.showTransient(navigationBars() | statusBars(),
                 true /* isGestureOnSystemBar */);
         waitUntilWindowAnimatorIdle();
         InsetsSourceControl[] controls =
@@ -393,13 +392,13 @@ public class InsetsPolicyTest extends WindowTestsBase {
         spyOn(policy);
         doNothing().when(policy).startAnimation(anyBoolean(), any());
         policy.updateBarControlTarget(app);
-        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR},
+        policy.showTransient(navigationBars() | statusBars(),
                 true /* isGestureOnSystemBar */);
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
         policy.updateBarControlTarget(app2);
-        assertFalse(policy.isTransient(ITYPE_STATUS_BAR));
-        assertFalse(policy.isTransient(ITYPE_NAVIGATION_BAR));
+        assertFalse(policy.isTransient(statusBars()));
+        assertFalse(policy.isTransient(navigationBars()));
     }
 
     private WindowState addNavigationBar() {

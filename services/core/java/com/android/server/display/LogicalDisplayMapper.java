@@ -992,7 +992,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 newDisplay.swapDisplaysLocked(oldDisplay);
             }
 
-            newDisplay.setPositionLocked(displayLayout.getPosition());
+            newDisplay.setDevicePositionLocked(displayLayout.getPosition());
             newDisplay.setLeadDisplayLocked(displayLayout.getLeadDisplayId());
             setLayoutLimitedRefreshRate(newDisplay, device, displayLayout);
             setEnabledLocked(newDisplay, displayLayout.isEnabled());

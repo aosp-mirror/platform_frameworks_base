@@ -81,6 +81,10 @@ data class SettingsPage(
         return getPageProvider(sppName)?.isEnabled(arguments) ?: false
     }
 
+    fun getTitle(): String {
+        return getPageProvider(sppName)?.getTitle(arguments) ?: ""
+    }
+
     @Composable
     fun UiLayout() {
         getPageProvider(sppName)?.Page(arguments)

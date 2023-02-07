@@ -38,8 +38,8 @@ sk_sp<SkMesh::IndexBuffer> genIndexBuffer(JNIEnv* env, jobject buffer, int size,
 }
 
 static jlong make(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobject vertexBuffer,
-                  jboolean isDirect, jint vertexCount, jint vertexOffset, jint left, jint top,
-                  jint right, jint bottom) {
+                  jboolean isDirect, jint vertexCount, jint vertexOffset, jfloat left, jfloat top,
+                  jfloat right, jfloat bottom) {
     auto skMeshSpec = sk_ref_sp(reinterpret_cast<SkMeshSpecification*>(meshSpec));
     sk_sp<SkMesh::VertexBuffer> skVertexBuffer =
             genVertexBuffer(env, vertexBuffer, vertexCount * skMeshSpec->stride(), isDirect);
@@ -60,7 +60,7 @@ static jlong make(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobject verte
 static jlong makeIndexed(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobject vertexBuffer,
                          jboolean isVertexDirect, jint vertexCount, jint vertexOffset,
                          jobject indexBuffer, jboolean isIndexDirect, jint indexCount,
-                         jint indexOffset, jint left, jint top, jint right, jint bottom) {
+                         jint indexOffset, jfloat left, jfloat top, jfloat right, jfloat bottom) {
     auto skMeshSpec = sk_ref_sp(reinterpret_cast<SkMeshSpecification*>(meshSpec));
     sk_sp<SkMesh::VertexBuffer> skVertexBuffer =
             genVertexBuffer(env, vertexBuffer, vertexCount * skMeshSpec->stride(), isVertexDirect);
@@ -210,8 +210,8 @@ static jlong getMeshFinalizer(JNIEnv*, jobject) {
 
 static const JNINativeMethod gMeshMethods[] = {
         {"nativeGetFinalizer", "()J", (void*)getMeshFinalizer},
-        {"nativeMake", "(JILjava/nio/Buffer;ZIIIIII)J", (void*)make},
-        {"nativeMakeIndexed", "(JILjava/nio/Buffer;ZIILjava/nio/ShortBuffer;ZIIIIII)J",
+        {"nativeMake", "(JILjava/nio/Buffer;ZIIFFFF)J", (void*)make},
+        {"nativeMakeIndexed", "(JILjava/nio/Buffer;ZIILjava/nio/ShortBuffer;ZIIFFFF)J",
          (void*)makeIndexed},
         {"nativeUpdateMesh", "(JZ)V", (void*)updateMesh},
         {"nativeUpdateUniforms", "(JLjava/lang/String;[FZ)V", (void*)updateFloatArrayUniforms},
