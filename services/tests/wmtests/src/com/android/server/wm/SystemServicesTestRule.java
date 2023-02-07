@@ -420,6 +420,7 @@ public class SystemServicesTestRule implements TestRule {
         LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
+        LocalServices.removeServiceForTest(ImeTargetVisibilityPolicy.class);
     }
 
     Description getDescription() {
