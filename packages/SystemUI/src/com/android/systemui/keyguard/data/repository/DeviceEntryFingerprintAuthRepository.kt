@@ -19,10 +19,13 @@ package com.android.systemui.keyguard.data.repository
 import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.Dumpable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dump.DumpManager
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
@@ -49,7 +52,16 @@ class DeviceEntryFingerprintAuthRepositoryImpl
 constructor(
     val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Application scope: CoroutineScope,
-) : DeviceEntryFingerprintAuthRepository {
+    dumpManager: DumpManager,
+) : DeviceEntryFingerprintAuthRepository, Dumpable {
+
+    init {
+        dumpManager.registerDumpable(this)
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<String?>) {
+        pw.println("isLockedOut=${isLockedOut.value}")
+    }
 
     override val isLockedOut: StateFlow<Boolean> =
         conflatedCallbackFlow {

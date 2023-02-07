@@ -91,8 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"खालील सीमेपासून <xliff:g id="PERCENT">%1$d</xliff:g> टक्के"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"डाव्या सीमेपासून <xliff:g id="PERCENT">%1$d</xliff:g> टक्के"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"उजव्या सीमेपासून <xliff:g id="PERCENT">%1$d</xliff:g> टक्के"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"ऑफिससंबंधित स्क्रीनशॉट <xliff:g id="APP">%1$s</xliff:g> अ‍ॅपमध्ये सेव्ह केले आहेत"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"<xliff:g id="APP">%1$s</xliff:g> मधील कार्य प्रोफाइलमध्ये सेव्ह केला"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"फाइल"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ने हा स्क्रीनशॉट डिटेक्ट केला."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> आणि उघडलेल्या इतर अ‍ॅप्सनी हा स्क्रीनशॉट डिटेक्ट केला."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रेकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रेकॉर्डिंग प्रोसेस सुरू"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रेकॉर्ड सत्रासाठी सुरू असलेली सूचना"</string>
@@ -852,6 +854,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> उघडा"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> मध्ये <xliff:g id="ARTIST_NAME">%2$s</xliff:g> चे <xliff:g id="SONG_NAME">%1$s</xliff:g> प्ले करा"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> मध्ये <xliff:g id="SONG_NAME">%1$s</xliff:g> प्ले करा"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"तुमच्यासाठी"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"पहिल्यासारखे करा"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> वर प्ले करण्यासाठी जवळ जा"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"येथे प्ले करण्यासाठी, <xliff:g id="DEVICENAME">%1$s</xliff:g> च्या जवळ जा"</string>
@@ -884,6 +887,7 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"स्पीकर आणि डिस्प्ले"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"सुचवलेली डिव्हाइस"</string>
+    <string name="media_output_status_require_premium" msgid="5691200962588753380">"प्रीमियम खाते आवश्यक आहे"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ब्रॉडकास्टिंग कसे काम करते"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ब्रॉडकास्ट करा"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"कंपॅटिबल ब्लूटूथ डिव्‍हाइस असलेले तुमच्या जवळपासचे लोक हे तुम्ही ब्रॉडकास्ट करत असलेला मीडिया ऐकू शकतात"</string>
@@ -1029,6 +1033,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"तुमचे कामाशी संबंधित धोरण तुम्हाला फक्त कार्य प्रोफाइलवरून फोन कॉल करन्याची अनुमती देते"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"कार्य प्रोफाइलवर स्विच करा"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"बंद करा"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"लॉक स्क्रीन सेटिंग्ज"</string>
 </resources>

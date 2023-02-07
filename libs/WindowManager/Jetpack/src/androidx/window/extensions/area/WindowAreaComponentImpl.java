@@ -252,4 +252,37 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
             }
         }
     }
+
+    @Override
+    public void addRearDisplayPresentationStatusListener(
+            @NonNull Consumer<ExtensionWindowAreaStatus> consumer) {
+        throw new UnsupportedOperationException(
+                "addRearDisplayPresentationStatusListener is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public void removeRearDisplayPresentationStatusListener(
+            @NonNull Consumer<ExtensionWindowAreaStatus> consumer) {
+        throw new UnsupportedOperationException(
+                "removeRearDisplayPresentationStatusListener is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public void startRearDisplayPresentationSession(@NonNull Activity activity,
+            @NonNull Consumer<@WindowAreaSessionState Integer> consumer) {
+        throw new UnsupportedOperationException(
+                "startRearDisplayPresentationSession is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public void endRearDisplayPresentationSession() {
+        throw new UnsupportedOperationException(
+                "endRearDisplayPresentationSession is not supported in API_VERSION=2");
+    }
+
+    @Override
+    public ExtensionWindowAreaPresentation getRearDisplayPresentation() {
+        throw new UnsupportedOperationException(
+                "getRearDisplayPresentation is not supported in API_VERSION=2");
+    }
 }

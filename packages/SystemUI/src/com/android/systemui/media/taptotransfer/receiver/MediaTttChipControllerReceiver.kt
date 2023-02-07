@@ -173,7 +173,11 @@ open class MediaTttChipControllerReceiver @Inject constructor(
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
         val packageName = newInfo.routeInfo.clientPackageName
-        var iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, packageName) {
+        var iconInfo = MediaTttUtils.getIconInfoFromPackageName(
+            context,
+            packageName,
+            isReceiver = true,
+        ) {
             logger.logPackageNotFound(packageName)
         }
 

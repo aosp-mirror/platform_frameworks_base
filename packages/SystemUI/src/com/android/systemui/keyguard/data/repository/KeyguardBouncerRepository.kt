@@ -158,17 +158,17 @@ constructor(
     override val bouncerErrorMessage: CharSequence?
         get() = viewMediatorCallback.consumeCustomMessage()
 
-    init {
-        setUpLogging()
-    }
-
     /** Values associated with the AlternateBouncer */
     private val _isAlternateBouncerVisible = MutableStateFlow(false)
     override val isAlternateBouncerVisible = _isAlternateBouncerVisible.asStateFlow()
     override var lastAlternateBouncerVisibleTime: Long = NOT_VISIBLE
-    private val _isAlternateBouncerUIAvailable = MutableStateFlow<Boolean>(false)
+    private val _isAlternateBouncerUIAvailable = MutableStateFlow(false)
     override val isAlternateBouncerUIAvailable: StateFlow<Boolean> =
         _isAlternateBouncerUIAvailable.asStateFlow()
+
+    init {
+        setUpLogging()
+    }
 
     override fun setPrimaryScrimmed(isScrimmed: Boolean) {
         _primaryBouncerScrimmed.value = isScrimmed
@@ -289,6 +289,9 @@ constructor(
             .launchIn(applicationScope)
         resourceUpdateRequests
             .logDiffsForTable(buffer, "", "ResourceUpdateRequests", false)
+            .launchIn(applicationScope)
+        isAlternateBouncerUIAvailable
+            .logDiffsForTable(buffer, "", "IsAlternateBouncerUIAvailable", false)
             .launchIn(applicationScope)
     }
 

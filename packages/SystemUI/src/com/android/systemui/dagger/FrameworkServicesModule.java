@@ -31,6 +31,7 @@ import android.app.StatsManager;
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.ambientcontext.AmbientContextManager;
 import android.app.job.JobScheduler;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
@@ -79,6 +80,7 @@ import android.permission.PermissionManager;
 import android.safetycenter.SafetyCenterManager;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.service.vr.IVrManager;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
@@ -144,6 +146,13 @@ public class FrameworkServicesModule {
     @Singleton
     static Optional<SystemUpdateManager> provideSystemUpdateManager(Context context) {
         return Optional.ofNullable(context.getSystemService(SystemUpdateManager.class));
+    }
+
+    @Provides
+    @Nullable
+    @Singleton
+    static AmbientContextManager provideAmbientContextManager(Context context) {
+        return context.getSystemService(AmbientContextManager.class);
     }
 
     /** */
@@ -256,6 +265,13 @@ public class FrameworkServicesModule {
     static IDreamManager provideIDreamManager() {
         return IDreamManager.Stub.asInterface(
                 ServiceManager.getService(DreamService.DREAM_SERVICE));
+    }
+
+    @Provides
+    @Singleton
+    @Nullable
+    static IVrManager provideIVrManager() {
+        return IVrManager.Stub.asInterface(ServiceManager.getService(Context.VR_SERVICE));
     }
 
     @Provides
