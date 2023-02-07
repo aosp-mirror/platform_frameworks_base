@@ -1904,6 +1904,14 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public int getDisplayIdAssignedToUser() {
+        // Not checking for any permission as it returns info about calling user
+        int userId = UserHandle.getUserId(Binder.getCallingUid());
+        int displayId = mUserVisibilityMediator.getDisplayAssignedToUser(userId);
+        return displayId;
+    }
+
+    @Override
     public @NonNull String getUserName() {
         final int callingUid = Binder.getCallingUid();
         if (!hasQueryOrCreateUsersPermission()
