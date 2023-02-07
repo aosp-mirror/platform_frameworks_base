@@ -485,6 +485,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ActivityManagerService extends IActivityManager.Stub
@@ -6448,6 +6449,44 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         final Pair<Long, FgsTempAllowListItem> entry = mFgsStartTempAllowList.get(uid);
         return entry == null ? null : entry.second;
+    }
+
+    private static class GetBackgroundStartPrivilegesFunctor implements Consumer<ProcessRecord> {
+        private BackgroundStartPrivileges mBackgroundStartPrivileges =
+                BackgroundStartPrivileges.NONE;
+        private int mUid;
+
+        void prepare(int uid) {
+            mUid = uid;
+            mBackgroundStartPrivileges = BackgroundStartPrivileges.NONE;
+        }
+
+        @NonNull
+        BackgroundStartPrivileges getResult() {
+            return mBackgroundStartPrivileges;
+        }
+
+        public void accept(ProcessRecord pr) {
+            if (pr.uid == mUid) {
+                mBackgroundStartPrivileges =
+                        mBackgroundStartPrivileges.merge(pr.getBackgroundStartPrivileges());
+            }
+        }
+    }
+
+    private final GetBackgroundStartPrivilegesFunctor mGetBackgroundStartPrivilegesFunctor =
+            new GetBackgroundStartPrivilegesFunctor();
+
+    /**
+     * Returns the current complete {@link BackgroundStartPrivileges} of the UID.
+     */
+    @NonNull
+    private BackgroundStartPrivileges getBackgroundStartPrivileges(int uid) {
+        synchronized (mProcLock) {
+            mGetBackgroundStartPrivilegesFunctor.prepare(uid);
+            mProcessList.forEachLruProcessesLOSP(false, mGetBackgroundStartPrivilegesFunctor);
+            return mGetBackgroundStartPrivilegesFunctor.getResult();
+        }
     }
 
     /**
@@ -17804,6 +17843,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         public boolean isBackgroundActivityStartsEnabled() {
             return mConstants.mFlagBackgroundActivityStartsEnabled;
+        }
+
+        @Override
+        public BackgroundStartPrivileges getBackgroundStartPrivileges(int uid) {
+            return ActivityManagerService.this.getBackgroundStartPrivileges(uid);
         }
 
         public void reportCurKeyguardUsageEvent(boolean keyguardShowing) {

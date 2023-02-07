@@ -49,6 +49,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
+import android.app.BackgroundStartPrivileges;
 import android.app.IActivityManager;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
@@ -63,6 +64,7 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.SparseIntArray;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -178,6 +180,8 @@ public final class JobConcurrencyManagerTest {
         mGracePeriodObserver = mock(GracePeriodObserver.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        doReturn(BackgroundStartPrivileges.NONE)
+                .when(mActivityManagerInternal).getBackgroundStartPrivileges(anyInt());
         mDefaultUserId = mNextUserId;
         createCurrentUser(true);
         mNextUserId = 10;
@@ -601,34 +605,75 @@ public final class JobConcurrencyManagerTest {
 
     @Test
     public void testHasImmediacyPrivilege() {
-        JobStatus job = createJob(mDefaultUserId * UserHandle.PER_USER_RANGE, 0);
+        final int uid = mDefaultUserId * UserHandle.PER_USER_RANGE;
+        JobStatus job = createJob(uid, 0);
         spyOn(job);
-        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job));
+        doReturn(BackgroundStartPrivileges.NONE)
+                .when(mActivityManagerInternal).getBackgroundStartPrivileges(uid);
+
+        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
 
         doReturn(false).when(job).shouldTreatAsExpeditedJob();
         doReturn(false).when(job).shouldTreatAsUserInitiatedJob();
         job.lastEvaluatedBias = JobInfo.BIAS_TOP_APP;
-        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job));
+        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
 
         doReturn(true).when(job).shouldTreatAsExpeditedJob();
         doReturn(false).when(job).shouldTreatAsUserInitiatedJob();
         job.lastEvaluatedBias = JobInfo.BIAS_DEFAULT;
-        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job));
+        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
 
         doReturn(false).when(job).shouldTreatAsExpeditedJob();
         doReturn(true).when(job).shouldTreatAsUserInitiatedJob();
         job.lastEvaluatedBias = JobInfo.BIAS_DEFAULT;
-        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job));
+        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
 
         doReturn(false).when(job).shouldTreatAsExpeditedJob();
         doReturn(true).when(job).shouldTreatAsUserInitiatedJob();
         job.lastEvaluatedBias = JobInfo.BIAS_TOP_APP;
-        assertTrue(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job));
+        assertTrue(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
 
         doReturn(true).when(job).shouldTreatAsExpeditedJob();
         doReturn(false).when(job).shouldTreatAsUserInitiatedJob();
         job.lastEvaluatedBias = JobInfo.BIAS_TOP_APP;
-        assertTrue(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job));
+        assertTrue(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job,
+                new SparseIntArray()));
+
+        doReturn(BackgroundStartPrivileges.ALLOW_FGS)
+                .when(mActivityManagerInternal).getBackgroundStartPrivileges(uid);
+
+        doReturn(false).when(job).shouldTreatAsExpeditedJob();
+        doReturn(false).when(job).shouldTreatAsUserInitiatedJob();
+        job.lastEvaluatedBias = JobInfo.BIAS_DEFAULT;
+        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
+
+        doReturn(true).when(job).shouldTreatAsExpeditedJob();
+        doReturn(false).when(job).shouldTreatAsUserInitiatedJob();
+        job.lastEvaluatedBias = JobInfo.BIAS_DEFAULT;
+        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
+
+        doReturn(false).when(job).shouldTreatAsExpeditedJob();
+        doReturn(true).when(job).shouldTreatAsUserInitiatedJob();
+        job.lastEvaluatedBias = JobInfo.BIAS_DEFAULT;
+        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
+
+        doReturn(BackgroundStartPrivileges.ALLOW_BAL)
+                .when(mActivityManagerInternal).getBackgroundStartPrivileges(uid);
+
+        doReturn(false).when(job).shouldTreatAsExpeditedJob();
+        doReturn(false).when(job).shouldTreatAsUserInitiatedJob();
+        job.lastEvaluatedBias = JobInfo.BIAS_DEFAULT;
+        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
+
+        doReturn(true).when(job).shouldTreatAsExpeditedJob();
+        doReturn(false).when(job).shouldTreatAsUserInitiatedJob();
+        job.lastEvaluatedBias = JobInfo.BIAS_DEFAULT;
+        assertFalse(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
+
+        doReturn(false).when(job).shouldTreatAsExpeditedJob();
+        doReturn(true).when(job).shouldTreatAsUserInitiatedJob();
+        job.lastEvaluatedBias = JobInfo.BIAS_DEFAULT;
+        assertTrue(mJobConcurrencyManager.hasImmediacyPrivilegeLocked(job, new SparseIntArray()));
     }
 
     @Test
