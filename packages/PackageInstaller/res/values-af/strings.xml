@@ -26,8 +26,6 @@
     <string name="install_done" msgid="5987363587661783896">"Program geïnstalleer."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Wil jy hierdie program installeer?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Wil jy hierdie program opdateer?"</string>
-    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Opdaterings vir hierdie app word tans deur <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> bestuur.\n\nAs jy opdateer, sal jy toekomstige opdaterings eerder van <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> af ontvang."</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Opdaterings vir hierdie app word tans deur <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> bestuur.\n\nWil jy hierdie opdatering vanaf <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> installeer?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Program nie geïnstalleer nie."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Die installering van die pakket is geblokkeer."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Program is nie geïnstalleer nie omdat pakket met \'n bestaande pakket bots."</string>
@@ -70,8 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"Deïnstalleer tans <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> …"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Deïnstallering is klaar."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Het <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> gedeïnstalleer"</string>
-    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
-    <skip />
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Het <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon uitgevee"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Deïnstallering onsuksesvol."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Kon nie <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> deïnstalleer nie."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Vee tans <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon uit …"</string>

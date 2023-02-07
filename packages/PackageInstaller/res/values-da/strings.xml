@@ -26,8 +26,6 @@
     <string name="install_done" msgid="5987363587661783896">"Appen er installeret."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Vil du installere denne app?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Vil du opdatere denne app?"</string>
-    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Opdateringer af denne app administreres i øjeblikket af <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nNår du opdaterer, vil du fremover få opdateringer fra <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> i stedet."</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Opdateringer af denne app administreres i øjeblikket af <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nVil du installere denne opdatering fra <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Appen blev ikke installeret."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Pakken blev forhindret i at blive installeret."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Appen blev ikke installeret, da pakken er i strid med en eksisterende pakke."</string>
@@ -70,8 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"Afinstallerer <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Afinstallationen er gennemført."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> blev afinstalleret"</string>
-    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
-    <skip />
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Klonen af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> blev slettet"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Appen blev ikke afinstalleret."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> kunne ikke afinstalleres."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Sletter klonen af <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>

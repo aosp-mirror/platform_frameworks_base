@@ -26,8 +26,6 @@
     <string name="install_done" msgid="5987363587661783896">"Қолданба орнатылды."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Бұл қолданбаны орнатқыңыз келе ме?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Бұл қолданбаны жаңартқыңыз келе ме?"</string>
-    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Бұл қолданбаны жаңартуды қазір <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> басқарады.\n\nЖаңартсаңыз, келесі жаңартуды <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> беретін болады."</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Бұл қолданбаны жаңартуды қазір <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> басқарады.\n\n<xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> беретін жаңартуды пайдаланғыңыз келе ме?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Қолданба орнатылмады."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Пакетті орнатуға тыйым салынды."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Жаңа пакет пен бұрыннан бар пакеттің арасында қайшылық туындағандықтан, қолданба орнатылмады."</string>
@@ -70,8 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> жойылуда…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Жою аяқталды."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> жойылды"</string>
-    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
-    <skip />
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клоны жойылды."</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Жою мүмкін болмады."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> жою сәтсіз аяқталды."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клоны жойылып жатыр…"</string>

@@ -26,8 +26,6 @@
     <string name="install_done" msgid="5987363587661783896">"Aplikácia bola nainštalovaná."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Chcete túto aplikáciu nainštalovať?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Chcete túto aplikáciu aktualizovať?"</string>
-    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Aktualizácie tejto aplikácie momentálne spravuje vlastník <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nPo aktualizovaní budete namiesto toho získavať budúce aplikácie od vlastníka <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Aktualizácie tejto aplikácie momentálne spravuje vlastník <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nChcete túto aktualizáciu nainštalovať od vlastníka <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>?"</string>
     <string name="install_failed" msgid="5777824004474125469">"Aplikácia nebola nainštalovaná."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Inštalácia balíka bola zablokovaná."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikácia sa nenainštalovala, pretože balík je v konflikte s existujúcim balíkom."</string>
@@ -70,8 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"Prebieha odinštalovanie balíka <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Odinštalovanie bolo dokončené."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"Balík <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> bol odinštalovaný"</string>
-    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
-    <skip />
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Klon balíka <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> bol odstránený"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Nepodarilo sa odinštalovať."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"Balík <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> sa nepodarilo odinštalovať."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"Klon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> sa odstraňuje…"</string>

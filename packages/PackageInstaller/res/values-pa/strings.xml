@@ -26,8 +26,6 @@
     <string name="install_done" msgid="5987363587661783896">"ਐਪ ਸਥਾਪਤ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
-    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"ਫ਼ਿਲਹਾਲ ਇਸ ਐਪ ਦੇ ਅੱਪਡੇਟਾਂ ਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।\n\nਅੱਪਡੇਟ ਕਰਨ ਨਾਲ, ਇਸਦੀ ਬਜਾਏ ਤੁਹਾਨੂੰ <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> ਤੋਂ ਭਵਿੱਖੀ ਅੱਪਡੇਟ ਪ੍ਰਾਪਤ ਹੋਣਗੇ।"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"ਫ਼ਿਲਹਾਲ ਇਸ ਐਪ ਦੇ ਅੱਪਡੇਟਾਂ ਦਾ ਪ੍ਰਬੰਧਨ <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।\n\nਕੀ ਤੁਸੀਂ <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> ਵੱਲੋਂ ਇਸ ਅੱਪਡੇਟ ਨੂੰ ਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ।"</string>
     <string name="install_failed" msgid="5777824004474125469">"ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ਪੈਕੇਜ ਨੂੰ ਸਥਾਪਤ ਹੋਣ ਤੋਂ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ਪੈਕੇਜ ਦੇ ਇੱਕ ਮੌਜੂਦਾ ਪੈਕੇਜ ਨਾਲ ਵਿਵਾਦ ਹੋਣ ਕਰਕੇ ਐਪ ਸਥਾਪਤ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
@@ -70,8 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"ਅਣਸਥਾਪਤ ਕਰਨਾ ਮੁਕੰਮਲ ਹੋਇਆ।"</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਕੀਤਾ ਗਿਆ"</string>
-    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
-    <skip />
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਕਲੋਨ ਨੂੰ ਮਿਟਾਇਆ ਗਿਆ"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"ਅਣਸਥਾਪਤ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ।"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ।"</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਦੇ ਕਲੋਨ ਨੂੰ ਮਿਟਾਇਆ ਜਾ ਰਿਹਾ ਹੈ…"</string>

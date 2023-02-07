@@ -26,8 +26,6 @@
     <string name="install_done" msgid="5987363587661783896">"अ‍ॅप इंस्टॉल झाले."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"तुम्हाला हे ॲप इंस्टॉल करायचे आहे का?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"तुम्हाला हे ॲप अपडेट करायचे आहे का?"</string>
-    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"या अ‍ॅपसाठीचे अपडेट सध्या <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> द्वारे व्यवस्थापित केले जात आहेत.\n\nत्या ऐवजी, अपडेट केल्याने, तुम्हाला भविष्यातील अपडेट <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> कडून मिळतील."</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"या अ‍ॅपसाठीचे अपडेट सध्या <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g> द्वारे व्यवस्थापित केले जात आहेत.\n\nतुम्हाला हे अपडेट <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> कडून इंस्टॉल करायचे आहे का."</string>
     <string name="install_failed" msgid="5777824004474125469">"अ‍ॅप इंस्टॉल झाले नाही."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"पॅकेज इंस्टॉल होण्यापासून ब्लॉक केले होते."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"पॅकेजचा विद्यमान पॅकेजशी विरोध असल्याने अ‍ॅप इंस्टॉल झाले नाही."</string>
@@ -70,8 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> अनइंस्टॉल करत आहे…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"अनइंस्टॉल पूर्ण झाले."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> अनइंस्टॉल केले"</string>
-    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
-    <skip />
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> क्लोन हटवला आहे"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"अनइंस्टॉल करता आले नाही."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> अनइंस्टॉल करता आले नाही."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"क्लोन <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> हटवत आहे…"</string>
