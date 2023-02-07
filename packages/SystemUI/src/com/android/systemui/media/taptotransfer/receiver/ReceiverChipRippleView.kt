@@ -119,13 +119,19 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
 
     private fun removeRippleFill() {
         with(rippleShader) {
+            // Set back to default because we modified them in [setupRippleFadeParams].
             baseRingFadeParams.fadeOutStart = RippleShader.DEFAULT_BASE_RING_FADE_OUT_START
             baseRingFadeParams.fadeOutEnd = RippleShader.DEFAULT_FADE_OUT_END
 
             centerFillFadeParams.fadeInStart = RippleShader.DEFAULT_FADE_IN_START
             centerFillFadeParams.fadeInEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_IN_END
-            centerFillFadeParams.fadeOutStart = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_START
-            centerFillFadeParams.fadeOutEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_END
+
+            // To avoid a seam showing up, we should match either:
+            // 1. baseRingFadeParams#fadeInEnd and centerFillFadeParams#fadeOutStart
+            // 2. baseRingFadeParams#fadeOutStart and centerFillFadeOutStart
+            // Here we go with 1 to fade in the centerFill faster.
+            centerFillFadeParams.fadeOutStart = baseRingFadeParams.fadeInEnd
+            centerFillFadeParams.fadeOutEnd = RippleShader.DEFAULT_FADE_OUT_END
         }
     }
 

@@ -82,7 +82,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
                 vec2 p_distorted = distort(p, in_time, in_distort_radial, in_distort_xy);
                 float radius = in_size.x * 0.5;
                 float sparkleRing = soften(circleRing(p_distorted-in_center, radius), in_blur);
-                float inside = soften(sdCircle(p_distorted-in_center, radius * 1.2), in_blur);
+                float inside = soften(sdCircle(p_distorted-in_center, radius * 1.25), in_blur);
                 float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
                     * (1.-sparkleRing) * in_fadeSparkle;
 
