@@ -12571,6 +12571,33 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns whether the status bar is disabled/enabled, see {@link #setStatusBarDisabled}.
+     *
+     * <p>Callable by device owner or profile owner of secondary users that is affiliated with the
+     * device owner.
+     *
+     * <p>This policy has no effect in LockTask mode. The behavior of the
+     * status bar in LockTask mode can be configured with
+     * {@link #setLockTaskFeatures(ComponentName, int)}.
+     *
+     * <p>This policy also does not have any effect while on the lock screen, where the status bar
+     * will not be disabled.
+     *
+     * @throws SecurityException if the caller is not the device owner, or a profile owner of
+     * secondary user that is affiliated with the device.
+     * @see #isAffiliatedUser
+     * @see #getSecondaryUsers
+     */
+    public boolean isStatusBarDisabled() {
+        throwIfParentInstance("isStatusBarDisabled");
+        try {
+            return mService.isStatusBarDisabled(mContext.getPackageName());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Called by the system update service to notify device and profile owners of pending system
      * updates.
      *

@@ -379,6 +379,7 @@ interface IDevicePolicyManager {
 
     boolean setKeyguardDisabled(in ComponentName admin, boolean disabled);
     boolean setStatusBarDisabled(in ComponentName who, boolean disabled);
+    boolean isStatusBarDisabled(in String callerPackage);
     boolean getDoNotAskCredentialsOnBoot();
 
     void notifyPendingSystemUpdate(in SystemUpdateInfo info);
