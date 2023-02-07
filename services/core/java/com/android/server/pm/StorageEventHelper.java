@@ -27,6 +27,7 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import android.annotation.NonNull;
+import android.app.ApplicationExitInfo;
 import android.app.ResourcesManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
@@ -153,7 +154,8 @@ public final class StorageEventHelper extends StorageEventListener {
         }
 
         for (PackageStateInternal ps : packages) {
-            freezers.add(mPm.freezePackage(ps.getPackageName(), "loadPrivatePackagesInner"));
+            freezers.add(mPm.freezePackage(ps.getPackageName(), UserHandle.USER_ALL,
+                    "loadPrivatePackagesInner", ApplicationExitInfo.REASON_OTHER));
             synchronized (mPm.mInstallLock) {
                 final AndroidPackage pkg;
                 try {
@@ -256,7 +258,8 @@ public final class StorageEventHelper extends StorageEventListener {
                     final PackageRemovedInfo outInfo = new PackageRemovedInfo(mPm);
 
                     try (PackageFreezer freezer = mPm.freezePackageForDelete(ps.getPackageName(),
-                            deleteFlags, "unloadPrivatePackagesInner")) {
+                             UserHandle.USER_ALL, deleteFlags,
+                            "unloadPrivatePackagesInner", ApplicationExitInfo.REASON_OTHER)) {
                         if (mDeletePackageHelper.deletePackageLIF(ps.getPackageName(), null, false,
                                 userIds, deleteFlags, outInfo, false)) {
                             unloaded.add(pkg);
