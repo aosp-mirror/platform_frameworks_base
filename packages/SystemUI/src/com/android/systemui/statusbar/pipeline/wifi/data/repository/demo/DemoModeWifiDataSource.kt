@@ -53,7 +53,7 @@ constructor(
 
     private fun Bundle.activeWifiEvent(): FakeWifiEventModel.Wifi {
         val level = getString("level")?.toInt()
-        val activity = getString("activity")?.toActivity()
+        val activity = getString("activity").toActivity()
         val ssid = getString("ssid")
         val validated = getString("fully").toBoolean()
 
@@ -73,7 +73,7 @@ constructor(
         return FakeWifiEventModel.CarrierMerged(subId, level, numberOfLevels)
     }
 
-    private fun String.toActivity(): Int =
+    private fun String?.toActivity(): Int =
         when (this) {
             "inout" -> WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT
             "in" -> WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN

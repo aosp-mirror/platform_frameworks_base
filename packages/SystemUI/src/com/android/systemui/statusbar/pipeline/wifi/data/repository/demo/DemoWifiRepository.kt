@@ -80,9 +80,7 @@ constructor(
     private fun processEnabledWifiState(event: FakeWifiEventModel.Wifi) {
         _isWifiEnabled.value = true
         _isWifiDefault.value = true
-        _wifiActivity.value =
-            event.activity?.toWifiDataActivityModel()
-                ?: DataActivityModel(hasActivityIn = false, hasActivityOut = false)
+        _wifiActivity.value = event.activity.toWifiDataActivityModel()
         _wifiNetwork.value = event.toWifiNetworkModel()
     }
 
