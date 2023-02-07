@@ -1733,7 +1733,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldListenForFace_whenOccludingAppRequestsFaceAuth_returnsTrue()
+    public void shouldListenForFace_secureCameraLaunchedButAlternateBouncerIsLaunched_returnsTrue()
             throws RemoteException {
         // Face auth should run when the following is true.
         keyguardNotGoingAway();
@@ -1749,7 +1749,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
 
-        occludingAppRequestsFaceAuth();
+        alternateBouncerVisible();
         mTestableLooper.processAllMessages();
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
@@ -1839,7 +1839,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldListenForFace_whenUdfpsBouncerIsShowing_returnsTrue()
+    public void testShouldListenForFace_whenAlternateBouncerIsShowing_returnsTrue()
             throws RemoteException {
         // Preconditions for face auth to run
         keyguardNotGoingAway();
@@ -1851,13 +1851,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
 
-        mKeyguardUpdateMonitor.setUdfpsBouncerShowing(true);
+        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
     }
 
     @Test
-    public void testShouldListenForFace_udfpsBouncerIsShowingButDeviceGoingToSleep_returnsFalse()
+    public void testShouldListenForFace_alternateBouncerShowingButDeviceGoingToSleep_returnsFalse()
             throws RemoteException {
         // Preconditions for face auth to run
         keyguardNotGoingAway();
@@ -1867,7 +1867,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         biometricsEnabledForCurrentUser();
         userNotCurrentlySwitching();
         deviceNotGoingToSleep();
-        mKeyguardUpdateMonitor.setUdfpsBouncerShowing(true);
+        alternateBouncerVisible();
         mTestableLooper.processAllMessages();
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
 
@@ -1875,6 +1875,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
+    }
+
+    private void alternateBouncerVisible() {
+        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
     }
 
     @Test
@@ -1887,7 +1891,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
         userNotCurrentlySwitching();
-        mKeyguardUpdateMonitor.setUdfpsBouncerShowing(true);
+        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
         mTestableLooper.processAllMessages();
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
 
