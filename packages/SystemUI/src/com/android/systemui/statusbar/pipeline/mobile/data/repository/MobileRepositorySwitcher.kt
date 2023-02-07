@@ -156,9 +156,6 @@ constructor(
                 realRepository.defaultMobileNetworkConnectivity.value
             )
 
-    override val globalMobileDataSettingChangedEvent: Flow<Unit> =
-        activeRepo.flatMapLatest { it.globalMobileDataSettingChangedEvent }
-
     override fun getRepoForSubId(subId: Int): MobileConnectionRepository {
         if (isDemoMode.value) {
             return demoMobileConnectionsRepository.getRepoForSubId(subId)
