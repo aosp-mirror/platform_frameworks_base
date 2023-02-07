@@ -35,6 +35,7 @@ sealed interface FakeWifiEventModel {
         val subscriptionId: Int,
         val level: Int,
         val numberOfLevels: Int,
+        @Annotation.DataActivityType val activity: Int,
     ) : FakeWifiEventModel
 
     object WifiDisabled : FakeWifiEventModel

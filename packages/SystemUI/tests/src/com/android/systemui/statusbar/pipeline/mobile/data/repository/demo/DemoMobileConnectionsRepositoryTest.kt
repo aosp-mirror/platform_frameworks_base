@@ -594,9 +594,11 @@ fun validCarrierMergedEvent(
     subId: Int = 1,
     level: Int = 1,
     numberOfLevels: Int = 4,
+    activity: Int = DATA_ACTIVITY_NONE,
 ): FakeWifiEventModel.CarrierMerged =
     FakeWifiEventModel.CarrierMerged(
         subscriptionId = subId,
         level = level,
         numberOfLevels = numberOfLevels,
+        activity = activity,
     )

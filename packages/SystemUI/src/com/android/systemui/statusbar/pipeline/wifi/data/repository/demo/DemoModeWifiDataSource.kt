@@ -69,8 +69,9 @@ constructor(
         val subId = getString("slot")?.toInt() ?: DEFAULT_CARRIER_MERGED_SUB_ID
         val level = getString("level")?.toInt() ?: 0
         val numberOfLevels = getString("numlevels")?.toInt() ?: DEFAULT_NUM_LEVELS
+        val activity = getString("activity").toActivity()
 
-        return FakeWifiEventModel.CarrierMerged(subId, level, numberOfLevels)
+        return FakeWifiEventModel.CarrierMerged(subId, level, numberOfLevels, activity)
     }
 
     private fun String?.toActivity(): Int =

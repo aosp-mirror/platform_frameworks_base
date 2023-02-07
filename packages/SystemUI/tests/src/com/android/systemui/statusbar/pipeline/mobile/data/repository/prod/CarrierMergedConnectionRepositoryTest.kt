@@ -135,6 +135,44 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun connectionInfo_activity_comesFromWifiActivity() =
+        testScope.runTest {
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+
+            wifiRepository.setIsWifiEnabled(true)
+            wifiRepository.setIsWifiDefault(true)
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.CarrierMerged(
+                    networkId = NET_ID,
+                    subscriptionId = SUB_ID,
+                    level = 3,
+                )
+            )
+            wifiRepository.setWifiActivity(
+                DataActivityModel(
+                    hasActivityIn = true,
+                    hasActivityOut = false,
+                )
+            )
+
+            assertThat(latest!!.dataActivityDirection.hasActivityIn).isTrue()
+            assertThat(latest!!.dataActivityDirection.hasActivityOut).isFalse()
+
+            wifiRepository.setWifiActivity(
+                DataActivityModel(
+                    hasActivityIn = false,
+                    hasActivityOut = true,
+                )
+            )
+
+            assertThat(latest!!.dataActivityDirection.hasActivityIn).isFalse()
+            assertThat(latest!!.dataActivityDirection.hasActivityOut).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
     fun connectionInfo_carrierMergedWifi_wrongSubId_isDefault() =
         testScope.runTest {
             var latest: MobileConnectionModel? = null

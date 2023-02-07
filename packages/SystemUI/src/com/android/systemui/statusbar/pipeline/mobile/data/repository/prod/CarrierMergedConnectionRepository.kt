@@ -87,8 +87,13 @@ class CarrierMergedConnectionRepository(
         }
 
     override val connectionInfo: StateFlow<MobileConnectionModel> =
-        network
-            .map { it.toMobileConnectionModel() }
+        combine(network, wifiRepository.wifiActivity) { network, activity ->
+                if (network == null) {
+                    MobileConnectionModel()
+                } else {
+                    createCarrierMergedConnectionModel(network.level, activity)
+                }
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectionModel())
 
     // Carrier merged is never roaming.
@@ -112,32 +117,22 @@ class CarrierMergedConnectionRepository(
 
     override val dataEnabled: StateFlow<Boolean> = wifiRepository.isWifiEnabled
 
-    private fun WifiNetworkModel.CarrierMerged?.toMobileConnectionModel(): MobileConnectionModel {
-        if (this == null) {
-            return MobileConnectionModel()
-        }
-
-        return createCarrierMergedConnectionModel(level)
-    }
-
     companion object {
         /**
          * Creates an instance of [MobileConnectionModel] that represents a carrier merged network
-         * with the given [level].
+         * with the given [level] and [activity].
          */
-        fun createCarrierMergedConnectionModel(level: Int): MobileConnectionModel {
+        fun createCarrierMergedConnectionModel(
+            level: Int,
+            activity: DataActivityModel,
+        ): MobileConnectionModel {
             return MobileConnectionModel(
                 primaryLevel = level,
                 cdmaLevel = level,
                 // A [WifiNetworkModel.CarrierMerged] instance is always connected.
                 // (A [WifiNetworkModel.Inactive] represents a disconnected network.)
                 dataConnectionState = DataConnectionState.Connected,
-                // TODO(b/238425913): This should come from [WifiRepository.wifiActivity].
-                dataActivityDirection =
-                    DataActivityModel(
-                        hasActivityIn = false,
-                        hasActivityOut = false,
-                    ),
+                dataActivityDirection = activity,
                 resolvedNetworkType = ResolvedNetworkType.CarrierMergedNetworkType,
                 // Carrier merged is never roaming
                 isRoaming = false,

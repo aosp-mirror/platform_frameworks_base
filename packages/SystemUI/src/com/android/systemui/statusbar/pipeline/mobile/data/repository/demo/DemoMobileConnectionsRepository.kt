@@ -258,6 +258,9 @@ constructor(
         maybeCreateSubscription(subId)
         carrierMergedSubId = subId
 
+        // TODO(b/261029387): until we have a command, use the most recent subId
+        defaultDataSubId.value = subId
+
         val connection = getRepoForSubId(subId)
         // This is always true here, because we split out disabled states at the data-source level
         connection.dataEnabled.value = true
@@ -336,7 +339,10 @@ constructor(
     }
 
     private fun FakeWifiEventModel.CarrierMerged.toMobileConnectionModel(): MobileConnectionModel {
-        return createCarrierMergedConnectionModel(this.level)
+        return createCarrierMergedConnectionModel(
+            this.level,
+            activity.toMobileDataActivityModel(),
+        )
     }
 
     private fun SignalIcon.MobileIconGroup?.toResolvedNetworkType(): ResolvedNetworkType {
