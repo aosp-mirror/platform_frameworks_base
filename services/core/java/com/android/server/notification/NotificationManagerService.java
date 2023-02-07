@@ -114,6 +114,7 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ALLOW_DISMISS_ONGOING;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -271,6 +272,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.MetricsLogger;
@@ -577,10 +579,10 @@ public class NotificationManagerService extends SystemService {
     private float mInCallNotificationVolume;
     private Binder mCallNotificationToken = null;
 
-    private static final boolean ONGOING_DISMISSAL = SystemProperties.getBoolean(
-            "persist.sysui.notification.ongoing_dismissal", true);
     @VisibleForTesting
     protected boolean mSystemExemptFromDismissal = false;
+
+    private SystemUiSystemPropertiesFlags.FlagResolver mFlagResolver;
 
     // used as a mutex for access to all active notifications & listeners
     final Object mNotificationLock = new Object();
@@ -1208,7 +1210,8 @@ public class NotificationManagerService extends SystemService {
                 }
             }
 
-            int mustNotHaveFlags = ONGOING_DISMISSAL ? FLAG_NO_DISMISS : FLAG_ONGOING_EVENT;
+            int mustNotHaveFlags = mFlagResolver.isEnabled(ALLOW_DISMISS_ONGOING)
+                    ? FLAG_NO_DISMISS : FLAG_ONGOING_EVENT;
             cancelNotification(callingUid, callingPid, pkg, tag, id,
                     /* mustHaveFlags= */ 0,
                     /* mustNotHaveFlags= */ mustNotHaveFlags,
@@ -2219,7 +2222,8 @@ public class NotificationManagerService extends SystemService {
             TelephonyManager telephonyManager, ActivityManagerInternal ami,
             MultiRateLimiter toastRateLimiter, PermissionHelper permissionHelper,
             UsageStatsManagerInternal usageStatsManagerInternal,
-            TelecomManager telecomManager, NotificationChannelLogger channelLogger) {
+            TelecomManager telecomManager, NotificationChannelLogger channelLogger,
+            SystemUiSystemPropertiesFlags.FlagResolver flagResolver) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2417,6 +2421,8 @@ public class NotificationManagerService extends SystemService {
         mMsgPkgsAllowedAsConvos = Set.of(getStringArrayResource(
                 com.android.internal.R.array.config_notificationMsgPkgsAllowedAsConvos));
 
+        mFlagResolver = flagResolver;
+
         mStatsManager = statsManager;
 
         mToastRateLimiter = toastRateLimiter;
@@ -2548,7 +2554,7 @@ public class NotificationManagerService extends SystemService {
                         AppGlobals.getPermissionManager()),
                 LocalServices.getService(UsageStatsManagerInternal.class),
                 getContext().getSystemService(TelecomManager.class),
-                new NotificationChannelLoggerImpl());
+                new NotificationChannelLoggerImpl(), SystemUiSystemPropertiesFlags.getResolver());
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
@@ -6702,7 +6708,7 @@ public class NotificationManagerService extends SystemService {
         Notification.addFieldsFromContext(ai, notification);
 
         // Only notifications that can be non-dismissible can have the flag FLAG_NO_DISMISS
-        if (ONGOING_DISMISSAL) {
+        if (mFlagResolver.isEnabled(ALLOW_DISMISS_ONGOING)) {
             if (((notification.flags & FLAG_ONGOING_EVENT) > 0)
                     && canBeNonDismissible(ai, notification)) {
                 notification.flags |= FLAG_NO_DISMISS;

@@ -72,6 +72,7 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ALLOW_DISMISS_ONGOING;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -202,6 +203,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.internal.messages.nano.SystemMessageProto;
@@ -374,6 +376,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     BroadcastReceiver mPackageIntentReceiver;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     TestableNotificationManagerService.StrongAuthTrackerFake mStrongAuthTracker;
+
+    TestFlagResolver mTestFlagResolver = new TestFlagResolver();
+
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
     @Mock
@@ -522,7 +527,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mAppOpsManager, mAppOpsService, mUm, mHistoryManager, mStatsManager,
                 mock(TelephonyManager.class),
                 mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class),
-                mTelecomManager, mLogger);
+                mTelecomManager, mLogger, mTestFlagResolver);
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
@@ -10120,8 +10125,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
         // Given: a notification from an app on the system partition has the flag
         // FLAG_ONGOING_EVENT set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -10136,17 +10141,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should be set
         assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 
     @Test
     public void fixMediaNotification_withOnGoingFlag_shouldBeNonDismissible()
             throws Exception {
         // Given: a media notification has the flag FLAG_ONGOING_EVENT set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .setStyle(new Notification.MediaStyle()
@@ -10158,16 +10160,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should be set
         assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 
     @Test
     public void fixNonExemptNotification_withOnGoingFlag_shouldBeDismissible() throws Exception {
         // Given: a non-exempt notification has the flag FLAG_ONGOING_EVENT set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -10177,9 +10176,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 
     @Test
@@ -10187,8 +10183,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
         // Given: a non-exempt notification has the flag FLAG_NO_DISMISS set (even though this is
         // not allowed)
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         Notification n = new Notification.Builder(mContext, "test")
                 .build();
         n.flags |= Notification.FLAG_NO_DISMISS;
@@ -10198,17 +10194,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should be cleared
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 
     @Test
     public void fixSystemNotification_withoutOnGoingFlag_shouldBeDismissible() throws Exception {
         // Given: a notification from an app on the system partition doesn't have the flag
         // FLAG_ONGOING_EVENT set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(false)
                 .build();
@@ -10223,9 +10216,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 
     @Test
@@ -10233,8 +10223,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
         // Given: a notification from an app on the system partition doesn't have the flag
         // FLAG_ONGOING_EVENT set, but has the flag FLAG_NO_DISMISS set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(false)
                 .build();
@@ -10250,16 +10240,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should be cleared
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 
     @Test
     public void fixMediaNotification_withoutOnGoingFlag_shouldBeDismissible() throws Exception {
         // Given: a media notification doesn't have the flag FLAG_ONGOING_EVENT set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(false)
                 .setStyle(new Notification.MediaStyle()
@@ -10271,9 +10258,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 
     @Test
@@ -10281,8 +10265,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
         // Given: a media notification doesn't have the flag FLAG_ONGOING_EVENT set,
         // but has the flag FLAG_NO_DISMISS set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(false)
                 .setStyle(new Notification.MediaStyle()
@@ -10295,18 +10279,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should be cleared
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 
     @Test
     public void fixNonExempt_Notification_withoutOnGoingFlag_shouldBeDismissible()
             throws Exception {
         // Given: a non-exempt notification has the flag FLAG_ONGOING_EVENT set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(false)
                 .build();
@@ -10316,9 +10296,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 
     @Test
@@ -10326,8 +10303,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
         when(mDevicePolicyManager.isActiveDeviceOwner(mUid)).thenReturn(true);
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         mService.setSystemExemptFromDismissal(false);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
@@ -10338,9 +10315,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should be set
         assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 
     @Test
@@ -10350,8 +10324,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, mUid,
                 PKG)).thenReturn(AppOpsManager.MODE_ALLOWED);
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         mService.setSystemExemptFromDismissal(true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
@@ -10363,8 +10337,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Then: the notification's flag FLAG_NO_DISMISS should be set
         assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
 
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
         mService.setSystemExemptFromDismissal(false);
     }
 
@@ -10375,8 +10347,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, mUid,
                 PKG)).thenReturn(AppOpsManager.MODE_ALLOWED);
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
-        // feature flag: NOTIFICATION_ONGOING_DISMISSAL is on
-        mService.setOngoingDismissal(true);
+        // feature flag: ALLOW_DISMISS_ONGOING is on
+        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
         mService.setSystemExemptFromDismissal(false);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
@@ -10387,8 +10359,5 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        // Avoid affecting other tests
-        mService.setOngoingDismissal(false);
     }
 }
