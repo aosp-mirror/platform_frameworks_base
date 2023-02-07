@@ -90,14 +90,15 @@ public abstract class CredentialProviderService extends Service {
     /**
      * Intent extra: The result of an authentication flow, to be set on finish of the
      * {@link android.app.Activity} invoked through the {@link android.app.PendingIntent} set on
-     * a {@link BeginGetCredentialResponse}. This result should contain the actual content,
+     * an authentication {@link Action}, as part of the original
+     * {@link BeginGetCredentialResponse}. This result should contain the actual content,
      * including credential entries and action entries, to be shown on the selector.
      *
      * <p>
-     * Type: {@link CredentialsResponseContent}
+     * Type: {@link BeginGetCredentialResponse}
      */
-    public static final String EXTRA_CREDENTIALS_RESPONSE_CONTENT =
-            "android.service.credentials.extra.CREDENTIALS_RESPONSE_CONTENT";
+    public static final String EXTRA_BEGIN_GET_CREDENTIAL_RESPONSE =
+            "android.service.credentials.extra.BEGIN_GET_CREDENTIAL_RESPONSE";
 
     /**
      * Intent extra: The failure exception set at the final stage of a get flow.
@@ -133,7 +134,7 @@ public abstract class CredentialProviderService extends Service {
      * <p>When a provider app receives a {@link BeginGetCredentialRequest} through the
      * {@link CredentialProviderService#onBeginGetCredential} call, it can construct the
      * {@link BeginGetCredentialResponse} with either an authentication {@link Action} (if the app
-     * is locked), or a {@link CredentialsResponseContent} (if the app is unlocked). In the former
+     * is locked), or a {@link BeginGetCredentialResponse} (if the app is unlocked). In the former
      * case, i.e. the app is locked, user will be shown the authentication action. When selected,
      * the underlying {@link PendingIntent} will be invoked which will lead the user to provider's
      * unlock activity. This pending intent will also contain the original
@@ -141,7 +142,7 @@ public abstract class CredentialProviderService extends Service {
      * flow is complete.
      *
      * <p>After the app is unlocked, the {@link BeginGetCredentialResponse} must be constructed
-     * using a {@link CredentialsResponseContent}, which must be set on an {@link Intent} as an
+     * using a {@link BeginGetCredentialResponse}, which must be set on an {@link Intent} as an
      * intent extra against CredentialProviderService#EXTRA_CREDENTIALS_RESPONSE_CONTENT}.
      * This intent should then be set as a result through {@link android.app.Activity#setResult}
      * before finishing the activity.
