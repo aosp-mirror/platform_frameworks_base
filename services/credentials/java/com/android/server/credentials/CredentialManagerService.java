@@ -574,6 +574,37 @@ public final class CredentialManagerService
         }
 
         @Override
+        public boolean isEnabledCredentialProviderService(
+                ComponentName componentName, String callingPackage) {
+            Log.i(TAG, "isEnabledCredentialProviderService");
+
+            // TODO(253157366): Check additional set of services.
+            final int userId = UserHandle.getCallingUserId();
+            synchronized (mLock) {
+                final List<CredentialManagerServiceImpl> services =
+                        getServiceListForUserLocked(userId);
+                for (CredentialManagerServiceImpl s : services) {
+                    final ComponentName serviceComponentName = s.getServiceComponentName();
+
+                    if (serviceComponentName.equals(componentName)) {
+                        if (!s.getServicePackageName().equals(callingPackage)) {
+                            // The component name and the package name do not match.
+                            Log.w(
+                                    TAG,
+                                    "isEnabledCredentialProviderService: Component name does not"
+                                            + " match package name.");
+                            return false;
+                        }
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        @Override
         public ICancellationSignal clearCredentialState(
                 ClearCredentialStateRequest request,
                 IClearCredentialStateCallback callback,

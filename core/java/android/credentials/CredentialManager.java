@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
 import android.os.CancellationSignal;
@@ -276,6 +277,25 @@ public final class CredentialManager {
                     providers, userId, new SetEnabledProvidersTransport(executor, callback));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns {@code true} if the calling application provides a CredentialProviderService that is
+     * enabled for the current user, or {@code false} otherwise. CredentialProviderServices are
+     * enabled on a per-service basis so the individual component name of the service should be
+     * passed in here.
+     *
+     * @param componentName the component name to check is enabled
+     */
+    public boolean isEnabledCredentialProviderService(@NonNull ComponentName componentName) {
+        requireNonNull(componentName, "componentName must not be null");
+
+        try {
+            return mService.isEnabledCredentialProviderService(
+                    componentName, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
