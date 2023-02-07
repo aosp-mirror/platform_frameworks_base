@@ -158,7 +158,7 @@ class MobileIconInteractorImpl(
                 if (
                     networkName is NetworkNameModel.Default && connection.operatorAlphaShort != null
                 ) {
-                    NetworkNameModel.Derived(connection.operatorAlphaShort)
+                    NetworkNameModel.IntentDerived(connection.operatorAlphaShort)
                 } else {
                     networkName
                 }

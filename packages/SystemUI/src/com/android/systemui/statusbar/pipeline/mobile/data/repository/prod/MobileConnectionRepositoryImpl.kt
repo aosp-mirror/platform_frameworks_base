@@ -92,7 +92,7 @@ class MobileConnectionRepositoryImpl(
     init {
         if (telephonyManager.subscriptionId != subId) {
             throw IllegalStateException(
-                "TelephonyManager should be created with subId($subId). " +
+                "MobileRepo: TelephonyManager should be created with subId($subId). " +
                     "Found ${telephonyManager.subscriptionId} instead."
             )
         }

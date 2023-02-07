@@ -539,7 +539,8 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
                 assertThat(connectionInfo.carrierNetworkChangeActive)
                     .isEqualTo(model.carrierNetworkChange)
                 assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)
-                assertThat(conn.networkName.value).isEqualTo(NetworkNameModel.Derived(model.name))
+                assertThat(conn.networkName.value)
+                    .isEqualTo(NetworkNameModel.IntentDerived(model.name))
 
                 // TODO(b/261029387) check these once we start handling them
                 assertThat(connectionInfo.isEmergencyOnly).isFalse()

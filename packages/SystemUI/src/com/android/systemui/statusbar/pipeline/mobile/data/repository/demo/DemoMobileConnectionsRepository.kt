@@ -240,7 +240,7 @@ constructor(
 
         // This is always true here, because we split out disabled states at the data-source level
         connection.dataEnabled.value = true
-        connection.networkName.value = NetworkNameModel.Derived(state.name)
+        connection.networkName.value = NetworkNameModel.IntentDerived(state.name)
 
         connection.cdmaRoaming.value = state.roaming
         connection.connectionInfo.value = state.toMobileConnectionModel()
@@ -264,7 +264,7 @@ constructor(
         val connection = getRepoForSubId(subId)
         // This is always true here, because we split out disabled states at the data-source level
         connection.dataEnabled.value = true
-        connection.networkName.value = NetworkNameModel.Derived(CARRIER_MERGED_NAME)
+        connection.networkName.value = NetworkNameModel.IntentDerived(CARRIER_MERGED_NAME)
         connection.numberOfLevels.value = event.numberOfLevels
         connection.cdmaRoaming.value = false
         connection.connectionInfo.value = event.toMobileConnectionModel()
@@ -377,5 +377,5 @@ class DemoMobileConnectionRepository(
 
     override val cdmaRoaming = MutableStateFlow(false)
 
-    override val networkName = MutableStateFlow(NetworkNameModel.Derived("demo network"))
+    override val networkName = MutableStateFlow(NetworkNameModel.IntentDerived("demo network"))
 }
