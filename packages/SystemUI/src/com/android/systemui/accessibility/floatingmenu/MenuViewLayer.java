@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.view.WindowInsets.Type.ime;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static androidx.core.view.WindowInsetsCompat.Type;
 
@@ -32,6 +33,7 @@ import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.content.ComponentCallbacks;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -132,16 +134,30 @@ class MenuViewLayer extends FrameLayout implements
                     Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
                     UserHandle.USER_CURRENT);
 
+            final List<ComponentName> hardwareKeyShortcutComponents =
+                    mAccessibilityManager.getAccessibilityShortcutTargets(
+                                    ACCESSIBILITY_SHORTCUT_KEY)
+                            .stream()
+                            .map(ComponentName::unflattenFromString)
+                            .toList();
+
             // Should disable the corresponding service when the fragment type is
             // INVISIBLE_TOGGLE, which will enable service when the shortcut is on.
             final List<AccessibilityServiceInfo> serviceInfoList =
                     mAccessibilityManager.getEnabledAccessibilityServiceList(
                             AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
             serviceInfoList.forEach(info -> {
-                if (getAccessibilityServiceFragmentType(info) == INVISIBLE_TOGGLE) {
-                    setAccessibilityServiceState(getContext(),
-                            info.getComponentName(), /* enabled= */ false);
+                if (getAccessibilityServiceFragmentType(info) != INVISIBLE_TOGGLE) {
+                    return;
                 }
+
+                final ComponentName serviceComponentName = info.getComponentName();
+                if (hardwareKeyShortcutComponents.contains(serviceComponentName)) {
+                    return;
+                }
+
+                setAccessibilityServiceState(getContext(), serviceComponentName, /* enabled= */
+                        false);
             });
 
             mFloatingMenu.hide();
