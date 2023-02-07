@@ -540,6 +540,12 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"මෙම දුරකථනය"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"මෙම ටැබ්ලටය"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"මෙම දුරකථනය"</string>
+    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <skip />
+    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <skip />
+    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"සම්බන්ධ කිරීමේ ගැටලුවකි උපාංගය ක්‍රියාවිරහිත කර &amp; ආපසු ක්‍රියාත්මක කරන්න"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"රැහැන්ගත කළ ඕඩියෝ උපාංගය"</string>
     <string name="help_label" msgid="3528360748637781274">"උදවු &amp; ප්‍රතිපෝෂණ"</string>
@@ -666,4 +672,8 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"පුරෝකථනමය පසු සජීවිකරණ"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"පුරෝකථනමය ආපසු සඳහා පද්ධති සජීවිකරණ සබල කරන්න."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"මෙම සැකසීම පුරෝකථනමය ඉංගිත සජීවිකරණය සඳහා පද්ධති සජීවිකරණ සබල කරයි. එයට මැනිෆෙස්ට් ගොනුව තුළ එක් යෙදුමකට enableOnBackInvokedCallback සත්‍ය ලෙස සැකසීම අවශ්‍ය වේ."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
 </resources>

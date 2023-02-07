@@ -540,6 +540,12 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Telefono hau"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tableta hau"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Telefono hau"</string>
+    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <skip />
+    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <skip />
+    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazo bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>
@@ -666,4 +672,8 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Atzera egiteko keinuaren animazio-igarleak"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Gaitu atzera egiteko keinuaren sistemaren animazio-igarleak."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Atzera egiteko keinuaren sistemaren animazio-igarleak gaitzen ditu ezarpenak. enableOnBackInvokedCallback-ek egiazko gisa ezarrita egon behar du aplikazio bakoitzaren manifestu-fitxategian."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
 </resources>

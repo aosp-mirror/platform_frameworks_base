@@ -315,7 +315,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Chọn cấu hình USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"Cho phép vị trí mô phỏng"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Cho phép vị trí mô phỏng"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"Cho phép kiểm tra thuộc tính của chế độ xem"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"Cho phép kiểm tra thuộc tính khung hiển thị"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Luôn bật dữ liệu di động ngay cả khi Wi-Fi đang hoạt động (để chuyển đổi mạng nhanh)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Sử dụng tính năng tăng tốc phần cứng khi chia sẻ Internet nếu có"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Cho phép gỡ lỗi qua USB?"</string>
@@ -540,6 +540,12 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Điện thoại này"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Máy tính bảng này"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Điện thoại này"</string>
+    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <skip />
+    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <skip />
+    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Sự cố kết nối. Hãy tắt thiết bị rồi bật lại"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Thiết bị âm thanh có dây"</string>
     <string name="help_label" msgid="3528360748637781274">"Trợ giúp và phản hồi"</string>
@@ -666,4 +672,8 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Ảnh xem trước thao tác quay lại"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Bật ảnh của hệ thống để xem trước thao tác quay lại"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Cài đặt này cho phép sử dụng ảnh động hệ thống cho ảnh động cử chỉ dự đoán. Nó yêu cầu cài đặt cho mỗi ứng dụng chuyển enableOnBackInvokedCallback thành lệnh true trong tệp kê khai."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
 </resources>

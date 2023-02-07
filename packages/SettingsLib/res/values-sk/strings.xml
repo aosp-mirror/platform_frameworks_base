@@ -540,6 +540,9 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Tento telefón"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tento tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Tento telefón"</string>
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Inovujte účet a prejdite naň"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Tu sa nedajú prehrať stiahnuté súbory"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Skúste to znova po reklame"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Pri pripájaní sa vyskytol problém. Zariadenie vypnite a znova zapnite."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio zariadenie s káblom"</string>
     <string name="help_label" msgid="3528360748637781274">"Pomocník a spätná väzba"</string>
@@ -666,4 +669,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Prediktívne animácie gesta Späť"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Povoľte animácie v systéme pre prediktívne gesto Späť"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Toto nastavenie povoľuje animácie v systéme na účely prediktívnej animácie gest. Vyžaduje nastavenie povolenia enableOnBackInvokedCallback na pravdu v súbore manifestu konkrétnej aplikácie."</string>
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Posuňte doľava"</item>
+    <item msgid="5425394847942513942">"Posuňte nadol"</item>
+    <item msgid="7728484337962740316">"Posuňte doprava"</item>
+    <item msgid="324200556467459329">"Presuňte nahor"</item>
+  </string-array>
 </resources>

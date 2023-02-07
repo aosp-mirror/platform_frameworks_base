@@ -540,6 +540,12 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"此手機"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"此平板電腦"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"這部手機"</string>
+    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <skip />
+    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <skip />
+    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"無法連接，請關閉裝置然後重新開機"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線音響裝置"</string>
     <string name="help_label" msgid="3528360748637781274">"說明與意見反映"</string>
@@ -666,4 +672,8 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"預測返回手勢動畫"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"為預測返回手勢啟用系統動畫。"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"此設定會啟用系統動畫作為預測手勢動畫。這必須在資訊清單檔案中將個別應用程式的 enableOnBackInvokedCallback 設定為 true。"</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
 </resources>
