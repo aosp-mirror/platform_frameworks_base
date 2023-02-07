@@ -983,6 +983,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         cleanUpInternal();
         mController.updateAnimatingState(mTmpTransaction);
         mTmpTransaction.apply();
+
+        // Handle back animation if it's already started.
+        mController.mAtm.mBackNavigationController.handleDeferredBackAnimation(mTargets);
     }
 
     void abort() {
