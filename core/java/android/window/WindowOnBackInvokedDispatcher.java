@@ -254,10 +254,34 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     }
 
     static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
-        private final WeakReference<OnBackInvokedCallback> mCallback;
+        static class CallbackRef {
+            final WeakReference<OnBackInvokedCallback> mWeakRef;
+            final OnBackInvokedCallback mStrongRef;
+            CallbackRef(@NonNull OnBackInvokedCallback callback, boolean useWeakRef) {
+                if (useWeakRef) {
+                    mWeakRef = new WeakReference<>(callback);
+                    mStrongRef = null;
+                } else {
+                    mStrongRef = callback;
+                    mWeakRef = null;
+                }
+            }
+
+            OnBackInvokedCallback get() {
+                if (mStrongRef != null) {
+                    return mStrongRef;
+                }
+                return mWeakRef.get();
+            }
+        }
+        final CallbackRef mCallbackRef;
 
         OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
-            mCallback = new WeakReference<>(callback);
+            mCallbackRef = new CallbackRef(callback, true /* useWeakRef */);
+        }
+
+        OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback, boolean useWeakRef) {
+            mCallbackRef = new CallbackRef(callback, useWeakRef);
         }
 
         @Override
@@ -300,8 +324,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         public void onBackInvoked() throws RemoteException {
             Handler.getMain().post(() -> {
                 mProgressAnimator.reset();
-                final OnBackInvokedCallback callback = mCallback.get();
+                final OnBackInvokedCallback callback = mCallbackRef.get();
                 if (callback == null) {
+                    Log.d(TAG, "Trying to call onBackInvoked() on a null callback reference.");
                     return;
                 }
                 callback.onBackInvoked();
@@ -310,7 +335,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
         @Nullable
         private OnBackAnimationCallback getBackAnimationCallback() {
-            OnBackInvokedCallback callback = mCallback.get();
+            OnBackInvokedCallback callback = mCallbackRef.get();
             return callback instanceof OnBackAnimationCallback ? (OnBackAnimationCallback) callback
                     : null;
         }
