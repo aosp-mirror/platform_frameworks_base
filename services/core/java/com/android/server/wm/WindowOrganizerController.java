@@ -29,6 +29,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_REQUEST_FOCUS_ON_TASK
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_ANIMATION_PARAMS;
 import static android.window.TaskFragmentOperation.OP_TYPE_SET_COMPANION_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_SET_RELATIVE_BOUNDS;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_UNKNOWN;
 import static android.window.WindowContainerTransaction.Change.CHANGE_RELATIVE_BOUNDS;
@@ -94,6 +95,7 @@ import android.window.IWindowOrganizerController;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
 import android.window.TaskFragmentOperation;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -784,8 +786,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         taskFragment.deferOrganizedTaskFragmentSurfaceUpdate();
         final Rect relBounds = c.getRelativeBounds();
         if (relBounds != null) {
-            // Make sure the TaskFragment bounds satisfied the min dimensions requirement.
-            adjustTaskFragmentBoundsForMinDimensionsIfNeeded(taskFragment, relBounds,
+            // Make sure the requested bounds satisfied the min dimensions requirement.
+            adjustTaskFragmentRelativeBoundsForMinDimensionsIfNeeded(taskFragment, relBounds,
                     errorCallbackToken);
 
             // For embedded TaskFragment, the organizer set the bounds in parent coordinate to
@@ -797,13 +799,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     parentBounds);
             c.getConfiguration().windowConfiguration.setBounds(absBounds);
             taskFragment.setRelativeEmbeddedBounds(relBounds);
-        } else if ((c.getWindowSetMask() & WINDOW_CONFIG_BOUNDS) != 0) {
-            // TODO(b/265271880): remove after we drop support to setBounds for TaskFragment in next
-            // release.
-            adjustTaskFragmentBoundsForMinDimensionsIfNeeded(taskFragment, c.getConfiguration()
-                    .windowConfiguration.getBounds(), errorCallbackToken);
-            // Reset the relative embedded bounds if WCT#setBounds is used instead for CTS compat.
-            taskFragment.setRelativeEmbeddedBounds(new Rect());
         }
         final int effects = applyChanges(taskFragment, c);
         if (taskFragment.shouldStartChangeTransition(mTmpBounds0, mTmpBounds1)) {
@@ -814,25 +809,27 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     /**
-     * Adjusts the override absolute bounds on {@link TaskFragment} to make sure it satisfies the
+     * Adjusts the requested relative bounds on {@link TaskFragment} to make sure it satisfies the
      * activity min dimensions.
      */
-    private void adjustTaskFragmentBoundsForMinDimensionsIfNeeded(
-            @NonNull TaskFragment taskFragment, @NonNull Rect inOutBounds,
+    private void adjustTaskFragmentRelativeBoundsForMinDimensionsIfNeeded(
+            @NonNull TaskFragment taskFragment, @NonNull Rect inOutRelativeBounds,
             @Nullable IBinder errorCallbackToken) {
-        if (inOutBounds.isEmpty()) {
+        if (inOutRelativeBounds.isEmpty()) {
             return;
         }
         final Point minDimensions = taskFragment.calculateMinDimension();
-        if (inOutBounds.width() < minDimensions.x || inOutBounds.height() < minDimensions.y) {
-            // Reset to match parent bounds.
-            inOutBounds.setEmpty();
+        if (inOutRelativeBounds.width() < minDimensions.x
+                || inOutRelativeBounds.height() < minDimensions.y) {
             // Notify organizer about the request failure.
-            final Throwable exception = new SecurityException("The task fragment's bounds:"
-                    + taskFragment.getBounds() + " does not satisfy minimum dimensions:"
+            final Throwable exception = new SecurityException("The requested relative bounds:"
+                    + inOutRelativeBounds + " does not satisfy minimum dimensions:"
                     + minDimensions);
             sendTaskFragmentOperationFailure(taskFragment.getTaskFragmentOrganizer(),
-                    errorCallbackToken, taskFragment, OP_TYPE_UNKNOWN, exception);
+                    errorCallbackToken, taskFragment, OP_TYPE_SET_RELATIVE_BOUNDS, exception);
+
+            // Reset to match parent bounds.
+            inOutRelativeBounds.setEmpty();
         }
     }
 
@@ -1726,9 +1723,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 t.getChanges().entrySet().iterator();
         while (entries.hasNext()) {
             final Map.Entry<IBinder, WindowContainerTransaction.Change> entry = entries.next();
-            // Only allow to apply changes to TaskFragment that is created by this organizer.
             final WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
-            enforceTaskFragmentOrganized(func, wc, organizer);
             enforceTaskFragmentConfigChangeAllowed(func, wc, entry.getValue(), organizer);
         }
 
@@ -1764,27 +1759,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     /**
-     * Makes sure that the given {@link WindowContainer} is a {@link TaskFragment} organized by the
-     * given {@link ITaskFragmentOrganizer}.
-     */
-    private void enforceTaskFragmentOrganized(@NonNull String func, @Nullable WindowContainer wc,
-            @NonNull ITaskFragmentOrganizer organizer) {
-        if (wc == null) {
-            Slog.e(TAG, "Attempt to operate on window that no longer exists");
-            return;
-        }
-
-        final TaskFragment tf = wc.asTaskFragment();
-        if (tf == null || !tf.hasTaskFragmentOrganizer(organizer)) {
-            String msg = "Permission Denial: " + func + " from pid=" + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid() + " trying to modify window container not"
-                    + " belonging to the TaskFragmentOrganizer=" + organizer;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-    }
-
-    /**
      * Makes sure that the {@link TaskFragment} of the given fragment token is created and organized
      * by the given {@link ITaskFragmentOrganizer}.
      */
@@ -1805,81 +1779,49 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     }
 
     /**
-     * Makes sure that SurfaceControl transactions and the ability to set bounds outside of the
-     * parent bounds are not allowed for embedding without full trust between the host and the
-     * target.
+     * For config change on {@link TaskFragment}, we only support the following operations:
+     * {@link WindowContainerTransaction#setRelativeBounds(WindowContainerToken, Rect)},
+     * {@link WindowContainerTransaction#setWindowingMode(WindowContainerToken, int)}.
      */
-    private void enforceTaskFragmentConfigChangeAllowed(String func, @Nullable WindowContainer wc,
-            WindowContainerTransaction.Change change, ITaskFragmentOrganizer organizer) {
+    private void enforceTaskFragmentConfigChangeAllowed(@NonNull String func,
+            @Nullable WindowContainer wc, @NonNull WindowContainerTransaction.Change change,
+            @NonNull ITaskFragmentOrganizer organizer) {
         if (wc == null) {
             Slog.e(TAG, "Attempt to operate on task fragment that no longer exists");
             return;
         }
-        if (change == null) {
+        final TaskFragment tf = wc.asTaskFragment();
+        if (tf == null || !tf.hasTaskFragmentOrganizer(organizer)) {
+            // Only allow to apply changes to TaskFragment that is organized by this organizer.
+            String msg = "Permission Denial: " + func + " from pid=" + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid() + " trying to modify window container"
+                    + " not belonging to the TaskFragmentOrganizer=" + organizer;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+
+        final int changeMask = change.getChangeMask();
+        final int configSetMask = change.getConfigSetMask();
+        final int windowSetMask = change.getWindowSetMask();
+        if (changeMask == 0 && configSetMask == 0 && windowSetMask == 0
+                && change.getWindowingMode() >= 0) {
+            // The change contains only setWindowingMode, which is allowed.
             return;
         }
-        final int changeMask = change.getChangeMask();
-        if (changeMask != 0 && changeMask != CHANGE_RELATIVE_BOUNDS) {
+        if (changeMask != CHANGE_RELATIVE_BOUNDS
+                || configSetMask != ActivityInfo.CONFIG_WINDOW_CONFIGURATION
+                || windowSetMask != WindowConfiguration.WINDOW_CONFIG_BOUNDS) {
             // None of the change should be requested from a TaskFragment organizer except
-            // setRelativeBounds.
+            // setRelativeBounds and setWindowingMode.
             // For setRelativeBounds, we don't need to check whether it is outside of the Task
             // bounds, because it is possible that the Task is also resizing, for which we don't
             // want to throw an exception. The bounds will be adjusted in
             // TaskFragment#translateRelativeBoundsToAbsoluteBounds.
             String msg = "Permission Denial: " + func + " from pid="
                     + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " trying to apply changes of " + changeMask + " to TaskFragment"
-                    + " TaskFragmentOrganizer=" + organizer;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-        // Check if TaskFragment is embedded in fully trusted mode.
-        if (wc.asTaskFragment().isAllowedToBeEmbeddedInTrustedMode()) {
-            // Fully trusted, no need to check further
-            return;
-        }
-        final WindowContainer wcParent = wc.getParent();
-        if (wcParent == null) {
-            Slog.e(TAG, "Attempt to apply config change on task fragment that has no parent");
-            return;
-        }
-        // TODO(b/265271880): we can remove those and only support WCT#setRelativeBounds.
-        final Configuration requestedConfig = change.getConfiguration();
-        final Configuration parentConfig = wcParent.getConfiguration();
-        if (parentConfig.screenWidthDp < requestedConfig.screenWidthDp
-                || parentConfig.screenHeightDp < requestedConfig.screenHeightDp
-                || parentConfig.smallestScreenWidthDp < requestedConfig.smallestScreenWidthDp) {
-            String msg = "Permission Denial: " + func + " from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " trying to apply screen width/height greater than parent's for non-trusted"
-                    + " host, TaskFragmentOrganizer=" + organizer;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-        if (change.getWindowSetMask() == 0) {
-            // No bounds change.
-            return;
-        }
-        final WindowConfiguration requestedWindowConfig = requestedConfig.windowConfiguration;
-        final WindowConfiguration parentWindowConfig = parentConfig.windowConfiguration;
-        if (!requestedWindowConfig.getBounds().isEmpty()
-                && !parentWindowConfig.getBounds().contains(requestedWindowConfig.getBounds())) {
-            String msg = "Permission Denial: " + func + " from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " trying to apply bounds outside of parent for non-trusted host,"
-                    + " TaskFragmentOrganizer=" + organizer;
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-        if (requestedWindowConfig.getAppBounds() != null
-                && !requestedWindowConfig.getAppBounds().isEmpty()
-                && parentWindowConfig.getAppBounds() != null
-                && !parentWindowConfig.getAppBounds().contains(
-                        requestedWindowConfig.getAppBounds())) {
-            String msg = "Permission Denial: " + func + " from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " trying to apply app bounds outside of parent for non-trusted host,"
-                    + " TaskFragmentOrganizer=" + organizer;
+                    + " trying to apply changes of changeMask=" + changeMask
+                    + " configSetMask=" + configSetMask + " windowSetMask=" + windowSetMask
+                    + " to TaskFragment=" + tf + " TaskFragmentOrganizer=" + organizer;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }

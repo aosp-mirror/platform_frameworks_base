@@ -3776,6 +3776,7 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction setHidden(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction setLaunchAdjacentFlagRoot(@NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction setLaunchRoot(@NonNull android.window.WindowContainerToken, @Nullable int[], @Nullable int[]);
+    method @NonNull public android.window.WindowContainerTransaction setRelativeBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setScreenSizeDp(@NonNull android.window.WindowContainerToken, int, int);
     method @NonNull public android.window.WindowContainerTransaction setSmallestScreenWidthDp(@NonNull android.window.WindowContainerToken, int);
     method @NonNull public android.window.WindowContainerTransaction setWindowingMode(@NonNull android.window.WindowContainerToken, int);
