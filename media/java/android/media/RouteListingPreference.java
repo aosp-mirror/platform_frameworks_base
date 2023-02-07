@@ -180,6 +180,7 @@ public final class RouteListingPreference implements Parcelable {
         /** Creates a new instance with default values (documented in the setters). */
         public Builder() {
             mItems = List.of();
+            mUseSystemOrdering = true;
         }
 
         /**
@@ -190,7 +191,6 @@ public final class RouteListingPreference implements Parcelable {
         @NonNull
         public Builder setItems(@NonNull List<Item> items) {
             mItems = List.copyOf(Objects.requireNonNull(items));
-            mUseSystemOrdering = true;
             return this;
         }
 
