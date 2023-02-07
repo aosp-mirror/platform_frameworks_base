@@ -1,4 +1,4 @@
-package com.android.systemui.statusbar
+package com.android.systemui.plugins
 
 import android.os.Bundle
 
