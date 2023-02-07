@@ -77,9 +77,9 @@ import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_ALLOWLISTED_COMPONENT;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_ALLOWLISTED_UID;
-import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_BAL_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_DEFAULT;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_PENDING_INTENT;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
@@ -1937,7 +1937,7 @@ class ActivityStarter {
         // BAL exception only allowed for new tasks
         if (taskToFront) {
             if (mBalCode == BAL_ALLOW_ALLOWLISTED_COMPONENT
-                    || mBalCode == BAL_ALLOW_BAL_PERMISSION
+                    || mBalCode == BAL_ALLOW_PERMISSION
                     || mBalCode == BAL_ALLOW_PENDING_INTENT) {
                 return true;
             }

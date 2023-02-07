@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.provider.DeviceConfig.NAMESPACE_WINDOW_MANAGER;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
@@ -31,6 +32,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.ComponentOptions;
 import android.content.ComponentName;
@@ -38,6 +40,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Process;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Slog;
@@ -67,7 +70,7 @@ public class BackgroundActivityStartController {
             BAL_ALLOW_ALLOWLISTED_COMPONENT,
             BAL_ALLOW_VISIBLE_WINDOW,
             BAL_ALLOW_PENDING_INTENT,
-            BAL_ALLOW_BAL_PERMISSION,
+            BAL_ALLOW_PERMISSION,
             BAL_ALLOW_SAW_PERMISSION,
             BAL_ALLOW_GRACE_PERIOD,
             BAL_ALLOW_FOREGROUND,
@@ -96,7 +99,7 @@ public class BackgroundActivityStartController {
 
     /** App has START_ACTIVITIES_FROM_BACKGROUND permission or BAL instrumentation privileges
      * granted to it */
-    static final int BAL_ALLOW_BAL_PERMISSION = 6;
+    static final int BAL_ALLOW_PERMISSION = 6;
 
     /** Process has SYSTEM_ALERT_WINDOW permission granted to it */
     static final int BAL_ALLOW_SAW_PERMISSION = 7;
@@ -310,7 +313,7 @@ public class BackgroundActivityStartController {
             if (ActivityTaskManagerService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND,
                     callingPid, callingUid) == PERMISSION_GRANTED) {
                 return logStartAllowedAndReturnCode(/*background*/ true, callingUid,
-                        BAL_ALLOW_BAL_PERMISSION,
+                    BAL_ALLOW_PERMISSION,
                         "START_ACTIVITIES_FROM_BACKGROUND permission granted");
             }
             // don't abort if the caller has the same uid as the recents component
@@ -338,6 +341,17 @@ public class BackgroundActivityStartController {
                                 + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
                 return logStartAllowedAndReturnCode(/*background*/ true, callingUid,
                         BAL_ALLOW_SAW_PERMISSION, "SYSTEM_ALERT_WINDOW permission is granted");
+            }
+            // don't abort if the callingUid and callingPackage have the
+            // OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop
+            if (isSystemExemptFlagEnabled() && mService.getAppOpsManager().checkOpNoThrow(
+                    AppOpsManager.OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
+                    callingUid,
+                    callingPackage)
+                    == AppOpsManager.MODE_ALLOWED) {
+                return logStartAllowedAndReturnCode(/*background*/ true, callingUid,
+                    BAL_ALLOW_PERMISSION,
+                    "OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop is granted");
             }
         }
         // If we don't have callerApp at this point, no caller was provided to startActivity().
@@ -460,5 +474,12 @@ public class BackgroundActivityStartController {
             Slog.d(TAG,  builder.toString());
         }
         return code;
+    }
+
+    private static boolean isSystemExemptFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_WINDOW_MANAGER,
+                /* name= */ "system_exempt_from_activity_bg_start_restriction_enabled",
+                /* defaultValue= */ true);
     }
 }
