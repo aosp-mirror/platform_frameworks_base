@@ -42,6 +42,10 @@ class KeyguardTransitionInteractor
 constructor(
     repository: KeyguardTransitionRepository,
 ) {
+    /** (any)->GONE transition information */
+    val anyStateToGoneTransition: Flow<TransitionStep> =
+        repository.transitions.filter { step -> step.to == KeyguardState.GONE }
+
     /** (any)->AOD transition information */
     val anyStateToAodTransition: Flow<TransitionStep> =
         repository.transitions.filter { step -> step.to == KeyguardState.AOD }
