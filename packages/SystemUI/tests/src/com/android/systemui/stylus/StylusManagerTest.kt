@@ -96,6 +96,9 @@ class StylusManagerTest : SysuiTestCase() {
         whenever(stylusDevice.bluetoothAddress).thenReturn(null)
         whenever(btStylusDevice.bluetoothAddress).thenReturn(STYLUS_BT_ADDRESS)
 
+        whenever(stylusDevice.batteryState).thenReturn(batteryState)
+        whenever(batteryState.capacity).thenReturn(0.5f)
+
         whenever(inputManager.getInputDevice(OTHER_DEVICE_ID)).thenReturn(otherDevice)
         whenever(inputManager.getInputDevice(STYLUS_DEVICE_ID)).thenReturn(stylusDevice)
         whenever(inputManager.getInputDevice(BT_STYLUS_DEVICE_ID)).thenReturn(btStylusDevice)
@@ -491,6 +494,47 @@ class StylusManagerTest : SysuiTestCase() {
         stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
 
         verify(stylusCallback, times(1)).onStylusFirstUsed()
+    }
+
+    @Test
+    fun onBatteryStateChanged_batteryPresent_notInUsiSession_logsSessionStart() {
+        whenever(batteryState.isPresent).thenReturn(true)
+
+        stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
+
+        verify(uiEventLogger, times(1))
+            .log(StylusUiEvent.USI_STYLUS_BATTERY_PRESENCE_FIRST_DETECTED)
+    }
+
+    @Test
+    fun onBatteryStateChanged_batteryPresent_inUsiSession_doesNotLogSessionStart() {
+        whenever(batteryState.isPresent).thenReturn(true)
+        stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
+        clearInvocations(uiEventLogger)
+
+        stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
+
+        verify(uiEventLogger, never()).log(any())
+    }
+
+    @Test
+    fun onBatteryStateChanged_batteryAbsent_notInUsiSession_doesNotLogSessionEnd() {
+        whenever(batteryState.isPresent).thenReturn(false)
+
+        stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
+
+        verify(uiEventLogger, never()).log(any())
+    }
+
+    @Test
+    fun onBatteryStateChanged_batteryAbsent_inUsiSession_logSessionEnd() {
+        whenever(batteryState.isPresent).thenReturn(true)
+        stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
+        whenever(batteryState.isPresent).thenReturn(false)
+
+        stylusManager.onBatteryStateChanged(STYLUS_DEVICE_ID, 1, batteryState)
+
+        verify(uiEventLogger, times(1)).log(StylusUiEvent.USI_STYLUS_BATTERY_PRESENCE_REMOVED)
     }
 
     @Test
