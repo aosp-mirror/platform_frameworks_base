@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display.Mode;
 import android.view.Surface;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import androidx.test.filters.FlakyTest;
@@ -291,6 +292,14 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(FRAME_RATE_VOTE_NONE, overrideWindow.mFrameRateVote);
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
+
+        // Use default mode if it is animating by shell transition.
+        overrideWindow.mActivityRecord.mSurfaceAnimator.cancelAnimation();
+        registerTestTransitionPlayer();
+        final Transition transition = overrideWindow.mTransitionController.createTransition(
+                WindowManager.TRANSIT_OPEN);
+        transition.collect(overrideWindow.mActivityRecord);
+        assertEquals(0, mPolicy.getPreferredModeId(overrideWindow));
 
         // If there will be display size change when switching from preferred mode to default mode,
         // then keep the current preferred mode during animating.
