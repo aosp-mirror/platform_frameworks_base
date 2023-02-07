@@ -2553,7 +2553,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      */
     @NonNull
     public RemoteLockscreenValidationResult
-            validateRemoteLockScreen2(@NonNull byte[] encryptedCredential) {
+            validateRemoteLockscreen(@NonNull byte[] encryptedCredential) {
         return mRecoverableKeyStoreManager.validateRemoteLockscreen(encryptedCredential, this);
     }
 

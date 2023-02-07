@@ -1075,6 +1075,46 @@ public class KeyguardManager {
         return response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK;
     }
 
+    /** Starts a session to verify lockscreen credentials provided by a remote device.
+     *
+     * The session and corresponding public key will be removed when
+     * {@code validateRemoteLockScreen} provides a correct guess or after 10 minutes of inactivity.
+     *
+     * @return information necessary to perform remote lock screen credentials check, including
+
+     * short lived public key used to send encrypted guess and lock screen type.
+     *
+     * @throws IllegalStateException if lock screen is not set
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CHECK_REMOTE_LOCKSCREEN)
+    @NonNull
+    public StartLockscreenValidationRequest startRemoteLockscreenValidation() {
+        return mLockPatternUtils.startRemoteLockscreenValidation();
+    }
+
+    /**
+     * Verifies credentials guess from a remote device.
+     *
+     * <p>Secret must be encrypted using {@code SecureBox} library
+     * with public key from {@code StartLockscreenValidationRequest}
+     * and header set to {@code "encrypted_remote_credentials"} in UTF-8 encoding.
+     *
+     * @throws IllegalStateException if there is no active lock screen validation session or
+     * there was a decryption error.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CHECK_REMOTE_LOCKSCREEN)
+    @NonNull
+    public RemoteLockscreenValidationResult validateRemoteLockscreen(
+            @NonNull byte[] encryptedCredential) {
+        return mLockPatternUtils.validateRemoteLockscreen(encryptedCredential);
+    }
+
     private LockscreenCredential createLockscreenCredential(
             @LockTypes int lockType, @Nullable byte[] password) {
         if (password == null) {

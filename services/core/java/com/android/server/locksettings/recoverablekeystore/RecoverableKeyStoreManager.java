@@ -1126,11 +1126,10 @@ public class RecoverableKeyStoreManager {
     }
 
     private void checkVerifyRemoteLockscreenPermission() {
-        // TODO(b/254335492): Check new system permission
         mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.RECOVER_KEYSTORE,
+                Manifest.permission.CHECK_REMOTE_LOCKSCREEN,
                 "Caller " + Binder.getCallingUid()
-                        + " doesn't have verifyRemoteLockscreen permission.");
+                        + " doesn't have CHECK_REMOTE_LOCKSCREEN permission.");
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
         mCleanupManager.registerRecoveryAgent(userId, uid);

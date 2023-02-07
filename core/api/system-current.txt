@@ -100,6 +100,7 @@ package android {
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
     field public static final String CHANGE_APP_LAUNCH_TIME_ESTIMATE = "android.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE";
     field public static final String CHANGE_DEVICE_IDLE_TEMP_WHITELIST = "android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST";
+    field public static final String CHECK_REMOTE_LOCKSCREEN = "android.permission.CHECK_REMOTE_LOCKSCREEN";
     field public static final String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
     field public static final String COMPANION_APPROVE_WIFI_CONNECTIONS = "android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS";
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
@@ -919,7 +920,9 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.SHOW_KEYGUARD_MESSAGE) public void requestDismissKeyguard(@NonNull android.app.Activity, @Nullable CharSequence, @Nullable android.app.KeyguardManager.KeyguardDismissCallback);
     method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public boolean setLock(int, @NonNull byte[], int);
     method @RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS) public void setPrivateNotificationsAllowed(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CHECK_REMOTE_LOCKSCREEN) public android.app.StartLockscreenValidationRequest startRemoteLockscreenValidation();
     method @RequiresPermission(android.Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN) public boolean unregisterWeakEscrowTokenRemovedListener(@NonNull android.app.KeyguardManager.WeakEscrowTokenRemovedListener);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CHECK_REMOTE_LOCKSCREEN) public android.app.RemoteLockscreenValidationResult validateRemoteLockscreen(@NonNull byte[]);
     field public static final int PASSWORD = 0; // 0x0
     field public static final int PATTERN = 2; // 0x2
     field public static final int PIN = 1; // 0x1
@@ -996,6 +999,25 @@ package android.app {
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL = "android.app.action.TOGGLE_NOTIFICATION_HANDLER_PANEL";
   }
 
+  public final class RemoteLockscreenValidationResult implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getResultCode();
+    method public long getTimeoutMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.RemoteLockscreenValidationResult> CREATOR;
+    field public static final int RESULT_GUESS_INVALID = 2; // 0x2
+    field public static final int RESULT_GUESS_VALID = 1; // 0x1
+    field public static final int RESULT_LOCKOUT = 3; // 0x3
+    field public static final int RESULT_NO_REMAINING_ATTEMPTS = 4; // 0x4
+  }
+
+  public static final class RemoteLockscreenValidationResult.Builder {
+    ctor public RemoteLockscreenValidationResult.Builder();
+    method @NonNull public android.app.RemoteLockscreenValidationResult build();
+    method @NonNull public android.app.RemoteLockscreenValidationResult.Builder setResultCode(int);
+    method @NonNull public android.app.RemoteLockscreenValidationResult.Builder setTimeoutMillis(long);
+  }
+
   public final class RuntimeAppOpAccessMessage implements android.os.Parcelable {
     ctor public RuntimeAppOpAccessMessage(@IntRange(from=0L) int, @IntRange(from=0L) int, @NonNull String, @Nullable String, @NonNull String, int);
     method public int describeContents();
@@ -1011,6 +1033,23 @@ package android.app {
 
   public class SearchManager implements android.content.DialogInterface.OnCancelListener android.content.DialogInterface.OnDismissListener {
     method public void launchAssist(@Nullable android.os.Bundle);
+  }
+
+  public final class StartLockscreenValidationRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getLockscreenUiType();
+    method public int getRemainingAttempts();
+    method @NonNull public byte[] getSourcePublicKey();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.StartLockscreenValidationRequest> CREATOR;
+  }
+
+  public static final class StartLockscreenValidationRequest.Builder {
+    ctor public StartLockscreenValidationRequest.Builder();
+    method @NonNull public android.app.StartLockscreenValidationRequest build();
+    method @NonNull public android.app.StartLockscreenValidationRequest.Builder setLockscreenUiType(int);
+    method @NonNull public android.app.StartLockscreenValidationRequest.Builder setRemainingAttempts(int);
+    method @NonNull public android.app.StartLockscreenValidationRequest.Builder setSourcePublicKey(@NonNull byte[]);
   }
 
   public class StatusBarManager {
