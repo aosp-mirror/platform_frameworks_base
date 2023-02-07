@@ -91,8 +91,15 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"નીચેની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ડાબી બાજુની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"જમણી બાજુની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"ઑફિસના સ્ક્રીનશૉટ <xliff:g id="APP">%1$s</xliff:g> ઍપમાં સાચવવામાં આવે છે"</string>
+    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
+    <skip />
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ફાઇલો"</string>
+    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
+    <skip />
+    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
+    <skip />
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"સ્ક્રીન રેકોર્ડર"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"સ્ક્રીન રેકૉર્ડિંગ ચાલુ છે"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"સ્ક્રીન રેકોર્ડિંગ સત્ર માટે ચાલુ નોટિફિકેશન"</string>
@@ -339,12 +346,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"ચહેરો ઓળખ્યો. ખોલવા માટે \'અનલૉક કરો\' આઇકન દબાવો."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ચહેરા દ્વારા અનલૉક કર્યું"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ચહેરો ઓળખ્યો"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"ડાબે ખસેડો"</item>
-    <item msgid="5558598599408514296">"નીચે ખસેડો"</item>
-    <item msgid="4844142668312841831">"જમણે ખસેડો"</item>
-    <item msgid="5640521437931460125">"ઉપર ખસેડો"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"ફરી પ્રયાસ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCનો ઉપયોગ કરવા માટે અનલૉક કરો"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"આ ડિવાઇસ તમારી સંસ્થાની માલિકીનું છે"</string>
@@ -832,10 +833,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"નિયંત્રણો ઉમેરવા માટે ઍપ પસંદ કરો"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# નિયંત્રણ ઉમેર્યું.}one{# નિયંત્રણ ઉમેર્યું.}other{# નિયંત્રણ ઉમેર્યા.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"કાઢી નાખ્યું"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ઉમેરીએ?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"જ્યારે તમે <xliff:g id="APPNAME">%s</xliff:g> ઉમેરો, ત્યારે તે આ પૅનલમાં નિયંત્રણો અને કન્ટેન્ટ ઉમેરી શકે છે. કેટલીક ઍપમાં, અહીં કયા નિયંત્રણો દેખાય તે તમે પસંદ કરી શકો છો."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"મનપસંદમાં ઉમેર્યું"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"મનપસંદમાં ઉમેર્યું, સ્થાન <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"મનપસંદમાંથી કાઢી નાખ્યું"</string>
@@ -853,7 +852,7 @@
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"અન્ય"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ડિવાઇસનાં નિયંત્રણોમાં ઉમેરો"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ઉમેરો"</string>
-    <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> દ્વારા સૂચન કરેલા"</string>
+    <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> દ્વારા સૂચવેલા"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"ડિવાઇસ લૉક કરેલું છે"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"લૉક સ્ક્રીનમાંથી ડિવાઇસ બતાવીએ અને નિયંત્રિત કરીએ?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"તમે તમારા બાહ્ય ડિવાઇસ માટેના નિયંત્રણો લૉક સ્ક્રીન પર ઉમેરી શકો છો.\n\nતમારી ડિવાઇસ ઍપ કદાચ તમને તમારો ફોન કે ટૅબ્લેટ અનલૉક કર્યા વિના અમુક ડિવાઇસ નિયંત્રિત કરવાની મંજૂરી આપી શકે.\n\nતમે ગમે ત્યારે સેટિંગમાં જઈને ફેરફાર કરી શકો છો."</string>
@@ -886,6 +885,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ખોલો"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> પર <xliff:g id="ARTIST_NAME">%2$s</xliff:g>નું <xliff:g id="SONG_NAME">%1$s</xliff:g> ગીત ચલાવો"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> પર <xliff:g id="SONG_NAME">%1$s</xliff:g> ગીત ચલાવો"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"તમારા માટે"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"છેલ્લો ફેરફાર રદ કરો"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> પર ચલાવવા માટે વધુ નજીક ખસેડો"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"અહીં ચલાવવા માટે, <xliff:g id="DEVICENAME">%1$s</xliff:g>ની નજીક લાવો"</string>
@@ -902,8 +902,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"ભૂલ, ફરીથી પ્રયાસ કરો"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"નિયંત્રણો ઉમેરો"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"નિયંત્રણોમાં ફેરફાર કરો"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"ઍપ ઉમેરો"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"આઉટપુટ ઉમેરો"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"ગ્રૂપ"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 ડિવાઇસ પસંદ કર્યું"</string>
@@ -919,7 +918,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"સ્પીકર અને ડિસ્પ્લે"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"સૂચવેલા ડિવાઇસ"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Premium એકાઉન્ટ જરૂરી છે"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"બ્રોડકાસ્ટ પ્રક્રિયાની કામ કરવાની રીત"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"બ્રોડકાસ્ટ કરો"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"સુસંગત બ્લૂટૂથ ડિવાઇસ ધરાવતા નજીકના લોકો તમે જે મીડિયા બ્રોડકાસ્ટ કરી રહ્યાં છો તે સાંભળી શકે છે"</string>
@@ -1031,6 +1029,8 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"કૅમેરા બંધ છે"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"માઇક્રોફોન બંધ છે"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"કૅમેરા અને માઇક બંધ છે"</string>
+    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
+    <skip />
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# નોટિફિકેશન}one{# નોટિફિકેશન}other{# નોટિફિકેશન}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"નોંધ લેવી"</string>
@@ -1046,6 +1046,10 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"એક-વખતના ઍક્સેસની મંજૂરી આપો"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"મંજૂરી આપશો નહીં"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"તમારા ડિવાઇસ પર થતી કામગીરીને ડિવાઇસ લૉગ રેકોર્ડ કરે છે. ઍપ આ લૉગનો ઉપયોગ સમસ્યાઓ શોધી તેનું નિરાકરણ કરવા માટે કરી શકે છે.\n\nઅમુક લૉગમાં સંવેદનશીલ માહિતી હોઈ શકે, આથી ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી માત્ર તમારી વિશ્વાસપાત્ર ઍપને જ આપો. \n\nજો તમે આ ઍપને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી ન આપો, તો પણ તે તેના પોતાના લૉગ ઍક્સેસ કરી શકે છે. તમારા ડિવાઇસના નિર્માતા હજી પણ કદાચ તમારા ડિવાઇસ પર અમુક લૉગ અથવા માહિતી ઍક્સેસ કરી શકે છે."</string>
+    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ખોલો"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ઍપનું સેટઅપ કરેલું છે"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ઓછામાં ઓછું એક કાર્ડ વૉલેટમાં ઉમેરેલું છે"</string>
@@ -1069,6 +1073,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"તમારી ઑફિસની પૉલિસી તમને માત્ર ઑફિસની પ્રોફાઇલ પરથી જ ફોન કૉલ કરવાની મંજૂરી આપે છે"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"ઑફિસની પ્રોફાઇલ પર સ્વિચ કરો"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"બંધ કરો"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"લૉક સ્ક્રીનના સેટિંગ"</string>
 </resources>

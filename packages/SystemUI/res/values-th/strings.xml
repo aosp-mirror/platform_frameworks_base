@@ -91,8 +91,11 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"ขอบเขตด้านล่าง <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ขอบเขตด้านซ้าย <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ขอบเขตด้านขวา <xliff:g id="PERCENT">%1$d</xliff:g> เปอร์เซ็นต์"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"ภาพหน้าจองานจะบันทึกอยู่ในแอป <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"บันทึกไว้ที่ <xliff:g id="APP">%1$s</xliff:g> ในโปรไฟล์งาน"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ไฟล์"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ตรวจพบภาพหน้าจอนี้"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> และแอปอื่นๆ ที่เปิดอยู่ตรวจพบภาพหน้าจอนี้"</string>
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"เพิ่มลงในโน้ต"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมบันทึกหน้าจอ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
@@ -339,12 +342,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"จดจำใบหน้าได้ กดไอคอนปลดล็อกเพื่อเปิด"</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ปลดล็อกด้วยใบหน้าแล้ว"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"จดจำใบหน้าได้"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"เลื่อนนิ้วไปทางซ้าย"</item>
-    <item msgid="5558598599408514296">"เลื่อนนิ้วลง"</item>
-    <item msgid="4844142668312841831">"เลื่อนนิ้วไปทางขวา"</item>
-    <item msgid="5640521437931460125">"เลื่อนนิ้วขึ้น"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"เลื่อนขึ้นเพื่อลองอีกครั้ง"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"ปลดล็อกเพื่อใช้ NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้"</string>
@@ -884,6 +881,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"เปิด <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"เปิดเพลง <xliff:g id="SONG_NAME">%1$s</xliff:g> ของ <xliff:g id="ARTIST_NAME">%2$s</xliff:g> จาก <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"เปิดเพลง <xliff:g id="SONG_NAME">%1$s</xliff:g> จาก <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"สำหรับคุณ"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"เลิกทำ"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"ขยับไปใกล้มากขึ้นเพื่อเล่นใน <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"ขยับไปใกล้ <xliff:g id="DEVICENAME">%1$s</xliff:g> มากขึ้นเพื่อเล่นที่นี่"</string>
@@ -916,7 +914,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ลำโพงและจอแสดงผล"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"อุปกรณ์ที่แนะนำ"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"ต้องใช้บัญชี Premium"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"วิธีการทำงานของการออกอากาศ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ประกาศ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ผู้ที่อยู่ใกล้คุณและมีอุปกรณ์บลูทูธที่รองรับสามารถรับฟังสื่อที่คุณกำลังออกอากาศได้"</string>
@@ -1028,6 +1025,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"กล้องปิดอยู่"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"ไมค์ปิดอยู่"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"กล้องและไมค์ปิดอยู่"</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant กำลังฟังอยู่"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{การแจ้งเตือน # รายการ}other{การแจ้งเตือน # รายการ}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"การจดบันทึก"</string>
@@ -1043,6 +1041,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"อนุญาตสิทธิ์เข้าถึงแบบครั้งเดียว"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ไม่อนุญาต"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"บันทึกของอุปกรณ์เก็บข้อมูลสิ่งที่เกิดขึ้นในอุปกรณ์ แอปสามารถใช้บันทึกเหล่านี้เพื่อค้นหาและแก้ไขปัญหา\n\nบันทึกบางรายการอาจมีข้อมูลที่ละเอียดอ่อน คุณจึงควรอนุญาตเฉพาะแอปที่เชื่อถือได้ให้เข้าถึงบันทึกทั้งหมดของอุปกรณ์ \n\nหากคุณไม่อนุญาตให้แอปนี้เข้าถึงบันทึกทั้งหมดของอุปกรณ์ แอปจะยังเข้าถึงบันทึกของตัวเองได้อยู่ ผู้ผลิตอุปกรณ์อาจยังเข้าถึงบันทึกหรือข้อมูลบางรายการในอุปกรณ์ของคุณได้"</string>
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ดูข้อมูลเพิ่มเติม"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"ดูข้อมูลเพิ่มเติมที่ <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"เปิด <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• แอปได้รับการตั้งค่าแล้ว"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• มีการเพิ่มบัตรลงใน Wallet อย่างน้อย 1 รายการ"</string>
@@ -1066,6 +1066,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"นโยบายการทำงานอนุญาตให้คุณโทรออกได้จากโปรไฟล์งานเท่านั้น"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"สลับไปใช้โปรไฟล์งาน"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"ปิด"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"การตั้งค่าหน้าจอล็อก"</string>
 </resources>

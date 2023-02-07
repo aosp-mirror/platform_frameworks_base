@@ -91,8 +91,12 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"దిగువ సరిహద్దు <xliff:g id="PERCENT">%1$d</xliff:g> శాతం"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ఎడమ వైపు సరిహద్దు <xliff:g id="PERCENT">%1$d</xliff:g> శాతం"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"కుడి వైపు సరిహద్దు <xliff:g id="PERCENT">%1$d</xliff:g> శాతం"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"వర్క్ స్క్రీన్‌షాట్‌లు <xliff:g id="APP">%1$s</xliff:g> యాప్‌లో సేవ్ చేయబడతాయి"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"వర్క్ ప్రొఫైల్‌లోని <xliff:g id="APP">%1$s</xliff:g>‌లో సేవ్ చేయబడింది"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ఫైల్స్"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g>, ఈ స్క్రీన్‌షాట్‌ను గుర్తించింది."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g>, ఇతర ఓపెన్ యాప్‌లు ఈ స్క్రీన్‌షాట్‌ను గుర్తించాయి."</string>
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"స్క్రీన్ రికార్డర్"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"స్క్రీన్ రికార్డింగ్ అవుతోంది"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
@@ -339,12 +343,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"ముఖం గుర్తించబడింది. తెరవడానికి అన్‌లాక్ చిహ్నం నొక్కండి."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"ముఖం ద్వారా అన్‌లాక్ చేయబడింది"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"ముఖం గుర్తించబడింది"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"ఎడమవైపుగా జరపండి"</item>
-    <item msgid="5558598599408514296">"కిందికి జరపండి"</item>
-    <item msgid="4844142668312841831">"కుడివైపుగా జరపండి"</item>
-    <item msgid="5640521437931460125">"పైకి జరపండి"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"మళ్ళీ ప్రయత్నించడానికి పైకి స్వైప్ చేయండి"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCని ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
@@ -832,10 +830,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"కంట్రోల్స్‌ను యాడ్ చేయడానికి యాప్‌ను ఎంచుకోండి"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# కంట్రోల్ జోడించబడింది.}other{# కంట్రోల్స్ జోడించబడ్డాయి.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"తీసివేయబడింది"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g>ను జోడించాలా?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"మీరు <xliff:g id="APPNAME">%s</xliff:g>ను జోడించినప్పుడు, ఇది ఈ ప్యానెల్‌కు కంట్రోల్స్‌ని, కంటెంట్‌ను జోడించగలదు. కొన్ని యాప్‌లలో, ఇక్కడ ఏయే కంట్రోల్స్ కనిపించాలో మీరు ఎంచుకోవచ్చు."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"ఇష్టమైనదిగా గుర్తు పెట్టబడింది"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"<xliff:g id="NUMBER">%d</xliff:g>వ స్థానంలో ఇష్టమైనదిగా గుర్తు పెట్టబడింది"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ఇష్టమైనదిగా పెట్టిన గుర్తు తీసివేయబడింది"</string>
@@ -886,6 +882,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g>ను తెరవండి"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> నుండి <xliff:g id="ARTIST_NAME">%2$s</xliff:g> పాడిన <xliff:g id="SONG_NAME">%1$s</xliff:g>‌ను ప్లే చేయండి"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> నుండి <xliff:g id="SONG_NAME">%1$s</xliff:g>‌ను ప్లే చేయండి"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"మీ కోసం"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"చర్య రద్దు"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>‌లో ప్లే చేయడానికి దగ్గరగా వెళ్లండి"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"ఇక్కడ ఆడటానికి, <xliff:g id="DEVICENAME">%1$s</xliff:g>‌కు దగ్గరగా వెళ్లండి"</string>
@@ -902,8 +899,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"ఎర్రర్, మళ్లీ ప్రయత్నించండి"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"కంట్రోల్స్‌ను జోడించండి"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"కంట్రోల్స్‌ను ఎడిట్ చేయండి"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"యాప్‌ను జోడించండి"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"అవుట్‌పుట్‌లను జోడించండి"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"గ్రూప్"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 పరికరం ఎంచుకోబడింది"</string>
@@ -919,7 +915,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"స్పీకర్‌లు &amp; డిస్‌ప్లేలు"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"సూచించబడిన పరికరాలు"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"ప్రీమియం ఖాతా అవసరం"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ప్రసారం కావడం అనేది ఎలా పని చేస్తుంది"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ప్రసారం"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"మీకు సమీపంలో ఉన్న వ్యక్తులు అనుకూలత ఉన్న బ్లూటూత్ పరికరాలతో మీరు ప్రసారం చేస్తున్న మీడియాను వినగలరు"</string>
@@ -1031,6 +1026,8 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"కెమెరా ఆఫ్‌లో ఉంది"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"మైక్ ఆఫ్‌లో ఉంది"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"కెమెరా, మైక్ ఆఫ్‌లో ఉన్నాయి"</string>
+    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
+    <skip />
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# నోటిఫికేషన్}other{# నోటిఫికేషన్‌లు}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"నోట్‌టేకింగ్"</string>
@@ -1046,6 +1043,10 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"వన్-టైమ్ యాక్సెస్‌ను అనుమతించండి"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"అనుమతించవద్దు"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"మీ పరికరంలో జరిగే దాన్ని పరికర లాగ్‌లు రికార్డ్ చేస్తాయి. సమస్యలను కనుగొని, పరిష్కరించడానికి యాప్‌లు ఈ లాగ్‌లను ఉపయోగిస్తాయి.\n\nకొన్ని లాగ్‌లలో గోప్యమైన సమాచారం ఉండవచ్చు, కాబట్టి మీరు విశ్వసించే యాప్‌లను మాత్రమే అన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి అనుమతించండి. \n\nఅన్ని పరికర లాగ్‌లను యాక్సెస్ చేయడానికి మీరు ఈ యాప్‌ను అనుమతించకపోతే, అది తన స్వంత లాగ్‌లను ఇప్పటికి యాక్సెస్ చేయగలదు. మీ పరికర తయారీదారు ఇప్పటికీ మీ పరికరంలో కొన్ని లాగ్‌లు లేదా సమాచారాన్ని యాక్సెస్ చేయగలరు."</string>
+    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g>‌ను తెరవండి"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• యాప్ సెటప్ చేయబడి ఉందని"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Walletకు కనీసం ఒక కార్డ్ అయినా జోడించబడి ఉందని"</string>
@@ -1057,7 +1058,7 @@
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"ఇప్పుడే తిప్పండి"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"మెరుగైన సెల్ఫీ కోసం ఫోన్‌ను అన్‌ఫోల్డ్ చేయండి"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"మంచి సెల్ఫీ కోసం ముందు వైపు డిస్‌ప్లేకు తిప్పాలా?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"అధిక రిజల్యూషన్‌తో పెద్ద ఫోటో కోసం వెనుక వైపున ఉన్న కెమెరాను ఉపయోగించండి."</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"వెనుక వైపున ఉన్న కెమెరాను ఉపయోగించి అధిక రిజల్యూషన్ గల, మరింత వెడల్పైన ఫోటోను పొందండి."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ ఈ స్క్రీన్ ఆఫ్ అవుతుంది"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"మడవగల పరికరం విప్పబడుతోంది"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"మడవగల పరికరం చుట్టూ తిప్పబడుతోంది"</string>
@@ -1069,6 +1070,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"మీ వర్క్ పాలసీ, మిమ్మల్ని వర్క్ ప్రొఫైల్ నుండి మాత్రమే ఫోన్ కాల్స్ చేయడానికి అనుమతిస్తుంది"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"వర్క్ ప్రొఫైల్‌కు మారండి"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"మూసివేయండి"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"లాక్ స్క్రీన్ సెట్టింగ్‌లు"</string>
 </resources>
