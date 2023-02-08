@@ -8917,6 +8917,10 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_READINESS_UNSUPPORTED = 4; // 0x4
   }
 
+  public class IptvFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getProtocolCapability();
+  }
+
   public class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettings.Builder builder();
     method @IntRange(from=0) public long getBitrate();
