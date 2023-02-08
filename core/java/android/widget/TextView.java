@@ -9957,8 +9957,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 range = adjustHandwritingDeleteGestureRange(range);
             }
 
-            getEditableText().delete(range[0], range[1]);
             Selection.setSelection(getEditableText(), range[0]);
+            getEditableText().delete(range[0], range[1]);
         }
         return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
     }
@@ -10162,8 +10162,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             endOffset += Character.charCount(codePointAtEnd);
         }
         if (startOffset < endOffset) {
-            getEditableText().delete(startOffset, endOffset);
             Selection.setSelection(getEditableText(), startOffset);
+            getEditableText().delete(startOffset, endOffset);
             return InputConnection.HANDWRITING_GESTURE_RESULT_SUCCESS;
         } else {
             // No whitespace found, so insert a space.
