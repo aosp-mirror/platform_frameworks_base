@@ -76,6 +76,16 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME =
             "settings_app_allow_dark_theme_activation_at_bedtime";
 
+    /**
+     * Flag to decouple bluetooth LE Audio Broadcast from Unicast
+     * If the flag is true, the broadcast feature will be enabled when the phone
+     * is connected to the BLE device.
+     * If the flag is false, it is not necessary to connect the BLE device.
+     * @hide
+     */
+    public static final String SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST =
+            "settings_need_connected_ble_device_for_broadcast";
+
     /** @hide */
     public static final String SETTINGS_AUTO_TEXT_WRAPPING = "settings_auto_text_wrapping";
 
@@ -199,6 +209,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_VOLUME_PANEL_IN_SYSTEMUI, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
+        DEFAULT_FLAGS.put(SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, "true");
         DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_SHORTCUT, "false");
