@@ -34,7 +34,6 @@ import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.service.assist.classification.FieldClassification;
 import android.view.autofill.AutofillId;
 import android.widget.RemoteViews;
 
@@ -46,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Response for an {@link
@@ -115,7 +113,6 @@ public final class FillResponse implements Parcelable {
     private final @StringRes int mServiceDisplayNameResourceId;
     private final boolean mShowFillDialogIcon;
     private final boolean mShowSaveDialogIcon;
-    private final @Nullable FieldClassification[] mDetectedFieldTypes;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
@@ -143,14 +140,6 @@ public final class FillResponse implements Parcelable {
         mServiceDisplayNameResourceId = builder.mServiceDisplayNameResourceId;
         mShowFillDialogIcon = builder.mShowFillDialogIcon;
         mShowSaveDialogIcon = builder.mShowSaveDialogIcon;
-        mDetectedFieldTypes = builder.mDetectedFieldTypes;
-    }
-
-    /** @hide */
-    @TestApi
-    @NonNull
-    public Set<FieldClassification> getDetectedFieldClassifications() {
-        return Set.of(mDetectedFieldTypes);
     }
 
     /** @hide */
@@ -323,28 +312,6 @@ public final class FillResponse implements Parcelable {
         private int mServiceDisplayNameResourceId;
         private boolean mShowFillDialogIcon = true;
         private boolean mShowSaveDialogIcon = true;
-        private FieldClassification[] mDetectedFieldTypes;
-
-        /**
-         * Adds a new {@link FieldClassification} to this response, to
-         * help the platform provide more accurate detection results.
-         *
-         * Call this when a field has been detected with a type.
-         *
-         * Altough similiarly named with {@link setFieldClassificationIds},
-         * it provides a different functionality - setFieldClassificationIds should
-         * be used when a field is only suspected to be Autofillable.
-         * This method should be used when a field is certainly Autofillable
-         * with a certain type.
-         */
-        @NonNull
-        public Builder setDetectedFieldClassifications(
-                @NonNull Set<FieldClassification> fieldInfos) {
-            throwIfDestroyed();
-            throwIfDisableAutofillCalled();
-            mDetectedFieldTypes = fieldInfos.toArray(new FieldClassification[0]);
-            return this;
-        }
 
         /**
          * Triggers a custom UI before autofilling the screen with any data set in this
@@ -1155,7 +1122,6 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelableArray(mIgnoredIds, flags);
         parcel.writeLong(mDisableDuration);
         parcel.writeParcelableArray(mFieldClassificationIds, flags);
-        parcel.writeParcelableArray(mDetectedFieldTypes, flags);
         parcel.writeInt(mIconResourceId);
         parcel.writeInt(mServiceDisplayNameResourceId);
         parcel.writeBoolean(mShowFillDialogIcon);
@@ -1224,12 +1190,6 @@ public final class FillResponse implements Parcelable {
                     parcel.readParcelableArray(null, AutofillId.class);
             if (fieldClassifactionIds != null) {
                 builder.setFieldClassificationIds(fieldClassifactionIds);
-            }
-
-            final FieldClassification[] detectedFields =
-                    parcel.readParcelableArray(null, FieldClassification.class);
-            if (detectedFields != null) {
-                builder.setDetectedFieldClassifications(Set.of(detectedFields));
             }
 
             builder.setIconResourceId(parcel.readInt());
