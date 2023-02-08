@@ -16,9 +16,11 @@
 
 package com.android.keyguard.logging
 
+import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController
 import com.android.systemui.log.dagger.KeyguardLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.statusbar.KeyguardIndicationController
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
@@ -75,5 +77,47 @@ constructor(
             },
             { "$str1 msgId: $str2 msg: $str3" }
         )
+    }
+
+    fun logUpdateDeviceEntryIndication(
+        animate: Boolean,
+        visible: Boolean,
+        dozing: Boolean,
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                bool1 = animate
+                bool2 = visible
+                bool3 = dozing
+            },
+            { "updateDeviceEntryIndication animate:$bool1 visible:$bool2 dozing $bool3" }
+        )
+    }
+
+    fun logKeyguardSwitchIndication(
+        type: Int,
+        message: String?,
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = type
+                str1 = message
+            },
+            { "keyguardSwitchIndication ${getKeyguardSwitchIndicationNonSensitiveLog(int1, str1)}" }
+        )
+    }
+
+    fun getKeyguardSwitchIndicationNonSensitiveLog(type: Int, message: String?): String {
+        // only show the battery string. other strings may contain sensitive info
+        return if (type == KeyguardIndicationRotateTextViewController.INDICATION_TYPE_BATTERY) {
+            "type=${KeyguardIndicationRotateTextViewController.indicationTypeToString(type)}" +
+                " message=$message"
+        } else {
+            "type=${KeyguardIndicationRotateTextViewController.indicationTypeToString(type)}"
+        }
     }
 }
