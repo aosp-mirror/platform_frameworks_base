@@ -32,7 +32,6 @@ import android.view.View;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import java.util.ArrayList;
 
 public class MeshActivity extends Activity {
     @Override
@@ -115,9 +114,11 @@ public class MeshActivity extends Activity {
                     + "      color = vec4(1.0, 0.0, 0.0, 1.0);"
                     + "      return varyings.position;\n"
                     + "}";
-            ArrayList<Attribute> attList = new ArrayList<>();
-            attList.add(new Attribute(MeshSpecification.FLOAT2, 0, "position"));
-            ArrayList<Varying> varyList = new ArrayList<>();
+            Attribute[] attList = new Attribute[]{
+                    new Attribute(MeshSpecification.TYPE_FLOAT2, 0, "position"),
+
+            };
+            Varying[] varyList = new Varying[0];
             return MeshSpecification.make(attList, 8, varyList, vs, fs);
         }
     }
