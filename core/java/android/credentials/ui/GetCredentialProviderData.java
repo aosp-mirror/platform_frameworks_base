@@ -38,7 +38,7 @@ public final class GetCredentialProviderData extends ProviderData implements Par
     private final List<Entry> mCredentialEntries;
     @NonNull
     private final List<Entry> mActionChips;
-    @Nullable
+    @NonNull
     private final List<Entry> mAuthenticationEntries;
     @Nullable
     private final Entry mRemoteEntry;
@@ -89,7 +89,7 @@ public final class GetCredentialProviderData extends ProviderData implements Par
 
         List<Entry> authenticationEntries  = new ArrayList<>();
         in.readTypedList(authenticationEntries, Entry.CREATOR);
-        mAuthenticationEntries = actionChips;
+        mAuthenticationEntries = authenticationEntries;
         AnnotationValidations.validate(NonNull.class, null, mAuthenticationEntries);
 
         Entry remoteEntry = in.readTypedObject(Entry.CREATOR);
@@ -133,7 +133,7 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         @NonNull private String mProviderFlattenedComponentName;
         @NonNull private List<Entry> mCredentialEntries = new ArrayList<>();
         @NonNull private List<Entry> mActionChips = new ArrayList<>();
-        @Nullable private List<Entry> mAuthenticationEntries = new ArrayList<>();
+        @NonNull private List<Entry> mAuthenticationEntries = new ArrayList<>();
         @Nullable private Entry mRemoteEntry = null;
 
         /** Constructor with required properties. */
