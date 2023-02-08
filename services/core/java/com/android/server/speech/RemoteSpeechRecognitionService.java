@@ -452,6 +452,11 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         }
 
         @Override
+        public void onLanguageDetection(Bundle results) throws RemoteException {
+            mRemoteListener.onLanguageDetection(results);
+        }
+
+        @Override
         public void onEvent(int eventType, Bundle params) throws RemoteException {
             mRemoteListener.onEvent(eventType, params);
         }

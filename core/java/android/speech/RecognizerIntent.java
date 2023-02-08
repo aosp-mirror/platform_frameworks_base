@@ -572,4 +572,85 @@ public class RecognizerIntent {
      */
     public static final String EXTRA_REQUEST_WORD_CONFIDENCE =
             "android.speech.extra.REQUEST_WORD_CONFIDENCE";
+
+    /**
+     * Optional boolean indicating whether to enable language detection. When enabled, the
+     * recognizer will consistently identify the language of the current spoken utterance and
+     * provide that info via {@link RecognitionListener#onLanguageDetection(Bundle)}.
+     *
+     * <p> Depending on the recognizer implementation, this flag may have no effect.
+     */
+    public static final String EXTRA_ENABLE_LANGUAGE_DETECTION =
+            "android.speech.extra.ENABLE_LANGUAGE_DETECTION";
+
+    /**
+     * Optional list of IETF language tags (as defined by BCP 47, e.g. "en-US", "de-DE").
+     * This extra is to be used with {@link #EXTRA_ENABLE_LANGUAGE_DETECTION}.
+     * If set, the recognizer will constrain the language detection output
+     * to this list of languages, potentially improving detection accuracy.
+     */
+    public static final String EXTRA_LANGUAGE_DETECTION_ALLOWED_LANGUAGES =
+            "android.speech.extra.LANGUAGE_DETECTION_ALLOWED_LANGUAGES";
+
+    /**
+     * Optional string to enable automatic switching to the language being spoken with
+     * the desired sensitivity level, instead of being restricted to a single language.
+     * The corresponding language models must be downloaded to support the switch.
+     * Otherwise, the recognizer will report an error on a switch failure. The recognizer
+     * provides the switch results via {@link RecognitionListener#onLanguageDetection(Bundle)}.
+     *
+     * <p> Since detection is a necessary requirement for the language switching,
+     * setting this value implicitly enables {@link #EXTRA_ENABLE_LANGUAGE_DETECTION}.
+     *
+     * <p> Depending on the recognizer implementation, this value may have no effect.
+     *
+     * @see #LANGUAGE_SWITCH_HIGH_PRECISION
+     * @see #LANGUAGE_SWITCH_BALANCED
+     * @see #LANGUAGE_SWITCH_QUICK_RESPONSE
+     */
+    public static final String EXTRA_ENABLE_LANGUAGE_SWITCH =
+            "android.speech.extra.ENABLE_LANGUAGE_SWITCH";
+
+    /**
+     * A value to use for {@link #EXTRA_ENABLE_LANGUAGE_SWITCH}.
+     *
+     * <p> Enables language switch only when a new language is detected as
+     * {@link SpeechRecognizer#LANGUAGE_DETECTION_CONFIDENCE_LEVEL_HIGHLY_CONFIDENT},
+     * which means the service may wait for longer before switching.
+     *
+     * @see #EXTRA_ENABLE_LANGUAGE_SWITCH
+     */
+    public static final String LANGUAGE_SWITCH_HIGH_PRECISION = "high_precision";
+
+    /**
+     * A value to use for {@link #EXTRA_ENABLE_LANGUAGE_SWITCH}.
+     *
+     * <p> Enables language switch only when a new language is detected as at least
+     * {@link SpeechRecognizer#LANGUAGE_DETECTION_CONFIDENCE_LEVEL_CONFIDENT}, which means
+     * the service is balancing between detecting a new language confidently and switching early.
+     *
+     * @see #EXTRA_ENABLE_LANGUAGE_SWITCH
+     */
+    public static final String LANGUAGE_SWITCH_BALANCED = "balanced";
+
+    /**
+     * A value to use for {@link #EXTRA_ENABLE_LANGUAGE_SWITCH}.
+     *
+     * <p> Enables language switch only when a new language is detected as at least
+     * {@link SpeechRecognizer#LANGUAGE_DETECTION_CONFIDENCE_LEVEL_NOT_CONFIDENT},
+     * which means the service should switch at the earliest moment possible.
+     *
+     * @see #EXTRA_ENABLE_LANGUAGE_SWITCH
+     */
+    public static final String LANGUAGE_SWITCH_QUICK_RESPONSE = "quick_response";
+
+    /**
+     * Optional list of IETF language tags (as defined by BCP 47, e.g. "en-US", "de-DE"). This extra
+     * is to be used with {@link #EXTRA_ENABLE_LANGUAGE_SWITCH}. If set, the recognizer will apply
+     * the auto switch only to these languages, even if the speech models of other languages also
+     * exist. The corresponding language models must be downloaded to support the switch.
+     * Otherwise, the recognizer will report an error on a switch failure.
+     */
+    public static final String EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES =
+            "android.speech.extra.LANGUAGE_SWITCH_ALLOWED_LANGUAGES";
 }
