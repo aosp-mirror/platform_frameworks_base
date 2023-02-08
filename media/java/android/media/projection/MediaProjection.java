@@ -191,20 +191,13 @@ public final class MediaProjection {
             } else {
                 session = ContentRecordingSession.createTaskSession(launchCookie);
             }
+            // Pass in the current session details, so they are guaranteed to only be set in WMS
+            // AFTER a VirtualDisplay is constructed (assuming there are no errors during set-up).
+            virtualDisplayConfig.setContentRecordingSession(session);
             virtualDisplayConfig.setWindowManagerMirroringEnabled(true);
             final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
             final VirtualDisplay virtualDisplay = dm.createVirtualDisplay(this,
                     virtualDisplayConfig.build(), callback, handler, windowContext);
-            if (virtualDisplay == null) {
-                // Since WM handling a new display and DM creating a new VirtualDisplay is async,
-                // WM may have tried to start task recording and encountered an error that required
-                // stopping recording entirely. The VirtualDisplay would then be null when the
-                // MediaProjection is no longer active.
-                return null;
-            }
-            session.setDisplayId(virtualDisplay.getDisplay().getDisplayId());
-            // Successfully set up, so save the current session details.
-            getProjectionService().setContentRecordingSession(session, mImpl);
             return virtualDisplay;
         } catch (RemoteException e) {
             // Can not capture if WMS is not accessible, so bail out.
