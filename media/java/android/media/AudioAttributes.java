@@ -1275,7 +1275,10 @@ public final class AudioAttributes implements Parcelable {
                     || (preset == MediaRecorder.AudioSource.VOICE_UPLINK)
                     || (preset == MediaRecorder.AudioSource.VOICE_CALL)
                     || (preset == MediaRecorder.AudioSource.ECHO_REFERENCE)
-                    || (preset == MediaRecorder.AudioSource.ULTRASOUND)) {
+                    || (preset == MediaRecorder.AudioSource.ULTRASOUND)
+                    // AUDIO_SOURCE_INVALID is used by convention on default initialized
+                    // audio attributes
+                    || (preset == MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID)) {
                 mSource = preset;
             } else {
                 setCapturePreset(preset);
