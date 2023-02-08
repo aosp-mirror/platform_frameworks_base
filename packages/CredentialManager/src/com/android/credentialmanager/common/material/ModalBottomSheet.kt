@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -40,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -131,7 +133,7 @@ class ModalBottomSheetState(
         if (isSkipHalfExpanded) {
             require(initialValue != HalfExpanded) {
                 "The initial value must not be set to HalfExpanded if skipHalfExpanded is set to" +
-                        " true."
+                    " true."
             }
         }
     }
@@ -209,10 +211,10 @@ class ModalBottomSheetState(
             message = "Please specify the skipHalfExpanded parameter",
             replaceWith = ReplaceWith(
                 "ModalBottomSheetState.Saver(" +
-                        "animationSpec = animationSpec," +
-                        "skipHalfExpanded = ," +
-                        "confirmStateChange = confirmStateChange" +
-                        ")"
+                    "animationSpec = animationSpec," +
+                    "skipHalfExpanded = ," +
+                    "confirmStateChange = confirmStateChange" +
+                    ")"
             )
         )
         fun Saver(
@@ -339,55 +341,77 @@ fun ModalBottomSheetLayout(
                 visible = sheetState.targetValue != Hidden
             )
         }
-        Surface(
-            Modifier
-                .fillMaxWidth()
-                .nestedScroll(sheetState.nestedScrollConnection)
-                .offset {
-                    val y = if (sheetState.anchors.isEmpty()) {
-                        // if we don't know our anchors yet, render the sheet as hidden
-                        fullHeight.roundToInt()
-                    } else {
-                        // if we do know our anchors, respect them
-                        sheetState.offset.value.roundToInt()
-                    }
-                    IntOffset(0, y)
-                }
-                .bottomSheetSwipeable(sheetState, fullHeight, sheetHeightState)
-                .onGloballyPositioned {
-                    sheetHeightState.value = it.size.height.toFloat()
-                }
-                .semantics {
-                    if (sheetState.isVisible) {
-                        dismiss {
-                            if (sheetState.confirmStateChange(Hidden)) {
-                                scope.launch { sheetState.hide() }
-                            }
-                            true
-                        }
-                        if (sheetState.currentValue == HalfExpanded) {
-                            expand {
-                                if (sheetState.confirmStateChange(Expanded)) {
-                                    scope.launch { sheetState.expand() }
-                                }
-                                true
-                            }
-                        } else if (sheetState.hasHalfExpandedState) {
-                            collapse {
-                                if (sheetState.confirmStateChange(HalfExpanded)) {
-                                    scope.launch { sheetState.halfExpand() }
-                                }
-                                true
-                            }
-                        }
-                    }
-                },
-            shape = sheetShape,
-            shadowElevation = sheetElevation,
-            color = sheetBackgroundColor,
-            contentColor = sheetContentColor
+
+        // For large screen, allow enough horizontal scrim space.
+        // Manually calculate the > compact width due to lack of corresponding jetpack dependency.
+        val maxSheetContentWidth: Dp =
+            if (maxWidth >= ModalBottomSheetDefaults.MaxCompactWidth &&
+                maxWidth <= ModalBottomSheetDefaults.MaxCompactWidth +
+                ModalBottomSheetDefaults.StartPadding + ModalBottomSheetDefaults.EndPadding
+            )
+                (maxWidth - ModalBottomSheetDefaults.StartPadding -
+                    ModalBottomSheetDefaults.EndPadding)
+            else ModalBottomSheetDefaults.MaxSheetWidth
+        val maxSheetContentHeight = maxHeight - ModalBottomSheetDefaults.MinScrimHeight
+        Box(
+            Modifier.sizeIn(
+                maxWidth = maxSheetContentWidth,
+                // Allow enough vertical scrim space.
+                maxHeight = maxSheetContentHeight
+            ).align(Alignment.TopCenter)
         ) {
-            Column(content = sheetContent)
+            Surface(
+                Modifier
+                    .fillMaxWidth()
+                    .nestedScroll(sheetState.nestedScrollConnection)
+                    .offset {
+                        val y = if (sheetState.anchors.isEmpty()) {
+                            // if we don't know our anchors yet, render the sheet as hidden
+                            fullHeight.roundToInt()
+                        } else {
+                            // if we do know our anchors, respect them
+                            sheetState.offset.value.roundToInt()
+                        }
+                        IntOffset(0, y)
+                    }
+                    .bottomSheetSwipeable(sheetState, fullHeight, sheetHeightState)
+                    .onGloballyPositioned {
+                        sheetHeightState.value = it.size.height.toFloat()
+                    }
+                    .semantics {
+                        if (sheetState.isVisible) {
+                            dismiss {
+                                if (sheetState.confirmStateChange(Hidden)) {
+                                    scope.launch { sheetState.hide() }
+                                }
+                                true
+                            }
+                            if (sheetState.currentValue == HalfExpanded) {
+                                expand {
+                                    if (sheetState.confirmStateChange(Expanded)) {
+                                        scope.launch { sheetState.expand() }
+                                    }
+                                    true
+                                }
+                            } else if (sheetState.hasHalfExpandedState) {
+                                collapse {
+                                    if (sheetState.confirmStateChange(HalfExpanded)) {
+                                        scope.launch { sheetState.halfExpand() }
+                                    }
+                                    true
+                                }
+                            }
+                        }
+                    },
+                shape = sheetShape,
+                shadowElevation = sheetElevation,
+                color = sheetBackgroundColor,
+                contentColor = sheetContentColor
+            ) {
+                Column(
+                    content = sheetContent
+                )
+            }
         }
     }
 }
@@ -465,6 +489,11 @@ private fun Scrim(
  * Contains useful Defaults for [ModalBottomSheetLayout].
  */
 object ModalBottomSheetDefaults {
+    val MaxCompactWidth = 600.dp
+    val MaxSheetWidth = 640.dp
+    val MinScrimHeight = 56.dp
+    val StartPadding = 56.dp
+    val EndPadding = 56.dp
 
     /**
      * The default elevation used by [ModalBottomSheetLayout].

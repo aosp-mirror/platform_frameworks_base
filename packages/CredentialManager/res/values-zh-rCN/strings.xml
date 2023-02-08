@@ -6,6 +6,10 @@
     <string name="string_continue" msgid="1346732695941131882">"继续"</string>
     <string name="string_more_options" msgid="7990658711962795124">"更多选项"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"了解详情"</string>
+    <!-- no translation found for content_description_show_password (3283502010388521607) -->
+    <skip />
+    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
+    <skip />
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"通行密钥可提高安全性"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"借助通行密钥，您无需创建或记住复杂的密码"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"通行密钥是指您使用您的指纹、面孔或屏锁方式创建的加密数字钥匙"</string>

@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"এপ্‌টো ব্যৱহাৰ কৰি থকাৰ সময়ত এপ্‌টোক হৃদস্পন্দনৰ হাৰ, উষ্ণতা আৰু তেজত অক্সিজেনৰ শতকৰা হাৰৰ দৰে শৰীৰৰ ছেন্সৰৰ ডেটা এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"নেপথ্যত থকাৰ সময়ত হৃদস্পন্দনৰ হাৰৰ দৰে শৰীৰৰ ছেন্সৰৰ ডেটা এক্সেছ কৰক"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"এপ্‌টো নেপথ্যত থকাৰ সময়ত এপ্‌টোক হৃদস্পন্দনৰ হাৰ, উষ্ণতা আৰু তেজত অক্সিজেনৰ শতকৰা হাৰৰ দৰে শৰীৰৰ ছেন্সৰৰ ডেটা এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"এপ্‌টো ব্যৱহাৰ হৈ থকাৰ সময়ত শৰীৰৰ ছেন্সৰ জৰিয়তে মণিবন্ধৰ উষ্ণতাৰ ডেটা এক্সেছ কৰে।"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"এপ্‌টো ব্যৱহাৰ হৈ থকাৰ সময়ত এপ্‌টোক শৰীৰৰ ছেন্সৰ জৰিয়তে মণিবন্ধৰ উষ্ণতাৰ ডেটা এক্সেছ কৰাৰ অনুমতি দিয়ে।"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"এপ্‌টো নেপথ্যত থকাৰ সময়ত শৰীৰৰ ছেন্সৰ জৰিয়তে মণিবন্ধৰ উষ্ণতাৰ ডেটা এক্সেছ কৰে।"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"এপ্‌টো নেপথ্যত থকাৰ সময়ত এপ্‌টোক শৰীৰৰ ছেন্সৰ জৰিয়তে মণিবন্ধৰ উষ্ণতাৰ ডেটা এক্সেছ কৰাৰ অনুমতি দিয়ে।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"কেলেণ্ডাৰৰ কাৰ্যক্ৰম আৰু সবিশেষ পঢ়িব পাৰে"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"এই এপ্‌টোৱে আপোনাৰ টেবলেটটোত সংৰক্ষিত আটাইবোৰ কেলেণ্ডাৰ কাৰ্যক্ৰম পঢ়িব পাৰে আৰু আপোনাৰ কেলেণ্ডাৰৰ ডেটা শ্বেয়াৰ বা ছেভ কৰিব পাৰে।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"এই এপ্‌টোৱে আপোনাৰ Android TV ডিভাইচটোত ষ্ট’ৰ কৰি ৰখা আটাইবোৰ কেলেণ্ডাৰৰ অনুষ্ঠান পঢ়িব পাৰে আৰু আপোনাৰ কেলেণ্ডাৰৰ ডেটা শ্বেয়াৰ অথবা ছেভ কৰিব পাৰে।"</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android আৰম্ভ কৰি থকা হৈছে…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"টেবলেটটো আৰম্ভ হৈছে…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"ডিভাইচটো আৰম্ভ হৈছে…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"ষ্ট’ৰেজ অপ্টিমাইজ কৰি থকা হৈছে।"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"ছিষ্টেম আপডে’ট সম্পূৰ্ণ কৰা হৈছে…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক আপগ্ৰেড কৰি থকা হৈছে…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g>ৰ ভিতৰত <xliff:g id="NUMBER_0">%1$d</xliff:g> এপ্ অপ্টিমাইজ কৰি থকা হৈছে৷"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>সাজু কৰি থকা হৈছে।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"আৰম্ভ হৈ থকা এপসমূহ।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"বুট কাৰ্য সমাপ্ত কৰিছে।"</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"স্ক্ৰীন পূৰ্ণৰূপত চাই আছে"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"বাহিৰ হ\'বলৈ ওপৰৰপৰা তললৈ ছোৱাইপ কৰক।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"বুজি পালোঁ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ভালকৈ চাবলৈ ঘূৰাওক"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ভালকৈ চাবলৈ বিভাজিত স্ক্ৰীনৰ পৰা বাহিৰ হওক"</string>
     <string name="done_label" msgid="7283767013231718521">"সম্পন্ন কৰা হ’ল"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ঘড়ীৰ বৃত্তাকাৰ শ্লাইডাৰ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"মিনিটৰ বৃত্তাকাৰ শ্লাইডাৰ"</string>
@@ -1861,6 +1857,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"কৰ্মস্থান <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"২য় কার্য <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"৩য় কার্য <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"ক্ল’ন <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"আনপিন কৰাৰ পূৰ্বে পিন দিবলৈ কওক"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"আনপিন কৰাৰ পূৰ্বে আনলক আৰ্হি দিবলৈ কওক"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"আনপিন কৰাৰ পূৰ্বে পাছৱৰ্ড দিবলৈ কওক"</string>
@@ -2315,4 +2312,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"এটা সহযোগী এপক নেপথ্যৰ পৰা অগ্ৰভূমি সেৱাসমূহ আৰম্ভ কৰিবলৈ দিয়ে।"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"মাইক্ৰ’ফ’নটো উপলব্ধ"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"মাইক্ৰ’ফ’নটো অৱৰোধ কৰি থোৱা আছে"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

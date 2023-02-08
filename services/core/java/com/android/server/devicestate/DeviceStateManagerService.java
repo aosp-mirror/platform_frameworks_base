@@ -34,6 +34,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateInfo;
@@ -1235,7 +1236,8 @@ public final class DeviceStateManagerService extends SystemService {
 
     private class OverrideRequestTaskStackListener extends TaskStackListener {
         @Override
-        public void onTaskStackChanged() throws RemoteException {
+        public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo)
+                throws RemoteException {
             synchronized (mLock) {
                 if (!shouldCancelOverrideRequestWhenRequesterNotOnTop()) {
                     return;

@@ -459,14 +459,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permet que l\'aplicació accedeixi a les dades del sensor corporal, com ara la freqüència cardíaca, la temperatura i el percentatge d\'oxigen a la sang, mentre s\'utilitza."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accedir a dades del sensor corporal, com la freqüència cardíaca, en segon pla"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permet que l\'aplicació accedeixi a les dades del sensor corporal, com ara la freqüència cardíaca, la temperatura i el percentatge d\'oxigen a la sang, mentre es troba en segon pla."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Accedir a les dades de la temperatura del canell del sensor corporal mentre s\'utilitza l\'aplicació."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permet que l\'aplicació accedeixi a les dades de la temperatura del canell del sensor corporal mentre s\'utilitza l\'aplicació."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Accedir a les dades de la temperatura del canell del sensor corporal mentre l\'aplicació es troba en segon pla."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permet que l\'aplicació accedeixi a les dades de la temperatura del canell del sensor corporal mentre l\'aplicació es troba en segon pla."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Aquesta aplicació pot llegir els esdeveniments i la informació del calendari"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aquesta aplicació pot llegir tots els esdeveniments del calendari emmagatzemats a la tauleta i compartir o desar les dades del teu calendari."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Aquesta aplicació pot llegir tots els esdeveniments del calendari emmagatzemats al dispositiu Android TV i compartir o desar les dades del calendari."</string>
@@ -1250,10 +1246,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"S\'està iniciant Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"S\'està iniciant la tauleta…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"S\'està iniciant el dispositiu…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"S\'està optimitzant l\'emmagatzematge."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Completant l\'actualització del sistema…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"S\'està actualitzant <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"S\'està optimitzant l\'aplicació <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"S\'està preparant <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"S\'estan iniciant les aplicacions."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"S\'està finalitzant l\'actualització."</string>
@@ -1851,6 +1845,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Mode de pantalla completa"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Per sortir, llisca cap avall des de la part superior."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entesos"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gira per a una millor visualització"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Surt de la pantalla dividida per a una millor visualització"</string>
     <string name="done_label" msgid="7283767013231718521">"Fet"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Control circular de les hores"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Control circular dels minuts"</string>
@@ -1862,6 +1858,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2n <xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3r <xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Sol·licita el PIN per deixar de fixar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Sol·licita el patró de desbloqueig per deixar de fixar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demana la contrasenya per deixar de fixar"</string>
@@ -2316,4 +2314,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permet que una aplicació complementària iniciï serveis en primer pla des d\'un segon pla."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"El micròfon està disponible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"El micròfon està bloquejat"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

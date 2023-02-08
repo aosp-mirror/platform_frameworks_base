@@ -41,6 +41,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.Singleton;
 
@@ -360,14 +361,14 @@ public final class MediaCas implements AutoCloseable {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_CAS_EVENT) {
-                mListener.onEvent(MediaCas.this, msg.arg1, msg.arg2,
-                        toBytes((ArrayList<Byte>) msg.obj));
+                byte[] data = (msg.obj == null) ? new byte[0] : (byte[]) msg.obj;
+                mListener.onEvent(MediaCas.this, msg.arg1, msg.arg2, data);
             } else if (msg.what == MSG_CAS_SESSION_EVENT) {
                 Bundle bundle = msg.getData();
                 byte[] sessionId = bundle.getByteArray(SESSION_KEY);
-                mListener.onSessionEvent(MediaCas.this,
-                        createFromSessionId(sessionId), msg.arg1, msg.arg2,
-                        bundle.getByteArray(DATA_KEY));
+                byte[] data = bundle.getByteArray(DATA_KEY);
+                mListener.onSessionEvent(
+                        MediaCas.this, createFromSessionId(sessionId), msg.arg1, msg.arg2, data);
             } else if (msg.what == MSG_CAS_STATUS_EVENT) {
                 if ((msg.arg1 == PLUGIN_STATUS_SESSION_NUMBER_CHANGED)
                         && (mTunerResourceManager != null)) {
@@ -599,7 +600,11 @@ public final class MediaCas implements AutoCloseable {
 
             try {
                 if (mICas != null) {
-                    mICas.setSessionPrivateData(mSessionId, data);
+                    try {
+                        mICas.setSessionPrivateData(mSessionId, data);
+                    } catch (ServiceSpecificException se) {
+                        MediaCasException.throwExceptionIfNeeded(se.errorCode);
+                    }
                 } else {
                     MediaCasException.throwExceptionIfNeeded(
                             mICasHidl.setSessionPrivateData(
@@ -628,7 +633,12 @@ public final class MediaCas implements AutoCloseable {
 
             try {
                 if (mICas != null) {
-                    mICas.processEcm(mSessionId, data);
+                    try {
+                        mICas.processEcm(
+                                mSessionId, Arrays.copyOfRange(data, offset, length + offset));
+                    } catch (ServiceSpecificException se) {
+                        MediaCasException.throwExceptionIfNeeded(se.errorCode);
+                    }
                 } else {
                     MediaCasException.throwExceptionIfNeeded(
                             mICasHidl.processEcm(
@@ -671,23 +681,26 @@ public final class MediaCas implements AutoCloseable {
             validateSessionInternalStates();
             if (mICas != null) {
                 try {
+                    if (data == null) {
+                        data = new byte[0];
+                    }
                     mICas.sendSessionEvent(mSessionId, event, arg, data);
                 } catch (RemoteException e) {
                     cleanupAndRethrowIllegalState();
                 }
-            }
+            } else {
+                if (mICasHidl11 == null) {
+                    Log.d(TAG, "Send Session Event isn't supported by cas@1.0 interface");
+                    throw new UnsupportedCasException("Send Session Event is not supported");
+                }
 
-            if (mICasHidl11 == null) {
-                Log.d(TAG, "Send Session Event isn't supported by cas@1.0 interface");
-                throw new UnsupportedCasException("Send Session Event is not supported");
-            }
-
-            try {
-                MediaCasException.throwExceptionIfNeeded(
-                        mICasHidl11.sendSessionEvent(
-                                toByteArray(mSessionId), event, arg, toByteArray(data)));
-            } catch (RemoteException e) {
-                cleanupAndRethrowIllegalState();
+                try {
+                    MediaCasException.throwExceptionIfNeeded(
+                            mICasHidl11.sendSessionEvent(
+                                    toByteArray(mSessionId), event, arg, toByteArray(data)));
+                } catch (RemoteException e) {
+                    cleanupAndRethrowIllegalState();
+                }
             }
         }
 
@@ -1038,7 +1051,11 @@ public final class MediaCas implements AutoCloseable {
 
         try {
             if (mICas != null) {
-                mICas.setPrivateData(data);
+                try {
+                    mICas.setPrivateData(data);
+                } catch (ServiceSpecificException se) {
+                    MediaCasException.throwExceptionIfNeeded(se.errorCode);
+                }
             } else {
                 MediaCasException.throwExceptionIfNeeded(
                         mICasHidl.setPrivateData(toByteArray(data, 0, data.length)));
@@ -1126,7 +1143,21 @@ public final class MediaCas implements AutoCloseable {
         int sessionResourceHandle = getSessionResourceHandle();
 
         try {
-            if (mICasHidl != null) {
+            if (mICas != null) {
+                try {
+                    byte[] sessionId = mICas.openSessionDefault();
+                    Session session = createFromSessionId(sessionId);
+                    Log.d(TAG, "Write Stats Log for succeed to Open Session.");
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS,
+                            mUserId,
+                            mCasSystemId,
+                            FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS__STATE__SUCCEEDED);
+                    return session;
+                } catch (ServiceSpecificException se) {
+                    MediaCasException.throwExceptionIfNeeded(se.errorCode);
+                }
+            } else if (mICasHidl != null) {
                 OpenSessionCallback cb = new OpenSessionCallback();
                 mICasHidl.openSession(cb);
                 MediaCasException.throwExceptionIfNeeded(cb.mStatus);
@@ -1183,7 +1214,7 @@ public final class MediaCas implements AutoCloseable {
                         mCasSystemId,
                         FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS__STATE__SUCCEEDED);
                 return session;
-            } catch (RemoteException e) {
+            } catch (ServiceSpecificException | RemoteException e) {
                 cleanupAndRethrowIllegalState();
             }
         }
@@ -1229,7 +1260,11 @@ public final class MediaCas implements AutoCloseable {
 
         try {
             if (mICas != null) {
-                mICas.processEmm(Arrays.copyOfRange(data, offset, length));
+                try {
+                    mICas.processEmm(Arrays.copyOfRange(data, offset, length));
+                } catch (ServiceSpecificException se) {
+                    MediaCasException.throwExceptionIfNeeded(se.errorCode);
+                }
             } else {
                 MediaCasException.throwExceptionIfNeeded(
                         mICasHidl.processEmm(toByteArray(data, offset, length)));
@@ -1272,7 +1307,14 @@ public final class MediaCas implements AutoCloseable {
 
         try {
             if (mICas != null) {
-                mICas.sendEvent(event, arg, data);
+                try {
+                    if (data == null) {
+                        data = new byte[0];
+                    }
+                    mICas.sendEvent(event, arg, data);
+                } catch (ServiceSpecificException se) {
+                    MediaCasException.throwExceptionIfNeeded(se.errorCode);
+                }
             } else {
                 MediaCasException.throwExceptionIfNeeded(
                         mICasHidl.sendEvent(event, arg, toByteArray(data)));
@@ -1298,7 +1340,11 @@ public final class MediaCas implements AutoCloseable {
 
         try {
             if (mICas != null) {
-                mICas.provision(provisionString);
+                try {
+                    mICas.provision(provisionString);
+                } catch (ServiceSpecificException se) {
+                    MediaCasException.throwExceptionIfNeeded(se.errorCode);
+                }
             } else {
                 MediaCasException.throwExceptionIfNeeded(mICasHidl.provision(provisionString));
             }
@@ -1323,7 +1369,14 @@ public final class MediaCas implements AutoCloseable {
 
         try {
             if (mICas != null) {
-                mICas.refreshEntitlements(refreshType, refreshData);
+                try {
+                    if (refreshData == null) {
+                        refreshData = new byte[0];
+                    }
+                    mICas.refreshEntitlements(refreshType, refreshData);
+                } catch (ServiceSpecificException se) {
+                    MediaCasException.throwExceptionIfNeeded(se.errorCode);
+                }
             } else {
                 MediaCasException.throwExceptionIfNeeded(
                         mICasHidl.refreshEntitlements(refreshType, toByteArray(refreshData)));

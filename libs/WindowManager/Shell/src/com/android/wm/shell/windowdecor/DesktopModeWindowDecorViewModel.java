@@ -301,18 +301,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     if (e.getRawY(dragPointerIdx) <= statusBarHeight) {
-                        if (DesktopModeStatus.isProto2Enabled()) {
-                            if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
-                                // Switch a single task to fullscreen
-                                mDesktopTasksController.ifPresent(
-                                        c -> c.moveToFullscreen(taskInfo));
-                            }
-                        } else if (DesktopModeStatus.isProto1Enabled()) {
-                            if (DesktopModeStatus.isActive(mContext)) {
-                                // Turn off desktop mode
-                                mDesktopModeController.ifPresent(
-                                        c -> c.setDesktopModeActive(false));
-                            }
+                        if (DesktopModeStatus.isProto2Enabled()
+                                && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+                            // Switch a single task to fullscreen
+                            mDesktopTasksController.ifPresent(
+                                    c -> c.moveToFullscreen(taskInfo));
                         }
                     }
                     break;
@@ -402,10 +395,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     || focusedDecor.mTaskInfo.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
                 handleCaptionThroughStatusBar(ev);
             }
-        } else if (DesktopModeStatus.isProto1Enabled()) {
-            if (!DesktopModeStatus.isActive(mContext)) {
-                handleCaptionThroughStatusBar(ev);
-            }
         }
         handleEventOutsideFocusedCaption(ev);
         // Prevent status bar from reacting to a caption drag.
@@ -451,9 +440,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         // In proto2 any full screen task can be dragged to freeform
                         dragFromStatusBarAllowed = focusedDecor.mTaskInfo.getWindowingMode()
                                 == WINDOWING_MODE_FULLSCREEN;
-                    } else if (DesktopModeStatus.isProto1Enabled()) {
-                        // In proto1 task can be dragged to freeform when not in desktop mode
-                        dragFromStatusBarAllowed = !DesktopModeStatus.isActive(mContext);
                     }
 
                     if (dragFromStatusBarAllowed && focusedDecor.checkTouchEventInHandle(ev)) {
@@ -524,7 +510,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
-        return DesktopModeStatus.isAnyEnabled()
+        return DesktopModeStatus.isProto2Enabled()
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && mDisplayController.getDisplayContext(taskInfo.displayId)
                 .getResources().getConfiguration().smallestScreenWidthDp >= 600;

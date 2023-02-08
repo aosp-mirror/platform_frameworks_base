@@ -16,11 +16,15 @@
 
 package com.android.internal.jank;
 
+import static android.Manifest.permission.READ_DEVICE_CONFIG;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_NORMAL;
 import static com.android.internal.jank.FrameTracker.REASON_CANCEL_TIMEOUT;
 import static com.android.internal.jank.FrameTracker.REASON_END_NORMAL;
 import static com.android.internal.jank.FrameTracker.REASON_END_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__BIOMETRIC_PROMPT_TRANSITION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_ALL_APPS_SCROLL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_CLOSE_TO_PIP;
@@ -89,17 +93,20 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__VOLUME_CONTROL;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__WALLPAPER_TRANSITION;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
 import android.annotation.WorkerThread;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
@@ -232,6 +239,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS = 66;
     public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE = 67;
     public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME = 68;
+    public static final int CUJ_IME_INSETS_ANIMATION = 69;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -309,6 +317,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_SWIPE_TO_RECENTS,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_SWIPE,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_TO_HOME,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_ANIMATION,
     };
 
     private static class InstanceHolder {
@@ -401,7 +410,8 @@ public class InteractionJankMonitor {
             CUJ_RECENTS_SCROLLING,
             CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS,
             CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE,
-            CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME
+            CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME,
+            CUJ_IME_INSETS_ANIMATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -422,29 +432,37 @@ public class InteractionJankMonitor {
      * @param worker the worker thread for the callbacks
      */
     @VisibleForTesting
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public InteractionJankMonitor(@NonNull HandlerThread worker) {
-        // Check permission early.
-        Settings.Config.enforceReadPermission(
-            DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR);
-
         mRunningTrackers = new SparseArray<>();
         mTimeoutActions = new SparseArray<>();
         mWorker = worker;
         mWorker.start();
-        mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
         mDisplayResolutionTracker = new DisplayResolutionTracker(worker.getThreadHandler());
-
-        // Post initialization to the background in case we're running on the main
-        // thread.
-        mWorker.getThreadHandler().post(
-                () -> mPropertiesChangedListener.onPropertiesChanged(
-                        DeviceConfig.getProperties(
-                                DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR)));
-        DeviceConfig.addOnPropertiesChangedListener(
-                DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR,
-                new HandlerExecutor(mWorker.getThreadHandler()),
-                mPropertiesChangedListener);
+        mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
         mEnabled = DEFAULT_ENABLED;
+
+        final Context context = ActivityThread.currentApplication();
+        if (context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) == PERMISSION_GRANTED) {
+            // Post initialization to the background in case we're running on the main thread.
+            mWorker.getThreadHandler().post(
+                    () -> mPropertiesChangedListener.onPropertiesChanged(
+                            DeviceConfig.getProperties(
+                                    DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR)));
+            DeviceConfig.addOnPropertiesChangedListener(
+                    DeviceConfig.NAMESPACE_INTERACTION_JANK_MONITOR,
+                    new HandlerExecutor(mWorker.getThreadHandler()),
+                    mPropertiesChangedListener);
+        } else {
+            if (DEBUG) {
+                Log.d(TAG, "Initialized the InteractionJankMonitor."
+                        + " (No READ_DEVICE_CONFIG permission to change configs)"
+                        + " enabled=" + mEnabled + ", interval=" + mSamplingInterval
+                        + ", missedFrameThreshold=" + mTraceThresholdMissedFrames
+                        + ", frameTimeThreshold=" + mTraceThresholdFrameTimeMillis
+                        + ", package=" + context.getPackageName());
+            }
+        }
     }
 
     /**
@@ -556,7 +574,8 @@ public class InteractionJankMonitor {
     public boolean begin(@NonNull Configuration.Builder builder) {
         try {
             final Configuration config = builder.build();
-            EventLogTags.writeJankCujEventsBeginRequest(config.mCujType);
+            EventLogTags.writeJankCujEventsBeginRequest(
+                    config.mCujType, SystemClock.elapsedRealtimeNanos(), SystemClock.uptimeNanos());
             final TrackerResult result = new TrackerResult();
             final boolean success = config.getHandler().runWithScissors(
                     () -> result.mResult = beginInternal(config), EXECUTOR_TASK_TIMEOUT);
@@ -630,7 +649,8 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is ended successfully, false otherwise.
      */
     public boolean end(@CujType int cujType) {
-        EventLogTags.writeJankCujEventsEndRequest(cujType);
+        EventLogTags.writeJankCujEventsEndRequest(cujType, SystemClock.elapsedRealtimeNanos(),
+                SystemClock.uptimeNanos());
         FrameTracker tracker = getTracker(cujType);
         // Skip this call since we haven't started a trace yet.
         if (tracker == null) return false;
@@ -668,7 +688,8 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is cancelled successfully, false otherwise.
      */
     public boolean cancel(@CujType int cujType) {
-        EventLogTags.writeJankCujEventsCancelRequest(cujType);
+        EventLogTags.writeJankCujEventsCancelRequest(cujType, SystemClock.elapsedRealtimeNanos(),
+                SystemClock.uptimeNanos());
         return cancel(cujType, REASON_CANCEL_NORMAL);
     }
 
@@ -923,6 +944,8 @@ public class InteractionJankMonitor {
                 return "LAUNCHER_CLOSE_ALL_APPS_SWIPE";
             case CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME:
                 return "LAUNCHER_CLOSE_ALL_APPS_TO_HOME";
+            case CUJ_IME_INSETS_ANIMATION:
+                return "IME_INSETS_ANIMATION";
         }
         return "UNKNOWN";
     }
@@ -1178,7 +1201,7 @@ public class InteractionJankMonitor {
          */
         @VisibleForTesting
         public int getDisplayId() {
-            return (mSurfaceOnly ? mContext.getDisplay() : mView.getDisplay()).getDisplayId();
+            return (mSurfaceOnly ? mContext : mView.getContext()).getDisplayId();
         }
     }
 

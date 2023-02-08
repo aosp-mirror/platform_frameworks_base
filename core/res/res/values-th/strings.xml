@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"อนุญาตให้แอปเข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ อุณหภูมิ และเปอร์เซ็นต์ออกซิเจนในเลือด ขณะใช้งานแอป"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"เข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ ขณะแอปทำงานในเบื้องหลัง"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"อนุญาตให้แอปเข้าถึงข้อมูลเซ็นเซอร์ร่างกาย เช่น อัตราการเต้นของหัวใจ อุณหภูมิ และเปอร์เซ็นต์ออกซิเจนในเลือด ขณะที่แอปทำงานในเบื้องหลัง"</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"เข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะใช้งานแอป"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"อนุญาตให้แอปเข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะใช้งานแอป"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"เข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะที่แอปทำงานในเบื้องหลัง"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"อนุญาตให้แอปเข้าถึงข้อมูลอุณหภูมิบนข้อมือจากเซ็นเซอร์ร่างกายขณะที่แอปทำงานในเบื้องหลัง"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"อ่านกิจกรรมในปฏิทินและรายละเอียด"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"แอปนี้สามารถอ่านกิจกรรมทั้งหมดในปฏิทินที่เก็บไว้ในแท็บเล็ต รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณ"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"แอปนี้อ่านกิจกรรมทั้งหมดในปฏิทินที่จัดเก็บไว้ในอุปกรณ์ Android TV ได้ รวมถึงแชร์หรือบันทึกข้อมูลในปฏิทินของคุณได้ด้วย"</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android กำลังเริ่มต้น…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"แท็บเล็ตกำลังเริ่มต้น…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"อุปกรณ์กำลังเริ่มต้น…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"กำลังเพิ่มประสิทธิภาพพื้นที่จัดเก็บข้อมูล"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"กำลังอัปเดตระบบ…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"กำลังอัปเกรด <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"กำลังเพิ่มประสิทธิภาพแอปพลิเคชัน <xliff:g id="NUMBER_0">%1$d</xliff:g> จาก <xliff:g id="NUMBER_1">%2$d</xliff:g> รายการ"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"กำลังเตรียม <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"กำลังเริ่มต้นแอปพลิเคชัน"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"เสร็จสิ้นการบูต"</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"กำลังดูแบบเต็มหน้าจอ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"หากต้องการออก ให้เลื่อนลงจากด้านบน"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"รับทราบ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"หมุนเพื่อรับมุมมองที่ดียิ่งขึ้น"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ออกจากโหมดแยกหน้าจอเพื่อรับมุมมองที่ดียิ่งขึ้น"</string>
     <string name="done_label" msgid="7283767013231718521">"เสร็จสิ้น"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ตัวเลื่อนหมุนระบุชั่วโมง"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ตัวเลื่อนหมุนระบุนาที"</string>
@@ -1861,6 +1857,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g>ที่ทำงาน"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> งานที่ 3"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"โคลน <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ขอ PIN ก่อนเลิกปักหมุด"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ขอรูปแบบการปลดล็อกก่อนเลิกปักหมุด"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ขอรหัสผ่านก่อนเลิกปักหมุด"</string>
@@ -2315,4 +2312,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"อนุญาตจากเบื้องหลังให้แอปที่ใช้ร่วมกันเริ่มการทำงานของบริการที่ทำงานอยู่เบื้องหน้า"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"ไมโครโฟนพร้อมใช้งาน"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ไมโครโฟนถูกบล็อก"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"หน้าจอคู่"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"หน้าจอคู่เปิดอยู่"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังใช้จอแสดงผลทั้งสองจอเพื่อแสดงเนื้อหา"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"อุปกรณ์ร้อนเกินไป"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"หน้าจอคู่ไม่พร้อมให้ใช้งานเนื่องจากโทรศัพท์ของคุณร้อนเกินไป"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ปิด"</string>
 </resources>

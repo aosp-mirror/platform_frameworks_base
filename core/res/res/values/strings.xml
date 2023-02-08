@@ -3396,18 +3396,12 @@
     <string name="android_start_title" product="device">Device is starting\u2026</string>
 
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog when doing an fstrim. -->
-    <string name="android_upgrading_fstrim">Optimizing storage.</string>
 
     <!-- [CHAR LIMIT=40] Title of notification that is shown when finishing a system update. -->
     <string name="android_upgrading_notification_title" product="default">Finishing system update\u2026</string>
 
     <!-- [CHAR LIMIT=40] Toast that is shown when an app is still upgrading. -->
     <string name="app_upgrading_toast"><xliff:g id="application">%1$s</xliff:g> is upgrading\u2026</string>
-
-    <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk that is optimized. -->
-    <string name="android_upgrading_apk">Optimizing app
-        <xliff:g id="number" example="123">%1$d</xliff:g> of
-        <xliff:g id="number" example="123">%2$d</xliff:g>.</string>
 
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk pre boot broadcast -->
     <string name="android_preparing_apk">Preparing <xliff:g id="appname">%1$s</xliff:g>.</string>
@@ -3699,6 +3693,8 @@
     <string name="usb_tether_notification_title">USB tethering turned on</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in MIDI mode.  This is the title -->
     <string name="usb_midi_notification_title">MIDI via USB turned on</string>
+    <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in UVC mode.  This is the title -->
+    <string name="usb_uvc_notification_title">Device connected as Webcam</string>
     <!-- USB_PREFERENCES: Notification for when a USB accessory is attached.  This is the title -->
     <string name="usb_accessory_notification_title">USB accessory connected</string>
     <!-- See USB_PREFERENCES. This is the message. -->
@@ -4713,7 +4709,7 @@
 
     <!-- Title of Color Inversion feature shown in the warning dialog about the accessibility
     shortcut. -->
-    <string name="color_inversion_feature_name">Color Inversion</string>
+    <string name="color_inversion_feature_name">Color inversion</string>
 
     <!-- Title of Color Correction feature, which is mostly used to help users who are colorblind,
      shown in the warning dialog about the accessibility shortcut. -->

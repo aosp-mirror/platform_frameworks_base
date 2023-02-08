@@ -28,6 +28,7 @@ import android.credentials.ICreateCredentialCallback;
 import android.credentials.IGetCredentialCallback;
 import android.credentials.IListEnabledProvidersCallback;
 import android.credentials.ISetEnabledProvidersCallback;
+import android.content.ComponentName;
 import android.os.ICancellationSignal;
 
 /**
@@ -50,5 +51,7 @@ interface ICredentialManager {
     void registerCredentialDescription(in RegisterCredentialDescriptionRequest request, String callingPackage);
 
     void unregisterCredentialDescription(in UnregisterCredentialDescriptionRequest request, String callingPackage);
+
+    boolean isEnabledCredentialProviderService(in ComponentName componentName, String callingPackage);
 }
 

@@ -21,7 +21,7 @@ import android.content.Context
 import android.provider.Settings
 import android.util.Log
 import com.android.compatibility.common.util.SystemUtil
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import java.io.IOException
 
 class MultiWindowUtils(

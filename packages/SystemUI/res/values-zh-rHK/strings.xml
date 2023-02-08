@@ -91,8 +91,12 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"下方邊界 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"左方邊界 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"右方邊界 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"工作的螢幕截圖會儲存在「<xliff:g id="APP">%1$s</xliff:g>」應用程式"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"已儲存在工作資料夾的「<xliff:g id="APP">%1$s</xliff:g>」中"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"檔案"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"「<xliff:g id="APPNAME">%1$s</xliff:g>」偵測到這張螢幕截圖。"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"「<xliff:g id="APPNAME">%1$s</xliff:g>」和其他開啟的應用程式偵測到這張螢幕截圖。"</string>
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕畫面錄影工具"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示錄影畫面工作階段通知"</string>
@@ -339,12 +343,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"已識別面孔。按解鎖圖示即可開啟。"</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"已使用面孔解鎖"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"已識別面孔"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"向左移"</item>
-    <item msgid="5558598599408514296">"向下移"</item>
-    <item msgid="4844142668312841831">"向右移"</item>
-    <item msgid="5640521437931460125">"向上移"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"請向上滑動以再試一次"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"解鎖方可使用 NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"此裝置屬於您的機構"</string>
@@ -832,10 +830,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"選擇要新增控制項的應用程式"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{已新增 # 個控制項。}other{已新增 # 個控制項。}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"已移除"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"要新增「<xliff:g id="APPNAME">%s</xliff:g>」嗎？"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"如果您新增「<xliff:g id="APPNAME">%s</xliff:g>」，應用程式可將控制項和內容新增至此面板。部份應用程式可讓您選擇要在這裡顯示的控制項。"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"已加入收藏"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"已加入至收藏位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"已取消收藏"</string>
@@ -886,6 +882,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"開啟 <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"在 <xliff:g id="APP_LABEL">%3$s</xliff:g> 播放 <xliff:g id="ARTIST_NAME">%2$s</xliff:g> 的《<xliff:g id="SONG_NAME">%1$s</xliff:g>》"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"在 <xliff:g id="APP_LABEL">%2$s</xliff:g> 播放《<xliff:g id="SONG_NAME">%1$s</xliff:g>》"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"為您推薦"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"復原"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"如要在「<xliff:g id="DEVICENAME">%1$s</xliff:g>」上播放，請靠近一點"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"如要在這部裝置播放，請靠近「<xliff:g id="DEVICENAME">%1$s</xliff:g>」一點"</string>
@@ -902,8 +899,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"發生錯誤，請重試"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"新增控制項"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"編輯控制項"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"新增應用程式"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"新增輸出裝置"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"群組"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"已選取 1 部裝置"</string>
@@ -919,7 +915,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"喇叭和螢幕"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"建議的裝置"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"需要付費帳戶"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播運作方式"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"廣播"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"附近有兼容藍牙裝置的人可收聽您正在廣播的媒體內容"</string>
@@ -1031,6 +1026,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"相機已關閉"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"麥克風已關閉"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"相機和麥克風已關閉"</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Google 助理正在聆聽"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# 則通知}other{# 則通知}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>，<xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"做筆記"</string>
@@ -1046,6 +1042,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"允許存取一次"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"不允許"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"裝置記錄會記下裝置的活動。應用程式可透過這些記錄找出並修正問題。\n\n部分記錄可能包含敏感資料，因此請只允許信任的應用程式存取所有裝置記錄。\n\n如果不允許此應用程式存取所有裝置記錄，此應用程式仍能存取自己的記錄，且裝置製造商可能仍可存取裝置上的部分記錄或資料。"</string>
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"瞭解詳情"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"如要瞭解詳情，請前往 <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"開啟「<xliff:g id="APPNAME">%1$s</xliff:g>」"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• 應用程式已完成設定"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• 已新增至少一張卡至「錢包」"</string>
@@ -1069,6 +1067,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"您的公司政策只允許透過工作設定檔撥打電話"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"切換至工作設定檔"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"關閉"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"上鎖畫面設定"</string>
 </resources>

@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"앱이 사용 중에 심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서 데이터에 액세스하도록 허용합니다."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"백그라운드에서 심박수와 같은 생체 신호 센서 데이터에 액세스"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"앱이 백그라운드에서 심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서 데이터에 액세스하도록 허용합니다."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"앱 사용 중에 생체 신호 센서 손목 온도 데이터에 액세스합니다"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"앱이 사용 중에 생체 신호 센서 손목 온도 데이터에 액세스하도록 허용합니다."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"앱이 백그라운드에 있을 때 생체 신호 센서 손목 온도 데이터에 액세스합니다"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"앱이 백그라운드에서 생체 신호 센서 손목 온도 데이터에 액세스하도록 허용합니다."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"캘린더 일정 및 세부정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"이 앱은 태블릿에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"앱이 Android TV 기기에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
@@ -636,7 +632,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"전원 누름이 감지되었습니다."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"조정 시도"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문이 인식될 때마다 손가락을 조금씩 이동하세요"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않았습니다."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android가 시작되는 중…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"태블릿을 시작하는 중…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"기기를 시작하는 중…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"저장소 최적화 중"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"시스템 업데이트를 완료하는 중…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> 업그레이드 중…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"앱 <xliff:g id="NUMBER_1">%2$d</xliff:g>개 중 <xliff:g id="NUMBER_0">%1$d</xliff:g>개 최적화 중"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> 준비 중..."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"앱을 시작하는 중입니다."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"부팅 완료"</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"전체 화면 모드"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"종료하려면 위에서 아래로 스와이프합니다."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"확인"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"카메라 미리보기 화면이 잘 보이도록 회전하세요."</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"카메라 미리보기 화면이 잘 보이도록 화면 분할을 종료하세요."</string>
     <string name="done_label" msgid="7283767013231718521">"완료"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"시간 원형 슬라이더"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"분 원형 슬라이더"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"두 번째 업무용 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"세 번째 업무용<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"고정 해제 이전에 PIN 요청"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"고정 해제 시 잠금 해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"고정 해제 이전에 비밀번호 요청"</string>
@@ -2315,4 +2313,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"호환 앱이 백그라운드에서 포그라운드 서비스를 시작할 수 있게 허용합니다."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"마이크 사용 가능"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"마이크가 차단됨"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

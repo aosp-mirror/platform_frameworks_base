@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.Airplane
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigCoreStartable
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileRepositorySwitcher
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
@@ -81,6 +82,11 @@ abstract class StatusBarPipelineModule {
     @IntoMap
     @ClassKey(MobileUiAdapter::class)
     abstract fun bindFeature(impl: MobileUiAdapter): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(CarrierConfigCoreStartable::class)
+    abstract fun bindCarrierConfigStartable(impl: CarrierConfigCoreStartable): CoreStartable
 
     companion object {
         @Provides

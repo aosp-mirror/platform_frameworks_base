@@ -591,7 +591,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mShowingPublicInitialized = false;
         updateNotificationColor();
-        updateLongClickable();
         if (mMenuRow != null) {
             mMenuRow.onNotificationUpdated(mEntry.getSbn());
             mMenuRow.setAppName(mAppName);
@@ -1197,26 +1196,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return getShowingLayout().getVisibleWrapper();
     }
 
-    private boolean isNotificationRowLongClickable() {
-        if (mLongPressListener == null) {
-            return false;
-        }
-
-        if (!areGutsExposed()) { // guts is not opened
-            return true;
-        }
-
-        // if it is leave behind, it shouldn't be long clickable.
-        return !isGutsLeaveBehind();
-    }
-
-    private void updateLongClickable() {
-        setLongClickable(isNotificationRowLongClickable());
-    }
-
     public void setLongPressListener(LongPressListener longPressListener) {
         mLongPressListener = longPressListener;
-        updateLongClickable();
     }
 
     public void setDragController(ExpandableNotificationRowDragController dragController) {
@@ -2063,13 +2044,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     void onGutsOpened() {
         resetTranslation();
         updateContentAccessibilityImportanceForGuts(false /* isEnabled */);
-        updateLongClickable();
     }
 
     void onGutsClosed() {
         updateContentAccessibilityImportanceForGuts(true /* isEnabled */);
         mIsSnoozed = false;
-        updateLongClickable();
     }
 
     /**
@@ -2966,10 +2945,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public boolean areGutsExposed() {
         return (mGuts != null && mGuts.isExposed());
-    }
-
-    private boolean isGutsLeaveBehind() {
-        return (mGuts != null && mGuts.isLeavebehind());
     }
 
     @Override

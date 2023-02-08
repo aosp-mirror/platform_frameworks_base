@@ -162,10 +162,12 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
                 @Nullable ImeTracker.Token statsToken) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
             if (listeners == null) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
+                ImeTracker.forLogging().onFailed(
+                        statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
                 return;
             }
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
+            ImeTracker.forLogging().onProgress(
+                    statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
             for (OnInsetsChangedListener listener : listeners) {
                 listener.showInsets(types, fromIme, statsToken);
             }
@@ -175,10 +177,12 @@ public class DisplayInsetsController implements DisplayController.OnDisplaysChan
                 @Nullable ImeTracker.Token statsToken) {
             CopyOnWriteArrayList<OnInsetsChangedListener> listeners = mListeners.get(mDisplayId);
             if (listeners == null) {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
+                ImeTracker.forLogging().onFailed(
+                        statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
                 return;
             }
-            ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
+            ImeTracker.forLogging().onProgress(
+                    statsToken, ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROLLER);
             for (OnInsetsChangedListener listener : listeners) {
                 listener.hideInsets(types, fromIme, statsToken);
             }

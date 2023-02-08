@@ -304,4 +304,9 @@ public abstract class DevicePolicyManagerInternal {
      * True if either the entire device or the user is organization managed.
      */
     public abstract boolean isUserOrganizationManaged(@UserIdInt int userId);
+
+    /**
+     * Returns whether the application exemptions feature flag is enabled.
+     */
+    public abstract boolean isApplicationExemptionsFlagEnabled();
 }

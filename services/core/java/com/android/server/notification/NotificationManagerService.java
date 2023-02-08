@@ -579,6 +579,8 @@ public class NotificationManagerService extends SystemService {
 
     private static final boolean ONGOING_DISMISSAL = SystemProperties.getBoolean(
             "persist.sysui.notification.ongoing_dismissal", true);
+    @VisibleForTesting
+    protected boolean mSystemExemptFromDismissal = false;
 
     // used as a mutex for access to all active notifications & listeners
     final Object mNotificationLock = new Object();
@@ -2595,6 +2597,8 @@ public class NotificationManagerService extends SystemService {
         mAllowFgsDismissal = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED, true);
+        mSystemExemptFromDismissal =
+                mDpm.isApplicationExemptionsFlagEnabled();
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 new HandlerExecutor(mHandler),
@@ -6801,12 +6805,20 @@ public class NotificationManagerService extends SystemService {
         // partition.
         boolean isSystemAppExempt = (ai.flags
                 & (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP | ApplicationInfo.FLAG_SYSTEM)) > 0;
-        return isSystemAppExempt || notification.isMediaNotification() || isEnterpriseExempted();
+        return isSystemAppExempt || notification.isMediaNotification() || isEnterpriseExempted(ai);
     }
 
-    // TODO: b/266237746 Enterprise app exemptions
-    private boolean isEnterpriseExempted() {
-        return false;
+    private boolean isEnterpriseExempted(ApplicationInfo ai) {
+        // Check if the app is an organization admin app
+        // TODO(b/234609037): Replace with new DPM APIs to check if organization admin
+        if (mDpm != null && (mDpm.isActiveProfileOwner(ai.uid)
+                || mDpm.isActiveDeviceOwner(ai.uid))) {
+            return true;
+        }
+        // Check if an app has been given system exemption
+        return mSystemExemptFromDismissal && mAppOps.checkOpNoThrow(
+                AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, ai.uid,
+                ai.packageName) == AppOpsManager.MODE_ALLOWED;
     }
 
     private void checkRemoteViews(String pkg, String tag, int id, Notification notification) {
@@ -8037,6 +8049,13 @@ public class NotificationManagerService extends SystemService {
                             }
                         }
                     }
+
+                    // Try to start flash notification event whenever an audible and non-suppressed
+                    // notification is received
+                    mAccessibilityManager.startFlashNotificationEvent(getContext(),
+                            AccessibilityManager.FLASH_REASON_NOTIFICATION,
+                            record.getSbn().getPackageName());
+
                 } else if ((record.getFlags() & Notification.FLAG_INSISTENT) != 0) {
                     hasValidSound = false;
                 }

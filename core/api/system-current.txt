@@ -547,7 +547,7 @@ package android.app {
 
   public class AlarmManager {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, @NonNull android.app.PendingIntent, @Nullable android.os.WorkSource);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler, @Nullable android.os.WorkSource);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void set(int, long, long, long, @NonNull android.app.AlarmManager.OnAlarmListener, @Nullable android.os.Handler, @Nullable android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void setExact(int, long, @Nullable String, @NonNull java.util.concurrent.Executor, @NonNull android.os.WorkSource, @NonNull android.app.AlarmManager.OnAlarmListener);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void setExactAndAllowWhileIdle(int, long, @Nullable String, @NonNull java.util.concurrent.Executor, @Nullable android.os.WorkSource, @NonNull android.app.AlarmManager.OnAlarmListener);
     method @RequiresPermission(android.Manifest.permission.SCHEDULE_PRIORITIZED_ALARM) public void setPrioritized(int, long, long, @Nullable String, @NonNull java.util.concurrent.Executor, @NonNull android.app.AlarmManager.OnAlarmListener);
@@ -1231,6 +1231,7 @@ package android.app.admin {
     field @Deprecated public static final String ACTION_STATE_USER_SETUP_COMPLETE = "android.app.action.STATE_USER_SETUP_COMPLETE";
     field @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP) public static final String ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER = "android.app.action.UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER";
     field public static final int EXEMPT_FROM_APP_STANDBY = 0; // 0x0
+    field public static final int EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS = 1; // 0x1
     field public static final String EXTRA_FORCE_UPDATE_ROLE_HOLDER = "android.app.extra.FORCE_UPDATE_ROLE_HOLDER";
     field public static final String EXTRA_LOST_MODE_LOCATION = "android.app.extra.LOST_MODE_LOCATION";
     field public static final String EXTRA_PROFILE_OWNER_NAME = "android.app.extra.PROFILE_OWNER_NAME";
@@ -3013,7 +3014,8 @@ package android.companion.virtual {
 
   public static interface VirtualDeviceManager.ActivityListener {
     method public void onDisplayEmpty(int);
-    method public void onTopActivityChanged(int, @NonNull android.content.ComponentName);
+    method @Deprecated public void onTopActivityChanged(int, @NonNull android.content.ComponentName);
+    method public default void onTopActivityChanged(int, @NonNull android.content.ComponentName, int);
   }
 
   public static interface VirtualDeviceManager.IntentInterceptorCallback {
@@ -5832,6 +5834,7 @@ package android.hardware.usb {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public long getCurrentFunctions();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_USB) public java.util.List<android.hardware.usb.UsbPort> getPorts();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void grantPermission(android.hardware.usb.UsbDevice, String);
+    method public static boolean isUvcSupportEnabled();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public boolean registerDisplayPortAltModeInfoListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.usb.UsbManager.DisplayPortAltModeInfoListener);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void resetUsbGadget();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setCurrentFunctions(long);
@@ -5853,6 +5856,7 @@ package android.hardware.usb {
     field public static final long FUNCTION_NONE = 0L; // 0x0L
     field public static final long FUNCTION_PTP = 16L; // 0x10L
     field public static final long FUNCTION_RNDIS = 32L; // 0x20L
+    field public static final long FUNCTION_UVC = 128L; // 0x80L
     field public static final String USB_CONFIGURED = "configured";
     field public static final String USB_CONNECTED = "connected";
     field public static final String USB_FUNCTION_NCM = "ncm";
@@ -6754,6 +6758,7 @@ package android.media {
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
     field public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE = 3; // 0x3
+    field public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY = 5; // 0x5
     field public static final int DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE = 4; // 0x4
     field public static final int DEVICE_VOLUME_BEHAVIOR_FIXED = 2; // 0x2
     field public static final int DEVICE_VOLUME_BEHAVIOR_FULL = 1; // 0x1
@@ -10069,6 +10074,10 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.DUMP) public void requestBugreport(@NonNull android.os.BugreportParams, @Nullable CharSequence, @Nullable CharSequence);
     method @RequiresPermission(android.Manifest.permission.DUMP) @WorkerThread public void retrieveBugreport(@NonNull String, @NonNull android.os.ParcelFileDescriptor, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
     method @RequiresPermission(android.Manifest.permission.DUMP) @WorkerThread public void startBugreport(@NonNull android.os.ParcelFileDescriptor, @Nullable android.os.ParcelFileDescriptor, @NonNull android.os.BugreportParams, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
+  }
+
+  public abstract static class BugreportManager.BugreportCallback {
+    method public void onFinished(@NonNull String);
   }
 
   public final class BugreportParams {

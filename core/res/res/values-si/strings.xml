@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"යෙදුම භාවිතයේ පවතින අතරතුර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"පසුබිමේ ඇති අතරතුර හෘද ස්පන්දන වේගය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වන්න"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"යෙදුම පසුබිමේ ඇති අතර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"යෙදුම භාවිතයේ පවතින අතරේ ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වන්න."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"යෙදුම භාවිතයේ ඇති අතරේ, ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"යෙදුම පසුබිමේ ඇති අතරේ ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වන්න."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"යෙදුම පසුබිමේ ඇති අතරේ, ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"දින දර්ශන සිදුවීම් හා විස්තර කියවන්න"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"මෙම යෙදුමට ඔබගේ Android TV මත ගබඩා කර ඇති සියලු දින දර්ශන සිදුවීම් කියවීමට සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට හැකිය."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android ආරම්භ කරමින්…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ටැබ්ලට් පරිගණකය ආරම්භ කරමින්…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"උපාංගය ආරම්භ කරමින්…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"ආචයනය ප්‍රශස්තිකරණය කිරීම."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"පද්ධති යාවත්කාලීනය අවසන් කරමින්…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> උත්ශ්‍රේණි කරමින්…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> කින් <xliff:g id="NUMBER_0">%1$d</xliff:g> වැනි යෙදුම ප්‍රශස්ත කරමින්."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> සූදානම් කරමින්."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"යෙදුම් ආරම්භ කරමින්."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ඇරඹුම අවසාන කරමින්."</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"මුළු තිරය බලමින්"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ඉවත් වීමට, ඉහළ සිට පහළට ස්වයිප් කරන්න"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"වැටහුණි"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"වඩා හොඳ දසුනක් සඳහා කරකවන්න"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"වඩා හොඳ දර්ශනයක් සඳහා බෙදුම් තිරයෙන් පිටවන්න"</string>
     <string name="done_label" msgid="7283767013231718521">"අවසන්"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"පැය කවාකාර සර්පනය"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"මිනිත්තු කවාකාර සර්පනය"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2වන වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3වන වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ගැලවීමට පෙර PIN විමසන්න"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ගැලවීමට පෙර අගුළු අරින රටාව සඳහා අසන්න"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ගැලවීමට පෙර මුරපදය විමසන්න"</string>
@@ -2315,4 +2313,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"පසුබිමේ සිට පෙරබිම් සේවා ආරම්භ කිරීමට සහායක යෙදුමකට ඉඩ දෙයි."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"මයික්‍රෆෝනය තිබේ"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"මයික්‍රෆෝනය අවහිර කර ඇත"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ද්විත්ව තිරය"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ද්විත්ව තිරය සක්‍රීයයි"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"අන්තර්ගතය පෙන්වීමට <xliff:g id="APP_NAME">%1$s</xliff:g> සංදර්ශන දෙකම භාවිත කරයි"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"උපාංගය ඉතා උණුසුම් වේ"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ඔබේ දුරකථනය ඉතා උණුසුම් නිසා ද්විත්ව තිරය ලබා ගත නොහැක"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"අක්‍රිය කරන්න"</string>
 </resources>

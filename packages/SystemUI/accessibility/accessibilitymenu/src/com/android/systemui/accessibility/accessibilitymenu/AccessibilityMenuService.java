@@ -110,6 +110,7 @@ public class AccessibilityMenuService extends AccessibilityService
     @Override
     public void onCreate() {
         super.onCreate();
+        setTheme(R.style.ServiceTheme);
 
         getAccessibilityButtonController().registerAccessibilityButtonCallback(
                 new AccessibilityButtonController.AccessibilityButtonCallback() {

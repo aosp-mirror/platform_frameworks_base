@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ஆப்ஸ் பயன்பாட்டில் இருக்கும்போது இதயத் துடிப்பு, வெப்பநிலை, ரத்த ஆக்ஸிஜன் சதவீதம் போன்ற உடல் சென்சார் தரவை அணுக ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"பின்னணியில் இயங்கும்போது இதயத் துடிப்பு போன்ற உடல் சென்சார் தரவை அணுகுதல்"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ஆப்ஸ் பின்னணியில் இயங்கும்போது இதயத் துடிப்பு, வெப்பநிலை, ரத்த ஆக்ஸிஜன் சதவீதம் போன்ற உடல் சென்சார் தரவை அணுக ஆப்ஸை அனுமதிக்கிறது."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ஆப்ஸ் பயன்பாட்டில் இருக்கும்போது உடல் சென்சார் மணிக்கட்டு வெப்பநிலைத் தரவை அணுகுதல்."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ஆப்ஸ் பயன்பாட்டில் இருக்கும்போது உடல் சென்சார் மணிக்கட்டு வெப்பநிலைத் தரவை அணுகுவதற்கு ஆப்ஸை அனுமதிக்கும்."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ஆப்ஸ் பின்னணியில் இயங்கும்போது உடல் சென்சார் மணிக்கட்டு வெப்பநிலைத் தரவை அணுகுதல்."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ஆப்ஸ் பின்னணியில் இயங்கும்போது உடல் சென்சார் மணிக்கட்டு வெப்பநிலைத் தரவை அணுகுவதற்கு ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"கேலெண்டர் நிகழ்வுகளையும் விவரங்களையும் படிக்கலாம்"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"இந்த ஆப்ஸ் உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள கேலெண்டர் நிகழ்வுகள் அனைத்தையும் படிக்கலாம், உங்கள் கேலெண்டர் தரவைப் பகிரலாம் அல்லது சேமிக்கலாம்."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"உங்கள் Android TVயில் சேமித்துள்ள அனைத்துக் கேலெண்டர் நிகழ்வுகளையும் இந்த ஆப்ஸால் தெரிந்துகொள்ள முடியும். அத்துடன் உங்களின் கேலெண்டர் தரவைப் பகிரவும் சேமிக்கவும் முடியும்."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android துவங்குகிறது..."</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"டேப்லெட் தொடங்குகிறது…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"சாதனம் தொடங்குகிறது…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"சேமிப்பகத்தை உகந்ததாக்குகிறது."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"சிஸ்டம் புதுப்பிப்பை நிறைவுசெய்கிறது…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g>ஐ மேம்படுத்துகிறது…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> ஆப்ஸை ஒருங்கிணைக்கிறது."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>ஐத் தயார்செய்கிறது."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ஆப்ஸ் தொடங்கப்படுகின்றன."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"துவக்குதலை முடிக்கிறது."</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"முழுத் திரையில் காட்டுகிறது"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"வெளியேற, மேலிருந்து கீழே ஸ்வைப் செய்யவும்"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"புரிந்தது"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"சிறந்த காட்சிக்கு சுழற்றுங்கள்"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"சிறந்த காட்சிக்கு திரைப் பிரிப்புப் பயன்முறையில் இருந்து வெளியேறுங்கள்"</string>
     <string name="done_label" msgid="7283767013231718521">"முடிந்தது"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"மணிநேர வட்ட வடிவ ஸ்லைடர்"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"நிமிடங்களுக்கான வட்டவடிவ ஸ்லைடர்"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"பணியிடம் <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2வது பணி <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3வது பணி <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"அகற்றும் முன் PINஐக் கேள்"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"அகற்றும் முன் அன்லாக் பேட்டர்னைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
@@ -2315,4 +2313,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"பின்னணியிலிருந்து முன்புலச் சேவைகளைத் தொடங்க துணைத் தயாரிப்பு ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"மைக்ரோஃபோன் இயக்கப்பட்டது"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"மைக்ரோஃபோன் முடக்கப்பட்டுள்ளது"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

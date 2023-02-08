@@ -1521,12 +1521,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public ParcelFileDescriptor getAppMetadataFd() {
         assertCallerIsOwnerOrRoot();
         synchronized (mLock) {
-            assertPreparedAndNotCommittedOrDestroyedLocked("openRead");
+            assertPreparedAndNotCommittedOrDestroyedLocked("getAppMetadataFd");
+            if (getStagedAppMetadataFile() == null) {
+                return null;
+            }
             try {
                 return openReadInternalLocked(APP_METADATA_FILE_NAME);
             } catch (IOException e) {
                 throw ExceptionUtils.wrap(e);
             }
+        }
+    }
+
+    @Override
+    public void removeAppMetadata() {
+        File file = getStagedAppMetadataFile();
+        if (file != null) {
+            file.delete();
         }
     }
 

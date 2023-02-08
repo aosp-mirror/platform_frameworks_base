@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Разрешава на приложението да осъществява достъп до данните от сензорите за тяло, като например тези за сърдечен ритъм, температура и процент на кислорода в кръвта, докато то се използва."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Достъп до данните от сензорите за тяло (напр. за сърдечен ритъм) на заден план"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Разрешава на приложението да осъществява достъп до данните от сензорите за тяло, като например тези за сърдечен ритъм, температура и процент на кислорода в кръвта, докато то се изпълнява на заден план."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Достъп до данните за температурата, измерена на китката от сензорите за тяло, докато приложението се използва."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Дава на приложението достъп до данните за температурата, измерена на китката от сензорите за тяло. Разрешението е в сила, докато приложението се използва."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Достъп до данните за температурата, измерена на китката от сензорите за тяло, докато приложението работи на заден план."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Дава на приложението достъп до данните за температурата, измерена на китката от сензорите за тяло. Разрешението е в сила, докато приложението работи на заден план."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Четене на събития и подробности от календара"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Това приложение може да чете всички съхранявани на таблета ви събития в календара и да споделя или запазва данни в календара ви."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Това приложение може да чете всички съхранявани на устройството ви с Android TV събития в календара и да споделя или запазва данни в календара ви."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android се стартира…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Таблетът се стартира…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Устройството се стартира…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Хранилището се оптимизира."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Системната актуализация завършва…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> се надстройва…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Оптимизира се приложение <xliff:g id="NUMBER_0">%1$d</xliff:g> от <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> се подготвя."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Приложенията се стартират."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Зареждането завършва."</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Изглед на цял екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"За изход плъзнете пръст надолу от горната част."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Разбрах"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Завъртете за по-добър изглед"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Излезте от разделения екран за по-добър изглед"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Кръгов плъзгач за часовете"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Кръгов плъзгач за минутите"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> за работа"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"Втори служебен профил (<xliff:g id="LABEL">%1$s</xliff:g>)"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"Трети служебен профил (<xliff:g id="LABEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Запитване за ПИН код преди освобождаване"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Запитване за фигура за отключване преди освобождаване"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Запитване за парола преди освобождаване"</string>
@@ -2315,4 +2313,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Разрешава на дадено придружаващо приложение да стартира услуги на преден план, докато се изпълнява на заден план."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофонът е налице"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофонът е блокиран"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

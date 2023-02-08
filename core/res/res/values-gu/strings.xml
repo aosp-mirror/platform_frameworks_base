@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ઍપ ઉપયોગમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ઍપ બૅકગ્રાઉન્ડમાં હોય, ત્યારે હૃદયના ધબકારા જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરો"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ઍપ બૅકગ્રાઉન્ડમાં હોય, ત્યારે ઍપને હૃદયના ધબકારા, તાપમાન અને લોહીમાં ઑક્સિજનની ટકાવારી જેવા બૉડી સેન્સર ડેટાનો ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ઍપનો ઉપયોગ થઈ રહ્યો હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરો."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ઍપનો ઉપયોગ થઈ રહ્યો હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરવાની ઍપને મંજૂરી આપે છે."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"બૅકગ્રાઉન્ડમાં ઍપ ચાલી રહી હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરો."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"બૅકગ્રાઉન્ડમાં ઍપ ચાલી રહી હોય ત્યારે કાંડા મારફતે મપાયેલા શરીરના તાપમાન સંબંધિત બૉડી સેન્સરનો ડેટા ઍક્સેસ કરવાની ઍપને મંજૂરી આપે છે."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"કૅલેન્ડર ઇવેન્ટ્સ અને વિગતો વાંચો"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"આ ઍપ્લિકેશન, તમારા ટેબ્લેટ પર સંગ્રહિત તમામ કૅલેન્ડર ઇવેન્ટ્સને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત બધા કૅલેન્ડર ઇવેન્ટને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android પ્રારંભ થઈ રહ્યું છે…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ટૅબ્લેટ શરૂ થઈ રહ્યું છે…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"ઉપકરણ શરૂ થઈ રહ્યું છે…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"સંગ્રહ ઓપ્ટિમાઇઝ કરી રહ્યું છે."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"સિસ્ટમ અપડેટ સમાપ્ત કરી રહ્યાં છીએ…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> અપગ્રેડ થઈ રહી છે…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> માંથી <xliff:g id="NUMBER_0">%1$d</xliff:g> ઍપ્લિકેશન ઓપ્ટિમાઇઝ કરી રહ્યું છે."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> તૈયાર કરી રહ્યું છે."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ઍપ્લિકેશનો શરૂ કરી રહ્યાં છે."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"બૂટ સમાપ્ત કરી રહ્યાં છે."</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"પૂર્ણ સ્ક્રીન પર જુઓ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"બહાર નીકળવા માટે, ટોચ પરથી નીચે સ્વાઇપ કરો."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"સમજાઈ ગયું"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"બહેતર વ્યૂ માટે ફેરવો"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"બહેતર વ્યૂ માટે, વિભાજિત સ્ક્રીનમાંથી બહાર નીકળો"</string>
     <string name="done_label" msgid="7283767013231718521">"થઈ ગયું"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"કલાકનું વર્તુળાકાર સ્લાઇડર"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"મિનિટનું વર્તુળાકાર સ્લાઇડર"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"ઑફિસ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2જું કાર્ય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3જું કાર્ય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"અનપિન કરતા પહેલાં પિન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"અનપિન કરતા પહેલાં અનલૉક પૅટર્ન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"અનપિન કરતાં પહેલાં પાસવર્ડ માટે પૂછો"</string>
@@ -2315,4 +2313,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"સાથી ઍપને બૅકગ્રાઉન્ડમાંથી ફૉરગ્રાઉન્ડ સેવાઓ શરૂ કરવાની મંજૂરી આપે છે."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"માઇક્રોફોન ઉપલબ્ધ છે"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"માઇક્રોફોનને બ્લૉક કરવામાં આવ્યો છે"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

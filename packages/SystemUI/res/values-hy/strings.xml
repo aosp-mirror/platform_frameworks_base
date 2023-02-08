@@ -91,8 +91,15 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Ներքևի սահմանագիծը՝ <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Ձախ կողմի սահմանագիծը՝ <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Աջ կողմի սահմանագիծը՝ <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Աշխատանքային սքրինշոթները պահվում են «<xliff:g id="APP">%1$s</xliff:g>» հավելվածում"</string>
+    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
+    <skip />
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Ֆայլեր"</string>
+    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
+    <skip />
+    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
+    <skip />
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Էկրանի տեսագրիչ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Էկրանի տեսագրության մշակում"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Էկրանի տեսագրման աշխատաշրջանի ընթացիկ ծանուցում"</string>
@@ -339,12 +346,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Դեմքը ճանաչվեց։ Բացելու համար սեղմեք ապակողպման պատկերակը։"</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Ապակողպվեց դեմքով"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Դեմքը ճանաչվեց"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Տեղափոխել ձախ"</item>
-    <item msgid="5558598599408514296">"Տեղափոխել ներքև"</item>
-    <item msgid="4844142668312841831">"Տեղափոխել աջ"</item>
-    <item msgid="5640521437931460125">"Տեղափոխել վերև"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Սահեցրեք վերև՝ նորից փորձելու համար"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Ապակողպեք՝ NFC-ն օգտագործելու համար"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Այս սարքը պատկանում է ձեր կազմակերպությանը"</string>
@@ -832,10 +833,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Ընտրեք հավելված` կառավարման տարրեր ավելացնելու համար"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Ավելացվեց կառավարման # տարր։}one{Ավելացվեց կառավարման # տարր։}other{Ավելացվեց կառավարման # տարր։}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Հեռացված է"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Ավելացնե՞լ <xliff:g id="APPNAME">%s</xliff:g> հավելվածը"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"Եթե ավելացնեք <xliff:g id="APPNAME">%s</xliff:g> հավելվածը, այն կարող է կարգավորումներ և բովանդակություն ավելացնել այս վահանակում։ Որոշ հավելվածներում դուք կարող եք ընտրել, թե որ կարգավորումները ցուցադրվեն այստեղ։"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ավելացված է ընտրանիում"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ավելացված է ընտրանիում, դիրքը՝ <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Հեռացված է ընտրանուց"</string>
@@ -886,6 +885,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Բացեք <xliff:g id="APP_LABEL">%1$s</xliff:g> հավելվածը"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Նվագարկել <xliff:g id="SONG_NAME">%1$s</xliff:g> երգը <xliff:g id="ARTIST_NAME">%2$s</xliff:g>-ի կատարմամբ <xliff:g id="APP_LABEL">%3$s</xliff:g> հավելվածից"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Նվագարկել <xliff:g id="SONG_NAME">%1$s</xliff:g> երգը <xliff:g id="APP_LABEL">%2$s</xliff:g> հավելվածից"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Ձեզ համար"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Հետարկել"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Ավելի մոտ եկեք՝ <xliff:g id="DEVICENAME">%1$s</xliff:g> սարքում նվագարկելու համար"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Այստեղ նվագարկելու համար մոտեցեք <xliff:g id="DEVICENAME">%1$s</xliff:g> սարքին"</string>
@@ -902,8 +902,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Սխալ առաջացավ։ Նորից փորձեք։"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Ավելացնել կառավարման տարրեր"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Փոփոխել կառավարման տարրերը"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Ավելացնել հավելված"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Ավելացրեք մուտքագրման սարքեր"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Խումբ"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Ընտրված է 1 սարք"</string>
@@ -919,7 +918,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Բարձրախոսներ և էկրաններ"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Առաջարկվող սարքեր"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Պահանջվում է պրեմիում հաշիվ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Ինչպես է աշխատում հեռարձակումը"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Հեռարձակում"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ձեր մոտակայքում գտնվող՝ համատեղելի Bluetooth սարքերով մարդիկ կարող են լսել մեդիա ֆայլերը, որոնք դուք հեռարձակում եք։"</string>
@@ -1031,6 +1029,8 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Տեսախցիկն անջատված է"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Խոսափողն անջատված է"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Տեսախցիկը և խոսափողն անջատված են"</string>
+    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
+    <skip />
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ծանուցում}one{# ծանուցում}other{# ծանուցում}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Նշումների ստեղծում"</string>
@@ -1046,6 +1046,10 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Թույլատրել մեկանգամյա մուտքը"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Չթույլատրել"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Այն, ինչ տեղի է ունենում ձեր սարքում, գրանցվում է սարքի մատյաններում։ Հավելվածները կարող են դրանք օգտագործել անսարքությունները հայտնաբերելու և վերացնելու նպատակով։\n\nՔանի որ որոշ մատյաններ անձնական տեղեկություններ են պարունակում, խորհուրդ ենք տալիս հասանելի դարձնել ձեր սարքի բոլոր մատյանները միայն այն հավելվածներին, որոնց վստահում եք։ \n\nԵթե այս հավելվածին նման թույլտվություն չեք տվել, դրան նախկինի պես հասանելի կլինեն իր մատյանները։ Հնարավոր է՝ ձեր սարքի արտադրողին ևս հասանելի լինեն սարքի որոշ մատյաններ և տեղեկություններ։"</string>
+    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Բացել <xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Հավելվածը կարգավորված է"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Առնվազն մեկ քարտ ավելացված է Wallet-ում"</string>
@@ -1069,6 +1073,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Ձեր աշխատանքային կանոնների համաձայն՝ դուք կարող եք զանգեր կատարել աշխատանքային պրոֆիլից"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Անցնել աշխատանքային պրոֆիլ"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Փակել"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Կողպէկրանի կարգավորումներ"</string>
 </resources>

@@ -146,6 +146,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
+        if (mController.isAdvancedLayoutSupported()
+                && position >= mController.getMediaItemList().size()) {
+            Log.d(TAG, "Incorrect position for item type: " + position);
+            return MediaItem.MediaItemType.TYPE_GROUP_DIVIDER;
+        }
         return mController.isAdvancedLayoutSupported()
                 ? mController.getMediaItemList().get(position).getMediaItemType()
                 : super.getItemViewType(position);
@@ -204,7 +209,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         && mController.isAdvancedLayoutSupported() && device.hasSubtext()) {
                     boolean isActiveWithOngoingSession =
                             (device.hasOngoingSession() && currentlyConnected);
-                    boolean isHost = mController.isVolumeControlEnabled(device)
+                    boolean isHost = device.isHostForOngoingSession()
                             && isActiveWithOngoingSession;
                     if (isHost) {
                         mCurrentActivePosition = position;

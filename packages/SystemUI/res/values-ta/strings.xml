@@ -91,8 +91,15 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"கீழ் எல்லை <xliff:g id="PERCENT">%1$d</xliff:g> சதவீதம்"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"இடது எல்லை <xliff:g id="PERCENT">%1$d</xliff:g> சதவீதம்"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"வலது எல்லை <xliff:g id="PERCENT">%1$d</xliff:g> சதவீதம்"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"பணிக் கணக்கு ஸ்கிரீன்ஷாட்டுகள் <xliff:g id="APP">%1$s</xliff:g> ஆப்ஸில் சேமிக்கப்படும்"</string>
+    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
+    <skip />
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
+    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
+    <skip />
+    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
+    <skip />
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"ஸ்கிரீன் ரெக்கார்டர்"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ஸ்க்ரீன் ரெக்கார்டிங் செயலாக்கப்படுகிறது"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"திரை ரெக்கார்டிங் அமர்விற்கான தொடர் அறிவிப்பு"</string>
@@ -339,12 +346,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"முகம் அங்கீகரிக்கப்பட்டது. திறக்க அன்லாக் ஐகானை அழுத்தவும்."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"முகத்தால் அன்லாக் செய்யப்பட்டது"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"முகம் அங்கீகரிக்கப்பட்டது"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"இடதுபுறம் நகர்த்துங்கள்"</item>
-    <item msgid="5558598599408514296">"கீழே நகர்த்துங்கள்"</item>
-    <item msgid="4844142668312841831">"வலதுபுறம் நகர்த்துங்கள்"</item>
-    <item msgid="5640521437931460125">"மேலே நகர்த்துங்கள்"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"மீண்டும் முயல மேல்நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCயைப் பயன்படுத்த அன்லாக் செய்யவும்"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"இந்த சாதனம் உங்கள் நிறுவனத்துக்கு சொந்தமானது"</string>
@@ -832,10 +833,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"கட்டுப்பாடுகளைச் சேர்க்க வேண்டிய ஆப்ஸைத் தேர்ந்தெடுங்கள்"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# கட்டுப்பாடு சேர்க்கப்பட்டது.}other{# கட்டுப்பாடுகள் சேர்க்கப்பட்டன.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"அகற்றப்பட்டது"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ஆப்ஸைச் சேர்க்கவா?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"இந்தப் பேனலில் <xliff:g id="APPNAME">%s</xliff:g> ஆப்ஸைச் சேர்க்கும்போது கட்டுப்பாடுகளையும் உள்ளடக்கத்தையும் அது சேர்க்கலாம். இருப்பினும், சில ஆப்ஸில் எந்தெந்தக் கட்டுப்பாடுகள் இங்கே காட்டப்பட வேண்டும் என்பதை நீங்களே தேர்வுசெய்யலாம்."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"பிடித்தவற்றில் சேர்க்கப்பட்டது"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"பிடித்தவற்றில் சேர்க்கப்பட்டது, நிலை <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"பிடித்தவற்றிலிருந்து நீக்கப்பட்டது"</string>
@@ -886,6 +885,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ஆப்ஸைத் திறங்கள்"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> இன் <xliff:g id="SONG_NAME">%1$s</xliff:g> பாடலை <xliff:g id="APP_LABEL">%3$s</xliff:g> ஆப்ஸில் பிளேசெய்"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> பாடலை <xliff:g id="APP_LABEL">%2$s</xliff:g> ஆப்ஸில் பிளேசெய்"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"உங்களுக்கானவை"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"செயல்தவிர்"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> சாதனத்தில் இயக்க உங்கள் சாதனத்தை அருகில் எடுத்துச் செல்லுங்கள்"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"இங்கு பிளே செய்ய உங்கள் சாதனத்தை <xliff:g id="DEVICENAME">%1$s</xliff:g>அருகில் நகர்த்துங்கள்"</string>
@@ -902,8 +902,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"பிழை, மீண்டும் முயலவும்"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"கட்டுப்பாடுகளைச் சேர்த்தல்"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"கட்டுப்பாடுகளை மாற்றுதல்"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"ஆப்ஸைச் சேர்"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"அவுட்புட்களைச் சேர்த்தல்"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"குழு"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 சாதனம் தேர்ந்தெடுக்கப்பட்டுள்ளது"</string>
@@ -919,7 +918,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ஸ்பீக்கர்கள் &amp; டிஸ்ப்ளேக்கள்"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"பரிந்துரைக்கப்படும் சாதனங்கள்"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"பிரீமியம் கணக்கு தேவை"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"பிராட்காஸ்ட் எவ்வாறு செயல்படுகிறது?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"பிராட்காஸ்ட்"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"நீங்கள் பிராட்காஸ்ட் செய்யும் மீடியாவை அருகிலுள்ளவர்கள் இணக்கமான புளூடூத் சாதனங்கள் மூலம் கேட்கலாம்"</string>
@@ -1031,6 +1029,8 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"கேமரா முடக்கப்பட்டுள்ளது"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"மைக் முடக்கப்பட்டுள்ளது"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"கேமராவும் மைக்கும் ஆஃப் செய்யப்பட்டுள்ளன"</string>
+    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
+    <skip />
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# அறிவிப்பு}other{# அறிவிப்புகள்}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"குறிப்பெடுத்தல்"</string>
@@ -1046,6 +1046,10 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"ஒருமுறை அணுகலை அனுமதி"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"அனுமதிக்க வேண்டாம்"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"உங்கள் சாதனத்தில் நடப்பவற்றைச் சாதனப் பதிவுகள் ரெக்கார்டு செய்யும். சிக்கல்களைக் கண்டறிந்து சரிசெய்ய ஆப்ஸ் இந்தப் பதிவுகளைப் பயன்படுத்தலாம்.\n\nபாதுகாக்க வேண்டிய தகவல்கள் சில பதிவுகளில் இருக்கக்கூடும் என்பதால் சாதனப் பதிவுகள் அனைத்தையும் அணுக நீங்கள் நம்பும் ஆப்ஸை மட்டுமே அனுமதிக்கவும். \n\nசாதனப் பதிவுகள் அனைத்தையும் அணுக இந்த ஆப்ஸை நீங்கள் அனுமதிக்கவில்லை என்றாலும் அதற்குச் சொந்தமான பதிவுகளை அதனால் அணுக முடியும். உங்கள் சாதனத்திலுள்ள சில பதிவுகளையோ தகவல்களையோ சாதன உற்பத்தியாளரால் தொடர்ந்து அணுக முடியும்."</string>
+    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ஆப்ஸைத் திற"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• இந்த ஆப்ஸ் அமைக்கப்பட்டிருக்க வேண்டும்"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Walletடில் குறைந்தபட்சம் ஒரு கார்டாவது சேர்க்கப்பட்டிருக்க வேண்டும்"</string>
@@ -1069,6 +1073,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"உங்கள் பணிக் கொள்கையின்படி நீங்கள் பணிக் கணக்கில் இருந்து மட்டுமே ஃபோன் அழைப்புகளைச் செய்ய முடியும்"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"பணிக் கணக்கிற்கு மாறு"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"மூடுக"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"பூட்டுத் திரை அமைப்புகள்"</string>
 </resources>

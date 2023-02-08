@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Жұмыс кезінде қолданбаға дене датчигінен алынған жүрек қағысы, температура, қандағы оттегі пайызы сияқты деректі пайдалануға рұқсат береді."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Фондық режимде дене датчигінен алынған жүрек қағысы сияқты деректі пайдалану"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Фондық режимде қолданбаға дене датчигінен алынған жүрек қағысы, температура, қандағы оттегі пайызы сияқты деректі пайдалануға рұқсат береді."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Қолданба пайдаланылып жатқанда оған қолдағы дене датчигінен алынған деректі пайдалануға рұқсат беру."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Қолданба пайдаланылып жатқанда оған қолдағы дене датчигінен алынған деректі пайдалануға рұқсат береді."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Фондық режимдегі қолданбаға қолдағы дене датчигінен алынған деректі пайдалануға рұқсат беру."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Фондық режимдегі қолданбаға қолдағы дене датчигінен алынған деректі пайдалануға рұқсат береді."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Күнтізбе оқиғалары мен мәліметтерін оқу"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Бұл қолданба планшетте сақталған барлық күнтізбе оқиғаларын оқи алады және күнтізбе деректерін бөлісе не сақтай алады."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Бұл қолданба Android TV құрылғыңызда сақталған барлық күнтізбе оқиғаларын оқи алады және күнтізбе деректерін бөлісе не сақтай алады."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android іске қосылуда…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Планшет іске қосылуда…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Құрылғы іске қосылуда…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Қойманы оңтайландыру."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Жүйелік жаңарту аяқталуда…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> жаңартылуда…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ішінен <xliff:g id="NUMBER_0">%1$d</xliff:g> қолданба оңтайландырылуда."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> дайындалуда."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Қолданбалар іске қосылуда."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Қосуды аяқтауда."</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Толық экранда көру"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Шығу үшін жоғарыдан төмен қарай сырғытыңыз."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Түсінікті"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Жақсырақ көру үшін бұрыңыз."</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Жақсырақ көру үшін экранды бөлу режимінен шығыңыз."</string>
     <string name="done_label" msgid="7283767013231718521">"Дайын"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Сағаттар айналымының қозғалтқышы"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Минут айналымын қозғалтқыш"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Жұмыс <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2-ші жұмыс профилі (<xliff:g id="LABEL">%1$s</xliff:g>)"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3-ші жұмыс профилі (<xliff:g id="LABEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Босату алдында PIN кодын сұрау"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Босату алдында бекітпесін ашу өрнегін сұрау"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Босату алдында құпия сөзді сұрау"</string>
@@ -2315,4 +2313,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Қосымша қолданбаға экрандық режимдегі қызметтерді фоннан іске қосуға рұқсат беріледі."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон қолжетімді."</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон бөгелген."</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

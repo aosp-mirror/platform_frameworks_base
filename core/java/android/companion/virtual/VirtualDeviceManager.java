@@ -27,6 +27,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
@@ -378,13 +379,16 @@ public final class VirtualDeviceManager {
                 new IVirtualDeviceActivityListener.Stub() {
 
                     @Override
-                    public void onTopActivityChanged(int displayId, ComponentName topActivity) {
+                    public void onTopActivityChanged(int displayId, ComponentName topActivity,
+                            @UserIdInt int userId) {
                         final long token = Binder.clearCallingIdentity();
                         try {
                             synchronized (mActivityListenersLock) {
                                 for (int i = 0; i < mActivityListeners.size(); i++) {
                                     mActivityListeners.valueAt(i)
                                             .onTopActivityChanged(displayId, topActivity);
+                                    mActivityListeners.valueAt(i)
+                                          .onTopActivityChanged(displayId, topActivity, userId);
                                 }
                             }
                         } finally {
@@ -1087,8 +1091,23 @@ public final class VirtualDeviceManager {
          *
          * @param displayId The display ID on which the activity change happened.
          * @param topActivity The component name of the top activity.
+         * @deprecated Use {@link #onTopActivityChanged(int, ComponentName, int)} instead
          */
         void onTopActivityChanged(int displayId, @NonNull ComponentName topActivity);
+
+        /**
+         * Called when the top activity is changed.
+         *
+         * <p>Note: When there are no activities running on the virtual display, the
+         * {@link #onDisplayEmpty(int)} will be called. If the value topActivity is cached, it
+         * should be cleared when {@link #onDisplayEmpty(int)} is called.
+         *
+         * @param displayId   The display ID on which the activity change happened.
+         * @param topActivity The component name of the top activity.
+         * @param userId      The user ID associated with the top activity.
+         */
+        default void onTopActivityChanged(int displayId, @NonNull ComponentName topActivity,
+                @UserIdInt int userId) {}
 
         /**
          * Called when the display becomes empty (e.g. if the user hits back on the last
@@ -1113,6 +1132,12 @@ public final class VirtualDeviceManager {
 
         public void onTopActivityChanged(int displayId, ComponentName topActivity) {
             mExecutor.execute(() -> mActivityListener.onTopActivityChanged(displayId, topActivity));
+        }
+
+        public void onTopActivityChanged(int displayId, ComponentName topActivity,
+                @UserIdInt int userId) {
+            mExecutor.execute(() ->
+                    mActivityListener.onTopActivityChanged(displayId, topActivity, userId));
         }
 
         public void onDisplayEmpty(int displayId) {

@@ -91,8 +91,12 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"फेदबाट <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"बायाँ किनाराबाट <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"दायाँ किनाराबाट <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"कार्य प्रोफाइल प्रयोग गरी लिइएका स्क्रिनसटहरू <xliff:g id="APP">%1$s</xliff:g> एपमा सेभ गरिन्छन्"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"कार्य प्रोफाइलअन्तर्गत <xliff:g id="APP">%1$s</xliff:g> मा सेभ गरियो"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ले यो स्क्रिनसट भेट्टाएको छ।"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> र खुला रहेका अन्य एपहरूले यो स्क्रिनसट भेट्टाएका छन्।"</string>
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रिन रेकर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रिन रेकर्डिङको प्रक्रिया अघि बढाइँदै"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"कुनै स्क्रिन रेकर्ड गर्ने सत्रका लागि चलिरहेको सूचना"</string>
@@ -339,12 +343,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"अनुहार पहिचान गरियो। डिभाइस खोल्न अनलक आइकनमा थिच्नुहोस्।"</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"अनुहार प्रयोग गरी अनलक गरियो"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"अनुहार पहिचान गरियो"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"बायाँ सार्नुहोस्"</item>
-    <item msgid="5558598599408514296">"तल सार्नुहोस्"</item>
-    <item msgid="4844142668312841831">"दायाँ सार्नुहोस्"</item>
-    <item msgid="5640521437931460125">"माथि सार्नुहोस्"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"फेरि प्रयास गर्न माथितिर स्वाइप गर्नुहोस्"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC प्रयोग गर्न स्क्रिन अनलक गर्नुहोस्"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"यो डिभाइस तपाईंको सङ्गठनको स्वामित्वमा छ"</string>
@@ -832,10 +830,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"कन्ट्रोल थप्नु पर्ने एप छान्नुहोस्"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# कन्ट्रोल हालियो।}other{# वटा कन्ट्रोल हालियो।}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"हटाइएको"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> हाल्ने हो?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"तपाईंले <xliff:g id="APPNAME">%s</xliff:g> हाल्नुभयो भने यसले यो प्यानलमा सेटिङ र सामग्री हाल्न सक्छ। तपाईं केही एपहरूमा यहाँ कुन कुन सेटिङ देखाउने भन्ने कुरा छनौट गर्न सक्नुहुन्छ।"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"मनपराइएको"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"मन पराइएका कुराहरूको <xliff:g id="NUMBER">%d</xliff:g> औँ स्थानमा"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"मन पर्ने कुराहरूको सूचीमा नराखिएको"</string>
@@ -886,6 +882,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> खोल्नुहोस्"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> को <xliff:g id="SONG_NAME">%1$s</xliff:g> बोलको गीत <xliff:g id="APP_LABEL">%3$s</xliff:g> मा बजाउनुहोस्"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> बोलको गीत <xliff:g id="APP_LABEL">%2$s</xliff:g> मा बजाउनुहोस्"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"तपाईंको लागि सिफारिस गरिएका"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"अन्डू गर्नुहोस्"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> मा प्ले गर्न आफ्नो डिभाइस नजिकै लैजानुहोस्"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"यो डिभाइसमा प्ले गर्न <xliff:g id="DEVICENAME">%1$s</xliff:g> को अझ नजिक जानुहोस्"</string>
@@ -902,8 +899,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"त्रुटि भयो, फेरि प्रयास गर्नु…"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"कन्ट्रोल थप्नुहोस्"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"कन्ट्रोल सम्पादन गर्नुहोस्"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"एप हाल्नुहोस्"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"आउटपुट यन्त्रहरू थप्नुहोस्"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"समूह"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"१ यन्त्र चयन गरियो"</string>
@@ -919,7 +915,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"स्पिकर तथा डिस्प्लेहरू"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"सिफारिस गरिएका डिभाइसहरू"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"प्रिमियम खाता चाहिन्छ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"प्रसारण गर्ने सुविधाले कसरी काम गर्छ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"प्रसारण"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"कम्प्याटिबल ब्लुटुथ डिभाइस भएका नजिकैका मान्छेहरू तपाईंले प्रसारण गरिरहनुभएको मिडिया सुन्न सक्छन्"</string>
@@ -1031,6 +1026,8 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"क्यामेरा अफ छ"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"माइक अफ छ"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"क्यामेरा र माइक अफ छन्"</string>
+    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
+    <skip />
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# वटा सूचना}other{# वटा सूचनाहरू}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"टिपोट गर्ने कार्य"</string>
@@ -1046,6 +1043,10 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"एक पटक प्रयोग गर्ने अनुमति दिनुहोस्"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"अनुमति नदिनुहोस्"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"डिभाइसका लगले तपाईंको डिभाइसमा भएका विभिन्न गतिविधिको अभिलेख राख्छन्। एपहरू यी लगका आधारमा समस्या पत्ता लगाउन र तिनको समाधान गर्न सक्छन्।\n\nकेही लगहरूमा संवेदनशील जानकारी समावेश हुन सक्ने भएकाले आफूले भरोसा गर्ने एपलाई मात्र डिभाइसका सबै लग हेर्ने अनुमति दिनुहोस्। \n\nतपाईंले यो एपलाई डिभाइसका सबै लग हेर्ने अनुमति दिनुभएन भने पनि यसले आफ्नै लग भने हेर्न सक्छ। तपाईंको डिभाइसका उत्पादकले पनि तपाईंको डिभाइसमा भएका केही लग वा जानकारी हेर्न सक्ने सम्भावना हुन्छ।"</string>
+    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> खोल्नुहोस्"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• एप सेटअप गरिएको छ"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet मा कम्तीमा एउटा कार्ड हालिएको छ"</string>
@@ -1069,6 +1070,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"तपाईंको कामसम्बन्धी नीतिअनुसार कार्य प्रोफाइलबाट मात्र फोन कल गर्न सकिन्छ"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"कार्य प्रोफाइल प्रयोग गर्नुहोस्"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"बन्द गर्नुहोस्"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"लक स्क्रिनसम्बन्धी सेटिङ"</string>
 </resources>

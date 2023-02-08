@@ -24,6 +24,7 @@ import static android.service.autofill.FillEventHistory.Event.UI_TYPE_MENU;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_UNKNOWN;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
+import static android.service.autofill.FillRequest.FLAG_PCC_DETECTION;
 import static android.service.autofill.FillRequest.FLAG_RESET_FILL_DIALOG_STATE;
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
@@ -384,6 +385,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     private final AssistDataReceiverImpl mAssistReceiver = new AssistDataReceiverImpl();
 
+    /**
+     * Receiver of assist data for pcc purpose
+     */
+    private final PccAssistDataReceiverImpl mPccAssistReceiver = new PccAssistDataReceiverImpl();
+
     @Nullable
     private ClientSuggestionsSession mClientSuggestionsSession;
 
@@ -695,6 +701,89 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 onFillRequestSuccess(requestId, response,
                         mService.getServicePackageName(), mLastFillRequest.getFlags());
             }
+        }
+    }
+
+    /**
+     * Assist Data Receiver for PCC
+     */
+    private final class PccAssistDataReceiverImpl extends IAssistDataReceiver.Stub {
+        // TODO: Uncomment lines below after field classification service definition merged
+        // @GuardedBy("mLock")
+        // private FieldClassificationRequest mPendingFieldClassifitacionRequest;
+        // @GuardedBy("mLock")
+        // private FieldClassificationRequest mLastFieldClassifitacionRequest;
+
+        @GuardedBy("mLock")
+        void maybeRequestFieldClassificationFromServiceLocked() {
+            // TODO: Uncomment lines below after field classification service definition merged
+            // if (mPendingFieldClassifitacionRequest == null) {
+            //     return;
+            // }
+            // mLastFieldClassifitacionRequest = mPendingFieldClassifitacionRequest;
+            //
+            // mRemoteFieldClassificationService.onFieldClassificationRequest(
+            //        mPendingFieldClassifitacionRequest);
+            //
+            // mPendingFieldClassifitacionRequest = null;
+        }
+
+        @Override
+        public void onHandleAssistData(Bundle resultData) throws RemoteException {
+            // TODO: add a check if pcc field classification service is present
+            final AssistStructure structure = resultData.getParcelable(ASSIST_KEY_STRUCTURE,
+                android.app.assist.AssistStructure.class);
+            if (structure == null) {
+                Slog.e(TAG, "No assist structure for pcc detection - "
+                    + "app might have crashed providing it");
+                return;
+            }
+
+            final Bundle receiverExtras = resultData.getBundle(ASSIST_KEY_RECEIVER_EXTRAS);
+            if (receiverExtras == null) {
+                Slog.e(TAG, "No receiver extras for pcc detection - "
+                    + "app might have crashed providing it");
+                return;
+            }
+
+            final int requestId = receiverExtras.getInt(EXTRA_REQUEST_ID);
+
+            if (sVerbose) {
+                Slog.v(TAG, "New structure for requestId " + requestId + ": " + structure);
+            }
+
+            synchronized (mLock) {
+                // TODO(b/35708678): Must fetch the data so it's available later on handleSave(),
+                // even if the activity is gone by then, but structure .ensureData() gives a
+                // ONE_WAY warning because system_service could block on app calls. We need to
+                // change AssistStructure so it provides a "one-way" writeToParcel() method that
+                // sends all the data
+                try {
+                    structure.ensureDataForAutofill();
+                } catch (RuntimeException e) {
+                    wtf(e, "Exception lazy loading assist structure for %s: %s",
+                        structure.getActivityComponent(), e);
+                    return;
+                }
+
+                final ArrayList<AutofillId> ids = Helper.getAutofillIds(structure,
+                    /* autofillableOnly= */false);
+                for (int i = 0; i < ids.size(); i++) {
+                    ids.get(i).setSessionId(Session.this.id);
+                }
+
+                // TODO: Uncomment lines below after field classification service definition merged
+                // FieldClassificationRequest request = new FieldClassificationRequest(structure);
+                //
+                // mPendingFieldClassifitacionRequest = request;
+                //
+                // maybeRequestFieldClassificationFromServiceLocked();
+            }
+        }
+
+        @Override
+        public void onHandleAssistScreenshot(Bitmap screenshot) {
+            // Do nothing
         }
     }
 
@@ -1059,6 +1148,32 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private boolean isRequestSupportFillDialog(int flags) {
         return (flags & FLAG_SUPPORTS_FILL_DIALOG) != 0;
+    }
+
+    @GuardedBy("mLock")
+    private void requestAssistStructureForPccLocked(int flags) {
+        // Get request id
+        int requestId;
+        // TODO(b/158623971): Update this to prevent possible overflow
+        do {
+            requestId = sIdCounter.getAndIncrement();
+        } while (requestId == INVALID_REQUEST_ID);
+
+        // Call requestAutofilLData
+        try {
+            final Bundle receiverExtras = new Bundle();
+            receiverExtras.putInt(EXTRA_REQUEST_ID, requestId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (!ActivityTaskManager.getService().requestAutofillData(mPccAssistReceiver,
+                    receiverExtras, mActivityToken, flags)) {
+                    Slog.w(TAG, "failed to request autofill data for pcc: " + mActivityToken);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        } catch (RemoteException e) {
+        }
     }
 
     @GuardedBy("mLock")
@@ -3093,6 +3208,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if ((flags & FLAG_RESET_FILL_DIALOG_STATE) != 0) {
             if (sDebug) Log.d(TAG, "force to reset fill dialog state");
             mSessionFlags.mFillDialogDisabled = false;
+        }
+
+        /* request assist structure for pcc */
+        if ((flags & FLAG_PCC_DETECTION) != 0) {
+            requestAssistStructureForPccLocked(flags);
+            return;
         }
 
         switch(action) {

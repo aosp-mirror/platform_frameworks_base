@@ -88,6 +88,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         rippleShader.color = 0xffffffff.toInt() // default color
         rippleShader.rawProgress = 0f
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
+        setupRippleFadeParams()
         ripplePaint.shader = rippleShader
 
         dwellShader.color = 0xffffffff.toInt() // default color
@@ -294,7 +295,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             )
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?) {
-                    rippleShader.rippleFill = false
                     drawRipple = true
                     visibility = VISIBLE
                 }
@@ -337,6 +337,18 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
                 dwellShader.color,
                 255
         )
+    }
+
+    private fun setupRippleFadeParams() {
+        with(rippleShader) {
+            baseRingFadeParams.fadeOutStart = RippleShader.DEFAULT_BASE_RING_FADE_OUT_START
+            baseRingFadeParams.fadeOutEnd = RippleShader.DEFAULT_FADE_OUT_END
+
+            centerFillFadeParams.fadeInStart = RippleShader.DEFAULT_FADE_IN_START
+            centerFillFadeParams.fadeInEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_IN_END
+            centerFillFadeParams.fadeOutStart = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_START
+            centerFillFadeParams.fadeOutEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_END
+        }
     }
 
     override fun onDraw(canvas: Canvas?) {

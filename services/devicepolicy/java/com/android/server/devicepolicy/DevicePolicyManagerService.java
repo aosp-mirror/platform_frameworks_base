@@ -30,6 +30,7 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY;
+import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_AFFILIATED;
 import static android.app.admin.DeviceAdminReceiver.ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
@@ -55,6 +56,7 @@ import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
 import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_APP_STANDBY;
+import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_IDS;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
@@ -703,6 +705,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     static {
         APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.put(
                 EXEMPT_FROM_APP_STANDBY, OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY);
+        APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.put(
+                EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
+                OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS);
     }
 
     /**
@@ -749,6 +754,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // TODO(b/261999445) remove the flag after rollout.
     private static final String HEADLESS_FLAG = "headless";
     private static final boolean DEFAULT_HEADLESS_FLAG = true;
+
+    // TODO(b/266831522) remove the flag after rollout.
+    private static final String APPLICATION_EXEMPTIONS_FLAG = "application_exemptions";
+    private static final boolean DEFAULT_APPLICATION_EXEMPTIONS_FLAG = true;
 
     /**
      * This feature flag is checked once after boot and this value us used until the next reboot to
@@ -7110,11 +7119,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * @param factoryReset null: legacy behaviour, false: attempt to remove user, true: attempt to
      *                     factory reset
      */
-    private void wipeDataNoLock(ComponentName admin, int flags, String internalReason,
-            @NonNull String wipeReasonForUser, int userId, boolean calledOnParentInstance,
+    private void wipeDataNoLock(@Nullable ComponentName admin, int flags, String internalReason,
+            String wipeReasonForUser, int userId, boolean calledOnParentInstance,
             @Nullable Boolean factoryReset) {
         wtfIfInLock();
-
+        final String adminPackage;
+        if (admin != null) {
+            adminPackage = admin.getPackageName();
+        } else {
+            int callerId = mInjector.binderGetCallingUid();
+            String[] adminPackages = mInjector.getPackageManager().getPackagesForUid(callerId);
+            Preconditions.checkState(adminPackages.length > 0,
+                    "Caller %s does not have any associated packages", callerId);
+            adminPackage = adminPackages[0];
+        }
         mInjector.binderWithCleanCallingIdentity(() -> {
             // First check whether the admin is allowed to wipe the device/user/profile.
             final String restriction;
@@ -7133,7 +7151,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             boolean isSystemUser = userId == UserHandle.USER_SYSTEM;
             boolean wipeDevice;
             if (factoryReset == null || !mInjector.isChangeEnabled(EXPLICIT_WIPE_BEHAVIOUR,
-                    admin.getPackageName(),
+                    adminPackage,
                     userId)) {
                 // Legacy mode
                 wipeDevice = isSystemUser;
@@ -8779,9 +8797,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean hasDeviceOwner() {
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
-                        || canManageUsers(caller) || isFinancedDeviceOwner(caller)
-                        || hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+        Preconditions.checkCallAuthorization(
+                isDefaultDeviceOwner(caller) || canManageUsers(caller) || isFinancedDeviceOwner(
+                        caller) || hasCallingOrSelfPermission(
+                        permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
         return mOwners.hasDeviceOwner();
     }
 
@@ -8789,10 +8808,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return isDeviceOwner(admin.info.getComponent(), admin.getUserHandle().getIdentifier());
     }
 
-    public boolean isDeviceOwner(ComponentName who, int userId) {
+    /**
+     * Check if the user is a Device Owner
+     *
+     * @param who    component to check against
+     * @param userId user to check
+     * @return if the user is a Device Owner
+     */
+    public boolean isDeviceOwner(@Nullable ComponentName who, int userId) {
         synchronized (getLockObject()) {
-            return mOwners.hasDeviceOwner()
-                    && mOwners.getDeviceOwnerUserId() == userId
+            return mOwners.hasDeviceOwner() && mOwners.getDeviceOwnerUserId() == userId
                     && mOwners.getDeviceOwnerComponent().equals(who);
         }
     }
@@ -8841,9 +8866,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    public boolean isProfileOwner(ComponentName who, int userId) {
-        final ComponentName profileOwner = mInjector.binderWithCleanCallingIdentity(() ->
-                getProfileOwnerAsUser(userId));
+    /**
+     * Check if {@link userId} is a Profile Owner
+     *
+     * @param who    component to check against
+     * @param userId user to check
+     * @return if the user is a Profile Owner
+     */
+    public boolean isProfileOwner(@Nullable ComponentName who, int userId) {
+        final ComponentName profileOwner = mInjector.binderWithCleanCallingIdentity(
+                () -> getProfileOwnerAsUser(userId));
         return who != null && who.equals(profileOwner);
     }
 
@@ -9321,7 +9353,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public CharSequence getDeviceOwnerLockScreenInfo() {
-        return mLockPatternUtils.getDeviceOwnerInfo();
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        return mInjector.binderWithCleanCallingIdentity(() ->
+            mLockPatternUtils.getDeviceOwnerInfo());
     }
 
     private void clearUserPoliciesLocked(int userId) {
@@ -11403,8 +11439,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean isAdminAffectedByRestriction(
-            ComponentName admin, String userRestriction, int userId) {
-        switch(mUserManager.getUserRestrictionSource(userRestriction, UserHandle.of(userId))) {
+            @Nullable ComponentName admin, String userRestriction, int userId) {
+        switch (mUserManager.getUserRestrictionSource(userRestriction, UserHandle.of(userId))) {
             case UserManager.RESTRICTION_NOT_SET:
                 return false;
             case UserManager.RESTRICTION_SOURCE_DEVICE_OWNER:
@@ -14188,6 +14224,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         @Override
         public boolean isUserOrganizationManaged(@UserIdInt int userHandle) {
             return getDeviceStateCache().isUserOrganizationManaged(userHandle);
+        }
+
+        @Override
+        public boolean isApplicationExemptionsFlagEnabled() {
+            return DeviceConfig.getBoolean(
+                    NAMESPACE_DEVICE_POLICY_MANAGER,
+                    APPLICATION_EXEMPTIONS_FLAG,
+                    DEFAULT_APPLICATION_EXEMPTIONS_FLAG);
         }
     }
 

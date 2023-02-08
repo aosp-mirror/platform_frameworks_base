@@ -180,6 +180,7 @@ public final class RouteListingPreference implements Parcelable {
         /** Creates a new instance with default values (documented in the setters). */
         public Builder() {
             mItems = List.of();
+            mUseSystemOrdering = true;
         }
 
         /**
@@ -190,7 +191,6 @@ public final class RouteListingPreference implements Parcelable {
         @NonNull
         public Builder setItems(@NonNull List<Item> items) {
             mItems = List.copyOf(Objects.requireNonNull(items));
-            mUseSystemOrdering = true;
             return this;
         }
 
@@ -259,7 +259,7 @@ public final class RouteListingPreference implements Parcelable {
         @IntDef(
                 flag = true,
                 prefix = {"FLAG_"},
-                value = {FLAG_ONGOING_SESSION, FLAG_SUGGESTED, FLAG_ONGOING_SESSION_MANAGED})
+                value = {FLAG_ONGOING_SESSION, FLAG_ONGOING_SESSION_MANAGED, FLAG_SUGGESTED})
         public @interface Flags {}
 
         /**
@@ -300,9 +300,13 @@ public final class RouteListingPreference implements Parcelable {
                 prefix = {"SUBTEXT_"},
                 value = {
                     SUBTEXT_NONE,
+                    SUBTEXT_ERROR_UNKNOWN,
                     SUBTEXT_SUBSCRIPTION_REQUIRED,
                     SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED,
                     SUBTEXT_AD_ROUTING_DISALLOWED,
+                    SUBTEXT_DEVICE_LOW_POWER,
+                    SUBTEXT_UNAUTHORIZED,
+                    SUBTEXT_TRACK_UNSUPPORTED,
                     SUBTEXT_CUSTOM
                 })
         public @interface SubText {}
@@ -310,20 +314,40 @@ public final class RouteListingPreference implements Parcelable {
         /** The corresponding route has no associated subtext. */
         public static final int SUBTEXT_NONE = 0;
         /**
+         * The corresponding route's subtext must indicate that it is not available because of an
+         * unknown error.
+         */
+        public static final int SUBTEXT_ERROR_UNKNOWN = 1;
+        /**
          * The corresponding route's subtext must indicate that it requires a special subscription
          * in order to be available for routing.
          */
-        public static final int SUBTEXT_SUBSCRIPTION_REQUIRED = 1;
+        public static final int SUBTEXT_SUBSCRIPTION_REQUIRED = 2;
         /**
          * The corresponding route's subtext must indicate that downloaded content cannot be routed
          * to it.
          */
-        public static final int SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED = 2;
+        public static final int SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED = 3;
         /**
          * The corresponding route's subtext must indicate that it is not available because an ad is
          * in progress.
          */
-        public static final int SUBTEXT_AD_ROUTING_DISALLOWED = 3;
+        public static final int SUBTEXT_AD_ROUTING_DISALLOWED = 4;
+        /**
+         * The corresponding route's subtext must indicate that it is not available because the
+         * device is in low-power mode.
+         */
+        public static final int SUBTEXT_DEVICE_LOW_POWER = 5;
+        /**
+         * The corresponding route's subtext must indicate that it is not available because the user
+         * is not authorized to route to it.
+         */
+        public static final int SUBTEXT_UNAUTHORIZED = 6;
+        /**
+         * The corresponding route's subtext must indicate that it is not available because the
+         * device does not support the current media track.
+         */
+        public static final int SUBTEXT_TRACK_UNSUPPORTED = 7;
         /**
          * The corresponding route's subtext must be obtained from {@link
          * #getCustomSubtextMessage()}.
@@ -399,6 +423,7 @@ public final class RouteListingPreference implements Parcelable {
          * Returns the flags associated to the route that corresponds to this item.
          *
          * @see #FLAG_ONGOING_SESSION
+         * @see #FLAG_ONGOING_SESSION_MANAGED
          * @see #FLAG_SUGGESTED
          */
         @Flags
@@ -415,10 +440,14 @@ public final class RouteListingPreference implements Parcelable {
          * <p>If this method returns {@link #SUBTEXT_CUSTOM}, then the subtext is obtained form
          * {@link #getCustomSubtextMessage()}.
          *
-         * @see #SUBTEXT_NONE
-         * @see #SUBTEXT_SUBSCRIPTION_REQUIRED
-         * @see #SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED
-         * @see #SUBTEXT_AD_ROUTING_DISALLOWED
+         * @see #SUBTEXT_NONE,
+         * @see #SUBTEXT_ERROR_UNKNOWN,
+         * @see #SUBTEXT_SUBSCRIPTION_REQUIRED,
+         * @see #SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED,
+         * @see #SUBTEXT_AD_ROUTING_DISALLOWED,
+         * @see #SUBTEXT_DEVICE_LOW_POWER,
+         * @see #SUBTEXT_UNAUTHORIZED ,
+         * @see #SUBTEXT_TRACK_UNSUPPORTED,
          * @see #SUBTEXT_CUSTOM
          */
         @SubText

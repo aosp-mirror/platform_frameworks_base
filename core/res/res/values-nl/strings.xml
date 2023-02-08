@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"De app heeft toegang tot gegevens van lichaamssensoren, zoals hartslag, temperatuur en zuurstofpercentage in het bloed, terwijl de app wordt gebruikt."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Toegang tot gegevens van lichaamssensoren, zoals hartslag, op de achtergrond"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"De app heeft toegang tot gegevens van lichaamssensoren, zoals hartslag, temperatuur en zuurstofpercentage in het bloed, terwijl de app op de achtergrond wordt uitgevoerd."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Toegang tot gegevens van de lichaamssensor voor polstemperatuur terwijl de app in gebruik is."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Geeft de app toegang tot gegevens van de lichaamssensor voor polstemperatuur terwijl de app in gebruik is."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Toegang tot gegevens van de lichaamssensor voor polstemperatuur terwijl de app op de achtergrond wordt uitgevoerd."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Geeft de app toegang tot gegevens van de lichaamssensor voor polstemperatuur terwijl de app op de achtergrond wordt uitgevoerd."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Agenda-afspraken en -gegevens lezen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je tablet en je agendagegevens delen of opslaan."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Deze app kan alle agenda-afspraken lezen die zijn opgeslagen op je Android TV-apparaat en je agendagegevens delen of opslaan."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android wordt gestart…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Tablet wordt gestart…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Apparaat wordt gestart…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Opslagruimte wordt geoptimaliseerd."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Systeemupdate voltooien…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> upgraden…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"App <xliff:g id="NUMBER_0">%1$d</xliff:g> van <xliff:g id="NUMBER_1">%2$d</xliff:g> optimaliseren."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> voorbereiden."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps starten."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Opstarten afronden."</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Volledig scherm wordt getoond"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Swipe omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ik snap het"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Draai voor een betere weergave"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Sluit het gesplitste scherm voor een betere weergave"</string>
     <string name="done_label" msgid="7283767013231718521">"Klaar"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ronde schuifregelaar voor uren"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Ronde schuifregelaar voor minuten"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Werk <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2e <xliff:g id="LABEL">%1$s</xliff:g>, werk"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3e <xliff:g id="LABEL">%1$s</xliff:g>, werk"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Vraag pin voor losmaken"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Vraag om ontgrendelingspatroon voor losmaken"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Vraag wachtwoord voor losmaken"</string>
@@ -2315,4 +2313,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Hiermee kan een bijbehorende app services op de voorgrond vanuit de achtergrond starten."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Microfoon is beschikbaar"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Microfoon is geblokkeerd"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

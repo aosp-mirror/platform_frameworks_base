@@ -19,6 +19,7 @@ package android.window;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -137,7 +138,7 @@ public abstract class DisplayWindowPolicyController {
     /**
      * This is called when the top activity of the display is changed.
      */
-    public void onTopActivityChanged(ComponentName topActivity, int uid) {}
+    public void onTopActivityChanged(ComponentName topActivity, int uid, @UserIdInt int userId) {}
 
     /**
      * This is called when the apps that contains running activities on the display has changed.

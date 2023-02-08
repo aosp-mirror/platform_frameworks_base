@@ -994,7 +994,7 @@ final class AccessibilityController {
                     // navigation bar insets into nonMagnifiedBounds. It happens when
                     // navigation mode is gestural.
                     if (isUntouchableNavigationBar(windowState, mTempRegion3)) {
-                        final Rect navBarInsets = getNavBarInsets(mDisplayContent);
+                        final Rect navBarInsets = getSystemBarInsetsFrame(windowState);
                         nonMagnifiedBounds.op(navBarInsets, Region.Op.UNION);
                         availableBounds.op(navBarInsets, Region.Op.DIFFERENCE);
                     }
@@ -1459,10 +1459,12 @@ final class AccessibilityController {
         return touchableRegion.isEmpty();
     }
 
-    static Rect getNavBarInsets(DisplayContent displayContent) {
-        final InsetsSource source = displayContent.getInsetsStateController().getRawInsetsState()
-                .peekSource(ITYPE_NAVIGATION_BAR);
-        return source != null ? source.getFrame() : EMPTY_RECT;
+    static Rect getSystemBarInsetsFrame(WindowState win) {
+        if (win == null) {
+            return EMPTY_RECT;
+        }
+        final InsetsSourceProvider provider = win.getControllableInsetProvider();
+        return provider != null ? provider.getSource().getFrame() : EMPTY_RECT;
     }
 
     /**
@@ -1615,7 +1617,10 @@ final class AccessibilityController {
                         // region of navigation bar inset because all touch events from this region
                         // would be received by launcher, i.e. this region is a un-touchable one
                         // for the application.
-                        unaccountedSpace.op(getNavBarInsets(dc), unaccountedSpace,
+                        unaccountedSpace.op(
+                                getSystemBarInsetsFrame(
+                                        mService.mWindowMap.get(a11yWindow.getWindowInfo().token)),
+                                unaccountedSpace,
                                 Region.Op.REVERSE_DIFFERENCE);
                     }
 

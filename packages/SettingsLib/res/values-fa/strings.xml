@@ -183,7 +183,7 @@
     <string name="tts_lang_use_system" msgid="6312945299804012406">"استفاده از زبان سیستم"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"زبان انتخاب نشده است"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"صدای خاص یک زبان را برای متن گفتاری تنظیم می‌کند"</string>
-    <string name="tts_play_example_title" msgid="1599468547216481684">"به نمونه‌ای گوش کنید"</string>
+    <string name="tts_play_example_title" msgid="1599468547216481684">"شنیدن نمونه"</string>
     <string name="tts_play_example_summary" msgid="634044730710636383">"قسمت کوتاهی از ترکیب گفتار پخش شود"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"نصب داده‌های صوتی"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"نصب داده‌های صوتی مورد نیاز برای ترکیب گفتار"</string>
@@ -540,6 +540,12 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"این تلفن"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"این رایانه لوحی"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"این تلفن"</string>
+    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <skip />
+    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <skip />
+    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"مشکل در اتصال. دستگاه را خاموش و دوباره روشن کنید"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"دستگاه صوتی سیمی"</string>
     <string name="help_label" msgid="3528360748637781274">"راهنما و بازخورد"</string>
@@ -666,4 +672,8 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"پویانمایی‌های اشاره برگشت پیش‌گویانه"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"پویانمایی‌های سیستم را برای اشاره برگشت پیش‌گویانه فعال کنید."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"‏این تنظیم پویانمایی‌های سیستم را برای پویانمایی اشاره برگشت پیش‌بینانه فعال می‌کند. این تنظیم مستلزم تنظیم شدن enableOnBackInvokedCallback مربوط به هر برنامه روی صحیح در فایل مانیفست است."</string>
+    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
+    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
 </resources>

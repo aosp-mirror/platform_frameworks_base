@@ -31,13 +31,18 @@ import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION;
+import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION_MANAGED;
 import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED;
 import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_TRANSFER;
 import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
 import static android.media.RouteListingPreference.Item.SUBTEXT_CUSTOM;
+import static android.media.RouteListingPreference.Item.SUBTEXT_DEVICE_LOW_POWER;
 import static android.media.RouteListingPreference.Item.SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_ERROR_UNKNOWN;
 import static android.media.RouteListingPreference.Item.SUBTEXT_NONE;
 import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQUIRED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_TRACK_UNSUPPORTED;
+import static android.media.RouteListingPreference.Item.SUBTEXT_UNAUTHORIZED;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
@@ -254,6 +259,16 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public boolean hasOngoingSession() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
                 && Api34Impl.hasOngoingSession(mItem);
+    }
+
+    /**
+     * Checks if device is the host for ongoing shared session, which allow user to adjust volume
+     *
+     * @return true if device is the host for ongoing shared session
+     */
+    public boolean isHostForOngoingSession() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && Api34Impl.isHostForOngoingSession(mItem);
     }
 
     /**
@@ -554,6 +569,13 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     @RequiresApi(34)
     private static class Api34Impl {
         @DoNotInline
+        static boolean isHostForOngoingSession(RouteListingPreference.Item item) {
+            int flags = item != null ? item.getFlags() : 0;
+            return (flags & FLAG_ONGOING_SESSION) != 0
+                    && (flags & FLAG_ONGOING_SESSION_MANAGED) != 0;
+        }
+
+        @DoNotInline
         static boolean isSuggestedDevice(RouteListingPreference.Item item) {
             return item != null && (item.getFlags() & FLAG_SUGGESTED) != 0;
         }
@@ -566,12 +588,20 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         @DoNotInline
         static String composeSubtext(RouteListingPreference.Item item, Context context) {
             switch (item.getSubText()) {
+                case SUBTEXT_ERROR_UNKNOWN:
+                    return context.getString(R.string.media_output_status_unknown_error);
                 case SUBTEXT_SUBSCRIPTION_REQUIRED:
                     return context.getString(R.string.media_output_status_require_premium);
                 case SUBTEXT_DOWNLOADED_CONTENT_ROUTING_DISALLOWED:
                     return context.getString(R.string.media_output_status_not_support_downloads);
                 case SUBTEXT_AD_ROUTING_DISALLOWED:
                     return context.getString(R.string.media_output_status_try_after_ad);
+                case SUBTEXT_DEVICE_LOW_POWER:
+                    return context.getString(R.string.media_output_status_device_in_low_power_mode);
+                case SUBTEXT_UNAUTHORIZED:
+                    return context.getString(R.string.media_output_status_unauthorized);
+                case SUBTEXT_TRACK_UNSUPPORTED:
+                    return context.getString(R.string.media_output_status_track_unsupported);
                 case SUBTEXT_CUSTOM:
                     return (String) item.getCustomSubtextMessage();
             }

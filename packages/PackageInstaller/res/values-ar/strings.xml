@@ -26,8 +26,6 @@
     <string name="install_done" msgid="5987363587661783896">"تم تثبيت التطبيق."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"هل تريد تثبيت هذا التطبيق؟"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"هل تريد تحديث هذا التطبيق؟"</string>
-    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"تتم إدارة تحديثات هذا التطبيق حاليًا من قِبل \"<xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>\".\n\nمن خلال التحديث، ستتلقّى التحديثات المتوفّرة من \"<xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>\" بدلاً من ذلك."</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"تتم إدارة تحديثات هذا التطبيق حاليًا من قِبل \"<xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>\".\n\nهل تريد تثبيت هذا التحديث من <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>\"؟"</string>
     <string name="install_failed" msgid="5777824004474125469">"التطبيق ليس مثبتًا."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"تم حظر تثبيت الحزمة."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"لم يتم تثبيت التطبيق لأن حزمة التثبيت تتعارض مع حزمة حالية."</string>
@@ -70,8 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"جارٍ إلغاء تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"تمّ إلغاء تثبيت التطبيق."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"تم إلغاء تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
-    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
-    <skip />
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"تم حذف النسخة الطبق الأصل عن \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\"."</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"تعذّر إلغاء تثبيت التطبيق."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"لم يتم إلغاء تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> بنجاح."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"جارٍ حذف النسخة الطبق الأصل عن \"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>\"…"</string>

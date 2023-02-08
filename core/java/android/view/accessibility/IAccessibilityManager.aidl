@@ -120,4 +120,8 @@ interface IAccessibilityManager {
     void injectInputEventToInputFilter(in InputEvent event);
 
     float getUiContrast();
+
+    boolean startFlashNotificationSequence(String opPkg, int reason, IBinder token);
+    boolean stopFlashNotificationSequence(String opPkg);
+    boolean startFlashNotificationEvent(String opPkg, int reason, String reasonPkg);
 }

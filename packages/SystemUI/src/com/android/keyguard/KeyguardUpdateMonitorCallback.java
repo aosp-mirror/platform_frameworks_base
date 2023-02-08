@@ -23,8 +23,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.systemui.plugins.Weather;
 import com.android.systemui.statusbar.KeyguardIndicationController;
-import com.android.systemui.statusbar.Weather;
 
 import java.util.TimeZone;
 

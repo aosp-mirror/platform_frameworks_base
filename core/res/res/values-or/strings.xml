@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ଏହି ଆପଟି ବ୍ୟବହାରରେ ଥିବା ସମୟରେ, ହାର୍ଟ ରେଟ ଏବଂ ତାପମାତ୍ରା, ରକ୍ତରେ ଅମ୍ଳଜାନ ଶତକଡ଼ା ପରି ବଡି ସେନ୍ସର ଡାଟାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ପୃଷ୍ଠପଟରେ ଥିବା ସମୟରେ, ହାର୍ଟ ରେଟ ପରି ବଡି ସେନ୍ସର ଡାଟାକୁ ଆକ୍ସେସ କରନ୍ତୁ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ଏହି ଆପଟି ପୃଷ୍ଠପଟରେ ଥିବା ସମୟରେ, ହାର୍ଟ ରେଟ, ତାପମାତ୍ରା ଏବଂ ରକ୍ତରେ ଅମ୍ଳଜାନ ଶତକଡ଼ା ପରି ବଡି ସେନ୍ସର ଡାଟାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ଆପଟି ବ୍ୟବହାରରେ ଥିବା ସମୟରେ ବଡି ସେନ୍ସର ରିଷ୍ଟ ତାପମାତ୍ରା ଡାଟାକୁ ଆକ୍ସେସ କରନ୍ତୁ।"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ଆପଟି ବ୍ୟବହାରରେ ଥିବା ସମୟରେ, ବଡି ସେନ୍ସର ରିଷ୍ଟ ତାପମାତ୍ରା ଡାଟାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ଆପଟି ପୃଷ୍ଠପଟରେ ଥିବା ସମୟରେ ବଡି ସେନ୍ସର ରିଷ୍ଟ ତାପମାତ୍ରା ଡାଟାକୁ ଆକ୍ସେସ କରନ୍ତୁ।"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ଆପଟି ପୃଷ୍ଠପଟରେ ଥିବା ସମୟରେ, ବଡି ସେନ୍ସର ରିଷ୍ଟ ତାପମାତ୍ରା ଡାଟାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"କ୍ୟାଲେଣ୍ଡର୍‍ ଇଭେଣ୍ଟ ଏବଂ ବିବରଣୀ ପଢ଼େ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ଆପଣଙ୍କ ଟାବଲେଟ୍‌ରେ ଷ୍ଟୋର୍‍ କରାଯାଇଥିବା ସମସ୍ତ କ୍ୟାଲେଣ୍ଡର ଇଭେଣ୍ଟ ଏହି ଆପ୍‍ ପଢ଼ିପାରେ ଏବଂ ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର ଡାଟା ସେୟାର୍‍ କରିପାରେ କିମ୍ବା ସେଭ୍‍ କରିପାରେ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ଏହି ଆପ୍ ଆପଣଙ୍କ Android TV ଡିଭାଇସ୍‌ରେ ଷ୍ଟୋର୍ କରାଯାଇଥିବା ସମସ୍ତ କ୍ୟାଲେଣ୍ଡର ଇଭେଣ୍ଟ ପଢ଼ିପାରେ ଏବଂ ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର ଡାଟା ସେୟାର୍ କରିପାରେ କିମ୍ବା ସେଭ୍ କରିପାରେ।"</string>
@@ -1081,13 +1077,13 @@
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"ସ୍ପେସ୍‍"</string>
     <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"ଏଣ୍ଟର୍"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ଡିଲିଟ୍‌ କରନ୍ତୁ"</string>
-    <string name="search_go" msgid="2141477624421347086">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
-    <string name="search_hint" msgid="455364685740251925">"ସନ୍ଧାନ…"</string>
-    <string name="searchview_description_search" msgid="1045552007537359343">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
+    <string name="search_go" msgid="2141477624421347086">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
+    <string name="search_hint" msgid="455364685740251925">"ସର୍ଚ୍ଚ କରନ୍ତୁ…"</string>
+    <string name="searchview_description_search" msgid="1045552007537359343">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="searchview_description_query" msgid="7430242366971716338">"କ୍ୱେରୀ ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="searchview_description_clear" msgid="1989371719192982900">"କ୍ୱେରୀ ଖାଲି କରନ୍ତୁ"</string>
     <string name="searchview_description_submit" msgid="6771060386117334686">"କ୍ୱେରୀ ଦାଖଲ କରନ୍ତୁ"</string>
-    <string name="searchview_description_voice" msgid="42360159504884679">"ଭଏସ୍‍ ସର୍ଚ୍ଚ"</string>
+    <string name="searchview_description_voice" msgid="42360159504884679">"ଭଏସ ସର୍ଚ୍ଚ"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"’ସ୍ପର୍ଶ କରି ଏକ୍ସପ୍ଲୋର୍‍ କରନ୍ତୁ’ ସକ୍ଷମ କରିବେ?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ’ସ୍ପର୍ଶ କରି ଏକ୍ସପ୍ଲୋର୍ କରନ୍ତୁ’ ସକ୍ଷମ କରିବାକୁ ଚାହେଁ। ’ସ୍ପର୍ଶ କରି ଏକ୍ସପ୍ଲୋର୍ କରନ୍ତୁ’ ଅନ୍‌ ଥିବାବେଳେ, ଆପଣଙ୍କ ଆଙ୍ଗୁଠି ତଳେ କ’ଣ ଅଛି, ତାହାର ବ୍ୟାଖ୍ୟା ଦେଖିପାରିବେ କିମ୍ବା ଟାବ୍‍ଲେଟ୍‍ ସହ କଥାବାର୍ତ୍ତା କରିବାକୁ ଜେଶ୍ଚର୍‌ କରିପାରିବେ।"</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ’ସ୍ପର୍ଶ କରି ଏକ୍ସପ୍ଲୋର୍ କରନ୍ତୁ’ ସକ୍ଷମ କରିବାକୁ ଚାହେଁ। ’ସ୍ପର୍ଶ କରି ଏକ୍ସପ୍ଲୋର୍ କରନ୍ତୁ’ ଅନ୍‌ ଥିବାବେଳେ, ଆପଣଙ୍କ ଆଙ୍ଗୁଠି ତଳେ କ’ଣ ଅଛି, ତାହାର ବ୍ୟାଖ୍ୟା ଦେଖିପାରିବେ କିମ୍ବା ଫୋନ୍‍ ସହ କଥାବାର୍ତ୍ତା କରିବାକୁ ଜେଶ୍ଚର୍‌ କରିପାରିବେ।"</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"ଆଣ୍ଡ୍ରଏଡ୍ ଆରମ୍ଭ ହେଉଛି…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ଟାବଲେଟ୍ ଆରମ୍ଭ ହେଉଛି…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"ଡିଭାଇସ୍ ଆରମ୍ଭ ହେଉଛି…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"ଷ୍ଟୋରେଜ୍‍ ବଢ଼ାଯାଉଛି"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"ସିଷ୍ଟମ୍ ଅପଡେଟ୍ ସମାପ୍ତ ହେଉଛି…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g>କୁ ଅପଗ୍ରେଡ୍‍ କରାଯାଉଛି…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g>ରୁ <xliff:g id="NUMBER_0">%1$d</xliff:g> ଆପ୍‍ ଅନୁକୂଳନ କରୁଛି।"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> ପ୍ରସ୍ତୁତ କରାଯାଉଛି।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ଆପ୍‍ ଆରମ୍ଭ କରାଯାଉଛି।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ବୁଟ୍‍ ସମାପ୍ତ କରୁଛି।"</string>
@@ -1468,7 +1462,7 @@
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ଜୁମ୍ ନିୟନ୍ତ୍ରଣ ପାଇଁ ଦୁଇଥର ଟାପ୍‌ କରନ୍ତୁ"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ୱିଜେଟ୍‍ ଯୋଡ଼ିପାରିବ ନାହିଁ।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ଯାଆନ୍ତୁ"</string>
-    <string name="ime_action_search" msgid="4501435960587287668">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
+    <string name="ime_action_search" msgid="4501435960587287668">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="ime_action_send" msgid="8456843745664334138">"ପଠାନ୍ତୁ"</string>
     <string name="ime_action_next" msgid="4169702997635728543">"ପରବର୍ତ୍ତୀ"</string>
     <string name="ime_action_done" msgid="6299921014822891569">"ହୋଇଗଲା"</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନରେ ଦେଖାଯାଉଛି"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ବାହାରିବା ପାଇଁ, ଉପରୁ ତଳକୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ବୁଝିଗଲି"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ରୋଟେଟ କରନ୍ତୁ"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ସ୍ପ୍ଲିଟ ସ୍କ୍ରିନରୁ ବାହାରି ଯାଆନ୍ତୁ"</string>
     <string name="done_label" msgid="7283767013231718521">"ହୋଇଗଲା"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ଘଣ୍ଟା ସର୍କୁଲାର୍‍ ସ୍ଲାଇଡର୍‍"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ମିନିଟ୍ସ ସର୍କୁଲାର୍‍ ସ୍ଲାଇଡର୍‍"</string>
@@ -1861,6 +1857,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"ୱାର୍କ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2ୟ କାର୍ଯ୍ୟ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3ୟ କାର୍ଯ୍ୟ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> କ୍ଲୋନ"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ଅନପିନ୍‌ କରିବା ପୂର୍ବରୁ PIN ପଚାରନ୍ତୁ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ଅନପିନ୍‌ କରିବା ପୂର୍ବରୁ ଲକ୍‌ ଖୋଲିବା ପାଟର୍ନ ପଚାରନ୍ତୁ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ଅନପିନ୍‌ କରିବା ପୂର୍ବରୁ ପାସ୍‌ୱର୍ଡ ପଚାରନ୍ତୁ"</string>
@@ -1943,7 +1940,7 @@
     <string name="region_picker_section_suggested_bilingual" msgid="704607569328224133">"ପ୍ରସ୍ତାବିତ ଅଞ୍ଚଳଗୁଡ଼ିକ"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"ସମସ୍ତ ଭାଷା"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"ସମସ୍ତ ଅଞ୍ଚଳ"</string>
-    <string name="locale_search_menu" msgid="6258090710176422934">"ସନ୍ଧାନ କରନ୍ତୁ"</string>
+    <string name="locale_search_menu" msgid="6258090710176422934">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"ଆପ୍‌ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"ବର୍ତ୍ତମାନ <xliff:g id="APP_NAME_0">%1$s</xliff:g> ଉପଲବ୍ଧ ନାହିଁ। ଏହା <xliff:g id="APP_NAME_1">%2$s</xliff:g> ଦ୍ଵାରା ପରିଚାଳିତ ହେଉଛି।"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
@@ -2315,4 +2312,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ପୃଷ୍ଠପଟରୁ ଫୋରଗ୍ରାଉଣ୍ଡ ସେବାଗୁଡ଼ିକ ଆରମ୍ଭ କରିବାକୁ ଏକ ସହଯୋଗୀ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"ମାଇକ୍ରୋଫୋନ ଉପଲବ୍ଧ ଅଛି"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ମାଇକ୍ରୋଫୋନକୁ ବ୍ଲକ କରାଯାଇଛି"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

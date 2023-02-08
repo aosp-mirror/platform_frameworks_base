@@ -166,4 +166,8 @@ public class TestableNotificationManagerService extends NotificationManagerServi
     protected void setOngoingDismissal(boolean ongoingDismissal) {
         ONGOING_DISMISSAL = ongoingDismissal;
     }
+
+    protected void setSystemExemptFromDismissal(boolean isOn) {
+        mSystemExemptFromDismissal = isOn;
+    }
 }

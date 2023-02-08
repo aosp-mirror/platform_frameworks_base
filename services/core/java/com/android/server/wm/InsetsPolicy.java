@@ -634,6 +634,12 @@ class InsetsPolicy {
         final SparseArray<InsetsSourceControl> controlsReady = new SparseArray<>();
         final InsetsSourceControl[] controls =
                 mStateController.getControlsForDispatch(mDummyControlTarget);
+        if (controls == null) {
+            if (callback != null) {
+                DisplayThread.getHandler().post(callback);
+            }
+            return;
+        }
         for (InsetsSourceControl control : controls) {
             if (isTransient(control.getType()) && control.getLeash() != null) {
                 typesReady |= control.getType();
@@ -712,7 +718,8 @@ class InsetsPolicy {
 
         InsetsPolicyAnimationControlListener(boolean show, Runnable finishCallback, int types) {
             super(show, false /* hasCallbacks */, types, BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
-                    false /* disable */, 0 /* floatingImeBottomInsets */, null);
+                    false /* disable */, 0 /* floatingImeBottomInsets */,
+                    null /* loggingListener */, null /* jankContext */);
             mFinishCallback = finishCallback;
             mControlCallbacks = new InsetsPolicyAnimationControlCallbacks(this);
         }

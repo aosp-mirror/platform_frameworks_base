@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ആപ്പ് ഉപയോഗത്തിലുള്ളപ്പോൾ അതിനെ ഹൃദയമിടിപ്പ്, ശരീരോഷ്മാവ്, രക്തത്തിലെ ഓക്സിജൻ ശതമാനം എന്നിവ പോലുള്ള ബോഡി സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കുന്നു."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"പശ്ചാത്തലത്തിലുള്ളപ്പോൾ ഹൃദയമിടിപ്പ് പോലുള്ള ബോഡി സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യുക"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ആപ്പ് പശ്ചാത്തലത്തിലുള്ളപ്പോൾ അതിനെ ഹൃദയമിടിപ്പ്, ശരീരോഷ്മാവ്, രക്തത്തിലെ ഓക്സിജൻ ശതമാനം എന്നിവ പോലുള്ള ബോഡി സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കുന്നു."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"കണങ്കയ്യിലൂടെ അറിയാനാകുന്ന ശരീരോഷ്‌മാവ് സംബന്ധിച്ച ബോഡി സെൻസർ ഡാറ്റ, ആപ്പ് പ്രവർത്തിച്ചുകൊണ്ടിരിക്കുമ്പോൾ ആക്‌സസ് ചെയ്യുക."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"കണങ്കയ്യിലൂടെ അറിയാനാകുന്ന ശരീരോഷ്‌മാവ് സംബന്ധിച്ച ബോഡി സെൻസർ ഡാറ്റ, ആപ്പ് പ്രവർത്തിച്ചുകൊണ്ടിരിക്കുമ്പോൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"കണങ്കയ്യിലൂടെ അറിയാനാകുന്ന ശരീരോഷ്‌മാവ് സംബന്ധിച്ച ബോഡി സെൻസർ ഡാറ്റ, ആപ്പ് പശ്ചാത്തലത്തിൽ പ്രവർത്തിക്കുമ്പോൾ ആക്‌സസ് ചെയ്യുക."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"കണങ്കയ്യിലൂടെ അറിയാനാകുന്ന ശരീരോഷ്‌മാവ് സംബന്ധിച്ച ബോഡി സെൻസർ ഡാറ്റ, ആപ്പ് പശ്ചാത്തലത്തിൽ പ്രവർത്തിക്കുമ്പോൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"കലണ്ടർ ഇവന്റുകളും വിശദാംശങ്ങളും വായിക്കുക"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ഈ ആപ്പിന് നിങ്ങളുടെ ടാബ്‌ലെറ്റിൽ സംഭരിച്ചിരിക്കുന്ന എല്ലാ കലണ്ടർ ഇവന്റുകളും വായിക്കാനും നിങ്ങളുടെ കലണ്ടർ വിവരങ്ങൾ പങ്കിടാനും അല്ലെങ്കിൽ സംരക്ഷിക്കാനും കഴിയും."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ഈ ആപ്പിന് നിങ്ങളുടെ Android TV-യിൽ സംഭരിച്ചിരിക്കുന്ന എല്ലാ കലണ്ടർ ഇവന്റുകളും വായിക്കാനും നിങ്ങളുടെ കലണ്ടർ ഡാറ്റ പങ്കിടാനോ സംരക്ഷിക്കാനോ സാധിക്കുകയും ചെയ്യും."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android ആരംഭിക്കുന്നു…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ടാബ്‌ലെറ്റ് ആരംഭിക്കുന്നു…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"ഉപകരണം ആരംഭിക്കുന്നു…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"സ്റ്റോറേജ്  ഒപ്‌റ്റിമൈസ് ചെയ്യുന്നു."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"സിസ്‌റ്റം അപ്‌ഡേറ്റ് പൂർത്തിയാക്കുന്നു…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> അപ്ഗ്രേഡ് ചെയ്യുന്നു…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> അപ്ലിക്കേഷൻ ഓപ്റ്റിമൈസ് ചെയ്യുന്നു."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> തയ്യാറാക്കുന്നു."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നു."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ബൂട്ട് ചെയ്യൽ പൂർത്തിയാകുന്നു."</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"പൂർണ്ണ സ്‌ക്രീനിൽ കാണുന്നു"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"അവസാനിപ്പിക്കാൻ, മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പ് ചെയ്യുക."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"മനസ്സിലായി"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"മികച്ച കാഴ്‌ചയ്‌ക്കായി റൊട്ടേറ്റ് ചെയ്യുക"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"മികച്ച കാഴ്‌ചയ്‌ക്കായി സ്‌ക്രീൻ വിഭജന മോഡിൽ നിന്ന് പുറത്തുകടക്കുക"</string>
     <string name="done_label" msgid="7283767013231718521">"പൂർത്തിയാക്കി"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ചാക്രികമായി മണിക്കൂറുകൾ ദൃശ്യമാകുന്ന സ്ലൈഡർ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ചാക്രികമായി മിനിറ്റുകൾ ദൃശ്യമാകുന്ന സ്ലൈഡർ"</string>
@@ -1861,6 +1857,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"ഔദ്യോഗികം <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"രണ്ടാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"മൂന്നാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"ക്ലോൺ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ചെയ്യുംമുമ്പ് പിൻ ചോദിക്കൂ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"അൺപിന്നിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടൂ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"അൺപിന്നിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടൂ"</string>
@@ -2315,4 +2312,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"പശ്ചാത്തലത്തിൽ നിന്ന് ഫോർഗ്രൗണ്ട് സേവനങ്ങൾ ആരംഭിക്കാൻ സഹകാരി ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"മൈക്രോഫോൺ ലഭ്യമാണ്"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"മൈക്രോഫോൺ ബ്ലോക്ക് ചെയ്‌തു"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ഡ്യുവൽ സ്ക്രീൻ"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ഡ്യുവൽ സ്ക്രീൻ ഓണാണ്"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"ഉള്ളടക്കം കാണിക്കാൻ <xliff:g id="APP_NAME">%1$s</xliff:g> രണ്ട് ഡിസ്പ്ലേകളും ഉപയോഗിക്കുന്നു"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ഉപകരണത്തിന് ചൂട് കൂടുതലാണ്"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"നിങ്ങളുടെ ഫോൺ വളരെയധികം ചൂടാകുന്നതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ഓഫാക്കുക"</string>
 </resources>

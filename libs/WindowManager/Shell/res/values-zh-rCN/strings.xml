@@ -84,16 +84,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"在某个应用外连续点按两次，即可调整它的位置"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"知道了"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"展开即可了解详情。"</string>
-    <!-- no translation found for letterbox_restart_dialog_title (8543049527871033505) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_description (6096946078246557848) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_cancel (1342209132692537805) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_restart (8529976234412442973) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_checkbox_title (5252918008140768386) -->
-    <skip />
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"重启以改进外观？"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"您可以重启应用，使其在屏幕上的显示效果更好，但您可能会丢失进度或任何未保存的更改"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"取消"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"重启"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"不再显示"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"最大化"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"最小化"</string>
     <string name="close_button_text" msgid="2913281996024033299">"关闭"</string>

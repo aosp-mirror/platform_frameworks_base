@@ -133,6 +133,10 @@ public final class ApplicationExitInfo implements Parcelable {
      * Application process was killed because of the user request, for example,
      * user clicked the "Force stop" button of the application in the Settings,
      * or removed the application away from Recents.
+     * <p>
+     * Prior to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, one of the uses of this
+     * reason was to indicate that an app was killed due to it being updated or any of its component
+     * states have changed without {@link android.content.pm.PackageManager#DONT_KILL_APP}
      */
     public static final int REASON_USER_REQUESTED = 10;
 
@@ -160,6 +164,23 @@ public final class ApplicationExitInfo implements Parcelable {
      * sync binder transactions while being frozen.
      */
     public static final int REASON_FREEZER = 14;
+
+    /**
+     * Application process was killed because the app was disabled, or any of its
+     * component states have changed without {@link android.content.pm.PackageManager#DONT_KILL_APP}
+     * <p>
+     * Prior to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * {@link #REASON_USER_REQUESTED} was used to indicate that an app was updated.
+     */
+    public static final int REASON_PACKAGE_STATE_CHANGE = 15;
+
+    /**
+     * Application process was killed because it was updated.
+     * <p>
+     * Prior to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * {@link #REASON_USER_REQUESTED} was used to indicate that an app was updated.
+     */
+    public static final int REASON_PACKAGE_UPDATED = 16;
 
     /**
      * Application process kills subreason is unknown.
@@ -403,6 +424,11 @@ public final class ApplicationExitInfo implements Parcelable {
      * {@link #REASON_USER_REQUESTED}.
      *
      * For internal use only.
+     *
+     * @deprecated starting {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * an app being killed due to a package update will have the reason
+     * {@link #REASON_PACKAGE_UPDATED}
+     *
      * @hide
      */
     public static final int SUBREASON_PACKAGE_UPDATE = 25;
@@ -566,6 +592,8 @@ public final class ApplicationExitInfo implements Parcelable {
         REASON_DEPENDENCY_DIED,
         REASON_OTHER,
         REASON_FREEZER,
+        REASON_PACKAGE_STATE_CHANGE,
+        REASON_PACKAGE_UPDATED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -1246,6 +1274,10 @@ public final class ApplicationExitInfo implements Parcelable {
                 return "OTHER KILLS BY SYSTEM";
             case REASON_FREEZER:
                 return "FREEZER";
+            case REASON_PACKAGE_STATE_CHANGE:
+                return "STATE CHANGE";
+            case REASON_PACKAGE_UPDATED:
+                return "PACKAGE UPDATED";
             default:
                 return "UNKNOWN";
         }
