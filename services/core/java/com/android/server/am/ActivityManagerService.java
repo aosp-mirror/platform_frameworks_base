@@ -239,6 +239,7 @@ import android.content.ContentCaptureOptions;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Context.BindServiceFlags;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -13254,7 +13255,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public int bindService(IApplicationThread caller, IBinder token, Intent service,
-            String resolvedType, IServiceConnection connection, int flags,
+            String resolvedType, IServiceConnection connection, long flags,
             String callingPackage, int userId) throws TransactionTooLargeException {
         return bindServiceInstance(caller, token, service, resolvedType, connection, flags,
                 null, callingPackage, userId);
@@ -13265,14 +13266,14 @@ public class ActivityManagerService extends IActivityManager.Stub
      * If the instanceName field is not supplied, binding to the service occurs as usual.
      */
     public int bindServiceInstance(IApplicationThread caller, IBinder token, Intent service,
-            String resolvedType, IServiceConnection connection, int flags, String instanceName,
+            String resolvedType, IServiceConnection connection, long flags, String instanceName,
             String callingPackage, int userId) throws TransactionTooLargeException {
         return bindServiceInstance(caller, token, service, resolvedType, connection, flags,
                 instanceName, false, INVALID_UID, null, null, callingPackage, userId);
     }
 
     private int bindServiceInstance(IApplicationThread caller, IBinder token, Intent service,
-            String resolvedType, IServiceConnection connection, int flags, String instanceName,
+            String resolvedType, IServiceConnection connection, long flags, String instanceName,
             boolean isSdkSandboxService, int sdkSandboxClientAppUid,
             String sdkSandboxClientAppPackage,
             IApplicationThread sdkSandboxClientApplicationThread,
@@ -17165,6 +17166,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int clientAppUid, IBinder clientApplicationThread, String clientAppPackage,
                 String processName, int flags)
                 throws RemoteException {
+            return bindSdkSandboxServiceInternal(service, conn, clientAppUid,
+                    clientApplicationThread, clientAppPackage, processName,
+                    Integer.toUnsignedLong(flags));
+        }
+
+        @Override
+        public boolean bindSdkSandboxService(Intent service, ServiceConnection conn,
+                int clientAppUid, IBinder clientApplicationThread, String clientAppPackage,
+                String processName, BindServiceFlags flags) throws RemoteException {
+            return bindSdkSandboxServiceInternal(service, conn, clientAppUid,
+                    clientApplicationThread, clientAppPackage, processName, flags.getValue());
+        }
+
+        private boolean bindSdkSandboxServiceInternal(Intent service, ServiceConnection conn,
+                int clientAppUid, IBinder clientApplicationThread, String clientAppPackage,
+                String processName, long flags)
+                throws RemoteException {
             if (service == null) {
                 throw new IllegalArgumentException("intent is null");
             }
@@ -17206,11 +17224,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     clientApplicationThreadVerified = rec.getThread();
                 }
             }
-            final IServiceConnection sd = mContext.getServiceDispatcher(conn, handler, flags);
+            final IServiceConnection sd = mContext.getServiceDispatcher(conn, handler,
+                    flags);
             service.prepareToLeaveProcess(mContext);
             return ActivityManagerService.this.bindServiceInstance(
                     mContext.getIApplicationThread(), mContext.getActivityToken(), service,
-                    service.resolveTypeIfNeeded(mContext.getContentResolver()), sd, flags,
+                    service.resolveTypeIfNeeded(mContext.getContentResolver()), sd,
+                    flags,
                     processName, /*isSdkSandboxService*/ true, clientAppUid, clientAppPackage,
                     clientApplicationThreadVerified, mContext.getOpPackageName(),
                     UserHandle.getUserId(clientAppUid)) != 0;

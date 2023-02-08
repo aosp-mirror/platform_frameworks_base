@@ -172,10 +172,10 @@ interface IActivityManager {
     // Currently keeping old bindService because it is on the greylist
     @UnsupportedAppUsage
     int bindService(in IApplicationThread caller, in IBinder token, in Intent service,
-            in String resolvedType, in IServiceConnection connection, int flags,
+            in String resolvedType, in IServiceConnection connection, long flags,
             in String callingPackage, int userId);
     int bindServiceInstance(in IApplicationThread caller, in IBinder token, in Intent service,
-            in String resolvedType, in IServiceConnection connection, int flags,
+            in String resolvedType, in IServiceConnection connection, long flags,
             in String instanceName, in String callingPackage, int userId);
     void updateServiceGroup(in IServiceConnection connection, int group, int importance);
     @UnsupportedAppUsage

@@ -24,6 +24,7 @@ import android.annotation.ColorRes;
 import android.annotation.DisplayContext;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionMethod;
@@ -267,7 +268,10 @@ public abstract class Context {
      */
     public static final int MODE_NO_LOCALIZED_COLLATORS = 0x0010;
 
-    /** @hide */
+    /**
+     * Flags used for bindService(int) APIs. Note, we now have long BIND_* flags.
+     * @hide
+     */
     @IntDef(flag = true, prefix = { "BIND_" }, value = {
             BIND_AUTO_CREATE,
             BIND_DEBUG_UNBIND,
@@ -280,10 +284,74 @@ public abstract class Context {
             BIND_NOT_PERCEPTIBLE,
             BIND_ALLOW_ACTIVITY_STARTS,
             BIND_INCLUDE_CAPABILITIES,
-            BIND_SHARED_ISOLATED_PROCESS
+            BIND_SHARED_ISOLATED_PROCESS,
+            BIND_EXTERNAL_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface BindServiceFlags {}
+    public @interface BindServiceFlagsBits {}
+
+    /**
+     * Long version of BIND_* flags used for bindService(BindServiceFlags) APIs.
+     * @hide
+     */
+    @LongDef(flag = true, prefix = { "BIND_" }, value = {
+            BIND_AUTO_CREATE,
+            BIND_DEBUG_UNBIND,
+            BIND_NOT_FOREGROUND,
+            BIND_ABOVE_CLIENT,
+            BIND_ALLOW_OOM_MANAGEMENT,
+            BIND_WAIVE_PRIORITY,
+            BIND_IMPORTANT,
+            BIND_ADJUST_WITH_ACTIVITY,
+            BIND_NOT_PERCEPTIBLE,
+            BIND_ALLOW_ACTIVITY_STARTS,
+            BIND_INCLUDE_CAPABILITIES,
+            BIND_SHARED_ISOLATED_PROCESS,
+            // Intentionally not included, because it'd cause sign-extension.
+            // This would allow Android Studio to show a warning, if someone tries to use
+            // BIND_EXTERNAL_SERVICE BindServiceFlags.
+            BIND_EXTERNAL_SERVICE_LONG
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BindServiceFlagsLongBits {}
+
+    /**
+     * Specific flags used for bindService() call, which encapsulates a 64 bits long integer.
+     * Call {@link BindServiceFlags#of(long)} to obtain an
+     * object of {@code BindServiceFlags}.
+     */
+    public final static class BindServiceFlags {
+        private final long mValue;
+
+        private BindServiceFlags(@BindServiceFlagsLongBits long value) {
+            mValue = value;
+        }
+
+        /**
+         * @return Return flags in 64 bits long integer.
+         */
+        public long getValue() {
+            return mValue;
+        }
+
+        /**
+         * Build {@link BindServiceFlags} from BIND_* FLAGS.
+         *
+         * Note, {@link #BIND_EXTERNAL_SERVICE} is not supported in this method, because
+         * it has the highest integer bit set and cause wrong flags to be set. Use
+         * {@link #BIND_EXTERNAL_SERVICE_LONG} instead.
+         */
+        @NonNull
+        public static BindServiceFlags of(@BindServiceFlagsLongBits long value) {
+            if ((value & Integer.toUnsignedLong(BIND_EXTERNAL_SERVICE)) != 0){
+                throw new IllegalArgumentException(
+                        "BIND_EXTERNAL_SERVICE is deprecated. Use BIND_EXTERNAL_SERVICE_LONG"
+                                + " instead");
+            }
+
+            return new BindServiceFlags(value);
+        }
+    }
 
     /**
      * Flag for {@link #bindService}: automatically create the service as long
@@ -595,8 +663,19 @@ public abstract class Context {
      * The purpose of this flag is to allow applications to provide services that are attributed
      * to the app using the service, rather than the application providing the service.
      * </p>
+     *
+     * <em>This flag is NOT compatible with {@link BindServiceFlags}. If you need to use
+     * {@link BindServiceFlags}, you must use {@link #BIND_EXTERNAL_SERVICE_LONG} instead.
      */
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
+
+
+    /**
+     * Works in the same way as {@link #BIND_EXTERNAL_SERVICE}, but it's defined as a (@code long)
+     * value that is compatible to {@link BindServiceFlags}.
+     */
+    public static final long BIND_EXTERNAL_SERVICE_LONG = 0x8000_0000_0000_0000L;
+
 
     /**
      * These bind flags reduce the strength of the binding such that we shouldn't
@@ -3648,6 +3727,9 @@ public abstract class Context {
      * {@link #registerReceiver}, since the lifetime of this BroadcastReceiver
      * is tied to another object (the one that registered it).</p>
      *
+     * <p>This method only accepts a int type flag, to pass in a long type flag, call
+     * {@link #bindService(Intent, ServiceConnection, BindServiceFlags)} instead.</p>
+     *
      * @param service Identifies the service to connect to.  The Intent must
      *      specify an explicit component name.
      * @param conn Receives information as the service is started and stopped.
@@ -3681,13 +3763,25 @@ public abstract class Context {
      * @see #unbindService
      * @see #startService
      */
-    public abstract boolean bindService(@RequiresPermission Intent service,
-            @NonNull ServiceConnection conn, @BindServiceFlags int flags);
+    public abstract boolean bindService(@RequiresPermission @NonNull Intent service,
+            @NonNull ServiceConnection conn, int flags);
+
+    /**
+     * See {@link #bindService(Intent, ServiceConnection, int)}
+     * Call {@link BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     */
+    public boolean bindService(@RequiresPermission @NonNull Intent service,
+            @NonNull ServiceConnection conn, @NonNull BindServiceFlags flags) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Same as {@link #bindService(Intent, ServiceConnection, int)
      * bindService(Intent, ServiceConnection, int)} with executor to control ServiceConnection
      * callbacks.
+     *
+     * <p>This method only accepts a 32 bits flag, to pass in a 64 bits flag, call
+     * {@link #bindService(Intent, BindServiceFlags, Executor, ServiceConnection)} instead.</p>
      *
      * @param executor Callbacks on ServiceConnection will be called on executor. Must use same
      *      instance for the same instance of ServiceConnection.
@@ -3697,7 +3791,17 @@ public abstract class Context {
      *      bindService(Intent, ServiceConnection, int)}.
      */
     public boolean bindService(@RequiresPermission @NonNull Intent service,
-            @BindServiceFlags int flags, @NonNull @CallbackExecutor Executor executor,
+            @BindServiceFlagsBits int flags, @NonNull @CallbackExecutor Executor executor,
+            @NonNull ServiceConnection conn) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * See {@link #bindService(Intent, int, Executor, ServiceConnection)}
+     * Call {@link BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     */
+    public boolean bindService(@RequiresPermission @NonNull Intent service,
+            @NonNull BindServiceFlags flags, @NonNull @CallbackExecutor Executor executor,
             @NonNull ServiceConnection conn) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -3735,7 +3839,17 @@ public abstract class Context {
      * @see android.R.attr#isolatedProcess
      */
     public boolean bindIsolatedService(@RequiresPermission @NonNull Intent service,
-            @BindServiceFlags int flags, @NonNull String instanceName,
+            int flags, @NonNull String instanceName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull ServiceConnection conn) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * See {@link #bindIsolatedService(Intent, int, String, Executor,ServiceConnection)}
+     * Call {@link BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     */
+    public boolean bindIsolatedService(@RequiresPermission @NonNull Intent service,
+            @NonNull BindServiceFlags flags, @NonNull String instanceName,
             @NonNull @CallbackExecutor Executor executor, @NonNull ServiceConnection conn) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -3786,9 +3900,24 @@ public abstract class Context {
     }
 
     /**
+     * See {@link #bindServiceAsUser(Intent, ServiceConnection, int, UserHandle)}
+     * Call {@link BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     */
+    @SuppressWarnings("unused")
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES
+    }, conditional = true)
+    public boolean bindServiceAsUser(
+            @NonNull @RequiresPermission Intent service, @NonNull ServiceConnection conn,
+            @NonNull BindServiceFlags flags, @NonNull UserHandle user) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Same as {@link #bindServiceAsUser(Intent, ServiceConnection, int, UserHandle)}, but with an
      * explicit non-null Handler to run the ServiceConnection callbacks on.
-     *
      * @hide
      */
     @RequiresPermission(anyOf = {
@@ -3799,6 +3928,22 @@ public abstract class Context {
     @UnsupportedAppUsage(trackingBug = 136728678)
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * See {@link #bindServiceAsUser(Intent, ServiceConnection, int, Handler, UserHandle)}
+     * Call {@link BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES
+    }, conditional = true)
+    @UnsupportedAppUsage(trackingBug = 136728678)
+    public boolean bindServiceAsUser(@NonNull Intent service, @NonNull ServiceConnection conn,
+            @NonNull BindServiceFlags flags, @NonNull Handler handler, @NonNull UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -7566,7 +7711,7 @@ public abstract class Context {
      */
     @Nullable
     public IServiceConnection getServiceDispatcher(ServiceConnection conn, Handler handler,
-            int flags) {
+            long flags) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
