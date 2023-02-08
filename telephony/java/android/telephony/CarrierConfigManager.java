@@ -10694,4 +10694,38 @@ public class CarrierConfigManager {
         }
         trm.removeCarrierConfigChangedListener(listener);
     }
+
+    /**
+     * Get subset of specified carrier configuration if available or empty bundle, without throwing
+     * {@link RuntimeException} to caller.
+     *
+     * <p>This is a system internally used only utility to reduce the repetitive logic.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}, or the calling app
+     * has carrier privileges on the specified subscription (see
+     * {@link TelephonyManager#hasCarrierPrivileges()}).
+     *
+     * @param context Context used to get the CarrierConfigManager service.
+     * @param subId The subscription ID to get the config from.
+     * @param keys The config keys the client is interested in.
+     * @return Config bundle with key/value for the specified keys or empty bundle when failed
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            "carrier privileges",
+    })
+    @NonNull
+    public static PersistableBundle getCarrierConfigSubset(
+            @NonNull Context context, int subId, @NonNull String... keys) {
+        PersistableBundle configs = null;
+        CarrierConfigManager ccm = context.getSystemService(CarrierConfigManager.class);
+        try {
+            configs = ccm.getConfigForSubId(subId, keys);
+        } catch (RuntimeException exception) {
+            Rlog.w(TAG, "CarrierConfigLoader is not available.");
+        }
+        return configs != null ? configs : new PersistableBundle();
+    }
 }
