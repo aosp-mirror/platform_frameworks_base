@@ -104,7 +104,9 @@ class CredentialSelectorViewModel(
                     entry.providerId, entry.entryKey, entry.entrySubkey,
                     resultCode, resultData,
                 )
-                uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+                if (entry.shouldTerminateUiUponSuccessfulProviderResult) {
+                    uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+                }
             } else {
                 Log.w(Constants.LOG_TAG,
                     "Illegal state: received a provider result but found no matching entry.")

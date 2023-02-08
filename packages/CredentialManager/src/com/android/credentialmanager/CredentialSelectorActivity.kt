@@ -27,6 +27,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,17 +44,6 @@ class CredentialSelectorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(Constants.LOG_TAG, "Creating new CredentialSelectorActivity")
-        init(intent)
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
-        Log.d(Constants.LOG_TAG, "Existing activity received new intent")
-        init(intent)
-    }
-
-    fun init(intent: Intent) {
         try {
             val userConfigRepo = UserConfigRepo(this)
             val credManRepo = CredentialManagerRepo(this, intent, userConfigRepo)
@@ -65,6 +55,20 @@ class CredentialSelectorActivity : ComponentActivity() {
                     )
                 }
             }
+        } catch (e: Exception) {
+            onInitializationError(e, intent)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        Log.d(Constants.LOG_TAG, "Existing activity received new intent")
+        try {
+            val userConfigRepo = UserConfigRepo(this)
+            val credManRepo = CredentialManagerRepo(this, intent, userConfigRepo)
+            val viewModel: CredentialSelectorViewModel by viewModels()
+            viewModel.onNewCredentialManagerRepo(credManRepo)
         } catch (e: Exception) {
             onInitializationError(e, intent)
         }
