@@ -139,11 +139,12 @@ public class TransitionUtil {
         // changes should be ordered top-to-bottom in z
         final int mode = change.getMode();
 
-        t.reparent(leash, info.getRootLeash());
+        final int rootIdx = TransitionUtil.rootIndexFor(change, info);
+        t.reparent(leash, info.getRoot(rootIdx).getLeash());
         final Rect absBounds =
                 (mode == TRANSIT_OPEN) ? change.getEndAbsBounds() : change.getStartAbsBounds();
-        t.setPosition(leash, absBounds.left - info.getRootOffset().x,
-                absBounds.top - info.getRootOffset().y);
+        t.setPosition(leash, absBounds.left - info.getRoot(rootIdx).getOffset().x,
+                absBounds.top - info.getRoot(rootIdx).getOffset().y);
 
         // Put all the OPEN/SHOW on top
         if (TransitionUtil.isOpeningType(mode)) {
@@ -179,12 +180,13 @@ public class TransitionUtil {
             // making leashes means we have to handle them specially.
             return change.getLeash();
         }
+        final int rootIdx = TransitionUtil.rootIndexFor(change, info);
         SurfaceControl leashSurface = new SurfaceControl.Builder()
                 .setName(change.getLeash().toString() + "_transition-leash")
                 .setContainerLayer()
                 // Initial the surface visible to respect the visibility of the original surface.
                 .setHidden(false)
-                .setParent(info.getRootLeash())
+                .setParent(info.getRoot(rootIdx).getLeash())
                 .build();
         // Copied Transitions setup code (which expects bottom-to-top order, so we swap here)
         setupLeash(leashSurface, change, info.getChanges().size() - order, info, t);
@@ -260,5 +262,19 @@ public class TransitionUtil {
                 (change.getFlags() & TransitionInfo.FLAG_WILL_IME_SHOWN) != 0);
         target.setRotationChange(change.getEndRotation() - change.getStartRotation());
         return target;
+    }
+
+    /**
+     * Finds the "correct" root idx for a change. The change's end display is prioritized, then
+     * the start display. If there is no display, it will fallback on the 0th root in the
+     * transition. There MUST be at-least 1 root in the transition (ie. it's not a no-op).
+     */
+    public static int rootIndexFor(@NonNull TransitionInfo.Change change,
+            @NonNull TransitionInfo info) {
+        int rootIdx = info.findRootIndex(change.getEndDisplayId());
+        if (rootIdx >= 0) return rootIdx;
+        rootIdx = info.findRootIndex(change.getStartDisplayId());
+        if (rootIdx >= 0) return rootIdx;
+        return 0;
     }
 }

@@ -321,7 +321,9 @@ public class RemoteTransitionCompat {
                     } else {
                         // We are receiving new opening tasks, so convert to onTasksAppeared.
                         targets[i] = TransitionUtil.newTarget(change, layer, info, t, mLeashMap);
-                        t.reparent(targets[i].leash, mInfo.getRootLeash());
+                        // reparent into the original `mInfo` since that's where we are animating.
+                        final int rootIdx = TransitionUtil.rootIndexFor(change, mInfo);
+                        t.reparent(targets[i].leash, mInfo.getRoot(rootIdx).getLeash());
                         t.setLayer(targets[i].leash, layer);
                         mOpeningTasks.add(new TaskState(change, targets[i].leash));
                     }

@@ -134,7 +134,7 @@ public class RemoteTransitionTest extends SysuiTestCase {
 
         TransitionInfoBuilder(@WindowManager.TransitionType int type) {
             mInfo = new TransitionInfo(type, 0 /* flags */);
-            mInfo.setRootLeash(createMockSurface(true /* valid */), 0, 0);
+            mInfo.addRootLeash(0, createMockSurface(true /* valid */), 0, 0);
         }
 
         TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
@@ -144,6 +144,7 @@ public class RemoteTransitionTest extends SysuiTestCase {
             change.setMode(mode);
             change.setFlags(flags);
             change.setTaskInfo(taskInfo);
+            change.setDisplayId(0, 0);
             mInfo.addChange(change);
             return this;
         }

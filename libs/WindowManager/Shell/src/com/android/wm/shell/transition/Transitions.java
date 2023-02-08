@@ -75,6 +75,7 @@ import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -415,8 +416,8 @@ public class Transitions implements RemoteCallable<Transitions> {
     private static void setupAnimHierarchy(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
         boolean isOpening = isOpeningType(info.getType());
-        if (info.getRootLeash().isValid()) {
-            t.show(info.getRootLeash());
+        for (int i = 0; i < info.getRootCount(); ++i) {
+            t.show(info.getRoot(i).getLeash());
         }
         final int numChanges = info.getChanges().size();
         // Put animating stuff above this line and put static stuff below it.
@@ -434,10 +435,12 @@ public class Transitions implements RemoteCallable<Transitions> {
 
             boolean hasParent = change.getParent() != null;
 
+            final int rootIdx = TransitionUtil.rootIndexFor(change, info);
             if (!hasParent) {
-                t.reparent(leash, info.getRootLeash());
-                t.setPosition(leash, change.getStartAbsBounds().left - info.getRootOffset().x,
-                        change.getStartAbsBounds().top - info.getRootOffset().y);
+                t.reparent(leash, info.getRoot(rootIdx).getLeash());
+                t.setPosition(leash,
+                        change.getStartAbsBounds().left - info.getRoot(rootIdx).getOffset().x,
+                        change.getStartAbsBounds().top - info.getRoot(rootIdx).getOffset().y);
             }
             final int layer;
             // Put all the OPEN/SHOW on top
@@ -532,12 +535,6 @@ public class Transitions implements RemoteCallable<Transitions> {
 
         if (info.getType() == TRANSIT_SLEEP) {
             if (activeIdx > 0) {
-                if (!info.getRootLeash().isValid()) {
-                    // Shell has some debug settings which makes calling binders with invalid
-                    // surfaces crash, so replace it with a "real" one.
-                    info.setRootLeash(new SurfaceControl.Builder().setName("Invalid")
-                            .setContainerLayer().build(), 0, 0);
-                }
                 // Sleep starts a process of forcing all prior transitions to finish immediately
                 finishForSleep(null /* forceFinish */);
                 return;
@@ -546,10 +543,10 @@ public class Transitions implements RemoteCallable<Transitions> {
 
         // Allow to notify keyguard un-occluding state to KeyguardService, which can happen while
         // screen-off, so there might no visibility change involved.
-        if (!info.getRootLeash().isValid() && info.getType() != TRANSIT_KEYGUARD_UNOCCLUDE) {
-            // Invalid root-leash implies that the transition is empty/no-op, so just do
+        if (info.getRootCount() == 0 && info.getType() != TRANSIT_KEYGUARD_UNOCCLUDE) {
+            // No root-leashes implies that the transition is empty/no-op, so just do
             // housekeeping and return.
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Invalid root leash (%s): %s",
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "No transition roots (%s): %s",
                     transitionToken, info);
             onAbort(active);
             return;
