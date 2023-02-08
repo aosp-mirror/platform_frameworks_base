@@ -68,6 +68,7 @@ import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
+import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_WEAR_TRIPLE_PRESS_GESTURE;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
@@ -190,6 +191,7 @@ import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.AssistUtils;
@@ -1400,7 +1402,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (DEBUG_INPUT) {
                     Slog.d(TAG, "Executing stem primary triple press action behavior.");
                 }
-                toggleTalkBack();
+
+                if (Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED,
+                        /* def= */ 0, UserHandle.USER_CURRENT) == 1) {
+                    /** Toggle talkback begin */
+                    ComponentName componentName = getTalkbackComponent();
+                    if (componentName != null && toggleTalkBack(componentName)) {
+                        /** log stem triple press telemetry if it's a talkback enabled event */
+                        logStemTriplePressAccessibilityTelemetry(componentName);
+                    }
+                    /** Toggle talkback end */
+                }
                 break;
         }
     }
@@ -1419,17 +1432,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void toggleTalkBack() {
-        final ComponentName componentName = getTalkbackComponent();
-        if (componentName == null) {
-            return;
-        }
-
+    /**
+     * A function that toggles talkback service
+     *
+     * @return {@code true} if talkback is enabled, {@code false} if talkback is disabled
+     */
+    private boolean toggleTalkBack(ComponentName componentName) {
         final Set<ComponentName> enabledServices =
                 AccessibilityUtils.getEnabledServicesFromSettings(mContext, mCurrentUserId);
 
+        boolean isTalkbackAlreadyEnabled = enabledServices.contains(componentName);
         AccessibilityUtils.setAccessibilityServiceState(mContext, componentName,
-                !enabledServices.contains(componentName));
+                !isTalkbackAlreadyEnabled);
+        /** if isTalkbackAlreadyEnabled is true, then it's a disabled event so return false
+         * and if isTalkbackAlreadyEnabled is false, return true as it's an enabled event */
+        return !isTalkbackAlreadyEnabled;
+    }
+
+    /**
+     * A function that logs stem triple press accessibility telemetry
+     * If the user setup (Oobe) is not completed, set the
+     * WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE
+     * setting which will be later logged via Settings Snapshot
+     * else, log ACCESSIBILITY_SHORTCUT_REPORTED atom
+     */
+    private void logStemTriplePressAccessibilityTelemetry(ComponentName componentName) {
+        if (!AccessibilityUtils.isUserSetupCompleted(mContext)) {
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.System.WEAR_ACCESSIBILITY_GESTURE_ENABLED_DURING_OOBE, 1);
+        } else {
+            AccessibilityStatsLogUtils.logAccessibilityShortcutActivated(mContext, componentName,
+                    ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_WEAR_TRIPLE_PRESS_GESTURE,
+                    /* serviceEnabled= */ true);
+        }
     }
 
     private ComponentName getTalkbackComponent() {
