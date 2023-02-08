@@ -20,6 +20,7 @@ import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_CONFLICTING_AD
 import static android.app.admin.PolicyUpdateResult.RESULT_SUCCESS;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_TARGET_USER_ID;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
+import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -32,6 +33,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.UserProperties;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -149,6 +151,8 @@ final class DevicePolicyEngine {
             updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
 
             write();
+
+            applyToInheritableProfiles(policyDefinition, enforcingAdmin, value, userId);
         }
     }
 
@@ -200,7 +204,49 @@ final class DevicePolicyEngine {
             updateDeviceAdminServiceOnPolicyRemoveLocked(enforcingAdmin);
 
             write();
+
+            applyToInheritableProfiles(policyDefinition, enforcingAdmin, /*value */ null, userId);
         }
+    }
+
+    /**
+     * If any of child user has property {@link UserProperties#INHERIT_DEVICE_POLICY_FROM_PARENT}
+     * set then propagate the policy to it if value is not null
+     * else remove the policy from child.
+     */
+    private <V> void applyToInheritableProfiles(PolicyDefinition<V> policyDefinition,
+            EnforcingAdmin enforcingAdmin, V value, int userId) {
+        if (policyDefinition.isInheritable()) {
+            Binder.withCleanCallingIdentity(() -> {
+                List<UserInfo> userInfos = mUserManager.getProfiles(userId);
+                for (UserInfo childUserInfo : userInfos) {
+                    int childUserId = childUserInfo.getUserHandle().getIdentifier();
+                    if (isProfileOfUser(childUserId, userId)
+                            && isInheritDevicePolicyFromParent(childUserInfo)) {
+                        if (value != null) {
+                            setLocalPolicy(policyDefinition, enforcingAdmin, value, childUserId);
+                        } else {
+                            removeLocalPolicy(policyDefinition, enforcingAdmin, childUserId);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Checks if given parentUserId is direct parent of childUserId.
+     */
+    private boolean isProfileOfUser(int childUserId, int parentUserId) {
+        UserInfo parentInfo = mUserManager.getProfileParent(childUserId);
+        return childUserId != parentUserId && parentInfo != null
+                && parentInfo.getUserHandle().getIdentifier() == parentUserId;
+    }
+
+    private boolean isInheritDevicePolicyFromParent(UserInfo userInfo) {
+        UserProperties userProperties = mUserManager.getUserProperties(userInfo.getUserHandle());
+        return userProperties != null && mUserManager.getUserProperties(userInfo.getUserHandle())
+                .getInheritDevicePolicy() == INHERIT_DEVICE_POLICY_FROM_PARENT;
     }
 
     /**
@@ -685,6 +731,47 @@ final class DevicePolicyEngine {
                 mDeviceAdminServiceController.startServiceForAdmin(
                         admin.getPackageName(), userId, actionForLog);
             }
+        }
+    }
+
+    void handleUserCreated(UserInfo user) {
+        enforcePoliciesOnInheritableProfilesIfApplicable(user);
+    }
+
+    private void enforcePoliciesOnInheritableProfilesIfApplicable(UserInfo user) {
+        if (!user.isProfile()) {
+            return;
+        }
+
+        Binder.withCleanCallingIdentity(() -> {
+            UserProperties userProperties = mUserManager.getUserProperties(user.getUserHandle());
+            if (userProperties == null || userProperties.getInheritDevicePolicy()
+                    != INHERIT_DEVICE_POLICY_FROM_PARENT) {
+                return;
+            }
+
+            int userId = user.id;
+            // Apply local policies present on parent to newly created child profile.
+            UserInfo parentInfo = mUserManager.getProfileParent(userId);
+            if (parentInfo == null || parentInfo.getUserHandle().getIdentifier() == userId) return;
+
+            for (Map.Entry<PolicyKey, PolicyState<?>> entry : mLocalPolicies.get(
+                    parentInfo.getUserHandle().getIdentifier()).entrySet()) {
+                enforcePolicyOnUser(userId, entry.getValue());
+            }
+        });
+    }
+
+    private <V> void enforcePolicyOnUser(int userId, PolicyState<V> policyState) {
+        if (!policyState.getPolicyDefinition().isInheritable()) {
+            return;
+        }
+        for (Map.Entry<EnforcingAdmin, V> enforcingAdminEntry :
+                policyState.getPoliciesSetByAdmins().entrySet()) {
+            setLocalPolicy(policyState.getPolicyDefinition(),
+                    enforcingAdminEntry.getKey(),
+                    enforcingAdminEntry.getValue(),
+                    userId);
         }
     }
 

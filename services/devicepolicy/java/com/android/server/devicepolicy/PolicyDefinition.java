@@ -44,6 +44,9 @@ final class PolicyDefinition<V> {
     // Only use this flag if a policy can not be applied globally.
     private static final int POLICY_FLAG_LOCAL_ONLY_POLICY = 1 << 1;
 
+    // Only use this flag if a policy is inheritable by child profile from parent.
+    private static final int POLICY_FLAG_INHERITABLE = 1 << 2;
+
     private static final MostRestrictive<Boolean> FALSE_MORE_RESTRICTIVE = new MostRestrictive<>(
             List.of(false, true));
 
@@ -208,6 +211,13 @@ final class PolicyDefinition<V> {
      */
     boolean isLocalOnlyPolicy() {
         return (mPolicyFlags & POLICY_FLAG_LOCAL_ONLY_POLICY) != 0;
+    }
+
+    /**
+     * Returns {@code true} if the policy is inheritable by child profiles.
+     */
+    boolean isInheritable() {
+        return (mPolicyFlags & POLICY_FLAG_INHERITABLE) != 0;
     }
 
     @Nullable

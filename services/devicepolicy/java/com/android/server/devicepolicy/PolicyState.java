@@ -216,4 +216,8 @@ final class PolicyState<V> {
         }
         return new PolicyState<V>(policyDefinition, policiesSetByAdmins, currentResolvedPolicy);
     }
+
+    PolicyDefinition<V> getPolicyDefinition() {
+        return mPolicyDefinition;
+    }
 }

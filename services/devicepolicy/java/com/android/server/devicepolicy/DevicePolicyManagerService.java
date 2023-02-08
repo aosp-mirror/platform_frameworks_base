@@ -11339,6 +11339,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         final int userId = user.id;
+
+        if (isCoexistenceFlagEnabled()) {
+            mDevicePolicyEngine.handleUserCreated(user);
+        }
+
         if (token != null) {
             synchronized (getLockObject()) {
                 if (mPendingUserCreatedCallbackTokens.contains(token)) {
