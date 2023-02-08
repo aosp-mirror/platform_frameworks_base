@@ -96,8 +96,7 @@ class CarrierMergedConnectionRepository(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectionModel())
 
-    // Carrier merged is never roaming.
-    override val cdmaRoaming: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()
+    override val cdmaRoaming: StateFlow<Boolean> = MutableStateFlow(ROAMING).asStateFlow()
 
     // TODO(b/238425913): Fetch the carrier merged network name.
     override val networkName: StateFlow<NetworkNameModel> =
@@ -129,15 +128,12 @@ class CarrierMergedConnectionRepository(
             return MobileConnectionModel(
                 primaryLevel = level,
                 cdmaLevel = level,
-                // A [WifiNetworkModel.CarrierMerged] instance is always connected.
-                // (A [WifiNetworkModel.Inactive] represents a disconnected network.)
-                dataConnectionState = DataConnectionState.Connected,
                 dataActivityDirection = activity,
+                // Here and below: These values are always the same for every carrier-merged
+                // connection.
                 resolvedNetworkType = ResolvedNetworkType.CarrierMergedNetworkType,
-                // Carrier merged is never roaming
-                isRoaming = false,
-
-                // TODO(b/238425913): Verify that these fields never change for carrier merged.
+                dataConnectionState = DataConnectionState.Connected,
+                isRoaming = ROAMING,
                 isEmergencyOnly = false,
                 operatorAlphaShort = null,
                 isInService = true,
@@ -145,6 +141,9 @@ class CarrierMergedConnectionRepository(
                 carrierNetworkChangeActive = false,
             )
         }
+
+        // Carrier merged is never roaming
+        private const val ROAMING = false
     }
 
     @SysUISingleton
