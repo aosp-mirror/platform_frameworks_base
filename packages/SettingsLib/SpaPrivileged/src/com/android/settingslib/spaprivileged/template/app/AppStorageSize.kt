@@ -43,5 +43,5 @@ fun ApplicationInfo.getStorageSize(): State<String> {
 private fun ApplicationInfo.calculateSizeBytes(context: Context): Long {
     val storageStatsManager = context.storageStatsManager
     val stats = storageStatsManager.queryStatsForPackage(storageUuid, packageName, userHandle)
-    return stats.codeBytes + stats.dataBytes + stats.cacheBytes
+    return stats.codeBytes + stats.dataBytes
 }
