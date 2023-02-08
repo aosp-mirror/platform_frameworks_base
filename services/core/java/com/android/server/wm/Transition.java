@@ -92,6 +92,7 @@ import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -231,7 +232,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mToken = new Token(this);
 
         mLogger.mCreateWallTimeMs = System.currentTimeMillis();
-        mLogger.mCreateTimeNs = SystemClock.uptimeNanos();
+        mLogger.mCreateTimeNs = SystemClock.elapsedRealtimeNanos();
         controller.mTransitionTracer.logState(this);
     }
 
@@ -391,6 +392,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mState == STATE_STARTED;
     }
 
+    boolean isPlaying() {
+        return mState == STATE_PLAYING;
+    }
+
+    boolean isFinished() {
+        return mState == STATE_FINISHED;
+    }
+
     @VisibleForTesting
     void startCollecting(long timeoutMs) {
         startCollecting(timeoutMs, TransitionController.SYNC_METHOD);
@@ -405,7 +414,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG, method);
 
         mLogger.mSyncId = mSyncId;
-        mLogger.mCollectTimeNs = SystemClock.uptimeNanos();
+        mLogger.mCollectTimeNs = SystemClock.elapsedRealtimeNanos();
         mController.mTransitionTracer.logState(this);
     }
 
@@ -425,7 +434,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 mSyncId);
         applyReady();
 
-        mLogger.mStartTimeNs = SystemClock.uptimeNanos();
+        mLogger.mStartTimeNs = SystemClock.elapsedRealtimeNanos();
         mController.mTransitionTracer.logState(this);
 
         mController.updateAnimatingState(mTmpTransaction);
@@ -635,7 +644,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                 "Set transition ready=%b %d", ready, mSyncId);
         mSyncEngine.setReady(mSyncId, ready);
-        if (ready) mLogger.mReadyTimeNs = SystemClock.uptimeNanos();
+        if (ready) mLogger.mReadyTimeNs = SystemClock.elapsedRealtimeNanos();
     }
 
     /**
@@ -787,7 +796,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                     System.identityHashCode(this));
         }
-        mLogger.mFinishTimeNs = SystemClock.uptimeNanos();
+        mLogger.mFinishTimeNs = SystemClock.elapsedRealtimeNanos();
         mController.mLoggerHandler.post(mLogger::logOnFinish);
         // Close the transactions now. They were originally copied to Shell in case we needed to
         // apply them due to a remote failure. Since we don't need to apply them anymore, free them
@@ -1123,8 +1132,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             try {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Calling onTransitionReady: %s", info);
-                mLogger.mSendTimeNs = SystemClock.uptimeNanos();
+                mLogger.mSendTimeNs = SystemClock.elapsedRealtimeNanos();
                 mLogger.mInfo = info;
+                mController.mTransitionTracer.logSentTransition(
+                        this, mTargets, mLogger.mCreateTimeNs, mLogger.mSendTimeNs, info);
                 mController.getTransitionPlayer().onTransitionReady(
                         mToken, info, transaction, mFinishTransaction);
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
@@ -1210,6 +1221,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
     }
 
+    // TODO(b/188595497): Remove after migrating to shell.
     /** @see RecentsAnimationController#attachNavigationBarToApp */
     private void handleLegacyRecentsStartBehavior(DisplayContent dc, TransitionInfo info) {
         if ((mFlags & TRANSIT_FLAG_IS_RECENTS) == 0) {
@@ -1290,8 +1302,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // Place the nav bar on top of anything else in the top activity.
             t.setLayer(navSurfaceControl, Integer.MAX_VALUE);
         }
-        if (mController.mStatusBar != null) {
-            mController.mStatusBar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, false);
+        final StatusBarManagerInternal bar = dc.getDisplayPolicy().getStatusBarManagerInternal();
+        if (bar != null) {
+            bar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, false);
         }
     }
 
@@ -1305,12 +1318,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             mRecentsDisplayId = DEFAULT_DISPLAY;
         }
 
-        if (mController.mStatusBar != null) {
-            mController.mStatusBar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, true);
-        }
-
         final DisplayContent dc =
                 mController.mAtm.mRootWindowContainer.getDisplayContent(mRecentsDisplayId);
+        final StatusBarManagerInternal bar = dc.getDisplayPolicy().getStatusBarManagerInternal();
+        if (bar != null) {
+            bar.setNavigationBarLumaSamplingEnabled(mRecentsDisplayId, true);
+        }
         final WindowState navWindow = dc.getDisplayPolicy().getNavigationBar();
         if (navWindow == null) return;
         navWindow.setSurfaceTranslationY(0);

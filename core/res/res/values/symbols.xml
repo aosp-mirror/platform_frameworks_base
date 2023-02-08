@@ -2001,6 +2001,7 @@
   <java-symbol type="integer" name="config_notificationsBatteryLedOn" />
   <java-symbol type="integer" name="config_notificationsBatteryLowARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryMediumARGB" />
+  <java-symbol type="integer" name="config_notificationsBatteryNearlyFullLevel" />
   <java-symbol type="integer" name="config_notificationServiceArchiveSize" />
   <java-symbol type="integer" name="config_previousVibrationsDumpLimit" />
   <java-symbol type="integer" name="config_defaultVibrationAmplitude" />
@@ -2054,8 +2055,6 @@
   <java-symbol type="string" name="aerr_process" />
   <java-symbol type="string" name="aerr_application_repeated" />
   <java-symbol type="string" name="aerr_process_repeated" />
-  <java-symbol type="string" name="android_upgrading_fstrim" />
-  <java-symbol type="string" name="android_upgrading_apk" />
   <java-symbol type="string" name="android_upgrading_complete" />
   <java-symbol type="string" name="android_upgrading_starting_apps" />
   <java-symbol type="string" name="anr_activity_application" />
@@ -2143,6 +2142,7 @@
   <java-symbol type="string" name="usb_power_notification_message" />
   <java-symbol type="string" name="usb_ptp_notification_title" />
   <java-symbol type="string" name="usb_midi_notification_title" />
+  <java-symbol type="string" name="usb_uvc_notification_title" />
   <java-symbol type="string" name="usb_tether_notification_title" />
   <java-symbol type="string" name="usb_supplying_notification_title" />
   <java-symbol type="string" name="usb_unsupported_audio_accessory_title" />

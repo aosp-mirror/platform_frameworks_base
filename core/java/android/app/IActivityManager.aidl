@@ -147,6 +147,7 @@ interface IActivityManager {
     oneway void finishReceiver(in IBinder who, int resultCode, in String resultData, in Bundle map,
             boolean abortBroadcast, int flags);
     void attachApplication(in IApplicationThread app, long startSeq);
+    void finishAttachApplication(long startSeq);
     List<ActivityManager.RunningTaskInfo> getTasks(int maxNum);
     @UnsupportedAppUsage
     void moveTaskToFront(in IApplicationThread caller, in String callingPackage, int task,
@@ -310,7 +311,8 @@ interface IActivityManager {
     int handleIncomingUser(int callingPid, int callingUid, int userId, boolean allowAll,
             boolean requireFull, in String name, in String callerPackage);
     void addPackageDependency(in String packageName);
-    void killApplication(in String pkg, int appId, int userId, in String reason);
+    void killApplication(in String pkg, int appId, int userId, in String reason,
+            int exitInfoReason);
     @UnsupportedAppUsage
     void closeSystemDialogs(in String reason);
     @UnsupportedAppUsage
@@ -719,8 +721,8 @@ interface IActivityManager {
 
     /**
      * Control the app freezer state. Returns true in case of success, false if the operation
-     * didn't succeed (for example, when the app freezer isn't supported). 
-     * Handling the freezer state via this method is reentrant, that is it can be 
+     * didn't succeed (for example, when the app freezer isn't supported).
+     * Handling the freezer state via this method is reentrant, that is it can be
      * disabled and re-enabled multiple times in parallel. As long as there's a 1:1 disable to
      * enable match, the freezer is re-enabled at last enable only.
      * @param enable set it to true to enable the app freezer, false to disable it.
@@ -803,7 +805,7 @@ interface IActivityManager {
      */
     @JavaPassthrough(annotation=
             "@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}, conditional = true)")
-    boolean startUserInBackgroundVisibleOnDisplay(int userid, int displayId);
+    boolean startUserInBackgroundVisibleOnDisplay(int userid, int displayId, IProgressListener unlockProgressListener);
 
     /**
      * Similar to {@link #startProfile(int userId)}, but with a listener to report user unlock

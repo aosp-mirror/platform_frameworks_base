@@ -91,8 +91,15 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Unterer Rand <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Linker Rand <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Rechter Rand <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Mit einem Arbeitsprofil aufgenommene Screenshots werden in der App „<xliff:g id="APP">%1$s</xliff:g>“ gespeichert"</string>
+    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
+    <skip />
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Dateien"</string>
+    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
+    <skip />
+    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
+    <skip />
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Bildschirmaufzeichnung"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Bildschirmaufzeichnung…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Fortlaufende Benachrichtigung für eine Bildschirmaufzeichnung"</string>
@@ -183,9 +190,9 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Flugmodus"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN an."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Akku bei <xliff:g id="NUMBER">%d</xliff:g> Prozent."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Akku bei <xliff:g id="PERCENTAGE">%1$d</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Akku bei <xliff:g id="PERCENTAGE">%1$d</xliff:g> Prozent, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Akku wird aufgeladen, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> Prozent."</string>
-    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Akku bei <xliff:g id="PERCENTAGE">%d</xliff:g>. Zum Schutz des Akkus wurde das Laden pausiert."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Akku bei <xliff:g id="PERCENTAGE">%d</xliff:g> Prozent. Zum Schutz des Akkus wurde das Laden pausiert."</string>
     <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Akku bei <xliff:g id="PERCENTAGE">%1$d</xliff:g>. <xliff:g id="TIME">%2$s</xliff:g>. Zum Schutz des Akkus wurde das Laden pausiert."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Alle Benachrichtigungen ansehen"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Schreibtelefonie aktiviert"</string>
@@ -339,12 +346,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Gesicht erkannt. Tippe zum Öffnen auf das Symbol „Entsperren“."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Gerät mit Gesicht entsperrt"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Gesicht erkannt"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Nach links bewegen"</item>
-    <item msgid="5558598599408514296">"Nach unten bewegen"</item>
-    <item msgid="4844142668312841831">"Nach rechts bewegen"</item>
-    <item msgid="5640521437931460125">"Nach oben bewegen"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Zum Wiederholen nach oben wischen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Zur Verwendung von NFC entsperren"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Dieses Gerät gehört deiner Organisation"</string>
@@ -832,10 +833,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"App zum Hinzufügen von Steuerelementen auswählen"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# Steuerelement hinzugefügt.}other{# Steuerelemente hinzugefügt.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Entfernt"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> hinzufügen?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"Wenn du <xliff:g id="APPNAME">%s</xliff:g> hinzufügst, kann diese App Einstellungen und Inhalte zu diesem Bereich hinzufügen. In einigen Apps kannst du festlegen, welche Einstellungen hier angezeigt werden sollen."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Zu Favoriten hinzugefügt"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Zu Favoriten hinzugefügt, Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Aus Favoriten entfernt"</string>
@@ -886,6 +885,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> öffnen"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="SONG_NAME">%1$s</xliff:g> von <xliff:g id="ARTIST_NAME">%2$s</xliff:g> über <xliff:g id="APP_LABEL">%3$s</xliff:g> wiedergeben"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> über <xliff:g id="APP_LABEL">%2$s</xliff:g> wiedergeben"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Für mich"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Rückgängig machen"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Gehe für die Wiedergabe näher an „<xliff:g id="DEVICENAME">%1$s</xliff:g>“ heran"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Für eine Wiedergabe auf diesem Gerät muss es näher bei <xliff:g id="DEVICENAME">%1$s</xliff:g> sein"</string>
@@ -902,8 +902,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Fehler – versuch es noch mal"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Steuerelemente hinzufügen"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Steuerelemente bearbeiten"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"App hinzufügen"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Ausgabegeräte hinzufügen"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Gruppe"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Ein Gerät ausgewählt"</string>
@@ -919,7 +918,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Lautsprecher &amp; Displays"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Vorgeschlagene Geräte"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Premium-Konto erforderlich"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Funktionsweise von Nachrichten an alle"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Nachricht an alle"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personen, die in der Nähe sind und kompatible Bluetooth-Geräten haben, können sich die Medien anhören, die du per Nachricht an alle sendest"</string>
@@ -1031,6 +1029,8 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera ist deaktiviert"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofon ist deaktiviert"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera und Mikrofon ausgeschaltet"</string>
+    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
+    <skip />
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# Benachrichtigung}other{# Benachrichtigungen}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Notizen machen"</string>
@@ -1046,6 +1046,10 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Einmaligen Zugriff erlauben"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Nicht erlauben"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"In Geräteprotokollen wird aufgezeichnet, welche Aktionen auf deinem Gerät ausgeführt werden. Apps können diese Protokolle verwenden, um Probleme zu finden und zu beheben.\n\nEinige Protokolle enthalten unter Umständen vertrauliche Informationen. Daher solltest du nur vertrauenswürdigen Apps den Zugriff auf alle Geräteprotokolle erlauben. \n\nWenn du dieser App keinen Zugriff auf alle Geräteprotokolle gewährst, kann sie trotzdem auf ihre eigenen Protokolle zugreifen. Dein Gerätehersteller hat möglicherweise auch Zugriff auf einige Protokolle oder Informationen auf deinem Gerät."</string>
+    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> öffnen"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Die App ist eingerichtet"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet wurde mindestens eine Karte hinzugefügt"</string>
@@ -1069,6 +1073,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Gemäß den Arbeitsrichtlinien darfst du nur über dein Arbeitsprofil telefonieren"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Zum Arbeitsprofil wechseln"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Schließen"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Sperrbildschirm-Einstellungen"</string>
 </resources>

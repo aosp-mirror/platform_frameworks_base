@@ -521,7 +521,7 @@ public class ITvInteractiveAppSessionWrapper
     @Override
     public void notifyTvMessage(String type, Bundle data) {
         mCaller.executeOrSendMessage(
-                mCaller.obtainMessageOO(DO_NOTIFY_TRACK_SELECTED, type, data));
+                mCaller.obtainMessageOO(DO_NOTIFY_TV_MESSAGE, type, data));
     }
 
     @Override

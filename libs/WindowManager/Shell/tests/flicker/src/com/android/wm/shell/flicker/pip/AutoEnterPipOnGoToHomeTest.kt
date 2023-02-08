@@ -54,7 +54,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 238367575)
-class AutoEnterPipOnGoToHomeTest(flicker: FlickerTest) : EnterPipTest(flicker) {
+class AutoEnterPipOnGoToHomeTest(flicker: FlickerTest) : EnterPipViaAppUiButtonTest(flicker) {
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
         get() = {

@@ -460,14 +460,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Poskytne aplikácii prístup k dátam telových senzorov, ako sú pulz, teplota a saturácia krvi kyslíkom počas používania aplikácie."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Prístup k dátam telových senzorov (napríklad pulzu) počas spustenia na pozadí"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Poskytne aplikácii prístup k dátam telových senzorov, ako sú pulz, teplota a saturácia krvi kyslíkom počas spustenia aplikácie na pozadí."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Prístup k údajom o teplote zápästia z telového senzora počas používania aplikácie."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Umožňuje aplikácii prístup k údajom o teplote zápästia z telového senzora počas používania aplikácie."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Prístup k údajom o teplote zápästia z telového senzora, keď je aplikácia na pozadí."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Umožňuje aplikácii prístup k údajom o teplote zápästia z telového senzora, keď je aplikácia na pozadí."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čítanie udalostí kalendára a podrobností"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Táto aplikácia môže čítať všetky udalosti kalendára uložené vo vašom tablete a zdieľať alebo ukladať dáta kalendára."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Táto aplikácia môže čítať všetky udalosti kalendára uložené vo vašom zariadení Android TV a zdieľať alebo ukladať údaje kalendára."</string>
@@ -1251,10 +1247,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Systém Android sa spúšťa…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Tablet sa spúšťa…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Zariadenie sa spúšťa…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Optimalizuje sa úložisko"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Dokončuje sa aktualizácia systému…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> sa inovuje…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Prebieha optimalizácia aplikácie <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"Pripravuje sa aplikácia <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Prebieha spúšťanie aplikácií."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Prebieha dokončovanie spúšťania."</string>
@@ -1852,6 +1846,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Zobrazenie na celú obrazovku"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ukončíte potiahnutím zhora nadol."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Dobre"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Otočte zariadenie pre lepšie zobrazenie"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Ukončite rozdelenú obrazovku pre lepšie zobrazenie"</string>
     <string name="done_label" msgid="7283767013231718521">"Hotovo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kruhový posúvač hodín"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kruhový posúvač minút"</string>
@@ -1863,6 +1859,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Práca – <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Pred odopnutím požiadať o číslo PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pred uvoľnením požiadať o bezpečnostný vzor"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pred odopnutím požiadať o heslo"</string>
@@ -2317,4 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Umožňuje sprievodnej aplikácii spúšťať služby na popredí z pozadia."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofón je k dispozícii"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofón je blokovaný"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dvojitá obrazovka"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dvojitá obrazovka je zapnutá"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> zobrazuje obsah na oboch obrazovkách"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Zariadenie je príliš horúce"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dvojitá obrazovka nie je k dispozícii, pretože telefón sa prehrieva"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Vypnúť"</string>
 </resources>

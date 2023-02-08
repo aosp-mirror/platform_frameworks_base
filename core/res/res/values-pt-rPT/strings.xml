@@ -459,14 +459,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite à app aceder a dados de sensores de corpo, como ritmo cardíaco, temperatura e percentagem de oxigénio no sangue, enquanto está a ser usada."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Aceder a dados de sensores de corpo, como ritmo cardíaco, quando em seg. plano"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite à app aceder a dados de sensores de corpo, como ritmo cardíaco, temperatura e percentagem de oxigénio no sangue, enquanto está em segundo plano."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Aceda a dados de temperatura do pulso de sensores de corpo enquanto a app está a ser usada."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permite à app aceder a dados de temperatura do pulso de sensores de corpo enquanto a app está a ser usada."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Aceda a dados de temperatura do pulso de sensores de corpo enquanto a app está em segundo plano."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permite à app aceder a dados de temperatura do pulso de sensores de corpo enquanto a app está em segundo plano."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ler detalhes e eventos do calendário"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta app pode ler todos os eventos do calendário armazenados no seu tablet e partilhar ou guardar os dados do calendário."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Esta app pode ler todos os eventos do calendário armazenados no seu dispositivo Android TV e partilhar ou guardar os dados do calendário."</string>
@@ -1250,10 +1246,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"O Android está a iniciar…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"O tablet está a iniciar…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"O dispositivo está a iniciar…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"A otimizar o armazenamento."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"A concluir a atualização do sistema…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"O <xliff:g id="APPLICATION">%1$s</xliff:g> está a ser atualizado…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"A otimizar a app <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"A preparar o <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"A iniciar aplicações"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"A concluir o arranque."</string>
@@ -1851,6 +1845,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização de ecrã inteiro"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para sair, deslize rapidamente para baixo a partir da parte superior."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Rode para uma melhor visualização"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Saia do ecrã dividido para uma melhor visualização"</string>
     <string name="done_label" msgid="7283767013231718521">"Concluído"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Controlo de deslize circular das horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Controlo de deslize circular dos minutos"</string>
@@ -1862,6 +1858,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> de trabalho"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2.º <xliff:g id="LABEL">%1$s</xliff:g> de trabalho"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3.º <xliff:g id="LABEL">%1$s</xliff:g> de trabalho"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Clonar <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Pedir PIN antes de soltar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Pedir padrão de desbloqueio antes de soltar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Pedir palavra-passe antes de soltar"</string>
@@ -2316,4 +2313,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permite que uma app associada em segundo plano inicie serviços em primeiro plano."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"O microfone está disponível"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"O microfone está bloqueado"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dois ecrãs"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"A funcionalidade Dois ecrãs está ativada"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> está a usar ambos os ecrãs para mostrar conteúdo"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"O dispositivo está a ficar demasiado quente"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"A funcionalidade Dois ecrãs está indisponível porque o seu telemóvel está a ficar demasiado quente"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desativar"</string>
 </resources>

@@ -59,7 +59,6 @@ import static android.view.WindowInsets.Type.systemGestures;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
-import static android.view.WindowManager.LayoutParams;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -4321,6 +4320,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return mImeTarget;
         }
 
+        @VisibleForTesting
+        SurfaceControl getImeScreenshotSurface() {
+            return mImeSurface;
+        }
+
         private SurfaceControl createImeSurface(ScreenCapture.ScreenshotHardwareBuffer b,
                 Transaction t) {
             final HardwareBuffer buffer = b.getHardwareBuffer();
@@ -4430,33 +4434,45 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    private void attachAndShowImeScreenshotOnTarget() {
+    private void attachImeScreenshotOnTargetIfNeeded() {
         // No need to attach screenshot if the IME target not exists or screen is off.
         if (!shouldImeAttachedToApp() || !mWmService.mPolicy.isScreenOn()) {
             return;
         }
 
-        final SurfaceControl.Transaction t = getPendingTransaction();
         // Prepare IME screenshot for the target if it allows to attach into.
         if (mInputMethodWindow != null && mInputMethodWindow.isVisible()) {
-            // Remove the obsoleted IME snapshot first in case the new snapshot happens to
-            // override the current one before the transition finish and the surface never be
-            // removed on the task.
-            removeImeSurfaceImmediately();
-            mImeScreenshot = new ImeScreenshot(
-                    mWmService.mSurfaceControlFactory.apply(null), mImeLayeringTarget);
-            mImeScreenshot.attachAndShow(t);
+            attachImeScreenshotOnTarget(mImeLayeringTarget);
         }
     }
 
+    private void attachImeScreenshotOnTarget(WindowState imeTarget) {
+        final SurfaceControl.Transaction t = getPendingTransaction();
+        // Remove the obsoleted IME snapshot first in case the new snapshot happens to
+        // override the current one before the transition finish and the surface never be
+        // removed on the task.
+        removeImeSurfaceImmediately();
+        mImeScreenshot = new ImeScreenshot(
+                mWmService.mSurfaceControlFactory.apply(null), imeTarget);
+        mImeScreenshot.attachAndShow(t);
+    }
+
     /**
-     * Shows the IME screenshot and attach to the IME target window.
+     * Shows the IME screenshot and attach to the IME layering target window.
      *
      * Used when the IME target window with IME visible is transitioning to the next target.
      * e.g. App transitioning or swiping this the task of the IME target window to recents app.
      */
     void showImeScreenshot() {
-        attachAndShowImeScreenshotOnTarget();
+        attachImeScreenshotOnTargetIfNeeded();
+    }
+
+    /**
+     * Shows the IME screenshot and attach it to the given IME target window.
+     */
+    @VisibleForTesting
+    void showImeScreenshot(WindowState imeTarget) {
+        attachImeScreenshotOnTarget(imeTarget);
     }
 
     /**
@@ -4617,24 +4633,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @VisibleForTesting
     SurfaceControl computeImeParent() {
-        if (mImeLayeringTarget != null) {
-            // Ensure changing the IME parent when the layering target that may use IME has
-            // became to the input target for preventing IME flickers.
-            // Note that:
-            // 1) For the imeLayeringTarget that may not use IME but requires IME on top
-            // of it (e.g. an overlay window with NOT_FOCUSABLE|ALT_FOCUSABLE_IM flags), we allow
-            // it to re-parent the IME on top the display to keep the legacy behavior.
-            // 2) Even though the starting window won't use IME, the associated activity
-            // behind the starting window may request the input. If so, then we should still hold
-            // the IME parent change until the activity started the input.
-            boolean imeLayeringTargetMayUseIme =
-                    LayoutParams.mayUseInputMethod(mImeLayeringTarget.mAttrs.flags)
-                    || mImeLayeringTarget.mAttrs.type == TYPE_APPLICATION_STARTING;
-            if (imeLayeringTargetMayUseIme && (mImeInputTarget == null
-                    || mImeLayeringTarget.mActivityRecord != mImeInputTarget.getActivityRecord())) {
-                // Do not change parent if the window hasn't requested IME.
-                return null;
-            }
+        if (!ImeTargetVisibilityPolicy.isReadyToComputeImeParent(mImeLayeringTarget,
+                mImeInputTarget)) {
+            return null;
         }
         // Attach it to app if the target is part of an app and such app is covering the entire
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
@@ -4919,7 +4920,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInsetsStateController.getImeSourceProvider().checkShowImePostLayout();
 
         mLastHasContent = mTmpApplySurfaceChangesTransactionState.displayHasContent;
-        if (!mWmService.mDisplayFrozen && !mDisplayRotation.isRotatingSeamlessly()) {
+        if (!inTransition() && !mDisplayRotation.isRotatingSeamlessly()) {
             mWmService.mDisplayManagerInternal.setDisplayProperties(mDisplayId,
                     mLastHasContent,
                     mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
@@ -6849,12 +6850,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public void showInsets(@WindowInsets.Type.InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {
             try {
-                ImeTracker.get().onProgress(statsToken,
+                ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SHOW_INSETS);
                 mRemoteInsetsController.showInsets(types, fromIme, statsToken);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver showInsets", e);
-                ImeTracker.get().onFailed(statsToken,
+                ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SHOW_INSETS);
             }
         }
@@ -6863,12 +6864,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public void hideInsets(@InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {
             try {
-                ImeTracker.get().onProgress(statsToken,
+                ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_HIDE_INSETS);
                 mRemoteInsetsController.hideInsets(types, fromIme, statsToken);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver hideInsets", e);
-                ImeTracker.get().onFailed(statsToken,
+                ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_HIDE_INSETS);
             }
         }

@@ -25,7 +25,7 @@ import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.TwoActivitiesAppHelper
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import com.android.server.wm.traces.parser.toFlickerComponent
 import org.junit.FixMethodOrder
 import org.junit.Test

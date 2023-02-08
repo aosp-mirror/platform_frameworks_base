@@ -22,11 +22,9 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
-import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.nfc.INfcCardEmulation;
 import android.nfc.NfcAdapter;
@@ -158,18 +156,13 @@ public final class CardEmulation {
             throw new UnsupportedOperationException();
         }
         if (!sIsInitialized) {
-            IPackageManager pm = ActivityThread.getPackageManager();
+            PackageManager pm = context.getPackageManager();
             if (pm == null) {
                 Log.e(TAG, "Cannot get PackageManager");
                 throw new UnsupportedOperationException();
             }
-            try {
-                if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION, 0)) {
-                    Log.e(TAG, "This device does not support card emulation");
-                    throw new UnsupportedOperationException();
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "PackageManager query failed.");
+            if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)) {
+                Log.e(TAG, "This device does not support card emulation");
                 throw new UnsupportedOperationException();
             }
             sIsInitialized = true;

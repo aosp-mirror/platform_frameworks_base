@@ -301,7 +301,7 @@
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Ημερολόγιο"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"έχει πρόσβαση στο ημερολόγιό σας"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="5726462398070064542">"στέλνει και να διαβάζει μηνύματα SMS"</string>
+    <string name="permgroupdesc_sms" msgid="5726462398070064542">"στέλνει και διαβάζει μηνύματα SMS"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"Αρχεία"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"πρόσβαση στα αρχεία της συσκευής σας"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Μουσική και ήχος"</string>
@@ -309,7 +309,7 @@
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Φωτογραφίες και βίντεο"</string>
     <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"πρόσβαση στις φωτογραφίες και τα βίντεο στη συσκευή σας"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Μικρόφωνο"</string>
-    <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ηχογραφεί"</string>
+    <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ηχογράφηση"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Σωματική δραστ/τητα"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"πρόσβαση στη σωματική σας δραστηριότητα"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Κάμερα"</string>
@@ -319,7 +319,7 @@
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Αρχεία καταγρ. κλήσ."</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ανάγνωση και εγγραφή αρχείου καταγραφής τηλεφωνικών κλήσεων"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Τηλέφωνο"</string>
-    <string name="permgroupdesc_phone" msgid="270048070781478204">"πραγματοποιεί και να διαχειρίζεται τηλ/κές κλήσεις"</string>
+    <string name="permgroupdesc_phone" msgid="270048070781478204">"πραγματοποιεί και διαχειρίζεται τηλ/κές κλήσεις"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Αισθητήρες σώματος"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"πρόσβαση στα δεδομένα αισθητήρα σχετικά με τις ζωτικές ενδείξεις σας"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Ειδοποιήσεις"</string>
@@ -366,7 +366,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"Επιτρέπει στην εφαρμογή την ανάγνωση μηνυμάτων που έχουν μεταδοθεί μέσω κινητού τηλεφώνου και έχουν ληφθεί από τη συσκευή σας. Ειδοποιήσεις που μεταδίδονται μέσω κινητού παραδίδονται σε ορισμένες τοποθεσίες για να σας προειδοποιήσουν για καταστάσεις έκτακτης ανάγκης. Κακόβουλες εφαρμογές ενδέχεται να παρεμποδίσουν την απόδοση ή τη λειτουργία της συσκευής σας κατά τη λήψη μετάδοσης μέσω κινητού σχετικά με μια επείγουσα κατάσταση."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"διαβάζει ροές δεδομένων στις οποίες έχετε εγγραφεί"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"Επιτρέπει στην εφαρμογή τη λήψη λεπτομερειών σχετικά με τις τρέχουσες συγχρονισμένες ροές δεδομένων."</string>
-    <string name="permlab_sendSms" msgid="7757368721742014252">"στέλνει και να διαβάζει μηνύματα SMS"</string>
+    <string name="permlab_sendSms" msgid="7757368721742014252">"στέλνει και διαβάζει μηνύματα SMS"</string>
     <string name="permdesc_sendSms" msgid="6757089798435130769">"Επιτρέπει στην εφαρμογή των αποστολή μηνυμάτων SMS. Αυτό μπορεί να προκαλέσει μη αναμενόμενες χρεώσεις. Οι κακόβουλες εφαρμογές ενδέχεται να σας κοστίσουν χρήματα, αποστέλλοντας μηνύματα χωρίς την έγκρισή σας."</string>
     <string name="permlab_readSms" msgid="5164176626258800297">"διαβάζει τα μηνύματα κειμένου (SMS ή MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα μηνύματα SMS (κειμένου) που είναι αποθηκευμένα στο tablet που χρησιμοποιείτε."</string>
@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Επιτρέπει στην εφαρμογή να αποκτά πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, θερμοκρασία και ποσοστό οξυγόνου στο αίμα, ενώ η εφαρμογή χρησιμοποιείται."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, στο παρασκήνιο"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Επιτρέπει στην εφαρμογή να αποκτά πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, θερμοκρασία και ποσοστό οξυγόνου στο αίμα, ενώ η εφαρμογή βρίσκεται στο παρασκήνιο."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή είναι σε χρήση."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή είναι σε χρήση."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή βρίσκεται στο παρασκήνιο."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή βρίσκεται στο παρασκήνιο."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ανάγνωση συμβάντων ημερολογίου και λεπτομερειών"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στο tablet που χρησιμοποιείτε και να μοιραστεί ή να αποθηκεύσει τα δεδομένα ημερολογίου σας."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στη συσκευή Android TV και να μοιραστεί ή να αποθηκεύσει τα δεδομένα ημερολογίου σας."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Εκκίνηση Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Εκκίνηση tablet…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Εκκίνηση συσκευής…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Βελτιστοποίηση αποθηκευτικού χώρου."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Ολοκλήρωση ενημέρωσης συστήματος…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> αναβαθμίζεται…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Βελτιστοποίηση της εφαρμογής <xliff:g id="NUMBER_0">%1$d</xliff:g> από <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"Προετοιμασία <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Έναρξη εφαρμογών."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Ολοκλήρωση εκκίνησης."</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Προβολή σε πλήρη οθόνη"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Για έξοδο, σύρετε προς τα κάτω από το επάνω μέρος."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Το κατάλαβα"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Περιστρέψτε την οθόνη για καλύτερη προβολή"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Εξέλθετε από τον διαχωρισμό οθόνης για καλύτερη προβολή"</string>
     <string name="done_label" msgid="7283767013231718521">"Τέλος"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Κυκλικό ρυθμιστικό ωρών"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Κυκλικό ρυθμιστικό λεπτών"</string>
@@ -1861,6 +1857,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Εργασία <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> εργασίας 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> εργασίας 3"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Κλώνος <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Να γίνεται ερώτηση για το PIN, πριν από το ξεκαρφίτσωμα"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Να γίνεται ερώτηση για το μοτίβο ξεκλειδώματος, πριν από το ξεκαρφίτσωμα"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Να γίνεται ερώτηση για τον κωδικό πρόσβασης, πριν από το ξεκαρφίτσωμα"</string>
@@ -2315,4 +2312,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Επιτρέπει σε μια συνοδευτική εφαρμογή να εκκινεί υπηρεσίες στο προσκήνιο από το παρασκήνιο."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Το μικρόφωνο είναι διαθέσιμο"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Το μικρόφωνο έχει αποκλειστεί"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

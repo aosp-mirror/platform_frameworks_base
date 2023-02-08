@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"यसले यो एप प्रयोग गरिँदै गरेका बेला यसलाई हृदयको गति, शरीरको तापक्रम तथा रगतमा रहेको अक्सिजनको प्रतिशत जस्ता बडी सेन्सरसम्बन्धी डेटा हेर्ने तथा प्रयोग गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ब्याकग्राउन्डमा चलेका बेला हृदयको गति जस्ता बडी सेन्सरसम्बन्धी डेटा हेरियोस् र प्रयोग गरियोस्"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"यसले यो एप ब्याकग्राउन्डमा चलेका बेला यसलाई हृदयको गति, शरीरको तापक्रम तथा रगतमा रहेको अक्सिजनको प्रतिशत जस्ता बडी सेन्सरसम्बन्धी डेटा हेर्ने तथा प्रयोग गर्ने अनुमति दिन्छ।"</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"यो एप प्रयोग भइरहेका बेला बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति।"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"यसले यो एप प्रयोग भइरहेका बेला यो एपलाई बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"यो एप ब्याकग्राउन्डमा चलिरहेका बेला बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति।"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"यसले यो एप ब्याकग्राउन्डमा चलिरहेका बेला यो एपलाई बडी सेन्सरले रेकर्ड गरेको नाडीको तापक्रमसम्बन्धी डेटा प्रयोग गर्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"पात्रोका कार्यक्रम र विवरणहरू पढ्ने"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"यस एपले तपाईंको ट्याब्लेटमा भण्डारण गरिएका पात्रो सम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"यस एपले तपाईंको Android टिभी डिभाइसमा भण्डारण गरिएका पात्रोसम्बन्धी सबै कार्यक्रमहरू पढ्न र तपाईंको पात्रोको डेटा आदान प्रदान वा सुरक्षित गर्न सक्छ।"</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android शुरू हुँदैछ..."</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ट्याब्लेट सुरु हुँदै छ…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"यन्त्र सुरु हुँदै छ…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"भण्डारण आफू अनुकूल गर्दै।"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"सिस्टम अपडेट सम्पन्न गरिँदै छ…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> को स्तरवृद्धि हुँदैछ…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"एप अनुकुल हुँदै <xliff:g id="NUMBER_0">%1$d</xliff:g> को <xliff:g id="NUMBER_1">%2$d</xliff:g>।"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तयारी गर्दै।"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"सुरुवात एपहरू।"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बुट पुरा हुँदै।"</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"पूरा पर्दा हेर्दै"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहिर निस्कन, माथिबाट तल स्वाइप गर्नुहोस्।"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"बुझेँ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"अझ राम्रो दृश्य हेर्न चाहनुहुन्छ भने रोटेट गर्नुहोस्"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"अझ राम्रो दृश्य हेर्न चाहनुहुन्छ भने \"स्प्लिट स्क्रिन\" बाट बाहिरिनुहोस्"</string>
     <string name="done_label" msgid="7283767013231718521">"भयो"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"घन्टा गोलाकार स्लाइडर"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"मिनेट गोलाकार स्लाइडर"</string>
@@ -1861,6 +1857,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"कार्यालयको दोस्रो <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"कार्यालयको तेस्रो <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> क्लोन गर्नुहोस्"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"अनपिन गर्नुअघि PIN मागियोस्"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"अनपिन गर्नअघि अनलक प्याटर्न माग्नुहोस्"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
@@ -2315,4 +2312,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"यसले सहयोगी एपलाई ब्याकग्राउन्डमा फोरग्राउन्ड सेवाहरू चलाउने अनुमति दिन्छ।"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"माइक्रोफोन अनम्युट गरिएको छ"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"माइक्रोफोन म्युट गरिएको छ"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

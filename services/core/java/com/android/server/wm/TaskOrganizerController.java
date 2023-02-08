@@ -722,6 +722,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         return true;
     }
 
+    boolean isSupportWindowlessStartingSurface() {
+        // Enable after ag/20426257
+        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        if (lastOrganizer == null) {
+            return false;
+        }
+        return false;
+    }
     /**
      * Notify the shell ({@link com.android.wm.shell.ShellTaskOrganizer} that the client has
      * removed the splash screen view.

@@ -459,14 +459,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permet à l\'appli d\'accéder aux données des capteurs corporels (fréquence cardiaque, température, taux d\'oxygène dans le sang, etc.) quand l\'appli est en cours d\'utilisation."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accéder aux données de capteurs corporels (comme le pouls) en arrière-plan"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permet à l\'appli d\'accéder aux données des capteurs corporels (fréquence cardiaque, température, taux d\'oxygène dans le sang, etc.) quand l\'appli est en arrière-plan."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Accédez aux données des capteurs corporels relatives à la température du poignet quand l\'appli est en cours d\'utilisation."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permet à l\'appli d\'accéder aux données des capteurs corporels relatives à la température du poignet quand l\'appli est en cours d\'utilisation."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Accédez aux données des capteurs corporels relatives à la température du poignet quand l\'appli est en arrière-plan."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permet à l\'appli d\'accéder aux données des capteurs corporels relatives à la température du poignet quand l\'appli est en arrière-plan."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lire les événements d\'agenda et les détails associés"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Cette application peut lire tous les événements d\'agenda enregistrés sur votre tablette et partager ou enregistrer vos données d\'agenda."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Cette application peut lire tous les événements de l\'agenda enregistrés sur votre appareil Android TV, et partager ou enregistrer les données de votre agenda."</string>
@@ -1250,10 +1246,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Démarrage d\'Android en cours"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Démarrage de la tablette…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Démarrage de l\'appareil…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Optimisation du stockage en cours…"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Finalisation de la mise à jour du système…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Mise à jour de l\'application <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Optimisation de l\'application <xliff:g id="NUMBER_0">%1$d</xliff:g> sur <xliff:g id="NUMBER_1">%2$d</xliff:g>…"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"Préparation de <xliff:g id="APPNAME">%1$s</xliff:g> en cours…"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Lancement des applications…"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finalisation de la mise à jour."</string>
@@ -1851,6 +1845,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Affichage en plein écran"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Pour quitter, balayez l\'écran du haut vers le bas."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Faites pivoter pour mieux voir"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Quittez l\'écran partagé pour mieux voir"</string>
     <string name="done_label" msgid="7283767013231718521">"OK"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Curseur circulaire des heures"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Curseur circulaire des minutes"</string>
@@ -1862,6 +1858,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (pro)"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2e <xliff:g id="LABEL">%1$s</xliff:g> professionnelle"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3e <xliff:g id="LABEL">%1$s</xliff:g> professionnelle"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Demander le code avant de retirer l\'épingle"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Demander le schéma de déverrouillage avant de retirer l\'épingle"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demander le mot de passe avant de retirer l\'épingle"</string>
@@ -2316,4 +2314,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Autorise une application associée à lancer des services de premier plan à partir de l\'arrière-plan."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Le micro est disponible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Le micro est bloqué"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

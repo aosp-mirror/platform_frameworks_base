@@ -27,7 +27,7 @@ import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

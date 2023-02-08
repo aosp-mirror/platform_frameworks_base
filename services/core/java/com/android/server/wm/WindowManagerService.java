@@ -1338,6 +1338,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mConstants.start(new HandlerExecutor(mH));
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
+        LocalServices.addService(
+                ImeTargetVisibilityPolicy.class, new ImeTargetVisibilityPolicyImpl());
         mEmbeddedWindowController = new EmbeddedWindowController(mAtmService);
 
         mDisplayAreaPolicyProvider = DisplayAreaPolicy.Provider.fromResources(
@@ -6010,7 +6012,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean isTransitionTraceEnabled() {
-        return mTransitionTracer.isEnabled();
+        return mTransitionTracer.isActiveTracingEnabled();
     }
 
     @Override
@@ -8125,14 +8127,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
                 }
                 if (dc != null && dc.getImeTarget(IME_TARGET_CONTROL) != null) {
-                    ImeTracker.get().onProgress(statsToken,
+                    ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
                     ProtoLog.d(WM_DEBUG_IME, "hideIme Control target: %s ",
                             dc.getImeTarget(IME_TARGET_CONTROL));
                     dc.getImeTarget(IME_TARGET_CONTROL).hideInsets(WindowInsets.Type.ime(),
                             true /* fromIme */, statsToken);
                 } else {
-                    ImeTracker.get().onFailed(statsToken,
+                    ImeTracker.forLogging().onFailed(statsToken,
                             ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
                 }
                 if (dc != null) {
@@ -8384,6 +8386,47 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             return null;
+        }
+    }
+
+    private final class ImeTargetVisibilityPolicyImpl extends ImeTargetVisibilityPolicy {
+
+        // TODO(b/258048231): Track IME visibility change in bugreport when invocations.
+        @Override
+        public boolean showImeScreenShot(@NonNull IBinder imeTarget, int displayId) {
+            synchronized (mGlobalLock) {
+                final WindowState imeTargetWindow = mWindowMap.get(imeTarget);
+                if (imeTargetWindow == null) {
+                    return false;
+                }
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    Slog.w(TAG, "Invalid displayId:" + displayId + ", fail to show ime screenshot");
+                    return false;
+                }
+
+                dc.showImeScreenshot(imeTargetWindow);
+                return true;
+            }
+        }
+
+        // TODO(b/258048231): Track IME visibility change in bugreport when invocations.
+        @Override
+        public boolean updateImeParent(@NonNull IBinder imeTarget, int displayId) {
+            synchronized (mGlobalLock) {
+                final WindowState imeTargetWindow = mWindowMap.get(imeTarget);
+                if (imeTargetWindow == null) {
+                    return false;
+                }
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    Slog.w(TAG, "Invalid displayId:" + displayId + ", fail to update ime parent");
+                    return false;
+                }
+
+                dc.updateImeParent();
+                return true;
+            }
         }
     }
 

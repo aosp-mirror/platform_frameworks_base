@@ -162,6 +162,7 @@ public final class BatteryService extends SystemService {
     private int mLowBatteryWarningLevel;
     private int mLastLowBatteryWarningLevel;
     private int mLowBatteryCloseWarningLevel;
+    private int mBatteryNearlyFullLevel;
     private int mShutdownBatteryTemperature;
 
     private int mPlugType;
@@ -1212,6 +1213,8 @@ public final class BatteryService extends SystemService {
                     com.android.internal.R.integer.config_notificationsBatteryLedOn);
             mBatteryLedOff = context.getResources().getInteger(
                     com.android.internal.R.integer.config_notificationsBatteryLedOff);
+            mBatteryNearlyFullLevel = context.getResources().getInteger(
+                    com.android.internal.R.integer.config_notificationsBatteryNearlyFullLevel);
         }
 
         /**
@@ -1234,7 +1237,8 @@ public final class BatteryService extends SystemService {
                 }
             } else if (status == BatteryManager.BATTERY_STATUS_CHARGING
                     || status == BatteryManager.BATTERY_STATUS_FULL) {
-                if (status == BatteryManager.BATTERY_STATUS_FULL || level >= 90) {
+                if (status == BatteryManager.BATTERY_STATUS_FULL
+                        || level >= mBatteryNearlyFullLevel) {
                     // Solid green when full or charging and nearly full
                     mBatteryLight.setColor(mBatteryFullARGB);
                 } else {

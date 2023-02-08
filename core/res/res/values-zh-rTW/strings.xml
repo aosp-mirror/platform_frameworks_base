@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用期間存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時可存取人體感應器資料，例如心跳速率"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"在應用程式使用期間存取手錶人體感應器上的溫度資料。"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"允許應用程式在使用期間存取手錶人體感應器上的溫度資料。"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"在背景執行應用程式時存取手錶人體感應器上的溫度資料。"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"允許應用程式在背景執行時存取手錶人體感應器上的溫度資料。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳細資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"這個應用程式可讀取所有儲存在平板電腦上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"這個應用程式可讀取所有儲存在 Android TV 裝置上的日曆活動，以及共用或儲存日曆資料。"</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android 正在啟動…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"平板電腦正在啟動…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"裝置正在啟動…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"正在對儲存空間進行最佳化處理。"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"正在完成系統更新…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"正在升級「<xliff:g id="APPLICATION">%1$s</xliff:g>」…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"正在最佳化第 <xliff:g id="NUMBER_0">%1$d</xliff:g> 個應用程式 (共 <xliff:g id="NUMBER_1">%2$d</xliff:g> 個)。"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"正在準備升級「<xliff:g id="APPNAME">%1$s</xliff:g>」。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在啟動應用程式。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"啟動完成。"</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"以全螢幕檢視"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"如要退出，請從畫面頂端向下滑動。"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋轉螢幕以瀏覽完整的檢視畫面"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"結束分割畫面以全螢幕瀏覽"</string>
     <string name="done_label" msgid="7283767013231718521">"完成"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"小時數環狀滑桿"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"分鐘數環狀滑桿"</string>
@@ -1861,6 +1857,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"第 2 項工作：<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"第 3 項工作：<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"複製<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消固定時必須畫出解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"取消固定時必須輸入密碼"</string>
@@ -2315,4 +2312,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"允許隨附應用程式從背景啟動前景服務。"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"麥克風已可使用"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"麥克風已封鎖"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"雙螢幕"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"雙螢幕功能已啟用"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在使用雙螢幕顯示內容"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"裝置過熱"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"手機過熱，因此無法使用雙螢幕功能"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"停用"</string>
 </resources>

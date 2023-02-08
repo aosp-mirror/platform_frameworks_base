@@ -459,14 +459,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Autorizza l\'app ad accedere ai dati dei sensori del corpo, ad esempio battito cardiaco, temperatura e percentuale di ossigeno nel sangue, mentre l\'app è in uso."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accesso ai dati dei sensori del corpo, come il battito cardiaco, in background"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Autorizza l\'app ad accedere ai dati dei sensori del corpo, ad esempio battito cardiaco, temperatura e percentuale di ossigeno nel sangue, mentre l\'app è in background."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Accesso ai dati della temperatura del polso misurata dal sensore del corpo mentre l\'app è in uso."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Consente all\'app, mentre è in uso, di accedere ai dati della temperatura del polso misurata dal sensore del corpo."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Accesso ai dati della temperatura del polso misurata dal sensore del corpo mentre l\'app è in background."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Consente all\'app, mentre è in background, di accedere ai dati della temperatura del polso misurata dal sensore del corpo."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"lettura di eventi di calendario e dettagli"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Questa app può leggere tutti gli eventi di calendario memorizzati sul tablet e condividere o salvare i dati di calendario."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Questa app può leggere tutti gli eventi di calendario memorizzati sul dispositivo Android TV e condividere o salvare i dati di calendario."</string>
@@ -1034,7 +1030,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Selettore utente"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Stato"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Fotocamera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Controlli media"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Controlli multimediali"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Riordino dei widget iniziato."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Riordino dei widget terminato."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> eliminato."</string>
@@ -1250,10 +1246,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Avvio di Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Avvio del tablet…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Avvio del dispositivo…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Ottimizzazione archiviazione."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Completamento aggiornamento di sistema…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Upgrade dell\'app <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Ottimizzazione applicazione <xliff:g id="NUMBER_0">%1$d</xliff:g> di <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> in preparazione."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Avvio app."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Conclusione dell\'avvio."</string>
@@ -1851,6 +1845,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualizzazione a schermo intero"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Per uscire, scorri dall\'alto verso il basso."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ruota per migliorare l\'anteprima"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Esci dallo schermo diviso per migliorare l\'anteprima"</string>
     <string name="done_label" msgid="7283767013231718521">"Fine"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Dispositivo di scorrimento circolare per le ore"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Dispositivo di scorrimento circolare per i minuti"</string>
@@ -1862,6 +1858,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> lavoro"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> di lavoro (2°)"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> di lavoro (3°)"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> (clone)"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Richiedi il PIN per lo sblocco"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Richiedi sequenza di sblocco prima di sbloccare"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Richiedi password prima di sbloccare"</string>
@@ -2316,4 +2313,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Consente a un\'app complementare di avviare servizi in primo piano dal background."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Microfono disponibile"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Microfono bloccato"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Doppio schermo"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Doppio schermo attivo"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> sta usando entrambi i display per mostrare contenuti"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Il dispositivo è troppo caldo"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Il doppio schermo non è disponibile perché il telefono si sta surriscaldando"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Disattiva"</string>
 </resources>

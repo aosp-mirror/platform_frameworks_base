@@ -6505,7 +6505,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean hasGesturePreviewHighlight() {
-        return mGesturePreviewHighlightStart > 0;
+        return mGesturePreviewHighlightStart >= 0;
     }
 
     /**
@@ -10229,8 +10229,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // The point is not within lineMargin of a line.
             return -1;
         }
-        if (point.x < mLayout.getLineLeft(line) - lineMargin
-                || point.x > mLayout.getLineRight(line) + lineMargin) {
+        if (point.x < -lineMargin || point.x > mLayout.getWidth() + lineMargin) {
             // The point is not within lineMargin of a line.
             return -1;
         }

@@ -91,8 +91,12 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Nederste kant: <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Venstre kant: <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Højre kant: <xliff:g id="PERCENT">%1$d</xliff:g> procent"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Screenshots, der tages via arbejdsprofilen, gemmer i appen <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Gemt i <xliff:g id="APP">%1$s</xliff:g> på arbejdsprofilen"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Filer"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> har registreret dette screenshot."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> og andre åbne apps har registreret dette screenshot."</string>
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Skærmoptagelse"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandler skærmoptagelse"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Konstant notifikation om skærmoptagelse"</string>
@@ -339,12 +343,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Ansigt genkendt. Tryk på oplåsningsikonet for at åbne."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Låst op via ansigtsgenkendelse"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Ansigtet er genkendt"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Flyt til venstre"</item>
-    <item msgid="5558598599408514296">"Flyt ned"</item>
-    <item msgid="4844142668312841831">"Flyt til højre"</item>
-    <item msgid="5640521437931460125">"Flyt op"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Stryg opad for at prøve igen"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Lås op for at bruge NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Denne enhed tilhører din organisation"</string>
@@ -832,10 +830,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Vælg en app for at tilføje styring"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# styringselement er tilføjet.}one{# styringselement er tilføjet.}other{# styringselementer er tilføjet.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Fjernet"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Vil du tilføje <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"Når du tilføjer <xliff:g id="APPNAME">%s</xliff:g>, kan den føje styringselementer og indhold til dette panel. I nogle apps kan du vælge, hvilke styringselementer der vises her."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Angivet som favorit"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Angivet som favorit. Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Fjernet fra favoritter"</string>
@@ -886,6 +882,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Åbn <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Afspil <xliff:g id="SONG_NAME">%1$s</xliff:g> af <xliff:g id="ARTIST_NAME">%2$s</xliff:g> via <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Afspil <xliff:g id="SONG_NAME">%1$s</xliff:g> via <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Til dig"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Fortryd"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Ryk tættere på for at afspille på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"For at afspille her skal enheden tættere på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
@@ -902,8 +899,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Der opstod en fejl. Prøv igen"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Tilføj styring"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Rediger styring"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Tilføj app"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Tilføj medieudgange"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Gruppe"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Der er valgt 1 enhed"</string>
@@ -919,7 +915,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Højttalere og skærme"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Foreslåede enheder"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Kræver Premium-konto"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Sådan fungerer udsendelser"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Udsendelse"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Personer i nærheden, som har kompatible Bluetooth-enheder, kan lytte til det medie, du udsender"</string>
@@ -1031,6 +1026,8 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kameraet er slukket"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofonen er slået fra"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera og mikrofon er slået fra"</string>
+    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
+    <skip />
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notifikation}one{# notifikation}other{# notifikationer}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Notetagning"</string>
@@ -1046,6 +1043,10 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Tillad engangsadgang"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Tillad ikke"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Enhedslogs registrerer, hvad der sker på din enhed. Apps kan bruge disse logs til at finde og løse problemer.\n\nNogle logs kan indeholde følsomme oplysninger, så giv kun apps, du har tillid til, adgang til alle enhedslogs. \n\nSelvom du ikke giver denne app adgang til alle enhedslogs, kan den stadig tilgå sine egne logs. Producenten af din enhed kan muligvis fortsat tilgå visse logs eller oplysninger på din enhed."</string>
+    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Åbn <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Appen er konfigureret"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Mindst ét kort er føjet til Wallet"</string>
@@ -1058,7 +1059,7 @@
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Fold telefonen ud for at tage en bedre selfie"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vil du bruge frontkameraet for at få bedre selfie?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Brug bagsidekameraet for at få et bredere billede med højere opløsning."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ *Denne skærm slukkes"</b></string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Denne skærm slukkes"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Foldbar enhed foldes ud"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Foldbar enhed vendes om"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> batteri tilbage"</string>
@@ -1069,6 +1070,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Din arbejdspolitik tillader kun, at du kan foretage telefonopkald fra arbejdsprofilen"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Skift til arbejdsprofil"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Luk"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Indstillinger for låseskærm"</string>
 </resources>

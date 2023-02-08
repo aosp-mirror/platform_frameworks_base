@@ -26,6 +26,7 @@ import com.android.server.wm.flicker.helpers.GestureHelper.Tuple
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.common.Rect
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
+import com.android.server.wm.traces.common.component.matchers.IComponentMatcher
 import com.android.server.wm.traces.common.region.Region
 import com.android.server.wm.traces.parser.toFlickerComponent
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
@@ -157,13 +158,13 @@ open class PipAppHelper(instrumentation: Instrumentation) :
     @JvmOverloads
     fun launchViaIntentAndWaitForPip(
         wmHelper: WindowManagerStateHelper,
-        expectedWindowName: String = "",
+        launchedAppComponentMatcherOverride: IComponentMatcher? = null,
         action: String? = null,
         stringExtras: Map<String, String>
     ) {
         launchViaIntentAndWaitShown(
             wmHelper,
-            expectedWindowName,
+            launchedAppComponentMatcherOverride,
             action,
             stringExtras,
             waitConditions = arrayOf(WindowManagerConditionsFactory.hasPipWindow())

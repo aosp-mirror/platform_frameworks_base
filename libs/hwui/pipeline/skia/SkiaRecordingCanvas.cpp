@@ -208,40 +208,52 @@ void SkiaRecordingCanvas::FilterForImage(SkPaint& paint) {
     }
 }
 
+void SkiaRecordingCanvas::handleMutableImages(Bitmap& bitmap, DrawImagePayload& payload) {
+    // if image->unique() is true, then mRecorder.drawImage failed for some reason. It also means
+    // it is not safe to store a raw SkImage pointer, because the image object will be destroyed
+    // when this function ends.
+    if (!bitmap.isImmutable() && payload.image.get() && !payload.image->unique()) {
+        mDisplayList->mMutableImages.push_back(payload.image.get());
+    }
+
+    if (bitmap.hasGainmap()) {
+        auto gainmapBitmap = bitmap.gainmap()->bitmap;
+        // Not all DrawImagePayload receivers will store the gainmap (such as DrawImageLattice),
+        // so only store it in the mutable list if it was actually recorded
+        if (!gainmapBitmap->isImmutable() && payload.gainmapImage.get() &&
+            !payload.gainmapImage->unique()) {
+            mDisplayList->mMutableImages.push_back(payload.gainmapImage.get());
+        }
+    }
+}
+
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) {
-    sk_sp<SkImage> image = bitmap.makeImage();
+    auto payload = DrawImagePayload(bitmap);
 
     applyLooper(
             paint,
             [&](const Paint& p) {
-                mRecorder.drawImage(image, left, top, p.sampling(), &p, bitmap.palette());
+                mRecorder.drawImage(DrawImagePayload(payload), left, top, p.sampling(), &p);
             },
             FilterForImage);
 
-    // if image->unique() is true, then mRecorder.drawImage failed for some reason. It also means
-    // it is not safe to store a raw SkImage pointer, because the image object will be destroyed
-    // when this function ends.
-    if (!bitmap.isImmutable() && image.get() && !image->unique()) {
-        mDisplayList->mMutableImages.push_back(image.get());
-    }
+    handleMutableImages(bitmap, payload);
 }
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) {
     SkAutoCanvasRestore acr(&mRecorder, true);
     concat(matrix);
 
-    sk_sp<SkImage> image = bitmap.makeImage();
+    auto payload = DrawImagePayload(bitmap);
 
     applyLooper(
             paint,
             [&](const Paint& p) {
-                mRecorder.drawImage(image, 0, 0, p.sampling(), &p, bitmap.palette());
+                mRecorder.drawImage(DrawImagePayload(payload), 0, 0, p.sampling(), &p);
             },
             FilterForImage);
 
-    if (!bitmap.isImmutable() && image.get() && !image->unique()) {
-        mDisplayList->mMutableImages.push_back(image.get());
-    }
+    handleMutableImages(bitmap, payload);
 }
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
@@ -250,20 +262,17 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
-    sk_sp<SkImage> image = bitmap.makeImage();
+    auto payload = DrawImagePayload(bitmap);
 
     applyLooper(
             paint,
             [&](const Paint& p) {
-                mRecorder.drawImageRect(image, srcRect, dstRect, p.sampling(), &p,
-                                        SkCanvas::kFast_SrcRectConstraint, bitmap.palette());
+                mRecorder.drawImageRect(DrawImagePayload(payload), srcRect, dstRect, p.sampling(),
+                                        &p, SkCanvas::kFast_SrcRectConstraint);
             },
             FilterForImage);
 
-    if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty() &&
-        !dstRect.isEmpty()) {
-        mDisplayList->mMutableImages.push_back(image.get());
-    }
+    handleMutableImages(bitmap, payload);
 }
 
 void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, float dstLeft,
@@ -291,7 +300,7 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
 
     lattice.fBounds = nullptr;
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    sk_sp<SkImage> image = bitmap.makeImage();
+    auto payload = DrawImagePayload(bitmap);
 
     // HWUI always draws 9-patches with linear filtering, regardless of the Paint.
     const SkFilterMode filter = SkFilterMode::kLinear;
@@ -299,13 +308,11 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     applyLooper(
             paint,
             [&](const SkPaint& p) {
-                mRecorder.drawImageLattice(image, lattice, dst, filter, &p, bitmap.palette());
+                mRecorder.drawImageLattice(DrawImagePayload(payload), lattice, dst, filter, &p);
             },
             FilterForImage);
 
-    if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
-        mDisplayList->mMutableImages.push_back(image.get());
-    }
+    handleMutableImages(bitmap, payload);
 }
 
 double SkiaRecordingCanvas::drawAnimatedImage(AnimatedImageDrawable* animatedImage) {

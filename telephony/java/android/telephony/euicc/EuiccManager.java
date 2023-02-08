@@ -882,6 +882,16 @@ public class EuiccManager {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long SHOULD_RESOLVE_PORT_INDEX_FOR_APPS = 224562872L;
 
+    /**
+     * Starting with Android U, a port is available if it is active without an enabled profile
+     * on it or calling app can activate a new profile on the selected port without any user
+     * interaction.
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    public static final long INACTIVE_PORT_AVAILABILITY_CHECK = 240273417L;
+
     private final Context mContext;
     private int mCardId;
 
@@ -1611,8 +1621,12 @@ public class EuiccManager {
 
     /**
      * Returns whether the passing portIndex is available.
-     * A port is available if it is active without an enabled profile on it or calling app can
-     * activate a new profile on the selected port without any user interaction.
+     * A port is available if it is active without enabled profile on it or
+     * calling app has carrier privilege over the profile installed on the selected port.
+     *
+     * <p> From Android U, a port is available if it is active without an enabled profile on it or
+     * calling app can activate a new profile on the selected port without any user interaction.
+     *
      * Always returns false if the cardId is a physical card.
      *
      * @param portIndex is an enumeration of the ports available on the UICC.

@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
 import android.os.CancellationSignal;
@@ -222,7 +223,7 @@ public final class CredentialManager {
      * @param callback the callback invoked when the request succeeds or fails
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public void listEnabledProviders(
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
@@ -280,13 +281,32 @@ public final class CredentialManager {
     }
 
     /**
+     * Returns {@code true} if the calling application provides a CredentialProviderService that is
+     * enabled for the current user, or {@code false} otherwise. CredentialProviderServices are
+     * enabled on a per-service basis so the individual component name of the service should be
+     * passed in here.
+     *
+     * @param componentName the component name to check is enabled
+     */
+    public boolean isEnabledCredentialProviderService(@NonNull ComponentName componentName) {
+        requireNonNull(componentName, "componentName must not be null");
+
+        try {
+            return mService.isEnabledCredentialProviderService(
+                    componentName, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns whether the service is enabled.
      *
      * @hide
      */
     public static boolean isServiceEnabled(Context context) {
         if (context == null) {
-	    return false;
+            return false;
         }
         CredentialManager credentialManager =
                 (CredentialManager) context.getSystemService(Context.CREDENTIAL_SERVICE);
@@ -298,8 +318,7 @@ public final class CredentialManager {
 
     private boolean isServiceEnabled() {
         return DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER,
-                true);
+                DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER, true);
     }
 
     /**
@@ -313,22 +332,19 @@ public final class CredentialManager {
     }
 
     /**
-     * Registers a {@link CredentialDescription} for an actively provisioned {@link Credential}
-     * a CredentialProvider has. This registry will then be used to determine where to
-     * fetch the requested {@link Credential} from. Not all credential types will be supported.
-     * The distinction will be made by the JetPack layer. For the types that are supported,
-     * JetPack will add a new key-value pair into {@link GetCredentialRequest}. These will not
-     * be persistent on the device. The Credential Providers will need to call this API again
-     * upon device reboot.
+     * Registers a {@link CredentialDescription} for an actively provisioned {@link Credential} a
+     * CredentialProvider has. This registry will then be used to determine where to fetch the
+     * requested {@link Credential} from. Not all credential types will be supported. The
+     * distinction will be made by the JetPack layer. For the types that are supported, JetPack will
+     * add a new key-value pair into {@link GetCredentialRequest}. These will not be persistent on
+     * the device. The Credential Providers will need to call this API again upon device reboot.
      *
      * @param request the request data
-     *
-     * @throws {@link  UnsupportedOperationException} if the feature has not been enabled.
-     * @throws {@link  com.android.server.credentials.NonCredentialProviderCallerException}
-     * if the calling package name is not also listed as a Credential Provider.
-     * @throws {@link  IllegalArgumentException} if the calling Credential Provider can not handle
-     * one or more of the Credential Types that are sent for registration.
-     *
+     * @throws {@link UnsupportedOperationException} if the feature has not been enabled.
+     * @throws {@link com.android.server.credentials.NonCredentialProviderCallerException} if the
+     *     calling package name is not also listed as a Credential Provider.
+     * @throws {@link IllegalArgumentException} if the calling Credential Provider can not handle
+     *     one or more of the Credential Types that are sent for registration.
      */
     public void registerCredentialDescription(
             @NonNull RegisterCredentialDescriptionRequest request) {
@@ -346,16 +362,12 @@ public final class CredentialManager {
         }
     }
 
-
     /**
-     *  Unregisters a {@link CredentialDescription} for an actively provisioned {@link Credential}
+     * Unregisters a {@link CredentialDescription} for an actively provisioned {@link Credential}
      * that has been registered previously.
      *
-     *
      * @param request the request data
-     *
-     * @throws {@link  UnsupportedOperationException} if the feature has not been enabled.
-     *
+     * @throws {@link UnsupportedOperationException} if the feature has not been enabled.
      */
     public void unregisterCredentialDescription(
             @NonNull UnregisterCredentialDescriptionRequest request) {
@@ -371,7 +383,6 @@ public final class CredentialManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-
     }
 
     private static class GetCredentialTransport extends IGetCredentialCallback.Stub {

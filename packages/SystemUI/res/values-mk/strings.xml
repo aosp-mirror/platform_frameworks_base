@@ -91,8 +91,12 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Долна граница <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Лева граница <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Десна граница <xliff:g id="PERCENT">%1$d</xliff:g> %%"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Сликите од екранот во работниот профил се зачувуваат во апликацијата <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Зачувано во <xliff:g id="APP">%1$s</xliff:g> во работниот профил"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Датотеки"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ја откри оваа слика од екранот."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> и други отворени апликации ја открија оваа слика од екранот."</string>
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Снимач на екран"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Се обработува снимка од екран"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Тековно известување за сесија за снимање на екранот"</string>
@@ -339,12 +343,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Лицето е препознаено. Притиснете ја иконата за отклучување за да отворите."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Отклучено со лице"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Лицето е препознаено"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Премести налево"</item>
-    <item msgid="5558598599408514296">"Премести надолу"</item>
-    <item msgid="4844142668312841831">"Премести надесно"</item>
-    <item msgid="5640521437931460125">"Премести нагоре"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Повлечете нагоре за да се обидете повторно"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Отклучете за да користите NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Уредов е во сопственост на организацијата"</string>
@@ -884,6 +882,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Отворете <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Пуштете <xliff:g id="SONG_NAME">%1$s</xliff:g> од <xliff:g id="ARTIST_NAME">%2$s</xliff:g> на <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Пуштете <xliff:g id="SONG_NAME">%1$s</xliff:g> на <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"За вас"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Врати"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Приближете се за да пуштите на <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"За да пуштате овде, приближете се до <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
@@ -916,7 +915,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Звучници и екрани"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Предложени уреди"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Потребна е премиум сметка"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Како функционира емитувањето"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Емитување"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Луѓето во ваша близина со компатибилни уреди со Bluetooth може да ги слушаат аудиозаписите што ги емитувате"</string>
@@ -1028,6 +1026,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Камерата е исклучена"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Микрофонот е исклучен"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Камерата и микрофонот се исклучени"</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"„Помошникот“ слуша"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# известување}one{# известување}other{# известувања}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Фаќање белешки"</string>
@@ -1043,6 +1042,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Дозволи еднократен пристап"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Не дозволувај"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Дневниците за евиденција на уредот снимаат што се случува на вашиот уред. Апликациите може да ги користат овие дневници за евиденција за да наоѓаат и поправаат проблеми.\n\nНекои дневници за евиденција може да содржат чувствителни податоци, па затоа дозволете им пристап до сите дневници за евиденција на уредот само на апликациите во кои имате доверба. \n\nАко не ѝ дозволите на апликацијава да пристапува до сите дневници за евиденција на уредот, таа сепак ќе може да пристапува до сопствените дневници за евиденција. Производителот на вашиот уред можеби сепак ќе може да пристапува до некои дневници за евиденција или податоци на уредот."</string>
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Дознајте повеќе"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Дознајте повеќе на <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Отворете ја <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• апликацијата е поставена"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• најмалку една картичка е додадена во Wallet"</string>
@@ -1066,6 +1067,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Вашето работно правило ви дозволува да упатувате повици само од работниот профил"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Префрли се на работен профил"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Затвори"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Поставки за заклучен екран"</string>
 </resources>

@@ -2480,6 +2480,10 @@
     <string name="media_transfer_loading">Loading</string>
     <!-- Default name of the device. [CHAR LIMIT=30] -->
     <string name="media_ttt_default_device_type">tablet</string>
+    <!-- Description of media transfer icon of unknown app appears in receiver devices. [CHAR LIMIT=NONE]-->
+    <string name="media_transfer_receiver_content_description_unknown_app">Casting your media</string>
+    <!-- Description of media transfer icon appears in receiver devices. [CHAR LIMIT=NONE]-->
+    <string name="media_transfer_receiver_content_description_with_app_name">Casting <xliff:g id="app_label" example="Spotify">%1$s</xliff:g></string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>

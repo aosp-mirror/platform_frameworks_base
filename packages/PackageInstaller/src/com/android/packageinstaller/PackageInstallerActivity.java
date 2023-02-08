@@ -297,6 +297,10 @@ public class PackageInstallerActivity extends AlertActivity {
                 return false;
             }
         }
+        if (mSourceInfo != null && checkPermission(Manifest.permission.INSTALL_PACKAGES,
+                -1 /* pid */, mSourceInfo.uid) == PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
         return true;
     }
 

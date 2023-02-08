@@ -27,6 +27,8 @@ import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 
+import com.android.systemui.R;
+
 /**
  * Similar to the {@link NumPadKey}, but displays an image.
  */
@@ -35,18 +37,13 @@ public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAni
     @Nullable
     private NumPadAnimator mAnimator;
     private int mOrientation;
+    private int mStyleAttr;
+    private boolean mIsTransparentMode;
 
     public NumPadButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        Drawable background = getBackground();
-        if (background instanceof GradientDrawable) {
-            mAnimator = new NumPadAnimator(context, background.mutate(),
-                    attrs.getStyleAttribute(), getDrawable());
-        } else {
-            mAnimator = null;
-        }
-
+        mStyleAttr = attrs.getStyleAttribute();
+        setupAnimator();
     }
 
     @Override
@@ -98,7 +95,9 @@ public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAni
     public void reloadColors() {
         if (mAnimator != null) mAnimator.reloadColors(getContext());
 
-        int[] customAttrs = {android.R.attr.textColorPrimaryInverse};
+        int textColorResId = mIsTransparentMode ? android.R.attr.textColorPrimary
+                : android.R.attr.textColorPrimaryInverse;
+        int[] customAttrs = {textColorResId};
         TypedArray a = getContext().obtainStyledAttributes(customAttrs);
         int imageColor = a.getColor(0, 0);
         a.recycle();
@@ -109,6 +108,36 @@ public class NumPadButton extends AlphaOptimizedImageButton implements NumPadAni
     public void setProgress(float progress) {
         if (mAnimator != null) {
             mAnimator.setProgress(progress);
+        }
+    }
+
+    /**
+     * Set whether button is transparent mode.
+     *
+     * @param isTransparentMode
+     */
+    public void setTransparentMode(boolean isTransparentMode) {
+        mIsTransparentMode = isTransparentMode;
+        if (isTransparentMode) {
+            setBackgroundColor(android.R.color.transparent);
+        } else {
+            setBackground(getContext().getDrawable(R.drawable.num_pad_key_background));
+        }
+        setupAnimator();
+        reloadColors();
+        requestLayout();
+    }
+
+    /**
+     * Set up the animator for the NumPadButton.
+     */
+    private void setupAnimator() {
+        Drawable background = getBackground();
+        if (background instanceof GradientDrawable) {
+            mAnimator = new NumPadAnimator(getContext(), background.mutate(),
+                    mStyleAttr, getDrawable());
+        } else {
+            mAnimator = null;
         }
     }
 }

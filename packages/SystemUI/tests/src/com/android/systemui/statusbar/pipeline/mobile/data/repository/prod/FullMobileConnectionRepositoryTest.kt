@@ -23,9 +23,7 @@ import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
-import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -33,7 +31,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -57,22 +54,15 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private val mobileMappings = FakeMobileMappingsProxy()
     private val tableLogBuffer = mock<TableLogBuffer>()
     private val mobileFactory = mock<MobileConnectionRepositoryImpl.Factory>()
     private val carrierMergedFactory = mock<CarrierMergedConnectionRepository.Factory>()
-
-    private lateinit var connectionsRepo: FakeMobileConnectionsRepository
-    private val globalMobileDataSettingChangedEvent: Flow<Unit>
-        get() = connectionsRepo.globalMobileDataSettingChangedEvent
 
     private lateinit var mobileRepo: FakeMobileConnectionRepository
     private lateinit var carrierMergedRepo: FakeMobileConnectionRepository
 
     @Before
     fun setUp() {
-        connectionsRepo = FakeMobileConnectionsRepository(mobileMappings, tableLogBuffer)
-
         mobileRepo = FakeMobileConnectionRepository(SUB_ID, tableLogBuffer)
         carrierMergedRepo = FakeMobileConnectionRepository(SUB_ID, tableLogBuffer)
 
@@ -82,7 +72,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                     any(),
                     eq(DEFAULT_NAME),
                     eq(SEP),
-                    eq(globalMobileDataSettingChangedEvent),
                 )
             )
             .thenReturn(mobileRepo)
@@ -109,7 +98,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                     tableLogBuffer,
                     DEFAULT_NAME,
                     SEP,
-                    globalMobileDataSettingChangedEvent
                 )
         }
 
@@ -310,7 +298,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                     startingIsCarrierMerged = false,
                     DEFAULT_NAME,
                     SEP,
-                    globalMobileDataSettingChangedEvent,
                 )
 
             val connection1Repeat =
@@ -319,7 +306,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                     startingIsCarrierMerged = false,
                     DEFAULT_NAME,
                     SEP,
-                    globalMobileDataSettingChangedEvent,
                 )
 
             assertThat(connection1.tableLogBuffer)
@@ -345,7 +331,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                     startingIsCarrierMerged = false,
                     DEFAULT_NAME,
                     SEP,
-                    globalMobileDataSettingChangedEvent,
                 )
 
             // WHEN a connection with the same sub ID but carrierMerged = true is created
@@ -355,7 +340,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                     startingIsCarrierMerged = true,
                     DEFAULT_NAME,
                     SEP,
-                    globalMobileDataSettingChangedEvent,
                 )
 
             // THEN the same table is re-used
@@ -374,7 +358,6 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                 tableLogBuffer,
                 DEFAULT_NAME,
                 SEP,
-                globalMobileDataSettingChangedEvent,
                 testScope.backgroundScope,
                 mobileFactory,
                 carrierMergedFactory,

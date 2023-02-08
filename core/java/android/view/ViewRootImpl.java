@@ -291,7 +291,7 @@ public final class ViewRootImpl implements ViewParent,
      * @hide
      */
     public static final boolean CAPTION_ON_SHELL =
-            SystemProperties.getBoolean("persist.wm.debug.caption_on_shell", false);
+            SystemProperties.getBoolean("persist.wm.debug.caption_on_shell", true);
 
     /**
      * Whether the client should compute the window frame on its own.
@@ -5815,7 +5815,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 case MSG_SHOW_INSETS: {
                     final ImeTracker.Token statsToken = (ImeTracker.Token) msg.obj;
-                    ImeTracker.get().onProgress(statsToken,
+                    ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_CLIENT_HANDLE_SHOW_INSETS);
                     if (mView == null) {
                         Log.e(TAG,
@@ -5828,7 +5828,7 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 case MSG_HIDE_INSETS: {
                     final ImeTracker.Token statsToken = (ImeTracker.Token) msg.obj;
-                    ImeTracker.get().onProgress(statsToken,
+                    ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_CLIENT_HANDLE_HIDE_INSETS);
                     mInsetsController.hide(msg.arg1, msg.arg2 == 1, statsToken);
                     break;
@@ -10407,10 +10407,10 @@ public final class ViewRootImpl implements ViewParent,
                         null /* icProto */);
             }
             if (viewAncestor != null) {
-                ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_SHOW_INSETS);
+                ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_SHOW_INSETS);
                 viewAncestor.showInsets(types, fromIme, statsToken);
             } else {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_SHOW_INSETS);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_SHOW_INSETS);
             }
         }
 
@@ -10424,10 +10424,10 @@ public final class ViewRootImpl implements ViewParent,
                         null /* icProto */);
             }
             if (viewAncestor != null) {
-                ImeTracker.get().onProgress(statsToken, ImeTracker.PHASE_CLIENT_HIDE_INSETS);
+                ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_HIDE_INSETS);
                 viewAncestor.hideInsets(types, fromIme, statsToken);
             } else {
-                ImeTracker.get().onFailed(statsToken, ImeTracker.PHASE_CLIENT_HIDE_INSETS);
+                ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_HIDE_INSETS);
             }
         }
 

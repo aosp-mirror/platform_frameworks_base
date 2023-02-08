@@ -22,7 +22,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -57,15 +56,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
+import com.android.credentialmanager.common.BaseEntry
 import com.android.credentialmanager.common.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
-import com.android.credentialmanager.common.material.ModalBottomSheetLayout
-import com.android.credentialmanager.common.material.ModalBottomSheetValue
-import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.ConfirmButton
 import com.android.credentialmanager.common.ui.Entry
+import com.android.credentialmanager.common.ui.ModalBottomSheet
 import com.android.credentialmanager.common.ui.TextOnSurface
 import com.android.credentialmanager.common.ui.TextSecondary
 import com.android.credentialmanager.common.ui.TextOnSurfaceVariant
@@ -76,50 +75,45 @@ import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 @Composable
 fun GetCredentialScreen(
-    viewModel: GetCredentialViewModel,
+    viewModel: CredentialSelectorViewModel,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
-    val state = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Expanded,
-        skipHalfExpanded = true
-    )
-    val uiState = viewModel.uiState
-    if (uiState.currentScreenState != GetScreenState.REMOTE_ONLY) {
-        ModalBottomSheetLayout(
-            sheetBackgroundColor = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.background(Color.Transparent),
-            sheetState = state,
+    val getCredentialUiState = viewModel.uiState.getCredentialUiState ?: return
+    if (getCredentialUiState.currentScreenState != GetScreenState.REMOTE_ONLY) {
+        ModalBottomSheet(
             sheetContent = {
                 // Hide the sheet content as opposed to the whole bottom sheet to maintain the scrim
                 // background color even when the content should be hidden while waiting for
                 // results from the provider app.
-                when (uiState.providerActivityState) {
+                when (viewModel.uiState.providerActivityState) {
                     ProviderActivityState.NOT_APPLICABLE -> {
-                        if (uiState.currentScreenState == GetScreenState.PRIMARY_SELECTION) {
+                        if (getCredentialUiState.currentScreenState
+                            == GetScreenState.PRIMARY_SELECTION) {
                             PrimarySelectionCard(
-                                requestDisplayInfo = uiState.requestDisplayInfo,
-                                providerDisplayInfo = uiState.providerDisplayInfo,
-                                providerInfoList = uiState.providerInfoList,
-                                activeEntry = uiState.activeEntry,
-                                onEntrySelected = viewModel::onEntrySelected,
-                                onConfirm = viewModel::onConfirmEntrySelected,
-                                onMoreOptionSelected = viewModel::onMoreOptionSelected,
+                                requestDisplayInfo = getCredentialUiState.requestDisplayInfo,
+                                providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
+                                providerInfoList = getCredentialUiState.providerInfoList,
+                                activeEntry = getCredentialUiState.activeEntry,
+                                onEntrySelected = viewModel::getFlowOnEntrySelected,
+                                onConfirm = viewModel::getFlowOnConfirmEntrySelected,
+                                onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
                             )
                         } else {
                             AllSignInOptionCard(
-                                providerInfoList = uiState.providerInfoList,
-                                providerDisplayInfo = uiState.providerDisplayInfo,
-                                onEntrySelected = viewModel::onEntrySelected,
-                                onBackButtonClicked = viewModel::onBackToPrimarySelectionScreen,
+                                providerInfoList = getCredentialUiState.providerInfoList,
+                                providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
+                                onEntrySelected = viewModel::getFlowOnEntrySelected,
+                                onBackButtonClicked =
+                                viewModel::getFlowOnBackToPrimarySelectionScreen,
                                 onCancel = viewModel::onCancel,
-                                isNoAccount = uiState.isNoAccount,
+                                isNoAccount = getCredentialUiState.isNoAccount,
                             )
                         }
                     }
                     ProviderActivityState.READY_TO_LAUNCH -> {
                         // Launch only once per providerActivityState change so that the provider
                         // UI will not be accidentally launched twice.
-                        LaunchedEffect(uiState.providerActivityState) {
+                        LaunchedEffect(viewModel.uiState.providerActivityState) {
                             viewModel.launchProviderUi(providerActivityLauncher)
                         }
                     }
@@ -128,17 +122,11 @@ fun GetCredentialScreen(
                     }
                 }
             },
-            scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
-            sheetShape = EntryShape.TopRoundedCorner,
-        ) {}
-        LaunchedEffect(state.currentValue) {
-            if (state.currentValue == ModalBottomSheetValue.Hidden) {
-                viewModel.onCancel()
-            }
-        }
+            onDismiss = viewModel::onCancel,
+        )
     } else {
         SnackBarScreen(
-            onClick = viewModel::onMoreOptionOnSnackBarSelected,
+            onClick = viewModel::getFlowOnMoreOptionOnSnackBarSelected,
             onCancel = viewModel::onCancel,
         )
     }
@@ -150,8 +138,8 @@ fun PrimarySelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
     providerDisplayInfo: ProviderDisplayInfo,
     providerInfoList: List<ProviderInfo>,
-    activeEntry: EntryInfo?,
-    onEntrySelected: (EntryInfo) -> Unit,
+    activeEntry: BaseEntry?,
+    onEntrySelected: (BaseEntry) -> Unit,
     onConfirm: () -> Unit,
     onMoreOptionSelected: () -> Unit,
 ) {
@@ -279,7 +267,7 @@ fun PrimarySelectionCard(
 fun AllSignInOptionCard(
     providerInfoList: List<ProviderInfo>,
     providerDisplayInfo: ProviderDisplayInfo,
-    onEntrySelected: (EntryInfo) -> Unit,
+    onEntrySelected: (BaseEntry) -> Unit,
     onBackButtonClicked: () -> Unit,
     onCancel: () -> Unit,
     isNoAccount: Boolean,
@@ -378,7 +366,7 @@ fun AllSignInOptionCard(
 @Composable
 fun ActionChips(
     providerInfoList: List<ProviderInfo>,
-    onEntrySelected: (EntryInfo) -> Unit,
+    onEntrySelected: (BaseEntry) -> Unit,
 ) {
     val actionChips = providerInfoList.flatMap { it.actionEntryList }
     if (actionChips.isEmpty()) {
@@ -406,7 +394,7 @@ fun ActionChips(
 @Composable
 fun RemoteEntryCard(
     remoteEntry: RemoteEntryInfo,
-    onEntrySelected: (EntryInfo) -> Unit,
+    onEntrySelected: (BaseEntry) -> Unit,
 ) {
     TextSecondary(
         text = stringResource(R.string.get_dialog_heading_from_another_device),
@@ -448,7 +436,7 @@ fun RemoteEntryCard(
 @Composable
 fun LockedCredentials(
     authenticationEntryList: List<AuthenticationEntryInfo>,
-    onEntrySelected: (EntryInfo) -> Unit,
+    onEntrySelected: (BaseEntry) -> Unit,
 ) {
     TextSecondary(
         text = stringResource(R.string.get_dialog_heading_locked_password_managers),
@@ -473,7 +461,7 @@ fun LockedCredentials(
 @Composable
 fun PerUserNameCredentials(
     perUserNameCredentialEntryList: PerUserNameCredentialEntryList,
-    onEntrySelected: (EntryInfo) -> Unit,
+    onEntrySelected: (BaseEntry) -> Unit,
 ) {
     TextSecondary(
         text = stringResource(
@@ -501,7 +489,7 @@ fun PerUserNameCredentials(
 @Composable
 fun CredentialEntryRow(
     credentialEntryInfo: CredentialEntryInfo,
-    onEntrySelected: (EntryInfo) -> Unit,
+    onEntrySelected: (BaseEntry) -> Unit,
 ) {
     Entry(
         onClick = { onEntrySelected(credentialEntryInfo) },
@@ -557,7 +545,7 @@ fun CredentialEntryRow(
 @Composable
 fun AuthenticationEntryRow(
     authenticationEntryInfo: AuthenticationEntryInfo,
-    onEntrySelected: (EntryInfo) -> Unit,
+    onEntrySelected: (BaseEntry) -> Unit,
 ) {
     Entry(
         onClick = { onEntrySelected(authenticationEntryInfo) },
@@ -601,7 +589,7 @@ fun AuthenticationEntryRow(
 @Composable
 fun ActionEntryRow(
     actionEntryInfo: ActionEntryInfo,
-    onEntrySelected: (EntryInfo) -> Unit,
+    onEntrySelected: (BaseEntry) -> Unit,
 ) {
     TransparentBackgroundEntry(
         icon = {

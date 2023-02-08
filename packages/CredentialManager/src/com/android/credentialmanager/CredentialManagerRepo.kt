@@ -35,6 +35,7 @@ import android.credentials.ui.BaseDialogResult
 import android.credentials.ui.ProviderPendingIntentResponse
 import android.credentials.ui.UserSelectionDialogResult
 import android.net.Uri
+import android.os.IBinder
 import android.os.Binder
 import android.os.Bundle
 import android.os.ResultReceiver
@@ -52,19 +53,21 @@ import java.time.Instant
 class CredentialManagerRepo(
     private val context: Context,
     intent: Intent,
+    userConfigRepo: UserConfigRepo,
 ) {
     val requestInfo: RequestInfo
     private val providerEnabledList: List<ProviderData>
     private val providerDisabledList: List<DisabledProviderData>?
-
     // TODO: require non-null.
     val resultReceiver: ResultReceiver?
+
+    var initialUiState: UiState
 
     init {
         requestInfo = intent.extras?.getParcelable(
             RequestInfo.EXTRA_REQUEST_INFO,
             RequestInfo::class.java
-        ) ?: testCreatePasswordRequestInfo()
+        ) ?: testGetRequestInfo()
 
         providerEnabledList = when (requestInfo.type) {
             RequestInfo.TYPE_CREATE ->
@@ -93,6 +96,35 @@ class CredentialManagerRepo(
             Constants.EXTRA_RESULT_RECEIVER,
             ResultReceiver::class.java
         )
+
+        initialUiState = when (requestInfo.type) {
+            RequestInfo.TYPE_CREATE -> {
+                val defaultProviderId = userConfigRepo.getDefaultProviderId()
+                val isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
+                val providerEnableListUiState = getCreateProviderEnableListInitialUiState()
+                val providerDisableListUiState = getCreateProviderDisableListInitialUiState()
+                val requestDisplayInfoUiState = getCreateRequestDisplayInfoInitialUiState()!!
+                UiState(
+                    createCredentialUiState = CreateFlowUtils.toCreateCredentialUiState(
+                        providerEnableListUiState,
+                        providerDisableListUiState,
+                        defaultProviderId,
+                        requestDisplayInfoUiState,
+                        /** isOnPasskeyIntroStateAlready = */ false,
+                        isPasskeyFirstUse)!!,
+                    getCredentialUiState = null,
+                )
+            }
+            RequestInfo.TYPE_GET -> UiState(
+                createCredentialUiState = null,
+                getCredentialUiState = getCredentialInitialUiState()!!,
+            )
+            else -> throw IllegalStateException("Unrecognized request type: ${requestInfo.type}")
+        }
+    }
+
+    fun initState(): UiState {
+        return initialUiState
     }
 
     // The dialog is canceled by the user.
@@ -110,9 +142,7 @@ class CredentialManagerRepo(
     }
 
     fun onCancel(cancelCode: Int) {
-        val resultData = Bundle()
-        BaseDialogResult.addToBundle(BaseDialogResult(requestInfo.token), resultData)
-        resultReceiver?.send(cancelCode, resultData)
+        sendCancellationCode(cancelCode, requestInfo.token, resultReceiver)
     }
 
     fun onOptionSelected(
@@ -129,15 +159,15 @@ class CredentialManagerRepo(
             entrySubkey,
             if (resultCode != null) ProviderPendingIntentResponse(resultCode, resultData) else null
         )
-        val resultData = Bundle()
-        UserSelectionDialogResult.addToBundle(userSelectionDialogResult, resultData)
+        val resultDataBundle = Bundle()
+        UserSelectionDialogResult.addToBundle(userSelectionDialogResult, resultDataBundle)
         resultReceiver?.send(
             BaseDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION,
-            resultData
+            resultDataBundle
         )
     }
 
-    fun getCredentialInitialUiState(): GetCredentialUiState? {
+    private fun getCredentialInitialUiState(): GetCredentialUiState? {
         val providerEnabledList = GetFlowUtils.toProviderList(
             // TODO: handle runtime cast error
             providerEnabledList as List<GetCredentialProviderData>, context
@@ -149,7 +179,7 @@ class CredentialManagerRepo(
         )
     }
 
-    fun getCreateProviderEnableListInitialUiState(): List<EnabledProviderInfo> {
+    private fun getCreateProviderEnableListInitialUiState(): List<EnabledProviderInfo> {
         val providerEnabledList = CreateFlowUtils.toEnabledProviderList(
             // Handle runtime cast error
             providerEnabledList as List<CreateCredentialProviderData>, context
@@ -157,15 +187,29 @@ class CredentialManagerRepo(
         return providerEnabledList
     }
 
-    fun getCreateProviderDisableListInitialUiState(): List<DisabledProviderInfo> {
+    private fun getCreateProviderDisableListInitialUiState(): List<DisabledProviderInfo> {
         return CreateFlowUtils.toDisabledProviderList(
             // Handle runtime cast error
             providerDisabledList, context
         )
     }
 
-    fun getCreateRequestDisplayInfoInitialUiState(): RequestDisplayInfo? {
+    private fun getCreateRequestDisplayInfoInitialUiState(): RequestDisplayInfo? {
         return CreateFlowUtils.toRequestDisplayInfo(requestInfo, context)
+    }
+
+    companion object {
+        fun sendCancellationCode(
+            cancelCode: Int,
+            requestToken: IBinder?,
+            resultReceiver: ResultReceiver?
+        ) {
+            if (requestToken != null && resultReceiver != null) {
+                val resultData = Bundle()
+                BaseDialogResult.addToBundle(BaseDialogResult(requestToken), resultData)
+                resultReceiver.send(cancelCode, resultData)
+            }
+        }
     }
 
     // TODO: below are prototype functionalities. To be removed for productionization.
@@ -240,8 +284,10 @@ class CredentialManagerRepo(
                             "Elisa Beckett", Instant.ofEpochSecond(500L)
                         ),
                     )
-                ).setAuthenticationEntry(
-                    GetTestUtils.newAuthenticationEntry(context, "key2", "subkey-1")
+                ).setAuthenticationEntries(
+            listOf<Entry>(
+                    GetTestUtils.newAuthenticationEntry(context, "key2", "subkey-1"),
+            )
                 ).setActionChips(
                     listOf(
                         GetTestUtils.newActionEntry(
@@ -268,8 +314,10 @@ class CredentialManagerRepo(
                             Instant.ofEpochSecond(11000L)
                         ),
                     )
-                ).setAuthenticationEntry(
-                    GetTestUtils.newAuthenticationEntry(context, "key2", "subkey-1")
+                ).setAuthenticationEntries(
+                     listOf<Entry>(
+                    GetTestUtils.newAuthenticationEntry(context, "key2", "subkey-1"),
+                     )
                 ).setActionChips(
                     listOf(
                         GetTestUtils.newActionEntry(

@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -138,10 +139,14 @@ class DisplayWindowPolicyControllerHelper {
                 true /* includeOverlays */);
         if (topActivity != mTopRunningActivity) {
             mTopRunningActivity = topActivity;
-            mDisplayWindowPolicyController.onTopActivityChanged(
-                    topActivity == null ? null : topActivity.info.getComponentName(),
-                    topActivity == null
-                            ? UserHandle.USER_NULL : topActivity.info.applicationInfo.uid);
+            if (topActivity == null) {
+                mDisplayWindowPolicyController.onTopActivityChanged(null, Process.INVALID_UID,
+                        UserHandle.USER_NULL);
+            } else {
+                mDisplayWindowPolicyController.onTopActivityChanged(
+                        topActivity.info.getComponentName(), topActivity.info.applicationInfo.uid,
+                        topActivity.mUserId);
+            }
         }
 
         // Update running uid.

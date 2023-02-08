@@ -459,14 +459,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Permite que la app acceda a datos del sensor corporal, como el ritmo cardíaco, la temperatura y el porcentaje de oxígeno en sangre, mientras la app está en uso."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Accede a datos del sensor corporal, como el ritmo cardíaco, en segundo plano"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Permite que la app acceda a datos del sensor corporal, como el ritmo cardíaco, la temperatura y el porcentaje de oxígeno en sangre, mientras la app está en segundo plano."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Accede a los datos de temperatura de la muñeca del sensor corporal mientras la app está en uso."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Permite que, mientras esté en uso, la app acceda a los datos de temperatura de la muñeca del sensor corporal."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Accede a los datos de temperatura de la muñeca del sensor corporal mientras la app está en segundo plano."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Permite que, mientras esté en segundo plano, la app acceda a los datos de temperatura de la muñeca del sensor corporal."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Leer eventos y detalles del calendario"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Esta app puede leer todos los eventos del calendario de tu tablet y compartir o guardar los datos correspondientes."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Esta app puede leer todos los eventos del calendario guardados en el dispositivo Android TV, así como compartir o almacenar los datos correspondientes."</string>
@@ -1250,10 +1246,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Iniciando Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Iniciando tablet…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Iniciando dispositivo…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Optimizando almacenamiento"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Finalizando actualización del sistema…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Se está actualizando <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Optimizando la aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"Preparando <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando aplicaciones"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finalizando el inicio"</string>
@@ -1851,6 +1845,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualización en pantalla completa"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para salir, desliza el dedo hacia abajo desde la parte superior."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Entendido"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Gira la pantalla para obtener una mejor vista"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Sal de la pantalla dividida para obtener una mejor vista"</string>
     <string name="done_label" msgid="7283767013231718521">"Listo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Control deslizante circular de horas"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Control deslizante circular de minutos"</string>
@@ -1862,6 +1858,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 3"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Clon de <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Solicitar PIN para quitar fijación"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Solicitar desbloqueo para quitar fijación"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Solicitar contraseña para quitar fijación"</string>
@@ -2316,4 +2313,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permite que una aplicación complementaria inicie servicios en primer plano desde el segundo plano."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"El micrófono está disponible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"El micrófono está bloqueado"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

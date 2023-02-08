@@ -200,7 +200,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final WindowSurfaceController surfaceController = mock(WindowSurfaceController.class);
         doReturn(true).when(surfaceController).hasSurface();
         spyOn(win);
-        doReturn(true).when(win).isExitAnimationRunningSelfOrParent();
+        doReturn(true).when(win).isAnimationRunningSelfOrParent();
         win.mWinAnimator.mSurfaceController = surfaceController;
         win.mViewVisibility = View.VISIBLE;
         win.mHasSurface = true;

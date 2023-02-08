@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Հավելվածին հասանելի է դարձնում մարմնի սենսորների տվյալները (օրինակ՝ սրտի զարկերի հաճախականությունը, ջերմաստիճանը, արյան մեջ թթվածնի տոկոսային պարունակության ցուցանիշները) հավելվածի օգտագործման ժամանակ։"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Մարմնի սենսորների տվյալների հասանելիություն ֆոնային ռեժիմում"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Հավելվածին հասանելի է դարձնում մարմնի սենսորների տվյալները (օրինակ՝ սրտի զարկերի հաճախականությունը, ջերմաստիճանը, արյան մեջ թթվածնի տոկոսային պարունակության ցուցանիշները), երբ հավելվածն աշխատում է ֆոնային ռեժիմում։"</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալների հասանելիություն հավելվածի օգտագործման ընթացքում։"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Գործարկված հավելվածին հասանելի է դարձնում մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալները։"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալների հասանելիություն ֆոնային ռեժիմում։"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Ֆոնային ռեժիմում գործարկված հավելվածին հասանելի է դարձնում մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալները։"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Կարդալ օրացույցի միջոցառումները և տվյալները"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր պլանշետում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր Android TV սարքում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android-ը մեկնարկում է…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Պլանշետը միանում է…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Սարքը միանում է…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Պահեստի օպտիմալացում:"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Համակարգի թարմացումը շուտով կվերջանա…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածը նորացվում է…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Օպտիմալացվում է հավելված <xliff:g id="NUMBER_0">%1$d</xliff:g>-ը <xliff:g id="NUMBER_1">%2$d</xliff:g>-ից:"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը պատրաստվում է:"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Հավելվածները մեկնարկում են:"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Բեռնումն ավարտվում է:"</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Լիաէկրան դիտում"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Դուրս գալու համար վերևից սահահարվածեք դեպի ներքև:"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Պարզ է"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Պտտեք՝ դիտակերպը լավացնելու համար"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Դուրս եկեք կիսված էկրանի ռեժիմից՝ դիտակերպը լավացնելու համար"</string>
     <string name="done_label" msgid="7283767013231718521">"Պատրաստ է"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Ժամերի ընտրություն թվատախտակից"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Րոպեների ընտրություն թվատախտակից"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Աշխատանքային <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2-րդ աշխատանք <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3-րդ աշխատանք <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Հարցնել PIN կոդը"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Հարցնել ապակողպող նախշը"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Հարցնել գաղտնաբառը"</string>
@@ -2315,4 +2313,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Թույլատրում է ուղեկցող հավելվածին ակտիվ ծառայություններ գործարկել ֆոնային ռեժիմից։"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Խոսափողը հասանելի է"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Խոսափողն արգելափակված է"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

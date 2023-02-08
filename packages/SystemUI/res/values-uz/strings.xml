@@ -91,8 +91,15 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Quyi chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Chap chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Oʻng chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Ish skrinshotlari <xliff:g id="APP">%1$s</xliff:g> ilovasida saqlanadi"</string>
+    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
+    <skip />
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Fayllar"</string>
+    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
+    <skip />
+    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
+    <skip />
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrandan yozib olish"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran yozib olinmoqda"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
@@ -339,12 +346,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Yuz aniqlandi. Ochish uchun ochish belgisini bosing."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Yuz bilan ochildi"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Yuz aniqlandi"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Chapga siljitish"</item>
-    <item msgid="5558598599408514296">"Pastga siljitish"</item>
-    <item msgid="4844142668312841831">"Oʻngga siljitish"</item>
-    <item msgid="5640521437931460125">"Tepaga siljitish"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Qayta urinish uchun tepaga suring"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ishlatish uchun qurilma qulfini oching"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Bu qurilma tashkilotingizga tegishli"</string>
@@ -832,10 +833,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Boshqaruv elementlarini kiritish uchun ilovani tanlang"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# ta boshqaruv elementi kiritildi.}other{# ta boshqaruv elementi kiritildi.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Olib tashlandi"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> qoʻshilsinmi?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"<xliff:g id="APPNAME">%s</xliff:g> bu panelga boshqaruv elementlari va kontent qoʻshishi mumkin. Ayrim ilovalarda bu yerda qaysi elementlar chiqishini tanlashingiz mumkin."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Saralanganlarga kiritilgan"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Saralanganlarga kiritilgan, <xliff:g id="NUMBER">%d</xliff:g>-joy"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Saralanganlardan olib tashlangan"</string>
@@ -886,6 +885,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ilovasini ochish"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g> ilovasida ijro etish: <xliff:g id="SONG_NAME">%1$s</xliff:g> – <xliff:g id="ARTIST_NAME">%2$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> ilovasida ijro etilmoqda: <xliff:g id="SONG_NAME">%1$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Siz uchun"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Qaytarish"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> qurilmasida ijro qilish uchun unga yaqinlashing"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Shu yerda ijro qilish uchun <xliff:g id="DEVICENAME">%1$s</xliff:g>ga yaqinroq suring"</string>
@@ -902,8 +902,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Xato, qayta urining"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Element kiritish"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Elementlarni tahrirlash"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Ilova kiritish"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Chiquvchi qurilmani kiritish"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Guruh"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 ta qurilma tanlandi"</string>
@@ -919,7 +918,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Karnaylar va displeylar"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Taklif qilingan qurilmalar"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Premium hisob talab etiladi"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Translatsiya qanday ishlaydi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Translatsiya"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Atrofingizdagi mos Bluetooth qurilmasiga ega foydalanuvchilar siz translatsiya qilayotgan mediani tinglay olishadi"</string>
@@ -1031,6 +1029,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera yoqilmagan"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofon yoqilmagan"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera va mikrofon yoqilmagan"</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistent tinglamoqda"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# ta bildirishnoma}other{# ta bildirishnoma}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Eslatma yozish"</string>
@@ -1046,6 +1045,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Bir matalik foydalanishga ruxsat berish"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Rad etish"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi."</string>
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Batafsil"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Batafsil: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Ochish: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Ilova sozlangan"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Kamida bitta kartochka Wallet xizmatiga qoʻshilgan"</string>
@@ -1054,10 +1055,10 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Kamida bitta qurilma mavjud"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Bosib turish yorligʻi"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Bekor qilish"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Hozir aylantirish"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Almashtirish"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Yaxshiroq selfi olish uchun telefonni yoying"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Old ekran sizga qaragan holda aylantirdingizmi?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Keng va yuqori tiniqlikdagi suratga olish uchun orqa kameradan foydalaning."</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Yaxshiroq selfi uchun old ekranga almashilsinmi?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Keng burchakli va yuqori aniqlikda suratga olish uchun orqa kameradan foydalaning."</string>
     <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Bu ekran oʻchiriladi"</b></string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Buklanadigan qurilma ochilmoqda"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Buklanadigan qurilma aylantirilmoqda"</string>
@@ -1069,6 +1070,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Ishga oid siyosatingiz faqat ish profilidan telefon chaqiruvlarini amalga oshirish imkonini beradi"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Ish profiliga almashish"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Yopish"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Qulflangan ekran sozlamalari"</string>
 </resources>

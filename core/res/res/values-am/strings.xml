@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"መተግበሪያው ስራ ላይ በሚውልበት ጊዜ እንደ የልብ ምት፣ የሙቀት መጠን እና የደም ኦክሲጅን መቶኛ ያለ የሰውነት ዳሳሽ ውሂብን እንዲደርስ ያስችለዋል።"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ከበስተጀርባ እያለ እንደ የልብ ምት ያለ የሰውነት ዳሳሽ ውሂብን መድረስ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"መተግበሪያው ከበስተጀርባ እያለ እንደ የልብ ምት፣ የሙቀት መጠን እና የደም ኦክሲጅን መቶኛ ያለ የሰውነት ዳሳሽ ውሂብን እንዲደርስ ያስችለዋል።"</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"መተግበሪያው በጥቅም ላይ ሳለ የሰውነት ዳሳሽ የአንጓ የሙቀት መጠን ውሂብን ይድረስ።"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"መተግበሪያው በጥቅም ላይ ሳለ መተግበሪያው የሰውነት ዳሳሽ የአንጓ የሙቀት መጠን ውሂብን እንዲደርስ ይፈቅድለታል።"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"መተግበሪያው ዳራ ውስጥ ሳለ የሰውነት ዳሳሽ የአንጓ የሙቀት መጠን ውሂብን ይድረስ።"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"መተግበሪያው በዳራ ውስጥ ሳለ መተግበሪያው የሰውነት ዳሳሽ የአንጓ የሙቀት መጠን ውሂብን እንዲደርስ ይፈቅድለታል።"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"የቀን መቁጠሪያ ክስተቶችን እና ዝርዝሮችን አንብብ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ይህ መተግበሪያ ሁሉንም በእርስዎ ጡባዊ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ይህ መተግበሪያ ሁሉንም በእርስዎ Android TV መሣሪያ ላይ የተከማቹ የቀን መቁጠሪያ ክስተቶችን ማንበብ ወይም የእርስዎን የቀን መቁጠሪያ ውሂብ ማስቀመጥ ይችላል።"</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android በመጀመር ላይ ነው…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ጡባዊ በመጀመር ላይ ነው…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"መሣሪያ በመጀመር ላይ ነው…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"ማከማቻን በማመቻቸት ላይ።"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"የስርዓት ዝማኔን በመጨረስ ላይ…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> በማላቅ ላይ…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"መተግበሪያዎች በአግባቡ በመጠቀም ላይ <xliff:g id="NUMBER_0">%1$d</xliff:g> ከ <xliff:g id="NUMBER_1">%2$d</xliff:g> ፡፡"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>ን ማዘጋጀት።"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"መተግበሪያዎችን በማስጀመር ላይ፡፡"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"አጨራረስ ማስነሻ፡፡"</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"ሙሉ ገጽ በማሳየት ላይ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ለመውጣት፣ ከላይ ወደታች ጠረግ ያድርጉ።"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ገባኝ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ለተሻለ ዕይታ ያሽከርክሩ"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ለተሻለ ዕይታ የተከፈለ ማያ ገጽን ትተው ይውጡ"</string>
     <string name="done_label" msgid="7283767013231718521">"ተከናውኗል"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"የሰዓታት ክብ ተንሸራታች"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"የደቂቃዎች ክብ ተንሸራታች"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"ስራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2ኛ ስራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3ኛ ስራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ከመንቀል በፊት ፒን ጠይቅ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ከመንቀል በፊት የማስከፈቻ ስርዓተ-ጥለት ጠይቅ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ከመንቀል በፊት የይለፍ ቃል ጠይቅ"</string>
@@ -2315,4 +2313,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"አጃቢ መተግበሪያ ከዳራ የፊት አገልግሎቶችን እንዲጀምር ያስችላል።"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"ማይክሮፎን ይገኛል"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ማይክሮፎን ታግዷል"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

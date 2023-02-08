@@ -133,18 +133,15 @@ public final class TvInputManager {
             VIDEO_UNAVAILABLE_REASON_CAS_REBOOTING, VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN})
     public @interface VideoUnavailableReason {}
 
-    /**
-     * @hide
-     */
+    /** Indicates that this TV message contains watermarking data */
     public static final String TV_MESSAGE_TYPE_WATERMARK = "Watermark";
-    /**
-     * @hide
-     */
-    public static final String TV_MESSAGE_TYPE_ATSC_CC = "ATSC_CC";
+
+    /** Indicates that this TV message contains Closed Captioning data */
+    public static final String TV_MESSAGE_TYPE_CLOSED_CAPTION = "CC";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TV_MESSAGE_TYPE_WATERMARK, TV_MESSAGE_TYPE_ATSC_CC})
+    @StringDef({TV_MESSAGE_TYPE_WATERMARK, TV_MESSAGE_TYPE_CLOSED_CAPTION})
     public @interface TvMessageType {}
 
     static final int VIDEO_UNAVAILABLE_REASON_START = 0;
@@ -792,11 +789,11 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when the session receives a new Tv Message
+         * This is called when the session receives a new TV Message
          *
-         * @param type the type of {@link TvMessageType}
-         * @param data the raw data of the message
-         * @hide
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param type The type of message received, such as {@link #TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The raw data of the message
          */
         public void onTvMessage(Session session, @TvInputManager.TvMessageType String type,
                 Bundle data) {

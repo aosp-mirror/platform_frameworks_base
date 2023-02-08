@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ایپ کے استعمال میں ہونے کے دوران ایپ کو حرکت قلب کی شرح، درجہ حرارت اور خون میں آکسیجن کا فیصد جیسے باڈی سینسر ڈیٹا تک رسائی کی اجازت دیتا ہے۔"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"پس منظر میں ہونے کے دوران حرکت قلب کی شرح جیسے باڈی سینسر ڈیٹا تک رسائی پائیں"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ایپ کے پس منظر میں ہونے کے دوران ایپ کو حرکت قلب کی شرح، درجہ حرارت اور خون میں آکسیجن کا فیصد جیسے باڈی سینسر ڈیٹا تک رسائی کی اجازت دیتا ہے۔"</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ایپ کے استعمال میں ہونے کے دوران، باڈی سینسر کلائی کے درجہ حرارت کے ڈیٹا تک رسائی حاصل کریں۔"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ایپ کے استعمال میں ہونے کے دوران، ایپ کو باڈی سینسر کلائی کے درجہ حرارت کے ڈیٹا تک رسائی کی اجازت دیتا ہے۔"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ایپ کے پس منظر میں ہونے کے دوران، باڈی سینسر کلائی کے درجہ حرارت کے ڈیٹا تک رسائی حاصل کریں۔"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ایپ کے پس منظر میں ہونے کے دوران، ایپ کو باڈی سینسر کلائی کے درجہ حرارت کے ڈیٹا تک رسائی کی اجازت دیتا ہے۔"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"کیلنڈر ایونٹس اور تفاصیل پڑھیں"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"یہ ایپ آپ کے ٹیبلیٹ پر اسٹور کردہ سبھی کیلنڈر ایونٹس کو پڑھ سکتی ہے اور آپ کے  کیلنڈر ڈیٹا کا اشتراک یا اسے محفوظ کر سکتی ہے۔"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"‏یہ ایپ آپ کے Android TV آلہ پر اسٹور کردہ سبھی کیلنڈر ایونٹس کو پڑھ سکتی ہے اور آپ کے کیلنڈر ڈیٹا کا اشتراک یا اسے محفوظ کر سکتی ہے۔"</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"‏Android شروع ہو رہا ہے…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ٹیبلیٹ شروع ہو رہا ہے…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"آلہ شروع ہو رہا ہے…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"اسٹوریج کو بہترین بنایا جا رہا ہے۔"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"سسٹم اپ ڈیٹ مکمل ہو رہا ہے…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> اپ گریڈ ہو رہی ہے…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"ایپ <xliff:g id="NUMBER_0">%1$d</xliff:g> از <xliff:g id="NUMBER_1">%2$d</xliff:g> کو بہتر بنایا جا رہا ہے۔"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> تیار ہو رہی ہے۔"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ایپس شروع ہو رہی ہیں۔"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"بوٹ مکمل ہو رہا ہے۔"</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"پوری اسکرین میں دیکھ رہے ہیں"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"خارج ہونے کیلئے اوپر سے نیچے سوائپ کریں۔"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"سمجھ آ گئی"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"بہتر منظر کے لیے گھمائیں"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"بہتر منظر کے لیے اسپلٹ اسکرین سے باہر نکلیں"</string>
     <string name="done_label" msgid="7283767013231718521">"ہو گیا"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"گھنٹوں کا سرکلر سلائیڈر"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"منٹس سرکلر سلائیڈر"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"دفتر <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"دوسرا کام <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"تیسرا کام <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"‏پن ہٹانے سے پہلے PIN طلب کریں"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"پن ہٹانے سے پہلے غیر مقفل کرنے کا پیٹرن طلب کریں"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"پن ہٹانے سے پہلے پاس ورڈ طلب کریں"</string>
@@ -2315,4 +2313,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ساتھی ایپ کو پس منظر سے پیش منظر کی سروسز شروع کرنے کی اجازت دیتی ہے۔"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"مائیکروفون دستیاب ہے"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"مائیکروفون مسدود ہے"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"دوہری اسکرین"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"دوہری اسکرین آن ہے"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> مواد دکھانے کیلئے دونوں ڈسپلیز استعمال کر رہی ہے"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"آلہ بہت زیادہ گرم ہے"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"دوہری اسکرین دستیاب نہیں ہے کیونکہ آپ کا فون بہت زیادہ گرم ہو رہا ہے"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"آف کریں"</string>
 </resources>

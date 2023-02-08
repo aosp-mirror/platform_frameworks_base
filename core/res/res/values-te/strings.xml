@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"యాప్ ఉపయోగంలో ఉన్నప్పుడు గుండె స్పందన రేటు, ఉష్ణోగ్రత, ఇంకా రక్తంలోని ఆక్సిజన్ శాతం వంటి శరీర సెన్సార్ డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"బ్యాక్‌గ్రౌండ్‌లో గుండె స్పందన రేటు వంటి శరీర సెన్సార్ డేటాను యాక్సెస్ చేయండి"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"యాప్ బ్యాక్‌గ్రౌండ్‌లో ఉన్నప్పుడు గుండె స్పందన రేటు, ఉష్ణోగ్రత, ఇంకా రక్తంలోని ఆక్సిజన్ శాతం వంటి శరీర సెన్సార్ డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"యాప్ వినియోగంలో ఉన్నప్పుడు, శరీర సెన్సార్ మణికట్టు ఉష్ణోగ్రత డేటాను యాక్సెస్ చేయండి."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"యాప్ వినియోగంలో ఉన్నప్పుడు, శరీర సెన్సార్ మణికట్టు ఉష్ణోగ్రత డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"యాప్ బ్యాక్‌గ్రౌండ్‌లో ఉన్నప్పుడు, శరీర సెన్సార్ మణికట్టు ఉష్ణోగ్రత డేటాను యాక్సెస్ చేయండి."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"యాప్ బ్యాక్‌గ్రౌండ్‌లో ఉన్నప్పుడు, శరీర సెన్సార్ మణికట్టు ఉష్ణోగ్రత డేటాను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"క్యాలెండర్ ఈవెంట్‌లు మరియు వివరాలను చదవడం"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ఈ యాప్ మీ టాబ్లెట్‌లో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు మరియు మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ఈ యాప్‌ మీ Android TV పరికరంలో నిల్వ చేసిన క్యాలెండర్ ఈవెంట్‌లన్నీ చదవగలదు, మీ క్యాలెండర్ డేటాను షేర్ చేయగలదు లేదా సేవ్ చేయగలదు."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android ప్రారంభమవుతోంది…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"టాబ్లెట్ ప్రారంభమవుతోంది…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"పరికరం ప్రారంభమవుతోంది…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"నిల్వను అనుకూలపరుస్తోంది."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"సిస్టమ్ అప్‌డేట్‌ని పూర్తి చేస్తోంది…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g>ని అప్‌గ్రేడ్ చేస్తోంది…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g>లో <xliff:g id="NUMBER_0">%1$d</xliff:g> యాప్‌ను అనుకూలీకరిస్తోంది."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g>ని సిద్ధం చేస్తోంది."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"యాప్‌లను ప్రారంభిస్తోంది."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"బూట్‌ను ముగిస్తోంది."</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"ఫుల్-స్క్రీన్‌లో వీక్షిస్తున్నారు"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"నిష్క్రమించడానికి, పై నుండి క్రిందికి స్వైప్ చేయండి."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"అర్థమైంది"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"మెరుగైన వీక్షణ కోసం తిప్పండి"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"మెరుగైన వీక్షణ కోసం స్ప్లిట్ స్క్రీన్ నుండి నిష్క్రమించండి"</string>
     <string name="done_label" msgid="7283767013231718521">"పూర్తయింది"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"గంటల వృత్తాకార స్లయిడర్"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"నిమిషాల వృత్తాకార స్లయిడర్"</string>
@@ -1861,6 +1857,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"ఆఫీస్ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2వ కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3వ కార్యాలయం <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"క్లోన్ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"అన్‌పిన్ చేయడానికి ముందు పిన్‌ కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ ఆకృతి కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
@@ -2315,4 +2312,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"బ్యాక్‌గ్రౌండ్ నుండి ఫోర్‌గ్రౌండ్ సర్వీస్‌లను ప్రారంభించడానికి సహాయక యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"మైక్రోఫోన్ అందుబాటులో ఉంది"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"మైక్రోఫోన్ బ్లాక్ చేయబడింది"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

@@ -151,6 +151,29 @@ public abstract class PackageManager {
             "android.media.PROPERTY_MEDIA_CAPABILITIES";
 
     /**
+     * &lt;application&gt; level {@link android.content.pm.PackageManager.Property} tag
+     * specifying the XML resource ID containing the declaration of the self-certified network
+     * capabilities used by the application.
+     *
+     * <p> Starting from Android 14, usage of some network capabilities in
+     * {@link android.net.ConnectivityManager#requestNetwork} require the application to
+     * declare its usage of that particular capability in this resource. Only some capabilities
+     * require a declaration. Please look up the specific capability you want to use in
+     * {@link android.net.NetworkCapabilities} to see if it needs declaration in this property.
+     *
+     * For example:
+     * &lt;application&gt;
+     *   &lt;property android:name="android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES"
+     *     android:resource="@xml/self_certified_network_capabilities"&gt;
+     * &lt;application&gt;
+     *
+     * <p> The detail format of self_certified_network_capabilities.xml is described in
+     * {@link android.net.NetworkRequest}
+     */
+    public static final String PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES =
+            "android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES";
+
+    /**
      * Application level property that an app can specify to opt-out from having private data
      * directories both on the internal and external storages.
      *
@@ -717,7 +740,7 @@ public abstract class PackageManager {
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
             MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS,
-            GET_ATTRIBUTIONS,
+            GET_ATTRIBUTIONS_LONG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PackageInfoFlagsBits {}
@@ -1127,8 +1150,9 @@ public abstract class PackageManager {
     public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
     /**
-     * {@link PackageInfo} flag: return all attributions declared in the package manifest
+     * @deprecated Use {@link #GET_ATTRIBUTIONS_LONG} to avoid unintended sign extension.
      */
+    @Deprecated
     public static final int GET_ATTRIBUTIONS = 0x80000000;
 
     /** @hide */
@@ -1151,6 +1175,11 @@ public abstract class PackageManager {
      * for activation at next reboot.
      */
     public static final int MATCH_APEX = 0x40000000;
+
+    /**
+     * {@link PackageInfo} flag: return all attributions declared in the package manifest
+     */
+    public static final long GET_ATTRIBUTIONS_LONG = 0x80000000L;
 
     /**
      * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set: when

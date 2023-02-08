@@ -91,8 +91,12 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Donja ivica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Leva ivica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Desna ivica <xliff:g id="PERCENT">%1$d</xliff:g> posto"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"Snimci ekrana za posao se čuvaju u aplikaciji <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Sačuvano je u aplikaciji <xliff:g id="APP">%1$s</xliff:g> na poslovnom profilu"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Fajlovi"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"Aplikacija <xliff:g id="APPNAME">%1$s</xliff:g> je otkrila ovaj snimak ekrana."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> i druge otvorene aplikacije su otkrile ovaj snimak ekrana."</string>
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"Snimač ekrana"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrađujemo video snimka ekrana"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obaveštenje o sesiji snimanja ekrana je aktivno"</string>
@@ -339,12 +343,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"Lice prepoznato. Pritisnite ikonu otključavanja da biste otvorili."</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"Otključano je licem"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"Lice je prepoznato"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"Pomerite nalevo"</item>
-    <item msgid="5558598599408514296">"Pomerite nadole"</item>
-    <item msgid="4844142668312841831">"Pomerite nadesno"</item>
-    <item msgid="5640521437931460125">"Pomerite nagore"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"Prevucite nagore da biste probali ponovo"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da biste koristili NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ovaj uređaj pripada organizaciji"</string>
@@ -832,10 +830,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Odaberite aplikaciju za dodavanje kontrola"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{# kontrola je dodata.}one{# kontrola je dodata.}few{# kontrole su dodate.}other{# kontrola je dodato.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Uklonjeno"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"Želite li da dodate <xliff:g id="APPNAME">%s</xliff:g>?"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"Kada dodate aplikaciju <xliff:g id="APPNAME">%s</xliff:g>, ona može da dodaje kontrole i sadržaj u ovo okno. U nekim aplikacijama možete da izaberete koje će se kontrole ovde prikazivati."</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Označeno je kao omiljeno"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Označeno je kao omiljeno, <xliff:g id="NUMBER">%d</xliff:g>. pozicija"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Uklonjeno je iz omiljenih"</string>
@@ -886,6 +882,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"Otvorite <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g> izvođača <xliff:g id="ARTIST_NAME">%2$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Pustite <xliff:g id="SONG_NAME">%1$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"Za vas"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Opozovi"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Približite da biste puštali muziku na: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"Da biste puštali sadržaj ovde, približite uređaju <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
@@ -902,8 +899,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Greška. Probajte ponovo"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrole"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Izmeni kontrole"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Dodaj aplikaciju"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodajte izlaze"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupa"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Izabran je 1 uređaj"</string>
@@ -919,7 +915,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Zvučnici i ekrani"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Predloženi uređaji"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"Zahteva premijum nalog"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako funkcioniše emitovanje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Emitovanje"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ljudi u blizini sa kompatibilnim Bluetooth uređajima mogu da slušaju medijski sadržaj koji emitujete"</string>
@@ -1031,6 +1026,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera je isključena"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofon je isključen"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera i mikrofon su isključeni"</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Pomoćnik sluša"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# obaveštenje}one{# obaveštenje}few{# obaveštenja}other{# obaveštenja}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Pravljenje beležaka"</string>
@@ -1046,6 +1042,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Dozvoli jednokratan pristup"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Ne dozvoli"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Evidencije uređaja registruju šta se dešava na uređaju. Aplikacije mogu da koriste te evidencije da bi pronašle i rešile probleme.\n\nNeke evidencije mogu da sadrže osetljive informacije, pa pristup svim evidencijama uređaja treba da dozvoljavate samo aplikacijama u koje imate poverenja. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim evidencijama uređaja, ona i dalje može da pristupa sopstvenim evidencijama. Proizvođač uređaja će možda i dalje moći da pristupa nekim evidencijama ili informacijama na uređaju."</string>
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Saznajte više"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Saznajte više na <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Otvorite: <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• da je aplikacija podešena"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• da je u Novčanik dodata barem jedna kartica"</string>
@@ -1054,7 +1052,7 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• da je dostupan barem jedan uređaj"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Dodirnite i zadržite prečicu"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Otkaži"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Obrnite"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Obrni"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Otvorite telefon za bolji selfi"</string>
     <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Želite da obrnete na prednji ekran za bolji selfi?"</string>
     <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Koristite zadnju kameru da biste snimili širu sliku sa višom rezolucijom."</string>
@@ -1069,6 +1067,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Smernice za posao vam omogućavaju da telefonirate samo sa poslovnog profila"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Pređi na poslovni profil"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Zatvori"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"Podešavanja zaključanog ekrana"</string>
 </resources>

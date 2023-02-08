@@ -105,6 +105,15 @@
     <!-- Accessibility action for moving docked stack divider to make the bottom screen full screen [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_divider_bottom_full">Bottom full screen</string>
 
+    <!-- Accessibility label for splitting to the left drop zone [CHAR LIMIT=NONE] -->
+    <string name="accessibility_split_left">Split left</string>
+    <!-- Accessibility label for splitting to the right drop zone [CHAR LIMIT=NONE] -->
+    <string name="accessibility_split_right">Split right</string>
+    <!-- Accessibility label for splitting to the top drop zone [CHAR LIMIT=NONE] -->
+    <string name="accessibility_split_top">Split top</string>
+    <!-- Accessibility label for splitting to the bottom drop zone [CHAR LIMIT=NONE] -->
+    <string name="accessibility_split_bottom">Split bottom</string>
+
     <!-- One-Handed Tutorial title [CHAR LIMIT=60] -->
     <string name="one_handed_tutorial_title">Using one-handed mode</string>
     <!-- One-Handed Tutorial description [CHAR LIMIT=NONE] -->

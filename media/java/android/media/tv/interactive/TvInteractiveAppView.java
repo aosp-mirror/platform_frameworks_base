@@ -918,6 +918,25 @@ public class TvInteractiveAppView extends ViewGroup {
         }
     }
 
+    /**
+     * This is called to notify the corresponding interactive app service when a new TV message
+     * is received.
+     *
+     * @param type The type of message received, such as
+     * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+     * @param data The raw data of the message
+     */
+    public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+            @NonNull Bundle data) {
+        if (DEBUG) {
+            Log.d(TAG, "notifyTvMessage type=" + type
+                    + "; data=" + data);
+        }
+        if (mSession != null) {
+            mSession.notifyTvMessage(type, data);
+        }
+    }
+
     private void resetInternal() {
         mSessionCallback = null;
         if (mSession != null) {

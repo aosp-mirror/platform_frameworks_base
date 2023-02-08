@@ -91,8 +91,12 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"အောက်ခြေအနားသတ် <xliff:g id="PERCENT">%1$d</xliff:g> ရာခိုင်နှုန်း"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ဘယ်ဘက်အနားသတ် <xliff:g id="PERCENT">%1$d</xliff:g> ရာခိုင်နှုန်း"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"ညာဘက်အနားသတ် <xliff:g id="PERCENT">%1$d</xliff:g> ရာခိုင်နှုန်း"</string>
-    <string name="screenshot_work_profile_notification" msgid="2812417845875653929">"အလုပ်နှင့်ဆိုင်သော ဖန်သားပြင်ဓာတ်ပုံများကို <xliff:g id="APP">%1$s</xliff:g> အက်ပ်တွင် သိမ်းသည်"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"အလုပ်ပရိုဖိုင်ရှိ <xliff:g id="APP">%1$s</xliff:g> တွင် သိမ်းထားသည်"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ဖိုင်များ"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> က ဤဖန်သားပြင်ဓာတ်ပုံကို တွေ့ရှိသည်။"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> နှင့် အခြားဖွင့်ထားသော အက်ပ်များက ဤဖန်သားပြင်ဓာတ်ပုံကို တွေ့ရှိသည်။"</string>
+    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"ဖန်သားပြင် ရိုက်ကူးမှု"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"စကရင်ရိုက်ကူးမှု အပြီးသတ်နေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
@@ -339,12 +343,6 @@
     <string name="keyguard_face_successful_unlock_press_alt_3" msgid="7219030481255573962">"မျက်နှာ မှတ်မိသည်။ ဖွင့်ရန် လော့ခ်ဖွင့်သင်္ကေတကို နှိပ်ပါ။"</string>
     <string name="keyguard_face_successful_unlock" msgid="4203999851465708287">"မျက်နှာဖြင့် ဖွင့်လိုက်သည်"</string>
     <string name="keyguard_face_successful_unlock_alt1" msgid="5853906076353839628">"မျက်နှာ မှတ်မိသည်"</string>
-  <string-array name="udfps_accessibility_touch_hints">
-    <item msgid="1901953991150295169">"ဘယ်ဘက်သို့ရွှေ့ရန်"</item>
-    <item msgid="5558598599408514296">"အောက်သို့ရွှေ့ရန်"</item>
-    <item msgid="4844142668312841831">"ညာဘက်သို့ရွှေ့ရန်"</item>
-    <item msgid="5640521437931460125">"အပေါ်သို့ရွှေ့ရန်"</item>
-  </string-array>
     <string name="keyguard_retry" msgid="886802522584053523">"ထပ်စမ်းကြည့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ကို အသုံးပြုရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ဤစက်ကို သင့်အဖွဲ့အစည်းက ပိုင်ဆိုင်သည်"</string>
@@ -832,10 +830,8 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"ထိန်းချုပ်မှုများထည့်ရန် အက်ပ်ရွေးခြင်း"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{ထိန်းချုပ်ခလုတ် # ခု ထည့်ထားသည်။}other{ထိန်းချုပ်ခလုတ် # ခု ထည့်ထားသည်။}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"ဖယ်ရှားထားသည်"</string>
-    <!-- no translation found for controls_panel_authorization_title (267429338785864842) -->
-    <skip />
-    <!-- no translation found for controls_panel_authorization (4540047176861801815) -->
-    <skip />
+    <string name="controls_panel_authorization_title" msgid="267429338785864842">"<xliff:g id="APPNAME">%s</xliff:g> ထည့်မလား။"</string>
+    <string name="controls_panel_authorization" msgid="4540047176861801815">"<xliff:g id="APPNAME">%s</xliff:g> ထည့်သောအခါ ၎င်းသည် ဤအကန့်တွင် သတ်မှတ်ချက်များနှင့် အကြောင်းအရာကို ထည့်နိုင်သည်။ အက်ပ်အချို့၌ မြင်ရမည့် သတ်မှတ်ချက်များကို ဤနေရာတွင် ရွေးနိုင်သည်။"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"အကြိုက်ဆုံးတွင် ထည့်ထားသည်"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"အကြိုက်ဆုံးတွင် ထည့်ထားသည်၊ အဆင့် <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"အကြိုက်ဆုံးမှ ဖယ်ရှားထားသည်"</string>
@@ -886,6 +882,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ကို ဖွင့်ပါ"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> ၏ <xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%3$s</xliff:g> တွင် ဖွင့်ပါ"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> ကို <xliff:g id="APP_LABEL">%2$s</xliff:g> တွင် ဖွင့်ပါ"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"သင့်အတွက်"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"နောက်ပြန်ရန်"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> တွင်ဖွင့်ရန် အနီးသို့ရွှေ့ပါ"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"ဤနေရာတွင် ဖွင့်ရန် <xliff:g id="DEVICENAME">%1$s</xliff:g> အနီးသို့ ရွှေ့ပါ"</string>
@@ -902,8 +899,7 @@
     <string name="controls_error_failed" msgid="960228639198558525">"မှားသွားသည်၊ ပြန်စမ်းကြည့်ပါ"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"ထိန်းချုပ်မှုများ ထည့်ရန်"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"ထိန်းချုပ်မှုများ ပြင်ရန်"</string>
-    <!-- no translation found for controls_menu_add_another_app (8661172304650786705) -->
-    <skip />
+    <string name="controls_menu_add_another_app" msgid="8661172304650786705">"အက်ပ်ထည့်ရန်"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"မီဒီယာအထွက်များ ထည့်ရန်"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"အုပ်စု"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"စက်ပစ္စည်း ၁ ခုကို ရွေးချယ်ထားသည်"</string>
@@ -919,7 +915,6 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"စပီကာနှင့် ဖန်သားပြင်များ"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"အကြံပြုထားသော စက်ပစ္စည်းများ"</string>
-    <string name="media_output_status_require_premium" msgid="5691200962588753380">"ပရီမီယံအကောင့် လိုအပ်သည်"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ထုတ်လွှင့်မှုဆောင်ရွက်ပုံ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ထုတ်လွှင့်ခြင်း"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"အနီးရှိတွဲသုံးနိုင်သော ဘလူးတုသ်သုံးစက် အသုံးပြုသူများက သင်ထုတ်လွှင့်နေသော မီဒီယာကို နားဆင်နိုင်သည်"</string>
@@ -1031,6 +1026,8 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"ကင်မရာ ပိတ်ထားသည်"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"မိုက်ပိတ်ထားသည်"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ကင်မရာနှင့် မိုက် ပိတ်ထားသည်"</string>
+    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
+    <skip />
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{အကြောင်းကြားချက် # ခု}other{အကြောင်းကြားချက် # ခု}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>၊ <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"မှတ်စုလိုက်ခြင်း"</string>
@@ -1046,6 +1043,10 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"တစ်ခါသုံး ဝင်ခွင့်ပေးရန်"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ခွင့်မပြုပါ"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"သင့်စက်ရှိ အဖြစ်အပျက်များကို စက်မှတ်တမ်းများက မှတ်တမ်းတင်သည်။ အက်ပ်များက ပြဿနာများ ရှာဖွေပြီးဖြေရှင်းရန် ဤမှတ်တမ်းများကို သုံးနိုင်သည်။\n\nအချို့မှတ်တမ်းများတွင် သတိထားရမည့်အချက်အလက်များ ပါဝင်နိုင်သဖြင့် ယုံကြည်ရသည့် အက်ပ်များကိုသာ စက်မှတ်တမ်းအားလုံး သုံးခွင့်ပြုပါ။ \n\nဤအက်ပ်ကို စက်မှတ်တမ်းအားလုံး သုံးခွင့်မပြုသော်လည်း ၎င်းက ကိုယ်ပိုင်မှတ်တမ်းများ သုံးနိုင်သေးသည်။ သင့်စက်ရှိ အချို့မှတ်တမ်းများ (သို့) အချက်အလက်များကို သင့်စက်ထုတ်လုပ်သူက သုံးနိုင်ပါသေးသည်။"</string>
+    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
+    <skip />
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ဖွင့်ရန်"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• အက်ပ်ကို စနစ်ထည့်သွင်းထားရမည်"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet တွင် အနည်းဆုံးကတ်တစ်ခု ထည့်ထားရမည်"</string>
@@ -1069,6 +1070,5 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"သင့်အလုပ်မူဝါဒသည် သင့်အား အလုပ်ပရိုဖိုင်မှသာ ဖုန်းခေါ်ဆိုခွင့် ပြုသည်"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"အလုပ်ပရိုဖိုင်သို့ ပြောင်းရန်"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"ပိတ်ရန်"</string>
-    <!-- no translation found for lock_screen_settings (9197175446592718435) -->
-    <skip />
+    <string name="lock_screen_settings" msgid="9197175446592718435">"လော့ခ်မျက်နှာပြင် ဆက်တင်များ"</string>
 </resources>

@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ ແລະ ເປີເຊັນອອກຊິເຈນໃນເລືອດ, ໃນຂະນະທີ່ໃຊ້ແອັບຢູ່."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ໃນຂະນະທີ່ແອັບຢູ່ໃນພື້ນຫຼັງ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ ແລະ ເປີເຊັນອອກຊິເຈນໃນເລືອດ, ໃນຂະນະທີ່ແອັບຢູ່ໃນພື້ນຫຼັງ."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ນຳໃຊ້ແອັບ."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ນຳໃຊ້ແອັບ."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ແອັບເຮັດວຽກໃນພື້ນຫຼັງ."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ແອັບເຮັດວຽກໃນພື້ນຫຼັງ."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Read calendar events and details"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"This app can read all calendar events stored on your tablet and share or save your calendar data."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ແອັບນີ້ສາມາດອ່ານນັດໝາຍປະຕິທິນທັງໝົດທີ່ບັນທຶກໄວ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ ແລະ ແບ່ງປັນ ຫຼື ບັນທຶກຂໍ້ມູນປະຕິທິນຂອງທ່ານ."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"ກຳ​ລັງ​ເລີ່ມລະ​ບົບ​ Android …"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"ກຳລັງເລີ່ມແທັບເລັດ…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"ກຳລັງເລີ່ມອຸປະກອນ…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"ການ​ປັບ​ບ່ອນ​ເກັບ​ຂໍ້​ມູນ​ໃຫ້​ເໝາະ​ສົມ."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"ກຳລັງສຳເລັດການອັບເດດລະບົບ…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"ກຳລັງອັບເກຣດ<xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"ກຳລັງ​ປັບປຸງ​ປະສິດທິພາບ​ແອັບຯ​ທີ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຈາກ​ທັງ​ໝົດ <xliff:g id="NUMBER_1">%2$d</xliff:g> ແອັບຯ."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"ກຳ​ລັງ​ກຽມ <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ກຳລັງເປີດແອັບຯ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ກຳລັງສຳເລັດການເປີດລະບົບ."</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"ການ​ເບິ່ງ​ເຕັມ​ໜ້າ​ຈໍ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ຫາກຕ້ອງການອອກ, ໃຫ້ຮູດຈາກທາງເທິງລົງມາທາງລຸ່ມ."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ໄດ້​ແລ້ວ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ໝຸນເພື່ອມຸມມອງທີ່ດີຂຶ້ນ"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ອອກຈາກແບ່ງໜ້າຈໍເພື່ອມຸມມອງທີ່ດີຂຶ້ນ"</string>
     <string name="done_label" msgid="7283767013231718521">"ແລ້ວໆ"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"ໂຕໝຸນປັບຊົ່ວໂມງ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"ໂຕໝຸນປັບນາທີ"</string>
@@ -1861,6 +1857,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"ບ່ອນເຮັດວຽກທີ 2 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"ບ່ອນເຮັດວຽກທີ 3 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"ໂຄລນ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"​ຖາມ​ຫາ​ຮູບ​ແບບ​ປົດ​ລັອກ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
@@ -2315,4 +2312,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ອະນຸຍາດຈາກເບື້ອງຫຼັງໃຫ້ແອັບຊ່ວຍເຫຼືອເລີ່ມໃຊ້ບໍລິການທີ່ເຮັດວຽກຢູ່ເບື້ອງໜ້າ."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"ໄມໂຄຣໂຟນພ້ອມໃຫ້ນຳໃຊ້"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ໄມໂຄຣໂຟນຖືກບລັອກໄວ້"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

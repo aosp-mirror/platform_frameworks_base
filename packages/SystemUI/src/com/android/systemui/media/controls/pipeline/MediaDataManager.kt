@@ -51,6 +51,7 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.media.utils.MediaConstants
 import com.android.internal.logging.InstanceId
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -68,6 +69,7 @@ import com.android.systemui.media.controls.models.recommendation.EXTRA_VALUE_TRI
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaDataProvider
 import com.android.systemui.media.controls.resume.MediaResumeListener
+import com.android.systemui.media.controls.resume.ResumeMediaBrowser
 import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.controls.util.MediaFlags
@@ -177,6 +179,7 @@ class MediaDataManager(
     private val mediaFlags: MediaFlags,
     private val logger: MediaUiEventLogger,
     private val smartspaceManager: SmartspaceManager,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     companion object {
@@ -241,6 +244,7 @@ class MediaDataManager(
         mediaFlags: MediaFlags,
         logger: MediaUiEventLogger,
         smartspaceManager: SmartspaceManager,
+        keyguardUpdateMonitor: KeyguardUpdateMonitor,
     ) : this(
         context,
         backgroundExecutor,
@@ -264,6 +268,7 @@ class MediaDataManager(
         mediaFlags,
         logger,
         smartspaceManager,
+        keyguardUpdateMonitor,
     )
 
     private val appChangeReceiver =
@@ -1338,7 +1343,9 @@ class MediaDataManager(
         Assert.isMainThread()
         val removed = mediaEntries.remove(key) ?: return
 
-        if (useMediaResumption && removed.resumeAction != null && removed.isLocalSession()) {
+        if (keyguardUpdateMonitor.isUserInLockdown(removed.userId)) {
+            logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
+        } else if (useMediaResumption && removed.resumeAction != null && removed.isLocalSession()) {
             convertToResumePlayer(removed)
         } else if (mediaFlags.isRetainingPlayersEnabled()) {
             handlePossibleRemoval(removed, notificationRemoved = true)
@@ -1434,6 +1441,22 @@ class MediaDataManager(
             notifyMediaDataLoaded(key = pkg, oldKey = pkg, info = updated)
         }
         logger.logActiveConvertedToResume(updated.appUid, pkg, updated.instanceId)
+
+        // Limit total number of resume controls
+        val resumeEntries = mediaEntries.filter { (key, data) -> data.resumption }
+        val numResume = resumeEntries.size
+        if (numResume > ResumeMediaBrowser.MAX_RESUMPTION_CONTROLS) {
+            resumeEntries
+                .toList()
+                .sortedBy { (key, data) -> data.lastActive }
+                .subList(0, numResume - ResumeMediaBrowser.MAX_RESUMPTION_CONTROLS)
+                .forEach { (key, data) ->
+                    Log.d(TAG, "Removing excess control $key")
+                    mediaEntries.remove(key)
+                    notifyMediaDataRemoved(key)
+                    logger.logMediaRemoved(data.appUid, data.packageName, data.instanceId)
+                }
+        }
     }
 
     fun setMediaResumptionEnabled(isEnabled: Boolean) {

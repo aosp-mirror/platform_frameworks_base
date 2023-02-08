@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"အက်ပ်သုံးစဉ် နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင်ရာခိုင်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာများသုံးရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"နောက်ခံတွင်ဖွင့်စဉ် နှလုံးခုန်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာ သုံးခြင်း"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"နောက်ခံတွင်အက်ပ်ဖွင့်စဉ် နှလုံးခုန်နှုန်း၊ အပူချိန်၊ သွေးတွင်း အောက်ဆီဂျင်ရာခိုင်နှုန်းကဲ့သို့ ခန္ဓာကိုယ်အာရုံခံစနစ် ဒေတာများသုံးရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"အက်ပ်သုံးနေစဉ် ခန္ဓာကိုယ် အာရုံခံကိရိယာမှ လက်ကောက်ဝတ်အပူချိန်ဒေတာကို သုံးပါ။"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"အက်ပ်သုံးနေစဉ် ခန္ဓာကိုယ် အာရုံခံကိရိယာမှ လက်ကောက်ဝတ်အပူချိန်ဒေတာသုံးရန် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"နောက်ခံတွင် အက်ပ်ဖွင့်ထားစဉ် ခန္ဓာကိုယ် အာရုံခံကိရိယာမှ လက်ကောက်ဝတ်အပူချိန်ဒေတာကို သုံးပါ။"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"နောက်ခံတွင် အက်ပ်ဖွင့်ထားစဉ် ခန္ဓာကိုယ် အာရုံခံကိရိယာမှ လက်ကောက်ဝတ်အပူချိန်ဒေတာသုံးရန် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"ပြက္ခဒိန်ဖြစ်ရပ်များနှင့် အသေးစိတ်အချက်အလက်များကို ဖတ်ခြင်း"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ဤအက်ပ်သည် သင့်တက်ဘလက်တွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များကို ကြည့်ရှုနိုင်ပြီး သင့်ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်းနှင့် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်ပါသည်။"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ဤအက်ပ်သည် သင့် Android TV စက်ပစ္စည်းတွင် သိမ်းဆည်းထားသည့် ပြက္ခဒိန်ဖြစ်ရပ်များအားလုံးကို ဖတ်နိုင်ပြီး သင်၏ ပြက္ခဒိန်ဒေတာများကို မျှဝေခြင်း သို့မဟုတ် သိမ်းဆည်းခြင်းတို့ ပြုလုပ်နိုင်သည်။"</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android စတင်နေ…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"တက်ဘလက် စတင်နေသည်…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"စက်ပစ္စည်း စတင်နေသည်…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"သိုလှောင်မှုအား ပြုပြင်ခြင်း။"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"စနစ်အပ်ဒိတ်ကို အပြီးသတ်နေသည်…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> ကို အဆင့်မြှင့်တင်နေပါသည်…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_0">%1$d</xliff:g> ထဲက အက်ပ်<xliff:g id="NUMBER_1">%2$d</xliff:g>ကို ဆီလျော်အောင် လုပ်နေ"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> အားပြင်ဆင်နေသည်။"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"အက်ပ်များကို စတင်နေ"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"လုပ်ငန်းစနစ်ထည့်သွင်း၍ ပြန်လည်စတင်ရန် ပြီးပါပြီ"</string>
@@ -1850,6 +1844,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"မျက်နှာပြင်အပြည့် ကြည့်နေသည်"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ထွက်ရန် အပေါ်မှ အောက်သို့ ဆွဲချပါ။"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"ရပါပြီ"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"ပိုကောင်းသောမြင်ကွင်းအတွက် လှည့်ပါ"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"ပိုကောင်းသောမြင်ကွင်းအတွက် မျက်နှာပြင် ခွဲ၍ပြသခြင်းမှ ထွက်ပါ"</string>
     <string name="done_label" msgid="7283767013231718521">"ပြီးပါပြီ"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"နာရီရွေးချက်စရာ"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"မိနစ်လှည့်သော ရွေ့လျားတန်"</string>
@@ -1861,6 +1857,8 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"အလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"ဒုတိယအလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"တတိယအလုပ် <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
+    <skip />
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ပင်မဖြုတ်မီမှာ PIN ကို မေးကြည့်ရန်"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ပင်မဖြုတ်မီမှာ သော့ဖွင့် ရေးဆွဲမှုပုံစံကို မေးကြည့်ရန်"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ပင်မဖြုတ်မီမှာ စကားဝှက်ကို မေးကြည့်ရန်"</string>
@@ -2315,4 +2313,16 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"နောက်ခံမှနေ၍ မျက်နှာစာဝန်ဆောင်မှုများ စတင်ရန် တွဲဖက် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"မိုက်ခရိုဖုန်း သုံးနိုင်သည်"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"မိုက်ခရိုဖုန်း ပိတ်ထားသည်"</string>
+    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
+    <skip />
+    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
+    <skip />
+    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
+    <skip />
 </resources>

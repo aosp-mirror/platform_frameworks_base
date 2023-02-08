@@ -459,14 +459,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Omogućuje aplikaciji pristup podacima s biometrijskih senzora, kao što su puls, temperatura i postotak kisika u krvi, dok se aplikacija upotrebljava."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Pristup podacima s biometrijskih senzora, kao što je puls, dok je u pozadini"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Omogućuje aplikaciji pristup podacima s biometrijskih senzora, kao što su puls, temperatura i postotak kisika u krvi, dok je aplikacija u pozadini."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Pristupite podacima o temperaturi na zapešću s biometrijskog senzora dok se aplikacija koristi."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Omogućuje aplikaciji da pristupi podacima o temperaturi na zapešću s biometrijskog senzora dok se aplikacija koristi."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Pristupite podacima o temperaturi na zapešću s biometrijskog senzora dok je aplikacija u pozadini."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Omogućuje aplikaciji da pristupi podacima o temperaturi na zapešću s biometrijskog senzora dok je aplikacija u pozadini."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čitanje događaja i pojedinosti kalendara"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aplikacija može čitati sve kalendarske događaje pohranjene na tabletu i dijeliti ili spremati podatke iz vašeg kalendara."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Aplikacija može čitati sve kalendarske događaje pohranjene na Android TV uređaju i dijeliti ili spremati podatke iz vašeg kalendara."</string>
@@ -1250,10 +1246,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Pokretanje Androida..."</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Tablet se pokreće…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Uređaj se pokreće…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Optimiziranje pohrane."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Dovršavanje ažuriranja sustava…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"Nadogradnja aplikacije <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"Optimiziranje aplikacije <xliff:g id="NUMBER_0">%1$d</xliff:g> od <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"Pripremanje aplikacije <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Pokretanje aplikacija."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Završetak inicijalizacije."</string>
@@ -1851,6 +1845,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Gledanje preko cijelog zaslona"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Za izlaz prijeđite prstom od vrha prema dolje."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Shvaćam"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Zakrenite kako biste bolje vidjeli"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Zatvorite podijeljeni zaslon kako biste bolje vidjeli"</string>
     <string name="done_label" msgid="7283767013231718521">"Gotovo"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kružni klizač sati"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kružni klizač minuta"</string>
@@ -1862,6 +1858,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> za posao"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2. <xliff:g id="LABEL">%1$s</xliff:g> za posao"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3. <xliff:g id="LABEL">%1$s</xliff:g> za posao"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Kloniraj <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Traži PIN radi otkvačivanja"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Traži uzorak za otključavanje radi otkvačivanja"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Traži zaporku radi otkvačivanja"</string>
@@ -2316,4 +2313,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Popratnoj aplikaciji omogućuje da iz pozadine pokrene usluge u prednjem planu."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon je dostupan"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon je blokiran"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dvostruki zaslon"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Uključen je dvostruki zaslon"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> upotrebljava oba zaslona za prikazivanje sadržaja"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Uređaj se pregrijao"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dvostruki zaslon nije podržan jer se vaš telefon pregrijao"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Isključi"</string>
 </resources>

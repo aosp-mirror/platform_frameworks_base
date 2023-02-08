@@ -71,9 +71,6 @@ class FakeMobileConnectionsRepository(
             ?: FakeMobileConnectionRepository(subId, tableLogBuffer).also { subIdRepos[subId] = it }
     }
 
-    private val _globalMobileDataSettingChangedEvent = MutableStateFlow(Unit)
-    override val globalMobileDataSettingChangedEvent = _globalMobileDataSettingChangedEvent
-
     override val defaultDataSubRatConfig = MutableStateFlow(MobileMappings.Config())
 
     private val _defaultMobileIconMapping = MutableStateFlow(TEST_MAPPING)
@@ -92,10 +89,6 @@ class FakeMobileConnectionsRepository(
 
     fun setMobileConnectivity(model: MobileConnectivityModel) {
         _mobileConnectivity.value = model
-    }
-
-    suspend fun triggerGlobalMobileDataSettingChangedEvent() {
-        _globalMobileDataSettingChangedEvent.emit(Unit)
     }
 
     fun setActiveMobileDataSubscriptionId(subId: Int) {
