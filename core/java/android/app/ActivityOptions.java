@@ -20,6 +20,8 @@ import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIO
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.IntDef;
@@ -1525,7 +1527,9 @@ public class ActivityOptions extends ComponentOptions {
      * @hide
      */
     public int getPendingIntentLaunchFlags() {
-        return mPendingIntentLaunchFlags;
+        // b/243794108: Ignore all flags except the new task flag, to be reconsidered in b/254490217
+        return mPendingIntentLaunchFlags &
+                (FLAG_ACTIVITY_NEW_TASK | FLAG_RECEIVER_FOREGROUND);
     }
 
     /**
