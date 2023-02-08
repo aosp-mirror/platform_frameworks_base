@@ -260,6 +260,22 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testCheckOpaqueIsLetterboxedWhenStrategyIsApplied() {
+        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
+        setUpDisplaySizeWithApp(2000, 1000);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        // Translucent Activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setLaunchedFromUid(mActivity.getUid())
+                .build();
+        doReturn(false).when(translucentActivity).fillsParent();
+        spyOn(mActivity);
+        mTask.addChild(translucentActivity);
+        verify(mActivity).isFinishing();
+    }
+
+    @Test
     public void testRestartProcessIfVisible() {
         setUpDisplaySizeWithApp(1000, 2500);
         doNothing().when(mSupervisor).scheduleRestartTimeout(mActivity);
