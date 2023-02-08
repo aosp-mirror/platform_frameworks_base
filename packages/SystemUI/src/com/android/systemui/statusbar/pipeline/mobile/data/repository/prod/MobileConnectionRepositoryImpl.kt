@@ -36,7 +36,6 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
@@ -62,7 +61,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
@@ -87,7 +85,7 @@ class MobileConnectionRepositoryImpl(
     private val mobileMappingsProxy: MobileMappingsProxy,
     bgDispatcher: CoroutineDispatcher,
     logger: ConnectivityPipelineLogger,
-    mobileLogger: TableLogBuffer,
+    override val tableLogBuffer: TableLogBuffer,
     scope: CoroutineScope,
 ) : MobileConnectionRepository {
     init {
@@ -100,8 +98,6 @@ class MobileConnectionRepositoryImpl(
     }
 
     private val telephonyCallbackEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-
-    override val tableLogBuffer: TableLogBuffer = mobileLogger
 
     /**
      * This flow defines the single shared connection to system_server via TelephonyCallback. Any
@@ -243,11 +239,6 @@ class MobileConnectionRepositoryImpl(
         val initial = MobileConnectionModel()
         callbackEvents
             .scan(initial, ::updateConnectionState)
-            .logDiffsForTable(
-                mobileLogger,
-                columnPrefix = "MobileConnection ($subId)",
-                initialValue = initial,
-            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
 
@@ -285,24 +276,12 @@ class MobileConnectionRepositoryImpl(
                     intent.toNetworkNameModel(networkNameSeparator) ?: defaultNetworkName
                 }
             }
-            .distinctUntilChanged()
-            .logDiffsForTable(
-                mobileLogger,
-                columnPrefix = "",
-                initialValue = defaultNetworkName,
-            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
 
     override val dataEnabled = run {
         val initial = telephonyManager.isDataConnectionAllowed
         callbackEvents
             .mapNotNull { (it as? CallbackEvent.OnDataEnabledChanged)?.enabled }
-            .logDiffsForTable(
-                mobileLogger,
-                columnPrefix = "",
-                columnName = "dataEnabled",
-                initialValue = initial
-            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
 

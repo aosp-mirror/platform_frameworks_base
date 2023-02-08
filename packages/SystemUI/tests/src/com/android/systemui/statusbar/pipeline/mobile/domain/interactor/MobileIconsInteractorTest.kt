@@ -27,6 +27,8 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobile
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
+import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -50,6 +52,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class MobileIconsInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsInteractor
+    private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var connectionsRepository: FakeMobileConnectionsRepository
     private val userSetupRepository = FakeUserSetupRepository()
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
@@ -62,6 +65,8 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        connectivityRepository = FakeConnectivityRepository()
 
         connectionsRepository = FakeMobileConnectionsRepository(mobileMappingsProxy, tableLogBuffer)
         connectionsRepository.setMobileConnectionRepositoryMap(
@@ -79,6 +84,8 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 connectionsRepository,
                 carrierConfigTracker,
                 logger = mock(),
+                tableLogger = mock(),
+                connectivityRepository,
                 userSetupRepository,
                 testScope.backgroundScope,
             )
@@ -605,6 +612,32 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                         isValidated = false,
                     )
                 )
+
+            job.cancel()
+        }
+
+    @Test
+    fun isForceHidden_repoHasMobileHidden_true() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isForceHidden.onEach { latest = it }.launchIn(this)
+
+            connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.MOBILE))
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isForceHidden_repoDoesNotHaveMobileHidden_false() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isForceHidden.onEach { latest = it }.launchIn(this)
+
+            connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.WIFI))
+
+            assertThat(latest).isFalse()
 
             job.cancel()
         }

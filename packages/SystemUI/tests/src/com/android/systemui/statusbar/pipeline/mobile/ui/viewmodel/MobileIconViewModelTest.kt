@@ -19,16 +19,18 @@ package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH
 import com.android.settingslib.AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH_NONE
-import com.android.settingslib.graph.SignalDrawable
 import com.android.settingslib.mobile.TelephonyIcons.THREE_G
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
+import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
+import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,7 +51,8 @@ import org.mockito.MockitoAnnotations
 class MobileIconViewModelTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconViewModel
     private lateinit var interactor: FakeMobileIconInteractor
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
+    private lateinit var airplaneModeInteractor: AirplaneModeInteractor
     @Mock private lateinit var constants: ConnectivityConstants
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
 
@@ -59,6 +62,15 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(constants.hasDataCapabilities).thenReturn(true)
+
+        airplaneModeRepository = FakeAirplaneModeRepository()
+        airplaneModeInteractor =
+            AirplaneModeInteractor(
+                airplaneModeRepository,
+                FakeConnectivityRepository(),
+            )
+
         interactor = FakeMobileIconInteractor(tableLogBuffer)
         interactor.apply {
             setLevel(1)
@@ -69,15 +81,94 @@ class MobileIconViewModelTest : SysuiTestCase() {
             setNumberOfLevels(4)
             isDataConnected.value = true
         }
-        underTest =
-            MobileIconViewModel(SUB_1_ID, interactor, logger, constants, testScope.backgroundScope)
+        createAndSetViewModel()
     }
+
+    @Test
+    fun isVisible_notDataCapable_alwaysFalse() =
+        testScope.runTest {
+            // Create a new view model here so the constants are properly read
+            whenever(constants.hasDataCapabilities).thenReturn(false)
+            createAndSetViewModel()
+
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isVisible_notAirplane_notForceHidden_true() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            airplaneModeRepository.setIsAirplaneMode(false)
+            interactor.isForceHidden.value = false
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isVisible_airplane_false() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            airplaneModeRepository.setIsAirplaneMode(true)
+            interactor.isForceHidden.value = false
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isVisible_forceHidden_false() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            airplaneModeRepository.setIsAirplaneMode(false)
+            interactor.isForceHidden.value = true
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isVisible_respondsToUpdates() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isVisible.onEach { latest = it }.launchIn(this)
+
+            airplaneModeRepository.setIsAirplaneMode(false)
+            interactor.isForceHidden.value = false
+
+            assertThat(latest).isTrue()
+
+            airplaneModeRepository.setIsAirplaneMode(true)
+            assertThat(latest).isFalse()
+
+            airplaneModeRepository.setIsAirplaneMode(false)
+            assertThat(latest).isTrue()
+
+            interactor.isForceHidden.value = true
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
 
     @Test
     fun iconId_correctLevel_notCutout() =
         testScope.runTest {
-            var latest: Int? = null
-            val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
             val expected = defaultSignal()
 
             assertThat(latest).isEqualTo(expected)
@@ -90,8 +181,8 @@ class MobileIconViewModelTest : SysuiTestCase() {
         testScope.runTest {
             interactor.setIsDefaultDataEnabled(false)
 
-            var latest: Int? = null
-            val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
             val expected = defaultSignal(level = 1, connected = false)
 
             assertThat(latest).isEqualTo(expected)
@@ -102,8 +193,8 @@ class MobileIconViewModelTest : SysuiTestCase() {
     @Test
     fun `icon - uses empty state - when not in service`() =
         testScope.runTest {
-            var latest: Int? = null
-            val job = underTest.iconId.onEach { latest = it }.launchIn(this)
+            var latest: SignalIconModel? = null
+            val job = underTest.icon.onEach { latest = it }.launchIn(this)
 
             interactor.isInService.value = false
 
@@ -364,14 +455,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         testScope.runTest {
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(false)
-            underTest =
-                MobileIconViewModel(
-                    SUB_1_ID,
-                    interactor,
-                    logger,
-                    constants,
-                    testScope.backgroundScope,
-                )
+            createAndSetViewModel()
 
             var inVisible: Boolean? = null
             val inJob = underTest.activityInVisible.onEach { inVisible = it }.launchIn(this)
@@ -403,14 +487,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
         testScope.runTest {
             // Create a new view model here so the constants are properly read
             whenever(constants.shouldShowActivityConfig).thenReturn(true)
-            underTest =
-                MobileIconViewModel(
-                    SUB_1_ID,
-                    interactor,
-                    logger,
-                    constants,
-                    testScope.backgroundScope,
-                )
+            createAndSetViewModel()
 
             var inVisible: Boolean? = null
             val inJob = underTest.activityInVisible.onEach { inVisible = it }.launchIn(this)
@@ -459,6 +536,16 @@ class MobileIconViewModelTest : SysuiTestCase() {
             containerJob.cancel()
         }
 
+    private fun createAndSetViewModel() {
+        underTest = MobileIconViewModel(
+            SUB_1_ID,
+            interactor,
+            airplaneModeInteractor,
+            constants,
+            testScope.backgroundScope,
+        )
+    }
+
     companion object {
         private const val SUB_1_ID = 1
 
@@ -466,10 +553,11 @@ class MobileIconViewModelTest : SysuiTestCase() {
         fun defaultSignal(
             level: Int = 1,
             connected: Boolean = true,
-        ): Int {
-            return SignalDrawable.getState(level, /* numLevels */ 4, !connected)
+        ): SignalIconModel {
+            return SignalIconModel(level, numberOfLevels = 4, showExclamationMark = !connected)
         }
 
-        fun emptySignal(): Int = SignalDrawable.getEmptyState(4)
+        fun emptySignal(): SignalIconModel =
+            SignalIconModel(level = 0, numberOfLevels = 4, showExclamationMark = true)
     }
 }

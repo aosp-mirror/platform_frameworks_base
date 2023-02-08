@@ -66,6 +66,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
                 mobileIconsInteractor.defaultMobileIconGroup,
                 mobileIconsInteractor.defaultDataSubId,
                 mobileIconsInteractor.isDefaultConnectionFailed,
+                mobileIconsInteractor.isForceHidden,
                 connectionRepository,
             )
     }
@@ -546,6 +547,21 @@ class MobileIconInteractorTest : SysuiTestCase() {
             yield()
 
             assertThat(latest).isEqualTo(DERIVED_NAME)
+
+            job.cancel()
+        }
+
+    @Test
+    fun isForceHidden_matchesParent() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.isForceHidden.onEach { latest = it }.launchIn(this)
+
+            mobileIconsInteractor.isForceHidden.value = true
+            assertThat(latest).isTrue()
+
+            mobileIconsInteractor.isForceHidden.value = false
+            assertThat(latest).isFalse()
 
             job.cancel()
         }

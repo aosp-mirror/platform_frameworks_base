@@ -117,11 +117,22 @@ class FullMobileConnectionRepository(
     override val connectionInfo =
         activeRepo
             .flatMapLatest { it.connectionInfo }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                initialValue = activeRepo.value.connectionInfo.value,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.connectionInfo.value)
 
     override val dataEnabled =
         activeRepo
             .flatMapLatest { it.dataEnabled }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = "dataEnabled",
+                initialValue = activeRepo.value.dataEnabled.value,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.dataEnabled.value)
 
     override val numberOfLevels =
@@ -132,6 +143,11 @@ class FullMobileConnectionRepository(
     override val networkName =
         activeRepo
             .flatMapLatest { it.networkName }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                initialValue = activeRepo.value.networkName.value,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.networkName.value)
 
     class Factory
@@ -168,7 +184,7 @@ class FullMobileConnectionRepository(
             const val MOBILE_CONNECTION_BUFFER_SIZE = 100
 
             /** Returns a log buffer name for a mobile connection with the given [subId]. */
-            fun tableBufferLogName(subId: Int): String = "MobileConnectionLog [$subId]"
+            fun tableBufferLogName(subId: Int): String = "MobileConnectionLog[$subId]"
         }
     }
 }

@@ -91,9 +91,6 @@ class CarrierMergedConnectionRepository(
             .map { it.toMobileConnectionModel() }
             .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectionModel())
 
-    // TODO(b/238425913): Add logging to this class.
-    // TODO(b/238425913): Make sure SignalStrength.getEmptyState is used when appropriate.
-
     // Carrier merged is never roaming.
     override val cdmaRoaming: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()
 
