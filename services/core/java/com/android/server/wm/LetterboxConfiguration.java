@@ -18,11 +18,6 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ALLOW_IGNORE_ORIENTATION_REQUEST;
-import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_CAMERA_COMPAT_TREATMENT;
-import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_COMPAT_FAKE_FOCUS;
-import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
-import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -43,6 +38,45 @@ import java.util.function.Function;
 final class LetterboxConfiguration {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxConfiguration" : TAG_ATM;
+
+    // Whether camera compatibility treatment is enabled.
+    // See DisplayRotationCompatPolicy for context.
+    private static final String KEY_ENABLE_CAMERA_COMPAT_TREATMENT =
+            "enable_compat_camera_treatment";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_CAMERA_COMPAT_TREATMENT = true;
+
+    // Whether enabling rotation compat policy for immersive apps that prevents auto
+    // rotation into non-optimal screen orientation while in fullscreen. This is needed
+    // because immersive apps, such as games, are often not optimized for all
+    // orientations and can have a poor UX when rotated. Additionally, some games rely
+    // on sensors for the gameplay so  users can trigger such rotations accidentally
+    // when auto rotation is on.
+    private static final String KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY =
+            "enable_display_rotation_immersive_app_compat_policy";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY =
+            true;
+
+    // Whether ignore orientation request is allowed
+    private static final String KEY_ALLOW_IGNORE_ORIENTATION_REQUEST =
+            "allow_ignore_orientation_request";
+
+    private static final boolean DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST = true;
+
+    // Whether sending compat fake focus is enabled for unfocused apps in splitscreen.
+    // Some game engines wait to get focus before drawing the content of the app so
+    // this needs  to be used otherwise the apps get blacked out when they are resumed
+    // and do not have focus yet.
+    private static final String KEY_ENABLE_COMPAT_FAKE_FOCUS = "enable_compat_fake_focus";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS = true;
+
+    // Whether translucent activities policy is enabled
+    private static final String KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY =
+            "enable_letterbox_translucent_activity";
+
+    private static final boolean DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY = true;
 
     /**
      * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
@@ -205,25 +239,12 @@ final class LetterboxConfiguration {
     // unresizable apps
     private boolean mIsDisplayAspectRatioEnabledForFixedOrientationLetterbox;
 
-    // Whether letterboxing strategy is enabled for translucent activities. If {@value false}
-    // all the feature is disabled
-    private boolean mTranslucentLetterboxingEnabled;
-
     // Allows to enable letterboxing strategy for translucent activities ignoring flags.
     private boolean mTranslucentLetterboxingOverrideEnabled;
-
-    // Whether sending compat fake focus is enabled for unfocused apps in splitscreen. Some game
-    // engines wait to get focus before drawing the content of the app so this needs to be used
-    // otherwise the apps get blacked out when they are resumed and do not have focus yet.
-    private boolean mIsCompatFakeFocusEnabled;
 
     // Whether we should use split screen aspect ratio for the activity when camera compat treatment
     // is enabled and activity is connected to the camera in fullscreen.
     private final boolean mIsCameraCompatSplitScreenAspectRatioEnabled;
-
-    // Whether camera compatibility treatment is enabled.
-    // See DisplayRotationCompatPolicy for context.
-    private final boolean mIsCameraCompatTreatmentEnabled;
 
     // Whether activity "refresh" in camera compatibility treatment is enabled.
     // See RefreshCallbackItem for context.
@@ -240,15 +261,8 @@ final class LetterboxConfiguration {
     // LetterboxUiController#shouldIgnoreRequestedOrientation for details.
     private final boolean mIsPolicyForIgnoringRequestedOrientationEnabled;
 
-    // Whether enabling rotation compat policy for immersive apps that prevents auto rotation
-    // into non-optimal screen orientation while in fullscreen. This is needed because immersive
-    // apps, such as games, are often not optimized for all orientations and can have a poor UX
-    // when rotated. Additionally, some games rely on sensors for the gameplay so users can trigger
-    // such rotations accidentally when auto rotation is on.
-    private final boolean mIsDisplayRotationImmersiveAppCompatPolicyEnabled;
-
     // Flags dynamically updated with {@link android.provider.DeviceConfig}.
-    @NonNull private final LetterboxConfigurationDeviceConfig mDeviceConfig;
+    @NonNull private final SynchedDeviceConfig mDeviceConfig;
 
     LetterboxConfiguration(@NonNull final Context systemUiContext) {
         this(systemUiContext,
@@ -267,7 +281,6 @@ final class LetterboxConfiguration {
     LetterboxConfiguration(@NonNull final Context systemUiContext,
             @NonNull final LetterboxConfigurationPersister letterboxConfigurationPersister) {
         mContext = systemUiContext;
-        mDeviceConfig = new LetterboxConfigurationDeviceConfig(systemUiContext.getMainExecutor());
 
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
                 R.dimen.config_fixedOrientationLetterboxAspectRatio);
@@ -305,36 +318,34 @@ final class LetterboxConfiguration {
         mIsDisplayAspectRatioEnabledForFixedOrientationLetterbox = mContext.getResources()
                 .getBoolean(R.bool
                         .config_letterboxIsDisplayAspectRatioForFixedOrientationLetterboxEnabled);
-        mTranslucentLetterboxingEnabled = mContext.getResources().getBoolean(
-                R.bool.config_letterboxIsEnabledForTranslucentActivities);
-        mIsCameraCompatTreatmentEnabled = mContext.getResources().getBoolean(
-                R.bool.config_isWindowManagerCameraCompatTreatmentEnabled);
         mIsCameraCompatSplitScreenAspectRatioEnabled = mContext.getResources().getBoolean(
                 R.bool.config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled);
-        mIsCompatFakeFocusEnabled = mContext.getResources().getBoolean(
-                R.bool.config_isCompatFakeFocusEnabled);
         mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled);
-        mIsDisplayRotationImmersiveAppCompatPolicyEnabled = mContext.getResources().getBoolean(
-                R.bool.config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled);
-        mDeviceConfig.updateFlagActiveStatus(
-                /* isActive */ mIsCameraCompatTreatmentEnabled,
-                /* key */ KEY_ENABLE_CAMERA_COMPAT_TREATMENT);
-        mDeviceConfig.updateFlagActiveStatus(
-                /* isActive */ mIsDisplayRotationImmersiveAppCompatPolicyEnabled,
-                /* key */ KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
-        mDeviceConfig.updateFlagActiveStatus(
-                /* isActive */ true,
-                /* key */ KEY_ALLOW_IGNORE_ORIENTATION_REQUEST);
-        mDeviceConfig.updateFlagActiveStatus(
-                /* isActive */ mIsCompatFakeFocusEnabled,
-                /* key */ KEY_ENABLE_COMPAT_FAKE_FOCUS);
-        mDeviceConfig.updateFlagActiveStatus(
-                /* isActive */ mTranslucentLetterboxingEnabled,
-                /* key */ KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY);
 
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
+
+        mDeviceConfig = SynchedDeviceConfig.builder(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                        systemUiContext.getMainExecutor())
+                .addDeviceConfigEntry(KEY_ENABLE_CAMERA_COMPAT_TREATMENT,
+                        DEFAULT_VALUE_ENABLE_CAMERA_COMPAT_TREATMENT,
+                        mContext.getResources().getBoolean(
+                                R.bool.config_isWindowManagerCameraCompatTreatmentEnabled))
+                .addDeviceConfigEntry(KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
+                        DEFAULT_VALUE_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY,
+                        mContext.getResources().getBoolean(R.bool
+                                .config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled))
+                .addDeviceConfigEntry(KEY_ALLOW_IGNORE_ORIENTATION_REQUEST,
+                        DEFAULT_VALUE_ALLOW_IGNORE_ORIENTATION_REQUEST, /* enabled */ true)
+                .addDeviceConfigEntry(KEY_ENABLE_COMPAT_FAKE_FOCUS,
+                        DEFAULT_VALUE_ENABLE_COMPAT_FAKE_FOCUS,
+                        mContext.getResources().getBoolean(R.bool.config_isCompatFakeFocusEnabled))
+                .addDeviceConfigEntry(KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
+                        DEFAULT_VALUE_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY,
+                        mContext.getResources().getBoolean(
+                                R.bool.config_letterboxIsEnabledForTranslucentActivities))
+                .build();
     }
 
     /**
@@ -342,7 +353,7 @@ final class LetterboxConfiguration {
      * via {@link android.provider.DeviceConfig}.
      */
     boolean isIgnoreOrientationRequestAllowed() {
-        return mDeviceConfig.getFlag(KEY_ALLOW_IGNORE_ORIENTATION_REQUEST);
+        return mDeviceConfig.getFlagValue(KEY_ALLOW_IGNORE_ORIENTATION_REQUEST);
     }
 
     /**
@@ -1049,28 +1060,21 @@ final class LetterboxConfiguration {
     }
 
     boolean isTranslucentLetterboxingEnabled() {
-        return mTranslucentLetterboxingOverrideEnabled || (mTranslucentLetterboxingEnabled
-                && mDeviceConfig.getFlag(KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY));
-    }
-
-    void setTranslucentLetterboxingEnabled(boolean translucentLetterboxingEnabled) {
-        mTranslucentLetterboxingEnabled = translucentLetterboxingEnabled;
+        return mTranslucentLetterboxingOverrideEnabled
+                || mDeviceConfig.getFlagValue(KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY);
     }
 
     void setTranslucentLetterboxingOverrideEnabled(
             boolean translucentLetterboxingOverrideEnabled) {
         mTranslucentLetterboxingOverrideEnabled = translucentLetterboxingOverrideEnabled;
-        setTranslucentLetterboxingEnabled(translucentLetterboxingOverrideEnabled);
     }
 
     /**
      * Resets whether we use the constraints override strategy for letterboxing when dealing
-     * with translucent activities {@link R.bool.config_letterboxIsEnabledForTranslucentActivities}.
+     * with translucent activities
+     * {@link mDeviceConfig.getFlagValue(KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY)}.
      */
     void resetTranslucentLetterboxingEnabled() {
-        final boolean newValue = mContext.getResources().getBoolean(
-                R.bool.config_letterboxIsEnabledForTranslucentActivities);
-        setTranslucentLetterboxingEnabled(newValue);
         setTranslucentLetterboxingOverrideEnabled(false);
     }
 
@@ -1100,15 +1104,7 @@ final class LetterboxConfiguration {
 
     /** Whether fake sending focus is enabled for unfocused apps in splitscreen */
     boolean isCompatFakeFocusEnabled() {
-        return mIsCompatFakeFocusEnabled && mDeviceConfig.getFlag(KEY_ENABLE_COMPAT_FAKE_FOCUS);
-    }
-
-    /**
-     * Overrides whether fake sending focus is enabled for unfocused apps in splitscreen
-     */
-    @VisibleForTesting
-    void setIsCompatFakeFocusEnabled(boolean enabled) {
-        mIsCompatFakeFocusEnabled = enabled;
+        return mDeviceConfig.getFlagValue(KEY_ENABLE_COMPAT_FAKE_FOCUS);
     }
 
     /**
@@ -1128,10 +1124,16 @@ final class LetterboxConfiguration {
         return mIsCameraCompatSplitScreenAspectRatioEnabled;
     }
 
-    /** Whether camera compatibility treatment is enabled. */
+    /**
+     * Whether camera compatibility treatment is enabled.
+     *
+     * @param checkDeviceConfig whether it should check both build time flag and a dynamic property
+     *        from {@link DeviceConfig} or only build time flag value.
+     */
     boolean isCameraCompatTreatmentEnabled(boolean checkDeviceConfig) {
-        return mIsCameraCompatTreatmentEnabled && (!checkDeviceConfig
-                || mDeviceConfig.getFlag(KEY_ENABLE_CAMERA_COMPAT_TREATMENT));
+        return mDeviceConfig.isBuildTimeFlagEnabled(KEY_ENABLE_CAMERA_COMPAT_TREATMENT)
+                    && (!checkDeviceConfig
+                    || mDeviceConfig.getFlagValue(KEY_ENABLE_CAMERA_COMPAT_TREATMENT));
     }
 
     /** Whether camera compatibility refresh is enabled. */
@@ -1183,12 +1185,14 @@ final class LetterboxConfiguration {
      * orientations and can have a poor UX when rotated. Additionally, some games rely on sensors
      * for the gameplay so users can trigger such rotations accidentally when auto rotation is on.
      *
-     * @param checkDeviceConfig whether should check both static config and a dynamic property
-     *        from {@link DeviceConfig} or only static value.
+     * @param checkDeviceConfig whether it should check both build time flag and a dynamic property
+     *        from {@link DeviceConfig} or only build time flag value.
      */
     boolean isDisplayRotationImmersiveAppCompatPolicyEnabled(final boolean checkDeviceConfig) {
-        return mIsDisplayRotationImmersiveAppCompatPolicyEnabled && (!checkDeviceConfig
-                || mDeviceConfig.getFlag(KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY));
+        return mDeviceConfig.isBuildTimeFlagEnabled(
+                    KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY) && (!checkDeviceConfig
+                    || mDeviceConfig.getFlagValue(
+                    KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY));
     }
 
 }
