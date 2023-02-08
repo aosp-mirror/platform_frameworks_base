@@ -3536,6 +3536,21 @@ public class JobSchedulerService extends com.android.server.SystemService
     final class LocalService implements JobSchedulerInternal {
 
         @Override
+        public List<JobInfo> getSystemScheduledOwnJobs(@Nullable String namespace) {
+            synchronized (mLock) {
+                final List<JobInfo> ownJobs = new ArrayList<>();
+                mJobs.forEachJob(Process.SYSTEM_UID, (job) -> {
+                    if (job.getSourceUid() == Process.SYSTEM_UID
+                            && Objects.equals(job.getNamespace(), namespace)
+                            && "android".equals(job.getSourcePackageName())) {
+                        ownJobs.add(job.getJob());
+                    }
+                });
+                return ownJobs;
+            }
+        }
+
+        @Override
         public void cancelJobsForUid(int uid, boolean includeProxiedJobs,
                 @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
             JobSchedulerService.this.cancelJobsForUid(uid,
