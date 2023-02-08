@@ -21,6 +21,8 @@ import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositoryImpl
@@ -92,10 +94,12 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         transitionRepository = KeyguardTransitionRepositoryImpl()
         runner = KeyguardTransitionRunner(transitionRepository)
 
+        val featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, true) }
         fromLockscreenTransitionInteractor =
             FromLockscreenTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor =
+                    KeyguardInteractor(keyguardRepository, commandQueue, featureFlags),
                 shadeRepository = shadeRepository,
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
@@ -105,7 +109,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDreamingTransitionInteractor =
             FromDreamingTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor =
+                    KeyguardInteractor(keyguardRepository, commandQueue, featureFlags),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -114,7 +119,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromAodTransitionInteractor =
             FromAodTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor =
+                    KeyguardInteractor(keyguardRepository, commandQueue, featureFlags),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -123,7 +129,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromGoneTransitionInteractor =
             FromGoneTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor =
+                    KeyguardInteractor(keyguardRepository, commandQueue, featureFlags),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -132,7 +139,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDozingTransitionInteractor =
             FromDozingTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor =
+                    KeyguardInteractor(keyguardRepository, commandQueue, featureFlags),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -141,7 +149,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromOccludedTransitionInteractor =
             FromOccludedTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor =
+                    KeyguardInteractor(keyguardRepository, commandQueue, featureFlags),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
