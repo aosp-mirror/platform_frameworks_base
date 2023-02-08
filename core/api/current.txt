@@ -209,7 +209,7 @@ package android {
     field public static final String REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE = "android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE";
     field public static final String REQUEST_PASSWORD_COMPLEXITY = "android.permission.REQUEST_PASSWORD_COMPLEXITY";
     field @Deprecated public static final String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
-    field public static final String RUN_LONG_JOBS = "android.permission.RUN_LONG_JOBS";
+    field public static final String RUN_USER_INITIATED_JOBS = "android.permission.RUN_USER_INITIATED_JOBS";
     field public static final String SCHEDULE_EXACT_ALARM = "android.permission.SCHEDULE_EXACT_ALARM";
     field public static final String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
     field public static final String SEND_SMS = "android.permission.SEND_SMS";
@@ -8688,7 +8688,7 @@ package android.app.job {
     method public android.app.job.JobInfo.Builder setTransientExtras(@NonNull android.os.Bundle);
     method public android.app.job.JobInfo.Builder setTriggerContentMaxDelay(long);
     method public android.app.job.JobInfo.Builder setTriggerContentUpdateDelay(long);
-    method @NonNull @RequiresPermission(android.Manifest.permission.RUN_LONG_JOBS) public android.app.job.JobInfo.Builder setUserInitiated(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.RUN_USER_INITIATED_JOBS) public android.app.job.JobInfo.Builder setUserInitiated(boolean);
   }
 
   public static final class JobInfo.TriggerContentUri implements android.os.Parcelable {
@@ -8740,7 +8740,7 @@ package android.app.job {
 
   public abstract class JobScheduler {
     ctor public JobScheduler();
-    method public boolean canRunLongJobs();
+    method public boolean canRunUserInitiatedJobs();
     method public abstract void cancel(int);
     method public abstract void cancelAll();
     method public void cancelInAllNamespaces();

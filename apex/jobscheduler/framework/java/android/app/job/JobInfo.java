@@ -1904,8 +1904,8 @@ public class JobInfo implements Parcelable {
          * and allow for rescheduling.
          *
          * <p>
-         * If the app doesn't hold the {@link android.Manifest.permission#RUN_LONG_JOBS} permission
-         * when scheduling a user-initiated job, JobScheduler will throw a
+         * If the app doesn't hold the {@link android.Manifest.permission#RUN_USER_INITIATED_JOBS}
+         * permission when scheduling a user-initiated job, JobScheduler will throw a
          * {@link SecurityException}.
          *
          * <p>
@@ -1914,7 +1914,7 @@ public class JobInfo implements Parcelable {
          *
          * @see JobInfo#isUserInitiated()
          */
-        @RequiresPermission(android.Manifest.permission.RUN_LONG_JOBS)
+        @RequiresPermission(android.Manifest.permission.RUN_USER_INITIATED_JOBS)
         @NonNull
         public Builder setUserInitiated(boolean userInitiated) {
             if (userInitiated) {
