@@ -209,16 +209,15 @@ class UidPermissionPolicy : SchemePolicy() {
         appId: Int,
         userId: Int
     ) {
-        resetRuntimePermissions(packageName, appId, userId)
+        resetRuntimePermissions(packageName, userId)
     }
 
-    fun MutateStateScope.resetRuntimePermissions(
-        packageName: String,
-        appId: Int,
-        userId: Int
-    ) {
-        val androidPackage = newState.systemState.packageStates[packageName]?.androidPackage
-            ?: return
+    fun MutateStateScope.resetRuntimePermissions(packageName: String, userId: Int) {
+        // It's okay to skip resetting permissions for packages that are removed,
+        // because their states will be trimmed in onPackageRemoved()/onAppIdRemoved()
+        val packageState = newState.systemState.packageStates[packageName] ?: return
+        val androidPackage = packageState.androidPackage ?: return
+        val appId = packageState.appId
         androidPackage.requestedPermissions.forEachIndexed { _, permissionName ->
             val permission = newState.systemState.permissions[permissionName]
                 ?: return@forEachIndexed

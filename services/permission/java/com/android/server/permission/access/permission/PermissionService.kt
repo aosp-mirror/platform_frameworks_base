@@ -1600,11 +1600,23 @@ class PermissionService(
     }
 
     override fun resetRuntimePermissions(androidPackage: AndroidPackage, userId: Int) {
-        // TODO("Not yet implemented")
+        service.mutateState {
+            with(policy) {
+                resetRuntimePermissions(androidPackage.packageName, userId)
+            }
+        }
     }
 
     override fun resetRuntimePermissionsForUser(userId: Int) {
-        // TODO("Not yet implemented")
+        packageManagerLocal.withUnfilteredSnapshot().use { snapshot ->
+            service.mutateState {
+                snapshot.packageStates.forEach { (_, packageState) ->
+                    with(policy) {
+                        resetRuntimePermissions(packageState.packageName, userId)
+                    }
+                }
+            }
+        }
     }
 
     override fun addOnPermissionsChangeListener(listener: IOnPermissionsChangeListener) {
