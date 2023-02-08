@@ -42,6 +42,9 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
@@ -82,6 +85,7 @@ constructor(
     private val subscriptionManager: SubscriptionManager,
     private val telephonyManager: TelephonyManager,
     private val logger: ConnectivityPipelineLogger,
+    @MobileSummaryLog private val tableLogger: TableLogBuffer,
     mobileMappingsProxy: MobileMappingsProxy,
     broadcastDispatcher: BroadcastDispatcher,
     private val context: Context,
@@ -114,6 +118,12 @@ constructor(
                 }
             }
             .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogger,
+                LOGGING_PREFIX,
+                columnName = "carrierMergedSubId",
+                initialValue = null,
+            )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), null)
 
     private val mobileSubscriptionsChangeEvent: Flow<Unit> = conflatedCallbackFlow {
@@ -139,8 +149,14 @@ constructor(
     override val subscriptions: StateFlow<List<SubscriptionModel>> =
         merge(mobileSubscriptionsChangeEvent, carrierMergedSubId)
             .mapLatest { fetchSubscriptionsList().map { it.toSubscriptionModel() } }
-            .logInputChange(logger, "onSubscriptionsChanged")
             .onEach { infos -> updateRepos(infos) }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogger,
+                LOGGING_PREFIX,
+                columnName = "subscriptions",
+                initialValue = listOf(),
+            )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), listOf())
 
     /** StateFlow that keeps track of the current active mobile data subscription */
@@ -157,7 +173,12 @@ constructor(
                 awaitClose { telephonyManager.unregisterTelephonyCallback(callback) }
             }
             .distinctUntilChanged()
-            .logInputChange(logger, "onActiveDataSubscriptionIdChanged")
+            .logDiffsForTable(
+                tableLogger,
+                LOGGING_PREFIX,
+                columnName = "activeSubId",
+                initialValue = INVALID_SUBSCRIPTION_ID,
+            )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), INVALID_SUBSCRIPTION_ID)
 
     private val defaultDataSubIdChangeEvent: MutableSharedFlow<Unit> =
@@ -171,7 +192,12 @@ constructor(
                 intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, INVALID_SUBSCRIPTION_ID)
             }
             .distinctUntilChanged()
-            .logInputChange(logger, "ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED")
+            .logDiffsForTable(
+                tableLogger,
+                LOGGING_PREFIX,
+                columnName = "defaultSubId",
+                initialValue = SubscriptionManager.getDefaultDataSubscriptionId(),
+            )
             .onEach { defaultDataSubIdChangeEvent.tryEmit(Unit) }
             .stateIn(
                 scope,
@@ -247,7 +273,11 @@ constructor(
                 awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
             }
             .distinctUntilChanged()
-            .logInputChange(logger, "defaultMobileNetworkConnectivity")
+            .logDiffsForTable(
+                tableLogger,
+                columnPrefix = "$LOGGING_PREFIX.defaultConnection",
+                initialValue = MobileConnectivityModel(),
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectivityModel())
 
     /**
@@ -321,4 +351,8 @@ constructor(
             subscriptionId = subscriptionId,
             isOpportunistic = isOpportunistic,
         )
+
+    companion object {
+        private const val LOGGING_PREFIX = "Repo"
+    }
 }
