@@ -120,8 +120,6 @@ public final class Dataset implements Parcelable {
     private final ArrayList<InlinePresentation> mFieldInlinePresentations;
     private final ArrayList<InlinePresentation> mFieldInlineTooltipPresentations;
     private final ArrayList<DatasetFieldFilter> mFieldFilters;
-    private final ArrayList<String> mAutofillDatatypes;
-
     @Nullable private final ClipData mFieldContent;
     private final RemoteViews mPresentation;
     private final RemoteViews mDialogPresentation;
@@ -145,14 +143,6 @@ public final class Dataset implements Parcelable {
         mInlineTooltipPresentation = builder.mInlineTooltipPresentation;
         mAuthentication = builder.mAuthentication;
         mId = builder.mId;
-        mAutofillDatatypes = builder.mAutofillDatatypes;
-    }
-
-    /** @hide */
-    @TestApi
-    @SuppressLint({"ConcreteCollection", "NullableCollection"})
-    public @Nullable ArrayList<String> getAutofillDatatypes() {
-        return mAutofillDatatypes;
     }
 
     /** @hide */
@@ -303,7 +293,6 @@ public final class Dataset implements Parcelable {
         private ArrayList<InlinePresentation> mFieldInlinePresentations;
         private ArrayList<InlinePresentation> mFieldInlineTooltipPresentations;
         private ArrayList<DatasetFieldFilter> mFieldFilters;
-        private ArrayList<String> mAutofillDatatypes;
         @Nullable private ClipData mFieldContent;
         private RemoteViews mPresentation;
         private RemoteViews mDialogPresentation;
@@ -933,55 +922,6 @@ public final class Dataset implements Parcelable {
         }
 
         /**
-         * Adds a field to this Dataset with a specific type and no
-         * AutofillId. This is used to send back Field information
-         * when Autofilling with platform detections is on.
-         * Platform detections are on when receiving a populated list from
-         * FillRequest#getHints().
-         *
-         * Populate every field/type known for this user for this app.
-         *
-         * For example, if getHints() contains "username" and "password",
-         * a new Dataset should be created that calls this method twice,
-         * one for the username, then another for the password (assuming
-         * the only one credential pair is found for the user). If a user
-         * has two credential pairs, then two Datasets should be created,
-         * and so on.
-         *
-         * Using this will remove any data populated with
-         * setField(@NonNull AutofillId id, @Nullable Field field).
-         *
-         * @param hint An autofill hint returned from {@link
-         *         FillRequest#getHints()}.
-         *
-         * @param field the fill information about the field.
-         *
-         * @throws IllegalStateException if {@link #build()} was already called
-         * or this builder also contains AutofillId information
-         *
-         * @return this builder.
-         */
-        public @NonNull Dataset.Builder setField(
-                @NonNull String hint, @NonNull Field field) {
-            throwIfDestroyed();
-
-            final DatasetFieldFilter filter = field.getDatasetFieldFilter();
-            final Presentations presentations = field.getPresentations();
-            if (presentations == null) {
-                setLifeTheUniverseAndEverything(hint, field.getValue(), null, null, null,
-                        filter, null);
-            } else {
-                setLifeTheUniverseAndEverything(hint, field.getValue(),
-                        presentations.getMenuPresentation(),
-                        presentations.getInlinePresentation(),
-                        presentations.getInlineTooltipPresentation(), filter,
-                        presentations.getDialogPresentation());
-            }
-
-            return this;
-        }
-
-        /**
          * Sets the value of a field with an <a href="#Filtering">explicit filter</a>, and using an
          * {@link InlinePresentation} to visualize it as an inline suggestion.
          *
@@ -1018,32 +958,6 @@ public final class Dataset implements Parcelable {
             return this;
         }
 
-        private void setLifeTheUniverseAndEverything(String datatype,
-                @Nullable AutofillValue value,
-                @Nullable RemoteViews presentation,
-                @Nullable InlinePresentation inlinePresentation,
-                @Nullable InlinePresentation tooltip,
-                @Nullable DatasetFieldFilter filter,
-                @Nullable RemoteViews dialogPresentation) {
-            if (mAutofillDatatypes == null) {
-                mFieldValues = new ArrayList<>();
-                mFieldPresentations = new ArrayList<>();
-                mFieldDialogPresentations = new ArrayList<>();
-                mFieldInlinePresentations = new ArrayList<>();
-                mFieldInlineTooltipPresentations = new ArrayList<>();
-                mFieldFilters = new ArrayList<>();
-                mAutofillDatatypes = new ArrayList<>();
-                mFieldIds = null;
-            }
-            mFieldValues.add(value);
-            mFieldPresentations.add(presentation);
-            mFieldDialogPresentations.add(dialogPresentation);
-            mFieldInlinePresentations.add(inlinePresentation);
-            mFieldInlineTooltipPresentations.add(tooltip);
-            mFieldFilters.add(filter);
-            mAutofillDatatypes.add(datatype);
-        }
-
         private void setLifeTheUniverseAndEverything(@NonNull AutofillId id,
                 @Nullable AutofillValue value, @Nullable RemoteViews presentation,
                 @Nullable InlinePresentation inlinePresentation,
@@ -1070,7 +984,6 @@ public final class Dataset implements Parcelable {
                 mFieldInlinePresentations = new ArrayList<>();
                 mFieldInlineTooltipPresentations = new ArrayList<>();
                 mFieldFilters = new ArrayList<>();
-                mAutofillDatatypes = null;
             }
             mFieldIds.add(id);
             mFieldValues.add(value);
@@ -1094,13 +1007,8 @@ public final class Dataset implements Parcelable {
         public @NonNull Dataset build() {
             throwIfDestroyed();
             mDestroyed = true;
-            if (mFieldIds == null && mAutofillDatatypes == null) {
+            if (mFieldIds == null) {
                 throw new IllegalStateException("at least one value must be set");
-            }
-            if (mFieldIds != null && mAutofillDatatypes != null) {
-                if (mFieldIds.size() > 0 && mAutofillDatatypes.size() > 0) {
-                    throw new IllegalStateException("both field and datatype were populated");
-                }
             }
             if (mFieldContent != null) {
                 if (mFieldIds.size() > 1) {
@@ -1143,7 +1051,6 @@ public final class Dataset implements Parcelable {
         parcel.writeTypedList(mFieldInlinePresentations, flags);
         parcel.writeTypedList(mFieldInlineTooltipPresentations, flags);
         parcel.writeTypedList(mFieldFilters, flags);
-        parcel.writeStringList(mAutofillDatatypes);
         parcel.writeParcelable(mFieldContent, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeString(mId);
@@ -1174,8 +1081,6 @@ public final class Dataset implements Parcelable {
                     parcel.createTypedArrayList(InlinePresentation.CREATOR);
             final ArrayList<DatasetFieldFilter> filters =
                     parcel.createTypedArrayList(DatasetFieldFilter.CREATOR);
-            final ArrayList<String> datatypes =
-                    parcel.createStringArrayList();
             final ClipData fieldContent = parcel.readParcelable(null,
                     android.content.ClipData.class);
             final IntentSender authentication = parcel.readParcelable(null,
@@ -1209,37 +1114,19 @@ public final class Dataset implements Parcelable {
                 builder.setContent(ids.get(0), fieldContent);
             }
             final int inlinePresentationsSize = inlinePresentations.size();
-
-            if (ids.size() == 0 && datatypes.size() > 0) {
-                for (int i = 0; i < ids.size(); i++) {
-                    final String datatype = datatypes.get(i);
-                    final AutofillValue value = values.get(i);
-                    final RemoteViews fieldPresentation = presentations.get(i);
-                    final RemoteViews fieldDialogPresentation = dialogPresentations.get(i);
-                    final InlinePresentation fieldInlinePresentation =
-                            i < inlinePresentationsSize ? inlinePresentations.get(i) : null;
-                    final InlinePresentation fieldInlineTooltipPresentation =
-                            i < inlinePresentationsSize ? inlineTooltipPresentations.get(i) : null;
-                    final DatasetFieldFilter filter = filters.get(i);
-                    builder.setLifeTheUniverseAndEverything(
-                            datatype, value, fieldPresentation, fieldInlinePresentation,
-                            fieldInlineTooltipPresentation, filter, fieldDialogPresentation);
-                }
-            } else {
-                for (int i = 0; i < ids.size(); i++) {
-                    final AutofillId id = ids.get(i);
-                    final AutofillValue value = values.get(i);
-                    final RemoteViews fieldPresentation = presentations.get(i);
-                    final RemoteViews fieldDialogPresentation = dialogPresentations.get(i);
-                    final InlinePresentation fieldInlinePresentation =
-                            i < inlinePresentationsSize ? inlinePresentations.get(i) : null;
-                    final InlinePresentation fieldInlineTooltipPresentation =
-                            i < inlinePresentationsSize ? inlineTooltipPresentations.get(i) : null;
-                    final DatasetFieldFilter filter = filters.get(i);
-                    builder.setLifeTheUniverseAndEverything(id, value, fieldPresentation,
-                            fieldInlinePresentation, fieldInlineTooltipPresentation, filter,
-                            fieldDialogPresentation);
-                }
+            for (int i = 0; i < ids.size(); i++) {
+                final AutofillId id = ids.get(i);
+                final AutofillValue value = values.get(i);
+                final RemoteViews fieldPresentation = presentations.get(i);
+                final RemoteViews fieldDialogPresentation = dialogPresentations.get(i);
+                final InlinePresentation fieldInlinePresentation =
+                        i < inlinePresentationsSize ? inlinePresentations.get(i) : null;
+                final InlinePresentation fieldInlineTooltipPresentation =
+                        i < inlinePresentationsSize ? inlineTooltipPresentations.get(i) : null;
+                final DatasetFieldFilter filter = filters.get(i);
+                builder.setLifeTheUniverseAndEverything(id, value, fieldPresentation,
+                        fieldInlinePresentation, fieldInlineTooltipPresentation, filter,
+                        fieldDialogPresentation);
             }
             builder.setAuthentication(authentication);
             builder.setId(datasetId);
