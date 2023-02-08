@@ -15846,25 +15846,18 @@ package android.telephony.ims {
   }
 
   public final class MediaQualityStatus implements android.os.Parcelable {
+    ctor public MediaQualityStatus(@NonNull String, int, int, @IntRange(from=0, to=100) int, @IntRange(from=0) int, @IntRange(from=0) long);
     method public int describeContents();
     method @NonNull public String getCallSessionId();
     method public int getMediaSessionType();
-    method public long getRtpInactivityMillis();
-    method public int getRtpJitterMillis();
+    method @IntRange(from=0) public long getRtpInactivityMillis();
+    method @IntRange(from=0) public int getRtpJitterMillis();
     method @IntRange(from=0, to=100) public int getRtpPacketLossRate();
     method public int getTransportType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.MediaQualityStatus> CREATOR;
     field public static final int MEDIA_SESSION_TYPE_AUDIO = 1; // 0x1
     field public static final int MEDIA_SESSION_TYPE_VIDEO = 2; // 0x2
-  }
-
-  public static final class MediaQualityStatus.Builder {
-    ctor public MediaQualityStatus.Builder(@NonNull String, int, int);
-    method @NonNull public android.telephony.ims.MediaQualityStatus build();
-    method @NonNull public android.telephony.ims.MediaQualityStatus.Builder setRtpInactivityMillis(long);
-    method @NonNull public android.telephony.ims.MediaQualityStatus.Builder setRtpJitterMillis(int);
-    method @NonNull public android.telephony.ims.MediaQualityStatus.Builder setRtpPacketLossRate(@IntRange(from=0, to=100) int);
   }
 
   public final class MediaThreshold implements android.os.Parcelable {
