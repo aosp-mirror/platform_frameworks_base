@@ -448,8 +448,7 @@ public class AccessibilityManagerServiceTest {
                 mA11yms.getCurrentUserIdLocked());
         Settings.Secure.putIntForUser(
                 mTestableContext.getContentResolver(),
-                // TODO: replace name with Settings Secure Key
-                "accessibility_magnification_always_on_enabled",
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
                 1, mA11yms.getCurrentUserIdLocked());
 
         mA11yms.readAlwaysOnMagnificationLocked(userState);
@@ -466,8 +465,7 @@ public class AccessibilityManagerServiceTest {
                 mA11yms.getCurrentUserIdLocked());
         Settings.Secure.putIntForUser(
                 mTestableContext.getContentResolver(),
-                // TODO: replace name with Settings Secure Key
-                "accessibility_magnification_always_on_enabled",
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
                 1, mA11yms.getCurrentUserIdLocked());
 
         mA11yms.readAlwaysOnMagnificationLocked(userState);

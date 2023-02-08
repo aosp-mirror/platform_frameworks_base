@@ -4379,9 +4379,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mMagnificationFollowTypingUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED);
 
-        // TODO: replace name with Settings Secure Key
         private final Uri mAlwaysOnMagnificationUri = Settings.Secure.getUriFor(
-                "accessibility_magnification_always_on_enabled");
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED);
 
         private final Uri mUiContrastUri = Settings.Secure.getUriFor(
                 CONTRAST_LEVEL);
@@ -4615,10 +4614,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     boolean readAlwaysOnMagnificationLocked(AccessibilityUserState userState) {
-        // TODO: replace name const with Settings Secure Key
         final boolean isSettingsAlwaysOnEnabled = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
-                "accessibility_magnification_always_on_enabled",
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
                 0, userState.mUserId) == 1;
         final boolean isAlwaysOnFeatureFlagEnabled = mMagnificationController
                 .isAlwaysOnMagnificationFeatureFlagEnabled();
