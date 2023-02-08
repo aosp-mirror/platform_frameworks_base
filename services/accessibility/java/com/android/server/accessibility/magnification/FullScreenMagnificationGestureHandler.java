@@ -445,12 +445,12 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
      */
     final class ViewportDraggingState implements State {
 
-        /** Whether to disable zoom after dragging ends */
-        @VisibleForTesting boolean mActivatedBeforeDrag;
-        /** Whether to restore scale after dragging ends */
-        private boolean mZoomedInTemporary;
-        /** The cached scale for recovering after dragging ends */
-        private float mScaleBeforeZoomedInTemporary;
+        /**
+         * The cached scale for recovering after dragging ends.
+         * If the scale >= 1.0, the magnifier needs to recover to scale.
+         * Otherwise, the magnifier should be disabled.
+         */
+        @VisibleForTesting float mScaleToRecoverAfterDraggingEnd = Float.NaN;
 
         private boolean mLastMoveOutsideMagnifiedRegion;
 
@@ -460,8 +460,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             final int action = event.getActionMasked();
             switch (action) {
                 case ACTION_POINTER_DOWN: {
-                    clear();
-                    transitionTo(mPanningScalingState);
+                    clearAndTransitToPanningScalingState();
                 }
                 break;
                 case ACTION_MOVE: {
@@ -484,14 +483,18 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
                 case ACTION_UP:
                 case ACTION_CANCEL: {
-                    if (mActivatedBeforeDrag) {
-                        if (mZoomedInTemporary) {
-                            zoomToScale(mScaleBeforeZoomedInTemporary, event.getX(), event.getY());
-                        }
+                    // If mScaleToRecoverAfterDraggingEnd >= 1.0, the dragging state is triggered
+                    // by zoom in temporary, and the magnifier needs to recover to original scale
+                    // after exiting dragging state.
+                    // Otherwise, the magnifier should be disabled.
+                    if (mScaleToRecoverAfterDraggingEnd >= 1.0f) {
+                        zoomToScale(mScaleToRecoverAfterDraggingEnd, event.getX(),
+                                event.getY());
                     } else {
                         zoomOff();
                     }
                     clear();
+                    mScaleToRecoverAfterDraggingEnd = Float.NaN;
                     transitionTo(mDetectingState);
                 }
                     break;
@@ -504,27 +507,49 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             }
         }
 
-        public void prepareForZoomInTemporary() {
-            mViewportDraggingState.mActivatedBeforeDrag =
-                    mFullScreenMagnificationController.isActivated(mDisplayId);
+        private boolean isAlwaysOnMagnificationEnabled() {
+            return mFullScreenMagnificationController.isAlwaysOnMagnificationEnabled();
+        }
 
-            mViewportDraggingState.mZoomedInTemporary = true;
-            mViewportDraggingState.mScaleBeforeZoomedInTemporary =
-                    mFullScreenMagnificationController.getScale(mDisplayId);
+        public void prepareForZoomInTemporary(boolean shortcutTriggered) {
+            boolean shouldRecoverAfterDraggingEnd;
+            if (mFullScreenMagnificationController.isActivated(mDisplayId)) {
+                // For b/267210808, if always-on feature is not enabled, we keep the expected
+                // behavior. If users tap shortcut and then tap-and-hold to zoom in temporary,
+                // the magnifier should be disabled after release.
+                // If always-on feature is enabled, in the same scenario the magnifier would
+                // zoom to 1.0 and keep activated.
+                if (shortcutTriggered) {
+                    shouldRecoverAfterDraggingEnd = isAlwaysOnMagnificationEnabled();
+                } else {
+                    shouldRecoverAfterDraggingEnd = true;
+                }
+            } else {
+                shouldRecoverAfterDraggingEnd = false;
+            }
+
+            mScaleToRecoverAfterDraggingEnd = shouldRecoverAfterDraggingEnd
+                    ? mFullScreenMagnificationController.getScale(mDisplayId) : Float.NaN;
+        }
+
+        private void clearAndTransitToPanningScalingState() {
+            final float scaleToRecovery = mScaleToRecoverAfterDraggingEnd;
+            clear();
+            mScaleToRecoverAfterDraggingEnd = scaleToRecovery;
+            transitionTo(mPanningScalingState);
         }
 
         @Override
         public void clear() {
             mLastMoveOutsideMagnifiedRegion = false;
 
-            mZoomedInTemporary = false;
-            mScaleBeforeZoomedInTemporary = 1.0f;
+            mScaleToRecoverAfterDraggingEnd = Float.NaN;
         }
 
         @Override
         public String toString() {
             return "ViewportDraggingState{"
-                    + "mActivatedBeforeDrag=" + mActivatedBeforeDrag
+                    + "mScaleToRecoverAfterDraggingEnd=" + mScaleToRecoverAfterDraggingEnd
                     + ", mLastMoveOutsideMagnifiedRegion=" + mLastMoveOutsideMagnifiedRegion
                     + '}';
         }
@@ -921,13 +946,14 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         void transitionToViewportDraggingStateAndClear(MotionEvent down) {
 
             if (DEBUG_DETECTING) Slog.i(mLogTag, "onTripleTapAndHold()");
+            final boolean shortcutTriggered = mShortcutTriggered;
             clear();
 
             // Triple tap and hold also belongs to triple tap event.
             final boolean enabled = !isActivated();
             logMagnificationTripleTap(enabled);
 
-            mViewportDraggingState.prepareForZoomInTemporary();
+            mViewportDraggingState.prepareForZoomInTemporary(shortcutTriggered);
 
             zoomInTemporary(down.getX(), down.getY());
 
