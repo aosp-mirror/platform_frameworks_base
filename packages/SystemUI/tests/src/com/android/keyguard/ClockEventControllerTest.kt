@@ -58,7 +58,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import java.util.*
+import java.util.TimeZone
 import java.util.concurrent.Executor
 import org.mockito.Mockito.`when` as whenever
 
@@ -105,7 +105,9 @@ class ClockEventControllerTest : SysuiTestCase() {
         repository = FakeKeyguardRepository()
 
         underTest = ClockEventController(
-            KeyguardInteractor(repository = repository, commandQueue = commandQueue),
+            KeyguardInteractor(repository = repository,
+                    commandQueue = commandQueue,
+                    featureFlags = featureFlags),
             KeyguardTransitionInteractor(repository = transitionRepository),
             broadcastDispatcher,
             batteryController,
