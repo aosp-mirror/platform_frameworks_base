@@ -953,7 +953,7 @@ class UidPermissionPolicy : SchemePolicy() {
         if (packageState.packageName == PLATFORM_PACKAGE_NAME) {
             return true
         }
-        if (!packageState.isPrivileged) {
+        if (!(packageState.isSystem && packageState.isPrivileged)) {
             return true
         }
         if (permission.packageName !in newState.systemState.privilegedPermissionAllowlistPackages) {
