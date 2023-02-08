@@ -92,13 +92,20 @@ class CredentialSelectorActivity : ComponentActivity() {
             handleDialogState(viewModel.uiState.dialogState)
         }
 
-        if (viewModel.uiState.createCredentialUiState != null) {
+        val createCredentialUiState = viewModel.uiState.createCredentialUiState
+        val getCredentialUiState = viewModel.uiState.getCredentialUiState
+        if (createCredentialUiState != null) {
             CreateCredentialScreen(
                 viewModel = viewModel,
+                createCredentialUiState = createCredentialUiState,
                 providerActivityLauncher = launcher
             )
-        } else if (viewModel.uiState.getCredentialUiState != null) {
-            GetCredentialScreen(viewModel = viewModel, providerActivityLauncher = launcher)
+        } else if (getCredentialUiState != null) {
+            GetCredentialScreen(
+                viewModel = viewModel,
+                getCredentialUiState = getCredentialUiState,
+                providerActivityLauncher = launcher
+            )
         } else {
             Log.d(Constants.LOG_TAG, "UI wasn't able to render neither get nor create flow")
             reportInstantiationErrorAndFinishActivity(credManRepo)

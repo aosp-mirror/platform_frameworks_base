@@ -255,14 +255,14 @@ class CredentialSelectorViewModel(
     }
 
     fun createFlowOnEntrySelectedFromFirstUseScreen(activeEntry: ActiveEntry) {
+        val providerId = activeEntry.activeProvider.id
+        createFlowOnDefaultChanged(providerId)
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
                 activeEntry = activeEntry
             )
         )
-        val providerId = uiState.createCredentialUiState?.activeEntry?.activeProvider?.id
-        createFlowOnDefaultChanged(providerId)
     }
 
     fun createFlowOnDisabledProvidersSelected() {
