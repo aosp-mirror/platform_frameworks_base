@@ -781,6 +781,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                 // the running transition finish.
                 final Transition transition = r != null
                         && r.mTransitionController.inPlayingTransition(r)
+                        && !r.mTransitionController.isCollecting()
                         ? r.mTransitionController.createTransition(TRANSIT_TO_BACK) : null;
                 if (transition != null) {
                     r.mTransitionController.requestStartTransition(transition, null /*startTask */,
@@ -820,6 +821,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                 // visibility while playing transition, there won't able to commit visibility until
                 // the running transition finish.
                 final Transition transition = r.mTransitionController.inPlayingTransition(r)
+                        && !r.mTransitionController.isCollecting()
                         ? r.mTransitionController.createTransition(TRANSIT_TO_FRONT) : null;
                 if (transition != null) {
                     r.mTransitionController.requestStartTransition(transition, null /*startTask */,
