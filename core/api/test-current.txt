@@ -1735,6 +1735,7 @@ package android.media {
 
   public final class MediaCas implements java.lang.AutoCloseable {
     method public void forceResourceLost();
+    method public boolean isAidlHal();
   }
 
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
@@ -1743,6 +1744,10 @@ package android.media {
     method public int getMaxFrameRate();
     method public long getMaxMacroBlockRate();
     method public int getMaxMacroBlocks();
+  }
+
+  public final class MediaDescrambler implements java.lang.AutoCloseable {
+    method public boolean isAidlHal();
   }
 
   public final class MediaRoute2Info implements android.os.Parcelable {

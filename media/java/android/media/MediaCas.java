@@ -944,10 +944,11 @@ public final class MediaCas implements AutoCloseable {
     }
 
     /**
-     * Check if the HAL is an AIDL implementation
+     * Check if the HAL is an AIDL implementation. For CTS testing purpose.
      *
      * @hide
      */
+    @TestApi
     public boolean isAidlHal() {
         return mICas != null;
     }
