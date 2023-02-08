@@ -117,6 +117,80 @@ public final class FillResponse implements Parcelable {
     private final boolean mShowSaveDialogIcon;
     private final @Nullable FieldClassification[] mDetectedFieldTypes;
 
+    /**
+    * Creates a shollow copy of the provided FillResponse.
+    *
+    * @hide
+    */
+    public static FillResponse shallowCopy(FillResponse r, List<Dataset> datasets) {
+        return new FillResponse(
+                (datasets != null) ? new ParceledListSlice<>(datasets) : null,
+                r.mSaveInfo,
+                r.mClientState,
+                r.mPresentation,
+                r.mInlinePresentation,
+                r.mInlineTooltipPresentation,
+                r.mDialogPresentation,
+                r.mDialogHeader,
+                r.mHeader,
+                r.mFooter,
+                r.mAuthentication,
+                r.mAuthenticationIds,
+                r.mIgnoredIds,
+                r.mFillDialogTriggerIds,
+                r.mDisableDuration,
+                r.mFieldClassificationIds,
+                r.mFlags,
+                r.mRequestId,
+                r.mUserData,
+                r.mCancelIds,
+                r.mSupportsInlineSuggestions,
+                r.mIconResourceId,
+                r.mServiceDisplayNameResourceId,
+                r.mShowFillDialogIcon,
+                r.mShowSaveDialogIcon,
+                r.mDetectedFieldTypes);
+    }
+
+    private FillResponse(ParceledListSlice<Dataset> datasets, SaveInfo saveInfo, Bundle clientState,
+            RemoteViews presentation, InlinePresentation inlinePresentation,
+            InlinePresentation inlineTooltipPresentation, RemoteViews dialogPresentation,
+            RemoteViews dialogHeader, RemoteViews header, RemoteViews footer,
+            IntentSender authentication, AutofillId[] authenticationIds, AutofillId[] ignoredIds,
+            AutofillId[] fillDialogTriggerIds, long disableDuration,
+            AutofillId[] fieldClassificationIds, int flags, int requestId, UserData userData,
+            int[] cancelIds, boolean supportsInlineSuggestions, int iconResourceId,
+            int serviceDisplayNameResourceId, boolean showFillDialogIcon,
+            boolean showSaveDialogIcon,
+            FieldClassification[] detectedFieldTypes) {
+        mDatasets = datasets;
+        mSaveInfo = saveInfo;
+        mClientState = clientState;
+        mPresentation = presentation;
+        mInlinePresentation = inlinePresentation;
+        mInlineTooltipPresentation = inlineTooltipPresentation;
+        mDialogPresentation = dialogPresentation;
+        mDialogHeader = dialogHeader;
+        mHeader = header;
+        mFooter = footer;
+        mAuthentication = authentication;
+        mAuthenticationIds = authenticationIds;
+        mIgnoredIds = ignoredIds;
+        mFillDialogTriggerIds = fillDialogTriggerIds;
+        mDisableDuration = disableDuration;
+        mFieldClassificationIds = fieldClassificationIds;
+        mFlags = flags;
+        mRequestId = requestId;
+        mUserData = userData;
+        mCancelIds = cancelIds;
+        mSupportsInlineSuggestions = supportsInlineSuggestions;
+        mIconResourceId = iconResourceId;
+        mServiceDisplayNameResourceId = serviceDisplayNameResourceId;
+        mShowFillDialogIcon = showFillDialogIcon;
+        mShowSaveDialogIcon = showSaveDialogIcon;
+        mDetectedFieldTypes = detectedFieldTypes;
+    }
+
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
         mSaveInfo = builder.mSaveInfo;
@@ -670,6 +744,15 @@ public final class FillResponse implements Parcelable {
             if (!mDatasets.add(dataset)) {
                 return this;
             }
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public Builder setDatasets(ArrayList<Dataset> dataset) {
+            mDatasets = dataset;
             return this;
         }
 

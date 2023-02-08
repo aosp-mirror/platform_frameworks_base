@@ -135,6 +135,9 @@ final class RemoteFillService extends ServiceConnector.Impl<IAutoFillService> {
     }
 
     public void onFillRequest(@NonNull FillRequest request) {
+        if (sVerbose) {
+            Slog.v(TAG, "onFillRequest:" + request);
+        }
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
         AtomicReference<CompletableFuture<FillResponse>> futureRef = new AtomicReference<>();
 

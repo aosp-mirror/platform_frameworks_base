@@ -18,6 +18,7 @@ package android.service.autofill;
 
 import static android.view.autofill.Helper.sDebug;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -33,6 +34,8 @@ import android.widget.RemoteViews;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -112,6 +115,55 @@ import java.util.regex.Pattern;
  * </ol>
  */
 public final class Dataset implements Parcelable {
+    /**
+     * This dataset is picked because of unknown reason.
+     * @hide
+     */
+    public static final int PICK_REASON_UNKNOWN = 0;
+    /**
+     * This dataset is picked because of autofill provider detection was chosen.
+     * @hide
+     */
+    public static final int PICK_REASON_AUTOFILL_PROVIDER_DETECTION = 1;
+    /**
+     * This dataset is picked because of PCC detection was chosen.
+     * @hide
+     */
+    public static final int PICK_REASON_PCC_DETECTION = 2;
+    /**
+     * This dataset is picked because of Framework detection was chosen.
+     * @hide
+     */
+    public static final int PICK_REASON_FRAMEWORK_DETECTION = 3;
+    /**
+     * This dataset is picked because of Autofill Provider being a fallback.
+     * @hide
+     */
+    public static final int PICK_REASON_AUTOFILL_PROVIDER_FALLBACK = 4;
+    /**
+     * This dataset is picked because of PCC detection being a fallback.
+     * @hide
+     */
+    public static final int PICK_REASON_PCC_DETECTION_FALLBACK = 5;
+    /**
+     * This dataset is picked because of Framework detection being a fallback.
+     * @hide
+     */
+    public static final int PICK_REASON_FRAMEWORK_FALLBACK = 6;
+
+    @IntDef(prefix = { "PICK_REASON_" }, value = {
+            PICK_REASON_UNKNOWN,
+            PICK_REASON_AUTOFILL_PROVIDER_DETECTION,
+            PICK_REASON_PCC_DETECTION,
+            PICK_REASON_FRAMEWORK_DETECTION,
+            PICK_REASON_AUTOFILL_PROVIDER_FALLBACK,
+            PICK_REASON_PCC_DETECTION_FALLBACK,
+            PICK_REASON_FRAMEWORK_FALLBACK,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface DatasetEligibleReason{}
+
+    private @DatasetEligibleReason int mEligibleReason;
 
     private final ArrayList<AutofillId> mFieldIds;
     private final ArrayList<AutofillValue> mFieldValues;
@@ -129,6 +181,67 @@ public final class Dataset implements Parcelable {
     @Nullable private final InlinePresentation mInlineTooltipPresentation;
     private final IntentSender mAuthentication;
     @Nullable String mId;
+
+    /**
+     * Constructor to copy the dataset, but replaces the AutofillId with the given input.
+     * Useful to modify the field type, and provide autofillId.
+     * @hide
+     */
+    public Dataset(
+            ArrayList<AutofillId> fieldIds,
+            ArrayList<AutofillValue> fieldValues,
+            ArrayList<RemoteViews> fieldPresentations,
+            ArrayList<RemoteViews> fieldDialogPresentations,
+            ArrayList<InlinePresentation> fieldInlinePresentations,
+            ArrayList<InlinePresentation> fieldInlineTooltipPresentations,
+            ArrayList<DatasetFieldFilter> fieldFilters,
+            ArrayList<String> autofillDatatypes,
+            ClipData fieldContent,
+            RemoteViews presentation,
+            RemoteViews dialogPresentation,
+            @Nullable InlinePresentation inlinePresentation,
+            @Nullable  InlinePresentation inlineTooltipPresentation,
+            @Nullable String id,
+            IntentSender authentication) {
+        mFieldIds = fieldIds;
+        mFieldValues = fieldValues;
+        mFieldPresentations = fieldPresentations;
+        mFieldDialogPresentations = fieldDialogPresentations;
+        mFieldInlinePresentations = fieldInlinePresentations;
+        mFieldInlineTooltipPresentations = fieldInlineTooltipPresentations;
+        mAutofillDatatypes = autofillDatatypes;
+        mFieldFilters = fieldFilters;
+        mFieldContent = fieldContent;
+        mPresentation = presentation;
+        mDialogPresentation = dialogPresentation;
+        mInlinePresentation = inlinePresentation;
+        mInlineTooltipPresentation = inlineTooltipPresentation;
+        mAuthentication = authentication;
+        mId = id;
+    }
+
+    /**
+     * Constructor to copy the dataset, but replaces the AutofillId with the given input.
+     * Useful to modify the field type, and provide autofillId.
+     * @hide
+     */
+    public Dataset(Dataset dataset, ArrayList<AutofillId> ids) {
+        mFieldIds = ids;
+        mFieldValues = dataset.mFieldValues;
+        mFieldPresentations = dataset.mFieldPresentations;
+        mFieldDialogPresentations = dataset.mFieldDialogPresentations;
+        mFieldInlinePresentations = dataset.mFieldInlinePresentations;
+        mFieldInlineTooltipPresentations = dataset.mFieldInlineTooltipPresentations;
+        mFieldFilters = dataset.mFieldFilters;
+        mFieldContent = dataset.mFieldContent;
+        mPresentation = dataset.mPresentation;
+        mDialogPresentation = dataset.mDialogPresentation;
+        mInlinePresentation = dataset.mInlinePresentation;
+        mInlineTooltipPresentation = dataset.mInlineTooltipPresentation;
+        mAuthentication = dataset.mAuthentication;
+        mId = dataset.mId;
+        mAutofillDatatypes = dataset.mAutofillDatatypes;
+    }
 
     private Dataset(Builder builder) {
         mFieldIds = builder.mFieldIds;
@@ -289,6 +402,22 @@ public final class Dataset implements Parcelable {
     @TestApi
     public @Nullable String getId() {
         return mId;
+    }
+
+    /**
+     * Sets the reason as to why this dataset is eligible
+     * @hide
+     */
+    public void setEligibleReasonReason(@DatasetEligibleReason int eligibleReason) {
+        this.mEligibleReason = eligibleReason;
+    }
+
+    /**
+     * Get the reason as to why this dataset is eligible.
+     * @hide
+     */
+    public @DatasetEligibleReason int getEligibleReason() {
+        return mEligibleReason;
     }
 
     /**
@@ -1147,6 +1276,7 @@ public final class Dataset implements Parcelable {
         parcel.writeParcelable(mFieldContent, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeString(mId);
+        parcel.writeInt(mEligibleReason);
     }
 
     public static final @NonNull Creator<Dataset> CREATOR = new Creator<Dataset>() {
@@ -1181,6 +1311,7 @@ public final class Dataset implements Parcelable {
             final IntentSender authentication = parcel.readParcelable(null,
                     android.content.IntentSender.class);
             final String datasetId = parcel.readString();
+            final int eligibleReason = parcel.readInt();
 
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
@@ -1243,7 +1374,9 @@ public final class Dataset implements Parcelable {
             }
             builder.setAuthentication(authentication);
             builder.setId(datasetId);
-            return builder.build();
+            Dataset dataset = builder.build();
+            dataset.mEligibleReason = eligibleReason;
+            return dataset;
         }
 
         @Override
