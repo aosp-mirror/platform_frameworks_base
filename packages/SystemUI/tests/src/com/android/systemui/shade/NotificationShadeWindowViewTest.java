@@ -25,6 +25,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -40,7 +42,6 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -93,7 +94,6 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock private AmbientState mAmbientState;
     @Mock private PulsingGestureListener mPulsingGestureListener;
-    @Mock private FeatureFlags mFeatureFlags;
     @Mock private KeyguardBouncerViewModel mKeyguardBouncerViewModel;
     @Mock private KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
     @Mock private KeyguardBouncerComponent mKeyguardBouncerComponent;
@@ -125,6 +125,9 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
 
         when(mDockManager.isDocked()).thenReturn(false);
 
+        when(mKeyguardTransitionInteractor.getLockscreenToDreamingTransition())
+                .thenReturn(emptyFlow());
+
         mController = new NotificationShadeWindowViewController(
                 mLockscreenShadeTransitionController,
                 new FalsingCollectorFake(),
@@ -144,7 +147,6 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationInsetsController,
                 mAmbientState,
                 mPulsingGestureListener,
-                mFeatureFlags,
                 mKeyguardBouncerViewModel,
                 mKeyguardBouncerComponentFactory,
                 mAlternateBouncerInteractor,

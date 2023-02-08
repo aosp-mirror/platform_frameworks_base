@@ -368,17 +368,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void setOccluded_animatesPanelExpansion_onlyIfBouncerHidden() {
-        mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, true /* animated */);
-        verify(mCentralSurfaces).animateKeyguardUnoccluding();
-
-        when(mPrimaryBouncerInteractor.isFullyShowing()).thenReturn(true);
-        clearInvocations(mCentralSurfaces);
-        mStatusBarKeyguardViewManager.setOccluded(false /* occluded */, true /* animated */);
-        verify(mCentralSurfaces, never()).animateKeyguardUnoccluding();
-    }
-
-    @Test
     public void setOccluded_onKeyguardOccludedChangedCalled() {
         clearInvocations(mKeyguardStateController);
         clearInvocations(mKeyguardUpdateMonitor);

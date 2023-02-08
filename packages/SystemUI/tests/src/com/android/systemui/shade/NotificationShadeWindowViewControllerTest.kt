@@ -28,10 +28,10 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -80,8 +81,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock
     private lateinit var keyguardUnlockAnimationController: KeyguardUnlockAnimationController
-    @Mock
-    private lateinit var featureFlags: FeatureFlags
     @Mock
     private lateinit var ambientState: AmbientState
     @Mock
@@ -124,6 +123,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 .thenReturn(keyguardBouncerComponent)
         whenever(keyguardBouncerComponent.securityContainerController)
                 .thenReturn(keyguardSecurityContainerController)
+        whenever(keyguardTransitionInteractor.lockscreenToDreamingTransition)
+                .thenReturn(emptyFlow<TransitionStep>())
         underTest = NotificationShadeWindowViewController(
             lockscreenShadeTransitionController,
             FalsingCollectorFake(),
@@ -143,7 +144,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             notificationInsetsController,
             ambientState,
             pulsingGestureListener,
-            featureFlags,
             keyguardBouncerViewModel,
             keyguardBouncerComponentFactory,
             alternateBouncerInteractor,

@@ -189,10 +189,6 @@ object Flags {
     @JvmField
     val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = true)
 
-    /** A different path for unocclusion transitions back to keyguard */
-    // TODO(b/262859270): Tracking Bug
-    @JvmField val UNOCCLUSION_TRANSITION = releasedFlag(223, "unocclusion_transition")
-
     // flag for controlling auto pin confirmation and material u shapes in bouncer
     @JvmField
     val AUTO_PIN_CONFIRMATION =
