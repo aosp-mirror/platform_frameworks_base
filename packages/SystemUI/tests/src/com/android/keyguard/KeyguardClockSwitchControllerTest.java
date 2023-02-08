@@ -300,8 +300,9 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
         mController.init();
-        verify(mSecureSettings).registerContentObserverForUser(any(String.class),
-                anyBoolean(), observerCaptor.capture(), eq(UserHandle.USER_ALL));
+        verify(mSecureSettings).registerContentObserverForUser(
+                eq(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK),
+                    anyBoolean(), observerCaptor.capture(), eq(UserHandle.USER_ALL));
         ContentObserver observer = observerCaptor.getValue();
         mExecutor.runAllReady();
 
@@ -347,6 +348,22 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         assertEquals(0, mController.getClockBottom(10));
     }
 
+    @Test
+    public void testChangeLockscreenWeatherEnabledSetsWeatherViewVisible() {
+        when(mSmartspaceController.isWeatherEnabled()).thenReturn(true);
+        ArgumentCaptor<ContentObserver> observerCaptor =
+                ArgumentCaptor.forClass(ContentObserver.class);
+        mController.init();
+        verify(mSecureSettings).registerContentObserverForUser(
+                eq(Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED), anyBoolean(),
+                    observerCaptor.capture(), eq(UserHandle.USER_ALL));
+        ContentObserver observer = observerCaptor.getValue();
+        mExecutor.runAllReady();
+        // When a settings change has occurred, check that view is visible.
+        observer.onChange(true);
+        mExecutor.runAllReady();
+        assertEquals(View.VISIBLE, mFakeWeatherView.getVisibility());
+    }
 
     private void verifyAttachment(VerificationMode times) {
         verify(mClockRegistry, times).registerClockChangeListener(

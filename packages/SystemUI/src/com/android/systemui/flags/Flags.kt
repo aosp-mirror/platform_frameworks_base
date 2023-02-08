@@ -512,7 +512,8 @@ object Flags {
     @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata", teamfood = true)
 
     // TODO(b/266955521): Tracking bug
-    @JvmField val SCREENSHOT_DETECTION = unreleasedFlag(1303, "screenshot_detection")
+    @JvmField
+    val SCREENSHOT_DETECTION = unreleasedFlag(1303, "screenshot_detection", teamfood = true)
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
@@ -524,7 +525,7 @@ object Flags {
 
     // 1500 - chooser aka sharesheet
     // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
+    val CHOOSER_UNBUNDLED = releasedFlag(1500, "chooser_unbundled")
 
     // TODO(b/266983432) Tracking Bug
     val SHARESHEET_CUSTOM_ACTIONS =
@@ -619,7 +620,11 @@ object Flags {
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
 
-    // 2600 - keyboard shortcut
+    // 2600 - keyboard
     // TODO(b/259352579): Tracking Bug
     @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+
+    // TODO(b/259428678): Tracking Bug
+    @JvmField
+    val KEYBOARD_BACKLIGHT_INDICATOR = unreleasedFlag(2601, "keyboard_backlight_indicator")
 }

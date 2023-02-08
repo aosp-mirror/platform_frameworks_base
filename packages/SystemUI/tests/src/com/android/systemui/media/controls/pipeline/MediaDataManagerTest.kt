@@ -40,6 +40,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -51,6 +52,7 @@ import com.android.systemui.media.controls.models.recommendation.EXTRA_VALUE_TRI
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaDataProvider
 import com.android.systemui.media.controls.resume.MediaResumeListener
+import com.android.systemui.media.controls.resume.ResumeMediaBrowser
 import com.android.systemui.media.controls.util.MediaControllerFactory
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
@@ -125,6 +127,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock lateinit var pendingIntent: PendingIntent
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock lateinit var smartspaceManager: SmartspaceManager
+    @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     lateinit var smartspaceMediaDataProvider: SmartspaceMediaDataProvider
     @Mock lateinit var mediaSmartspaceTarget: SmartspaceTarget
     @Mock private lateinit var mediaRecommendationItem: SmartspaceAction
@@ -186,6 +189,7 @@ class MediaDataManagerTest : SysuiTestCase() {
                 mediaFlags = mediaFlags,
                 logger = logger,
                 smartspaceManager = smartspaceManager,
+                keyguardUpdateMonitor = keyguardUpdateMonitor
             )
         verify(tunerService)
             .addTunable(capture(tunableCaptor), eq(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION))
@@ -241,6 +245,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(false)
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         whenever(logger.getNewInstanceId()).thenReturn(instanceIdSequence.newInstanceId())
+        whenever(keyguardUpdateMonitor.isUserInLockdown(any())).thenReturn(false)
     }
 
     @After
@@ -639,6 +644,59 @@ class MediaDataManagerTest : SysuiTestCase() {
 
         // THEN the media data is removed
         verify(listener).onMediaDataRemoved(eq(KEY))
+    }
+
+    @Test
+    fun testOnNotificationRemoved_withResumption_tooManyPlayers() {
+        // Given the maximum number of resume controls already
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                build()
+            }
+        for (i in 0..ResumeMediaBrowser.MAX_RESUMPTION_CONTROLS) {
+            addResumeControlAndLoad(desc, "$i:$PACKAGE_NAME")
+            clock.advanceTime(1000)
+        }
+
+        // And an active, resumable notification
+        whenever(controller.metadata).thenReturn(metadataBuilder.build())
+        addNotificationAndLoad()
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isFalse()
+        mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
+
+        // When the notification is removed
+        mediaDataManager.onNotificationRemoved(KEY)
+
+        // Then it is converted to resumption
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(PACKAGE_NAME),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        assertThat(mediaDataCaptor.value.resumption).isTrue()
+        assertThat(mediaDataCaptor.value.isPlaying).isFalse()
+
+        // And the oldest resume control was removed
+        verify(listener).onMediaDataRemoved(eq("0:$PACKAGE_NAME"))
+    }
+
+    fun testOnNotificationRemoved_lockDownMode() {
+        whenever(keyguardUpdateMonitor.isUserInLockdown(any())).thenReturn(true)
+
+        addNotificationAndLoad()
+        val data = mediaDataCaptor.value
+        mediaDataManager.onNotificationRemoved(KEY)
+
+        verify(listener, never()).onMediaDataRemoved(eq(KEY))
+        verify(logger, never())
+            .logActiveConvertedToResume(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
+        verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
     }
 
     @Test
@@ -1846,7 +1904,10 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     /** Helper function to add a resumption control and capture the resulting MediaData */
-    private fun addResumeControlAndLoad(desc: MediaDescription) {
+    private fun addResumeControlAndLoad(
+        desc: MediaDescription,
+        packageName: String = PACKAGE_NAME
+    ) {
         mediaDataManager.addResumptionControls(
             USER_ID,
             desc,
@@ -1854,14 +1915,14 @@ class MediaDataManagerTest : SysuiTestCase() {
             session.sessionToken,
             APP_NAME,
             pendingIntent,
-            PACKAGE_NAME
+            packageName
         )
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
 
         verify(listener)
             .onMediaDataLoaded(
-                eq(PACKAGE_NAME),
+                eq(packageName),
                 eq(null),
                 capture(mediaDataCaptor),
                 eq(true),

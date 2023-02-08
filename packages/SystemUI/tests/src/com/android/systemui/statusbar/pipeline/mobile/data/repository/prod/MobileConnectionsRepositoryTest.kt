@@ -23,7 +23,6 @@ import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.os.ParcelUuid
-import android.provider.Settings
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
@@ -39,6 +38,7 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.tableBufferLogName
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
@@ -49,7 +49,6 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
@@ -80,6 +79,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var carrierMergedFactory: CarrierMergedConnectionRepository.Factory
     private lateinit var fullConnectionFactory: FullMobileConnectionRepository.Factory
     private lateinit var wifiRepository: FakeWifiRepository
+    private lateinit var carrierConfigRepository: CarrierConfigRepository
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
@@ -89,7 +89,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private val mobileMappings = FakeMobileMappingsProxy()
 
     private val scope = CoroutineScope(IMMEDIATE)
-    private val globalSettings = FakeSettings()
 
     @Before
     fun setUp() {
@@ -119,16 +118,25 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         wifiRepository = FakeWifiRepository()
 
+        carrierConfigRepository =
+            CarrierConfigRepository(
+                fakeBroadcastDispatcher,
+                mock(),
+                mock(),
+                logger,
+                scope,
+            )
+
         connectionFactory =
             MobileConnectionRepositoryImpl.Factory(
                 fakeBroadcastDispatcher,
                 context = context,
                 telephonyManager = telephonyManager,
                 bgDispatcher = IMMEDIATE,
-                globalSettings = globalSettings,
                 logger = logger,
                 mobileMappingsProxy = mobileMappings,
                 scope = scope,
+                carrierConfigRepository = carrierConfigRepository,
             )
         carrierMergedFactory =
             CarrierMergedConnectionRepository.Factory(
@@ -151,7 +159,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 logger,
                 mobileMappings,
                 fakeBroadcastDispatcher,
-                globalSettings,
                 context,
                 IMMEDIATE,
                 scope,
@@ -544,24 +551,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun globalMobileDataSettingsChangedEvent_producesOnSettingChange() =
-        runBlocking(IMMEDIATE) {
-            var produced = false
-            val job =
-                underTest.globalMobileDataSettingChangedEvent
-                    .onEach { produced = true }
-                    .launchIn(this)
-
-            assertThat(produced).isFalse()
-
-            globalSettings.putInt(Settings.Global.MOBILE_DATA, 0)
-
-            assertThat(produced).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
     fun mobileConnectivity_isConnected_isNotValidated() =
         runBlocking(IMMEDIATE) {
             val caps = createCapabilities(connected = true, validated = false)
@@ -629,7 +618,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     logger,
                     mobileMappings,
                     fakeBroadcastDispatcher,
-                    globalSettings,
                     context,
                     IMMEDIATE,
                     scope,
