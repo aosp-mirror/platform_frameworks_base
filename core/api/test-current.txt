@@ -2550,6 +2550,7 @@ package android.service.autofill {
   }
 
   public final class FillResponse implements android.os.Parcelable {
+    method @NonNull public java.util.Set<android.service.assist.classification.FieldClassification> getDetectedFieldClassifications();
     method public int getFlags();
   }
 
