@@ -35,78 +35,105 @@ data class GetCredentialUiState(
 )
 
 data class ProviderInfo(
-  /**
-   * Unique id (component name) of this provider.
-   * Not for display purpose - [displayName] should be used for ui rendering.
-   */
-  val id: String,
-  val icon: Drawable,
-  val displayName: String,
-  val credentialEntryList: List<CredentialEntryInfo>,
-  val authenticationEntryList: List<AuthenticationEntryInfo>,
-  val remoteEntry: RemoteEntryInfo?,
-  val actionEntryList: List<ActionEntryInfo>,
+    /**
+     * Unique id (component name) of this provider.
+     * Not for display purpose - [displayName] should be used for ui rendering.
+     */
+    val id: String,
+    val icon: Drawable,
+    val displayName: String,
+    val credentialEntryList: List<CredentialEntryInfo>,
+    val authenticationEntryList: List<AuthenticationEntryInfo>,
+    val remoteEntry: RemoteEntryInfo?,
+    val actionEntryList: List<ActionEntryInfo>,
 )
 
 /** Display-centric data structure derived from the [ProviderInfo]. This abstraction is not grouping
  *  by the provider id but instead focuses on structures convenient for display purposes. */
 data class ProviderDisplayInfo(
-  /**
-   * The credential entries grouped by userName, derived from all entries of the [providerInfoList].
-   * Note that the list order matters to the display order.
-   */
-  val sortedUserNameToCredentialEntryList: List<PerUserNameCredentialEntryList>,
-  val authenticationEntryList: List<AuthenticationEntryInfo>,
-  val remoteEntry: RemoteEntryInfo?
+    /**
+     * The credential entries grouped by userName, derived from all entries of the [providerInfoList].
+     * Note that the list order matters to the display order.
+     */
+    val sortedUserNameToCredentialEntryList: List<PerUserNameCredentialEntryList>,
+    val authenticationEntryList: List<AuthenticationEntryInfo>,
+    val remoteEntry: RemoteEntryInfo?
 )
 
 class CredentialEntryInfo(
-  providerId: String,
-  entryKey: String,
-  entrySubkey: String,
-  pendingIntent: PendingIntent?,
-  fillInIntent: Intent?,
-  /** Type of this credential used for sorting. Not localized so must not be directly displayed. */
-  val credentialType: CredentialType,
-  /** Localized type value of this credential used for display purpose. */
-  val credentialTypeDisplayName: String,
-  val userName: String,
-  val displayName: String?,
-  val icon: Drawable?,
-  val lastUsedTimeMillis: Instant?,
-) : BaseEntry(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
+    providerId: String,
+    entryKey: String,
+    entrySubkey: String,
+    pendingIntent: PendingIntent?,
+    fillInIntent: Intent?,
+    /** Type of this credential used for sorting. Not localized so must not be directly displayed. */
+    val credentialType: CredentialType,
+    /** Localized type value of this credential used for display purpose. */
+    val credentialTypeDisplayName: String,
+    val userName: String,
+    val displayName: String?,
+    val icon: Drawable?,
+    val lastUsedTimeMillis: Instant?,
+) : BaseEntry(
+    providerId,
+    entryKey,
+    entrySubkey,
+    pendingIntent,
+    fillInIntent,
+    shouldTerminateUiUponSuccessfulProviderResult = true,
+)
 
 class AuthenticationEntryInfo(
-  providerId: String,
-  entryKey: String,
-  entrySubkey: String,
-  pendingIntent: PendingIntent?,
-  fillInIntent: Intent?,
-  val title: String,
-  val icon: Drawable,
-) : BaseEntry(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
+    providerId: String,
+    entryKey: String,
+    entrySubkey: String,
+    pendingIntent: PendingIntent?,
+    fillInIntent: Intent?,
+    val title: String,
+    val icon: Drawable,
+) : BaseEntry(
+    providerId,
+    entryKey, entrySubkey,
+    pendingIntent,
+    fillInIntent,
+    shouldTerminateUiUponSuccessfulProviderResult = false,
+)
 
 class RemoteEntryInfo(
-  providerId: String,
-  entryKey: String,
-  entrySubkey: String,
-  pendingIntent: PendingIntent?,
-  fillInIntent: Intent?,
-) : BaseEntry(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
+    providerId: String,
+    entryKey: String,
+    entrySubkey: String,
+    pendingIntent: PendingIntent?,
+    fillInIntent: Intent?,
+) : BaseEntry(
+    providerId,
+    entryKey,
+    entrySubkey,
+    pendingIntent,
+    fillInIntent,
+    shouldTerminateUiUponSuccessfulProviderResult = true,
+)
 
 class ActionEntryInfo(
-  providerId: String,
-  entryKey: String,
-  entrySubkey: String,
-  pendingIntent: PendingIntent?,
-  fillInIntent: Intent?,
-  val title: String,
-  val icon: Drawable,
-  val subTitle: String?,
-) : BaseEntry(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
+    providerId: String,
+    entryKey: String,
+    entrySubkey: String,
+    pendingIntent: PendingIntent?,
+    fillInIntent: Intent?,
+    val title: String,
+    val icon: Drawable,
+    val subTitle: String?,
+) : BaseEntry(
+    providerId,
+    entryKey,
+    entrySubkey,
+    pendingIntent,
+    fillInIntent,
+    shouldTerminateUiUponSuccessfulProviderResult = false,
+)
 
 data class RequestDisplayInfo(
-  val appName: String,
+    val appName: String,
 )
 
 /**
@@ -115,18 +142,20 @@ data class RequestDisplayInfo(
  *                                     by last used timestamps and then by credential types
  */
 data class PerUserNameCredentialEntryList(
-  val userName: String,
-  val sortedCredentialEntryList: List<CredentialEntryInfo>,
+    val userName: String,
+    val sortedCredentialEntryList: List<CredentialEntryInfo>,
 )
 
 /** The name of the current screen. */
 enum class GetScreenState {
-  /** The primary credential selection page. */
-  PRIMARY_SELECTION,
-  /** The secondary credential selection page, where all sign-in options are listed. */
-  ALL_SIGN_IN_OPTIONS,
-  /** The snackbar only page when there's no account but only a remoteEntry. */
-  REMOTE_ONLY,
+    /** The primary credential selection page. */
+    PRIMARY_SELECTION,
+
+    /** The secondary credential selection page, where all sign-in options are listed. */
+    ALL_SIGN_IN_OPTIONS,
+
+    /** The snackbar only page when there's no account but only a remoteEntry. */
+    REMOTE_ONLY,
 }
 
 // IMPORTANT: new invocation should be mindful that this method will throw if more than 1 remote
@@ -135,113 +164,113 @@ private fun toProviderDisplayInfo(
     providerInfoList: List<ProviderInfo>
 ): ProviderDisplayInfo {
 
-  val userNameToCredentialEntryMap = mutableMapOf<String, MutableList<CredentialEntryInfo>>()
-  val authenticationEntryList = mutableListOf<AuthenticationEntryInfo>()
-  val remoteEntryList = mutableListOf<RemoteEntryInfo>()
-  providerInfoList.forEach { providerInfo ->
-    authenticationEntryList.addAll(providerInfo.authenticationEntryList)
-    if (providerInfo.remoteEntry != null) {
-      remoteEntryList.add(providerInfo.remoteEntry)
-    }
-    // There can only be at most one remote entry
-    Preconditions.checkState(remoteEntryList.size <= 1)
-
-    providerInfo.credentialEntryList.forEach {
-      userNameToCredentialEntryMap.compute(
-          it.userName
-      ) { _, v ->
-        if (v == null) {
-          mutableListOf(it)
-        } else {
-          v.add(it)
-          v
+    val userNameToCredentialEntryMap = mutableMapOf<String, MutableList<CredentialEntryInfo>>()
+    val authenticationEntryList = mutableListOf<AuthenticationEntryInfo>()
+    val remoteEntryList = mutableListOf<RemoteEntryInfo>()
+    providerInfoList.forEach { providerInfo ->
+        authenticationEntryList.addAll(providerInfo.authenticationEntryList)
+        if (providerInfo.remoteEntry != null) {
+            remoteEntryList.add(providerInfo.remoteEntry)
         }
-      }
+        // There can only be at most one remote entry
+        Preconditions.checkState(remoteEntryList.size <= 1)
+
+        providerInfo.credentialEntryList.forEach {
+            userNameToCredentialEntryMap.compute(
+                it.userName
+            ) { _, v ->
+                if (v == null) {
+                    mutableListOf(it)
+                } else {
+                    v.add(it)
+                    v
+                }
+            }
+        }
     }
-  }
 
-  // Compose sortedUserNameToCredentialEntryList
-  val comparator = CredentialEntryInfoComparatorByTypeThenTimestamp()
-  // Sort per username
-  userNameToCredentialEntryMap.values.forEach {
-    it.sortWith(comparator)
-  }
-  // Transform to list of PerUserNameCredentialEntryLists and then sort across usernames
-  val sortedUserNameToCredentialEntryList = userNameToCredentialEntryMap.map {
-    PerUserNameCredentialEntryList(it.key, it.value)
-  }.sortedWith(
-      compareByDescending { it.sortedCredentialEntryList.first().lastUsedTimeMillis }
-  )
+    // Compose sortedUserNameToCredentialEntryList
+    val comparator = CredentialEntryInfoComparatorByTypeThenTimestamp()
+    // Sort per username
+    userNameToCredentialEntryMap.values.forEach {
+        it.sortWith(comparator)
+    }
+    // Transform to list of PerUserNameCredentialEntryLists and then sort across usernames
+    val sortedUserNameToCredentialEntryList = userNameToCredentialEntryMap.map {
+        PerUserNameCredentialEntryList(it.key, it.value)
+    }.sortedWith(
+        compareByDescending { it.sortedCredentialEntryList.first().lastUsedTimeMillis }
+    )
 
-  return ProviderDisplayInfo(
-      sortedUserNameToCredentialEntryList = sortedUserNameToCredentialEntryList,
-      authenticationEntryList = authenticationEntryList,
-      remoteEntry = remoteEntryList.getOrNull(0),
-  )
+    return ProviderDisplayInfo(
+        sortedUserNameToCredentialEntryList = sortedUserNameToCredentialEntryList,
+        authenticationEntryList = authenticationEntryList,
+        remoteEntry = remoteEntryList.getOrNull(0),
+    )
 }
 
 private fun toActiveEntry(
     providerDisplayInfo: ProviderDisplayInfo,
 ): BaseEntry? {
-  val sortedUserNameToCredentialEntryList =
-      providerDisplayInfo.sortedUserNameToCredentialEntryList
-  val authenticationEntryList = providerDisplayInfo.authenticationEntryList
-  var activeEntry: BaseEntry? = null
-  if (sortedUserNameToCredentialEntryList
-          .size == 1 && authenticationEntryList.isEmpty()
-  ) {
-    activeEntry = sortedUserNameToCredentialEntryList.first().sortedCredentialEntryList.first()
-  } else if (
-      sortedUserNameToCredentialEntryList
-          .isEmpty() && authenticationEntryList.size == 1
-  ) {
-    activeEntry = authenticationEntryList.first()
-  }
-  return activeEntry
+    val sortedUserNameToCredentialEntryList =
+        providerDisplayInfo.sortedUserNameToCredentialEntryList
+    val authenticationEntryList = providerDisplayInfo.authenticationEntryList
+    var activeEntry: BaseEntry? = null
+    if (sortedUserNameToCredentialEntryList
+            .size == 1 && authenticationEntryList.isEmpty()
+    ) {
+        activeEntry = sortedUserNameToCredentialEntryList.first().sortedCredentialEntryList.first()
+    } else if (
+        sortedUserNameToCredentialEntryList
+            .isEmpty() && authenticationEntryList.size == 1
+    ) {
+        activeEntry = authenticationEntryList.first()
+    }
+    return activeEntry
 }
 
 private fun toGetScreenState(
     providerInfoList: List<ProviderInfo>
 ): GetScreenState {
-  var noLocalAccount = true
-  var remoteInfo: RemoteEntryInfo? = null
-  providerInfoList.forEach { providerInfo ->
-    if (providerInfo.credentialEntryList.isNotEmpty() ||
-        providerInfo.authenticationEntryList.isNotEmpty()) {
-      noLocalAccount = false
+    var noLocalAccount = true
+    var remoteInfo: RemoteEntryInfo? = null
+    providerInfoList.forEach { providerInfo ->
+        if (providerInfo.credentialEntryList.isNotEmpty() ||
+            providerInfo.authenticationEntryList.isNotEmpty()) {
+            noLocalAccount = false
+        }
+        if (providerInfo.remoteEntry != null) {
+            remoteInfo = providerInfo.remoteEntry
+        }
     }
-    if (providerInfo.remoteEntry != null) {
-      remoteInfo = providerInfo.remoteEntry
-    }
-  }
 
-  return if (noLocalAccount && remoteInfo != null)
-    GetScreenState.REMOTE_ONLY else GetScreenState.PRIMARY_SELECTION
+    return if (noLocalAccount && remoteInfo != null)
+        GetScreenState.REMOTE_ONLY else GetScreenState.PRIMARY_SELECTION
 }
 
 internal class CredentialEntryInfoComparatorByTypeThenTimestamp : Comparator<CredentialEntryInfo> {
-  override fun compare(p0: CredentialEntryInfo, p1: CredentialEntryInfo): Int {
-    // First prefer passkey type for its security benefits
-    if (p0.credentialType != p1.credentialType) {
-      if (CredentialType.PASSKEY == p0.credentialType) {
-        return -1
-      } else if (CredentialType.PASSKEY == p1.credentialType) {
-        return 1
-      }
-    }
+    override fun compare(p0: CredentialEntryInfo, p1: CredentialEntryInfo): Int {
+        // First prefer passkey type for its security benefits
+        if (p0.credentialType != p1.credentialType) {
+            if (CredentialType.PASSKEY == p0.credentialType) {
+                return -1
+            } else if (CredentialType.PASSKEY == p1.credentialType) {
+                return 1
+            }
+        }
 
-    // Then order by last used timestamp
-    if (p0.lastUsedTimeMillis != null && p1.lastUsedTimeMillis != null) {
-      if (p0.lastUsedTimeMillis < p1.lastUsedTimeMillis) {
-        return 1
-      } else if (p0.lastUsedTimeMillis > p1.lastUsedTimeMillis) {
-        return -1
-      }
-    } else if (p0.lastUsedTimeMillis != null) {
-      return -1
-    } else if (p1.lastUsedTimeMillis != null) {
-      return 1
+        // Then order by last used timestamp
+        if (p0.lastUsedTimeMillis != null && p1.lastUsedTimeMillis != null) {
+            if (p0.lastUsedTimeMillis < p1.lastUsedTimeMillis) {
+                return 1
+            } else if (p0.lastUsedTimeMillis > p1.lastUsedTimeMillis) {
+                return -1
+            }
+        } else if (p0.lastUsedTimeMillis != null) {
+            return -1
+        } else if (p1.lastUsedTimeMillis != null) {
+            return 1
+        }
+        return 0
     }
-    return 0
-  }
 }
