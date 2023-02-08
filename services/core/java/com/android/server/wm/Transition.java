@@ -2010,17 +2010,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mainWin.getAttrs().rotationAnimation;
     }
 
-    /** Applies the new configuration and returns {@code true} if there is a display change. */
-    boolean applyDisplayChangeIfNeeded() {
-        boolean changed = false;
+    /** Applies the new configuration for the changed displays. */
+    void applyDisplayChangeIfNeeded() {
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WindowContainer<?> wc = mParticipants.valueAt(i);
             final DisplayContent dc = wc.asDisplayContent();
             if (dc == null || !mChanges.get(dc).hasChanged()) continue;
             dc.sendNewConfiguration();
-            changed = true;
+            setReady(dc, true);
         }
-        return changed;
     }
 
     boolean getLegacyIsReady() {
