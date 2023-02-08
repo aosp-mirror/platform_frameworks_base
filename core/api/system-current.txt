@@ -4896,8 +4896,8 @@ package android.hardware.input {
 
   public final class VirtualNavigationTouchpadConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
     method public int describeContents();
-    method public int getHeight();
-    method public int getWidth();
+    method @IntRange(from=1) public int getHeight();
+    method @IntRange(from=1) public int getWidth();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualNavigationTouchpadConfig> CREATOR;
   }
