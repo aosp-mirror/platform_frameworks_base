@@ -163,8 +163,7 @@ public class StatusBarIconControllerImpl implements Tunable,
         for (int i = currentSlots.size() - 1; i >= 0; i--) {
             Slot s = currentSlots.get(i);
             slotsToReAdd.put(s, s.getHolderList());
-            // Don't force here because the new pipeline properly handles the tuner settings
-            removeAllIconsForSlot(s.getName(), /* force */ false);
+            removeAllIconsForSlot(s.getName(), /* fromNewPipeline */ false);
         }
 
         // Add them all back
@@ -286,7 +285,7 @@ public class StatusBarIconControllerImpl implements Tunable,
         // Because of the way we cache the icon holders, we need to remove everything any time
         // we get a new set of subscriptions. This might change in the future, but is required
         // to support demo mode for now
-        removeAllIconsForSlot(slotName, /* force */ true);
+        removeAllIconsForSlot(slotName, /* fromNewPipeline */ true);
 
         Collections.reverse(subIds);
 
@@ -453,13 +452,13 @@ public class StatusBarIconControllerImpl implements Tunable,
     /** */
     @Override
     public void removeAllIconsForSlot(String slotName) {
-        removeAllIconsForSlot(slotName, /* force */ false);
+        removeAllIconsForSlot(slotName, /* fromNewPipeline */ false);
     }
 
-    private void removeAllIconsForSlot(String slotName, Boolean force) {
+    private void removeAllIconsForSlot(String slotName, boolean fromNewPipeline) {
         // If the new pipeline is on for this icon, don't allow removal, since the new pipeline
         // will never call this method
-        if (!force && mStatusBarPipelineFlags.isIconControlledByFlags(slotName)) {
+        if (!fromNewPipeline && mStatusBarPipelineFlags.isIconControlledByFlags(slotName)) {
             Log.i(TAG, "Ignoring removal of (" + slotName + "). "
                     + "It should be controlled elsewhere");
             return;
