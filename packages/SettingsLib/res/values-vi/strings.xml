@@ -325,7 +325,7 @@
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Chọn cấu hình USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"Cho phép vị trí mô phỏng"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Cho phép vị trí mô phỏng"</string>
-    <string name="debug_view_attributes" msgid="3539609843984208216">"Cho phép kiểm tra thuộc tính của chế độ xem"</string>
+    <string name="debug_view_attributes" msgid="3539609843984208216">"Cho phép kiểm tra thuộc tính khung hiển thị"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Luôn bật dữ liệu di động ngay cả khi Wi-Fi đang hoạt động (để chuyển đổi mạng nhanh)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Sử dụng tính năng tăng tốc phần cứng khi chia sẻ Internet nếu có"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Cho phép gỡ lỗi qua USB?"</string>

@@ -460,7 +460,7 @@
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Chamadas e notificações farão o smartphone tocar (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"Sintonizador System UI"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barra de status"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Modo de demonstração da IU do sistema"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Modo de demonstração da interface do sistema"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Ativar modo de demonstração"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Mostrar modo de demonstração"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
