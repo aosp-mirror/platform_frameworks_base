@@ -21,6 +21,7 @@ import android.os.Binder;
 import android.telephony.satellite.stub.SatelliteImplBase;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -91,6 +92,34 @@ public class SatelliteCallback {
                 @SatelliteManager.SatelliteMessageTransferState int state);
     }
 
+    /**
+     * Interface for satellite state change listener.
+     */
+    public interface SatelliteStateListener {
+        /**
+         * Called when satellite state changes.
+         * @param state - The new satellite state.
+         */
+        void onSatelliteModemStateChange(@SatelliteManager.SatelliteModemState int state);
+
+        /**
+         * Called when there are pending messages to be received from satellite.
+         * @param count - pending message count.
+         */
+        void onPendingMessageCount(int count);
+    }
+
+    /**
+     * Interface for satellite datagram listener.
+     */
+    public interface SatelliteDatagramListener {
+        /**
+         * Called when there are incoming datagrams to be received.
+         * @param datagrams - datagrams to be received over satellite.
+         */
+        void onSatelliteDatagrams(SatelliteDatagram[] datagrams);
+    }
+
     private static class ISatelliteStateListenerStub extends ISatelliteStateListener.Stub {
         private WeakReference<SatelliteCallback> mSatelliteCallbackWeakRef;
         private Executor mExecutor;
@@ -127,6 +156,37 @@ public class SatelliteCallback {
 
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
                     () -> listener.onMessageTransferStateUpdate(state)));
+        }
+
+
+        @Override
+        public void onSatelliteModemStateChange(@SatelliteManager.SatelliteModemState int state) {
+            SatelliteStateListener listener =
+                    (SatelliteStateListener) mSatelliteCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onSatelliteModemStateChange(state)));
+        }
+
+        @Override
+        public void onPendingMessageCount(int count) {
+            SatelliteStateListener listener =
+                    (SatelliteStateListener) mSatelliteCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onPendingMessageCount(count)));
+        }
+
+        @Override
+        public void onSatelliteDatagrams(SatelliteDatagram[] datagrams) {
+            SatelliteDatagramListener listener =
+                    (SatelliteDatagramListener) mSatelliteCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onSatelliteDatagrams(datagrams)));
         }
     }
 }
