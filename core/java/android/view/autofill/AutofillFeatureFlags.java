@@ -82,12 +82,6 @@ public class AutofillFeatureFlags {
             "autofill_dialog_enabled";
 
     /**
-     * Indicates that PCC Autofill detection feature is enabled or not.
-     */
-    public static final String DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS =
-            "pcc_classification_hints";
-
-    /**
      * Sets the autofill hints allowed list for the fields that can trigger the fill dialog
      * feature at Activity starting.
      *
@@ -196,11 +190,9 @@ public class AutofillFeatureFlags {
             "autofill_inline_tooltip_first_show_delay";
 
     private static final String DIALOG_HINTS_DELIMITER = ":";
-    private static final String PCC_HINTS_DELIMITER = ",";
 
     private static final boolean DEFAULT_HAS_FILL_DIALOG_UI_FEATURE = false;
     private static final String DEFAULT_FILL_DIALOG_ENABLED_HINTS = "";
-    private static final String DEFAULT_PCC_FEATURE_PROVIDER_HINTS = "";
 
 
     // CREDENTIAL MANAGER DEFAULTS
@@ -230,25 +222,6 @@ public class AutofillFeatureFlags {
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED,
                 DEFAULT_HAS_FILL_DIALOG_UI_FEATURE);
-    }
-
-    /**
-     * The list of datatypes that is supported by framework
-     * detection.
-     *
-     * @hide
-     */
-    public static String[] getTypeHintsForProvider() {
-        final String typeHints = DeviceConfig.getString(
-                DeviceConfig.NAMESPACE_AUTOFILL,
-                DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS,
-                DEFAULT_PCC_FEATURE_PROVIDER_HINTS);
-        if (TextUtils.isEmpty(typeHints)) {
-            return new String[0];
-        }
-
-        return ArrayUtils.filter(typeHints.split(PCC_HINTS_DELIMITER), String[]::new,
-                (str) -> !TextUtils.isEmpty(str));
     }
 
     /**
