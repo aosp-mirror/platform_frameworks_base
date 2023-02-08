@@ -3989,8 +3989,15 @@ public class AudioService extends IAudioService.Stub
         // VOLUME_CHANGED_ACTION intent to see if the current device is the one being modified
         final int currDev = getDeviceForStream(vi.getStreamType());
 
+        final boolean skipping = (currDev == ada.getInternalType());
+
         AudioService.sVolumeLogger.enqueue(new DeviceVolumeEvent(vi.getStreamType(), index, ada,
-                currDev, callingPackage));
+                currDev, callingPackage, skipping));
+
+        if (skipping) {
+            // setDeviceVolume was called on a device currently being used
+            return;
+        }
 
         // TODO handle unmuting of current audio device
         // if a stream is not muted but the VolumeInfo is for muting, set the volume index
