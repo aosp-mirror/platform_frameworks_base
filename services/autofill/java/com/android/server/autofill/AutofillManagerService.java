@@ -193,6 +193,32 @@ public final class AutofillManagerService
 
     final AugmentedAutofillState mAugmentedAutofillState = new AugmentedAutofillState();
 
+    /**
+     * Lock used to synchronize access to flags.
+     */
+    private final Object mFlagLock = new Object();
+
+    // Flag holders for Autofill PCC classification
+
+    @GuardedBy("mFlagLock")
+    private boolean mPccClassificationEnabled;
+
+    @GuardedBy("mFlagLock")
+    private boolean mPccPreferProviderOverPcc;
+
+    @GuardedBy("mFlagLock")
+    private boolean mPccUseFallbackDetection;
+
+    @GuardedBy("mFlagLock")
+    private String mPccProviderHints;
+
+    // Default flag values for Autofill PCC
+
+    private static final String DEFAULT_PCC_FEATURE_PROVIDER_HINTS = "";
+    private static final boolean DEFAULT_PREFER_PROVIDER_OVER_PCC = true;
+
+    private static final boolean DEFAULT_PCC_USE_FALLBACK = true;
+
     public AutofillManagerService(Context context) {
         super(context,
                 new SecureSettingsServiceNameResolver(context, Settings.Secure.AUTOFILL_SERVICE),
@@ -302,6 +328,10 @@ public final class AutofillManagerService
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES:
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT:
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT:
+                case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_CLASSIFICATION_ENABLED:
+                case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS:
+                case AutofillFeatureFlags.DEVICE_CONFIG_PREFER_PROVIDER_OVER_PCC:
+                case AutofillFeatureFlags.DEVICE_CONFIG_PCC_USE_FALLBACK:
                     setDeviceConfigProperties();
                     break;
                 case AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
@@ -579,11 +609,36 @@ public final class AutofillManagerService
                     AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES,
                     AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM);
             if (verbose) {
-                Slog.v(mTag, "setDeviceConfigProperties(): "
+                Slog.v(mTag, "setDeviceConfigProperties() for AugmentedAutofill: "
                         + "augmentedIdleTimeout=" + mAugmentedServiceIdleUnbindTimeoutMs
                         + ", augmentedRequestTimeout=" + mAugmentedServiceRequestTimeoutMs
                         + ", smartSuggestionMode="
                         + getSmartSuggestionModeToString(mSupportedSmartSuggestionModes));
+            }
+        }
+        synchronized (mFlagLock) {
+            mPccClassificationEnabled = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
+                    AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_CLASSIFICATION_ENABLED,
+                    AutofillFeatureFlags.DEFAULT_AUTOFILL_PCC_CLASSIFICATION_ENABLED);
+            mPccPreferProviderOverPcc = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
+                    AutofillFeatureFlags.DEVICE_CONFIG_PREFER_PROVIDER_OVER_PCC,
+                    DEFAULT_PREFER_PROVIDER_OVER_PCC);
+            mPccUseFallbackDetection = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
+                    AutofillFeatureFlags.DEVICE_CONFIG_PCC_USE_FALLBACK,
+                    DEFAULT_PCC_USE_FALLBACK);
+            mPccProviderHints = DeviceConfig.getString(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
+                    AutofillFeatureFlags.DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS,
+                    DEFAULT_PCC_FEATURE_PROVIDER_HINTS);
+            if (verbose) {
+                Slog.v(mTag, "setDeviceConfigProperties() for PCC: "
+                        + "mPccClassificationEnabled=" + mPccClassificationEnabled
+                        + ", mPccPreferProviderOverPcc=" + mPccPreferProviderOverPcc
+                        + ", mPccUseFallbackDetection=" + mPccUseFallbackDetection
+                        + ", mPccProviderHints=" + mPccProviderHints);
             }
         }
     }
@@ -788,6 +843,46 @@ public final class AutofillManagerService
             receiver.send(value1, SyncResultReceiver.bundleFor(value2));
         } catch (RemoteException e) {
             Slog.w(TAG, "Error async reporting result to client: " + e);
+        }
+    }
+
+    /**
+     * Whether the Autofill PCC Classification feature is enabled.
+     */
+    public boolean isPccClassificationEnabled() {
+        synchronized (mFlagLock) {
+            return mPccClassificationEnabled;
+        }
+    }
+
+    /**
+     * Whether the Autofill Provider shouldbe preferred over PCC results for selecting datasets.
+     */
+    public boolean preferProviderOverPcc() {
+        synchronized (mFlagLock) {
+            return mPccPreferProviderOverPcc;
+        }
+    }
+
+    /**
+     * Whether to use the fallback for detection.
+     * If true, use data from secondary source if primary not present .
+     * For eg: if we prefer PCC over provider, and PCC detection didn't classify a field, however,
+     * autofill provider did, this flag would decide whether we use that result, and show some
+     * presentation for that particular field.
+     */
+    public boolean shouldUsePccFallback() {
+        synchronized (mFlagLock) {
+            return mPccUseFallbackDetection;
+        }
+    }
+
+    /**
+     * Provides Autofill Hints that would be requested by the service from the Autofill Provider.
+     */
+    public String getPccProviderHints() {
+        synchronized (mFlagLock) {
+            return mPccProviderHints;
         }
     }
 
