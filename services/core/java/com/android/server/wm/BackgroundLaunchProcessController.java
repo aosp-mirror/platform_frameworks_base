@@ -241,7 +241,7 @@ class BackgroundLaunchProcessController {
         }
     }
 
-    void addBoundClientUid(int clientUid, String clientPackageName, int bindFlags) {
+    void addBoundClientUid(int clientUid, String clientPackageName, long bindFlags) {
         if (!CompatChanges.isChangeEnabled(
                 DEFAULT_RESCIND_BAL_FG_PRIVILEGES_BOUND_SERVICE,
                 clientPackageName,
