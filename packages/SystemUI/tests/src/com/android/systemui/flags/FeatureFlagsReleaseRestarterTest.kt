@@ -22,6 +22,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP
 import com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -63,7 +64,7 @@ class FeatureFlagsReleaseRestarterTest : SysuiTestCase() {
         whenever(batteryController.isPluggedIn).thenReturn(true)
 
         assertThat(executor.numPending()).isEqualTo(0)
-        restarter.restartSystemUI()
+        restarter.restartSystemUI("Restart for test")
         assertThat(executor.numPending()).isEqualTo(1)
     }
 
@@ -72,11 +73,11 @@ class FeatureFlagsReleaseRestarterTest : SysuiTestCase() {
         whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_ASLEEP)
         whenever(batteryController.isPluggedIn).thenReturn(true)
 
-        restarter.restartSystemUI()
-        verify(systemExitRestarter, never()).restartSystemUI()
+        restarter.restartSystemUI("Restart for test")
+        verify(systemExitRestarter, never()).restartSystemUI("Restart for test")
         executor.advanceClockToLast()
         executor.runAllReady()
-        verify(systemExitRestarter).restartSystemUI()
+        verify(systemExitRestarter).restartSystemUI(any())
     }
 
     @Test
@@ -85,7 +86,7 @@ class FeatureFlagsReleaseRestarterTest : SysuiTestCase() {
         whenever(batteryController.isPluggedIn).thenReturn(true)
 
         assertThat(executor.numPending()).isEqualTo(0)
-        restarter.restartSystemUI()
+        restarter.restartSystemUI("Restart for test")
         assertThat(executor.numPending()).isEqualTo(0)
     }
 
@@ -95,7 +96,7 @@ class FeatureFlagsReleaseRestarterTest : SysuiTestCase() {
         whenever(batteryController.isPluggedIn).thenReturn(false)
 
         assertThat(executor.numPending()).isEqualTo(0)
-        restarter.restartSystemUI()
+        restarter.restartSystemUI("Restart for test")
         assertThat(executor.numPending()).isEqualTo(0)
     }
 
@@ -105,8 +106,8 @@ class FeatureFlagsReleaseRestarterTest : SysuiTestCase() {
         whenever(batteryController.isPluggedIn).thenReturn(true)
 
         assertThat(executor.numPending()).isEqualTo(0)
-        restarter.restartSystemUI()
-        restarter.restartSystemUI()
+        restarter.restartSystemUI("Restart for test")
+        restarter.restartSystemUI("Restart for test")
         assertThat(executor.numPending()).isEqualTo(1)
     }
 
@@ -115,7 +116,7 @@ class FeatureFlagsReleaseRestarterTest : SysuiTestCase() {
         whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_AWAKE)
         whenever(batteryController.isPluggedIn).thenReturn(true)
         assertThat(executor.numPending()).isEqualTo(0)
-        restarter.restartSystemUI()
+        restarter.restartSystemUI("Restart for test")
 
         val captor = ArgumentCaptor.forClass(WakefulnessLifecycle.Observer::class.java)
         verify(wakefulnessLifecycle).addObserver(captor.capture())
@@ -131,7 +132,7 @@ class FeatureFlagsReleaseRestarterTest : SysuiTestCase() {
         whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_ASLEEP)
         whenever(batteryController.isPluggedIn).thenReturn(false)
         assertThat(executor.numPending()).isEqualTo(0)
-        restarter.restartSystemUI()
+        restarter.restartSystemUI("Restart for test")
 
         val captor =
             ArgumentCaptor.forClass(BatteryController.BatteryStateChangeCallback::class.java)

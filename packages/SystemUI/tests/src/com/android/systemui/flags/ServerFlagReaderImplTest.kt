@@ -45,7 +45,7 @@ class ServerFlagReaderImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        serverFlagReader = ServerFlagReaderImpl(NAMESPACE, deviceConfig, executor)
+        serverFlagReader = ServerFlagReaderImpl(NAMESPACE, deviceConfig, executor, false)
     }
 
     @Test
@@ -56,6 +56,6 @@ class ServerFlagReaderImplTest : SysuiTestCase() {
         deviceConfig.setProperty(NAMESPACE, "flag_override_1", "1", false)
         executor.runAllReady()
 
-        verify(changeListener).onChange()
+        verify(changeListener).onChange(flag)
     }
 }
