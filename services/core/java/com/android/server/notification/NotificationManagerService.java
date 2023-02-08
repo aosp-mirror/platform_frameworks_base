@@ -6516,7 +6516,7 @@ public class NotificationManagerService extends SystemService {
 
         // Fix the notification as best we can.
         try {
-            fixNotification(notification, pkg, tag, id, userId);
+            fixNotification(notification, pkg, tag, id, userId, notificationUid);
         } catch (Exception e) {
             if (notification.isForegroundService()) {
                 throw new SecurityException("Invalid FGS notification", e);
@@ -6694,7 +6694,8 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void fixNotification(Notification notification, String pkg, String tag, int id,
-            int userId) throws NameNotFoundException, RemoteException {
+            @UserIdInt int userId, int notificationUid) throws NameNotFoundException,
+            RemoteException {
         final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
                 pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                 (userId == UserHandle.USER_ALL) ? USER_SYSTEM : userId);
@@ -6710,17 +6711,31 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        int canColorize = mPackageManagerClient.checkPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, pkg);
+        int canColorize = getContext().checkPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, -1, notificationUid);
+
         if (canColorize == PERMISSION_GRANTED) {
             notification.flags |= Notification.FLAG_CAN_COLORIZE;
         } else {
             notification.flags &= ~Notification.FLAG_CAN_COLORIZE;
         }
 
+        if (notification.extras.getBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, false)) {
+            int hasShowDuringSetupPerm = getContext().checkPermission(
+                    android.Manifest.permission.NOTIFICATION_DURING_SETUP, -1, notificationUid);
+            if (hasShowDuringSetupPerm != PERMISSION_GRANTED) {
+                notification.extras.remove(Notification.EXTRA_ALLOW_DURING_SETUP);
+                if (DBG) {
+                    Slog.w(TAG, "warning: pkg " + pkg + " attempting to show during setup"
+                            + " without holding perm "
+                            + Manifest.permission.NOTIFICATION_DURING_SETUP);
+                }
+            }
+        }
+
         if (notification.fullScreenIntent != null && ai.targetSdkVersion >= Build.VERSION_CODES.Q) {
-            int fullscreenIntentPermission = mPackageManagerClient.checkPermission(
-                    android.Manifest.permission.USE_FULL_SCREEN_INTENT, pkg);
+            int fullscreenIntentPermission = getContext().checkPermission(
+                    android.Manifest.permission.USE_FULL_SCREEN_INTENT, -1, notificationUid);
             if (fullscreenIntentPermission != PERMISSION_GRANTED) {
                 notification.fullScreenIntent = null;
                 Slog.w(TAG, "Package " + pkg +
@@ -6765,8 +6780,8 @@ public class NotificationManagerService extends SystemService {
 
         // Ensure MediaStyle has correct permissions for remote device extras
         if (notification.isStyle(Notification.MediaStyle.class)) {
-            int hasMediaContentControlPermission = mPackageManager.checkPermission(
-                    android.Manifest.permission.MEDIA_CONTENT_CONTROL, pkg, userId);
+            int hasMediaContentControlPermission = getContext().checkPermission(
+                    android.Manifest.permission.MEDIA_CONTENT_CONTROL, -1, notificationUid);
             if (hasMediaContentControlPermission != PERMISSION_GRANTED) {
                 notification.extras.remove(Notification.EXTRA_MEDIA_REMOTE_DEVICE);
                 notification.extras.remove(Notification.EXTRA_MEDIA_REMOTE_ICON);
@@ -6780,8 +6795,8 @@ public class NotificationManagerService extends SystemService {
 
         // Ensure only allowed packages have a substitute app name
         if (notification.extras.containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME)) {
-            int hasSubstituteAppNamePermission = mPackageManager.checkPermission(
-                    permission.SUBSTITUTE_NOTIFICATION_APP_NAME, pkg, userId);
+            int hasSubstituteAppNamePermission = getContext().checkPermission(
+                    permission.SUBSTITUTE_NOTIFICATION_APP_NAME, -1, notificationUid);
             if (hasSubstituteAppNamePermission != PERMISSION_GRANTED) {
                 notification.extras.remove(Notification.EXTRA_SUBSTITUTE_APP_NAME);
                 if (DBG) {
