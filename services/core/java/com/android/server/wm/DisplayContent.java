@@ -3140,22 +3140,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * Returns true if the input point is within an app window.
-     */
-    boolean pointWithinAppWindow(int x, int y) {
-        final int[] targetWindowType = {-1};
-        forAllWindows(w -> {
-            if (w.isOnScreen() && w.isVisible() && w.getFrame().contains(x, y)) {
-                targetWindowType[0] = w.mAttrs.type;
-                return true;
-            }
-            return false;
-        }, true /* traverseTopToBottom */);
-        return FIRST_APPLICATION_WINDOW <= targetWindowType[0]
-                && targetWindowType[0] <= LAST_APPLICATION_WINDOW;
-    }
-
-    /**
      * Find the task whose outside touch area (for resizing) (x, y) falls within.
      * Returns null if the touch doesn't fall into a resizing area.
      */
