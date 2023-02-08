@@ -474,7 +474,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 new MagnificationScaleProvider(mContext));
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
-        mProxyManager = new ProxyManager(mLock, mA11yWindowManager);
+        mProxyManager = new ProxyManager(mLock, mA11yWindowManager, mContext);
         mFlashNotificationsController = new FlashNotificationsController(mContext);
         init();
     }
@@ -2495,6 +2495,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                     inputFilter = mInputFilter;
                     setInputFilter = true;
+                    mProxyManager.setAccessibilityInputFilter(mInputFilter);
                 }
                 mInputFilter.setUserAndEnabledFeatures(userState.mUserId, flags);
                 mInputFilter.setCombinedGenericMotionEventSources(
@@ -3883,6 +3884,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public boolean unregisterProxyForDisplay(int displayId) throws RemoteException {
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         return mProxyManager.unregisterProxy(displayId);
+    }
+
+    boolean isDisplayProxyed(int displayId) {
+        return mProxyManager.isProxyed(displayId);
     }
 
     @Override public float getUiContrast() {
