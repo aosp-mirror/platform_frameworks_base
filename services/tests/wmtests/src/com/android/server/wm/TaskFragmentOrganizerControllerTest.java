@@ -352,6 +352,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final ActivityRecord activity = createActivityRecord(mDisplayContent);
+        // Flush EVENT_APPEARED.
+        mController.dispatchPendingEvents();
         final Task task = activity.getTask();
         activity.info.applicationInfo.uid = uid;
         doReturn(pid).when(activity).getPid();
@@ -379,6 +381,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
                 DEFAULT_TASK_FRAGMENT_ORGANIZER_PROCESS_NAME);
         activity.reparent(taskFragment, POSITION_TOP);
         activity.mLastTaskFragmentOrganizerBeforePip = null;
+        // Flush EVENT_INFO_CHANGED.
+        mController.dispatchPendingEvents();
 
         // Clear invocations now because there will be another transaction for the TaskFragment
         // change above, triggered by the reparent. We only want to test onActivityReparentedToTask
@@ -400,6 +404,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         task.addChild(mTaskFragment, POSITION_TOP);
         final ActivityRecord activity = createActivityRecord(task);
+        // Flush EVENT_APPEARED.
+        mController.dispatchPendingEvents();
 
         // Make sure the activity belongs to the same app, but it is in a different pid.
         activity.info.applicationInfo.uid = uid;
@@ -442,6 +448,8 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         final Task task = createTask(mDisplayContent);
         task.addChild(mTaskFragment, POSITION_TOP);
         final ActivityRecord activity = createActivityRecord(task);
+        // Flush EVENT_APPEARED.
+        mController.dispatchPendingEvents();
 
         // Make sure the activity is embedded in untrusted mode.
         activity.info.applicationInfo.uid = uid + 1;
