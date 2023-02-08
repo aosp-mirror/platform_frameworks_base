@@ -308,7 +308,7 @@ public final class SaveInfo implements Parcelable {
      * username field, another for password).
      */
     // TODO(b/113281366): improve documentation: add example, document relationship with other
-    // flagss, etc...
+    // flags, etc...
     public static final int FLAG_DELAY_SAVE = 0x4;
 
     /** @hide */
@@ -777,17 +777,13 @@ public final class SaveInfo implements Parcelable {
         /**
          * Builds a new {@link SaveInfo} instance.
          *
-         * @throws IllegalStateException if no
-         * {@link #Builder(int, AutofillId[]) required ids},
+         * If no {@link #Builder(int, AutofillId[]) required ids},
          * or {@link #setOptionalIds(AutofillId[]) optional ids}, or {@link #FLAG_DELAY_SAVE}
-         * were set
+         * were set, Save Dialog will only be triggered if platform detection is enabled, which
+         * is indicated when {@link FillRequest.getHints()} is not empty.
          */
         public SaveInfo build() {
             throwIfDestroyed();
-            Preconditions.checkState(
-                    !ArrayUtils.isEmpty(mRequiredIds) || !ArrayUtils.isEmpty(mOptionalIds)
-                            || (mFlags & FLAG_DELAY_SAVE) != 0,
-                    "must have at least one required or optional id or FLAG_DELAYED_SAVE");
             mDestroyed = true;
             return new SaveInfo(this);
         }
