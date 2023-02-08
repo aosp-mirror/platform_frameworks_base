@@ -118,5 +118,12 @@ abstract class StatusBarPipelineModule {
         fun provideAirplaneTableLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
             return factory.create("AirplaneTableLog", 30)
         }
+
+        @Provides
+        @SysUISingleton
+        @MobileSummaryLog
+        fun provideMobileSummaryLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
+            return factory.create("MobileSummaryLog", 100)
+        }
     }
 }

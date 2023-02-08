@@ -36,6 +36,17 @@ class TableChangeTest : SysuiTestCase() {
     }
 
     @Test
+    fun setString_null() {
+        val underTest = TableChange()
+
+        underTest.reset(timestamp = 100, columnPrefix = "", columnName = "fakeName")
+        underTest.set(null as String?)
+
+        assertThat(underTest.hasData()).isTrue()
+        assertThat(underTest.getVal()).isEqualTo("null")
+    }
+
+    @Test
     fun setBoolean_isBoolean() {
         val underTest = TableChange()
 
@@ -55,6 +66,17 @@ class TableChangeTest : SysuiTestCase() {
 
         assertThat(underTest.hasData()).isTrue()
         assertThat(underTest.getVal()).isEqualTo("8900")
+    }
+
+    @Test
+    fun setInt_null() {
+        val underTest = TableChange()
+
+        underTest.reset(timestamp = 100, columnPrefix = "", columnName = "fakeName")
+        underTest.set(null as Int?)
+
+        assertThat(underTest.hasData()).isTrue()
+        assertThat(underTest.getVal()).isEqualTo("null")
     }
 
     @Test

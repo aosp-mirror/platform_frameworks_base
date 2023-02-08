@@ -73,6 +73,8 @@ class FakeMobileIconsInteractor(
     private val _isUserSetup = MutableStateFlow(true)
     override val isUserSetup = _isUserSetup
 
+    override val isForceHidden = MutableStateFlow(false)
+
     /** Always returns a new fake interactor */
     override fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor {
         return FakeMobileIconInteractor(tableLogBuffer)
