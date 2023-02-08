@@ -22,6 +22,8 @@ import android.graphics.Point
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
@@ -31,7 +33,6 @@ import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.CommandQueue.Callbacks
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -41,7 +42,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onStart
 
 /**
  * Encapsulates business-logic related to the keyguard but not to a more specific part within it.
@@ -52,6 +55,7 @@ class KeyguardInteractor
 constructor(
     private val repository: KeyguardRepository,
     private val commandQueue: CommandQueue,
+    featureFlags: FeatureFlags,
 ) {
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
@@ -128,6 +132,29 @@ constructor(
      * side, under display) is used to unlock the device.
      */
     val biometricUnlockState: Flow<BiometricUnlockModel> = repository.biometricUnlockState
+
+    /** Keyguard is present and is not occluded. */
+    val isKeyguardVisible: Flow<Boolean> =
+        combine(isKeyguardShowing, isKeyguardOccluded) { showing, occluded -> showing && !occluded }
+
+    /** Whether camera is launched over keyguard. */
+    var isSecureCameraActive =
+        if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
+            combine(
+                    isKeyguardVisible,
+                    repository.isBouncerShowing,
+                    onCameraLaunchDetected,
+                ) { isKeyguardVisible, isBouncerShowing, cameraLaunchEvent ->
+                    when {
+                        isKeyguardVisible -> false
+                        isBouncerShowing -> false
+                        else -> cameraLaunchEvent == CameraLaunchSourceModel.POWER_DOUBLE_TAP
+                    }
+                }
+                .onStart { emit(false) }
+        } else {
+            flowOf(false)
+        }
 
     /** The approximate location on the screen of the fingerprint sensor, if one is available. */
     val fingerprintSensorLocation: Flow<Point?> = repository.fingerprintSensorLocation
