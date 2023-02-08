@@ -158,7 +158,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     }
 
     @Test
-    fun `DREAMING to LOCKSCREEN`() =
+    fun `DREAMING to LOCKSCREEN - dreaming state changes first`() =
         testScope.runTest {
             // GIVEN a device is dreaming and occluded
             keyguardRepository.setDreamingWithOverlay(true)
@@ -188,8 +188,58 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             )
             // AND dreaming has stopped
             keyguardRepository.setDreamingWithOverlay(false)
+            advanceUntilIdle()
+            // AND then occluded has stopped
+            keyguardRepository.setKeyguardOccluded(false)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to BOUNCER should occur
+            assertThat(info.ownerName).isEqualTo("FromDreamingTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DREAMING)
+            assertThat(info.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `DREAMING to LOCKSCREEN - occluded state changes first`() =
+        testScope.runTest {
+            // GIVEN a device is dreaming and occluded
+            keyguardRepository.setDreamingWithOverlay(true)
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            // GIVEN a prior transition has run to DREAMING
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.DREAMING,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // WHEN doze is complete
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
             // AND occluded has stopped
             keyguardRepository.setKeyguardOccluded(false)
+            advanceUntilIdle()
+            // AND then dreaming has stopped
+            keyguardRepository.setDreamingWithOverlay(false)
             advanceUntilIdle()
 
             val info =
