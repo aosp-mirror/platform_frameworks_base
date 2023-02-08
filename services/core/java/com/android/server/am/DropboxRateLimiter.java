@@ -22,6 +22,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.expresslog.Counter;
 
 /** Rate limiter for adding errors into dropbox. */
 public class DropboxRateLimiter {
@@ -100,6 +101,9 @@ public class DropboxRateLimiter {
 
         for (int i = mErrorClusterRecords.size() - 1; i >= 0; i--) {
             if (now - mErrorClusterRecords.valueAt(i).getStartTime() > RATE_LIMIT_BUFFER_EXPIRY) {
+                Counter.logIncrement(
+                        "stability_errors.value_dropbox_buffer_expired_count",
+                        mErrorClusterRecords.valueAt(i).getCount());
                 mErrorClusterRecords.removeAt(i);
             }
         }
