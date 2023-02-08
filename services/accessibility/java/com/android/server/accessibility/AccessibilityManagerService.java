@@ -2725,6 +2725,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         somethingChanged |= readMagnificationModeForDefaultDisplayLocked(userState);
         somethingChanged |= readMagnificationCapabilitiesLocked(userState);
         somethingChanged |= readMagnificationFollowTypingLocked(userState);
+        somethingChanged |= readAlwaysOnMagnificationLocked(userState);
         somethingChanged |= readUiContrastLocked(userState);
         return somethingChanged;
     }
@@ -4378,6 +4379,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mMagnificationFollowTypingUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED);
 
+        // TODO: replace name with Settings Secure Key
+        private final Uri mAlwaysOnMagnificationUri = Settings.Secure.getUriFor(
+                "accessibility_magnification_always_on_enabled");
+
         private final Uri mUiContrastUri = Settings.Secure.getUriFor(
                 CONTRAST_LEVEL);
 
@@ -4421,6 +4426,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mMagnificationCapabilityUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mMagnificationFollowTypingUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mAlwaysOnMagnificationUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mUiContrastUri, false, this, UserHandle.USER_ALL);
         }
@@ -4492,6 +4499,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 } else if (mMagnificationFollowTypingUri.equals(uri)) {
                     readMagnificationFollowTypingLocked(userState);
+                } else if (mAlwaysOnMagnificationUri.equals(uri)) {
+                    readAlwaysOnMagnificationLocked(userState);
                 } else if (mUiContrastUri.equals(uri)) {
                     if (readUiContrastLocked(userState)) {
                         updateUiContrastLocked(userState);
@@ -4600,6 +4609,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (followTypeEnabled != userState.isMagnificationFollowTypingEnabled()) {
             userState.setMagnificationFollowTypingEnabled(followTypeEnabled);
             mMagnificationController.setMagnificationFollowTypingEnabled(followTypeEnabled);
+            return true;
+        }
+        return false;
+    }
+
+    boolean readAlwaysOnMagnificationLocked(AccessibilityUserState userState) {
+        // TODO: replace name const with Settings Secure Key
+        final boolean isSettingsAlwaysOnEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                "accessibility_magnification_always_on_enabled",
+                0, userState.mUserId) == 1;
+        final boolean isAlwaysOnFeatureFlagEnabled = mMagnificationController
+                .isAlwaysOnMagnificationFeatureFlagEnabled();
+        final boolean isAlwaysOnEnabled = isAlwaysOnFeatureFlagEnabled && isSettingsAlwaysOnEnabled;
+        if (isAlwaysOnEnabled != userState.isAlwaysOnMagnificationEnabled()) {
+            userState.setAlwaysOnMagnificationEnabled(isAlwaysOnEnabled);
+            mMagnificationController.setAlwaysOnMagnificationEnabled(isAlwaysOnEnabled);
             return true;
         }
         return false;
