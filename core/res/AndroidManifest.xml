@@ -4594,6 +4594,15 @@
     <permission android:name="android.permission.BIND_TEXTCLASSIFIER_SERVICE"
                 android:protectionLevel="signature" />
 
+    <!-- Must be required by a
+         {@link android.service.remotelockscreenvalidation.RemoteLockscreenValidationService}
+         to ensure that only the system can bind to it.
+         @SystemApi @hide This is not a third-party API
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a android.service.selectiontoolbar.SelectionToolbarRenderService,
           to ensure that only the system can bind to it.
           @hide This is not a third-party API (intended for OEMs and system apps).
