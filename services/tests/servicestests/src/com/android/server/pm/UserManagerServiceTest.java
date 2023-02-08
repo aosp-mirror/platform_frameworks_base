@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.os.UserManager.DISALLOW_BLUETOOTH;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -41,7 +40,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.server.LocalServices;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -188,13 +186,11 @@ public class UserManagerServiceTest {
         while (mUserManagerService.userExists(incorrectId)) {
             incorrectId++;
         }
-        try {
-            mUserManagerService.setUserRestriction(DISALLOW_BLUETOOTH, true, incorrectId);
-            Assert.fail();
-        } catch (IllegalArgumentException e) {
-            //Exception is expected to be thrown if user ID does not exist.
-            // IllegalArgumentException thrown means this test is successful.
-        }
+        assertThat(mUserManagerService.hasUserRestriction(DISALLOW_USER_SWITCH, incorrectId))
+                .isFalse();
+        mUserManagerService.setUserRestriction(DISALLOW_USER_SWITCH, true, incorrectId);
+        assertThat(mUserManagerService.hasUserRestriction(DISALLOW_USER_SWITCH, incorrectId))
+                .isFalse();
     }
 
     @Test

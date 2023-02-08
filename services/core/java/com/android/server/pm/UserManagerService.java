@@ -2810,8 +2810,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         if (!userExists(userId)) {
-            throw new IllegalArgumentException("Cannot set user restriction. "
-                    + "User with this id does not exist");
+            Slogf.w(LOG_TAG, "Cannot set user restriction %s. User with id %d does not exist",
+                    key, userId);
+            return;
         }
         synchronized (mRestrictionsLock) {
             // Note we can't modify Bundles stored in mBaseUserRestrictions directly, so create
