@@ -108,7 +108,6 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         Log.i(TAG, "Unable to create provider session");
         return null;
     }
-
     private static BeginGetCredentialRequest constructQueryPhaseRequest(
             android.credentials.GetCredentialRequest filteredRequest,
             CallingAppInfo callingAppInfo,
@@ -445,7 +444,22 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     /** Updates the response being maintained in state by this provider session. */
     private void onUpdateResponse(BeginGetCredentialResponse response) {
         mProviderResponse = response;
-        updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);
+        if (isEmptyResponse(response)) {
+            updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
+        } else {
+            updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);
+        }
+    }
+
+    private boolean isEmptyResponse(BeginGetCredentialResponse response) {
+        if ((response.getCredentialEntries() == null || response.getCredentialEntries().isEmpty())
+                && (response.getAuthenticationActions() == null || response
+                .getAuthenticationActions().isEmpty())
+                && (response.getActions() == null || response.getActions().isEmpty())
+                && response.getRemoteCredentialEntry() == null) {
+            return true;
+        }
+        return false;
     }
 
     private void onUpdateEmptyResponse() {

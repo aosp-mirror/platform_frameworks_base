@@ -147,6 +147,12 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
     }
 
     @Override
+    public void onUiSelectorInvocationFailure() {
+        respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
+                    "No credentials to show on the selector.");
+    }
+
+    @Override
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName) {
         Log.i(TAG, "in onStatusChanged with status: " + status);

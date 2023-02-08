@@ -472,8 +472,8 @@ public final class CredentialManagerService
             if (providerSessions.isEmpty()) {
                 try {
                     callback.onError(
-                            CreateCredentialException.TYPE_NO_CREDENTIAL,
-                            "No credentials available on this device.");
+                            CreateCredentialException.TYPE_NO_CREATE_OPTIONS,
+                            "No create options available.");
                 } catch (RemoteException e) {
                     Log.i(
                             TAG,

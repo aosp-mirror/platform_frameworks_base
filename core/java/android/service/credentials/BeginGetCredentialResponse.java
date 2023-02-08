@@ -44,6 +44,17 @@ public final class BeginGetCredentialResponse implements Parcelable {
     /** Remote credential entry to get the response from a different device. */
     private final @Nullable CredentialEntry mRemoteCredentialEntry;
 
+    /**
+     * Creates an empty response instance, to be used when there are no {@link CredentialEntry},
+     * or {@link Action} to return.
+     */
+    public BeginGetCredentialResponse() {
+        this(/*credentialEntries=*/new ArrayList<>(),
+                /*authenticationActions=*/new ArrayList<>(),
+                /*actions=*/new ArrayList<>(),
+                /*remoteCredentialEntry=*/null);
+    }
+
     private BeginGetCredentialResponse(@NonNull List<CredentialEntry> credentialEntries,
             @NonNull List<Action> authenticationEntries, @NonNull List<Action> actions,
             @Nullable CredentialEntry remoteCredentialEntry) {
@@ -243,16 +254,8 @@ public final class BeginGetCredentialResponse implements Parcelable {
 
         /**
          * Builds a {@link BeginGetCredentialResponse} instance.
-         *
-         * @throws IllegalStateException if {@code credentialEntries}, {@code actions}
-         *                               and {@code remoteCredentialEntry} are all null or empty.
          */
         public @NonNull BeginGetCredentialResponse build() {
-            if (mCredentialEntries.isEmpty() && mActions.isEmpty()
-                    && mRemoteCredentialEntry == null && mAuthenticationEntries.isEmpty()) {
-                throw new IllegalStateException("must set either an authentication, "
-                        + "credential, action or remote entry");
-            }
             return new BeginGetCredentialResponse(mCredentialEntries, mAuthenticationEntries,
                     mActions, mRemoteCredentialEntry);
         }

@@ -97,7 +97,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
         if (response != null) {
             respondToClientWithResponseAndFinish(response);
         } else {
-            respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREDENTIAL,
+            respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREATE_OPTIONS,
                     "Invalid response");
         }
     }
@@ -117,6 +117,12 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_INTERRUPTED,
                     "The UI was interrupted - please try again.");
         }
+    }
+
+    @Override
+    public void onUiSelectorInvocationFailure() {
+        respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREATE_OPTIONS,
+                "No create options available.");
     }
 
     private void respondToClientWithResponseAndFinish(CreateCredentialResponse response) {
@@ -166,8 +172,8 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                 Log.i(TAG, "in onProviderStatusChanged - isUiInvocationNeeded");
                 getProviderDataAndInitiateUi();
             } else {
-                respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREDENTIAL,
-                        "No credentials available");
+                respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREATE_OPTIONS,
+                        "No create options available.");
             }
         }
     }
