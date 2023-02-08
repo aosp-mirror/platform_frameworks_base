@@ -45,7 +45,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Central provider session that listens for provider callbacks, and maintains provider state.
@@ -67,6 +66,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     // Key to be used as an entry key for a credential entry
     private static final String CREDENTIAL_ENTRY_KEY = "credential_key";
 
+    @NonNull
+    private final Map<String, CredentialOption> mBeginGetOptionToCredentialOptionMap;
     @NonNull
     private final Map<String, CredentialEntry> mUiCredentialEntries = new HashMap<>();
     @NonNull
@@ -91,12 +92,16 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 filterOptions(providerInfo.getCapabilities(),
                         getRequestSession.mClientRequest);
         if (filteredRequest != null) {
+            Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
+                    new HashMap<>();
             BeginGetCredentialRequest beginGetCredentialRequest = constructQueryPhaseRequest(
                     filteredRequest, getRequestSession.mClientAppInfo,
-                    getRequestSession.mClientRequest.alwaysSendAppInfoToProvider());
+                    getRequestSession.mClientRequest.alwaysSendAppInfoToProvider(),
+                    beginGetOptionToCredentialOptionMap);
             return new ProviderGetSession(context, providerInfo, getRequestSession, userId,
                     remoteCredentialService, beginGetCredentialRequest, filteredRequest,
-                    getRequestSession.mClientAppInfo);
+                    getRequestSession.mClientAppInfo,
+                    beginGetOptionToCredentialOptionMap);
         }
         Log.i(TAG, "Unable to create provider session");
         return null;
@@ -105,15 +110,18 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     private static BeginGetCredentialRequest constructQueryPhaseRequest(
             android.credentials.GetCredentialRequest filteredRequest,
             CallingAppInfo callingAppInfo,
-            boolean propagateToProvider) {
+            boolean propagateToProvider,
+            Map<String, CredentialOption> beginGetOptionToCredentialOptionMap
+    ) {
         BeginGetCredentialRequest.Builder builder = new BeginGetCredentialRequest.Builder();
-        builder.setBeginGetCredentialOptions(
-                filteredRequest.getCredentialOptions().stream().map(
-                        option -> {
-                            return new BeginGetCredentialOption(
-                                    option.getType(),
-                                    option.getCandidateQueryData());
-                        }).collect(Collectors.toList()));
+        filteredRequest.getCredentialOptions().forEach(option -> {
+            String id = generateUniqueId();
+            builder.addBeginGetCredentialOption(
+                    new BeginGetCredentialOption(
+                            id, option.getType(), option.getCandidateQueryData())
+            );
+            beginGetOptionToCredentialOptionMap.put(id, option);
+        });
         if (propagateToProvider) {
             builder.setCallingAppInfo(callingAppInfo);
         }
@@ -152,11 +160,13 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             int userId, RemoteCredentialService remoteCredentialService,
             BeginGetCredentialRequest beginGetRequest,
             android.credentials.GetCredentialRequest completeGetRequest,
-            CallingAppInfo callingAppInfo) {
+            CallingAppInfo callingAppInfo,
+            Map<String, CredentialOption> beginGetOptionToCredentialOptionMap) {
         super(context, info, beginGetRequest, callbacks, userId, remoteCredentialService);
         mCompleteRequest = completeGetRequest;
         mCallingAppInfo = callingAppInfo;
         setStatus(Status.PENDING);
+        mBeginGetOptionToCredentialOptionMap = beginGetOptionToCredentialOptionMap;
     }
 
     /** Called when the provider response has been updated by an external source. */
@@ -260,7 +270,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         if (remoteCredentialEntry == null) {
             return null;
         }
-        String entryId = generateEntryId();
+        String entryId = generateUniqueId();
         Entry remoteEntry = new Entry(REMOTE_ENTRY_KEY, entryId, remoteCredentialEntry.getSlice());
         mUiRemoteEntry = new Pair<>(entryId, remoteCredentialEntry);
         return remoteEntry;
@@ -271,7 +281,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         List<Entry> authenticationUiEntries = new ArrayList<>();
 
         for (Action authenticationAction : authenticationEntries) {
-            String entryId = generateEntryId();
+            String entryId = generateUniqueId();
             mUiAuthenticationEntries.put(entryId, authenticationAction);
             authenticationUiEntries.add(new Entry(
                     AUTHENTICATION_ACTION_ENTRY_KEY, entryId,
@@ -288,7 +298,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
         // Populate the credential entries
         for (CredentialEntry credentialEntry : credentialEntries) {
-            String entryId = generateEntryId();
+            String entryId = generateUniqueId();
             mUiCredentialEntries.put(entryId, credentialEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
             credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
@@ -298,18 +308,17 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         return credentialUiEntries;
     }
 
-    private Intent setUpFillInIntent(String type) {
-        Intent intent = new Intent();
-        for (CredentialOption option : mCompleteRequest.getCredentialOptions()) {
-            if (option.getType().equals(type)) {
-                intent.putExtra(
-                        CredentialProviderService
-                                .EXTRA_GET_CREDENTIAL_REQUEST,
-                        new GetCredentialRequest(mCallingAppInfo, option));
-                return intent;
-            }
+    private Intent setUpFillInIntent(@Nullable String id) {
+        // TODO: Determine if we should skip this entry if entry id is not set, or is set
+        // but does not resolve to a valid option. For now, not skipping it because
+        // it may be possible that the provider adds their own extras and expects to receive
+        // those and complete the flow.
+        if (id == null || mBeginGetOptionToCredentialOptionMap.get(id) == null) {
+            Log.i(TAG, "Id from Credential Entry does not resolve to a valid option");
         }
-        return intent;
+        return new Intent().putExtra(CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,
+                new GetCredentialRequest(
+                        mCallingAppInfo, mBeginGetOptionToCredentialOptionMap.get(id)));
     }
 
     private Intent setUpFillInIntentForAuthentication() {
