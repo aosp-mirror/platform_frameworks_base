@@ -938,7 +938,7 @@ public class StatusBarManager {
      * @param tileLabel label of the tile to show to the user.
      * @param icon icon to use in the tile shown to the user.
      * @param resultExecutor an executor to run the callback on
-     * @param resultCallback callback to indicate the {@link RequestResult}.
+     * @param resultCallback callback to indicate the result of the request.
      *
      * @see android.service.quicksettings.TileService
      */
