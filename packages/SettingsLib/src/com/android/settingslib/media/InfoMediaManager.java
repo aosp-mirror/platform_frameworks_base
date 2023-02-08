@@ -106,6 +106,15 @@ public class InfoMediaManager extends MediaManager {
         mMediaDevices.clear();
         mRouterManager.registerCallback(mExecutor, mMediaRouterCallback);
         mRouterManager.registerScanRequest();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && !TextUtils.isEmpty(mPackageName)) {
+            RouteListingPreference routeListingPreference =
+                    mRouterManager.getRouteListingPreference(mPackageName);
+            if (routeListingPreference != null) {
+                Api34Impl.onRouteListingPreferenceUpdated(null, routeListingPreference,
+                        mPreferenceItemMap);
+            }
+        }
         refreshDevices();
     }
 
@@ -500,7 +509,8 @@ public class InfoMediaManager extends MediaManager {
                 infos.add(transferableRoute);
             }
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+                && !TextUtils.isEmpty(mPackageName)) {
             RouteListingPreference routeListingPreference =
                     mRouterManager.getRouteListingPreference(mPackageName);
             if (routeListingPreference != null) {
@@ -633,6 +643,7 @@ public class InfoMediaManager extends MediaManager {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 Api34Impl.onRouteListingPreferenceUpdated(packageName, routeListingPreference,
                         mPreferenceItemMap);
+                refreshDevices();
             }
         }
     }
@@ -695,6 +706,9 @@ public class InfoMediaManager extends MediaManager {
         @DoNotInline
         static boolean preferRouteListingOrdering(MediaRouter2Manager mediaRouter2Manager,
                 String packageName) {
+            if (TextUtils.isEmpty(packageName)) {
+                return false;
+            }
             RouteListingPreference routeListingPreference =
                     mediaRouter2Manager.getRouteListingPreference(packageName);
             return routeListingPreference != null
@@ -705,6 +719,9 @@ public class InfoMediaManager extends MediaManager {
         @Nullable
         static ComponentName getLinkedItemComponentName(
                 MediaRouter2Manager mediaRouter2Manager, String packageName) {
+            if (TextUtils.isEmpty(packageName)) {
+                return null;
+            }
             RouteListingPreference routeListingPreference =
                     mediaRouter2Manager.getRouteListingPreference(packageName);
             return routeListingPreference == null ? null
