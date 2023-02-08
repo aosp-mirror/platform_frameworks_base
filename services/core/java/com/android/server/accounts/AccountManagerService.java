@@ -528,7 +528,7 @@ public class AccountManagerService
     private Map<Account, Integer> getAccountsAndVisibilityForPackage(String packageName,
             List<String> accountTypes, Integer callingUid, UserAccounts accounts) {
         if (!packageExistsForUser(packageName, accounts.userId)) {
-            Log.d(TAG, "Package not found " + packageName);
+            Log.w(TAG, "getAccountsAndVisibilityForPackage#Package not found " + packageName);
             return new LinkedHashMap<>();
         }
 
@@ -677,7 +677,7 @@ public class AccountManagerService
                 restoreCallingIdentity(identityToken);
             }
         } catch (NameNotFoundException e) {
-            Log.d(TAG, "Package not found " + e.getMessage());
+            Log.w(TAG, "resolveAccountVisibility#Package not found " + e.getMessage());
             return AccountManager.VISIBILITY_NOT_VISIBLE;
         }
 
@@ -756,7 +756,7 @@ public class AccountManagerService
             }
             return true;
         } catch (NameNotFoundException e) {
-            Log.d(TAG, "Package not found " + e.getMessage());
+            Log.w(TAG, "isPreOApplication#Package not found " + e.getMessage());
             return true;
         }
     }
@@ -4063,7 +4063,7 @@ public class AccountManagerService
             int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
             return hasAccountAccess(account, packageName, uid);
         } catch (NameNotFoundException e) {
-            Log.d(TAG, "Package not found " + e.getMessage());
+            Log.w(TAG, "hasAccountAccess#Package not found " + e.getMessage());
             return false;
         }
     }
@@ -4195,7 +4195,7 @@ public class AccountManagerService
         }
         final long token = Binder.clearCallingIdentity();
         try {
-            AccountAndUser[] allAccounts = getAllAccounts();
+            AccountAndUser[] allAccounts = getAllAccountsForSystemProcess();
             for (int i = allAccounts.length - 1; i >= 0; i--) {
                 if (allAccounts[i].account.equals(account)) {
                     return true;
@@ -4345,10 +4345,11 @@ public class AccountManagerService
     /**
      * Returns accounts for all running users, ignores visibility values.
      *
+     * Should only be called by System process.
      * @hide
      */
     @NonNull
-    public AccountAndUser[] getRunningAccounts() {
+    public AccountAndUser[] getRunningAccountsForSystem() {
         final int[] runningUserIds;
         try {
             runningUserIds = ActivityManager.getService().getRunningUserIds();
@@ -4356,26 +4357,34 @@ public class AccountManagerService
             // Running in system_server; should never happen
             throw new RuntimeException(e);
         }
-        return getAccounts(runningUserIds);
+        return getAccountsForSystem(runningUserIds);
     }
 
     /**
      * Returns accounts for all users, ignores visibility values.
      *
+     * Should only be called by system process
+     *
      * @hide
      */
     @NonNull
-    public AccountAndUser[] getAllAccounts() {
+    public AccountAndUser[] getAllAccountsForSystemProcess() {
         final List<UserInfo> users = getUserManager().getAliveUsers();
         final int[] userIds = new int[users.size()];
         for (int i = 0; i < userIds.length; i++) {
             userIds[i] = users.get(i).id;
         }
-        return getAccounts(userIds);
+        return getAccountsForSystem(userIds);
     }
 
+    /**
+     * Returns all accounts for the given user, ignores all visibility checks.
+     * This should only be called by system process.
+     *
+     * @hide
+     */
     @NonNull
-    private AccountAndUser[] getAccounts(int[] userIds) {
+    private AccountAndUser[] getAccountsForSystem(int[] userIds) {
         final ArrayList<AccountAndUser> runningAccounts = Lists.newArrayList();
         for (int userId : userIds) {
             UserAccounts userAccounts = getUserAccounts(userId);
@@ -4384,7 +4393,7 @@ public class AccountManagerService
                     userAccounts,
                     null /* type */,
                     Binder.getCallingUid(),
-                    null /* packageName */,
+                    "android"/* packageName */,
                     false /* include managed not visible*/);
             for (Account account : accounts) {
                 runningAccounts.add(new AccountAndUser(account, userId));
@@ -5360,7 +5369,7 @@ public class AccountManagerService
             }
         } else {
             Account[] accounts = getAccountsFromCache(userAccounts, null /* type */,
-                    Process.SYSTEM_UID, null /* packageName */, false);
+                    Process.SYSTEM_UID, "android" /* packageName */, false);
             fout.println("Accounts: " + accounts.length);
             for (Account account : accounts) {
                 fout.println("  " + account.toString());
@@ -5555,7 +5564,7 @@ public class AccountManagerService
                         return true;
                     }
                 } catch (PackageManager.NameNotFoundException e) {
-                    Log.d(TAG, "Package not found " + e.getMessage());
+                    Log.w(TAG, "isPrivileged#Package not found " + e.getMessage());
                 }
             }
         } finally {
@@ -6079,7 +6088,7 @@ public class AccountManagerService
                     }
                 }
             } catch (NameNotFoundException e) {
-                Log.d(TAG, "Package not found " + e.getMessage());
+                Log.w(TAG, "filterSharedAccounts#Package not found " + e.getMessage());
             }
             Map<Account, Integer> filtered = new LinkedHashMap<>();
             for (Map.Entry<Account, Integer> entry : unfiltered.entrySet()) {
