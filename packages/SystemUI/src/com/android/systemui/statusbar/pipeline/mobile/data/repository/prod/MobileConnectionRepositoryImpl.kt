@@ -61,6 +61,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
@@ -267,15 +268,14 @@ class MobileConnectionRepositoryImpl(
 
     override val networkName: StateFlow<NetworkNameModel> =
         broadcastDispatcher
-            .broadcastFlow(IntentFilter(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED)) {
-                intent,
-                _ ->
-                if (intent.getIntExtra(EXTRA_SUBSCRIPTION_ID, INVALID_SUBSCRIPTION_ID) != subId) {
-                    defaultNetworkName
-                } else {
-                    intent.toNetworkNameModel(networkNameSeparator) ?: defaultNetworkName
-                }
+            .broadcastFlow(
+                filter = IntentFilter(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED),
+                map = { intent, _ -> intent },
+            )
+            .filter { intent ->
+                intent.getIntExtra(EXTRA_SUBSCRIPTION_ID, INVALID_SUBSCRIPTION_ID) == subId
             }
+            .map { intent -> intent.toNetworkNameModel(networkNameSeparator) ?: defaultNetworkName }
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
 
     override val dataEnabled = run {
