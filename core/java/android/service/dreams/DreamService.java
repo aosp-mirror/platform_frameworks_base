@@ -234,6 +234,7 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mCanDoze;
     private boolean mDozing;
     private boolean mWindowless;
+    private boolean mOverlayFinishing;
     private int mDozeScreenState = Display.STATE_UNKNOWN;
     private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
@@ -1051,6 +1052,7 @@ public class DreamService extends Service implements Window.Callback {
         // We must unbind from any overlay connection if we are unbound before finishing.
         if (mOverlayConnection != null) {
             mOverlayConnection.unbind();
+            mOverlayConnection = null;
         }
 
         return super.onUnbind(intent);
@@ -1067,7 +1069,9 @@ public class DreamService extends Service implements Window.Callback {
         // If there is an active overlay connection, signal that the dream is ending before
         // continuing. Note that the overlay cannot rely on the unbound state, since another dream
         // might have bound to it in the meantime.
-        if (mOverlayConnection != null) {
+        if (mOverlayConnection != null && !mOverlayFinishing) {
+            // Set mOverlayFinish to true to only allow this consumer to be added once.
+            mOverlayFinishing = true;
             mOverlayConnection.addConsumer(overlay -> {
                 try {
                     overlay.endDream();
