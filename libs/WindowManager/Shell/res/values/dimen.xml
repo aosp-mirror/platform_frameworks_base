@@ -228,7 +228,7 @@
     <dimen name="bubble_user_education_stack_padding">16dp</dimen>
 
     <!-- Bottom and end margin for compat buttons. -->
-    <dimen name="compat_button_margin">16dp</dimen>
+    <dimen name="compat_button_margin">24dp</dimen>
 
     <!-- The radius of the corners of the compat hint bubble. -->
     <dimen name="compat_hint_corner_radius">28dp</dimen>
