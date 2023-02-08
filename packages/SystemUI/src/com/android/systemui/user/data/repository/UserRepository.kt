@@ -47,12 +47,14 @@ import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -120,9 +122,25 @@ constructor(
     featureFlags: FeatureFlags,
 ) : UserRepository {
 
-    private val _userSwitcherSettings = MutableStateFlow(runBlocking { getSettings() })
-    override val userSwitcherSettings: Flow<UserSwitcherSettingsModel> =
-        _userSwitcherSettings.asStateFlow().filterNotNull()
+    private val _userSwitcherSettings: StateFlow<UserSwitcherSettingsModel> =
+        globalSettings
+            .observerFlow(
+                names =
+                    arrayOf(
+                        SETTING_SIMPLE_USER_SWITCHER,
+                        Settings.Global.ADD_USERS_WHEN_LOCKED,
+                        Settings.Global.USER_SWITCHER_ENABLED,
+                    ),
+                userId = UserHandle.USER_SYSTEM,
+            )
+            .onStart { emit(Unit) } // Forces an initial update.
+            .map { getSettings() }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = runBlocking { getSettings() },
+            )
+    override val userSwitcherSettings: Flow<UserSwitcherSettingsModel> = _userSwitcherSettings
 
     private val _userInfos = MutableStateFlow<List<UserInfo>?>(null)
     override val userInfos: Flow<List<UserInfo>> = _userInfos.filterNotNull()
@@ -154,7 +172,6 @@ constructor(
 
     init {
         observeSelectedUser()
-        observeUserSettings()
         if (featureFlags.isEnabled(FACE_AUTH_REFACTOR)) {
             observeUserSwitching()
         }
@@ -234,23 +251,6 @@ constructor(
 
                 _selectedUserInfo.value = it
             }
-            .launchIn(applicationScope)
-    }
-
-    private fun observeUserSettings() {
-        globalSettings
-            .observerFlow(
-                names =
-                    arrayOf(
-                        SETTING_SIMPLE_USER_SWITCHER,
-                        Settings.Global.ADD_USERS_WHEN_LOCKED,
-                        Settings.Global.USER_SWITCHER_ENABLED,
-                    ),
-                userId = UserHandle.USER_SYSTEM,
-            )
-            .onStart { emit(Unit) } // Forces an initial update.
-            .map { getSettings() }
-            .onEach { _userSwitcherSettings.value = it }
             .launchIn(applicationScope)
     }
 
