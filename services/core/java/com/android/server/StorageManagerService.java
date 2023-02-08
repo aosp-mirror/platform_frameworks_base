@@ -3748,8 +3748,12 @@ class StorageManagerService extends IStorageManager.Stub
                     // Return both read only and write only volumes. When includeSharedProfile is
                     // true, all the volumes of userIdSharingMedia should be returned when queried
                     // from the user it shares media with
+                    // Public Volumes will be also be returned if visible to the
+                    // userIdSharingMedia with.
                     match = vol.isVisibleForUser(userId)
                             || (!vol.isVisible() && includeInvisible && vol.getPath() != null)
+                            || (vol.getType() == VolumeInfo.TYPE_PUBLIC
+                                    && vol.isVisibleForUser(userIdSharingMedia))
                             || (includeSharedProfile && vol.isVisibleForUser(userIdSharingMedia));
                 }
                 if (!match) continue;
