@@ -453,7 +453,7 @@ interface IDevicePolicyManager {
 
     boolean bindDeviceAdminServiceAsUser(in ComponentName admin,
         IApplicationThread caller, IBinder token, in Intent service,
-        IServiceConnection connection, int flags, int targetUserId);
+        IServiceConnection connection, long flags, int targetUserId);
     List<UserHandle> getBindDeviceAdminTargetUsers(in ComponentName admin);
     boolean isEphemeralUser(in ComponentName admin);
 
