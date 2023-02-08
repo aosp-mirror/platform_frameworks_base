@@ -308,7 +308,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 synchronized (mLock) {
                     final List<TaskFragmentContainer> containers = taskContainer.mContainers;
                     // Clean up the TaskFragmentContainers by the z-order from the lowest.
-                    for (int i = 0; i < containers.size() - 1; i++) {
+                    for (int i = 0; i < containers.size(); i++) {
                         final TaskFragmentContainer container = containers.get(i);
                         if (pendingFinishingContainers.contains(container)) {
                             // Don't update records here to prevent double invocation.
@@ -318,7 +318,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                     }
                     // Remove container records.
                     removeContainers(taskContainer, pendingFinishingContainers);
-                    // Update the change to the client side.
+                    // Update the change to the server side.
                     updateContainersInTaskIfVisible(wct, taskContainer.getTaskId());
                 }
             });
@@ -353,21 +353,25 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     @Override
     public void updateSplitAttributes(@NonNull IBinder splitInfoToken,
             @NonNull SplitAttributes splitAttributes) {
+        Objects.requireNonNull(splitInfoToken);
+        Objects.requireNonNull(splitAttributes);
         synchronized (mLock) {
             final SplitContainer splitContainer = getSplitContainer(splitInfoToken);
             if (splitContainer == null) {
                 Log.w(TAG, "Cannot find SplitContainer for token:" + splitInfoToken);
                 return;
             }
-            WindowContainerTransaction wct = mTransactionManager.startNewTransaction()
-                    .getTransaction();
+            // Override the default split Attributes so that it will be applied
+            // if the SplitContainer is not visible currently.
+            splitContainer.updateDefaultSplitAttributes(splitAttributes);
+
+            final TransactionRecord transactionRecord = mTransactionManager.startNewTransaction();
+            final WindowContainerTransaction wct = transactionRecord.getTransaction();
             if (updateSplitContainerIfNeeded(splitContainer, wct, splitAttributes)) {
-                splitContainer.updateDefaultSplitAttributes(splitAttributes);
-                mTransactionManager.getCurrentTransactionRecord()
-                        .apply(false /* shouldApplyIndependently */);
+                transactionRecord.apply(false /* shouldApplyIndependently */);
             } else {
                 // Abort if the SplitContainer wasn't updated.
-                mTransactionManager.getCurrentTransactionRecord().abort();
+                transactionRecord.abort();
             }
         }
     }
@@ -1559,8 +1563,9 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      *
      * @return {@code true} if the update succeed. Otherwise, returns {@code false}.
      */
+    @VisibleForTesting
     @GuardedBy("mLock")
-    private boolean updateSplitContainerIfNeeded(@NonNull SplitContainer splitContainer,
+    boolean updateSplitContainerIfNeeded(@NonNull SplitContainer splitContainer,
             @NonNull WindowContainerTransaction wct, @Nullable SplitAttributes splitAttributes) {
         if (!isTopMostSplit(splitContainer)) {
             // Skip position update - it isn't the topmost split.
@@ -1904,6 +1909,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return null;
     }
 
+    @VisibleForTesting
     @Nullable
     @GuardedBy("mLock")
     SplitContainer getSplitContainer(@NonNull IBinder token) {
