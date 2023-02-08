@@ -179,6 +179,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             if (mCurrentActivePosition == position) {
                 mCurrentActivePosition = -1;
             }
+            mStatusIcon.setVisibility(View.GONE);
 
             if (mController.isAnyDeviceTransferring()) {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
@@ -233,7 +234,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         setUpDeviceIcon(device);
                         mSubTitleText.setText(device.getSubtextString());
                         Drawable deviceStatusIcon =
-                                isActiveWithOngoingSession ? mContext.getDrawable(
+                                device.hasOngoingSession() ? mContext.getDrawable(
                                         R.drawable.media_output_status_session)
                                         : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
                                                 device,
@@ -331,7 +332,19 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setSingleLineLayout(getItemTitle(device));
                     if (mController.isAdvancedLayoutSupported()
                             && mController.isSubStatusSupported()) {
-                        updateClickActionBasedOnSelectionBehavior(device);
+                        Drawable deviceStatusIcon =
+                                device.hasOngoingSession() ? mContext.getDrawable(
+                                        R.drawable.media_output_status_session)
+                                        : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
+                                                device,
+                                                mContext);
+                        if (deviceStatusIcon != null) {
+                            updateDeviceStatusIcon(deviceStatusIcon);
+                            mStatusIcon.setVisibility(View.VISIBLE);
+                        }
+                        updateTwoLineLayoutContentAlpha(
+                                updateClickActionBasedOnSelectionBehavior(device)
+                                        ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
                     } else {
                         updateFullItemClickListener(v -> onItemClick(v, device));
                     }
