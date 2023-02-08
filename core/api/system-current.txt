@@ -3274,6 +3274,7 @@ package android.content {
     field public static final String SAFETY_CENTER_SERVICE = "safety_center";
     field public static final String SEARCH_UI_SERVICE = "search_ui";
     field public static final String SECURE_ELEMENT_SERVICE = "secure_element";
+    field public static final String SHARED_CONNECTIVITY_SERVICE = "shared_connectivity";
     field public static final String SMARTSPACE_SERVICE = "smartspace";
     field public static final String STATS_MANAGER = "stats";
     field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
@@ -9843,7 +9844,6 @@ package android.net.wifi.sharedconnectivity.app {
   }
 
   public class SharedConnectivityManager {
-    ctor public SharedConnectivityManager(@NonNull android.content.Context);
     method public boolean connectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
     method public boolean connectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
     method public boolean disconnectTetherNetwork();

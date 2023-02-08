@@ -19,7 +19,6 @@ package android.net.wifi.sharedconnectivity.app;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.ComponentName;
@@ -114,8 +113,9 @@ public class SharedConnectivityManager {
      *
      * Automatically binds to implementation of {@link SharedConnectivityService} specified in
      * device overlay.
+     *
+     * @hide
      */
-    @SuppressLint("ManagerConstructor")
     public SharedConnectivityManager(@NonNull Context context) {
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
