@@ -4,6 +4,7 @@ per-file ContextImpl.java = *
 
 # ActivityManager
 per-file ActivityManager* = file:/services/core/java/com/android/server/am/OWNERS
+per-file ApplicationStartInfo* = file:/services/core/java/com/android/server/am/OWNERS
 per-file ApplicationErrorReport* = file:/services/core/java/com/android/server/am/OWNERS
 per-file ApplicationExitInfo* = file:/services/core/java/com/android/server/am/OWNERS
 per-file Application.java = file:/services/core/java/com/android/server/am/OWNERS
