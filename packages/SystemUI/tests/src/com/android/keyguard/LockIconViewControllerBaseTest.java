@@ -43,6 +43,7 @@ import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.doze.util.BurnInHelperKt;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
@@ -159,9 +160,12 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mAuthRippleController,
                 mResources,
                 new KeyguardTransitionInteractor(mTransitionRepository),
-                new KeyguardInteractor(new FakeKeyguardRepository(),
+                new KeyguardInteractor(
+                        new FakeKeyguardRepository(),
                         mCommandQueue,
-                        mFeatureFlags),
+                        mFeatureFlags,
+                        new FakeKeyguardBouncerRepository()
+                ),
                 mFeatureFlags
         );
     }

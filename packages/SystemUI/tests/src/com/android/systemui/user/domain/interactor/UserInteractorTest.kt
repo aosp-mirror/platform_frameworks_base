@@ -39,6 +39,7 @@ import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
@@ -143,6 +144,7 @@ class UserInteractorTest : SysuiTestCase() {
                         repository = keyguardRepository,
                         commandQueue = commandQueue,
                         featureFlags = featureFlags,
+                        bouncerRepository = FakeKeyguardBouncerRepository(),
                     ),
                 manager = manager,
                 applicationScope = testScope.backgroundScope,
