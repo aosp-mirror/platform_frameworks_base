@@ -935,7 +935,6 @@ public final class TvInteractiveAppManager {
      * can be detected by the system.
      *
      * @return List of {@link AppLinkInfo} for each package that deslares its app link information.
-     * @hide
      */
     @NonNull
     public List<AppLinkInfo> getAppLinkInfoList() {
