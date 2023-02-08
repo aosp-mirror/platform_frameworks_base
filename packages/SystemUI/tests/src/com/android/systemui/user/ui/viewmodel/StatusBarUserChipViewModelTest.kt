@@ -82,7 +82,6 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
 
     private val userRepository = FakeUserRepository()
     private val keyguardRepository = FakeKeyguardRepository()
-    private val featureFlags = FakeFeatureFlags()
     private lateinit var guestUserInteractor: GuestUserInteractor
     private lateinit var refreshUsersScheduler: RefreshUsersScheduler
 
@@ -233,6 +232,11 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
         }
 
     private fun viewModel(): StatusBarUserChipViewModel {
+        val featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+                set(Flags.FACE_AUTH_REFACTOR, true)
+            }
         return StatusBarUserChipViewModel(
             context = context,
             interactor =
@@ -244,9 +248,9 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                         KeyguardInteractor(
                             repository = keyguardRepository,
                             commandQueue = commandQueue,
+                            featureFlags = featureFlags,
                         ),
-                    featureFlags =
-                        FakeFeatureFlags().apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) },
+                    featureFlags = featureFlags,
                     manager = manager,
                     applicationScope = testScope.backgroundScope,
                     telephonyInteractor =
