@@ -2267,19 +2267,18 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (win.mAttrs.providedInsets == null || attrs.providedInsets == null
                             || (win.mAttrs.providedInsets.length != attrs.providedInsets.length)) {
                         throw new IllegalArgumentException(
-                                "Insets types can not be changed after the window is added.");
+                                "Insets amount can not be changed after the window is added.");
                     } else {
                         final int insetsTypes = attrs.providedInsets.length;
                         for (int i = 0; i < insetsTypes; i++) {
-                            if (win.mAttrs.providedInsets[i].type != attrs.providedInsets[i].type) {
+                            if (!win.mAttrs.providedInsets[i].idEquals(attrs.providedInsets[i])) {
                                 throw new IllegalArgumentException(
-                                        "Insets types can not be changed after the window is "
-                                                + "added.");
+                                        "Insets ID can not be changed after the window is added.");
                             }
                             final InsetsFrameProvider.InsetsSizeOverride[] overrides =
-                                    win.mAttrs.providedInsets[i].insetsSizeOverrides;
+                                    win.mAttrs.providedInsets[i].getInsetsSizeOverrides();
                             final InsetsFrameProvider.InsetsSizeOverride[] newOverrides =
-                                    attrs.providedInsets[i].insetsSizeOverrides;
+                                    attrs.providedInsets[i].getInsetsSizeOverrides();
                             if (!(overrides == null && newOverrides == null)) {
                                 if (overrides == null || newOverrides == null
                                         || (overrides.length != newOverrides.length)) {
@@ -2289,7 +2288,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                 } else {
                                     final int overrideTypes = overrides.length;
                                     for (int j = 0; j < overrideTypes; j++) {
-                                        if (overrides[j].windowType != newOverrides[j].windowType) {
+                                        if (overrides[j].getWindowType()
+                                                != newOverrides[j].getWindowType()) {
                                             throw new IllegalArgumentException(
                                                     "Insets override types can not be changed after"
                                                             + " the window is added.");
