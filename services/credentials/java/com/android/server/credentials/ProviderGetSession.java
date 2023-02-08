@@ -75,6 +75,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     @Nullable
     private final Map<String, Action> mUiAuthenticationEntries = new HashMap<>();
 
+    @Nullable protected Pair<String, CredentialEntry> mUiRemoteEntry;
+
     /** The complete request to be used in the second round. */
     private final android.credentials.GetCredentialRequest mCompleteRequest;
     private final CallingAppInfo mCallingAppInfo;
@@ -271,7 +273,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             return null;
         }
         String entryId = generateUniqueId();
-        Entry remoteEntry = new Entry(REMOTE_ENTRY_KEY, entryId, remoteCredentialEntry.getSlice());
+        Entry remoteEntry = new Entry(REMOTE_ENTRY_KEY, entryId, remoteCredentialEntry.getSlice(),
+                setUpFillInIntent(remoteCredentialEntry.getType()));
         mUiRemoteEntry = new Pair<>(entryId, remoteCredentialEntry);
         return remoteEntry;
     }
