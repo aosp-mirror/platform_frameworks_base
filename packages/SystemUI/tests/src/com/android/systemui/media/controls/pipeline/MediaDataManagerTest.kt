@@ -810,6 +810,24 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testAddResumptionControls_hasNoExtras() {
+        whenever(mediaFlags.isResumeProgressEnabled()).thenReturn(true)
+
+        // WHEN resumption controls are added that do not have any extras
+        val desc =
+            MediaDescription.Builder().run {
+                setTitle(SESSION_TITLE)
+                build()
+            }
+        addResumeControlAndLoad(desc)
+
+        // Resume progress is null
+        val data = mediaDataCaptor.value
+        assertThat(data.resumption).isTrue()
+        assertThat(data.resumeProgress).isEqualTo(null)
+    }
+
+    @Test
     fun testResumptionDisabled_dismissesResumeControls() {
         // WHEN there are resume controls and resumption is switched off
         val desc =
