@@ -72,6 +72,7 @@ import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
 import com.android.server.permission.access.util.withClearedCallingIdentity
 import com.android.server.pm.KnownPackages
+import com.android.server.pm.PackageInstallerService
 import com.android.server.pm.PackageManagerLocal
 import com.android.server.pm.UserManagerInternal
 import com.android.server.pm.UserManagerService
@@ -770,10 +771,12 @@ class PermissionService(
                             )
                         }
                     }
-                    permission.isAppOp -> setAppOpPermissionGranted(
-                        packageState, userId, permissionName,
-                        permissionState == PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED
-                    )
+                    permission.isAppOp && permissionName in
+                            PackageInstallerService.INSTALLER_CHANGEABLE_APP_OP_PERMISSIONS ->
+                        setAppOpPermissionGranted(
+                            packageState, userId, permissionName, permissionState ==
+                                    PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED
+                        )
                     else -> {}
                 }
             }
