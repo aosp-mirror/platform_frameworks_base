@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.app.KeyguardManager.LockTypes;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,6 +29,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class StartLockscreenValidationRequest implements Parcelable {
 
     @LockTypes

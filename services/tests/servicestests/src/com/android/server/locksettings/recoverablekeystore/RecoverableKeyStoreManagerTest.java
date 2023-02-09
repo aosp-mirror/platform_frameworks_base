@@ -1316,10 +1316,10 @@ public class RecoverableKeyStoreManagerTest {
 
         mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
 
-        // TODO(b/254335492): Check new system permission
         verify(mMockContext, times(1))
                 .enforceCallingOrSelfPermission(
-                        eq(Manifest.permission.RECOVER_KEYSTORE), any());
+                        eq(Manifest.permission.CHECK_REMOTE_LOCKSCREEN), any());
+        mRemoteLockscreenValidationSessionStorage.finishSession(mUserId);
     }
     @Test
     public void startRemoteLockscreenValidation_returnsCredentailsType() throws Exception {

@@ -5975,6 +5975,11 @@
     <permission android:name="android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS"
                 android:protectionLevel="signature"/>
 
+    <!-- @SystemApi Allows application to verify lockscreen credentials provided by a remote device.
+         @hide -->
+    <permission android:name="android.permission.CHECK_REMOTE_LOCKSCREEN"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows managing (adding, removing) fingerprint templates. Reserved for the system. @hide -->
     <permission android:name="android.permission.MANAGE_FINGERPRINT"
         android:protectionLevel="signature|privileged" />
