@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.pm.UserInfo
 import android.os.UserHandle
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.FakeUserTracker
@@ -38,12 +37,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(JUnit4::class)
 class KeyguardQuickAffordanceRemoteUserSelectionManagerTest : SysuiTestCase() {
 
     @Mock private lateinit var userHandle: UserHandle

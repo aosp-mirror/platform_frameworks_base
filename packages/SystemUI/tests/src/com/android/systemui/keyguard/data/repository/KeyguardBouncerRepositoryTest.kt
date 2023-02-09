@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.data.repository
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.SysuiTestCase
@@ -28,13 +27,14 @@ import kotlinx.coroutines.test.TestCoroutineScope
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(JUnit4::class)
 class KeyguardBouncerRepositoryTest : SysuiTestCase() {
 
     @Mock private lateinit var systemClock: SystemClock
