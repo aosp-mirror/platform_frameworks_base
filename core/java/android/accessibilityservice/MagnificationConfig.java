@@ -107,7 +107,7 @@ public final class MagnificationConfig implements Parcelable {
      * Returns the activated state of the controlling magnifier. The controlling magnifier can be
      * activated even if the scale returned by {@link MagnificationConfig#getScale()} equals to 1.0.
      *
-     * @return {@code true} if the magnifier is showing on screen,
+     * @return {@code true} if the magnifier is activated and showing on screen,
      *         {@code false} otherwise.
      */
     public boolean isActivated() {
