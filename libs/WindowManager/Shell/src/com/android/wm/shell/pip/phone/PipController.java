@@ -123,7 +123,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             SystemProperties.getLong("persist.wm.debug.pip_keep_clear_areas_delay", 200);
 
     private boolean mEnablePipKeepClearAlgorithm =
-            SystemProperties.getBoolean("persist.wm.debug.enable_pip_keep_clear_algorithm", false);
+            SystemProperties.getBoolean("persist.wm.debug.enable_pip_keep_clear_algorithm", true);
 
     @VisibleForTesting
     void setEnablePipKeepClearAlgorithm(boolean value) {

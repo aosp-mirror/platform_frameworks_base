@@ -314,6 +314,7 @@ public class PipControllerTest extends ShellTestCase {
 
     @Test
     public void onKeepClearAreasChanged_featureDisabled_pipBoundsStateDoesntChange() {
+        mPipController.setEnablePipKeepClearAlgorithm(false);
         final int displayId = 1;
         final Rect keepClearArea = new Rect(0, 0, 10, 10);
         when(mMockPipBoundsState.getDisplayId()).thenReturn(displayId);

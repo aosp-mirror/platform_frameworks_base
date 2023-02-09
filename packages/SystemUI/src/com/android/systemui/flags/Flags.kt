@@ -480,7 +480,7 @@ object Flags {
         sysPropBooleanFlag(
             1110,
             "persist.wm.debug.enable_pip_keep_clear_algorithm",
-            default = false
+            default = true
         )
 
     // TODO(b/256873975): Tracking Bug
