@@ -43,6 +43,7 @@ const val SEARCH_DYNAMIC_ROW = "search_dynamic_row"
 /** Enum to define all column names in provider. */
 enum class ColumnEnum(val id: String) {
     ENTRY_ID("entryId"),
+    ENTRY_LABEL("entryLabel"),
     SEARCH_TITLE("searchTitle"),
     SEARCH_KEYWORD("searchKw"),
     SEARCH_PATH("searchPath"),
@@ -50,7 +51,6 @@ enum class ColumnEnum(val id: String) {
     INTENT_TARGET_CLASS("intentTargetClass"),
     INTENT_EXTRAS("intentExtras"),
     SLICE_URI("sliceUri"),
-    LEGACY_KEY("legacyKey"),
     ENTRY_DISABLED("entryDisabled"),
 }
 
@@ -64,6 +64,7 @@ enum class QueryEnum(
         SEARCH_STATIC_DATA,
         listOf(
             ColumnEnum.ENTRY_ID,
+            ColumnEnum.ENTRY_LABEL,
             ColumnEnum.SEARCH_TITLE,
             ColumnEnum.SEARCH_KEYWORD,
             ColumnEnum.SEARCH_PATH,
@@ -71,13 +72,13 @@ enum class QueryEnum(
             ColumnEnum.INTENT_TARGET_CLASS,
             ColumnEnum.INTENT_EXTRAS,
             ColumnEnum.SLICE_URI,
-            ColumnEnum.LEGACY_KEY
         )
     ),
     SEARCH_DYNAMIC_DATA_QUERY(
         SEARCH_DYNAMIC_DATA,
         listOf(
             ColumnEnum.ENTRY_ID,
+            ColumnEnum.ENTRY_LABEL,
             ColumnEnum.SEARCH_TITLE,
             ColumnEnum.SEARCH_KEYWORD,
             ColumnEnum.SEARCH_PATH,
@@ -85,13 +86,13 @@ enum class QueryEnum(
             ColumnEnum.INTENT_TARGET_CLASS,
             ColumnEnum.INTENT_EXTRAS,
             ColumnEnum.SLICE_URI,
-            ColumnEnum.LEGACY_KEY
         )
     ),
     SEARCH_IMMUTABLE_STATUS_DATA_QUERY(
         SEARCH_IMMUTABLE_STATUS,
         listOf(
             ColumnEnum.ENTRY_ID,
+            ColumnEnum.ENTRY_LABEL,
             ColumnEnum.ENTRY_DISABLED,
         )
     ),
@@ -99,6 +100,7 @@ enum class QueryEnum(
         SEARCH_MUTABLE_STATUS,
         listOf(
             ColumnEnum.ENTRY_ID,
+            ColumnEnum.ENTRY_LABEL,
             ColumnEnum.ENTRY_DISABLED,
         )
     ),
@@ -106,6 +108,7 @@ enum class QueryEnum(
         SEARCH_STATIC_ROW,
         listOf(
             ColumnEnum.ENTRY_ID,
+            ColumnEnum.ENTRY_LABEL,
             ColumnEnum.SEARCH_TITLE,
             ColumnEnum.SEARCH_KEYWORD,
             ColumnEnum.SEARCH_PATH,
@@ -113,7 +116,6 @@ enum class QueryEnum(
             ColumnEnum.INTENT_TARGET_CLASS,
             ColumnEnum.INTENT_EXTRAS,
             ColumnEnum.SLICE_URI,
-            ColumnEnum.LEGACY_KEY,
             ColumnEnum.ENTRY_DISABLED,
         )
     ),
@@ -121,6 +123,7 @@ enum class QueryEnum(
         SEARCH_DYNAMIC_ROW,
         listOf(
             ColumnEnum.ENTRY_ID,
+            ColumnEnum.ENTRY_LABEL,
             ColumnEnum.SEARCH_TITLE,
             ColumnEnum.SEARCH_KEYWORD,
             ColumnEnum.SEARCH_PATH,
@@ -128,7 +131,6 @@ enum class QueryEnum(
             ColumnEnum.INTENT_TARGET_CLASS,
             ColumnEnum.INTENT_EXTRAS,
             ColumnEnum.SLICE_URI,
-            ColumnEnum.LEGACY_KEY,
             ColumnEnum.ENTRY_DISABLED,
         )
     ),
