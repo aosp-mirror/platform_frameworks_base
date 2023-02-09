@@ -12764,8 +12764,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         // restored. This distinction is important for system-process packages that live in the
         // system user's process but backup/restore data for non-system users.
         // TODO (b/123688746): Handle all system-process packages with singleton check.
-        final int instantiatedUserId =
-                PLATFORM_PACKAGE_NAME.equals(packageName) ? UserHandle.USER_SYSTEM : targetUserId;
+        boolean useSystemUser = PLATFORM_PACKAGE_NAME.equals(packageName)
+                || getPackageManagerInternal().getSystemUiServiceComponent().getPackageName()
+                        .equals(packageName);
+        final int instantiatedUserId = useSystemUser ? UserHandle.USER_SYSTEM : targetUserId;
 
         IPackageManager pm = AppGlobals.getPackageManager();
         ApplicationInfo app = null;

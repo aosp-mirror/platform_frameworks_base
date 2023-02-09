@@ -25,7 +25,7 @@ import com.android.systemui.shared.shadow.DoubleShadowTextHelper.ShadowInfo
 import com.android.systemui.shared.shadow.DoubleShadowTextHelper.applyShadows
 
 /** Extension of [TextView] which draws two shadows on the text (ambient and key shadows} */
-class DoubleShadowTextView
+open class DoubleShadowTextView
 @JvmOverloads
 constructor(
     context: Context,

@@ -36,16 +36,16 @@ constructor(
     private val flags: FeatureFlags,
     @HostUserHandle private val hostUserHandle: UserHandle,
     @MediaProjectionAppSelector private val scope: CoroutineScope,
-    @MediaProjectionAppSelector private val appSelectorComponentName: ComponentName
+    @MediaProjectionAppSelector private val appSelectorComponentName: ComponentName,
+    @MediaProjectionAppSelector private val callerPackageName: String?
 ) {
 
     fun init() {
         scope.launch {
             val recentTasks = recentTaskListProvider.loadRecentTasks()
 
-            val tasks = recentTasks
-                .filterDevicePolicyRestrictedTasks()
-                .sortedTasks()
+            val tasks =
+                recentTasks.filterDevicePolicyRestrictedTasks().filterAppSelector().sortedTasks()
 
             view.bind(tasks)
         }
@@ -67,8 +67,13 @@ constructor(
             filter { UserHandle.of(it.userId) == hostUserHandle }
         }
 
+    private fun List<RecentTask>.filterAppSelector(): List<RecentTask> = filter {
+        // Only take tasks that is not the app selector
+        it.topActivityComponent != appSelectorComponentName
+    }
+
     private fun List<RecentTask>.sortedTasks(): List<RecentTask> = sortedBy {
         // Show normal tasks first and only then tasks with opened app selector
-        it.topActivityComponent == appSelectorComponentName
+        it.topActivityComponent?.packageName == callerPackageName
     }
 }

@@ -125,9 +125,18 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 ),
             )
         repository = FakeKeyguardRepository()
+        val featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
+                set(Flags.FACE_AUTH_REFACTOR, true)
+            }
 
         val keyguardInteractor =
-            KeyguardInteractor(repository = repository, commandQueue = commandQueue)
+            KeyguardInteractor(
+                repository = repository,
+                commandQueue = commandQueue,
+                featureFlags = featureFlags,
+            )
         whenever(userTracker.userHandle).thenReturn(mock())
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
@@ -191,10 +200,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         keyguardStateController = keyguardStateController,
                         userTracker = userTracker,
                         activityStarter = activityStarter,
-                        featureFlags =
-                            FakeFeatureFlags().apply {
-                                set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
-                            },
+                        featureFlags = featureFlags,
                         repository = { quickAffordanceRepository },
                         launchAnimator = launchAnimator,
                     ),

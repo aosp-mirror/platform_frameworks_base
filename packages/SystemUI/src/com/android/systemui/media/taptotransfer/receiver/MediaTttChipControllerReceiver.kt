@@ -16,7 +16,9 @@
 
 package com.android.systemui.media.taptotransfer.receiver
 
+import android.animation.TimeInterpolator
 import android.annotation.SuppressLint
+import android.animation.ValueAnimator
 import android.app.StatusBarManager
 import android.content.Context
 import android.graphics.Rect
@@ -31,8 +33,10 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.view.View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE
+import android.view.View.ACCESSIBILITY_LIVE_REGION_NONE
 import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
+import com.android.systemui.animation.Interpolators
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
@@ -99,6 +103,13 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         height = WindowManager.LayoutParams.MATCH_PARENT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
         fitInsetsTypes = 0 // Ignore insets from all system bars
+    }
+
+    // Value animator that controls the bouncing animation of views.
+    private val bounceAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+        repeatCount = ValueAnimator.INFINITE
+        repeatMode = ValueAnimator.REVERSE
+        duration = ICON_BOUNCE_ANIM_DURATION
     }
 
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
@@ -203,44 +214,52 @@ open class MediaTttChipControllerReceiver @Inject constructor(
 
         val iconView = currentView.getAppIconView()
         iconView.setPadding(iconPadding, iconPadding, iconPadding, iconPadding)
-        iconView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_ASSERTIVE
         TintedIconViewBinder.bind(iconInfo.toTintedIcon(), iconView)
+
+        val iconContainerView = currentView.getIconContainerView()
+        iconContainerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_ASSERTIVE
     }
 
     override fun animateViewIn(view: ViewGroup) {
-        val appIconView = view.getAppIconView()
+        val iconContainerView = view.getIconContainerView()
         val iconRippleView: ReceiverChipRippleView = view.requireViewById(R.id.icon_glow_ripple)
         val rippleView: ReceiverChipRippleView = view.requireViewById(R.id.ripple)
-        animateViewTranslationAndFade(appIconView, -1 * getTranslationAmount(), 1f)
-        animateViewTranslationAndFade(iconRippleView, -1 * getTranslationAmount(), 1f)
+        val translationYBy = getTranslationAmount()
+        // Make the icon container view starts animation from bottom of the screen.
+        iconContainerView.translationY += rippleController.getReceiverIconSize()
+        animateViewTranslationAndFade(
+            iconContainerView,
+            translationYBy = -1 * translationYBy,
+            alphaEndValue = 1f,
+            Interpolators.EMPHASIZED_DECELERATE,
+        ) {
+            animateBouncingView(iconContainerView, translationYBy * BOUNCE_TRANSLATION_RATIO)
+        }
         rippleController.expandToInProgressState(rippleView, iconRippleView)
     }
 
     override fun animateViewOut(view: ViewGroup, removalReason: String?, onAnimationEnd: Runnable) {
-        val appIconView = view.getAppIconView()
-        val iconRippleView: ReceiverChipRippleView = view.requireViewById(R.id.icon_glow_ripple)
+        val iconContainerView = view.getIconContainerView()
         val rippleView: ReceiverChipRippleView = view.requireViewById(R.id.ripple)
+        val translationYBy = getTranslationAmount()
+
+        // Remove update listeners from bounce animator to prevent any conflict with
+        // translation animation.
+        bounceAnimator.removeAllUpdateListeners()
+        bounceAnimator.cancel()
         if (removalReason == ChipStateReceiver.TRANSFER_TO_RECEIVER_SUCCEEDED.name &&
                 mediaTttFlags.isMediaTttReceiverSuccessRippleEnabled()) {
             rippleController.expandToSuccessState(rippleView, onAnimationEnd)
             animateViewTranslationAndFade(
-                iconRippleView,
-                -1 * getTranslationAmount(),
-                0f,
-                translationDuration = ICON_TRANSLATION_SUCCEEDED_DURATION,
-                alphaDuration = ICON_TRANSLATION_SUCCEEDED_DURATION,
-            )
-            animateViewTranslationAndFade(
-                appIconView,
-                -1 * getTranslationAmount(),
+                iconContainerView,
+                -1 * translationYBy,
                 0f,
                 translationDuration = ICON_TRANSLATION_SUCCEEDED_DURATION,
                 alphaDuration = ICON_TRANSLATION_SUCCEEDED_DURATION,
             )
         } else {
             rippleController.collapseRipple(rippleView, onAnimationEnd)
-            animateViewTranslationAndFade(iconRippleView, getTranslationAmount(), 0f)
-            animateViewTranslationAndFade(appIconView, getTranslationAmount(), 0f)
+            animateViewTranslationAndFade(iconContainerView, translationYBy, 0f)
         }
     }
 
@@ -252,15 +271,19 @@ open class MediaTttChipControllerReceiver @Inject constructor(
 
     /** Animation of view translation and fading. */
     private fun animateViewTranslationAndFade(
-        view: View,
+        view: ViewGroup,
         translationYBy: Float,
         alphaEndValue: Float,
+        interpolator: TimeInterpolator? = null,
         translationDuration: Long = ICON_TRANSLATION_ANIM_DURATION,
         alphaDuration: Long = ICON_ALPHA_ANIM_DURATION,
+        onAnimationEnd: Runnable? = null,
     ) {
         view.animate()
             .translationYBy(translationYBy)
+            .setInterpolator(interpolator)
             .setDuration(translationDuration)
+            .withEndAction { onAnimationEnd?.run() }
             .start()
         view.animate()
             .alpha(alphaEndValue)
@@ -270,17 +293,42 @@ open class MediaTttChipControllerReceiver @Inject constructor(
 
     /** Returns the amount that the chip will be translated by in its intro animation. */
     private fun getTranslationAmount(): Float {
-        return rippleController.getRippleSize() * 0.5f -
-            rippleController.getReceiverIconSize()
+        return rippleController.getRippleSize() * 0.5f
     }
 
     private fun View.getAppIconView(): CachingIconView {
         return this.requireViewById(R.id.app_icon)
     }
 
+    private fun View.getIconContainerView(): ViewGroup {
+        return this.requireViewById(R.id.icon_container_view)
+    }
+
+    private fun animateBouncingView(iconContainerView: ViewGroup, translationYBy: Float) {
+        if (bounceAnimator.isStarted) {
+            return
+        }
+
+        addViewToBounceAnimation(iconContainerView, translationYBy)
+
+        // In order not to announce description every time the view animate.
+        iconContainerView.accessibilityLiveRegion = ACCESSIBILITY_LIVE_REGION_NONE
+        bounceAnimator.start()
+    }
+
+    private fun addViewToBounceAnimation(view: View, translationYBy: Float) {
+        val prevTranslationY = view.translationY
+        bounceAnimator.addUpdateListener { updateListener ->
+            val progress = updateListener.animatedValue as Float
+            view.translationY = prevTranslationY + translationYBy * progress
+        }
+    }
+
     companion object {
         private const val ICON_TRANSLATION_ANIM_DURATION = 500L
+        private const val ICON_BOUNCE_ANIM_DURATION = 750L
         private const val ICON_TRANSLATION_SUCCEEDED_DURATION = 167L
+        private const val BOUNCE_TRANSLATION_RATIO = 0.15f
         private val ICON_ALPHA_ANIM_DURATION = 5.frames
     }
 }

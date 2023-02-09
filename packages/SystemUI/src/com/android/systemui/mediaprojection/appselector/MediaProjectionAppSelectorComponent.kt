@@ -46,10 +46,10 @@ import dagger.Provides
 import dagger.Subcomponent
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import javax.inject.Qualifier
 import javax.inject.Scope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 
 @Qualifier @Retention(AnnotationRetention.BINARY) annotation class MediaProjectionAppSelector
 
@@ -106,6 +106,12 @@ interface MediaProjectionAppSelectorModule {
         @MediaProjectionAppSelectorScope
         fun provideAppSelectorComponentName(context: Context): ComponentName =
             ComponentName(context, MediaProjectionAppSelectorActivity::class.java)
+
+        @Provides
+        @MediaProjectionAppSelector
+        @MediaProjectionAppSelectorScope
+        fun provideCallerPackageName(activity: MediaProjectionAppSelectorActivity): String? =
+            activity.callingPackage
 
         @Provides
         @MediaProjectionAppSelector

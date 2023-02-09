@@ -71,6 +71,8 @@ class FakeMobileIconInteractor(
     private val _numberOfLevels = MutableStateFlow(DEFAULT_NUM_LEVELS)
     override val numberOfLevels = _numberOfLevels
 
+    override val isForceHidden = MutableStateFlow(false)
+
     fun setIconGroup(group: SignalIcon.MobileIconGroup) {
         _iconGroup.value = group
     }
