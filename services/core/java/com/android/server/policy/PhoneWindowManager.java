@@ -38,6 +38,7 @@ import static android.view.KeyEvent.KEYCODE_DPAD_CENTER;
 import static android.view.KeyEvent.KEYCODE_DPAD_DOWN;
 import static android.view.KeyEvent.KEYCODE_HOME;
 import static android.view.KeyEvent.KEYCODE_POWER;
+import static android.view.KeyEvent.KEYCODE_STEM_PRIMARY;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_DOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
@@ -128,6 +129,7 @@ import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.DeviceIdleManager;
 import android.os.FactoryTest;
@@ -2248,6 +2250,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             cancelPendingScreenshotChordAction();
                         }
                     });
+            if (mHasFeatureWatch) {
+                mKeyCombinationManager.addRule(
+                        new TwoKeysCombinationRule(KEYCODE_POWER, KEYCODE_STEM_PRIMARY) {
+                            @Override
+                            void execute() {
+                                mPowerKeyHandled = true;
+                                interceptScreenshotChord(SCREENSHOT_KEY_CHORD,
+                                        getScreenshotChordLongPressDelay());
+                            }
+                            @Override
+                            void cancel() {
+                                cancelPendingScreenshotChordAction();
+                            }
+                        });
+            }
         }
 
         mKeyCombinationManager.addRule(
