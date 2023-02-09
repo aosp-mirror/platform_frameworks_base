@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.os.Looper
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -36,11 +35,12 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(JUnit4::class)
 class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     private lateinit var repository: FakeKeyguardBouncerRepository
     @Mock private lateinit var bouncerView: BouncerView

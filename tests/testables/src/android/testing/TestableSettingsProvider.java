@@ -49,15 +49,14 @@ public class TestableSettingsProvider extends MockContentProvider {
     }
 
     void clearValuesAndCheck(Context context) {
-        // Ensure we swapped over to use TestableSettingsProvider
+        int userId = UserHandle.myUserId();
+        mValues.put(key("global", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
+        mValues.put(key("secure", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
+        mValues.put(key("system", MY_UNIQUE_KEY, userId), MY_UNIQUE_KEY);
+
         Settings.Global.clearProviderForTest();
         Settings.Secure.clearProviderForTest();
         Settings.System.clearProviderForTest();
-
-        // putString will eventually invoking the mocked call() method and update mValues
-        Settings.Global.putString(context.getContentResolver(), MY_UNIQUE_KEY, MY_UNIQUE_KEY);
-        Settings.Secure.putString(context.getContentResolver(), MY_UNIQUE_KEY, MY_UNIQUE_KEY);
-        Settings.System.putString(context.getContentResolver(), MY_UNIQUE_KEY, MY_UNIQUE_KEY);
         // Verify that if any test is using TestableContext, they all have the correct settings
         // provider.
         assertEquals("Incorrect settings provider, test using incorrect Context?", MY_UNIQUE_KEY,

@@ -21,7 +21,6 @@ import android.content.Context
 import android.media.AudioManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
@@ -48,6 +47,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
@@ -55,8 +55,8 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
+@RunWith(JUnit4::class)
+class MuteQuickAffordanceCoreStartableTest : SysuiTestCase()  {
 
     @Mock
     private lateinit var featureFlags: FeatureFlags
