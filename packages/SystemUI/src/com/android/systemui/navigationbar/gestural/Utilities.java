@@ -18,21 +18,13 @@ package com.android.systemui.navigationbar.gestural;
 
 import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
 
-import android.content.Context;
 import android.view.MotionEvent;
-import android.view.ViewConfiguration;
 
 public final class Utilities {
-
-    private static final int TRACKPAD_GESTURE_SCALE = 200;
 
     public static boolean isTrackpadMotionEvent(boolean isTrackpadGestureBackEnabled,
             MotionEvent event) {
         return isTrackpadGestureBackEnabled
                 && event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE;
-    }
-
-    public static int getTrackpadScale(Context context) {
-        return ViewConfiguration.get(context).getScaledTouchSlop() * TRACKPAD_GESTURE_SCALE;
     }
 }
