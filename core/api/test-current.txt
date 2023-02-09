@@ -1033,6 +1033,22 @@ package android.content.rollback {
 
 package android.credentials.ui {
 
+  public final class AuthenticationEntry implements android.os.Parcelable {
+    ctor public AuthenticationEntry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, int);
+    ctor public AuthenticationEntry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, int, @NonNull android.content.Intent);
+    method public int describeContents();
+    method @Nullable public android.content.Intent getFrameworkExtrasIntent();
+    method @NonNull public String getKey();
+    method @NonNull public android.app.slice.Slice getSlice();
+    method @NonNull public int getStatus();
+    method @NonNull public String getSubkey();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ui.AuthenticationEntry> CREATOR;
+    field public static final int STATUS_LOCKED = 0; // 0x0
+    field public static final int STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT = 1; // 0x1
+    field public static final int STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT = 2; // 0x2
+  }
+
   public final class CreateCredentialProviderData extends android.credentials.ui.ProviderData implements android.os.Parcelable {
     ctor public CreateCredentialProviderData(@NonNull String, @NonNull java.util.List<android.credentials.ui.Entry>, @Nullable android.credentials.ui.Entry);
     method @Nullable public android.credentials.ui.Entry getRemoteEntry();
@@ -1064,15 +1080,12 @@ package android.credentials.ui {
     method @NonNull public String getSubkey();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ui.Entry> CREATOR;
-    field @NonNull public static final String EXTRA_ENTRY_AUTHENTICATION_ACTION = "android.credentials.ui.extra.ENTRY_AUTHENTICATION_ACTION";
-    field @NonNull public static final String EXTRA_ENTRY_LIST_ACTION_CHIP = "android.credentials.ui.extra.ENTRY_LIST_ACTION_CHIP";
-    field @NonNull public static final String EXTRA_ENTRY_LIST_CREDENTIAL = "android.credentials.ui.extra.ENTRY_LIST_CREDENTIAL";
   }
 
   public final class GetCredentialProviderData extends android.credentials.ui.ProviderData implements android.os.Parcelable {
-    ctor public GetCredentialProviderData(@NonNull String, @NonNull java.util.List<android.credentials.ui.Entry>, @NonNull java.util.List<android.credentials.ui.Entry>, @NonNull java.util.List<android.credentials.ui.Entry>, @Nullable android.credentials.ui.Entry);
+    ctor public GetCredentialProviderData(@NonNull String, @NonNull java.util.List<android.credentials.ui.Entry>, @NonNull java.util.List<android.credentials.ui.Entry>, @NonNull java.util.List<android.credentials.ui.AuthenticationEntry>, @Nullable android.credentials.ui.Entry);
     method @NonNull public java.util.List<android.credentials.ui.Entry> getActionChips();
-    method @NonNull public java.util.List<android.credentials.ui.Entry> getAuthenticationEntries();
+    method @NonNull public java.util.List<android.credentials.ui.AuthenticationEntry> getAuthenticationEntries();
     method @NonNull public java.util.List<android.credentials.ui.Entry> getCredentialEntries();
     method @Nullable public android.credentials.ui.Entry getRemoteEntry();
     field @NonNull public static final android.os.Parcelable.Creator<android.credentials.ui.GetCredentialProviderData> CREATOR;
@@ -1082,7 +1095,7 @@ package android.credentials.ui {
     ctor public GetCredentialProviderData.Builder(@NonNull String);
     method @NonNull public android.credentials.ui.GetCredentialProviderData build();
     method @NonNull public android.credentials.ui.GetCredentialProviderData.Builder setActionChips(@NonNull java.util.List<android.credentials.ui.Entry>);
-    method @NonNull public android.credentials.ui.GetCredentialProviderData.Builder setAuthenticationEntries(@NonNull java.util.List<android.credentials.ui.Entry>);
+    method @NonNull public android.credentials.ui.GetCredentialProviderData.Builder setAuthenticationEntries(@NonNull java.util.List<android.credentials.ui.AuthenticationEntry>);
     method @NonNull public android.credentials.ui.GetCredentialProviderData.Builder setCredentialEntries(@NonNull java.util.List<android.credentials.ui.Entry>);
     method @NonNull public android.credentials.ui.GetCredentialProviderData.Builder setRemoteEntry(@Nullable android.credentials.ui.Entry);
   }

@@ -24,6 +24,7 @@ import android.credentials.CreateCredentialRequest
 import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import android.credentials.CredentialOption
 import android.credentials.GetCredentialRequest
+import android.credentials.ui.AuthenticationEntry
 import android.credentials.ui.Constants
 import android.credentials.ui.Entry
 import android.credentials.ui.CreateCredentialProviderData
@@ -291,9 +292,13 @@ class CredentialManagerRepo(
                 ).setAuthenticationEntries(
                     listOf(
                         GetTestUtils.newAuthenticationEntry(
-                            context, "key2", "subkey-1", "locked-user1@gmail.com"),
+                            context, "key2", "subkey-1", "locked-user1@gmail.com",
+                            AuthenticationEntry.STATUS_LOCKED
+                        ),
                         GetTestUtils.newAuthenticationEntry(
-                            context, "key2", "subkey-2", "locked-user2@gmail.com"),
+                            context, "key2", "subkey-2", "locked-user2@gmail.com",
+                            AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT
+                        ),
                     )
                 ).setActionChips(
                     listOf(
@@ -323,7 +328,9 @@ class CredentialManagerRepo(
                     )
                 ).setAuthenticationEntries(
                      listOf(GetTestUtils.newAuthenticationEntry(
-                         context, "key2", "subkey-1", "foo@email.com"))
+                         context, "key2", "subkey-1", "foo@email.com",
+                         AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT
+                     ))
                 ).setActionChips(
                     listOf(
                         GetTestUtils.newActionEntry(

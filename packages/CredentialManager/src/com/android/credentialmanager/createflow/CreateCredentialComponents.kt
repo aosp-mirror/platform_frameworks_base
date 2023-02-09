@@ -840,7 +840,6 @@ fun PrimaryCreateOptionRow(
         },
         label = {
             Column() {
-                // TODO: Add the function to hide/view password when the type is create password
                 when (requestDisplayInfo.type) {
                     CredentialType.PASSKEY -> {
                         TextOnSurfaceVariant(

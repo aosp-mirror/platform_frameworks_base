@@ -485,7 +485,6 @@ fun PerUserNameCredentials(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CredentialEntryRow(
     credentialEntryInfo: CredentialEntryInfo,
@@ -498,15 +497,13 @@ fun CredentialEntryRow(
                 Image(
                     modifier = Modifier.padding(start = 10.dp).size(32.dp),
                     bitmap = credentialEntryInfo.icon.toBitmap().asImageBitmap(),
-                    // TODO: add description.
-                    contentDescription = "",
+                    contentDescription = null,
                 )
             } else {
                 Icon(
                     modifier = Modifier.padding(start = 10.dp).size(32.dp),
                     painter = painterResource(R.drawable.ic_other_sign_in),
-                    // TODO: add description.
-                    contentDescription = "",
+                    contentDescription = null,
                     tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant
                 )
             }
@@ -553,8 +550,7 @@ fun AuthenticationEntryRow(
             Image(
                 modifier = Modifier.padding(start = 10.dp).size(32.dp),
                 bitmap = authenticationEntryInfo.icon.toBitmap().asImageBitmap(),
-                // TODO: add description.
-                contentDescription = ""
+                contentDescription = null
             )
         },
         label = {
@@ -563,23 +559,28 @@ fun AuthenticationEntryRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 5.dp),
             ) {
                 Column() {
-                    // TODO: fix the text values.
                     TextOnSurfaceVariant(
                         text = authenticationEntryInfo.title,
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(top = 16.dp)
                     )
                     TextSecondary(
-                        text = stringResource(R.string.locked_credential_entry_label_subtext),
+                        text = stringResource(
+                            if (authenticationEntryInfo.isUnlockedAndEmpty)
+                                R.string.locked_credential_entry_label_subtext_no_sign_in
+                            else R.string.locked_credential_entry_label_subtext_tap_to_unlock
+                    ),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
-                Icon(
-                    Icons.Outlined.Lock,
-                    null,
-                    Modifier.align(alignment = Alignment.CenterVertically).padding(end = 10.dp),
-                )
+                if (!authenticationEntryInfo.isUnlockedAndEmpty) {
+                    Icon(
+                        Icons.Outlined.Lock,
+                        null,
+                        Modifier.align(alignment = Alignment.CenterVertically).padding(end = 10.dp),
+                    )
+                }
             }
         }
     )
@@ -596,8 +597,7 @@ fun ActionEntryRow(
             Image(
                 modifier = Modifier.padding(start = 10.dp).size(24.dp),
                 bitmap = actionEntryInfo.icon.toBitmap().asImageBitmap(),
-                // TODO: add description.
-                contentDescription = ""
+                contentDescription = null,
             )
         },
         label = {

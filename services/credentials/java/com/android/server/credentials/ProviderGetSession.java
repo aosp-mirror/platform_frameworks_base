@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
+import android.credentials.ui.AuthenticationEntry;
 import android.credentials.ui.Entry;
 import android.credentials.ui.GetCredentialProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
@@ -278,16 +279,18 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         return remoteEntry;
     }
 
-    private List<Entry> prepareUiAuthenticationEntries(
+    private List<AuthenticationEntry> prepareUiAuthenticationEntries(
             @NonNull List<Action> authenticationEntries) {
-        List<Entry> authenticationUiEntries = new ArrayList<>();
+        List<AuthenticationEntry> authenticationUiEntries = new ArrayList<>();
 
+        // TODO: properly construct entries when they should have the unlocked status.
         for (Action authenticationAction : authenticationEntries) {
             String entryId = generateUniqueId();
             mUiAuthenticationEntries.put(entryId, authenticationAction);
-            authenticationUiEntries.add(new Entry(
+            authenticationUiEntries.add(new AuthenticationEntry(
                     AUTHENTICATION_ACTION_ENTRY_KEY, entryId,
                     authenticationAction.getSlice(),
+                    AuthenticationEntry.STATUS_LOCKED,
                     setUpFillInIntentForAuthentication()));
         }
         return authenticationUiEntries;
@@ -346,7 +349,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     }
 
     private GetCredentialProviderData prepareUiProviderData(List<Entry> actionEntries,
-            List<Entry> credentialEntries, List<Entry> authenticationActionEntries,
+            List<Entry> credentialEntries, List<AuthenticationEntry> authenticationActionEntries,
             Entry remoteEntry) {
         return new GetCredentialProviderData.Builder(
                 mComponentName.flattenToString()).setActionChips(actionEntries)
