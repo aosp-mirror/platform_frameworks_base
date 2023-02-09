@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
@@ -235,7 +236,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         mSubTitleText.setText(device.getSubtextString());
                         Drawable deviceStatusIcon =
                                 device.hasOngoingSession() ? mContext.getDrawable(
-                                        R.drawable.media_output_status_session)
+                                        R.drawable.ic_sound_bars_anim)
                                         : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
                                                 device,
                                                 mContext);
@@ -334,7 +335,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             && mController.isSubStatusSupported()) {
                         Drawable deviceStatusIcon =
                                 device.hasOngoingSession() ? mContext.getDrawable(
-                                        R.drawable.media_output_status_session)
+                                        R.drawable.ic_sound_bars_anim)
                                         : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
                                                 device,
                                                 mContext);
@@ -399,6 +400,9 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         private void updateDeviceStatusIcon(Drawable drawable) {
             mStatusIcon.setImageDrawable(drawable);
             mStatusIcon.setColorFilter(mController.getColorItemContent());
+            if (drawable instanceof AnimatedVectorDrawable) {
+                ((AnimatedVectorDrawable) drawable).start();
+            }
         }
 
         private void updateProgressBarColor() {
