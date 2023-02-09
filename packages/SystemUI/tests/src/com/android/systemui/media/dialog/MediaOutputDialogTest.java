@@ -36,6 +36,7 @@ import android.media.session.PlaybackState;
 import android.os.PowerExemptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.FeatureFlagUtils;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -171,6 +172,8 @@ public class MediaOutputDialogTest extends SysuiTestCase {
                 mLocalBluetoothLeBroadcast);
         when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
         when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_PLAYING);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
         when(mMediaDevice.isBLEDevice()).thenReturn(false);
 
         assertThat(mMediaOutputDialog.getStopButtonVisibility()).isEqualTo(View.GONE);
@@ -181,6 +184,62 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         mFeatures.add(MediaRoute2Info.FEATURE_LOCAL_PLAYBACK);
 
         assertThat(mMediaOutputDialog.getStopButtonVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void isBroadcastSupported_flagOnAndConnectBleDevice_returnsTrue() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
+        when(mMediaDevice.isBLEDevice()).thenReturn(true);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isTrue();
+    }
+
+    @Test
+    public void isBroadcastSupported_flagOnAndNoBleDevice_returnsFalse() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
+        when(mMediaDevice.isBLEDevice()).thenReturn(false);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isFalse();
+    }
+
+    @Test
+    public void isBroadcastSupported_notSupportBroadcastAndflagOn_returnsFalse() {
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, true);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isFalse();
+    }
+
+    @Test
+    public void isBroadcastSupported_flagOffAndConnectToBleDevice_returnsTrue() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, false);
+        when(mMediaDevice.isBLEDevice()).thenReturn(true);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isTrue();
+    }
+
+    @Test
+    public void isBroadcastSupported_flagOffAndNoBleDevice_returnsTrue() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        when(mLocalBluetoothLeBroadcast.isEnabled(any())).thenReturn(false);
+        FeatureFlagUtils.setEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, false);
+        when(mMediaDevice.isBLEDevice()).thenReturn(false);
+
+        assertThat(mMediaOutputDialog.isBroadcastSupported()).isTrue();
     }
 
     @Test

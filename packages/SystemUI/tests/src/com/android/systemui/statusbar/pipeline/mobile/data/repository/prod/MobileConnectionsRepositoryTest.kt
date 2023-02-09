@@ -84,6 +84,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var summaryLogger: TableLogBuffer
     @Mock private lateinit var logBufferFactory: TableLogBufferFactory
 
     private val mobileMappings = FakeMobileMappingsProxy()
@@ -157,6 +158,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 subscriptionManager,
                 telephonyManager,
                 logger,
+                summaryLogger,
                 mobileMappings,
                 fakeBroadcastDispatcher,
                 context,
@@ -616,6 +618,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     subscriptionManager,
                     telephonyManager,
                     logger,
+                    summaryLogger,
                     mobileMappings,
                     fakeBroadcastDispatcher,
                     context,

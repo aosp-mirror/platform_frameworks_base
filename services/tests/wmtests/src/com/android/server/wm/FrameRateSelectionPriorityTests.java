@@ -182,13 +182,11 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
     @Test
     public void testApplicationNotInFocusWithModeId() {
         final WindowState appWindow = createWindow("appWindow");
-        assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
-
-        final WindowState inFocusWindow = createWindow("inFocus");
-        appWindow.mToken.mDisplayContent.mCurrentFocus = inFocusWindow;
-
+        mDisplayContent.mCurrentFocus = appWindow;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
+        mDisplayContent.mCurrentFocus = null;
+        appWindow.updateFrameRateSelectionPriorityIfNeeded();
+
         // The window is not in focus.
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
         assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
@@ -211,13 +209,11 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
     @Test
     public void testApplicationNotInFocusWithoutModeId() {
         final WindowState appWindow = createWindow("appWindow");
-        assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
-        assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);
-
-        final WindowState inFocusWindow = createWindow("inFocus");
-        appWindow.mToken.mDisplayContent.mCurrentFocus = inFocusWindow;
-
+        mDisplayContent.mCurrentFocus = appWindow;
         appWindow.updateFrameRateSelectionPriorityIfNeeded();
+        mDisplayContent.mCurrentFocus = null;
+        appWindow.updateFrameRateSelectionPriorityIfNeeded();
+
         // The window is not in focus.
         assertEquals(appWindow.mFrameRateSelectionPriority, RefreshRatePolicy.LAYER_PRIORITY_UNSET);
         assertEquals(appWindow.mFrameRateVote, FRAME_RATE_VOTE_NONE);

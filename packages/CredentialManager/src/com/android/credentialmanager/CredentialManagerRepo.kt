@@ -49,7 +49,12 @@ import androidx.credentials.CreatePasswordRequest
 
 import java.time.Instant
 
-// Consider repo per screen, similar to view model?
+/**
+ * Client for interacting with Credential Manager. Also holds data inputs from it.
+ *
+ * IMPORTANT: instantiation of the object can fail if the data inputs aren't valid. Callers need
+ * to be equipped to handle this gracefully.
+ */
 class CredentialManagerRepo(
     private val context: Context,
     intent: Intent,
@@ -81,7 +86,6 @@ class CredentialManagerRepo(
                     GetCredentialProviderData::class.java
                 ) ?: testGetCredentialProviderList()
             else -> {
-                // TODO: fail gracefully
                 throw IllegalStateException("Unrecognized request type: ${requestInfo.type}")
             }
         }
@@ -167,9 +171,9 @@ class CredentialManagerRepo(
         )
     }
 
+    // IMPORTANT: new invocation should be mindful that this method can throw.
     private fun getCredentialInitialUiState(): GetCredentialUiState? {
         val providerEnabledList = GetFlowUtils.toProviderList(
-            // TODO: handle runtime cast error
             providerEnabledList as List<GetCredentialProviderData>, context
         )
         val requestDisplayInfo = GetFlowUtils.toRequestDisplayInfo(requestInfo, context)
@@ -179,9 +183,9 @@ class CredentialManagerRepo(
         )
     }
 
+    // IMPORTANT: new invocation should be mindful that this method can throw.
     private fun getCreateProviderEnableListInitialUiState(): List<EnabledProviderInfo> {
         val providerEnabledList = CreateFlowUtils.toEnabledProviderList(
-            // Handle runtime cast error
             providerEnabledList as List<CreateCredentialProviderData>, context
         )
         return providerEnabledList
@@ -266,7 +270,7 @@ class CredentialManagerRepo(
         return listOf(
             GetCredentialProviderData.Builder("io.enpass.app")
                 .setCredentialEntries(
-                    listOf<Entry>(
+                    listOf(
                         GetTestUtils.newPasswordEntry(
                             context, "key1", "subkey-1", "elisa.family@outlook.com", null,
                             Instant.ofEpochSecond(8000L)
@@ -285,9 +289,12 @@ class CredentialManagerRepo(
                         ),
                     )
                 ).setAuthenticationEntries(
-            listOf<Entry>(
-                    GetTestUtils.newAuthenticationEntry(context, "key2", "subkey-1"),
-            )
+                    listOf(
+                        GetTestUtils.newAuthenticationEntry(
+                            context, "key2", "subkey-1", "locked-user1@gmail.com"),
+                        GetTestUtils.newAuthenticationEntry(
+                            context, "key2", "subkey-2", "locked-user2@gmail.com"),
+                    )
                 ).setActionChips(
                     listOf(
                         GetTestUtils.newActionEntry(
@@ -315,9 +322,8 @@ class CredentialManagerRepo(
                         ),
                     )
                 ).setAuthenticationEntries(
-                     listOf<Entry>(
-                    GetTestUtils.newAuthenticationEntry(context, "key2", "subkey-1"),
-                     )
+                     listOf(GetTestUtils.newAuthenticationEntry(
+                         context, "key2", "subkey-1", "foo@email.com"))
                 ).setActionChips(
                     listOf(
                         GetTestUtils.newActionEntry(
@@ -388,7 +394,6 @@ class CredentialManagerRepo(
             CreateCredentialRequest(
                 "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL",
                 credentialData,
-                // TODO: populate with actual data
                 /*candidateQueryData=*/ Bundle(),
                 /*isSystemProviderRequired=*/ false
             ),

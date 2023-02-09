@@ -19,10 +19,12 @@ import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -47,6 +49,8 @@ public class ProxyManager {
 
     private final Object mLock;
 
+    private final Context mContext;
+
     // Used to determine if we should notify AccessibilityManager clients of updates.
     // TODO(254545943): Separate this so each display id has its own state. Currently there is no
     // way to identify from AccessibilityManager which proxy state should be returned.
@@ -57,9 +61,12 @@ public class ProxyManager {
 
     private AccessibilityWindowManager mA11yWindowManager;
 
-    ProxyManager(Object lock, AccessibilityWindowManager awm) {
+    private AccessibilityInputFilter mA11yInputFilter;
+
+    ProxyManager(Object lock, AccessibilityWindowManager awm, Context context) {
         mLock = lock;
         mA11yWindowManager = awm;
+        mContext = context;
     }
 
     /**
@@ -109,6 +116,9 @@ public class ProxyManager {
             connection.mSystemSupport.onClientChangeLocked(true);
         }
 
+        if (mA11yInputFilter != null) {
+            mA11yInputFilter.disableFeaturesForDisplayIfInstalled(displayId);
+        }
         connection.initializeServiceInterface(client);
     }
 
@@ -120,14 +130,25 @@ public class ProxyManager {
     }
 
     private boolean clearConnection(int displayId) {
+        boolean removed = false;
         synchronized (mLock) {
             if (mProxyA11yServiceConnections.contains(displayId)) {
                 mProxyA11yServiceConnections.remove(displayId);
-                return true;
+                removed = true;
             }
         }
-        mA11yWindowManager.stopTrackingDisplayProxy(displayId);
-        return false;
+        if (removed) {
+            mA11yWindowManager.stopTrackingDisplayProxy(displayId);
+            if (mA11yInputFilter != null) {
+                final DisplayManager displayManager = (DisplayManager)
+                        mContext.getSystemService(Context.DISPLAY_SERVICE);
+                final Display proxyDisplay = displayManager.getDisplay(displayId);
+                if (proxyDisplay != null) {
+                    mA11yInputFilter.enableFeaturesForDisplayIfInstalled(proxyDisplay);
+                }
+            }
+        }
+        return removed;
     }
 
     /**
@@ -250,5 +271,9 @@ public class ProxyManager {
                     mProxyA11yServiceConnections.valueAt(i);
             proxy.notifyClearAccessibilityNodeInfoCache();
         }
+    }
+
+    void setAccessibilityInputFilter(AccessibilityInputFilter filter) {
+        mA11yInputFilter = filter;
     }
 }

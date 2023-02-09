@@ -605,11 +605,16 @@ public class ActivityStartController {
         final Task task = r.getTask();
         mService.deferWindowLayout();
         try {
-            r.mTransitionController.requestStartTransition(transition,
-                    task, remoteTransition, null /* displayChange */);
-            r.mTransitionController.collect(task);
-            r.mTransitionController.setTransientLaunch(r,
-                    TaskDisplayArea.getRootTaskAbove(rootTask));
+            final TransitionController controller = r.mTransitionController;
+            if (controller.getTransitionPlayer() != null) {
+                controller.requestStartTransition(transition, task, remoteTransition,
+                        null /* displayChange */);
+                controller.collect(task);
+                controller.setTransientLaunch(r, TaskDisplayArea.getRootTaskAbove(rootTask));
+            } else {
+                // The transition player might be died when executing the queued transition.
+                transition.abort();
+            }
             task.moveToFront("startExistingRecents");
             task.mInResumeTopActivity = true;
             task.resumeTopActivity(null /* prev */, options, true /* deferPause */);

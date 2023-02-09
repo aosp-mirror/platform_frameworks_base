@@ -18,6 +18,7 @@ package com.android.systemui.media.dialog;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.FeatureFlagUtils;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -99,10 +100,18 @@ public class MediaOutputDialog extends MediaOutputBaseDialog {
     @Override
     public boolean isBroadcastSupported() {
         boolean isBluetoothLeDevice = false;
-        if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
-            isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
+        if (FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST)) {
+            if (mMediaOutputController.getCurrentConnectedMediaDevice() != null) {
+                isBluetoothLeDevice = mMediaOutputController.isBluetoothLeDevice(
                     mMediaOutputController.getCurrentConnectedMediaDevice());
+            }
+        } else {
+            // To decouple LE Audio Broadcast and Unicast, it always displays the button when there
+            // is no LE Audio device connected to the phone
+            isBluetoothLeDevice = true;
         }
+
         return mMediaOutputController.isBroadcastSupported() && isBluetoothLeDevice;
     }
 

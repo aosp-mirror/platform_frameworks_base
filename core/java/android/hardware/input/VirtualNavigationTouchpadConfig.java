@@ -49,12 +49,12 @@ public final class VirtualNavigationTouchpadConfig extends VirtualInputDeviceCon
     }
 
     /** Returns the touchpad height. */
-    public int getHeight() {
+    @IntRange(from = 1) public int getHeight() {
         return mHeight;
     }
 
     /** Returns the touchpad width. */
-    public int getWidth() {
+    @IntRange(from = 1) public int getWidth() {
         return mWidth;
     }
 

@@ -264,8 +264,10 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
             if (total.remainingPowerMah < 0) total.remainingPowerMah = 0;
         } else {
             // Smear unattributed active time and add it to the remaining power consumption.
-            total.remainingPowerMah +=
-                    (totalActivePowerMah * total.remainingDurationMs) / totalActiveDurationMs;
+            if (totalActiveDurationMs != 0) {
+                total.remainingPowerMah +=
+                        (totalActivePowerMah * total.remainingDurationMs) / totalActiveDurationMs;
+            }
 
             // Calculate the inactive modem power consumption.
             final BatteryStats.ControllerActivityCounter modemActivity =

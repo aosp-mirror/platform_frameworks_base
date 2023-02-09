@@ -1064,7 +1064,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (thread != null) {
             mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
                     app, OOM_ADJ_REASON_FINISH_RECEIVER);
-            if (r.shareIdentity) {
+            if (r.shareIdentity && app.uid != r.callingUid) {
                 mService.mPackageManagerInt.grantImplicitAccess(r.userId, r.intent,
                         UserHandle.getAppId(app.uid), r.callingUid, true);
             }

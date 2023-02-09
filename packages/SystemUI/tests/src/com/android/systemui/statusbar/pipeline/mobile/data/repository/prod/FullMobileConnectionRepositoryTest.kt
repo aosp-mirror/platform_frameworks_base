@@ -16,20 +16,32 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.telephony.ServiceState
+import android.telephony.SignalStrength
+import android.telephony.TelephonyCallback
+import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_EMERGENCY
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_OPERATOR
+import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_PRIMARY_LEVEL
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers.getTelephonyCallbackForType
+import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -52,9 +64,10 @@ import org.mockito.Mockito.verify
 class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: FullMobileConnectionRepository
 
+    private val systemClock = FakeSystemClock()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private val tableLogBuffer = mock<TableLogBuffer>()
+    private val tableLogBuffer = TableLogBuffer(maxSize = 100, name = "TestName", systemClock)
     private val mobileFactory = mock<MobileConnectionRepositoryImpl.Factory>()
     private val carrierMergedFactory = mock<CarrierMergedConnectionRepository.Factory>()
 
@@ -347,8 +360,214 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                 .isSameInstanceAs(connection1Repeat.tableLogBuffer)
         }
 
-    // TODO(b/238425913): Verify that the logging switches correctly (once the carrier merged repo
-    //   implements logging).
+    @Test
+    fun connectionInfo_logging_notCarrierMerged_getsUpdates() =
+        testScope.runTest {
+            // SETUP: Use real repositories to verify the diffing still works. (See b/267501739.)
+            val telephonyManager = mock<TelephonyManager>()
+            createRealMobileRepo(telephonyManager)
+            createRealCarrierMergedRepo(FakeWifiRepository())
+
+            initializeRepo(startingIsCarrierMerged = false)
+
+            val job = underTest.connectionInfo.launchIn(this)
+
+            // WHEN we set up some mobile connection info
+            val serviceState = ServiceState()
+            serviceState.setOperatorName("longName", "OpTypical", "1")
+            serviceState.isEmergencyOnly = false
+            getTelephonyCallbackForType<TelephonyCallback.ServiceStateListener>(telephonyManager)
+                .onServiceStateChanged(serviceState)
+
+            // THEN it's logged to the buffer
+            assertThat(dumpBuffer()).contains("$COL_OPERATOR${BUFFER_SEPARATOR}OpTypical")
+            assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}false")
+
+            // WHEN we update mobile connection info
+            val serviceState2 = ServiceState()
+            serviceState2.setOperatorName("longName", "OpDiff", "1")
+            serviceState2.isEmergencyOnly = true
+            getTelephonyCallbackForType<TelephonyCallback.ServiceStateListener>(telephonyManager)
+                .onServiceStateChanged(serviceState2)
+
+            // THEN the updates are logged
+            assertThat(dumpBuffer()).contains("$COL_OPERATOR${BUFFER_SEPARATOR}OpDiff")
+            assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}true")
+
+            job.cancel()
+        }
+
+    @Test
+    fun connectionInfo_logging_carrierMerged_getsUpdates() =
+        testScope.runTest {
+            // SETUP: Use real repositories to verify the diffing still works. (See b/267501739.)
+            createRealMobileRepo(mock())
+            val wifiRepository = FakeWifiRepository()
+            createRealCarrierMergedRepo(wifiRepository)
+
+            initializeRepo(startingIsCarrierMerged = true)
+
+            val job = underTest.connectionInfo.launchIn(this)
+
+            // WHEN we set up carrier merged info
+            val networkId = 2
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.CarrierMerged(
+                    networkId,
+                    SUB_ID,
+                    level = 3,
+                )
+            )
+
+            // THEN the carrier merged info is logged
+            assertThat(dumpBuffer()).contains("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}3")
+
+            // WHEN we update the info
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.CarrierMerged(
+                    networkId,
+                    SUB_ID,
+                    level = 1,
+                )
+            )
+
+            // THEN the updates are logged
+            assertThat(dumpBuffer()).contains("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}1")
+
+            job.cancel()
+        }
+
+    @Test
+    fun connectionInfo_logging_updatesWhenCarrierMergedUpdates() =
+        testScope.runTest {
+            // SETUP: Use real repositories to verify the diffing still works. (See b/267501739.)
+            val telephonyManager = mock<TelephonyManager>()
+            createRealMobileRepo(telephonyManager)
+
+            val wifiRepository = FakeWifiRepository()
+            createRealCarrierMergedRepo(wifiRepository)
+
+            initializeRepo(startingIsCarrierMerged = false)
+
+            val job = underTest.connectionInfo.launchIn(this)
+
+            // WHEN we set up some mobile connection info
+            val signalStrength = mock<SignalStrength>()
+            whenever(signalStrength.level).thenReturn(1)
+
+            getTelephonyCallbackForType<TelephonyCallback.SignalStrengthsListener>(telephonyManager)
+                .onSignalStrengthsChanged(signalStrength)
+
+            // THEN it's logged to the buffer
+            assertThat(dumpBuffer()).contains("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}1")
+
+            // WHEN isCarrierMerged is set to true
+            val networkId = 2
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.CarrierMerged(
+                    networkId,
+                    SUB_ID,
+                    level = 3,
+                )
+            )
+            underTest.setIsCarrierMerged(true)
+
+            // THEN the carrier merged info is logged
+            assertThat(dumpBuffer()).contains("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}3")
+
+            // WHEN the carrier merge network is updated
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.CarrierMerged(
+                    networkId,
+                    SUB_ID,
+                    level = 4,
+                )
+            )
+
+            // THEN the new level is logged
+            assertThat(dumpBuffer()).contains("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}4")
+
+            // WHEN isCarrierMerged is set to false
+            underTest.setIsCarrierMerged(false)
+
+            // THEN the typical info is logged
+            // Note: Since our first logs also had the typical info, we need to search the log
+            // contents for after our carrier merged level log.
+            val fullBuffer = dumpBuffer()
+            val carrierMergedContentIndex = fullBuffer.indexOf("${BUFFER_SEPARATOR}4")
+            val bufferAfterCarrierMerged = fullBuffer.substring(carrierMergedContentIndex)
+            assertThat(bufferAfterCarrierMerged).contains("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}1")
+
+            // WHEN the normal network is updated
+            val newMobileInfo =
+                MobileConnectionModel(
+                    operatorAlphaShort = "Mobile Operator 2",
+                    primaryLevel = 0,
+                )
+            mobileRepo.setConnectionInfo(newMobileInfo)
+
+            // THEN the new level is logged
+            assertThat(dumpBuffer()).contains("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}0")
+
+            job.cancel()
+        }
+
+    @Test
+    fun connectionInfo_logging_doesNotLogUpdatesForNotActiveRepo() =
+        testScope.runTest {
+            // SETUP: Use real repositories to verify the diffing still works. (See b/267501739.)
+            val telephonyManager = mock<TelephonyManager>()
+            createRealMobileRepo(telephonyManager)
+
+            val wifiRepository = FakeWifiRepository()
+            createRealCarrierMergedRepo(wifiRepository)
+
+            // WHEN isCarrierMerged = false
+            initializeRepo(startingIsCarrierMerged = false)
+
+            val job = underTest.connectionInfo.launchIn(this)
+
+            val signalStrength = mock<SignalStrength>()
+            whenever(signalStrength.level).thenReturn(1)
+            getTelephonyCallbackForType<TelephonyCallback.SignalStrengthsListener>(telephonyManager)
+                .onSignalStrengthsChanged(signalStrength)
+
+            // THEN updates to the carrier merged level aren't logged
+            val networkId = 2
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.CarrierMerged(
+                    networkId,
+                    SUB_ID,
+                    level = 4,
+                )
+            )
+            assertThat(dumpBuffer()).doesNotContain("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}4")
+
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.CarrierMerged(
+                    networkId,
+                    SUB_ID,
+                    level = 3,
+                )
+            )
+            assertThat(dumpBuffer()).doesNotContain("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}3")
+
+            // WHEN isCarrierMerged is set to true
+            underTest.setIsCarrierMerged(true)
+
+            // THEN updates to the normal level aren't logged
+            whenever(signalStrength.level).thenReturn(5)
+            getTelephonyCallbackForType<TelephonyCallback.SignalStrengthsListener>(telephonyManager)
+                .onSignalStrengthsChanged(signalStrength)
+            assertThat(dumpBuffer()).doesNotContain("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}5")
+
+            whenever(signalStrength.level).thenReturn(6)
+            getTelephonyCallbackForType<TelephonyCallback.SignalStrengthsListener>(telephonyManager)
+                .onSignalStrengthsChanged(signalStrength)
+            assertThat(dumpBuffer()).doesNotContain("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}6")
+
+            job.cancel()
+        }
 
     private fun initializeRepo(startingIsCarrierMerged: Boolean) {
         underTest =
@@ -364,9 +583,68 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             )
     }
 
+    private fun createRealMobileRepo(
+        telephonyManager: TelephonyManager,
+    ): MobileConnectionRepositoryImpl {
+        whenever(telephonyManager.subscriptionId).thenReturn(SUB_ID)
+
+        val realRepo =
+            MobileConnectionRepositoryImpl(
+                context,
+                SUB_ID,
+                defaultNetworkName = NetworkNameModel.Default("default"),
+                networkNameSeparator = SEP,
+                telephonyManager,
+                systemUiCarrierConfig = mock(),
+                fakeBroadcastDispatcher,
+                mobileMappingsProxy = mock(),
+                testDispatcher,
+                logger = mock(),
+                tableLogBuffer,
+                testScope.backgroundScope,
+            )
+        whenever(
+                mobileFactory.build(
+                    eq(SUB_ID),
+                    any(),
+                    eq(DEFAULT_NAME),
+                    eq(SEP),
+                )
+            )
+            .thenReturn(realRepo)
+
+        return realRepo
+    }
+
+    private fun createRealCarrierMergedRepo(
+        wifiRepository: FakeWifiRepository,
+    ): CarrierMergedConnectionRepository {
+        wifiRepository.setIsWifiEnabled(true)
+        wifiRepository.setIsWifiDefault(true)
+        val realRepo =
+            CarrierMergedConnectionRepository(
+                SUB_ID,
+                tableLogBuffer,
+                defaultNetworkName = NetworkNameModel.Default("default"),
+                testScope.backgroundScope,
+                wifiRepository,
+            )
+        whenever(carrierMergedFactory.build(eq(SUB_ID), any(), eq(DEFAULT_NAME)))
+            .thenReturn(realRepo)
+
+        return realRepo
+    }
+
+    private fun dumpBuffer(): String {
+        val outputWriter = StringWriter()
+        tableLogBuffer.dump(PrintWriter(outputWriter), arrayOf())
+        return outputWriter.toString()
+    }
+
     private companion object {
         const val SUB_ID = 42
         private val DEFAULT_NAME = NetworkNameModel.Default("default name")
         private const val SEP = "-"
+        private const val BUFFER_SEPARATOR = "|"
     }
 }

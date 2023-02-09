@@ -692,9 +692,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     /** Starts a pair of intents using legacy transition. */
     void startIntentsWithLegacyTransition(PendingIntent pendingIntent1, Intent fillInIntent1,
-            @Nullable Bundle options1, PendingIntent pendingIntent2, Intent fillInIntent2,
-            @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
-            RemoteAnimationAdapter adapter, InstanceId instanceId) {
+            @Nullable ShortcutInfo shortcutInfo1, @Nullable Bundle options1,
+            @Nullable PendingIntent pendingIntent2, Intent fillInIntent2,
+            @Nullable ShortcutInfo shortcutInfo2, @Nullable Bundle options2,
+            @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
+            InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
         if (pendingIntent2 == null) {
@@ -703,15 +705,23 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             activityOptions.update(ActivityOptions.makeRemoteAnimation(adapter));
             options1 = activityOptions.toBundle();
             addActivityOptions(options1, null /* launchTarget */);
-            wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
+            if (shortcutInfo1 != null) {
+                wct.startShortcut(mContext.getPackageName(), shortcutInfo1, options1);
+            } else {
+                wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
+            }
             mSyncQueue.queue(wct);
             return;
         }
 
         addActivityOptions(options1, mSideStage);
-        wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
-        startWithLegacyTransition(wct, pendingIntent2, fillInIntent2, options2, splitPosition,
-                splitRatio, adapter, instanceId);
+        if (shortcutInfo1 != null) {
+            wct.startShortcut(mContext.getPackageName(), shortcutInfo1, options1);
+        } else {
+            wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
+        }
+        startWithLegacyTransition(wct, pendingIntent2, fillInIntent2, shortcutInfo2, options2,
+                splitPosition, splitRatio, adapter, instanceId);
     }
 
     void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent, Intent fillInIntent,
@@ -763,18 +773,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void startWithLegacyTransition(WindowContainerTransaction wct,
             @Nullable PendingIntent mainPendingIntent, @Nullable Intent mainFillInIntent,
-            @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
-            RemoteAnimationAdapter adapter, InstanceId instanceId) {
+            @Nullable ShortcutInfo mainShortcutInfo, @Nullable Bundle mainOptions,
+            @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
+            InstanceId instanceId) {
         startWithLegacyTransition(wct, INVALID_TASK_ID, mainPendingIntent, mainFillInIntent,
-                mainOptions, sidePosition, splitRatio, adapter, instanceId);
+                mainShortcutInfo, mainOptions, sidePosition, splitRatio, adapter, instanceId);
     }
 
     private void startWithLegacyTransition(WindowContainerTransaction wct, int mainTaskId,
             @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
             RemoteAnimationAdapter adapter, InstanceId instanceId) {
         startWithLegacyTransition(wct, mainTaskId, null /* mainPendingIntent */,
-                null /* mainFillInIntent */, mainOptions, sidePosition, splitRatio, adapter,
-                instanceId);
+                null /* mainFillInIntent */, null /* mainShortcutInfo */, mainOptions, sidePosition,
+                splitRatio, adapter, instanceId);
     }
 
     /**
@@ -784,8 +795,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
      */
     private void startWithLegacyTransition(WindowContainerTransaction wct, int mainTaskId,
             @Nullable PendingIntent mainPendingIntent, @Nullable Intent mainFillInIntent,
-            @Nullable Bundle mainOptions, @SplitPosition int sidePosition, float splitRatio,
-            RemoteAnimationAdapter adapter, InstanceId instanceId) {
+            @Nullable ShortcutInfo mainShortcutInfo, @Nullable Bundle options,
+            @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
+            InstanceId instanceId) {
         if (!isSplitScreenVisible()) {
             exitSplitScreen(null /* childrenToTop */, EXIT_REASON_RECREATE_SPLIT);
         }
@@ -809,15 +821,19 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mMainStage.activate(wct, false /* reparent */);
         }
 
-        if (mainOptions == null) mainOptions = new Bundle();
-        addActivityOptions(mainOptions, mMainStage);
-        mainOptions = wrapAsSplitRemoteAnimation(adapter, mainOptions);
+        if (options == null) options = new Bundle();
+        addActivityOptions(options, mMainStage);
+        options = wrapAsSplitRemoteAnimation(adapter, options);
 
         updateWindowBounds(mSplitLayout, wct);
-        if (mainTaskId == INVALID_TASK_ID) {
-            wct.sendPendingIntent(mainPendingIntent, mainFillInIntent, mainOptions);
+
+        // TODO(b/268008375): Merge APIs to start a split pair into one.
+        if (mainTaskId != INVALID_TASK_ID) {
+            wct.startTask(mainTaskId, options);
+        } else if (mainShortcutInfo != null) {
+            wct.startShortcut(mContext.getPackageName(), mainShortcutInfo, options);
         } else {
-            wct.startTask(mainTaskId, mainOptions);
+            wct.sendPendingIntent(mainPendingIntent, mainFillInIntent, options);
         }
 
         wct.reorder(mRootTaskInfo.token, true);

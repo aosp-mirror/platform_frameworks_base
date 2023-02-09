@@ -25,4 +25,5 @@ open class BaseEntry (
     val entrySubkey: String,
     val pendingIntent: PendingIntent?,
     val fillInIntent: Intent?,
+    val shouldTerminateUiUponSuccessfulProviderResult: Boolean,
 )

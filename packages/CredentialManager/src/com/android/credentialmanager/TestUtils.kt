@@ -23,10 +23,11 @@ import android.content.Context
 import android.content.Intent
 import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import android.credentials.ui.Entry
-import android.graphics.drawable.Icon
 import android.net.Uri
 import android.provider.Settings
 import androidx.credentials.provider.CreateEntry
+import androidx.credentials.provider.PasswordCredentialEntry
+import androidx.credentials.provider.PublicKeyCredentialEntry
 
 import java.time.Instant
 
@@ -37,6 +38,7 @@ class GetTestUtils {
             context: Context,
             key: String,
             subkey: String,
+            title: String,
         ): Entry {
             val slice = Slice.Builder(
                 Uri.EMPTY, SliceSpec("AuthenticationAction", 0)
@@ -51,6 +53,11 @@ class GetTestUtils {
                         ".SLICE_HINT_PENDING_INTENT"))
                     .build(),
                 /*subType=*/null
+            )
+            slice.addText(
+                title,
+                null,
+                listOf("androidx.credentials.provider.authenticationAction.SLICE_HINT_TITLE")
             )
             return Entry(
                 key,
@@ -94,23 +101,6 @@ class GetTestUtils {
             )
         }
 
-        private const val SLICE_HINT_TYPE_DISPLAY_NAME =
-            "androidx.credentials.provider.passwordCredentialEntry.SLICE_HINT_TYPE_DISPLAY_NAME"
-        private const val SLICE_HINT_TITLE =
-            "androidx.credentials.provider.passwordCredentialEntry.SLICE_HINT_USER_NAME"
-        private const val SLICE_HINT_SUBTITLE =
-            "androidx.credentials.provider.passwordCredentialEntry.SLICE_HINT_TYPE_DISPLAY_NAME"
-        private const val SLICE_HINT_LAST_USED_TIME_MILLIS =
-            "androidx.credentials.provider.passwordCredentialEntry.SLICE_HINT_LAST_USED_TIME_MILLIS"
-        private const val SLICE_HINT_ICON =
-            "androidx.credentials.provider.passwordCredentialEntry.SLICE_HINT_PROFILE_ICON"
-        private const val SLICE_HINT_PENDING_INTENT =
-            "androidx.credentials.provider.passwordCredentialEntry.SLICE_HINT_PENDING_INTENT"
-        private const val SLICE_HINT_AUTO_ALLOWED =
-            "androidx.credentials.provider.passwordCredentialEntry.SLICE_HINT_AUTO_ALLOWED"
-        private const val AUTO_SELECT_TRUE_STRING = "true"
-        private const val AUTO_SELECT_FALSE_STRING = "false"
-
         internal fun newPasswordEntry(
             context: Context,
             key: String,
@@ -125,89 +115,12 @@ class GetTestUtils {
             val pendingIntent = PendingIntent.getActivity(
                 context, 1,
                 intent, (PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                    or PendingIntent.FLAG_ONE_SHOT)
+                or PendingIntent.FLAG_ONE_SHOT)
             )
-            return Entry(
-                key,
-                subkey,
-                toPasswordSlice(userName, userDisplayName, pendingIntent, lastUsedTime),
-                Intent()
-            )
+            val passwordEntry = PasswordCredentialEntry.Builder(context, userName, pendingIntent)
+                .setDisplayName(userDisplayName).setLastUsedTime(lastUsedTime).build()
+            return Entry(key, subkey, passwordEntry.slice, Intent())
         }
-
-        private fun toPasswordSlice(
-            title: CharSequence,
-            subTitle: CharSequence?,
-            pendingIntent: PendingIntent,
-            lastUsedTime: Instant?,
-            icon: Icon? = null,
-            isAutoSelectAllowed: Boolean = true
-        ): Slice {
-            val type = TYPE_PASSWORD_CREDENTIAL
-            val autoSelectAllowed = if (isAutoSelectAllowed) {
-                AUTO_SELECT_TRUE_STRING
-            } else {
-                AUTO_SELECT_FALSE_STRING
-            }
-            val sliceBuilder = Slice.Builder(
-                Uri.EMPTY, SliceSpec(
-                    type, 1
-                )
-            )
-                .addText(
-                    "Password", /*subType=*/null,
-                    listOf(SLICE_HINT_TYPE_DISPLAY_NAME)
-                )
-                .addText(
-                    title, /*subType=*/null,
-                    listOf(SLICE_HINT_TITLE)
-                )
-                .addText(
-                    subTitle, /*subType=*/null,
-                    listOf(SLICE_HINT_SUBTITLE)
-                )
-                .addText(
-                    autoSelectAllowed, /*subType=*/null,
-                    listOf(SLICE_HINT_AUTO_ALLOWED)
-                )
-            if (lastUsedTime != null) {
-                sliceBuilder.addLong(
-                    lastUsedTime.toEpochMilli(),
-                    /*subType=*/null,
-                    listOf(SLICE_HINT_LAST_USED_TIME_MILLIS)
-                )
-            }
-            if (icon != null) {
-                sliceBuilder.addIcon(
-                    icon, /*subType=*/null,
-                    listOf(SLICE_HINT_ICON)
-                )
-            }
-            sliceBuilder.addAction(
-                pendingIntent,
-                Slice.Builder(sliceBuilder)
-                    .addHints(listOf(SLICE_HINT_PENDING_INTENT))
-                    .build(),
-                /*subType=*/null
-            )
-            return sliceBuilder.build()
-        }
-
-
-        private const val PASSKEY_SLICE_HINT_TYPE_DISPLAY_NAME =
-            "androidx.credentials.provider.publicKeyCredEntry.SLICE_HINT_TYPE_DISPLAY_NAME"
-        private const val PASSKEY_SLICE_HINT_TITLE =
-            "androidx.credentials.provider.publicKeyCredEntry.SLICE_HINT_USER_NAME"
-        private const val PASSKEY_SLICE_HINT_SUBTITLE =
-            "androidx.credentials.provider.publicKeyCredEntry.SLICE_HINT_TYPE_DISPLAY_NAME"
-        private const val PASSKEY_SLICE_HINT_LAST_USED_TIME_MILLIS =
-            "androidx.credentials.provider.publicKeyCredEntry.SLICE_HINT_LAST_USED_TIME_MILLIS"
-        private const val PASSKEY_SLICE_HINT_ICON =
-            "androidx.credentials.provider.publicKeyCredEntry.SLICE_HINT_PROFILE_ICON"
-        private const val PASSKEY_SLICE_HINT_PENDING_INTENT =
-            "androidx.credentials.provider.publicKeyCredEntry.SLICE_HINT_PENDING_INTENT"
-        private const val PASSKEY_SLICE_HINT_AUTO_ALLOWED =
-            "androidx.credentials.provider.publicKeyCredEntry.SLICE_HINT_AUTO_ALLOWED"
 
         internal fun newPasskeyEntry(
             context: Context,
@@ -223,72 +136,11 @@ class GetTestUtils {
             val pendingIntent = PendingIntent.getActivity(
                 context, 1,
                 intent, (PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                    or PendingIntent.FLAG_ONE_SHOT)
+                or PendingIntent.FLAG_ONE_SHOT)
             )
-            return Entry(
-                key, subkey, toPasskeySlice(
-                    userName, userDisplayName, pendingIntent, lastUsedTime
-                ),
-                Intent()
-            )
-        }
-
-        private fun toPasskeySlice(
-            title: CharSequence,
-            subTitle: CharSequence?,
-            pendingIntent: PendingIntent,
-            lastUsedTime: Instant?,
-            icon: Icon? = null,
-            isAutoSelectAllowed: Boolean = true
-        ): Slice {
-            val type = "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL"
-            val autoSelectAllowed = if (isAutoSelectAllowed) {
-                AUTO_SELECT_TRUE_STRING
-            } else {
-                AUTO_SELECT_FALSE_STRING
-            }
-            val sliceBuilder = Slice.Builder(
-                Uri.EMPTY, SliceSpec(
-                    type, 1
-                )
-            )
-                .addText(
-                    "Passkey", /*subType=*/null,
-                    listOf(PASSKEY_SLICE_HINT_TYPE_DISPLAY_NAME)
-                )
-                .addText(
-                    title, /*subType=*/null,
-                    listOf(PASSKEY_SLICE_HINT_TITLE)
-                )
-                .addText(
-                    subTitle, /*subType=*/null,
-                    listOf(PASSKEY_SLICE_HINT_SUBTITLE)
-                )
-                .addText(
-                    autoSelectAllowed, /*subType=*/null,
-                    listOf(PASSKEY_SLICE_HINT_AUTO_ALLOWED)
-                )
-            if (lastUsedTime != null) {
-                sliceBuilder.addLong(
-                    lastUsedTime.toEpochMilli(),
-                    /*subType=*/null,
-                    listOf(PASSKEY_SLICE_HINT_LAST_USED_TIME_MILLIS)
-                )
-            }
-            if (icon != null) {
-                sliceBuilder.addIcon(
-                    icon, /*subType=*/null,
-                    listOf(PASSKEY_SLICE_HINT_ICON)
-                )
-            }
-            sliceBuilder.addAction(
-                pendingIntent,
-                Slice.Builder(sliceBuilder)
-                    .addHints(listOf(PASSKEY_SLICE_HINT_PENDING_INTENT))
-                    .build(),
-                /*subType=*/null
-            )
-            return sliceBuilder.build()
+            val passkeyEntry = PublicKeyCredentialEntry.Builder(context, userName, pendingIntent)
+                .setDisplayName(userDisplayName).setLastUsedTime(lastUsedTime).build()
+            return Entry(key, subkey, passkeyEntry.slice, Intent())
         }
     }
 }
@@ -326,7 +178,7 @@ class CreateTestUtils {
             val pendingIntent = PendingIntent.getActivity(
                 context, 1,
                 intent, (PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                    or PendingIntent.FLAG_ONE_SHOT)
+                or PendingIntent.FLAG_ONE_SHOT)
             )
             val credCountMap = mutableMapOf<String, Int>()
             passwordCount?.let { credCountMap.put(TYPE_PASSWORD_CREDENTIAL, it) }

@@ -635,7 +635,8 @@ public class DisplayRotation {
 
         if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
             if (!mDisplayContent.mTransitionController.isCollecting()) {
-                throw new IllegalStateException("Trying to rotate outside a transition");
+                // The remote may be too slow to response before transition timeout.
+                Slog.e(TAG, "Trying to continue rotation outside a transition");
             }
             mDisplayContent.mTransitionController.collect(mDisplayContent);
         }

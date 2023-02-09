@@ -273,7 +273,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                         performReceiveLocked(oldRecord.resultToApp, oldRecord.resultTo,
                                 oldRecord.intent,
                                 Activity.RESULT_CANCELED, null, null,
-                                false, false, r.shareIdentity, oldRecord.userId,
+                                false, false, oldRecord.shareIdentity, oldRecord.userId,
                                 oldRecord.callingUid, r.callingUid, r.callerPackage,
                                 SystemClock.uptimeMillis() - oldRecord.enqueueTime, 0);
                     } catch (RemoteException e) {

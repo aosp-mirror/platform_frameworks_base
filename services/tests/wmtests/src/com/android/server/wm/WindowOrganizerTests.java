@@ -871,6 +871,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         lastReportedTiles.clear();
         called[0] = false;
         task1.positionChildAt(POSITION_TOP, rootTask, false /* includingParents */);
+        mAtm.mTaskOrganizerController.dispatchPendingEvents();
         assertTrue(called[0]);
         assertEquals(ACTIVITY_TYPE_STANDARD, lastReportedTiles.get(0).topActivityType);
 
@@ -1124,11 +1125,11 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord record = createActivityRecord(rootTask.mDisplayContent, task);
+        final ActivityRecord record = createActivityRecordAndDispatchPendingEvents(task);
 
         rootTask.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         record.setTaskDescription(new ActivityManager.TaskDescription("TestDescription"));
-        waitUntilHandlersIdle();
+        mAtm.mTaskOrganizerController.dispatchPendingEvents();
         assertEquals("TestDescription", o.mChangedInfo.taskDescription.getLabel());
     }
 
@@ -1288,6 +1289,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testAppearDeferThenInfoChange() {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
+        // Flush EVENT_APPEARED.
+        mAtm.mTaskOrganizerController.dispatchPendingEvents();
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1310,6 +1313,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
     public void testAppearDeferThenVanish() {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
+        // Flush EVENT_APPEARED.
+        mAtm.mTaskOrganizerController.dispatchPendingEvents();
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1328,7 +1333,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord record = createActivityRecord(rootTask.mDisplayContent, task);
+        final ActivityRecord record = createActivityRecordAndDispatchPendingEvents(task);
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1358,7 +1363,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord record = createActivityRecord(rootTask.mDisplayContent, task);
+        final ActivityRecord record = createActivityRecordAndDispatchPendingEvents(task);
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1381,7 +1386,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord record = createActivityRecord(rootTask.mDisplayContent, task);
+        createActivityRecordAndDispatchPendingEvents(task);
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1400,7 +1405,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord record = createActivityRecord(rootTask.mDisplayContent, task);
+        final ActivityRecord record = createActivityRecordAndDispatchPendingEvents(task);
 
         // Assume layout defer
         mWm.mWindowPlacerLocked.deferLayout();
@@ -1465,13 +1470,12 @@ public class WindowOrganizerTests extends WindowTestsBase {
         final ITaskOrganizer organizer = registerMockOrganizer();
         final Task rootTask = createRootTask();
         final Task task = createTask(rootTask);
-        final ActivityRecord activity = createActivityRecord(rootTask.mDisplayContent, task);
+        final ActivityRecord activity = createActivityRecordAndDispatchPendingEvents(task);
         final ArgumentCaptor<RunningTaskInfo> infoCaptor =
                 ArgumentCaptor.forClass(RunningTaskInfo.class);
 
         assertTrue(rootTask.isOrganized());
 
-        spyOn(activity);
         doReturn(true).when(activity).inSizeCompatMode();
         doReturn(true).when(activity).isState(RESUMED);
 
@@ -1548,6 +1552,13 @@ public class WindowOrganizerTests extends WindowTestsBase {
         t.setWindowingMode(newToken, WINDOWING_MODE_FULLSCREEN);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         verify(mWm.mAtmService.mRootWindowContainer).resumeFocusedTasksTopActivities();
+    }
+
+    private ActivityRecord createActivityRecordAndDispatchPendingEvents(Task task) {
+        final ActivityRecord record = createActivityRecord(task);
+        // Flush EVENT_APPEARED.
+        mAtm.mTaskOrganizerController.dispatchPendingEvents();
+        return record;
     }
 
     /**

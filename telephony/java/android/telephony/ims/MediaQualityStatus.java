@@ -40,7 +40,7 @@ public final class MediaQualityStatus implements Parcelable {
     private final int mMediaSessionType;
     private final int mTransportType;
     private final int mRtpPacketLossRate;
-    private final int mRtpJitter;
+    private final int mRtpJitterMillis;
     private final long mRtpInactivityTimeMillis;
 
     /** @hide */
@@ -52,23 +52,26 @@ public final class MediaQualityStatus implements Parcelable {
     public @interface MediaSessionType {}
 
     /**
-     * Constructor for this
+     * The constructor for MediaQualityStatus, which represents the media quality for each session
+     * type ({@link #MEDIA_SESSION_TYPE_AUDIO} or {@link #MEDIA_SESSION_TYPE_VIDEO}) of the IMS call
      *
      * @param imsCallSessionId IMS call session id of this quality status
      * @param mediaSessionType media session type of this quality status
      * @param transportType transport type of this quality status
-     * @param rtpPacketLossRate measured RTP packet loss rate
-     * @param rtpJitter measured RTP jitter value
+     * @param rtpPacketLossRate measured RTP packet loss rate in percentage
+     * @param rtpJitterMillis measured RTP jitter(RFC3550) in milliseconds
      * @param rptInactivityTimeMillis measured RTP inactivity time in milliseconds
      */
-    private MediaQualityStatus(@NonNull String imsCallSessionId,
+    public MediaQualityStatus(@NonNull String imsCallSessionId,
             @MediaSessionType int mediaSessionType, @TransportType int transportType,
-            int rtpPacketLossRate, int rtpJitter, long rptInactivityTimeMillis) {
+            @IntRange(from = 0, to = 100) int rtpPacketLossRate,
+            @IntRange(from = 0) int rtpJitterMillis,
+            @IntRange(from = 0) long rptInactivityTimeMillis) {
         mImsCallSessionId = imsCallSessionId;
         mMediaSessionType = mediaSessionType;
         mTransportType = transportType;
         mRtpPacketLossRate = rtpPacketLossRate;
-        mRtpJitter = rtpJitter;
+        mRtpJitterMillis = rtpJitterMillis;
         mRtpInactivityTimeMillis = rptInactivityTimeMillis;
     }
 
@@ -106,13 +109,15 @@ public final class MediaQualityStatus implements Parcelable {
     /**
      * Retrieves measured RTP jitter(RFC3550) value in milliseconds
      */
+    @IntRange(from = 0)
     public int getRtpJitterMillis() {
-        return mRtpJitter;
+        return mRtpJitterMillis;
     }
 
     /**
      * Retrieves measured RTP inactivity time in milliseconds
      */
+    @IntRange(from = 0)
     public long getRtpInactivityMillis() {
         return mRtpInactivityTimeMillis;
     }
@@ -126,7 +131,7 @@ public final class MediaQualityStatus implements Parcelable {
         mMediaSessionType = in.readInt();
         mTransportType = in.readInt();
         mRtpPacketLossRate = in.readInt();
-        mRtpJitter = in.readInt();
+        mRtpJitterMillis = in.readInt();
         mRtpInactivityTimeMillis = in.readLong();
     }
 
@@ -136,7 +141,7 @@ public final class MediaQualityStatus implements Parcelable {
         dest.writeInt(mMediaSessionType);
         dest.writeInt(mTransportType);
         dest.writeInt(mRtpPacketLossRate);
-        dest.writeInt(mRtpJitter);
+        dest.writeInt(mRtpJitterMillis);
         dest.writeLong(mRtpInactivityTimeMillis);
     }
 
@@ -167,14 +172,14 @@ public final class MediaQualityStatus implements Parcelable {
                 && mMediaSessionType == that.mMediaSessionType
                 && mTransportType == that.mTransportType
                 && mRtpPacketLossRate == that.mRtpPacketLossRate
-                && mRtpJitter == that.mRtpJitter
+                && mRtpJitterMillis == that.mRtpJitterMillis
                 && mRtpInactivityTimeMillis == that.mRtpInactivityTimeMillis;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mImsCallSessionId, mMediaSessionType, mTransportType,
-                mRtpPacketLossRate, mRtpJitter, mRtpInactivityTimeMillis);
+                mRtpPacketLossRate, mRtpJitterMillis, mRtpInactivityTimeMillis);
     }
 
     @Override
@@ -188,100 +193,11 @@ public final class MediaQualityStatus implements Parcelable {
         sb.append(mTransportType);
         sb.append(", mRtpPacketLossRate=");
         sb.append(mRtpPacketLossRate);
-        sb.append(", mRtpJitter=");
-        sb.append(mRtpJitter);
+        sb.append(", mRtpJitterMillis=");
+        sb.append(mRtpJitterMillis);
         sb.append(", mRtpInactivityTimeMillis=");
         sb.append(mRtpInactivityTimeMillis);
         sb.append("}");
         return sb.toString();
-    }
-
-    /**
-     * Provides a convenient way to set the fields of an {@link MediaQualityStatus} when creating a
-     * new instance.
-     *
-     * <p>The example below shows how you might create a new {@code RtpQualityStatus}:
-     *
-     * <pre><code>
-     *
-     * MediaQualityStatus = new MediaQualityStatus.Builder(
-     *                                          callSessionId, mediaSessionType, transportType)
-     *     .setRtpPacketLossRate(packetLossRate)
-     *     .setRtpJitter(jitter)
-     *     .setRtpInactivityMillis(inactivityTimeMillis)
-     *     .build();
-     * </code></pre>
-     */
-    public static final class Builder {
-        private final String mImsCallSessionId;
-        private final int mMediaSessionType;
-        private final int mTransportType;
-        private int mRtpPacketLossRate;
-        private int mRtpJitter;
-        private long mRtpInactivityTimeMillis;
-
-        /**
-         * Default constructor for the Builder.
-         */
-        public Builder(
-                @NonNull String imsCallSessionId,
-                @MediaSessionType int mediaSessionType,
-                @TransportType int transportType) {
-            mImsCallSessionId = imsCallSessionId;
-            mMediaSessionType = mediaSessionType;
-            mTransportType = transportType;
-        }
-
-        /**
-         * Set RTP packet loss info.
-         *
-         * @param packetLossRate RTP packet loss rate in percentage
-         * @return The same instance of the builder.
-         */
-        @NonNull
-        public Builder setRtpPacketLossRate(@IntRange(from = 0, to = 100) int packetLossRate) {
-            this.mRtpPacketLossRate = packetLossRate;
-            return this;
-        }
-
-        /**
-         * Set calculated RTP jitter(RFC3550) value in milliseconds.
-         *
-         * @param jitter calculated RTP jitter value.
-         * @return The same instance of the builder.
-         */
-        @NonNull
-        public Builder setRtpJitterMillis(int jitter) {
-            this.mRtpJitter = jitter;
-            return this;
-        }
-
-        /**
-         * Set measured RTP inactivity time.
-         *
-         * @param inactivityTimeMillis RTP inactivity time in Milliseconds.
-         * @return The same instance of the builder.
-         */
-        @NonNull
-        public Builder setRtpInactivityMillis(long inactivityTimeMillis) {
-            this.mRtpInactivityTimeMillis = inactivityTimeMillis;
-            return this;
-        }
-
-        /**
-         * Build the {@link MediaQualityStatus}
-         *
-         * @return the {@link MediaQualityStatus} object
-         */
-        @NonNull
-        public MediaQualityStatus build() {
-            return new MediaQualityStatus(
-                    mImsCallSessionId,
-                    mMediaSessionType,
-                    mTransportType,
-                    mRtpPacketLossRate,
-                    mRtpJitter,
-                    mRtpInactivityTimeMillis);
-        }
     }
 }

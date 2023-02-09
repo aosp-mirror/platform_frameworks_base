@@ -3919,6 +3919,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    boolean isFinishing() {
+        return finishing;
+    }
+
     /**
      * This method is to only be called from the client via binder when the activity is destroyed
      * AND finished.

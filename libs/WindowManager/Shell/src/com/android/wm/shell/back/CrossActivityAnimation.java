@@ -370,13 +370,7 @@ class CrossActivityAnimation {
 
         @Override
         public void onBackCancelled() {
-            // End the fade in animation.
             mProgressAnimator.onBackCancelled(CrossActivityAnimation.this::finishAnimation);
-            mEnteringProgressSpring.cancel();
-            mLeavingProgressSpring.cancel();
-            // TODO (b259608500): Let BackProgressAnimator could play cancel animation.
-            mProgressAnimator.reset();
-            finishAnimation();
         }
 
         @Override

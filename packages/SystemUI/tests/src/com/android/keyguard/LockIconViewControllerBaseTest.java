@@ -159,7 +159,9 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
                 mAuthRippleController,
                 mResources,
                 new KeyguardTransitionInteractor(mTransitionRepository),
-                new KeyguardInteractor(new FakeKeyguardRepository(), mCommandQueue),
+                new KeyguardInteractor(new FakeKeyguardRepository(),
+                        mCommandQueue,
+                        mFeatureFlags),
                 mFeatureFlags
         );
     }

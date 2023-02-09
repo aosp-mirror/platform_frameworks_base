@@ -677,6 +677,19 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         getFullScreenMagnificationController().setMagnificationFollowTypingEnabled(enabled);
     }
 
+    /**
+     * Called when the always on magnification feature is switched.
+     *
+     * @param enabled Enable the always on magnification feature
+     */
+    public void setAlwaysOnMagnificationEnabled(boolean enabled) {
+        getFullScreenMagnificationController().setAlwaysOnMagnificationEnabled(enabled);
+    }
+
+    public boolean isAlwaysOnMagnificationFeatureFlagEnabled() {
+        return AlwaysOnMagnificationFeatureFlag.isAlwaysOnMagnificationEnabled();
+    }
+
     private DisableMagnificationCallback getDisableMagnificationEndRunnableLocked(
             int displayId) {
         return mMagnificationEndRunnableSparseArray.get(displayId);

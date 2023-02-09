@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoMobileConnectionsRepository
@@ -81,6 +82,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var summaryLogger: TableLogBuffer
     @Mock private lateinit var demoModeController: DemoModeController
     @Mock private lateinit var dumpManager: DumpManager
 
@@ -114,6 +116,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 subscriptionManager,
                 telephonyManager,
                 logger,
+                summaryLogger,
                 mobileMappings,
                 fakeBroadcastDispatcher,
                 context,

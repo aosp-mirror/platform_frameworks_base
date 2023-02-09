@@ -17,6 +17,7 @@
 package com.android.credentialmanager
 
 import android.app.slice.Slice
+import android.app.slice.SliceItem
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
@@ -176,7 +177,9 @@ class GetFlowUtils {
         }
 
 
-        /* From service data structure to UI credential entry list representation. */
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         private fun getCredentialOptionInfoList(
             providerId: String,
             credentialEntries: List<Entry>,
@@ -255,6 +258,9 @@ class GetFlowUtils {
             }
         }
 
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         private fun getAuthenticationEntryList(
             providerId: String,
             providerDisplayName: String,
@@ -262,16 +268,24 @@ class GetFlowUtils {
             authEntryList: List<Entry>,
         ): List<AuthenticationEntryInfo> {
             val result: MutableList<AuthenticationEntryInfo> = mutableListOf()
-            authEntryList.forEach {
+            authEntryList.forEach { entry ->
                 val structuredAuthEntry =
-                    AuthenticationAction.fromSlice(it.slice) ?: return@forEach
+                    AuthenticationAction.fromSlice(entry.slice) ?: return@forEach
+
+                // TODO: replace with official jetpack code.
+                val titleItem: SliceItem? = entry.slice.items.firstOrNull {
+                    it.hasHint(
+                        "androidx.credentials.provider.authenticationAction.SLICE_HINT_TITLE")
+                }
+                val title: String = titleItem?.text?.toString() ?: providerDisplayName
+
                 result.add(AuthenticationEntryInfo(
                     providerId = providerId,
-                    entryKey = it.key,
-                    entrySubkey = it.subkey,
+                    entryKey = entry.key,
+                    entrySubkey = entry.subkey,
                     pendingIntent = structuredAuthEntry.pendingIntent,
-                    fillInIntent = it.frameworkExtrasIntent,
-                    title = providerDisplayName,
+                    fillInIntent = entry.frameworkExtrasIntent,
+                    title = title,
                     icon = providerIcon,
                 ))
             }
@@ -279,7 +293,6 @@ class GetFlowUtils {
         }
 
         private fun getRemoteEntry(providerId: String, remoteEntry: Entry?): RemoteEntryInfo? {
-            // TODO: should also call fromSlice after getting the official jetpack code.
             if (remoteEntry == null) {
                 return null
             }
@@ -294,6 +307,9 @@ class GetFlowUtils {
             )
         }
 
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         private fun getActionEntryList(
             providerId: String,
             actionEntries: List<Entry>,
@@ -321,7 +337,9 @@ class GetFlowUtils {
 
 class CreateFlowUtils {
     companion object {
-        // Returns the list (potentially empty) of enabled provider.
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         fun toEnabledProviderList(
             providerDataList: List<CreateCredentialProviderData>,
             context: Context,
@@ -346,7 +364,9 @@ class CreateFlowUtils {
             return providerList
         }
 
-        // Returns the list (potentially empty) of disabled provider.
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         fun toDisabledProviderList(
             providerDataList: List<DisabledProviderData>?,
             context: Context,
@@ -532,6 +552,9 @@ class CreateFlowUtils {
             } else null
         }
 
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         private fun toCreationOptionInfoList(
             providerId: String,
             creationEntries: List<Entry>,

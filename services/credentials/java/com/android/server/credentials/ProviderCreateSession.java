@@ -35,6 +35,7 @@ import android.service.credentials.CreateEntry;
 import android.service.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderService;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -61,6 +62,8 @@ public final class ProviderCreateSession extends ProviderSession<
     private final CreateCredentialRequest mCompleteRequest;
 
     private CreateCredentialException mProviderException;
+
+    @Nullable protected Pair<String, CreateEntry> mUiRemoteEntry;
 
     /** Creates a new provider session to be used by the request session. */
     @Nullable public static ProviderCreateSession createNewSession(
@@ -185,10 +188,20 @@ public final class ProviderCreateSession extends ProviderSession<
             Log.i(TAG, "In prepareUiData save entries not null");
             return prepareUiProviderData(
                     prepareUiSaveEntries(response.getCreateEntries()),
-                    null,
-                    /*isDefaultProvider=*/false);
+                    prepareUiRemoteEntry(response.getRemoteCreateEntry()));
         }
         return null;
+    }
+
+    private Entry prepareUiRemoteEntry(CreateEntry remoteCreateEntry) {
+        if (remoteCreateEntry == null) {
+            return null;
+        }
+        String entryId = generateUniqueId();
+        Entry remoteEntry = new Entry(REMOTE_ENTRY_KEY, entryId, remoteCreateEntry.getSlice(),
+                setUpFillInIntent());
+        mUiRemoteEntry = new Pair<>(entryId, remoteCreateEntry);
+        return remoteEntry;
     }
 
     @Override
@@ -229,7 +242,7 @@ public final class ProviderCreateSession extends ProviderSession<
 
         // Populate the save entries
         for (CreateEntry createEntry : saveEntries) {
-            String entryId = generateEntryId();
+            String entryId = generateUniqueId();
             mUiSaveEntries.put(entryId, createEntry);
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
             uiSaveEntries.add(new Entry(SAVE_ENTRY_KEY, entryId, createEntry.getSlice(),
@@ -246,10 +259,11 @@ public final class ProviderCreateSession extends ProviderSession<
     }
 
     private CreateCredentialProviderData prepareUiProviderData(List<Entry> saveEntries,
-            Entry remoteEntry, boolean isDefaultProvider) {
+            Entry remoteEntry) {
         return new CreateCredentialProviderData.Builder(
                 mComponentName.flattenToString())
                 .setSaveEntries(saveEntries)
+                .setRemoteEntry(remoteEntry)
                 .build();
     }
 

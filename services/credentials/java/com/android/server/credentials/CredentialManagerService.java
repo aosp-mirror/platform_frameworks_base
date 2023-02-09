@@ -341,11 +341,12 @@ public final class CredentialManagerService
                 IGetCredentialCallback callback,
                 final String callingPackage) {
             Log.i(TAG, "starting executeGetCredential with callingPackage: " + callingPackage);
-            // TODO : Implement cancellation
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
-            int userId = UserHandle.getCallingUserId();
-            int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getCallingUserId();
+            final int callingUid = Binder.getCallingUid();
+            enforceCallingPackage(callingPackage, callingUid);
+
             // New request session, scoped for this request only.
             final GetRequestSession session =
                     new GetRequestSession(
@@ -446,13 +447,14 @@ public final class CredentialManagerService
                 CreateCredentialRequest request,
                 ICreateCredentialCallback callback,
                 String callingPackage) {
-            Log.i(TAG, "starting executeCreateCredential with callingPackage: " + callingPackage);
-
+            Log.i(TAG, "starting executeCreateCredential with callingPackage: "
+                    + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+            final int userId = UserHandle.getCallingUserId();
+            final int callingUid = Binder.getCallingUid();
+            enforceCallingPackage(callingPackage, callingUid);
 
             // New request session, scoped for this request only.
-            int userId = UserHandle.getCallingUserId();
-            int callingUid = Binder.getCallingUid();
             final CreateRequestSession session =
                     new CreateRequestSession(
                             getContext(),
@@ -581,6 +583,8 @@ public final class CredentialManagerService
 
             // TODO(253157366): Check additional set of services.
             final int userId = UserHandle.getCallingUserId();
+            final int callingUid = Binder.getCallingUid();
+            enforceCallingPackage(callingPackage, callingUid);
             synchronized (mLock) {
                 final List<CredentialManagerServiceImpl> services =
                         getServiceListForUserLocked(userId);
@@ -611,12 +615,14 @@ public final class CredentialManagerService
                 IClearCredentialStateCallback callback,
                 String callingPackage) {
             Log.i(TAG, "starting clearCredentialState with callingPackage: " + callingPackage);
+            final int userId = UserHandle.getCallingUserId();
+            int callingUid = Binder.getCallingUid();
+            enforceCallingPackage(callingPackage, callingUid);
+
             // TODO : Implement cancellation
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
             // New request session, scoped for this request only.
-            int userId = UserHandle.getCallingUserId();
-            int callingUid = Binder.getCallingUid();
             final ClearRequestSession session =
                     new ClearRequestSession(
                             getContext(),
@@ -654,6 +660,8 @@ public final class CredentialManagerService
                 RegisterCredentialDescriptionRequest request, String callingPackage)
                 throws IllegalArgumentException, NonCredentialProviderCallerException {
             Log.i(TAG, "registerCredentialDescription");
+
+            enforceCallingPackage(callingPackage, Binder.getCallingUid());
 
             List<CredentialProviderInfo> services =
                     CredentialProviderInfo.getAvailableServices(
@@ -705,7 +713,8 @@ public final class CredentialManagerService
                 UnregisterCredentialDescriptionRequest request, String callingPackage)
                 throws IllegalArgumentException {
             Log.i(TAG, "registerCredentialDescription");
-            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+
+            enforceCallingPackage(callingPackage, Binder.getCallingUid());
 
             List<CredentialProviderInfo> services =
                     CredentialProviderInfo.getAvailableServices(
@@ -726,6 +735,21 @@ public final class CredentialManagerService
                     CredentialDescriptionRegistry.forUser(UserHandle.getCallingUserId());
 
             session.executeUnregisterRequest(request, callingPackage);
+        }
+    }
+
+    private void enforceCallingPackage(String callingPackage, int callingUid) {
+        int packageUid;
+        PackageManager pm = mContext.createContextAsUser(
+                UserHandle.getUserHandleForUid(callingUid), 0).getPackageManager();
+        try {
+            packageUid = pm.getPackageUid(callingPackage,
+                    PackageManager.PackageInfoFlags.of(0));
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new SecurityException(callingPackage + " not found");
+        }
+        if (packageUid != callingUid) {
+            throw new SecurityException(callingPackage + " does not belong to uid " + callingUid);
         }
     }
 }
