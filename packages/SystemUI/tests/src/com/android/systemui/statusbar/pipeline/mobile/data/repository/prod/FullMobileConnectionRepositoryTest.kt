@@ -88,8 +88,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                 )
             )
             .thenReturn(mobileRepo)
-        whenever(carrierMergedFactory.build(eq(SUB_ID), any(), eq(DEFAULT_NAME)))
-            .thenReturn(carrierMergedRepo)
+        whenever(carrierMergedFactory.build(eq(SUB_ID), any())).thenReturn(carrierMergedRepo)
     }
 
     @Test
@@ -127,7 +126,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             assertThat(underTest.activeRepo.value).isEqualTo(mobileRepo)
             assertThat(underTest.connectionInfo.value).isEqualTo(mobileConnectionInfo)
-            verify(carrierMergedFactory, never()).build(SUB_ID, tableLogBuffer, DEFAULT_NAME)
+            verify(carrierMergedFactory, never()).build(SUB_ID, tableLogBuffer)
         }
 
     @Test
@@ -364,9 +363,10 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     fun connectionInfo_logging_notCarrierMerged_getsUpdates() =
         testScope.runTest {
             // SETUP: Use real repositories to verify the diffing still works. (See b/267501739.)
-            val telephonyManager = mock<TelephonyManager>()
+            val telephonyManager =
+                mock<TelephonyManager>().apply { whenever(this.simOperatorName).thenReturn("") }
             createRealMobileRepo(telephonyManager)
-            createRealCarrierMergedRepo(FakeWifiRepository())
+            createRealCarrierMergedRepo(telephonyManager, FakeWifiRepository())
 
             initializeRepo(startingIsCarrierMerged = false)
 
@@ -401,9 +401,11 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     fun connectionInfo_logging_carrierMerged_getsUpdates() =
         testScope.runTest {
             // SETUP: Use real repositories to verify the diffing still works. (See b/267501739.)
-            createRealMobileRepo(mock())
+            val telephonyManager =
+                mock<TelephonyManager>().apply { whenever(this.simOperatorName).thenReturn("") }
+            createRealMobileRepo(telephonyManager)
             val wifiRepository = FakeWifiRepository()
-            createRealCarrierMergedRepo(wifiRepository)
+            createRealCarrierMergedRepo(telephonyManager, wifiRepository)
 
             initializeRepo(startingIsCarrierMerged = true)
 
@@ -441,11 +443,12 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     fun connectionInfo_logging_updatesWhenCarrierMergedUpdates() =
         testScope.runTest {
             // SETUP: Use real repositories to verify the diffing still works. (See b/267501739.)
-            val telephonyManager = mock<TelephonyManager>()
+            val telephonyManager =
+                mock<TelephonyManager>().apply { whenever(this.simOperatorName).thenReturn("") }
             createRealMobileRepo(telephonyManager)
 
             val wifiRepository = FakeWifiRepository()
-            createRealCarrierMergedRepo(wifiRepository)
+            createRealCarrierMergedRepo(telephonyManager, wifiRepository)
 
             initializeRepo(startingIsCarrierMerged = false)
 
@@ -516,11 +519,12 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     fun connectionInfo_logging_doesNotLogUpdatesForNotActiveRepo() =
         testScope.runTest {
             // SETUP: Use real repositories to verify the diffing still works. (See b/267501739.)
-            val telephonyManager = mock<TelephonyManager>()
+            val telephonyManager =
+                mock<TelephonyManager>().apply { whenever(this.simOperatorName).thenReturn("") }
             createRealMobileRepo(telephonyManager)
 
             val wifiRepository = FakeWifiRepository()
-            createRealCarrierMergedRepo(wifiRepository)
+            createRealCarrierMergedRepo(telephonyManager, wifiRepository)
 
             // WHEN isCarrierMerged = false
             initializeRepo(startingIsCarrierMerged = false)
@@ -617,6 +621,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     }
 
     private fun createRealCarrierMergedRepo(
+        telephonyManager: TelephonyManager,
         wifiRepository: FakeWifiRepository,
     ): CarrierMergedConnectionRepository {
         wifiRepository.setIsWifiEnabled(true)
@@ -625,12 +630,11 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             CarrierMergedConnectionRepository(
                 SUB_ID,
                 tableLogBuffer,
-                defaultNetworkName = NetworkNameModel.Default("default"),
+                telephonyManager,
                 testScope.backgroundScope,
                 wifiRepository,
             )
-        whenever(carrierMergedFactory.build(eq(SUB_ID), any(), eq(DEFAULT_NAME)))
-            .thenReturn(realRepo)
+        whenever(carrierMergedFactory.build(eq(SUB_ID), any())).thenReturn(realRepo)
 
         return realRepo
     }

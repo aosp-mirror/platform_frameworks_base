@@ -531,7 +531,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
             )
             yield()
 
-            assertThat(latest).isEqualTo(NetworkNameModel.Derived(testOperatorName))
+            assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived(testOperatorName))
 
             // Default network name, operator name is null, uses the default
             connectionRepository.setConnectionInfo(MobileConnectionModel(operatorAlphaShort = null))
@@ -575,6 +575,6 @@ class MobileIconInteractorTest : SysuiTestCase() {
         private const val SUB_1_ID = 1
 
         private val DEFAULT_NAME = NetworkNameModel.Default("test default name")
-        private val DERIVED_NAME = NetworkNameModel.Derived("test derived name")
+        private val DERIVED_NAME = NetworkNameModel.IntentDerived("test derived name")
     }
 }
