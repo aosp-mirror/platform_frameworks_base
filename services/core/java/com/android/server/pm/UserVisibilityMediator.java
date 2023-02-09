@@ -330,6 +330,12 @@ public final class UserVisibilityMediator implements Dumpable {
                         ? USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE
                         : USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
             }
+        } else if (mUsersAssignedToDisplayOnStart != null
+                && isUserAssignedToDisplayOnStartLocked(userId, displayId)) {
+            if (DBG) {
+                Slogf.d(TAG, "full user %d is already visible on display %d", userId, displayId);
+            }
+            return USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE;
         }
 
         return foreground || displayId != DEFAULT_DISPLAY
@@ -403,7 +409,15 @@ public final class UserVisibilityMediator implements Dumpable {
             return SECONDARY_DISPLAY_MAPPING_NOT_NEEDED;
         }
 
-        // Check if display is available
+        if (mUsersAssignedToDisplayOnStart == null) {
+            // Should never have reached this point
+            Slogf.wtf(TAG, "canAssignUserToDisplayLocked(%d, %d, %d, %d) is trying to check "
+                    + "mUsersAssignedToDisplayOnStart when it's not set",
+                    userId, profileGroupId, userStartMode, displayId);
+            return SECONDARY_DISPLAY_MAPPING_FAILED;
+        }
+
+        // Check if display is available and user is not assigned to any display
         for (int i = 0; i < mUsersAssignedToDisplayOnStart.size(); i++) {
             int assignedUserId = mUsersAssignedToDisplayOnStart.keyAt(i);
             int assignedDisplayId = mUsersAssignedToDisplayOnStart.valueAt(i);
@@ -599,6 +613,23 @@ public final class UserVisibilityMediator implements Dumpable {
             Slogf.d(TAG, "isUserVisible(%d): %b from mapping", userId, visible);
         }
         return visible;
+    }
+
+    @GuardedBy("mLock")
+    private boolean isUserAssignedToDisplayOnStartLocked(@UserIdInt int userId, int displayId) {
+        if (mUsersAssignedToDisplayOnStart == null) {
+            // Shouldn't have been called in this case
+            Slogf.wtf(TAG, "isUserAssignedToDisplayOnStartLocked(%d, %d): called when "
+                    + "mUsersAssignedToDisplayOnStart is null", userId, displayId);
+            return false;
+        }
+        boolean isIt = displayId != INVALID_DISPLAY
+                && mUsersAssignedToDisplayOnStart.get(userId, INVALID_DISPLAY) == displayId;
+        if (VERBOSE) {
+            Slogf.v(TAG, "isUserAssignedToDisplayOnStartLocked(%d, %d): %b", userId, displayId,
+                    isIt);
+        }
+        return isIt;
     }
 
     /**
