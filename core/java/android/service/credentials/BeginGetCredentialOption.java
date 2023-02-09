@@ -63,8 +63,6 @@ public class BeginGetCredentialOption implements Parcelable {
      * Returns the unique id associated with this request. Providers must pass this id
      * to the constructor of {@link CredentialEntry} while creating a candidate credential
      * entry for this request option.
-     *
-     * @hide
      */
     @NonNull
     public String getId() {
