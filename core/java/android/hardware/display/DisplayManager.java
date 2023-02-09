@@ -1758,10 +1758,12 @@ public final class DisplayManager {
         /**
          * Key for the brightness throttling data as a String formatted:
          * <displayId>,<no of throttling levels>,[<severity as string>,<brightness cap>]
-         * Where the latter part is repeated for each throttling level, and the entirety is repeated
-         * for each display, separated by a semicolon.
+         * [,<throttlingId>]?
+         * Where [<severity as string>,<brightness cap>] is repeated for each throttling level.
+         * The entirety is repeated for each display and throttling id, separated by a semicolon.
          * For example:
          * 123,1,critical,0.8;456,2,moderate,0.9,critical,0.7
+         * 123,1,critical,0.8,default;123,1,moderate,0.6,id_2;456,2,moderate,0.9,critical,0.7
          */
         String KEY_BRIGHTNESS_THROTTLING_DATA = "brightness_throttling_data";
     }
