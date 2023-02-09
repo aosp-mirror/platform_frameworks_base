@@ -225,7 +225,6 @@ public final class DeviceInfo implements Parcelable {
      *
      * @return Returns the battery charge percentage in the range 0 to 100.
      */
-    @NonNull
     @IntRange(from = 0, to = 100)
     public int getBatteryPercentage() {
         return mBatteryPercentage;
@@ -236,7 +235,6 @@ public final class DeviceInfo implements Parcelable {
      *
      * @return Returns the connection strength in range 0 to 3.
      */
-    @NonNull
     @IntRange(from = 0, to = 3)
     public int getConnectionStrength() {
         return mConnectionStrength;
