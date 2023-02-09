@@ -2023,6 +2023,8 @@ class PermissionService(
      */
     private inner class OnPermissionFlagsChangedListener :
         UidPermissionPolicy.OnPermissionFlagsChangedListener() {
+        private var isPermissionFlagsChanged = false
+
         private val runtimePermissionChangedUids = IntSet()
         // Mapping from UID to whether only notifications permissions are revoked.
         private val runtimePermissionRevokedUids = IntBooleanMap()
@@ -2046,6 +2048,8 @@ class PermissionService(
             oldFlags: Int,
             newFlags: Int
         ) {
+            isPermissionFlagsChanged = true
+
             val uid = UserHandle.getUid(userId, appId)
             val permission = service.getState {
                 with(policy) { getPermissions()[permissionName] }
@@ -2072,6 +2076,11 @@ class PermissionService(
         }
 
         override fun onStateMutated() {
+            if (isPermissionFlagsChanged) {
+                PackageManager.invalidatePackageInfoCache()
+                isPermissionFlagsChanged = false
+            }
+
             runtimePermissionChangedUids.forEachIndexed { _, uid ->
                 onPermissionsChangeListeners.onPermissionsChanged(uid)
             }
