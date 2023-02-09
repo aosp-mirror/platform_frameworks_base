@@ -65,7 +65,13 @@ final class PolicyState<V> {
      * Returns {@code true} if the resolved policy has changed, {@code false} otherwise.
      */
     boolean addPolicy(@NonNull EnforcingAdmin admin, @NonNull PolicyValue<V> policy) {
-        mPoliciesSetByAdmins.put(Objects.requireNonNull(admin), Objects.requireNonNull(policy));
+        Objects.requireNonNull(admin);
+        Objects.requireNonNull(policy);
+
+        //LinkedHashMap doesn't update the insertion order of existing keys, removing the existing
+        // key will cause it to update.
+        mPoliciesSetByAdmins.remove(admin);
+        mPoliciesSetByAdmins.put(admin, policy);
 
         return resolvePolicy();
     }
@@ -131,6 +137,10 @@ final class PolicyState<V> {
      * Returns {@code true} if the resolved policy has changed, {@code false} otherwise.
      */
     boolean resolvePolicy(LinkedHashMap<EnforcingAdmin, PolicyValue<V>> globalPoliciesSetByAdmins) {
+        //Non coexistable policies don't need resolving
+        if (mPolicyDefinition.isNonCoexistablePolicy()) {
+            return false;
+        }
         // Add global policies first then override with local policies for the same admin.
         LinkedHashMap<EnforcingAdmin, PolicyValue<V>> mergedPolicies =
                 new LinkedHashMap<>(globalPoliciesSetByAdmins);
@@ -149,6 +159,10 @@ final class PolicyState<V> {
     }
 
     private boolean resolvePolicy() {
+        //Non coexistable policies don't need resolving
+        if (mPolicyDefinition.isNonCoexistablePolicy()) {
+            return false;
+        }
         PolicyValue<V> resolvedPolicy = mPolicyDefinition.resolvePolicy(mPoliciesSetByAdmins);
         boolean policyChanged = !Objects.equals(resolvedPolicy, mCurrentResolvedPolicy);
         mCurrentResolvedPolicy = resolvedPolicy;
