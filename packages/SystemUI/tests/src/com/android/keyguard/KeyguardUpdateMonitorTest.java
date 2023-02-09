@@ -27,6 +27,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.keyguard.FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED;
+import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_STATE_CANCELLING_RESTARTING;
 import static com.android.keyguard.KeyguardUpdateMonitor.DEFAULT_CANCEL_SIGNAL_TIMEOUT;
 import static com.android.keyguard.KeyguardUpdateMonitor.HAL_POWER_PRESS_TIMEOUT;
@@ -240,7 +241,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private FingerprintInteractiveToAuthProvider mInteractiveToAuthProvider;
 
-
+    private List<FingerprintSensorPropertiesInternal> mFingerprintSensorProperties;
     private final int mCurrentUserId = 100;
     private final UserInfo mCurrentUserInfo = new UserInfo(mCurrentUserId, "Test user", 0);
 
@@ -280,9 +281,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceSensorProperties.get(anyInt())).thenReturn(
                 createFaceSensorProperties(/* supportsFaceDetection = */ false));
 
-        when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
-        when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
-        when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(List.of(
+        mFingerprintSensorProperties = List.of(
                 new FingerprintSensorPropertiesInternal(1 /* sensorId */,
                         FingerprintSensorProperties.STRENGTH_STRONG,
                         1 /* maxEnrollmentsPerUser */,
@@ -291,7 +290,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                                 "1.01" /* firmwareVersion */,
                                 "00000001" /* serialNumber */, "" /* softwareVersion */)),
                         FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
-                        false /* resetLockoutRequiresHAT */)));
+                        false /* resetLockoutRequiresHAT */));
+        when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
+        when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
+        when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(
+                mFingerprintSensorProperties);
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
         when(mUserManager.isPrimaryUser()).thenReturn(true);
         when(mStrongAuthTracker.getStub()).thenReturn(mock(IStrongAuthTracker.Stub.class));
@@ -770,12 +773,43 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void nofaceDetect_whenStrongAuthRequiredAndBypassUdfpsSupportedAndFpRunning() {
+        // GIVEN mocked keyguardUpdateMonitorCallback
+        KeyguardUpdateMonitorCallback keyguardUpdateMonitorCallback =
+                mock(KeyguardUpdateMonitorCallback.class);
+        mKeyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback);
+
+        // GIVEN bypass is enabled, face detection is supported
+        lockscreenBypassIsAllowed();
+        supportsFaceDetection();
+        keyguardIsVisible();
+
+        // GIVEN udfps is supported and strong auth required for weak biometrics (face) only
+        givenUdfpsSupported();
+        strongAuthRequiredForWeakBiometricOnly(); // this allows fingerprint to run but not face
+
+        // WHEN the device wakes up
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+
+        // THEN face detect and authenticate are NOT triggered
+        verify(mFaceManager, never()).detectFace(any(), any(), anyInt());
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
+                anyBoolean());
+
+        // THEN biometric help message sent to callback
+        verify(keyguardUpdateMonitorCallback).onBiometricHelp(
+                eq(BIOMETRIC_HELP_FACE_NOT_AVAILABLE), anyString(), eq(BiometricSourceType.FACE));
+    }
+
+    @Test
     public void faceDetect_whenStrongAuthRequiredAndBypass() {
         // GIVEN bypass is enabled, face detection is supported and strong auth is required
         lockscreenBypassIsAllowed();
         supportsFaceDetection();
         strongAuthRequiredEncrypted();
         keyguardIsVisible();
+        // fingerprint is NOT running, UDFPS is NOT supported
 
         // WHEN the device wakes up
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
@@ -2466,6 +2500,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
     }
 
+    private void strongAuthRequiredForWeakBiometricOnly() {
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(eq(true))).thenReturn(true);
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(eq(false))).thenReturn(false);
+    }
+
     private void strongAuthNotRequired() {
         when(mStrongAuthTracker.getStrongAuthForUser(KeyguardUpdateMonitor.getCurrentUser()))
                 .thenReturn(0);
@@ -2518,6 +2557,12 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private void setKeyguardBouncerVisibility(boolean isVisible) {
         mKeyguardUpdateMonitor.sendPrimaryBouncerChanged(isVisible, isVisible);
         mTestableLooper.processAllMessages();
+    }
+
+    private void givenUdfpsSupported() {
+        Assert.assertFalse(mFingerprintSensorProperties.isEmpty());
+        when(mAuthController.getUdfpsProps()).thenReturn(mFingerprintSensorProperties);
+        Assert.assertTrue(mKeyguardUpdateMonitor.isUdfpsSupported());
     }
 
     private void setBroadcastReceiverPendingResult(BroadcastReceiver receiver) {
