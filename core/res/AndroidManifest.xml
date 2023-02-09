@@ -4036,14 +4036,19 @@
 
     <!-- Allows a system application to be registered with credential manager without
          having to be enabled by the user.
-         @hide -->
-    <permission android:name="android.permission.SYSTEM_CREDENTIAL_PROVIDER"
+         @hide @SystemApi -->
+    <permission android:name="android.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- Allows a browser to invoke credential manager APIs on behalf of another RP.
+        <p>Protection level: normal -->
+    <permission android:name="android.permission.CREDENTIAL_MANAGER_SET_ORIGIN"
+        android:protectionLevel="normal" />
 
     <!-- Allows an application to be able to store and retrieve credentials from a remote
          device.
-         @hide -->
-    <permission android:name="android.permission.HYBRID_CREDENTIAL_PROVIDER"
+         @hide @SystemApi -->
+    <permission android:name="android.permission.PROVIDE_HYBRID_CREDENTIAL_SERVICE"
                 android:protectionLevel="signature|privileged" />
 
     <!-- ========================================= -->

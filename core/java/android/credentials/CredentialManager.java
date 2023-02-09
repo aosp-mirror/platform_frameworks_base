@@ -16,6 +16,8 @@
 
 package android.credentials;
 
+import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
+
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.CallbackExecutor;
@@ -124,6 +126,57 @@ public final class CredentialManager {
     }
 
     /**
+     * Launches the necessary flows to retrieve an app credential from the user, for the given
+     * origin.
+     *
+     * <p>The execution can potentially launch UI flows to collect user consent to using a
+     * credential, display a picker when multiple credentials exist, etc.
+     *
+     * @param request the request specifying type(s) of credentials to get from the user
+     * @param origin the origin of the calling app. Callers of this special API (e.g. browsers)
+     * can set this origin for an app different from their own, to be able to get credentials
+     * on behalf of that app.
+     * @param activity the activity used to launch any UI needed
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
+     */
+    @RequiresPermission(CREDENTIAL_MANAGER_SET_ORIGIN)
+    public void getCredentialWithOrigin(
+            @NonNull GetCredentialRequest request,
+            @Nullable String origin,
+            @NonNull Activity activity,
+            @Nullable CancellationSignal cancellationSignal,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<GetCredentialResponse, GetCredentialException> callback) {
+        requireNonNull(request, "request must not be null");
+        requireNonNull(activity, "activity must not be null");
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            Log.w(TAG, "getCredential already canceled");
+            return;
+        }
+
+        ICancellationSignal cancelRemote = null;
+        try {
+            cancelRemote =
+                mService.executeGetCredentialWithOrigin(
+                    request,
+                    new GetCredentialTransport(activity, executor, callback),
+                    mContext.getOpPackageName(),
+                    origin);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null && cancelRemote != null) {
+            cancellationSignal.setRemote(cancelRemote);
+        }
+    }
+
+    /**
      * Launches the necessary flows to register an app credential for the user.
      *
      * <p>The execution can potentially launch UI flows to collect user consent to creating or
@@ -159,6 +212,58 @@ public final class CredentialManager {
                             request,
                             new CreateCredentialTransport(activity, executor, callback),
                             mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        if (cancellationSignal != null && cancelRemote != null) {
+            cancellationSignal.setRemote(cancelRemote);
+        }
+    }
+
+    /**
+     * Launches the necessary flows to register an app credential for the user.
+     *
+     * <p>The execution can potentially launch UI flows to collect user consent to creating or
+     * storing the new credential, etc.
+     *
+     * @param request the request specifying type(s) of credentials to get from the user, for the
+     * given origin
+     * @param origin the origin of the calling app. Callers of this special API (e.g. browsers)
+     * can set this origin for an app different from their own, to be able to get credentials
+     * on behalf of that app.
+     * @param activity the activity used to launch any UI needed
+     * @param cancellationSignal an optional signal that allows for cancelling this call
+     * @param executor the callback will take place on this {@link Executor}
+     * @param callback the callback invoked when the request succeeds or fails
+     */
+    @RequiresPermission(CREDENTIAL_MANAGER_SET_ORIGIN)
+    public void createCredentialWithOrigin(
+            @NonNull CreateCredentialRequest request,
+            @Nullable String origin,
+            @NonNull Activity activity,
+            @Nullable CancellationSignal cancellationSignal,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull
+            OutcomeReceiver<CreateCredentialResponse, CreateCredentialException> callback) {
+        requireNonNull(request, "request must not be null");
+        requireNonNull(activity, "activity must not be null");
+        requireNonNull(executor, "executor must not be null");
+        requireNonNull(callback, "callback must not be null");
+
+        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
+            Log.w(TAG, "createCredential already canceled");
+            return;
+        }
+
+        ICancellationSignal cancelRemote = null;
+        try {
+            cancelRemote =
+                mService.executeCreateCredentialWithOrigin(
+                    request,
+                    new CreateCredentialTransport(activity, executor, callback),
+                    mContext.getOpPackageName(),
+                    origin);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

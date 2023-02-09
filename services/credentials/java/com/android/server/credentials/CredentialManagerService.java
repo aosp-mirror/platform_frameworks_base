@@ -16,10 +16,12 @@
 
 package com.android.server.credentials;
 
+import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
 import static android.content.Context.CREDENTIAL_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -316,22 +318,26 @@ public final class CredentialManagerService
         CredentialDescriptionRegistry.clearUserSession(user.getUserIdentifier());
     }
 
-    private CallingAppInfo constructCallingAppInfo(String packageName, int userId) {
+    private CallingAppInfo constructCallingAppInfo(
+            String realPackageName,
+            int userId,
+            @Nullable String origin) {
         final PackageInfo packageInfo;
+        String actualPackageName = origin == null ? realPackageName : origin;
         try {
             packageInfo =
-                    getContext()
-                            .getPackageManager()
-                            .getPackageInfoAsUser(
-                                    packageName,
-                                    PackageManager.PackageInfoFlags.of(
-                                            PackageManager.GET_SIGNING_CERTIFICATES),
-                                    userId);
+                getContext()
+                    .getPackageManager()
+                    .getPackageInfoAsUser(
+                        actualPackageName,
+                        PackageManager.PackageInfoFlags.of(
+                            PackageManager.GET_SIGNING_CERTIFICATES),
+                        userId);
         } catch (PackageManager.NameNotFoundException e) {
             Log.i(TAG, "Issue while retrieving signatureInfo : " + e.getMessage());
-            return new CallingAppInfo(packageName, null);
+            return new CallingAppInfo(actualPackageName, null);
         }
-        return new CallingAppInfo(packageName, packageInfo.signingInfo);
+        return new CallingAppInfo(actualPackageName, packageInfo.signingInfo);
     }
 
     final class CredentialManagerServiceStub extends ICredentialManager.Stub {
@@ -355,59 +361,97 @@ public final class CredentialManagerService
                             callingUid,
                             callback,
                             request,
-                            constructCallingAppInfo(callingPackage, userId),
+                            constructCallingAppInfo(callingPackage, userId, null),
                             CancellationSignal.fromTransport(cancelTransport));
 
+            processGetCredential(request, callback, session);
+            return cancelTransport;
+        }
+
+        public ICancellationSignal executeGetCredentialWithOrigin(
+                GetCredentialRequest request,
+                IGetCredentialCallback callback,
+                final String callingPackage,
+                final String origin) {
+            Log.i(TAG, "starting executeGetCredential with callingPackage: " + callingPackage);
+            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+
+            // Check privileged permissions
+            mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ORIGIN, null);
+
+            final int userId = UserHandle.getCallingUserId();
+            final int callingUid = Binder.getCallingUid();
+            enforceCallingPackage(callingPackage, callingUid);
+
+            // New request session, scoped for this request only.
+            final GetRequestSession session =
+                    new GetRequestSession(
+                        getContext(),
+                        userId,
+                        callingUid,
+                        callback,
+                        request,
+                        constructCallingAppInfo(callingPackage, userId, origin),
+                        CancellationSignal.fromTransport(cancelTransport));
+
+            processGetCredential(request, callback, session);
+            return cancelTransport;
+        }
+
+        private void processGetCredential(
+                GetCredentialRequest request,
+                IGetCredentialCallback callback,
+                GetRequestSession session) {
             List<ProviderSession> providerSessions;
 
             // TODO(b/268143699): temporarily disable the flag due to bug.
             if (false) {
                 List<CredentialOption> optionsThatRequireActiveCredentials =
                         request.getCredentialOptions().stream()
-                                .filter(
-                                        getCredentialOption ->
-                                                !TextUtils.isEmpty(
-                                                        getCredentialOption
-                                                                .getCredentialRetrievalData()
-                                                                .getString(
-                                                                        CredentialOption
-                                                                                .FLATTENED_REQUEST,
-                                                                        null)))
-                                .toList();
+                        .filter(
+                            getCredentialOption ->
+                                !TextUtils.isEmpty(
+                                    getCredentialOption
+                                        .getCredentialRetrievalData()
+                                        .getString(
+                                            CredentialOption
+                                                .FLATTENED_REQUEST,
+                                            null)))
+                        .toList();
 
                 List<CredentialOption> optionsThatDoNotRequireActiveCredentials =
                         request.getCredentialOptions().stream()
-                                .filter(
-                                        getCredentialOption ->
-                                                TextUtils.isEmpty(
-                                                        getCredentialOption
-                                                                .getCredentialRetrievalData()
-                                                                .getString(
-                                                                        CredentialOption
-                                                                                .FLATTENED_REQUEST,
-                                                                        null)))
-                                .toList();
+                        .filter(
+                            getCredentialOption ->
+                                TextUtils.isEmpty(
+                                    getCredentialOption
+                                        .getCredentialRetrievalData()
+                                        .getString(
+                                            CredentialOption
+                                                .FLATTENED_REQUEST,
+                                            null)))
+                        .toList();
 
                 List<ProviderSession> sessionsWithoutRemoteService =
                         initiateProviderSessionsWithActiveContainers(
-                                session,
-                                optionsThatRequireActiveCredentials.stream()
-                                        .map(
-                                                getCredentialOption ->
-                                                        getCredentialOption
-                                                                .getCredentialRetrievalData()
-                                                                .getString(
-                                                                        CredentialOption
-                                                                                .FLATTENED_REQUEST))
-                                        .collect(Collectors.toList()),
-                                getFilteredResultFromRegistry(optionsThatRequireActiveCredentials));
+                        session,
+                        optionsThatRequireActiveCredentials.stream()
+                            .map(
+                                getCredentialOption ->
+                                    getCredentialOption
+                                        .getCredentialRetrievalData()
+                                        .getString(
+                                            CredentialOption
+                                                .FLATTENED_REQUEST))
+                            .collect(Collectors.toList()),
+                        getFilteredResultFromRegistry(optionsThatRequireActiveCredentials));
 
                 List<ProviderSession> sessionsWithRemoteService =
                         initiateProviderSessions(
-                                session,
-                                optionsThatDoNotRequireActiveCredentials.stream()
-                                        .map(CredentialOption::getType)
-                                        .collect(Collectors.toList()));
+                        session,
+                        optionsThatDoNotRequireActiveCredentials.stream()
+                            .map(CredentialOption::getType)
+                            .collect(Collectors.toList()));
 
                 Set<ProviderSession> all = new LinkedHashSet<>();
                 all.addAll(sessionsWithRemoteService);
@@ -417,11 +461,11 @@ public final class CredentialManagerService
             } else {
                 // Initiate all provider sessions
                 providerSessions =
-                        initiateProviderSessions(
-                                session,
-                                request.getCredentialOptions().stream()
-                                        .map(CredentialOption::getType)
-                                        .collect(Collectors.toList()));
+                    initiateProviderSessions(
+                        session,
+                        request.getCredentialOptions().stream()
+                            .map(CredentialOption::getType)
+                            .collect(Collectors.toList()));
             }
 
             if (providerSessions.isEmpty()) {
@@ -433,13 +477,11 @@ public final class CredentialManagerService
                     Log.i(
                             TAG,
                             "Issue invoking onError on IGetCredentialCallback "
-                                    + "callback: "
-                                    + e.getMessage());
+                                + "callback: "
+                                + e.getMessage());
                 }
             }
             providerSessions.forEach(ProviderSession::invokeSession);
-
-            return cancelTransport;
         }
 
         @Override
@@ -462,9 +504,47 @@ public final class CredentialManagerService
                             callingUid,
                             request,
                             callback,
-                            constructCallingAppInfo(callingPackage, userId),
+                            constructCallingAppInfo(callingPackage, userId, null),
                             CancellationSignal.fromTransport(cancelTransport));
 
+            processCreateCredential(request, callback, session);
+            return cancelTransport;
+        }
+
+        public ICancellationSignal executeCreateCredentialWithOrigin(
+                CreateCredentialRequest request,
+                ICreateCredentialCallback callback,
+                String callingPackage,
+                String origin) {
+            Log.i(TAG, "starting executeCreateCredential with callingPackage: " + callingPackage);
+            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+
+            // Check privileged permissions
+            mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ORIGIN, null);
+
+            final int userId = UserHandle.getCallingUserId();
+            final int callingUid = Binder.getCallingUid();
+            enforceCallingPackage(callingPackage, callingUid);
+
+            // New request session, scoped for this request only.
+            final CreateRequestSession session =
+                    new CreateRequestSession(
+                        getContext(),
+                        userId,
+                        callingUid,
+                        request,
+                        callback,
+                        constructCallingAppInfo(callingPackage, userId, origin),
+                        CancellationSignal.fromTransport(cancelTransport));
+
+            processCreateCredential(request, callback, session);
+            return cancelTransport;
+        }
+
+        private void processCreateCredential(
+                CreateCredentialRequest request,
+                ICreateCredentialCallback callback,
+                CreateRequestSession session) {
             // Initiate all provider sessions
             List<ProviderSession> providerSessions =
                     initiateProviderSessions(session, List.of(request.getType()));
@@ -478,14 +558,13 @@ public final class CredentialManagerService
                     Log.i(
                             TAG,
                             "Issue invoking onError on ICreateCredentialCallback "
-                                    + "callback: "
-                                    + e.getMessage());
+                                + "callback: "
+                                + e.getMessage());
                 }
             }
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(ProviderSession::invokeSession);
-            return cancelTransport;
         }
 
         @SuppressWarnings("GuardedBy") // ErrorProne requires listEnabledProviders
@@ -630,7 +709,7 @@ public final class CredentialManagerService
                             callingUid,
                             callback,
                             request,
-                            constructCallingAppInfo(callingPackage, userId),
+                            constructCallingAppInfo(callingPackage, userId, null),
                             CancellationSignal.fromTransport(cancelTransport));
 
             // Initiate all provider sessions
