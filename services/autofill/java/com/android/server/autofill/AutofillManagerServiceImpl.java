@@ -162,6 +162,17 @@ final class AutofillManagerServiceImpl
     private long mLastPrune = 0;
 
     /**
+     * Reference to the {@link RemoteFieldClassificationService}, is set on demand.
+     */
+    @GuardedBy("mLock")
+    @Nullable
+    private RemoteFieldClassificationService mRemoteFieldClassificationService;
+
+    @GuardedBy("mLock")
+    @Nullable
+    private ServiceInfo mRemoteFieldClassificationServiceInfo;
+
+    /**
      * Reference to the {@link RemoteAugmentedAutofillService}, is set on demand.
      */
     @GuardedBy("mLock")
@@ -1051,10 +1062,11 @@ final class AutofillManagerServiceImpl
         }
         pw.print(prefix); pw.print("Default component: "); pw.println(getContext()
                 .getString(R.string.config_defaultAutofillService));
+        pw.println();
 
-        pw.print(prefix); pw.println("mAugmentedAutofillNamer: ");
-        pw.print(prefix2); mMaster.mAugmentedAutofillResolver.dumpShort(pw, mUserId); pw.println();
-
+        pw.print(prefix); pw.println("mAugmentedAutofillName: ");
+        pw.print(prefix2); mMaster.mAugmentedAutofillResolver.dumpShort(pw, mUserId);
+        pw.println();
         if (mRemoteAugmentedAutofillService != null) {
             pw.print(prefix); pw.println("RemoteAugmentedAutofillService: ");
             mRemoteAugmentedAutofillService.dump(prefix2, pw);
@@ -1063,6 +1075,27 @@ final class AutofillManagerServiceImpl
             pw.print(prefix); pw.print("RemoteAugmentedAutofillServiceInfo: ");
             pw.println(mRemoteAugmentedAutofillServiceInfo);
         }
+        pw.println();
+
+        pw.print(prefix); pw.println("mFieldClassificationService for system detection");
+        pw.print(prefix2); pw.print("Default component: "); pw.println(getContext()
+                .getString(R.string.config_defaultFieldClassificationService));
+        pw.print(prefix2); mMaster.mFieldClassificationResolver.dumpShort(pw, mUserId);
+        pw.println();
+
+        if (mRemoteFieldClassificationService != null) {
+            pw.print(prefix); pw.println("RemoteFieldClassificationService: ");
+            mRemoteFieldClassificationService.dump(prefix2, pw);
+        } else {
+            pw.print(prefix); pw.println("mRemoteFieldClassificationService: null");
+        }
+        if (mRemoteFieldClassificationServiceInfo != null) {
+            pw.print(prefix); pw.print("RemoteFieldClassificationServiceInfo: ");
+            pw.println(mRemoteFieldClassificationServiceInfo);
+        } else {
+            pw.print(prefix); pw.println("mRemoteFieldClassificationServiceInfo: null");
+        }
+        pw.println();
 
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
@@ -1627,6 +1660,95 @@ final class AutofillManagerServiceImpl
                 session.onSwitchInputMethodLocked();
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    @Nullable RemoteFieldClassificationService getRemoteFieldClassificationServiceLocked() {
+        if (mRemoteFieldClassificationService == null) {
+            final String serviceName = mMaster.mFieldClassificationResolver.getServiceName(mUserId);
+            if (serviceName == null) {
+                if (mMaster.verbose) {
+                    Slog.v(TAG, "getRemoteFieldClassificationServiceLocked(): not set");
+                }
+                return null;
+            }
+            if (sVerbose) {
+                Slog.v(TAG, "getRemoteFieldClassificationServiceLocked serviceName: "
+                        + serviceName);
+            }
+            boolean sTemporaryFieldDetectionService =
+                    mMaster.mFieldClassificationResolver.isTemporary(mUserId);
+            final Pair<ServiceInfo, ComponentName> pair = RemoteFieldClassificationService
+                    .getComponentName(serviceName, mUserId, sTemporaryFieldDetectionService);
+            if (pair == null) {
+                Slog.w(TAG, "RemoteFieldClassificationService.getComponentName returned null "
+                        + "with serviceName: " + serviceName);
+                return null;
+            }
+
+            mRemoteFieldClassificationServiceInfo = pair.first;
+            final ComponentName componentName = pair.second;
+            if (sVerbose) {
+                Slog.v(TAG, "getRemoteFieldClassificationServiceLocked(): " + componentName);
+            }
+            final int serviceUid = mRemoteFieldClassificationServiceInfo.applicationInfo.uid;
+            mRemoteFieldClassificationService = new RemoteFieldClassificationService(getContext(),
+                    componentName, serviceUid, mUserId);
+        }
+
+        return mRemoteFieldClassificationService;
+    }
+
+    @GuardedBy("mLock")
+    @Nullable RemoteFieldClassificationService
+            getRemoteFieldClassificationServiceIfCreatedLocked() {
+        return mRemoteFieldClassificationService;
+    }
+
+    /**
+     * Called when the {@link AutofillManagerService#mAugmentedAutofillResolver}
+     * changed (among other places).
+     */
+    void updateRemoteFieldClassificationService() {
+        synchronized (mLock) {
+            if (mRemoteFieldClassificationService != null) {
+                if (sVerbose) {
+                    Slog.v(TAG, "updateRemoteFieldClassificationService(): "
+                            + "destroying old remote service");
+                }
+                mRemoteFieldClassificationService.unbind();
+
+                mRemoteFieldClassificationService = null;
+                mRemoteFieldClassificationServiceInfo = null;
+            }
+
+            final boolean available = isFieldClassificationServiceAvailableLocked();
+            if (sVerbose) Slog.v(TAG, "updateRemoteFieldClassificationService(): " + available);
+
+            if (available) {
+                mRemoteFieldClassificationService = getRemoteFieldClassificationServiceLocked();
+            }
+        }
+    }
+
+    private boolean isFieldClassificationServiceAvailableLocked() {
+        if (mMaster.verbose) {
+            Slog.v(TAG, "isAugmentedAutofillService(): "
+                    + "setupCompleted=" + isSetupCompletedLocked()
+                    + ", disabled=" + isDisabledByUserRestrictionsLocked()
+                    + ", augmentedService="
+                    + mMaster.mAugmentedAutofillResolver.getServiceName(mUserId));
+        }
+        if (!isSetupCompletedLocked() || isDisabledByUserRestrictionsLocked()
+                || mMaster.mAugmentedAutofillResolver.getServiceName(mUserId) == null) {
+            return false;
+        }
+        return true;
+    }
+
+    boolean isRemoteClassificationServiceForUserLocked(int callingUid) {
+        return mRemoteFieldClassificationServiceInfo != null
+                && mRemoteFieldClassificationServiceInfo.applicationInfo.uid == callingUid;
     }
 
     @Override

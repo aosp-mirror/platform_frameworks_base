@@ -150,6 +150,12 @@ public final class AutofillManagerService
     @NonNull
     final FrameworkResourcesServiceNameResolver mAugmentedAutofillResolver;
 
+    /**
+     * Object used to set the name of the field classification service.
+     */
+    @NonNull
+    final FrameworkResourcesServiceNameResolver mFieldClassificationResolver;
+
     private final AutoFillUI mUi;
 
     private final LocalLog mRequestsHistory = new LocalLog(20);
@@ -244,6 +250,15 @@ public final class AutofillManagerService
                 com.android.internal.R.string.config_defaultAugmentedAutofillService);
         mAugmentedAutofillResolver.setOnTemporaryServiceNameChangedCallback(
                 (u, s, t) -> onAugmentedServiceNameChanged(u, s, t));
+
+        mFieldClassificationResolver = new FrameworkResourcesServiceNameResolver(getContext(),
+                com.android.internal.R.string.config_defaultFieldClassificationService);
+        if (sVerbose) {
+            Slog.v(TAG, "Resolving FieldClassificationService to serviceName: "
+                    + mFieldClassificationResolver.readServiceName(0));
+        }
+        mFieldClassificationResolver.setOnTemporaryServiceNameChangedCallback(
+                (u, s, t) -> onFieldClassificationServiceNameChanged(u, s, t));
 
         if (mSupportedSmartSuggestionModes != AutofillManager.FLAG_SMART_SUGGESTION_OFF) {
             final List<UserInfo> users = getSupportedUsers();
@@ -354,6 +369,20 @@ public final class AutofillManagerService
                 getServiceForUserLocked(userId);
             } else {
                 service.updateRemoteAugmentedAutofillService();
+            }
+        }
+    }
+
+    private void onFieldClassificationServiceNameChanged(
+            @UserIdInt int userId, @Nullable String serviceName, boolean isTemporary) {
+        synchronized (mLock) {
+            final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+            if (service == null) {
+                // If we cannot get the service from the services cache, it will call
+                // updateRemoteAugmentedAutofillService() finally. Skip call this update again.
+                getServiceForUserLocked(userId);
+            } else {
+                service.updateRemoteFieldClassificationService();
             }
         }
     }
