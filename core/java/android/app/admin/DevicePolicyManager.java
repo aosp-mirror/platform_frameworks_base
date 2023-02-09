@@ -3888,6 +3888,14 @@ public class DevicePolicyManager {
     public static final int EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS =  1;
 
     /**
+     * Allows an application to start an activity while running in the background.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION = 2;
+
+    /**
      * Exemptions to platform restrictions, given to an application through
      * {@link #setApplicationExemptions(String, Set)}.
      *
@@ -3895,7 +3903,8 @@ public class DevicePolicyManager {
      */
     @IntDef(prefix = { "EXEMPT_FROM_"}, value = {
             EXEMPT_FROM_APP_STANDBY,
-            EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS
+            EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
+            EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationExemptionConstants {}
