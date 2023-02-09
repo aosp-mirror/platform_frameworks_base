@@ -8489,7 +8489,8 @@ public class DevicePolicyManager {
      * higher, to set whether auto time is required. If auto time is required, no user will be able
      * set the date and time and network date and time will be used.
      * <p>
-     * Note: if auto time is required the user can still manually set the time zone.
+     * Note: If auto time is required the user can still manually set the time zone. Staring from
+     * Android 11, if auto time is required, the user cannot manually set the time zone.
      * <p>
      * The calling device admin must be a device owner, or alternatively a profile owner from
      * Android 8.0 (API level 26) or higher. If it is not, a security exception will be thrown.
