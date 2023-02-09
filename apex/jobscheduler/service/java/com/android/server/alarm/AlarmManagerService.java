@@ -56,6 +56,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
@@ -317,6 +318,8 @@ public class AlarmManagerService extends SystemService {
     private final SparseBooleanArray mPendingSendNextAlarmClockChangedForUser =
             new SparseBooleanArray();
     private boolean mNextAlarmClockMayChange;
+    ActivityOptions mActivityOptsRestrictBal = ActivityOptions.makeBasic();
+    BroadcastOptions mBroadcastOptsRestrictBal = BroadcastOptions.makeBasic();
 
     @GuardedBy("mLock")
     private final Runnable mAlarmClockUpdater = () -> mNextAlarmClockMayChange = true;
@@ -1611,6 +1614,11 @@ public class AlarmManagerService extends SystemService {
     @Override
     public void onStart() {
         mInjector.init();
+        mOptsWithFgs.setPendingIntentBackgroundActivityLaunchAllowed(false);
+        mOptsWithoutFgs.setPendingIntentBackgroundActivityLaunchAllowed(false);
+        mOptsTimeBroadcast.setPendingIntentBackgroundActivityLaunchAllowed(false);
+        mActivityOptsRestrictBal.setPendingIntentBackgroundActivityLaunchAllowed(false);
+        mBroadcastOptsRestrictBal.setPendingIntentBackgroundActivityLaunchAllowed(false);
         mMetricsHelper = new MetricsHelper(getContext(), mLock);
 
         mListenerDeathRecipient = new IBinder.DeathRecipient() {
@@ -4306,6 +4314,14 @@ public class AlarmManagerService extends SystemService {
         return alarm.creatorUid;
     }
 
+    private Bundle getAlarmOperationBundle(Alarm alarm) {
+        if (alarm.mIdleOptions != null) {
+            return alarm.mIdleOptions;
+        } else if (alarm.operation.isActivity()) {
+            return mActivityOptsRestrictBal.toBundle();
+        }
+        return mBroadcastOptsRestrictBal.toBundle();
+    }
 
     @VisibleForTesting
     class AlarmHandler extends Handler {
@@ -4344,7 +4360,11 @@ public class AlarmManagerService extends SystemService {
                     for (int i = 0; i < triggerList.size(); i++) {
                         Alarm alarm = triggerList.get(i);
                         try {
-                            alarm.operation.send();
+                            // Disallow AlarmManager to start random background activity.
+                            final Bundle bundle = getAlarmOperationBundle(alarm);
+                            alarm.operation.send(/* context */ null, /* code */0, /* intent */
+                                    null, /* onFinished */null, /* handler */
+                                    null, /* requiredPermission */ null, bundle);
                         } catch (PendingIntent.CanceledException e) {
                             if (alarm.repeatInterval > 0) {
                                 // This IntentSender is no longer valid, but this
@@ -4906,9 +4926,10 @@ public class AlarmManagerService extends SystemService {
                     mSendCount++;
 
                     try {
+                        final Bundle bundle = getAlarmOperationBundle(alarm);
                         alarm.operation.send(getContext(), 0,
                                 mBackgroundIntent.putExtra(Intent.EXTRA_ALARM_COUNT, alarm.count),
-                                mDeliveryTracker, mHandler, null, alarm.mIdleOptions);
+                                mDeliveryTracker, mHandler, null, bundle);
                     } catch (PendingIntent.CanceledException e) {
                         if (alarm.repeatInterval > 0) {
                             // This IntentSender is no longer valid, but this
