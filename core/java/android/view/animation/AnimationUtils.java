@@ -28,7 +28,6 @@ import android.content.res.XmlResourceParser;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Xml;
-import android.view.InflateException;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -138,9 +137,16 @@ public class AnimationUtils {
         try {
             parser = context.getResources().getAnimation(id);
             return createAnimationFromXml(context, parser);
-        } catch (XmlPullParserException | IOException | InflateException ex) {
-            throw new NotFoundException(
-                    "Can't load animation resource ID #0x" + Integer.toHexString(id), ex);
+        } catch (XmlPullParserException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
+        } catch (IOException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
         } finally {
             if (parser != null) parser.close();
         }
@@ -153,9 +159,8 @@ public class AnimationUtils {
     }
 
     @UnsupportedAppUsage
-    private static Animation createAnimationFromXml(
-            Context c, XmlPullParser parser, AnimationSet parent, AttributeSet attrs)
-            throws XmlPullParserException, IOException, InflateException {
+    private static Animation createAnimationFromXml(Context c, XmlPullParser parser,
+            AnimationSet parent, AttributeSet attrs) throws XmlPullParserException, IOException {
 
         Animation anim = null;
 
@@ -163,8 +168,8 @@ public class AnimationUtils {
         int type;
         int depth = parser.getDepth();
 
-        while (((type = parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
-                && type != XmlPullParser.END_DOCUMENT) {
+        while (((type=parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
+               && type != XmlPullParser.END_DOCUMENT) {
 
             if (type != XmlPullParser.START_TAG) {
                 continue;
@@ -188,7 +193,7 @@ public class AnimationUtils {
             } else if (name.equals("extend")) {
                 anim = new ExtendAnimation(c, attrs);
             } else {
-                throw new InflateException("Unknown animation name: " + parser.getName());
+                throw new RuntimeException("Unknown animation name: " + parser.getName());
             }
 
             if (parent != null) {
@@ -215,24 +220,29 @@ public class AnimationUtils {
         try {
             parser = context.getResources().getAnimation(id);
             return createLayoutAnimationFromXml(context, parser);
-        } catch (XmlPullParserException | IOException | InflateException ex) {
-            throw new NotFoundException(
-                    "Can't load animation resource ID #0x" + Integer.toHexString(id), ex);
+        } catch (XmlPullParserException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
+        } catch (IOException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
         } finally {
             if (parser != null) parser.close();
         }
     }
 
-    private static LayoutAnimationController createLayoutAnimationFromXml(
-            Context c, XmlPullParser parser)
-            throws XmlPullParserException, IOException, InflateException {
+    private static LayoutAnimationController createLayoutAnimationFromXml(Context c,
+            XmlPullParser parser) throws XmlPullParserException, IOException {
 
         return createLayoutAnimationFromXml(c, parser, Xml.asAttributeSet(parser));
     }
 
-    private static LayoutAnimationController createLayoutAnimationFromXml(
-            Context c, XmlPullParser parser, AttributeSet attrs)
-            throws XmlPullParserException, IOException, InflateException {
+    private static LayoutAnimationController createLayoutAnimationFromXml(Context c,
+            XmlPullParser parser, AttributeSet attrs) throws XmlPullParserException, IOException {
 
         LayoutAnimationController controller = null;
 
@@ -253,7 +263,7 @@ public class AnimationUtils {
             } else if ("gridLayoutAnimation".equals(name)) {
                 controller = new GridLayoutAnimationController(c, attrs);
             } else {
-                throw new InflateException("Unknown layout animation name: " + name);
+                throw new RuntimeException("Unknown layout animation name: " + name);
             }
         }
 
@@ -332,9 +342,16 @@ public class AnimationUtils {
         try {
             parser = context.getResources().getAnimation(id);
             return createInterpolatorFromXml(context.getResources(), context.getTheme(), parser);
-        } catch (XmlPullParserException | IOException | InflateException ex) {
-            throw new NotFoundException(
-                    "Can't load animation resource ID #0x" + Integer.toHexString(id), ex);
+        } catch (XmlPullParserException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
+        } catch (IOException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
         } finally {
             if (parser != null) parser.close();
         }
@@ -355,20 +372,25 @@ public class AnimationUtils {
         try {
             parser = res.getAnimation(id);
             return createInterpolatorFromXml(res, theme, parser);
-        } catch (XmlPullParserException | IOException | InflateException ex) {
-            throw new NotFoundException(
-                    "Can't load animation resource ID #0x" + Integer.toHexString(id), ex);
+        } catch (XmlPullParserException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
+        } catch (IOException ex) {
+            NotFoundException rnf = new NotFoundException("Can't load animation resource ID #0x" +
+                    Integer.toHexString(id));
+            rnf.initCause(ex);
+            throw rnf;
         } finally {
-            if (parser != null) {
+            if (parser != null)
                 parser.close();
-            }
         }
 
     }
 
-    private static Interpolator createInterpolatorFromXml(
-            Resources res, Theme theme, XmlPullParser parser)
-            throws XmlPullParserException, IOException, InflateException {
+    private static Interpolator createInterpolatorFromXml(Resources res, Theme theme, XmlPullParser parser)
+            throws XmlPullParserException, IOException {
 
         BaseInterpolator interpolator = null;
 
@@ -408,7 +430,7 @@ public class AnimationUtils {
             } else if (name.equals("pathInterpolator")) {
                 interpolator = new PathInterpolator(res, theme, attrs);
             } else {
-                throw new InflateException("Unknown interpolator name: " + parser.getName());
+                throw new RuntimeException("Unknown interpolator name: " + parser.getName());
             }
         }
         return interpolator;
