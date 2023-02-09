@@ -96,14 +96,20 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         if (filteredRequest != null) {
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap =
                     new HashMap<>();
-            BeginGetCredentialRequest beginGetCredentialRequest = constructQueryPhaseRequest(
-                    filteredRequest, getRequestSession.mClientAppInfo,
-                    getRequestSession.mClientRequest.alwaysSendAppInfoToProvider(),
-                    beginGetOptionToCredentialOptionMap);
-            return new ProviderGetSession(context, providerInfo, getRequestSession, userId,
-                    remoteCredentialService, beginGetCredentialRequest, filteredRequest,
+            return new ProviderGetSession(
+                    context,
+                    providerInfo,
+                    getRequestSession,
+                    userId,
+                    remoteCredentialService,
+                    constructQueryPhaseRequest(
+                            filteredRequest, getRequestSession.mClientAppInfo,
+                            getRequestSession.mClientRequest.alwaysSendAppInfoToProvider(),
+                            beginGetOptionToCredentialOptionMap),
+                    filteredRequest,
                     getRequestSession.mClientAppInfo,
-                    beginGetOptionToCredentialOptionMap);
+                    beginGetOptionToCredentialOptionMap
+            );
         }
         Log.i(TAG, "Unable to create provider session");
         return null;
@@ -167,7 +173,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         mCompleteRequest = completeGetRequest;
         mCallingAppInfo = callingAppInfo;
         setStatus(Status.PENDING);
-        mBeginGetOptionToCredentialOptionMap = beginGetOptionToCredentialOptionMap;
+        mBeginGetOptionToCredentialOptionMap = new HashMap<>(beginGetOptionToCredentialOptionMap);
     }
 
     /** Called when the provider response has been updated by an external source. */

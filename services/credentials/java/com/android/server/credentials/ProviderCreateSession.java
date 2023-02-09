@@ -77,14 +77,19 @@ public final class ProviderCreateSession extends ProviderSession<
                         createRequestSession.mClientRequest,
                         createRequestSession.mClientAppInfo);
         if (providerCreateRequest != null) {
-            BeginCreateCredentialRequest providerBeginCreateRequest =
+            return new ProviderCreateSession(
+                    context,
+                    providerInfo,
+                    createRequestSession,
+                    userId,
+                    remoteCredentialService,
                     constructQueryPhaseRequest(createRequestSession.mClientRequest.getType(),
                             createRequestSession.mClientRequest.getCandidateQueryData(),
                             createRequestSession.mClientAppInfo,
                             createRequestSession
-                                    .mClientRequest.alwaysSendAppInfoToProvider());
-            return new ProviderCreateSession(context, providerInfo, createRequestSession, userId,
-                    remoteCredentialService, providerBeginCreateRequest, providerCreateRequest);
+                                    .mClientRequest.alwaysSendAppInfoToProvider()),
+                    providerCreateRequest
+            );
         }
         Log.i(TAG, "Unable to create provider session");
         return null;

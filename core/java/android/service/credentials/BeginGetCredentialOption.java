@@ -16,8 +16,6 @@
 
 package android.service.credentials;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -60,9 +58,7 @@ public class BeginGetCredentialOption implements Parcelable {
     private final Bundle mCandidateQueryData;
 
     /**
-     * Returns the unique id associated with this request. Providers must pass this id
-     * to the constructor of {@link CredentialEntry} while creating a candidate credential
-     * entry for this request option.
+     * Returns the unique id associated with this request. This is for internal use only.
      */
     @NonNull
     public String getId() {
@@ -127,8 +123,9 @@ public class BeginGetCredentialOption implements Parcelable {
             @NonNull Bundle candidateQueryData) {
         mId = id;
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
-        mCandidateQueryData = requireNonNull(
-                candidateQueryData, "candidateQueryData must not be null");
+        Bundle bundle = new Bundle();
+        bundle.putAll(candidateQueryData);
+        mCandidateQueryData = bundle;
         addIdToBundle();
     }
 
