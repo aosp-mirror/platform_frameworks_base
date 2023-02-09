@@ -253,7 +253,8 @@ class FlashNotificationsController {
         broadcastFilter.addAction(ACTION_FLASH_NOTIFICATION_START_PREVIEW);
         broadcastFilter.addAction(ACTION_FLASH_NOTIFICATION_STOP_PREVIEW);
         mFlashBroadcastReceiver = new FlashBroadcastReceiver();
-        mContext.registerReceiver(mFlashBroadcastReceiver, broadcastFilter);
+        mContext.registerReceiver(
+                mFlashBroadcastReceiver, broadcastFilter, Context.RECEIVER_EXPORTED);
 
         final PowerManager powerManager = mContext.getSystemService(PowerManager.class);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKE_LOCK_TAG);

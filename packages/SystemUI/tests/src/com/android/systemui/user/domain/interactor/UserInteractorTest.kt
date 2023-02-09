@@ -119,8 +119,11 @@ class UserInteractorTest : SysuiTestCase() {
             SUPERVISED_USER_CREATION_APP_PACKAGE,
         )
 
-        featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+        featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+                set(Flags.FACE_AUTH_REFACTOR, true)
+            }
         userRepository = FakeUserRepository()
         keyguardRepository = FakeKeyguardRepository()
         telephonyRepository = FakeTelephonyRepository()
@@ -141,6 +144,7 @@ class UserInteractorTest : SysuiTestCase() {
                     KeyguardInteractor(
                         repository = keyguardRepository,
                         commandQueue = commandQueue,
+                        featureFlags = featureFlags,
                     ),
                 manager = manager,
                 applicationScope = testScope.backgroundScope,

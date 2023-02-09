@@ -1316,7 +1316,7 @@
     <!-- Name of the phone device with an active remote session. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_phone">This phone</string>
     <!-- Sub status indicates device is not available due to an unknown error. [CHAR LIMIT=NONE] -->
-    <string name="media_output_status_unknown_error">Unavailable due to unknown error</string>
+    <string name="media_output_status_unknown_error">Can\’t play on this device</string>
     <!-- Sub status indicates device need premium account. [CHAR LIMIT=NONE] -->
     <string name="media_output_status_require_premium">Upgrade account to switch</string>
     <!-- Sub status indicates device not support download content. [CHAR LIMIT=NONE] -->
@@ -1324,11 +1324,11 @@
     <!-- Sub status indicates device need to wait after ad. [CHAR LIMIT=NONE] -->
     <string name="media_output_status_try_after_ad">Try again after the ad</string>
     <!-- Sub status indicates device is in low-power mode. [CHAR LIMIT=NONE] -->
-    <string name="media_output_status_device_in_low_power_mode">Device in low power mode</string>
+    <string name="media_output_status_device_in_low_power_mode">Wake up device to play here</string>
     <!-- Sub status indicates the device does not authorize the user. [CHAR LIMIT=NONE] -->
-    <string name="media_output_status_unauthorized">Requires authorization</string>
+    <string name="media_output_status_unauthorized">Device not approved to play</string>
     <!-- Sub status indicates the device does not support the current media track. [CHAR LIMIT=NONE] -->
-    <string name="media_output_status_track_unsupported">Current media track not supported</string>
+    <string name="media_output_status_track_unsupported">Can\’t play this media here</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>

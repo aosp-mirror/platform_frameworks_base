@@ -156,6 +156,7 @@ import android.net.vcn.IVcnManagementService;
 import android.net.vcn.VcnManager;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
+import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
 import android.nfc.NfcManager;
 import android.ondevicepersonalization.OnDevicePersonalizationFrameworkInitializer;
 import android.os.BatteryManager;
@@ -1572,6 +1573,13 @@ public final class SystemServiceRegistry {
                                                 Context.GRAMMATICAL_INFLECTION_SERVICE)));
                     }});
 
+        registerService(Context.SHARED_CONNECTIVITY_SERVICE, SharedConnectivityManager.class,
+                new CachedServiceFetcher<SharedConnectivityManager>() {
+                    @Override
+                    public SharedConnectivityManager createService(ContextImpl ctx) {
+                        return new SharedConnectivityManager(ctx);
+                    }
+                });
 
         sInitializing = true;
         try {

@@ -18,30 +18,34 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.app.StatusBarManager
+import android.content.Context
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
+import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.CommandQueue.Callbacks
-import com.android.systemui.util.mockito.argumentCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.Mock
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardInteractorTest : SysuiTestCase() {
-    @Mock private lateinit var commandQueue: CommandQueue
+    private lateinit var commandQueue: FakeCommandQueue
+    private lateinit var featureFlags: FakeFeatureFlags
+    private lateinit var testScope: TestScope
 
     private lateinit var underTest: KeyguardInteractor
     private lateinit var repository: FakeKeyguardRepository
@@ -49,38 +53,134 @@ class KeyguardInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
+        featureFlags = FakeFeatureFlags().apply { set(FACE_AUTH_REFACTOR, true) }
+        commandQueue = FakeCommandQueue(mock(Context::class.java), mock(DisplayTracker::class.java))
+        testScope = TestScope()
         repository = FakeKeyguardRepository()
-        underTest = KeyguardInteractor(repository, commandQueue)
+        underTest = KeyguardInteractor(repository, commandQueue, featureFlags)
     }
 
     @Test
-    fun onCameraLaunchDetected() = runTest {
-        val flow = underTest.onCameraLaunchDetected
-        var cameraLaunchSource = collectLastValue(flow)
-        runCurrent()
+    fun onCameraLaunchDetected() =
+        testScope.runTest {
+            val flow = underTest.onCameraLaunchDetected
+            var cameraLaunchSource = collectLastValue(flow)
+            runCurrent()
 
-        val captor = argumentCaptor<CommandQueue.Callbacks>()
-        verify(commandQueue).addCallback(captor.capture())
+            commandQueue.doForEachCallback {
+                it.onCameraLaunchGestureDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE)
+            }
+            assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.WIGGLE)
 
-        captor.value.onCameraLaunchGestureDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_WIGGLE)
-        assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.WIGGLE)
+            commandQueue.doForEachCallback {
+                it.onCameraLaunchGestureDetected(
+                    StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
+                )
+            }
+            assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.POWER_DOUBLE_TAP)
 
-        captor.value.onCameraLaunchGestureDetected(
-            StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
-        )
-        assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.POWER_DOUBLE_TAP)
+            commandQueue.doForEachCallback {
+                it.onCameraLaunchGestureDetected(StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER)
+            }
+            assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.LIFT_TRIGGER)
 
-        captor.value.onCameraLaunchGestureDetected(
-            StatusBarManager.CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER
-        )
-        assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.LIFT_TRIGGER)
+            commandQueue.doForEachCallback {
+                it.onCameraLaunchGestureDetected(
+                    StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE
+                )
+            }
+            assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.QUICK_AFFORDANCE)
 
-        captor.value.onCameraLaunchGestureDetected(
-            StatusBarManager.CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE
-        )
-        assertThat(cameraLaunchSource()).isEqualTo(CameraLaunchSourceModel.QUICK_AFFORDANCE)
+            flow.onCompletion { assertThat(commandQueue.callbackCount()).isEqualTo(0) }
+        }
 
-        flow.onCompletion { verify(commandQueue).removeCallback(captor.value) }
+    @Test
+    fun testKeyguardGuardVisibilityStopsSecureCamera() =
+        testScope.runTest {
+            val secureCameraActive = collectLastValue(underTest.isSecureCameraActive)
+            runCurrent()
+
+            commandQueue.doForEachCallback {
+                it.onCameraLaunchGestureDetected(
+                    StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
+                )
+            }
+
+            assertThat(secureCameraActive()).isTrue()
+
+            // Keyguard is showing but occluded
+            repository.setKeyguardShowing(true)
+            repository.setKeyguardOccluded(true)
+            assertThat(secureCameraActive()).isTrue()
+
+            // Keyguard is showing and not occluded
+            repository.setKeyguardOccluded(false)
+            assertThat(secureCameraActive()).isFalse()
+        }
+
+    @Test
+    fun testBouncerShowingResetsSecureCameraState() =
+        testScope.runTest {
+            val secureCameraActive = collectLastValue(underTest.isSecureCameraActive)
+            runCurrent()
+
+            commandQueue.doForEachCallback {
+                it.onCameraLaunchGestureDetected(
+                    StatusBarManager.CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP
+                )
+            }
+            assertThat(secureCameraActive()).isTrue()
+
+            // Keyguard is showing and not occluded
+            repository.setKeyguardShowing(true)
+            repository.setKeyguardOccluded(true)
+            assertThat(secureCameraActive()).isTrue()
+
+            repository.setBouncerShowing(true)
+            assertThat(secureCameraActive()).isFalse()
+        }
+
+    @Test
+    fun keyguardVisibilityIsDefinedAsKeyguardShowingButNotOccluded() = runTest {
+        var isVisible = collectLastValue(underTest.isKeyguardVisible)
+        repository.setKeyguardShowing(true)
+        repository.setKeyguardOccluded(false)
+
+        assertThat(isVisible()).isTrue()
+
+        repository.setKeyguardOccluded(true)
+        assertThat(isVisible()).isFalse()
+
+        repository.setKeyguardShowing(false)
+        repository.setKeyguardOccluded(true)
+        assertThat(isVisible()).isFalse()
     }
+
+    @Test
+    fun secureCameraIsNotActiveWhenNoCameraLaunchEventHasBeenFiredYet() =
+        testScope.runTest {
+            val secureCameraActive = collectLastValue(underTest.isSecureCameraActive)
+            runCurrent()
+
+            assertThat(secureCameraActive()).isFalse()
+        }
+}
+
+class FakeCommandQueue(val context: Context, val displayTracker: DisplayTracker) :
+    CommandQueue(context, displayTracker) {
+    private val callbacks = mutableListOf<Callbacks>()
+
+    override fun addCallback(callback: Callbacks) {
+        callbacks.add(callback)
+    }
+
+    override fun removeCallback(callback: Callbacks) {
+        callbacks.remove(callback)
+    }
+
+    fun doForEachCallback(func: (callback: Callbacks) -> Unit) {
+        callbacks.forEach { func(it) }
+    }
+
+    fun callbackCount(): Int = callbacks.size
 }

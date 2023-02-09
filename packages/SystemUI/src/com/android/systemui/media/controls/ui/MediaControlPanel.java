@@ -1139,8 +1139,10 @@ public class MediaControlPanel {
                         /* pixelDensity= */ getContext().getResources().getDisplayMetrics().density,
                         mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
                         /* opacity= */ 100,
-                        /* shouldFillRipple= */ false,
                         /* sparkleStrength= */ 0f,
+                        /* baseRingFadeParams= */ null,
+                        /* sparkleRingFadeParams= */ null,
+                        /* centerFillFadeParams= */ null,
                         /* shouldDistort= */ false
                 )
         );

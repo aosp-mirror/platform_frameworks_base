@@ -104,7 +104,9 @@ class CredentialSelectorViewModel(
                     entry.providerId, entry.entryKey, entry.entrySubkey,
                     resultCode, resultData,
                 )
-                uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+                if (entry.shouldTerminateUiUponSuccessfulProviderResult) {
+                    uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+                }
             } else {
                 Log.w(Constants.LOG_TAG,
                     "Illegal state: received a provider result but found no matching entry.")
@@ -253,14 +255,14 @@ class CredentialSelectorViewModel(
     }
 
     fun createFlowOnEntrySelectedFromFirstUseScreen(activeEntry: ActiveEntry) {
+        val providerId = activeEntry.activeProvider.id
+        createFlowOnDefaultChanged(providerId)
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
                 activeEntry = activeEntry
             )
         )
-        val providerId = uiState.createCredentialUiState?.activeEntry?.activeProvider?.id
-        createFlowOnDefaultChanged(providerId)
     }
 
     fun createFlowOnDisabledProvidersSelected() {

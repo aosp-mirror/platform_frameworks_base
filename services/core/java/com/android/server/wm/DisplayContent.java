@@ -3952,23 +3952,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    // TODO: This should probably be called any time a visual change is made to the hierarchy like
-    // moving containers or resizing them. Need to investigate the best way to have it automatically
-    // happen so we don't run into issues with programmers forgetting to do it.
-    void layoutAndAssignWindowLayersIfNeeded() {
-        mWmService.mWindowsChanged = true;
-        setLayoutNeeded();
-
-        if (!mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
-                false /*updateInputWindows*/)) {
-            assignWindowLayers(false /* setLayoutNeeded */);
-        }
-
-        mInputMonitor.setUpdateInputWindowsNeededLw();
-        mWmService.mWindowPlacerLocked.performSurfacePlacement();
-        mInputMonitor.updateInputWindowsLw(false /*force*/);
-    }
-
     /** Returns true if a leaked surface was destroyed */
     boolean destroyLeakedSurfaces() {
         // Used to indicate that a surface was leaked.

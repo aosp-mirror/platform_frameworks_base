@@ -121,6 +121,9 @@ public class UserManagerServiceShellCommand extends ShellCommand {
         pw.println("    If the display option is not set, it uses the user's context to check");
         pw.println("    (so it emulates what apps would get from UserManager.isUserVisible())");
         pw.println();
+        pw.println("  get-main-user ");
+        pw.println("    Displays main user id or message if there is no main user");
+        pw.println();
     }
 
     @Override
@@ -145,6 +148,8 @@ public class UserManagerServiceShellCommand extends ShellCommand {
                     return runIsVisibleBackgroundUserOnDefaultDisplaySupported();
                 case "is-user-visible":
                     return runIsUserVisible();
+                case "get-main-user":
+                    return runGetMainUserId();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -513,6 +518,17 @@ public class UserManagerServiceShellCommand extends ShellCommand {
             pw.printf("effective=%b real=%b\n", effective, Resources.getSystem()
                     .getBoolean(R.bool.config_multiuserVisibleBackgroundUsersOnDefaultDisplay));
         }
+        return 0;
+    }
+
+    private int runGetMainUserId() {
+        PrintWriter pw = getOutPrintWriter();
+        final int mainUserId = mService.getMainUserId();
+        if (mainUserId == UserHandle.USER_NULL) {
+            pw.println("Couldn't get main user.");
+            return 1;
+        }
+        pw.println("Main user id: " + mainUserId);
         return 0;
     }
 

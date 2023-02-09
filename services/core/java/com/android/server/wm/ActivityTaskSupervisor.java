@@ -2053,7 +2053,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // Stop any activities that are scheduled to do so but have been waiting for the transition
         // animation to finish.
         ArrayList<ActivityRecord> readyToStopActivities = null;
-        for (int i = mStoppingActivities.size() - 1; i >= 0; --i) {
+        for (int i = 0; i < mStoppingActivities.size(); i++) {
             final ActivityRecord s = mStoppingActivities.get(i);
             final boolean animating = s.isInTransition();
             ProtoLog.v(WM_DEBUG_STATES, "Stopping %s: nowVisible=%b animating=%b "
@@ -2074,6 +2074,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 readyToStopActivities.add(s);
 
                 mStoppingActivities.remove(i);
+                i--;
             }
         }
 

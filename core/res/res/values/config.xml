@@ -6266,6 +6266,9 @@
     <string-array name="config_healthConnectMigrationKnownSigners">
     </string-array>
 
+    <!-- Package name of Health Connect data migrator application.  -->
+    <string name="config_healthConnectMigratorPackageName"></string>
+
     <!-- The Universal Stylus Initiative (USI) protocol version supported by each display.
          (@see https://universalstylus.org/).
 

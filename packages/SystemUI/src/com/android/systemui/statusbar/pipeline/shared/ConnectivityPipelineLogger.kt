@@ -204,15 +204,6 @@ constructor(
 
     // TODO(b/238425913): We should split this class into mobile-specific and wifi-specific loggers.
 
-    fun logFilteredSubscriptionsChanged(subs: List<SubscriptionModel>) {
-        buffer.log(
-            SB_LOGGING_TAG,
-            LogLevel.INFO,
-            { str1 = subs.toString() },
-            { "Filtered subscriptions updated: $str1" },
-        )
-    }
-
     fun logUiAdapterSubIdsUpdated(subs: List<Int>) {
         buffer.log(
             SB_LOGGING_TAG,

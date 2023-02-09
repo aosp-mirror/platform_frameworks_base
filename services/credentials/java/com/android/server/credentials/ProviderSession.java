@@ -25,10 +25,8 @@ import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
-import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
-import android.util.Pair;
 
 import java.util.UUID;
 
@@ -54,7 +52,7 @@ public abstract class ProviderSession<T, R>
     @NonNull protected final T mProviderRequest;
     @Nullable protected R mProviderResponse;
     @NonNull protected Boolean mProviderResponseSet = false;
-    @Nullable protected Pair<String, CredentialEntry> mUiRemoteEntry;
+
 
 
     /**
@@ -145,7 +143,7 @@ public abstract class ProviderSession<T, R>
         return Status.CANCELED;
     }
 
-    protected String generateEntryId() {
+    protected static String generateUniqueId() {
         return UUID.randomUUID().toString();
     }
 

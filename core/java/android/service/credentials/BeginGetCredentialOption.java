@@ -39,6 +39,11 @@ import com.android.internal.util.Preconditions;
  */
 @SuppressLint("ParcelNotFinal")
 public class BeginGetCredentialOption implements Parcelable {
+    /**
+     * A unique id associated with this request option.
+     */
+    @NonNull
+    private final String mId;
 
     /**
      * The requested credential type.
@@ -51,6 +56,18 @@ public class BeginGetCredentialOption implements Parcelable {
      */
     @NonNull
     private final Bundle mCandidateQueryData;
+
+    /**
+     * Returns the unique id associated with this request. Providers must pass this id
+     * to the constructor of {@link CredentialEntry} while creating a candidate credential
+     * entry for this request option.
+     *
+     * @hide
+     */
+    @NonNull
+    public String getId() {
+        return mId;
+    }
 
     /**
      * Returns the requested credential type.
@@ -80,6 +97,7 @@ public class BeginGetCredentialOption implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mType);
         dest.writeBundle(mCandidateQueryData);
+        dest.writeString8(mId);
     }
 
     @Override
@@ -92,20 +110,22 @@ public class BeginGetCredentialOption implements Parcelable {
         return "GetCredentialOption {"
                 + "type=" + mType
                 + ", candidateQueryData=" + mCandidateQueryData
+                + ", id=" + mId
                 + "}";
     }
 
     /**
      * Constructs a {@link BeginGetCredentialOption}.
      *
-     * @param type the requested credential type
+     * @param id the unique id associated with this option
+     * @param type               the requested credential type
      * @param candidateQueryData the request candidateQueryData
-     *
      * @throws IllegalArgumentException If type is empty.
      */
     public BeginGetCredentialOption(
-            @NonNull String type,
+            @NonNull String id, @NonNull String type,
             @NonNull Bundle candidateQueryData) {
+        mId = id;
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
         mCandidateQueryData = requireNonNull(
                 candidateQueryData, "candidateQueryData must not be null");
@@ -114,11 +134,13 @@ public class BeginGetCredentialOption implements Parcelable {
     private BeginGetCredentialOption(@NonNull Parcel in) {
         String type = in.readString8();
         Bundle candidateQueryData = in.readBundle();
+        String id = in.readString8();
 
         mType = type;
         AnnotationValidations.validate(NonNull.class, null, mType);
         mCandidateQueryData = candidateQueryData;
         AnnotationValidations.validate(NonNull.class, null, mCandidateQueryData);
+        mId = id;
     }
 
     public static final @NonNull Creator<BeginGetCredentialOption> CREATOR =

@@ -20,11 +20,14 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,6 +49,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsViewModel
     private val interactor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
 
+    private lateinit var airplaneModeInteractor: AirplaneModeInteractor
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var constants: ConnectivityConstants
@@ -57,6 +61,12 @@ class MobileIconsViewModelTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        airplaneModeInteractor =
+            AirplaneModeInteractor(
+                FakeAirplaneModeRepository(),
+                FakeConnectivityRepository(),
+            )
+
         val subscriptionIdsFlow =
             interactor.filteredSubscriptions
                 .map { subs -> subs.map { it.subscriptionId } }
@@ -66,6 +76,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
             MobileIconsViewModel(
                 subscriptionIdsFlow,
                 interactor,
+                airplaneModeInteractor,
                 logger,
                 constants,
                 testScope.backgroundScope,

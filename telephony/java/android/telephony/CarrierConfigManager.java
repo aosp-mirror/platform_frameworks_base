@@ -6990,11 +6990,11 @@ public class CarrierConfigManager {
 
         /**
          * Maximum Retry Count for SMS over IMS on Failure, If the Retry Count exceeds this value,
-         * and if the retry count is less than KEY_SMS_MAX_RETRY_COUNT_INT
+         * and if the retry count is less than {@link #KEY_SMS_MAX_RETRY_COUNT_INT}
          * sending SMS should fallback to CS
          */
-        public static final String KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT =
-                KEY_PREFIX + "sms_max_retry_count_over_ims_int";
+        public static final String KEY_SMS_MAX_RETRY_OVER_IMS_COUNT_INT =
+                KEY_PREFIX + "sms_max_retry_over_ims_count_int";
 
         /**
          * Delay Timer Value in milliseconds
@@ -7062,7 +7062,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_SMS_OVER_IMS_FORMAT_INT, SMS_FORMAT_3GPP);
 
             defaults.putInt(KEY_SMS_MAX_RETRY_COUNT_INT, 3);
-            defaults.putInt(KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT, 3);
+            defaults.putInt(KEY_SMS_MAX_RETRY_OVER_IMS_COUNT_INT, 3);
             defaults.putInt(KEY_SMS_OVER_IMS_SEND_RETRY_DELAY_MILLIS_INT,
                     2000);
             defaults.putInt(KEY_SMS_TR1_TIMER_MILLIS_INT, 130000);
@@ -8989,8 +8989,9 @@ public class CarrierConfigManager {
             "carrier_certificate_string_array";
 
     /**
-     * Flag specifying whether the incoming call number should be formatted to national number
-     * for Japan. @return {@code true} convert to the national format, {@code false} otherwise.
+     * Flag specifying whether the incoming call number and the conference participant number
+     * should be formatted to national number for Japan.
+     * @return {@code true} convert to the national format, {@code false} otherwise.
      * e.g. "+819012345678" -> "09012345678"
      * @hide
      */
@@ -10059,7 +10060,7 @@ public class CarrierConfigManager {
         sDefaults.putAll(Bsf.getDefaults());
         sDefaults.putAll(Iwlan.getDefaults());
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, new String[0]);
-         sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
+        sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);

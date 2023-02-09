@@ -24,8 +24,8 @@ import android.content.res.Resources
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.View
-import android.widget.FrameLayout
 import android.view.ViewTreeObserver
+import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -40,8 +40,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.log.dagger.KeyguardSmallClockLog
 import com.android.systemui.log.dagger.KeyguardLargeClockLog
+import com.android.systemui.log.dagger.KeyguardSmallClockLog
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockTickRate
@@ -53,22 +53,24 @@ import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import java.util.Locale
+import java.util.TimeZone
+import java.util.concurrent.Executor
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import java.util.Locale
-import java.util.TimeZone
-import java.util.concurrent.Executor
-import javax.inject.Inject
 
 /**
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
  * [KeyguardClockSwitchController]. Functionality is forked from [AnimatableClockController].
  */
-open class ClockEventController @Inject constructor(
+open class ClockEventController
+@Inject
+constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val broadcastDispatcher: BroadcastDispatcher,
@@ -115,52 +117,59 @@ open class ClockEventController @Inject constructor(
     private var disposableHandle: DisposableHandle? = null
     private val regionSamplingEnabled = featureFlags.isEnabled(REGION_SAMPLING)
 
-    private val mLayoutChangedListener = object : View.OnLayoutChangeListener {
-        private var currentSmallClockView: View? = null
-        private var currentLargeClockView: View? = null
-        private var currentSmallClockLocation = IntArray(2)
-        private var currentLargeClockLocation = IntArray(2)
+    private val mLayoutChangedListener =
+        object : View.OnLayoutChangeListener {
+            private var currentSmallClockView: View? = null
+            private var currentLargeClockView: View? = null
+            private var currentSmallClockLocation = IntArray(2)
+            private var currentLargeClockLocation = IntArray(2)
 
-        override fun onLayoutChange(
-            view: View?,
-            left: Int,
-            top: Int,
-            right: Int,
-            bottom: Int,
-            oldLeft: Int,
-            oldTop: Int,
-            oldRight: Int,
-            oldBottom: Int
-        ) {
-        val parent = (view?.parent) as FrameLayout
+            override fun onLayoutChange(
+                view: View?,
+                left: Int,
+                top: Int,
+                right: Int,
+                bottom: Int,
+                oldLeft: Int,
+                oldTop: Int,
+                oldRight: Int,
+                oldBottom: Int
+            ) {
+                val parent = (view?.parent) as FrameLayout
 
-        // don't pass in negative bounds when clocks are in transition state
-        if (view.locationOnScreen[0] < 0 || view.locationOnScreen[1] < 0) {
-            return
-        }
+                // don't pass in negative bounds when clocks are in transition state
+                if (view.locationOnScreen[0] < 0 || view.locationOnScreen[1] < 0) {
+                    return
+                }
 
-        // SMALL CLOCK
-        if (parent.id == R.id.lockscreen_clock_view) {
-            // view bounds have changed due to clock size changing (i.e. different character widths)
-            // AND/OR the view has been translated when transitioning between small and large clock
-            if (view != currentSmallClockView ||
-                !view.locationOnScreen.contentEquals(currentSmallClockLocation)) {
-                currentSmallClockView = view
-                currentSmallClockLocation = view.locationOnScreen
-                updateRegionSampler(view)
+                // SMALL CLOCK
+                if (parent.id == R.id.lockscreen_clock_view) {
+                    // view bounds have changed due to clock size changing (i.e. different character
+                    // widths)
+                    // AND/OR the view has been translated when transitioning between small and
+                    // large clock
+                    if (
+                        view != currentSmallClockView ||
+                            !view.locationOnScreen.contentEquals(currentSmallClockLocation)
+                    ) {
+                        currentSmallClockView = view
+                        currentSmallClockLocation = view.locationOnScreen
+                        updateRegionSampler(view)
+                    }
+                }
+                // LARGE CLOCK
+                else if (parent.id == R.id.lockscreen_clock_view_large) {
+                    if (
+                        view != currentLargeClockView ||
+                            !view.locationOnScreen.contentEquals(currentLargeClockLocation)
+                    ) {
+                        currentLargeClockView = view
+                        currentLargeClockLocation = view.locationOnScreen
+                        updateRegionSampler(view)
+                    }
+                }
             }
         }
-        // LARGE CLOCK
-        else if (parent.id == R.id.lockscreen_clock_view_large) {
-            if (view != currentLargeClockView ||
-                !view.locationOnScreen.contentEquals(currentLargeClockLocation)) {
-                currentLargeClockView = view
-                currentLargeClockLocation = view.locationOnScreen
-                updateRegionSampler(view)
-            }
-        }
-        }
-    }
 
     private fun updateColors() {
         val wallpaperManager = WallpaperManager.getInstance(context)
@@ -189,30 +198,33 @@ open class ClockEventController @Inject constructor(
 
     private fun updateRegionSampler(sampledRegion: View) {
         regionSampler?.stopRegionSampler()
-        regionSampler = createRegionSampler(
-            sampledRegion,
-            mainExecutor,
-            bgExecutor,
-            regionSamplingEnabled,
-            ::updateColors
-        )?.apply { startRegionSampler() }
+        regionSampler =
+            createRegionSampler(
+                    sampledRegion,
+                    mainExecutor,
+                    bgExecutor,
+                    regionSamplingEnabled,
+                    ::updateColors
+                )
+                ?.apply { startRegionSampler() }
 
         updateColors()
     }
 
     protected open fun createRegionSampler(
-            sampledView: View?,
-            mainExecutor: Executor?,
-            bgExecutor: Executor?,
-            regionSamplingEnabled: Boolean,
-            updateColors: () -> Unit
+        sampledView: View?,
+        mainExecutor: Executor?,
+        bgExecutor: Executor?,
+        regionSamplingEnabled: Boolean,
+        updateColors: () -> Unit
     ): RegionSampler? {
         return RegionSampler(
             sampledView,
             mainExecutor,
             bgExecutor,
             regionSamplingEnabled,
-            updateColors)
+            updateColors
+        )
     }
 
     var regionSampler: RegionSampler? = null
@@ -224,63 +236,67 @@ open class ClockEventController @Inject constructor(
     private var smallClockIsDark = true
     private var largeClockIsDark = true
 
-    private val configListener = object : ConfigurationController.ConfigurationListener {
-        override fun onThemeChanged() {
-            clock?.events?.onColorPaletteChanged(resources)
-            updateColors()
-        }
-
-        override fun onDensityOrFontScaleChanged() {
-            updateFontSizes()
-        }
-    }
-
-    private val batteryCallback = object : BatteryStateChangeCallback {
-        override fun onBatteryLevelChanged(level: Int, pluggedIn: Boolean, charging: Boolean) {
-            if (isKeyguardVisible && !isCharging && charging) {
-                clock?.animations?.charge()
+    private val configListener =
+        object : ConfigurationController.ConfigurationListener {
+            override fun onThemeChanged() {
+                clock?.events?.onColorPaletteChanged(resources)
+                updateColors()
             }
-            isCharging = charging
-        }
-    }
 
-    private val localeBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            clock?.events?.onLocaleChanged(Locale.getDefault())
+            override fun onDensityOrFontScaleChanged() {
+                updateFontSizes()
+            }
         }
-    }
 
-    private val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
-        override fun onKeyguardVisibilityChanged(visible: Boolean) {
-            isKeyguardVisible = visible
-            if (!featureFlags.isEnabled(DOZING_MIGRATION_1)) {
-                if (!isKeyguardVisible) {
-                    clock?.animations?.doze(if (isDozing) 1f else 0f)
+    private val batteryCallback =
+        object : BatteryStateChangeCallback {
+            override fun onBatteryLevelChanged(level: Int, pluggedIn: Boolean, charging: Boolean) {
+                if (isKeyguardVisible && !isCharging && charging) {
+                    clock?.animations?.charge()
+                }
+                isCharging = charging
+            }
+        }
+
+    private val localeBroadcastReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                clock?.events?.onLocaleChanged(Locale.getDefault())
+            }
+        }
+
+    private val keyguardUpdateMonitorCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onKeyguardVisibilityChanged(visible: Boolean) {
+                isKeyguardVisible = visible
+                if (!featureFlags.isEnabled(DOZING_MIGRATION_1)) {
+                    if (!isKeyguardVisible) {
+                        clock?.animations?.doze(if (isDozing) 1f else 0f)
+                    }
+                }
+
+                smallTimeListener?.update(shouldTimeListenerRun)
+                largeTimeListener?.update(shouldTimeListenerRun)
+            }
+
+            override fun onTimeFormatChanged(timeFormat: String) {
+                clock?.events?.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+            }
+
+            override fun onTimeZoneChanged(timeZone: TimeZone) {
+                clock?.events?.onTimeZoneChanged(timeZone)
+            }
+
+            override fun onUserSwitchComplete(userId: Int) {
+                clock?.events?.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+            }
+
+            override fun onWeatherDataChanged(data: Weather?) {
+                if (data != null) {
+                    clock?.events?.onWeatherDataChanged(data)
                 }
             }
-
-            smallTimeListener?.update(shouldTimeListenerRun)
-            largeTimeListener?.update(shouldTimeListenerRun)
         }
-
-        override fun onTimeFormatChanged(timeFormat: String) {
-            clock?.events?.onTimeFormatChanged(DateFormat.is24HourFormat(context))
-        }
-
-        override fun onTimeZoneChanged(timeZone: TimeZone) {
-            clock?.events?.onTimeZoneChanged(timeZone)
-        }
-
-        override fun onUserSwitchComplete(userId: Int) {
-            clock?.events?.onTimeFormatChanged(DateFormat.is24HourFormat(context))
-        }
-
-        override fun onWeatherDataChanged(data: Weather?) {
-            if (data != null) {
-                clock?.events?.onWeatherDataChanged(data)
-            }
-        }
-    }
 
     fun registerListeners(parent: View) {
         if (isRegistered) {
@@ -295,17 +311,18 @@ open class ClockEventController @Inject constructor(
         configurationController.addCallback(configListener)
         batteryController.addCallback(batteryCallback)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
-        disposableHandle = parent.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                listenForDozing(this)
-                if (featureFlags.isEnabled(DOZING_MIGRATION_1)) {
-                    listenForDozeAmountTransition(this)
-                    listenForAnyStateToAodTransition(this)
-                } else {
-                    listenForDozeAmount(this)
+        disposableHandle =
+            parent.repeatWhenAttached {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    listenForDozing(this)
+                    if (featureFlags.isEnabled(DOZING_MIGRATION_1)) {
+                        listenForDozeAmountTransition(this)
+                        listenForAnyStateToAodTransition(this)
+                    } else {
+                        listenForDozeAmount(this)
+                    }
                 }
             }
-        }
         smallTimeListener?.update(shouldTimeListenerRun)
         largeTimeListener?.update(shouldTimeListenerRun)
     }
@@ -344,10 +361,18 @@ open class ClockEventController @Inject constructor(
     }
 
     private fun updateFontSizes() {
-        clock?.smallClock?.events?.onFontSettingChanged(
-            resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat())
-        clock?.largeClock?.events?.onFontSettingChanged(
-            resources.getDimensionPixelSize(R.dimen.large_clock_text_size).toFloat())
+        clock
+            ?.smallClock
+            ?.events
+            ?.onFontSettingChanged(
+                resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat()
+            )
+        clock
+            ?.largeClock
+            ?.events
+            ?.onFontSettingChanged(
+                resources.getDimensionPixelSize(R.dimen.large_clock_text_size).toFloat()
+            )
     }
 
     private fun handleDoze(doze: Float) {
@@ -359,68 +384,59 @@ open class ClockEventController @Inject constructor(
 
     @VisibleForTesting
     internal fun listenForDozeAmount(scope: CoroutineScope): Job {
-        return scope.launch {
-            keyguardInteractor.dozeAmount.collect {
-                handleDoze(it)
-            }
-        }
+        return scope.launch { keyguardInteractor.dozeAmount.collect { handleDoze(it) } }
     }
 
     @VisibleForTesting
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            keyguardTransitionInteractor.dozeAmountTransition.collect {
-                handleDoze(it.value)
-            }
+            keyguardTransitionInteractor.dozeAmountTransition.collect { handleDoze(it.value) }
         }
     }
 
     /**
-     * When keyguard is displayed again after being gone, the clock must be reset to full
-     * dozing.
+     * When keyguard is displayed again after being gone, the clock must be reset to full dozing.
      */
     @VisibleForTesting
     internal fun listenForAnyStateToAodTransition(scope: CoroutineScope): Job {
         return scope.launch {
-            keyguardTransitionInteractor.anyStateToAodTransition.filter {
-                it.transitionState == TransitionState.FINISHED
-            }.collect {
-                handleDoze(1f)
-            }
+            keyguardTransitionInteractor.anyStateToAodTransition
+                .filter { it.transitionState == TransitionState.FINISHED }
+                .collect { handleDoze(1f) }
         }
     }
 
     @VisibleForTesting
     internal fun listenForDozing(scope: CoroutineScope): Job {
         return scope.launch {
-            combine (
-                keyguardInteractor.dozeAmount,
-                keyguardInteractor.isDozing,
-            ) { localDozeAmount, localIsDozing ->
-                localDozeAmount > dozeAmount || localIsDozing
-            }
-            .collect { localIsDozing ->
-                isDozing = localIsDozing
-            }
+            combine(
+                    keyguardInteractor.dozeAmount,
+                    keyguardInteractor.isDozing,
+                ) { localDozeAmount, localIsDozing ->
+                    localDozeAmount > dozeAmount || localIsDozing
+                }
+                .collect { localIsDozing -> isDozing = localIsDozing }
         }
     }
 
     class TimeListener(val clockFace: ClockFaceController, val executor: DelayableExecutor) {
-        val predrawListener = ViewTreeObserver.OnPreDrawListener {
-            clockFace.events.onTimeTick()
-            true
-        }
-
-        val secondsRunnable = object : Runnable {
-            override fun run() {
-                if (!isRunning) {
-                    return
-                }
-
-                executor.executeDelayed(this, 990)
+        val predrawListener =
+            ViewTreeObserver.OnPreDrawListener {
                 clockFace.events.onTimeTick()
+                true
             }
-        }
+
+        val secondsRunnable =
+            object : Runnable {
+                override fun run() {
+                    if (!isRunning) {
+                        return
+                    }
+
+                    executor.executeDelayed(this, 990)
+                    clockFace.events.onTimeTick()
+                }
+            }
 
         var isRunning: Boolean = false
             private set
@@ -432,7 +448,9 @@ open class ClockEventController @Inject constructor(
 
             isRunning = true
             when (clockFace.events.tickRate) {
-                ClockTickRate.PER_MINUTE -> {/* Handled by KeyguardClockSwitchController */}
+                ClockTickRate.PER_MINUTE -> {
+                    /* Handled by KeyguardClockSwitchController */
+                }
                 ClockTickRate.PER_SECOND -> executor.execute(secondsRunnable)
                 ClockTickRate.PER_FRAME -> {
                     clockFace.view.viewTreeObserver.addOnPreDrawListener(predrawListener)
@@ -442,7 +460,9 @@ open class ClockEventController @Inject constructor(
         }
 
         fun stop() {
-            if (!isRunning) { return }
+            if (!isRunning) {
+                return
+            }
 
             isRunning = false
             clockFace.view.viewTreeObserver.removeOnPreDrawListener(predrawListener)

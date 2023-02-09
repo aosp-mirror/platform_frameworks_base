@@ -42,13 +42,35 @@ class RippleAnimationTest : SysuiTestCase() {
                 pixelDensity = 2f,
                 color = Color.RED,
                 opacity = 30,
-                shouldFillRipple = true,
+                baseRingFadeParams =
+                    RippleShader.FadeParams(
+                        fadeInStart = 0f,
+                        fadeInEnd = 0.3f,
+                        fadeOutStart = 0.5f,
+                        fadeOutEnd = 1f
+                    ),
+                sparkleRingFadeParams =
+                    RippleShader.FadeParams(
+                        fadeInStart = 0.1f,
+                        fadeInEnd = 0.2f,
+                        fadeOutStart = 0.7f,
+                        fadeOutEnd = 0.9f
+                    ),
+                centerFillFadeParams =
+                    RippleShader.FadeParams(
+                        fadeInStart = 0f,
+                        fadeInEnd = 0.1f,
+                        fadeOutStart = 0.2f,
+                        fadeOutEnd = 0.3f
+                    ),
                 sparkleStrength = 0.3f
             )
         val rippleAnimation = RippleAnimation(config)
 
         with(rippleAnimation.rippleShader) {
-            assertThat(rippleFill).isEqualTo(config.shouldFillRipple)
+            assertThat(baseRingFadeParams).isEqualTo(config.baseRingFadeParams)
+            assertThat(sparkleRingFadeParams).isEqualTo(config.sparkleRingFadeParams)
+            assertThat(centerFillFadeParams).isEqualTo(config.centerFillFadeParams)
             assertThat(pixelDensity).isEqualTo(config.pixelDensity)
             assertThat(color).isEqualTo(ColorUtils.setAlphaComponent(config.color, config.opacity))
             assertThat(sparkleStrength).isEqualTo(config.sparkleStrength)

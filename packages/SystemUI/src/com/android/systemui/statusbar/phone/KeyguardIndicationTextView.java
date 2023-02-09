@@ -165,6 +165,13 @@ public class KeyguardIndicationTextView extends TextView {
         }
     }
 
+    /**
+     * Get the message that should be shown after the previous text animates out.
+     */
+    public CharSequence getMessage() {
+        return mMessage;
+    }
+
     private AnimatorSet getOutAnimator() {
         AnimatorSet animatorSet = new AnimatorSet();
         Animator fadeOut = ObjectAnimator.ofFloat(this, View.ALPHA, 0f);

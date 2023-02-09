@@ -52,7 +52,6 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_SHORTCUT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
-import static com.android.server.wm.ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
@@ -617,8 +616,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
             }
 
-            if ((effects & TRANSACT_EFFECTS_CLIENT_CONFIG) != 0) {
-                mService.addWindowLayoutReasons(LAYOUT_REASON_CONFIG_CHANGED);
+            if (effects != 0) {
+                mService.mWindowManager.mWindowPlacerLocked.requestTraversal();
             }
         } finally {
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);

@@ -10952,10 +10952,13 @@ public abstract class PackageManager {
 
     /**
      * Attempt to relinquish the update ownership of the given package. Only the current
-     * update owner of the given package can use this API or a SecurityException will be
-     * thrown.
+     * update owner of the given package can use this API.
      *
      * @param targetPackage The installed package whose update owner will be changed.
+     * @throws IllegalArgumentException if the given package is invalid.
+     * @throws SecurityException if you are not the current update owner of the given package.
+     *
+     * @see PackageInstaller.SessionParams#setRequestUpdateOwnership
      */
     public void relinquishUpdateOwnership(@NonNull String targetPackage) {
         throw new UnsupportedOperationException(

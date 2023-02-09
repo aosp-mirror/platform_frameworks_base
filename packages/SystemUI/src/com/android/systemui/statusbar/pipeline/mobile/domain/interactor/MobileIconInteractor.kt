@@ -33,7 +33,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 interface MobileIconInteractor {
@@ -109,6 +111,9 @@ interface MobileIconInteractor {
 
     /** Based on [CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL], either 4 or 5 */
     val numberOfLevels: StateFlow<Int>
+
+    /** See [MobileIconsInteractor.isForceHidden]. */
+    val isForceHidden: Flow<Boolean>
 }
 
 /** Interactor for a single mobile connection. This connection _should_ have one subscription ID */
@@ -124,6 +129,7 @@ class MobileIconInteractorImpl(
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
     defaultDataSubId: StateFlow<Int>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
+    override val isForceHidden: Flow<Boolean>,
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
     private val connectionInfo = connectionRepository.connectionInfo
@@ -180,6 +186,16 @@ class MobileIconInteractorImpl(
                         info.resolvedNetworkType.iconGroupOverride
                     else -> mapping[info.resolvedNetworkType.lookupKey] ?: defaultGroup
                 }
+            }
+            .distinctUntilChanged()
+            .onEach {
+                // Doesn't use [logDiffsForTable] because [MobileIconGroup] can't implement the
+                // [Diffable] interface.
+                tableLogBuffer.logChange(
+                    prefix = "",
+                    columnName = "networkTypeIcon",
+                    value = it.name
+                )
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
 

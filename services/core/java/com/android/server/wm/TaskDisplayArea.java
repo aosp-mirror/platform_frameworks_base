@@ -405,8 +405,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
 
         child.updateTaskMovement(moveToTop, targetPosition);
 
-        mDisplayContent.layoutAndAssignWindowLayersIfNeeded();
-
         // The insert position may be adjusted to non-top when there is always-on-top root task.
         // Since the original position is preferred to be top, the root task should have higher
         // priority when we are looking for top focusable root task. The condition {@code

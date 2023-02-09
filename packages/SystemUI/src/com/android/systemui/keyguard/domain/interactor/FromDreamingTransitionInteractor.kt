@@ -34,6 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -56,9 +57,14 @@ constructor(
 
     private fun listenForDreamingToLockscreen() {
         scope.launch {
-            // Using isDreamingWithOverlay provides an optimized path to LOCKSCREEN state, which
-            // otherwise would have gone through OCCLUDED first
-            keyguardInteractor.isAbleToDream
+            // Dependending on the dream, either dream state or occluded change will change first,
+            // so listen for both
+            combine(keyguardInteractor.isAbleToDream, keyguardInteractor.isKeyguardOccluded) {
+                    isAbleToDream,
+                    isKeyguardOccluded ->
+                    isAbleToDream && isKeyguardOccluded
+                }
+                .distinctUntilChanged()
                 .sample(
                     combine(
                         keyguardInteractor.dozeTransitionModel,

@@ -5873,9 +5873,6 @@ class Task extends TaskFragment {
         }
 
         positionChildAt(POSITION_TOP, child, true /* includingParents */);
-
-        final DisplayContent displayContent = getDisplayContent();
-        displayContent.layoutAndAssignWindowLayersIfNeeded();
     }
 
     void positionChildAtBottom(Task child) {
@@ -5896,7 +5893,6 @@ class Task extends TaskFragment {
         }
 
         positionChildAt(POSITION_BOTTOM, child, includingParents);
-        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
     }
 
     @Override
@@ -5909,12 +5905,6 @@ class Task extends TaskFragment {
         if (child.asTask() != null) {
             // Non-root task position changed.
             mRootWindowContainer.invalidateTaskLayers();
-        }
-
-        final boolean isTop = getTopChild() == child;
-        if (isTop) {
-            final DisplayContent displayContent = getDisplayContent();
-            displayContent.layoutAndAssignWindowLayersIfNeeded();
         }
     }
 

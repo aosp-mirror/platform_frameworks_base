@@ -76,9 +76,9 @@ import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 @Composable
 fun GetCredentialScreen(
     viewModel: CredentialSelectorViewModel,
+    getCredentialUiState: GetCredentialUiState,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
-    val getCredentialUiState = viewModel.uiState.getCredentialUiState ?: return
     if (getCredentialUiState.currentScreenState != GetScreenState.REMOTE_ONLY) {
         ModalBottomSheet(
             sheetContent = {

@@ -1617,6 +1617,15 @@ jobject JTuner::getDtmbFrontendCaps(JNIEnv *env, FrontendCapabilities &caps) {
             interleaveModeCap, codeRateCap, bandwidthCap);
 }
 
+jobject JTuner::getIptvFrontendCaps(JNIEnv *env, FrontendCapabilities &caps) {
+    jclass clazz = env->FindClass("android/media/tv/tuner/frontend/IptvFrontendCapabilities");
+    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(I)V");
+
+    jint protocolCap = caps.get<FrontendCapabilities::Tag::iptvCaps>()->protocolCap;
+
+    return env->NewObject(clazz, capsInit, protocolCap);
+}
+
 jobject JTuner::getFrontendInfo(int id) {
     shared_ptr<FrontendInfo> feInfo;
     feInfo = sTunerClient->getFrontendInfo(id);
@@ -1693,6 +1702,11 @@ jobject JTuner::getFrontendInfo(int id) {
         case FrontendType::DTMB:
             if (FrontendCapabilities::Tag::dtmbCaps == caps.getTag()) {
                 jcaps = getDtmbFrontendCaps(env, caps);
+            }
+            break;
+        case FrontendType::IPTV:
+            if (FrontendCapabilities::Tag::iptvCaps == caps.getTag()) {
+                jcaps = getIptvFrontendCaps(env, caps);
             }
             break;
         default:
@@ -3518,17 +3532,18 @@ static DemuxIpAddress getDemuxIpAddress(JNIEnv *env, const jobject& config, cons
 
 static FrontendIptvSettingsFec getIptvFrontendSettingsFec(JNIEnv *env, const jobject &settings) {
     jclass clazz = env->FindClass("android/media/tv/tuner/frontend/IptvFrontendSettings");
-    jobject fec = env->GetObjectField(settings, env->GetFieldID(clazz, "mFec",
-            "[Landroid/media/tv/tuner/frontend/IptvFrontendSettingsFec;"));
     jclass fecClazz = env->FindClass("android/media/tv/tuner/frontend/IptvFrontendSettingsFec");
-    FrontendIptvSettingsFecType fecType =
+    jobject fec = env->GetObjectField(settings, env->GetFieldID(clazz, "mFec",
+            "Landroid/media/tv/tuner/frontend/IptvFrontendSettingsFec;"));
+
+    FrontendIptvSettingsFecType type =
             static_cast<FrontendIptvSettingsFecType>(
-                    env->GetIntField(fec, env->GetFieldID(fecClazz, "mFec", "I")));
+                    env->GetIntField(fec, env->GetFieldID(fecClazz, "mFecType", "I")));
     int32_t fecColNum = env->GetIntField(fec, env->GetFieldID(fecClazz, "mFecColNum", "I"));
     int32_t fecRowNum = env->GetIntField(fec, env->GetFieldID(fecClazz, "mFecRowNum", "I"));
 
-    FrontendIptvSettingsFec frontendIptvSettingsFec {
-        .type = fecType,
+    FrontendIptvSettingsFec frontendIptvSettingsFec = {
+        .type = type,
         .fecColNum = fecColNum,
         .fecRowNum = fecRowNum,
     };
@@ -3538,31 +3553,36 @@ static FrontendIptvSettingsFec getIptvFrontendSettingsFec(JNIEnv *env, const job
 
 static FrontendSettings getIptvFrontendSettings(JNIEnv *env, const jobject &settings) {
     FrontendSettings frontendSettings;
-    const char *clazzName = "android/media/tv/tuner/frontend/IptvFrontendSettings";
-    jclass clazz = env->FindClass(clazzName);
+    const char *className = "android/media/tv/tuner/frontend/IptvFrontendSettings";
+    jclass clazz = env->FindClass(className);
     FrontendIptvSettingsProtocol protocol =
             static_cast<FrontendIptvSettingsProtocol>(
                     env->GetIntField(settings, env->GetFieldID(clazz, "mProtocol", "I")));
     FrontendIptvSettingsIgmp igmp =
             static_cast<FrontendIptvSettingsIgmp>(
                     env->GetIntField(settings, env->GetFieldID(clazz, "mIgmp", "I")));
-    FrontendIptvSettingsFec fec = getIptvFrontendSettingsFec(env, settings);
     int64_t bitrate = env->GetIntField(settings, env->GetFieldID(clazz, "mBitrate", "J"));
-    jstring contentUrlJString = (jstring) env->GetObjectField(settings, env->GetFieldID(
-                                clazz, "mContentUrl",
-                                "[Landroid/media/tv/tuner/frontend/IptvFrontendSettings;"));
-    const char *contentUrl = env->GetStringUTFChars(contentUrlJString, 0);
-    DemuxIpAddress ipAddr = getDemuxIpAddress(env, settings, clazzName);
+    jstring jContentUrl = (jstring) env->GetObjectField(settings, env->GetFieldID(
+                                clazz, "mContentUrl", "Ljava/lang/String;"));
+    const char *contentUrl = env->GetStringUTFChars(jContentUrl, 0);
+    DemuxIpAddress ipAddr = getDemuxIpAddress(env, settings, className);
 
     FrontendIptvSettings frontendIptvSettings{
             .protocol = protocol,
-            .fec = fec,
             .igmp = igmp,
             .bitrate = bitrate,
             .ipAddr = ipAddr,
             .contentUrl = contentUrl,
     };
+
+    jobject jFec = env->GetObjectField(settings, env->GetFieldID(clazz, "mFec",
+            "Landroid/media/tv/tuner/frontend/IptvFrontendSettingsFec;"));
+    if (jFec != nullptr) {
+        frontendIptvSettings.fec = getIptvFrontendSettingsFec(env, settings);
+    }
+
     frontendSettings.set<FrontendSettings::Tag::iptv>(frontendIptvSettings);
+    env->ReleaseStringUTFChars(jContentUrl, contentUrl);
     return frontendSettings;
 }
 
@@ -3878,7 +3898,6 @@ static jobject android_media_tv_Tuner_open_lnb_by_name(JNIEnv *env, jobject thiz
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->openLnbByName(name);
 }
-
 
 static jobject android_media_tv_Tuner_open_filter(
         JNIEnv *env, jobject thiz, jint type, jint subType, jlong bufferSize) {

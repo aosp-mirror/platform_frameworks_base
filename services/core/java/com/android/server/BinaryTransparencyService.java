@@ -584,7 +584,7 @@ public class BinaryTransparencyService extends SystemService {
                             + packageInfo.applicationInfo.sourceDir);
                     if (packageInfo.applicationInfo.sourceDir.startsWith("/data/apex/")) {
                         String origPackageFilepath = getOriginalApexPreinstalledLocation(
-                                packageInfo.packageName, packageInfo.applicationInfo.sourceDir);
+                                packageInfo.packageName);
                         pw.println("|--> Pre-installed package install location: "
                                 + origPackageFilepath);
 
@@ -1628,8 +1628,7 @@ public class BinaryTransparencyService extends SystemService {
     }
 
     @NonNull
-    private String getOriginalApexPreinstalledLocation(String packageName,
-            String currentInstalledLocation) {
+    private String getOriginalApexPreinstalledLocation(String packageName) {
         try {
             final String moduleName = apexPackageNameToModuleName(packageName);
             IApexService apexService = IApexService.Stub.asInterface(

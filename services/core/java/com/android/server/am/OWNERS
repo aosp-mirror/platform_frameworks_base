@@ -38,6 +38,8 @@ per-file CarUserSwitchingDialog.java = file:platform/packages/services/Car:/OWNE
 
 per-file ContentProviderHelper.java = varunshah@google.com, omakoto@google.com, jsharkey@google.com, yamasani@google.com
 
+per-file CachedAppOptimizer.java = file:/PERFORMANCE_OWNERS
+
 # Multiuser
 per-file User* = file:/MULTIUSER_OWNERS
 

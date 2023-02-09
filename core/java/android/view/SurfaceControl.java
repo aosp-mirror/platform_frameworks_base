@@ -479,6 +479,14 @@ public final class SurfaceControl implements Parcelable {
 
     private WeakReference<View> mLocalOwnerView;
 
+    // A throwable with the stack filled when this SurfaceControl is released (only if
+    // sDebugUsageAfterRelease) is enabled
+    private Throwable mReleaseStack = null;
+
+    // Triggers the stack to be saved when any SurfaceControl in this process is released, which can
+    // be dumped as additional context
+    private static volatile boolean sDebugUsageAfterRelease = false;
+
     static GlobalTransactionWrapper sGlobalTransaction;
     static long sTransactionNestCount = 0;
 
@@ -751,6 +759,11 @@ public final class SurfaceControl implements Parcelable {
         }
         mNativeObject = nativeObject;
         mNativeHandle = mNativeObject != 0 ? nativeGetHandle(nativeObject) : 0;
+        if (sDebugUsageAfterRelease && mNativeObject == 0) {
+            mReleaseStack = new Throwable("Assigned invalid nativeObject");
+        } else {
+            mReleaseStack = null;
+        }
     }
 
     /**
@@ -1246,6 +1259,9 @@ public final class SurfaceControl implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (sDebugUsageAfterRelease) {
+            checkNotReleased();
+        }
         dest.writeString8(mName);
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
@@ -1259,6 +1275,18 @@ public final class SurfaceControl implements Parcelable {
         if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
             release();
         }
+    }
+
+    /**
+     * Enables additional debug logs to track usage-after-release of all SurfaceControls in this
+     * process.
+     * @hide
+     */
+    public static void setDebugUsageAfterRelease(boolean debug) {
+        if (!Build.isDebuggable()) {
+            return;
+        }
+        sDebugUsageAfterRelease = debug;
     }
 
     /**
@@ -1382,6 +1410,9 @@ public final class SurfaceControl implements Parcelable {
             mFreeNativeResources.run();
             mNativeObject = 0;
             mNativeHandle = 0;
+            if (sDebugUsageAfterRelease) {
+                mReleaseStack = new Throwable("Released");
+            }
             mCloseGuard.close();
             synchronized (mChoreographerLock) {
                 if (mChoreographer != null) {
@@ -1403,8 +1434,15 @@ public final class SurfaceControl implements Parcelable {
     }
 
     private void checkNotReleased() {
-        if (mNativeObject == 0) throw new NullPointerException(
-                "Invalid " + this + ", mNativeObject is null. Have you called release() already?");
+        if (mNativeObject == 0) {
+            if (mReleaseStack != null) {
+                throw new IllegalStateException("Invalid usage after release of " + this,
+                        mReleaseStack);
+            } else {
+                throw new NullPointerException("mNativeObject of " + this
+                        + " is null. Have you called release() already?");
+            }
+        }
     }
 
     /**
@@ -2738,7 +2776,7 @@ public final class SurfaceControl implements Parcelable {
          */
         @NonNull
         public Transaction setFrameRateSelectionPriority(@NonNull SurfaceControl sc, int priority) {
-            sc.checkNotReleased();
+            checkPreconditions(sc);
             nativeSetFrameRateSelectionPriority(mNativeObject, sc.mNativeObject, priority);
             return this;
         }

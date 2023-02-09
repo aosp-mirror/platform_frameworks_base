@@ -3274,6 +3274,7 @@ package android.content {
     field public static final String SAFETY_CENTER_SERVICE = "safety_center";
     field public static final String SEARCH_UI_SERVICE = "search_ui";
     field public static final String SECURE_ELEMENT_SERVICE = "secure_element";
+    field public static final String SHARED_CONNECTIVITY_SERVICE = "shared_connectivity";
     field public static final String SMARTSPACE_SERVICE = "smartspace";
     field public static final String STATS_MANAGER = "stats";
     field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
@@ -4895,8 +4896,8 @@ package android.hardware.input {
 
   public final class VirtualNavigationTouchpadConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
     method public int describeContents();
-    method public int getHeight();
-    method public int getWidth();
+    method @IntRange(from=1) public int getHeight();
+    method @IntRange(from=1) public int getWidth();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.input.VirtualNavigationTouchpadConfig> CREATOR;
   }
@@ -8916,6 +8917,10 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_READINESS_UNSUPPORTED = 4; // 0x4
   }
 
+  public class IptvFrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
+    method public int getProtocolCapability();
+  }
+
   public class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettings.Builder builder();
     method @IntRange(from=0) public long getBitrate();
@@ -9843,7 +9848,6 @@ package android.net.wifi.sharedconnectivity.app {
   }
 
   public class SharedConnectivityManager {
-    ctor public SharedConnectivityManager(@NonNull android.content.Context);
     method public boolean connectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
     method public boolean connectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
     method public boolean disconnectTetherNetwork();
@@ -15846,25 +15850,18 @@ package android.telephony.ims {
   }
 
   public final class MediaQualityStatus implements android.os.Parcelable {
+    ctor public MediaQualityStatus(@NonNull String, int, int, @IntRange(from=0, to=100) int, @IntRange(from=0) int, @IntRange(from=0) long);
     method public int describeContents();
     method @NonNull public String getCallSessionId();
     method public int getMediaSessionType();
-    method public long getRtpInactivityMillis();
-    method public int getRtpJitterMillis();
+    method @IntRange(from=0) public long getRtpInactivityMillis();
+    method @IntRange(from=0) public int getRtpJitterMillis();
     method @IntRange(from=0, to=100) public int getRtpPacketLossRate();
     method public int getTransportType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.MediaQualityStatus> CREATOR;
     field public static final int MEDIA_SESSION_TYPE_AUDIO = 1; // 0x1
     field public static final int MEDIA_SESSION_TYPE_VIDEO = 2; // 0x2
-  }
-
-  public static final class MediaQualityStatus.Builder {
-    ctor public MediaQualityStatus.Builder(@NonNull String, int, int);
-    method @NonNull public android.telephony.ims.MediaQualityStatus build();
-    method @NonNull public android.telephony.ims.MediaQualityStatus.Builder setRtpInactivityMillis(long);
-    method @NonNull public android.telephony.ims.MediaQualityStatus.Builder setRtpJitterMillis(int);
-    method @NonNull public android.telephony.ims.MediaQualityStatus.Builder setRtpPacketLossRate(@IntRange(from=0, to=100) int);
   }
 
   public final class MediaThreshold implements android.os.Parcelable {

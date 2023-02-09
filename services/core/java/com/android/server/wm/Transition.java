@@ -427,7 +427,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mState < STATE_COLLECTING) {
             throw new IllegalStateException("Can't start Transition which isn't collecting.");
         } else if (mState >= STATE_STARTED) {
-            Slog.w(TAG, "Transition already started: " + mSyncId);
+            Slog.w(TAG, "Transition already started id=" + mSyncId + " state=" + mState);
+            // The transition may be aborted (STATE_ABORT) or timed out (STATE_PLAYING by
+            // SyncGroup#finishNow), so do not revert the state to STATE_STARTED.
+            return;
         }
         mState = STATE_STARTED;
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Starting Transition %d",

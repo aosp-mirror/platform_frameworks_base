@@ -62,9 +62,9 @@ import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 @Composable
 fun CreateCredentialScreen(
     viewModel: CredentialSelectorViewModel,
+    createCredentialUiState: CreateCredentialUiState,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
-    val createCredentialUiState = viewModel.uiState.createCredentialUiState ?: return
     ModalBottomSheet(
         sheetContent = {
             // Hide the sheet content as opposed to the whole bottom sheet to maintain the scrim
@@ -94,6 +94,7 @@ fun CreateCredentialScreen(
                             requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
                             enabledProviderList = createCredentialUiState.enabledProviders,
                             providerInfo = createCredentialUiState.activeEntry?.activeProvider!!,
+                            hasDefaultProvider = createCredentialUiState.hasDefaultProvider,
                             createOptionInfo =
                             createCredentialUiState.activeEntry.activeEntryInfo
                                 as CreateOptionInfo,
@@ -264,7 +265,6 @@ fun ConfirmationCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProviderSelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
@@ -351,7 +351,6 @@ fun ProviderSelectionCard(
                 thickness = 24.dp,
                 color = Color.Transparent
             )
-            // TODO: handle the error situation that if multiple remoteInfos exists
             enabledProviderList.forEach { enabledProvider ->
                 if (enabledProvider.remoteEntry != null) {
                     Row(
@@ -363,6 +362,7 @@ fun ProviderSelectionCard(
                             onMoreOptionsSelected
                         )
                     }
+                    return@forEach
                 }
             }
             Divider(
@@ -463,7 +463,6 @@ fun MoreOptionsSelectionCard(
                             )
                         }
                     }
-                    // TODO: handle the error situation that if multiple remoteInfos exists
                     enabledProviderList.forEach {
                         if (it.remoteEntry != null) {
                             item {
@@ -472,6 +471,7 @@ fun MoreOptionsSelectionCard(
                                     onRemoteEntrySelected = onRemoteEntrySelected,
                                 )
                             }
+                            return@forEach
                         }
                     }
                 }
@@ -549,6 +549,7 @@ fun CreationSelectionCard(
     onOptionSelected: (BaseEntry) -> Unit,
     onConfirm: () -> Unit,
     onMoreOptionsSelected: () -> Unit,
+    hasDefaultProvider: Boolean,
 ) {
     ContainerCard() {
         Column() {
@@ -601,7 +602,6 @@ fun CreationSelectionCard(
                     onOptionSelected = onOptionSelected
                 )
             }
-            var shouldShowMoreOptionsButton = false
             var createOptionsSize = 0
             var remoteEntry: RemoteInfo? = null
             enabledProviderList.forEach { enabledProvider ->
@@ -610,8 +610,13 @@ fun CreationSelectionCard(
                 }
                 createOptionsSize += enabledProvider.createOptions.size
             }
-            if (createOptionsSize > 1 || remoteEntry != null) {
-                shouldShowMoreOptionsButton = true
+            val shouldShowMoreOptionsButton = if (!hasDefaultProvider) {
+                // User has already been presented with all options on the default provider
+                // selection screen. Don't show them again. Therefore, only show the more option
+                // button if remote option is present.
+                remoteEntry != null
+            } else {
+                createOptionsSize > 1 || remoteEntry != null
             }
             Row(
                 horizontalArrangement =

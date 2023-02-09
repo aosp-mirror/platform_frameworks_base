@@ -69,7 +69,14 @@ class CreateOptionInfo(
     val totalCredentialCount: Int?,
     val lastUsedTime: Instant?,
     val footerDescription: String?,
-) : BaseEntry(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
+) : BaseEntry(
+    providerId,
+    entryKey,
+    entrySubkey,
+    pendingIntent,
+    fillInIntent,
+    shouldTerminateUiUponSuccessfulProviderResult = true,
+)
 
 class RemoteInfo(
   providerId: String,
@@ -77,7 +84,14 @@ class RemoteInfo(
   entrySubkey: String,
   pendingIntent: PendingIntent?,
   fillInIntent: Intent?,
-) : BaseEntry(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
+) : BaseEntry(
+    providerId,
+    entryKey,
+    entrySubkey,
+    pendingIntent,
+    fillInIntent,
+    shouldTerminateUiUponSuccessfulProviderResult = true,
+)
 
 data class RequestDisplayInfo(
   val title: String,

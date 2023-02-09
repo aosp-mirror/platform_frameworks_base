@@ -6232,6 +6232,18 @@ public abstract class Context {
     public static final String SATELLITE_SERVICE = "satellite";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.net.wifi.sharedconnectivity.app.SharedConnectivityManager} for accessing
+     * shared connectivity services.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.wifi.sharedconnectivity.app.SharedConnectivityManager
+     * @hide
+     */
+    @SystemApi
+    public static final String SHARED_CONNECTIVITY_SERVICE = "shared_connectivity";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

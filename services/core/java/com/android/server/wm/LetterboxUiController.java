@@ -105,6 +105,7 @@ import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 
 import java.io.PrintWriter;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
 /** Controls behaviour of the letterbox UI for {@link mActivityRecord}. */
 // TODO(b/185262487): Improve test coverage of this class. Parts of it are tested in
@@ -113,6 +114,9 @@ import java.util.function.BooleanSupplier;
 // hierarchy in addition to ActivityRecord (Task, DisplayArea, ...).
 // TODO(b/263021211): Consider renaming to more generic CompatUIController.
 final class LetterboxUiController {
+
+    private static final Predicate<ActivityRecord> FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE =
+            activityRecord -> activityRecord.fillsParent() && !activityRecord.isFinishing();
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxUiController" : TAG_ATM;
 
@@ -1390,7 +1394,8 @@ final class LetterboxUiController {
             return;
         }
         final ActivityRecord firstOpaqueActivityBeneath = mActivityRecord.getTask().getActivity(
-                ActivityRecord::fillsParent, mActivityRecord, false /* includeBoundary */,
+                FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE /* callback */,
+                mActivityRecord /* boundary */, false /* includeBoundary */,
                 true /* traverseTopToBottom */);
         if (firstOpaqueActivityBeneath == null) {
             // We skip letterboxing if the translucent activity doesn't have any opaque

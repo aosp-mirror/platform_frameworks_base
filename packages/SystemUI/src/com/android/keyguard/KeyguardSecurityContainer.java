@@ -50,6 +50,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -164,6 +165,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     private boolean mDisappearAnimRunning;
     private SwipeListener mSwipeListener;
     private ViewMode mViewMode = new DefaultViewMode();
+    private boolean mIsInteractable;
+    protected ViewMediatorCallback mViewMediatorCallback;
     /*
      * Using MODE_UNINITIALIZED to mean the view mode is set to DefaultViewMode, but init() has not
      * yet been called on it. This will happen when the ViewController is initialized.
@@ -265,31 +268,6 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         return mBackCallback;
     }
 
-    // Used to notify the container when something interesting happens.
-    public interface SecurityCallback {
-        /**
-         * Potentially dismiss the current security screen, after validating that all device
-         * security has been unlocked. Otherwise show the next screen.
-         */
-        boolean dismiss(boolean authenticated, int targetUserId, boolean bypassSecondaryLockScreen,
-                SecurityMode expectedSecurityMode);
-
-        void userActivity();
-
-        void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput);
-
-        /**
-         * @param strongAuth   wheher the user has authenticated with strong authentication like
-         *                     pattern, password or PIN but not by trust agents or fingerprint
-         * @param targetUserId a user that needs to be the foreground user at the finish completion.
-         */
-        void finish(boolean strongAuth, int targetUserId);
-
-        void reset();
-
-        void onCancelClicked();
-    }
-
     public interface SwipeListener {
         void onSwipeUp();
     }
@@ -342,7 +320,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
     public KeyguardSecurityContainer(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mSpringAnimation = new SpringAnimation(this, DynamicAnimation.Y);
+        mSpringAnimation = new SpringAnimation(this, DynamicAnimation.TRANSLATION_Y);
         mViewConfiguration = ViewConfiguration.get(context);
         mDoubleTapDetector = new GestureDetector(context, new DoubleTapListener());
     }
@@ -445,6 +423,11 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         mViewMode.reset();
     }
 
+    /** Set true if the view can be interacted with */
+    public void setInteractable(boolean isInteractable) {
+        mIsInteractable = isInteractable;
+    }
+
     @Override
     public boolean shouldDelayChildPressedState() {
         return true;
@@ -452,6 +435,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (!mIsInteractable) {
+            return true;
+        }
+
         boolean result =  mMotionEventListeners.stream().anyMatch(
                 listener -> listener.onInterceptTouchEvent(event))
                 || super.onInterceptTouchEvent(event);
@@ -637,6 +624,18 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin));
         setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), paddingBottom);
         return insets.inset(0, 0, 0, inset);
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        if (mViewMediatorCallback != null) {
+            mViewMediatorCallback.keyguardDoneDrawing();
+        }
+    }
+
+    public void setViewMediatorCallback(ViewMediatorCallback viewMediatorCallback) {
+        mViewMediatorCallback = viewMediatorCallback;
     }
 
     private void showDialog(String title, String message) {
