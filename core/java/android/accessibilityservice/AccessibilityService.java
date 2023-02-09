@@ -1982,6 +1982,10 @@ public abstract class AccessibilityService extends Service {
         IAccessibilityServiceConnection connection =
             AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
         if (mInfo != null && connection != null) {
+            if (!mInfo.isWithinParcelableSize()) {
+                throw new IllegalStateException(
+                        "Cannot update service info: size is larger than safe parcelable limits.");
+            }
             try {
                 connection.setServiceInfo(mInfo);
                 mInfo = null;
