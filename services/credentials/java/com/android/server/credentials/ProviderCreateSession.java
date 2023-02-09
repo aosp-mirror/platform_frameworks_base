@@ -93,13 +93,14 @@ public final class ProviderCreateSession extends ProviderSession<
         if (propagateToProvider) {
             return new BeginCreateCredentialRequest(
                     type,
-                    candidateQueryData
+                    candidateQueryData,
+                    callingAppInfo
             );
         }
         return new BeginCreateCredentialRequest(
                 type,
-                candidateQueryData,
-                callingAppInfo);
+                candidateQueryData
+        );
     }
 
     @Nullable
