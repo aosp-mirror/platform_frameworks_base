@@ -98,7 +98,6 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
-import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
@@ -6307,7 +6306,7 @@ public final class Settings implements Watchable, Snappable {
         boolean changed = false;
         while (it.hasNext()) {
             PersistentPreferredActivity ppa = it.next();
-            if (IntentResolver.filterEquals(ppa.getIntentFilter(), filter)) {
+            if (IntentFilter.filterEquals(ppa.getIntentFilter(), filter)) {
                 ppir.removeFilter(ppa);
                 changed = true;
                 break;

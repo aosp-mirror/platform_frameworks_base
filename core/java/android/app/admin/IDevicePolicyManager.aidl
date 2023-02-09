@@ -53,6 +53,7 @@ import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.telephony.data.ApnSetting;
 import com.android.internal.infra.AndroidFuture;
+import android.app.admin.DevicePolicyState;
 
 import java.util.List;
 
@@ -591,4 +592,6 @@ interface IDevicePolicyManager {
 
     void setManagedSubscriptionsPolicy(in ManagedSubscriptionsPolicy policy);
     ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy();
+
+    DevicePolicyState getDevicePolicyState();
 }
