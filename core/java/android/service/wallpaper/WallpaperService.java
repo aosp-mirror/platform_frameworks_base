@@ -2198,6 +2198,11 @@ public abstract class WallpaperService extends Service {
                 }
                 mCreated = false;
             }
+
+            if (mSurfaceControl != null) {
+                mSurfaceControl.release();
+                mSurfaceControl = null;
+            }
         }
 
         private final DisplayListener mDisplayListener = new DisplayListener() {
