@@ -1623,14 +1623,13 @@ public class DisplayPolicy {
     }
 
     /**
-     * @return Whether the top app should hide the statusbar based on the top fullscreen opaque
-     *         window.
+     * @return Whether the top fullscreen app hides the given type of system bar.
      */
-    boolean topAppHidesStatusBar() {
+    boolean topAppHidesSystemBar(@InsetsType int type) {
         if (mTopFullscreenOpaqueWindowState == null || mForceShowSystemBars) {
             return false;
         }
-        return !mTopFullscreenOpaqueWindowState.isRequestedVisible(Type.statusBars());
+        return !mTopFullscreenOpaqueWindowState.isRequestedVisible(type);
     }
 
     /**
@@ -2053,7 +2052,10 @@ public class DisplayPolicy {
                 navColorWin != null && navColorWin == mDisplayContent.mInputMethodWindow;
         final int appearance = updateLightNavigationBarLw(win.mAttrs.insetsFlags.appearance,
                 navColorWin) | opaqueAppearance;
-        final int behavior = win.mAttrs.insetsFlags.behavior;
+        final WindowState navBarControlWin = topAppHidesSystemBar(Type.navigationBars())
+                ? mTopFullscreenOpaqueWindowState
+                : win;
+        final int behavior = navBarControlWin.mAttrs.insetsFlags.behavior;
         final String focusedApp = win.mAttrs.packageName;
         final boolean isFullscreen = !win.isRequestedVisible(Type.statusBars())
                 || !win.isRequestedVisible(Type.navigationBars());
@@ -2168,7 +2170,7 @@ public class DisplayPolicy {
                 || mDisplayContent.getInsetsPolicy().remoteInsetsControllerControlsSystemBars(win);
         mDisplayContent.getInsetsPolicy().updateBarControlTarget(win);
 
-        final boolean topAppHidesStatusBar = topAppHidesStatusBar();
+        final boolean topAppHidesStatusBar = topAppHidesSystemBar(Type.statusBars());
         if (getStatusBar() != null) {
             final StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
             if (statusBar != null) {
