@@ -1836,6 +1836,18 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_RINGTONE_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_CALL_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_CALL_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_MEDIA_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_MEDIA_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_SYSTEM_SOUNDS_ROUTING);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);
