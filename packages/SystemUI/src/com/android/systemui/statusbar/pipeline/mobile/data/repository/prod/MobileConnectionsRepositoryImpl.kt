@@ -159,13 +159,16 @@ constructor(
             )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), listOf())
 
-    /** StateFlow that keeps track of the current active mobile data subscription */
-    override val activeMobileDataSubscriptionId: StateFlow<Int> =
+    override val activeMobileDataSubscriptionId: StateFlow<Int?> =
         conflatedCallbackFlow {
                 val callback =
                     object : TelephonyCallback(), ActiveDataSubscriptionIdListener {
                         override fun onActiveDataSubscriptionIdChanged(subId: Int) {
-                            trySend(subId)
+                            if (subId != INVALID_SUBSCRIPTION_ID) {
+                                trySend(subId)
+                            } else {
+                                trySend(null)
+                            }
                         }
                     }
 
@@ -179,7 +182,18 @@ constructor(
                 columnName = "activeSubId",
                 initialValue = INVALID_SUBSCRIPTION_ID,
             )
-            .stateIn(scope, started = SharingStarted.WhileSubscribed(), INVALID_SUBSCRIPTION_ID)
+            .stateIn(scope, started = SharingStarted.WhileSubscribed(), null)
+
+    override val activeMobileDataRepository =
+        activeMobileDataSubscriptionId
+            .map { activeSubId ->
+                if (activeSubId == null) {
+                    null
+                } else {
+                    getOrCreateRepoForSubId(activeSubId)
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
     private val defaultDataSubIdChangeEvent: MutableSharedFlow<Unit> =
         MutableSharedFlow(extraBufferCapacity = 1)
@@ -240,9 +254,12 @@ constructor(
             )
         }
 
-        return subIdRepositoryCache[subId]
-            ?: createRepositoryForSubId(subId).also { subIdRepositoryCache[subId] = it }
+        return getOrCreateRepoForSubId(subId)
     }
+
+    private fun getOrCreateRepoForSubId(subId: Int) =
+        subIdRepositoryCache[subId]
+            ?: createRepositoryForSubId(subId).also { subIdRepositoryCache[subId] = it }
 
     @SuppressLint("MissingPermission")
     override val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel> =
@@ -292,7 +309,9 @@ constructor(
     override val activeSubChangedInGroupEvent =
         activeMobileDataSubscriptionId
             .pairwise()
-            .mapNotNull { (prevVal: Int, newVal: Int) ->
+            .mapNotNull { (prevVal: Int?, newVal: Int?) ->
+                if (prevVal == null || newVal == null) return@mapNotNull null
+
                 val prevSub = subscriptionManager.getActiveSubscriptionInfo(prevVal)?.groupUuid
                 val nextSub = subscriptionManager.getActiveSubscriptionInfo(newVal)?.groupUuid
 
@@ -300,15 +319,7 @@ constructor(
             }
             .flowOn(bgDispatcher)
 
-    private fun isValidSubId(subId: Int): Boolean {
-        subscriptions.value.forEach {
-            if (it.subscriptionId == subId) {
-                return true
-            }
-        }
-
-        return false
-    }
+    private fun isValidSubId(subId: Int): Boolean = checkSub(subId, subscriptions.value)
 
     @VisibleForTesting fun getSubIdRepoCache() = subIdRepositoryCache
 
@@ -335,12 +346,27 @@ constructor(
     private fun dropUnusedReposFromCache(newInfos: List<SubscriptionModel>) {
         // Remove any connection repository from the cache that isn't in the new set of IDs. They
         // will get garbage collected once their subscribers go away
-        val currentValidSubscriptionIds = newInfos.map { it.subscriptionId }
-
         subIdRepositoryCache =
-            subIdRepositoryCache
-                .filter { currentValidSubscriptionIds.contains(it.key) }
-                .toMutableMap()
+            subIdRepositoryCache.filter { checkSub(it.key, newInfos) }.toMutableMap()
+    }
+
+    /**
+     * True if the checked subId is in the list of current subs or the active mobile data subId
+     *
+     * @param checkedSubs the list to validate [subId] against. To invalidate the cache, pass in the
+     * new subscription list. Otherwise use [subscriptions.value] to validate a subId against the
+     * current known subscriptions
+     */
+    private fun checkSub(subId: Int, checkedSubs: List<SubscriptionModel>): Boolean {
+        if (activeMobileDataSubscriptionId.value == subId) return true
+
+        checkedSubs.forEach {
+            if (it.subscriptionId == subId) {
+                return true
+            }
+        }
+
+        return false
     }
 
     private suspend fun fetchSubscriptionsList(): List<SubscriptionInfo> =
