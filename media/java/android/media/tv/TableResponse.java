@@ -54,6 +54,17 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
         return new TableResponse(in);
     }
 
+    /**
+     * Constructs a TableResponse with a table URI.
+     *
+     * @param requestId The ID is used to associate the response with the request.
+     * @param sequence The sequence number which indicates the order of related responses.
+     * @param responseResult The result for the response. It's one of {@link #RESPONSE_RESULT_OK},
+     *                       {@link #RESPONSE_RESULT_CANCEL}, {@link #RESPONSE_RESULT_ERROR}.
+     * @param tableUri The URI of the table in the database.
+     * @param version The version number of requested table.
+     * @param size The Size number of table in bytes.
+     */
     public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
             @Nullable Uri tableUri, int version, int size) {
         super(RESPONSE_TYPE, requestId, sequence, responseResult);
@@ -64,7 +75,19 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
         mTableSharedMemory = null;
     }
 
-    /** @hide */
+    /**
+     * Constructs a TableResponse with a table URI.
+     *
+     * @param requestId The ID is used to associate the response with the request.
+     * @param sequence The sequence number which indicates the order of related responses.
+     * @param responseResult The result for the response. It's one of {@link #RESPONSE_RESULT_OK},
+     *                       {@link #RESPONSE_RESULT_CANCEL}, {@link #RESPONSE_RESULT_ERROR}.
+     * @param tableByteArray The byte array which stores the table in bytes. The structure and
+     *                       syntax of the table depends on the table name in
+     *                       {@link TableRequest#getTableName()} and the corresponding standard.
+     * @param version The version number of requested table.
+     * @param size The Size number of table in bytes.
+     */
     public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
             @NonNull byte[] tableByteArray, int version, int size) {
         super(RESPONSE_TYPE, requestId, sequence, responseResult);
@@ -75,7 +98,21 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
         mTableSharedMemory = null;
     }
 
-    /** @hide */
+    /**
+     * Constructs a TableResponse with a table URI.
+     *
+     * @param requestId The ID is used to associate the response with the request.
+     * @param sequence The sequence number which indicates the order of related responses.
+     * @param responseResult The result for the response. It's one of {@link #RESPONSE_RESULT_OK},
+     *                       {@link #RESPONSE_RESULT_CANCEL}, {@link #RESPONSE_RESULT_ERROR}.
+     * @param tableSharedMemory The shared memory which stores the table. The table size can be
+     *                          large so using a shared memory optimizes the data
+     *                          communication between the table data source and the receiver. The
+     *                          structure syntax of the table depends on the table name in
+     *                          {@link TableRequest#getTableName()} and the corresponding standard.
+     * @param version The version number of requested table.
+     * @param size The Size number of table in bytes.
+     */
     public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
             @NonNull SharedMemory tableSharedMemory, int version, int size) {
         super(RESPONSE_TYPE, requestId, sequence, responseResult);
@@ -115,7 +152,6 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
      *
      * @return the table data as a byte array, or {@code null} if the data is not stored as a byte
      *         array.
-     * @hide
      */
     @Nullable
     public byte[] getTableByteArray() {
@@ -125,9 +161,14 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
     /**
      * Gets the data of the table as a {@link SharedMemory} object.
      *
+     * <p> This data lives in a {@link SharedMemory} instance because of the potentially large
+     * amount of data needed to store the table. This optimizes the data communication between the
+     * table data source and the receiver.
+     *
      * @return the table data as a {@link SharedMemory} object, or {@code null} if the data is not
      *         stored in shared memory.
-     * @hide
+     *
+     * @see SharedMemory#map(int, int, int)
      */
     @Nullable
     public SharedMemory getTableSharedMemory() {
