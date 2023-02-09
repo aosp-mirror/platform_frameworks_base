@@ -26,6 +26,7 @@ import android.os.ParcelUuid
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
@@ -39,6 +40,7 @@ import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.tableBufferLogName
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
@@ -55,6 +57,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
@@ -256,10 +259,9 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun testActiveDataSubscriptionId_initialValueIsInvalidId() =
+    fun testActiveDataSubscriptionId_initialValueIsNull() =
         runBlocking(IMMEDIATE) {
-            assertThat(underTest.activeMobileDataSubscriptionId.value)
-                .isEqualTo(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
+            assertThat(underTest.activeMobileDataSubscriptionId.value).isEqualTo(null)
         }
 
     @Test
@@ -275,6 +277,140 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(active).isEqualTo(SUB_2_ID)
 
             job.cancel()
+        }
+
+    @Test
+    fun activeSubId_nullIfInvalidSubIdIsReceived() =
+        runBlocking(IMMEDIATE) {
+            var latest: Int? = null
+
+            val job = underTest.activeMobileDataSubscriptionId.onEach { latest = it }.launchIn(this)
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            assertThat(latest).isNotNull()
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(INVALID_SUBSCRIPTION_ID)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
+    fun activeRepo_initiallyNull() {
+        assertThat(underTest.activeMobileDataRepository.value).isNull()
+    }
+
+    @Test
+    fun activeRepo_updatesWithActiveDataId() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileConnectionRepository? = null
+            val job = underTest.activeMobileDataRepository.onEach { latest = it }.launchIn(this)
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            assertThat(latest?.subId).isEqualTo(SUB_2_ID)
+
+            job.cancel()
+        }
+
+    @Test
+    fun activeRepo_nullIfActiveDataSubIdBecomesInvalid() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileConnectionRepository? = null
+            val job = underTest.activeMobileDataRepository.onEach { latest = it }.launchIn(this)
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            assertThat(latest).isNotNull()
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(INVALID_SUBSCRIPTION_ID)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
+    /** Regression test for b/268146648. */
+    fun activeSubIdIsSetBeforeSubscriptionsAreUpdated_doesNotThrow() =
+        runBlocking(IMMEDIATE) {
+            var activeRepo: MobileConnectionRepository? = null
+            var subscriptions: List<SubscriptionModel>? = null
+
+            val activeRepoJob =
+                underTest.activeMobileDataRepository.onEach { activeRepo = it }.launchIn(this)
+            val subscriptionsJob =
+                underTest.subscriptions.onEach { subscriptions = it }.launchIn(this)
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            assertThat(subscriptions).isEmpty()
+            assertThat(activeRepo).isNotNull()
+
+            activeRepoJob.cancel()
+            subscriptionsJob.cancel()
+        }
+
+    @Test
+    fun getRepoForSubId_activeDataSubIdIsRequestedBeforeSubscriptionsUpdate() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileConnectionRepository? = null
+            var subscriptions: List<SubscriptionModel>? = null
+            val activeSubIdJob =
+                underTest.activeMobileDataSubscriptionId
+                    .filterNotNull()
+                    .onEach { latest = underTest.getRepoForSubId(it) }
+                    .launchIn(this)
+            val subscriptionsJob =
+                underTest.subscriptions.onEach { subscriptions = it }.launchIn(this)
+
+            // Active data subscription id is sent, but no subscription change has been posted yet
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            // Subscriptions list is empty
+            assertThat(subscriptions).isEmpty()
+            // getRepoForSubId does not throw
+            assertThat(latest).isNotNull()
+
+            activeSubIdJob.cancel()
+            subscriptionsJob.cancel()
+        }
+
+    @Test
+    fun activeDataSentBeforeSubscriptionList_subscriptionReusesActiveDataRepo() =
+        runBlocking(IMMEDIATE) {
+            var activeRepo: MobileConnectionRepository? = null
+            val job = underTest.activeMobileDataRepository.onEach { activeRepo = it }.launchIn(this)
+            val subscriptionsJob = underTest.subscriptions.launchIn(this)
+
+            // GIVEN active repo is updated before the subscription list updates
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            assertThat(activeRepo).isNotNull()
+
+            // GIVEN the subscription list is then updated which includes the active data sub id
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList)
+                .thenReturn(listOf(SUB_2))
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            // WHEN requesting a connection repository for the subscription
+            val newRepo = underTest.getRepoForSubId(SUB_2_ID)
+
+            // THEN the newly request repo has been cached and reused
+            assertThat(activeRepo).isSameInstanceAs(newRepo)
+
+            job.cancel()
+            subscriptionsJob.cancel()
         }
 
     @Test
@@ -477,7 +613,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `connection repository - log buffer contains sub id in its name`() =
+    fun connectionRepository_logBufferContainsSubIdInItsName() =
         runBlocking(IMMEDIATE) {
             val job = underTest.subscriptions.launchIn(this)
 
@@ -693,7 +829,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `active data change - in same group - emits unit`() =
+    fun activeDataChange_inSameGroup_emitsUnit() =
         runBlocking(IMMEDIATE) {
             var latest: Unit? = null
             val job = underTest.activeSubChangedInGroupEvent.onEach { latest = it }.launchIn(this)
@@ -709,7 +845,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `active data change - not in same group - does not emit`() =
+    fun activeDataChange_notInSameGroup_doesNotEmit() =
         runBlocking(IMMEDIATE) {
             var latest: Unit? = null
             val job = underTest.activeSubChangedInGroupEvent.onEach { latest = it }.launchIn(this)
