@@ -271,6 +271,35 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testTranslucentActivitiesWhenUnfolding() {
+        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
+        setUpDisplaySizeWithApp(2800, 1400);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mWmService.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
+                1.0f /*letterboxVerticalPositionMultiplier*/);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        // We launch a transparent activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setLaunchedFromUid(mActivity.getUid())
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+        doReturn(false).when(translucentActivity).fillsParent();
+        mTask.addChild(translucentActivity);
+
+        mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        spyOn(mActivity);
+
+        // Halffold
+        setFoldablePosture(translucentActivity, true /* isHalfFolded */, false /* isTabletop */);
+        verify(mActivity).recomputeConfiguration();
+        clearInvocations(mActivity);
+
+        // Unfold
+        setFoldablePosture(translucentActivity, false /* isHalfFolded */, false /* isTabletop */);
+        verify(mActivity).recomputeConfiguration();
+    }
+
+    @Test
     public void testRestartProcessIfVisible() {
         setUpDisplaySizeWithApp(1000, 2500);
         doNothing().when(mSupervisor).scheduleRestartTimeout(mActivity);
@@ -3339,14 +3368,20 @@ public class SizeCompatTests extends WindowTestsBase {
 
     }
 
-    private void setFoldablePosture(boolean isHalfFolded, boolean isTabletop) {
-        final DisplayRotation r = mActivity.mDisplayContent.getDisplayRotation();
+    private void setFoldablePosture(ActivityRecord activity, boolean isHalfFolded,
+            boolean isTabletop) {
+        final DisplayRotation r = activity.mDisplayContent.getDisplayRotation();
         doReturn(isHalfFolded).when(r).isDisplaySeparatingHinge();
         doReturn(false).when(r).isDeviceInPosture(any(DeviceState.class), anyBoolean());
         if (isHalfFolded) {
-            doReturn(true).when(r).isDeviceInPosture(DeviceState.HALF_FOLDED, isTabletop);
+            doReturn(true).when(r)
+                    .isDeviceInPosture(DeviceState.HALF_FOLDED, isTabletop);
         }
-        mActivity.recomputeConfiguration();
+        activity.recomputeConfiguration();
+    }
+
+    private void setFoldablePosture(boolean isHalfFolded, boolean isTabletop) {
+        setFoldablePosture(mActivity, isHalfFolded, isTabletop);
     }
 
     @Test
