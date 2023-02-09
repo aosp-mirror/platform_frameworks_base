@@ -63,6 +63,7 @@ final class EnforcingAdmin {
     private Set<String> mAuthorities;
     private final int mUserId;
     private final boolean mIsRoleAuthority;
+    private final ActiveAdmin mActiveAdmin;
 
     static EnforcingAdmin createEnforcingAdmin(@NonNull String packageName, int userId) {
         Objects.requireNonNull(packageName);
@@ -73,14 +74,31 @@ final class EnforcingAdmin {
             @NonNull ComponentName componentName, int userId) {
         Objects.requireNonNull(componentName);
         return new EnforcingAdmin(
-                componentName.getPackageName(), componentName, Set.of(DPC_AUTHORITY), userId);
+                componentName.getPackageName(), componentName, Set.of(DPC_AUTHORITY), userId,
+                /* activeAdmin=*/ null);
+    }
+
+    static EnforcingAdmin createEnterpriseEnforcingAdmin(
+            @NonNull ComponentName componentName, int userId, ActiveAdmin activeAdmin) {
+        Objects.requireNonNull(componentName);
+        return new EnforcingAdmin(
+                componentName.getPackageName(), componentName, Set.of(DPC_AUTHORITY), userId,
+                activeAdmin);
     }
 
     static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName, int userId) {
         Objects.requireNonNull(componentName);
         return new EnforcingAdmin(
                 componentName.getPackageName(), componentName, Set.of(DEVICE_ADMIN_AUTHORITY),
-                userId);
+                userId, /* activeAdmin=*/ null);
+    }
+
+    static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName, int userId,
+            ActiveAdmin activeAdmin) {
+        Objects.requireNonNull(componentName);
+        return new EnforcingAdmin(
+                componentName.getPackageName(), componentName, Set.of(DEVICE_ADMIN_AUTHORITY),
+                userId, activeAdmin);
     }
 
     static String getRoleAuthorityOf(String roleName) {
@@ -88,7 +106,8 @@ final class EnforcingAdmin {
     }
 
     private EnforcingAdmin(
-            String packageName, ComponentName componentName, Set<String> authorities, int userId) {
+            String packageName, ComponentName componentName, Set<String> authorities, int userId,
+            ActiveAdmin activeAdmin) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(componentName);
         Objects.requireNonNull(authorities);
@@ -99,6 +118,7 @@ final class EnforcingAdmin {
         mComponentName = componentName;
         mAuthorities = new HashSet<>(authorities);
         mUserId = userId;
+        mActiveAdmin = activeAdmin;
     }
 
     private EnforcingAdmin(String packageName, int userId) {
@@ -111,6 +131,7 @@ final class EnforcingAdmin {
         mComponentName = null;
         // authorities will be loaded when needed
         mAuthorities = null;
+        mActiveAdmin = null;
     }
 
     private static Set<String> getRoleAuthoritiesOrDefault(String packageName, int userId) {
@@ -154,6 +175,11 @@ final class EnforcingAdmin {
 
     int getUserId() {
         return mUserId;
+    }
+
+    @Nullable
+    public ActiveAdmin getActiveAdmin() {
+        return mActiveAdmin;
     }
 
     /**
@@ -224,7 +250,7 @@ final class EnforcingAdmin {
             String className = parser.getAttributeValue(/* namespace= */ null, ATTR_CLASS_NAME);
             ComponentName componentName = new ComponentName(packageName, className);
             Set<String> authorities = Set.of(authoritiesStr.split(ATTR_AUTHORITIES_SEPARATOR));
-            return new EnforcingAdmin(packageName, componentName, authorities, userId);
+            return new EnforcingAdmin(packageName, componentName, authorities, userId, null);
         }
     }
 
