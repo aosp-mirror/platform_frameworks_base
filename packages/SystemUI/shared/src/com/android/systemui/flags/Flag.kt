@@ -145,7 +145,7 @@ data class SysPropBooleanFlag constructor(
     override val namespace: String,
     override val default: Boolean = false,
 ) : SysPropFlag<Boolean> {
-    // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
+    // TODO(b/268520433): Teamfood not supported for sysprop flags yet.
     override val teamfood: Boolean = false
 }
 
