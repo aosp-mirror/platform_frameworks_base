@@ -1070,6 +1070,45 @@ public class SatelliteManager {
         return SATELLITE_REQUEST_FAILED;
     }
 
+    /**
+     * Send datagram over satellite.
+     * @param datagramType - type of datagram
+     * @param datagram - datagram to send over satellite
+     * @param executor - The executor on which the result listener will be called.
+     * @param resultListener - Listener that will be called with the result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void sendSatelliteDatagram(@DatagramType int datagramType,
+            @NonNull SatelliteDatagram datagram, @NonNull @CallbackExecutor Executor executor,
+            @SatelliteError @NonNull Consumer<Integer> resultListener) {
+        Objects.requireNonNull(datagram);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(resultListener);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IIntegerConsumer internalCallback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> resultListener.accept(result)));
+                    }
+                };
+                telephony.sendSatelliteDatagram(mSubId, datagramType, datagram,
+                        internalCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("sendSatelliteDatagram() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
     private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(TelephonyFrameworkInitializer
                 .getTelephonyServiceManager()
