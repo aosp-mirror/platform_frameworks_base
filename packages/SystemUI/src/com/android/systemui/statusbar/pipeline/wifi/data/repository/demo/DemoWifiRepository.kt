@@ -80,17 +80,14 @@ constructor(
     private fun processEnabledWifiState(event: FakeWifiEventModel.Wifi) {
         _isWifiEnabled.value = true
         _isWifiDefault.value = true
-        _wifiActivity.value =
-            event.activity?.toWifiDataActivityModel()
-                ?: DataActivityModel(hasActivityIn = false, hasActivityOut = false)
+        _wifiActivity.value = event.activity.toWifiDataActivityModel()
         _wifiNetwork.value = event.toWifiNetworkModel()
     }
 
     private fun processCarrierMergedWifiState(event: FakeWifiEventModel.CarrierMerged) {
         _isWifiEnabled.value = true
         _isWifiDefault.value = true
-        // TODO(b/238425913): Support activity in demo mode.
-        _wifiActivity.value = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
+        _wifiActivity.value = event.activity.toWifiDataActivityModel()
         _wifiNetwork.value = event.toCarrierMergedModel()
     }
 

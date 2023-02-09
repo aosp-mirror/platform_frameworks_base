@@ -94,6 +94,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(telephonyManager.simOperatorName).thenReturn("")
 
         // Set up so the individual connection repositories
         whenever(telephonyManager.createForSubscriptionId(anyInt())).thenAnswer { invocation ->
@@ -141,6 +142,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             )
         carrierMergedFactory =
             CarrierMergedConnectionRepository.Factory(
+                telephonyManager,
                 scope,
                 wifiRepository,
             )
