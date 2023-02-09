@@ -206,7 +206,9 @@ public class ITvInteractiveAppSessionWrapper
                 break;
             }
             case DO_NOTIFY_RECORDING_STARTED: {
-                mSessionImpl.notifyRecordingStarted((String) msg.obj);
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.notifyRecordingStarted((String) args.arg1, (String) args.arg2);
+                args.recycle();
                 break;
             }
             case DO_NOTIFY_RECORDING_STOPPED: {
@@ -555,9 +557,9 @@ public class ITvInteractiveAppSessionWrapper
     }
 
     @Override
-    public void notifyRecordingStarted(String recordingId) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageO(
-                DO_NOTIFY_RECORDING_STARTED, recordingId));
+    public void notifyRecordingStarted(String recordingId, String requestId) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(
+                DO_NOTIFY_RECORDING_STARTED, recordingId, recordingId));
     }
 
     @Override

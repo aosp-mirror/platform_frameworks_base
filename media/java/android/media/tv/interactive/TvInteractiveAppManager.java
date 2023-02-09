@@ -542,14 +542,14 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
-            public void onRequestStartRecording(Uri programUri, int seq) {
+            public void onRequestStartRecording(String requestId, Uri programUri, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postRequestStartRecording(programUri);
+                    record.postRequestStartRecording(requestId, programUri);
                 }
             }
 
@@ -566,21 +566,8 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
-            public void onRequestScheduleRecording(String inputId, Uri channelUri, Uri programUri,
-                    Bundle params, int seq) {
-                synchronized (mSessionCallbackRecordMap) {
-                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
-                    if (record == null) {
-                        Log.e(TAG, "Callback not found for seq " + seq);
-                        return;
-                    }
-                    record.postRequestScheduleRecording(inputId, channelUri, programUri, params);
-                }
-            }
-
-            @Override
-            public void onRequestScheduleRecording2(String inputId, Uri channelUri, long startTime,
-                    long duration, int repeatDays, Bundle params, int seq) {
+            public void onRequestScheduleRecording(String requestId, String inputId, Uri channelUri,
+                    Uri programUri, Bundle params, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
@@ -588,7 +575,22 @@ public final class TvInteractiveAppManager {
                         return;
                     }
                     record.postRequestScheduleRecording(
-                            inputId, channelUri, startTime, duration, repeatDays, params);
+                            requestId, inputId, channelUri, programUri, params);
+                }
+            }
+
+            @Override
+            public void onRequestScheduleRecording2(String requestId, String inputId,
+                    Uri channelUri, long startTime, long duration, int repeatDays, Bundle params,
+                    int seq) {
+                synchronized (mSessionCallbackRecordMap) {
+                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
+                    if (record == null) {
+                        Log.e(TAG, "Callback not found for seq " + seq);
+                        return;
+                    }
+                    record.postRequestScheduleRecording(requestId, inputId, channelUri, startTime,
+                            duration, repeatDays, params);
                 }
             }
 
@@ -1267,13 +1269,13 @@ public final class TvInteractiveAppManager {
             }
         }
 
-        void notifyRecordingStarted(String recordingId) {
+        void notifyRecordingStarted(String recordingId, String requestId) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.notifyRecordingStarted(mToken, recordingId, mUserId);
+                mService.notifyRecordingStarted(mToken, recordingId, requestId, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -2129,11 +2131,11 @@ public final class TvInteractiveAppManager {
             });
         }
 
-        void postRequestStartRecording(Uri programUri) {
+        void postRequestStartRecording(String requestId, Uri programUri) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSessionCallback.onRequestStartRecording(mSession, programUri);
+                    mSessionCallback.onRequestStartRecording(mSession, requestId, programUri);
                 }
             });
         }
@@ -2147,24 +2149,24 @@ public final class TvInteractiveAppManager {
             });
         }
 
-        void postRequestScheduleRecording(String inputId, Uri channelUri, Uri programUri,
-                Bundle params) {
+        void postRequestScheduleRecording(String requestId, String inputId, Uri channelUri,
+                Uri programUri, Bundle params) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mSessionCallback.onRequestScheduleRecording(
-                            mSession, inputId, channelUri, programUri, params);
+                            mSession, requestId, inputId, channelUri, programUri, params);
                 }
             });
         }
 
-        void postRequestScheduleRecording(String inputId, Uri channelUri, long startTime,
-                long duration, int repeatDays, Bundle params) {
+        void postRequestScheduleRecording(String requestId, String inputId, Uri channelUri,
+                long startTime, long duration, int repeatDays, Bundle params) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSessionCallback.onRequestScheduleRecording(
-                            mSession, inputId, channelUri, startTime, duration, repeatDays, params);
+                    mSessionCallback.onRequestScheduleRecording(mSession, requestId, inputId,
+                            channelUri, startTime, duration, repeatDays, params);
                 }
             });
         }
@@ -2405,7 +2407,7 @@ public final class TvInteractiveAppManager {
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
          * @param programUri The Uri of the program to be recorded.
          */
-        public void onRequestStartRecording(Session session, Uri programUri) {
+        public void onRequestStartRecording(Session session, String requestId, Uri programUri) {
         }
 
         /**
@@ -2420,7 +2422,7 @@ public final class TvInteractiveAppManager {
 
         /**
          * This is called when
-         * {@link TvInteractiveAppService.Session#requestScheduleRecording(String, Uri, Uri, Bundle)}
+         * {@link TvInteractiveAppService.Session#requestScheduleRecording(String, String, Uri, Uri, Bundle)}
          * is called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
@@ -2433,13 +2435,14 @@ public final class TvInteractiveAppManager {
          * @see android.media.tv.TvRecordingClient#tune(String, Uri, Bundle)
          * @see android.media.tv.TvRecordingClient#startRecording(Uri)
          */
-        public void onRequestScheduleRecording(Session session, @NonNull String inputId,
-                @NonNull Uri channelUri, @NonNull Uri programUri, @NonNull Bundle params) {
+        public void onRequestScheduleRecording(Session session, @NonNull String requestId,
+                @NonNull String inputId, @NonNull Uri channelUri, @NonNull Uri programUri,
+                @NonNull Bundle params) {
         }
 
         /**
          * This is called when
-         * {@link TvInteractiveAppService.Session#requestScheduleRecording(String, Uri, long, long, int, Bundle)}
+         * {@link TvInteractiveAppService.Session#requestScheduleRecording(String, String, Uri, long, long, int, Bundle)}
          * is called.
          *
          * @param session A {@link TvInteractiveAppService.Session} associated with this callback.
@@ -2454,9 +2457,9 @@ public final class TvInteractiveAppManager {
          * @see android.media.tv.TvRecordingClient#tune(String, Uri, Bundle)
          * @see android.media.tv.TvRecordingClient#startRecording(Uri)
          */
-        public void onRequestScheduleRecording(Session session, @NonNull String inputId,
-                @NonNull Uri channelUri, long startTime, long duration, int repeatDays,
-                @NonNull Bundle params) {
+        public void onRequestScheduleRecording(Session session, @NonNull String requestId,
+                @NonNull String inputId, @NonNull Uri channelUri, long startTime, long duration,
+                int repeatDays, @NonNull Bundle params) {
         }
 
         /**
