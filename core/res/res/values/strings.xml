@@ -975,6 +975,11 @@
     <!-- Description for the capability of an accessibility service to take screenshot. [CHAR LIMIT=NONE] -->
     <string name="capability_desc_canTakeScreenshot">Can take a screenshot of the display.</string>
 
+    <!-- Dream -->
+
+    <!-- The title to use when a dream is opened in preview mode. [CHAR LIMIT=NONE] -->
+    <string name="dream_preview_title">Preview, <xliff:g id="dream_name" example="Clock">%1$s</xliff:g></string>
+
     <!--  Permissions -->
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

@@ -4281,6 +4281,8 @@
   <java-symbol type="string" name="capability_desc_canTakeScreenshot" />
   <java-symbol type="string" name="capability_title_canTakeScreenshot" />
 
+  <java-symbol type="string" name="dream_preview_title" />
+
   <java-symbol type="string" name="config_servicesExtensionPackage" />
 
   <!-- For app process exit info tracking -->
