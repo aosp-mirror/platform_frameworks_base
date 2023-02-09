@@ -1244,13 +1244,13 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             rescheduleTimeoutH();
         }
 
-        if (mODICaptionsTooltipView != null) {
-            mODICaptionsTooltipView.setAlpha(0.0f);
+        // We need to wait for layout and then center the caption view. Since the height of the
+        // dialog is now dynamic (with the variable ringer drawer height changing the height of
+        // the dialog), we need to do this here in code vs. in XML.
+        mHandler.post(() -> {
+            if (mODICaptionsTooltipView != null) {
+                mODICaptionsTooltipView.setAlpha(0.0f);
 
-            // We need to wait for layout and then center the caption view. Since the height of the
-            // dialog is now dynamic (with the variable ringer drawer height changing the height of
-            // the dialog), we need to do this here in code vs. in XML.
-            mHandler.post(() -> {
                 final int[] odiTooltipLocation = mODICaptionsTooltipView.getLocationOnScreen();
                 final int[] odiButtonLocation = mODICaptionsIcon.getLocationOnScreen();
 
@@ -1276,8 +1276,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                             }
                         })
                         .start();
-            });
-        }
+            }
+        });
     }
 
     private void hideCaptionsTooltip() {
