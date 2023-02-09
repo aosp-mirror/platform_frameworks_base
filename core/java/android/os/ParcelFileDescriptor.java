@@ -45,6 +45,7 @@ import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
 import android.util.Log;
+import android.util.Slog;
 
 import dalvik.system.CloseGuard;
 import dalvik.system.VMRuntime;
@@ -329,6 +330,14 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     }
 
     private static FileDescriptor openInternal(File file, int mode) throws FileNotFoundException {
+        if ((mode & MODE_WRITE_ONLY) != 0 && (mode & MODE_APPEND) == 0
+                && (mode & MODE_TRUNCATE) == 0 && ((mode & MODE_READ_ONLY) == 0)
+                && file != null && file.exists()) {
+            Slog.wtfQuiet(TAG, "ParcelFileDescriptor.open is called with w without t or a or r, "
+                    + "which will have a different behavior beginning in Android Q."
+                    + "\nMode: " + mode + "\nFilename: " + file.getPath());
+        }
+
         final int flags = FileUtils.translateModePfdToPosix(mode) | ifAtLeastQ(O_CLOEXEC);
 
         int realMode = S_IRWXU | S_IRWXG;
