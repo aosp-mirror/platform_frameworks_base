@@ -23,6 +23,8 @@ import android.util.ArraySet;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 
 /**
@@ -31,6 +33,32 @@ import java.io.PrintWriter;
  * In the future this interface will also include op restrictions.
  */
 public interface AppOpsCheckingServiceInterface {
+
+    /**
+     * Tells the checking service to write its state to persistence (unconditionally).
+     * This is only made visible for testing.
+     */
+    @VisibleForTesting
+    void writeState();
+
+    /**
+     * Tells the checking service to read its state from persistence. This is generally called
+     * shortly after instantiation. If extra system services need to be guaranteed to be published
+     * that work should be done in {@link #systemReady()}
+     */
+    void readState();
+
+    /**
+     * Tells the checking service that a shutdown is occurring. This gives it a chance to write its
+     * state to persistence (if there are any pending changes).
+     */
+    void shutdown();
+
+    /**
+     * Do additional initialization work that is dependent on external system services.
+     */
+    void systemReady();
+
     /**
      * Returns a copy of non-default app-ops with op as keys and their modes as values for a uid.
      * Returns an empty SparseIntArray if nothing is set.

@@ -40,6 +40,30 @@ public class AppOpsCheckingServiceLoggingDecorator implements AppOpsCheckingServ
     }
 
     @Override
+    public void writeState() {
+        Log.i(LOG_TAG, "writeState()");
+        mService.writeState();
+    }
+
+    @Override
+    public void readState() {
+        Log.i(LOG_TAG, "readState()");
+        mService.readState();
+    }
+
+    @Override
+    public void shutdown() {
+        Log.i(LOG_TAG, "shutdown()");
+        mService.shutdown();
+    }
+
+    @Override
+    public void systemReady() {
+        Log.i(LOG_TAG, "systemReady()");
+        mService.systemReady();
+    }
+
+    @Override
     public SparseIntArray getNonDefaultUidModes(int uid) {
         Log.i(LOG_TAG, "getNonDefaultUidModes(uid = " + uid + ")");
         return mService.getNonDefaultUidModes(uid);
