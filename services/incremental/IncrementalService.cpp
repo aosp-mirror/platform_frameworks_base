@@ -419,6 +419,17 @@ int64_t IncrementalService::elapsedUsSinceMonoTs(uint64_t monoTsUs) {
     return nowUs - monoTsUs;
 }
 
+static const char* loadingStateToString(incfs::LoadingState state) {
+    switch (state) {
+        case (incfs::LoadingState::Full):
+            return "Full";
+        case (incfs::LoadingState::MissingBlocks):
+            return "MissingBlocks";
+        default:
+            return "error obtaining loading state";
+    }
+}
+
 void IncrementalService::onDump(int fd) {
     dprintf(fd, "Incremental is %s\n", incfs::enabled() ? "ENABLED" : "DISABLED");
     dprintf(fd, "IncFs features: 0x%x\n", int(mIncFs->features()));
@@ -453,9 +464,13 @@ void IncrementalService::onDump(int fd) {
             }
             dprintf(fd, "    storages (%d): {\n", int(mnt.storages.size()));
             for (auto&& [storageId, storage] : mnt.storages) {
-                dprintf(fd, "      [%d] -> [%s] (%d %% loaded) \n", storageId, storage.name.c_str(),
+                auto&& ifs = getIfsLocked(storageId);
+                dprintf(fd, "      [%d] -> [%s] (%d %% loaded)(%s) \n", storageId,
+                        storage.name.c_str(),
                         (int)(getLoadingProgressFromPath(mnt, storage.name.c_str()).getProgress() *
-                              100));
+                              100),
+                        ifs ? loadingStateToString(mIncFs->isEverythingFullyLoaded(ifs->control))
+                            : "error obtaining ifs");
             }
             dprintf(fd, "    }\n");
 
