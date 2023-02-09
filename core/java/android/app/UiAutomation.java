@@ -1623,7 +1623,9 @@ public final class UiAutomation {
                         if (isGenerationChangedLocked()) {
                             return;
                         }
-                        mLastEventTimeMillis = event.getEventTime();
+                        // It is not guaranteed that the accessibility framework sends events by the
+                        // order of event timestamp.
+                        mLastEventTimeMillis = Math.max(mLastEventTimeMillis, event.getEventTime());
                         if (mWaitingForEventDelivery) {
                             mEventQueue.add(AccessibilityEvent.obtain(event));
                         }
