@@ -376,6 +376,7 @@ constructor(
         SubscriptionModel(
             subscriptionId = subscriptionId,
             isOpportunistic = isOpportunistic,
+            groupUuid = groupUuid,
         )
 
     companion object {
