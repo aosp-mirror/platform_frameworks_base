@@ -91,6 +91,11 @@ class AuthenticationEntryInfo(
     fillInIntent: Intent?,
     val title: String,
     val icon: Drawable,
+    // The entry had been unlocked and turned out to be empty. Used to determine whether to
+    // show "Tap to unlock" or "No sign-in info" for this entry.
+    val isUnlockedAndEmpty: Boolean,
+    // True if the entry was the last one unlocked. Used to show the no sign-in info snackbar.
+    val isLastUnlocked: Boolean,
 ) : BaseEntry(
     providerId,
     entryKey, entrySubkey,

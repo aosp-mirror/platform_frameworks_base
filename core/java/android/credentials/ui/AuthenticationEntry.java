@@ -16,11 +16,11 @@
 
 package android.credentials.ui;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
-import android.app.PendingIntent;
 import android.app.slice.Slice;
 import android.content.Intent;
 import android.os.Parcel;
@@ -28,62 +28,69 @@ import android.os.Parcelable;
 
 import com.android.internal.util.AnnotationValidations;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
- * A credential, create, or action entry to be rendered.
+ * An authentication entry.
  *
  * @hide
  */
 @TestApi
-public final class Entry implements Parcelable {
+public final class AuthenticationEntry implements Parcelable {
     @NonNull private final String mKey;
     @NonNull private final String mSubkey;
-    @Nullable private PendingIntent mPendingIntent;
+    @NonNull private final @Status int mStatus;
     @Nullable private Intent mFrameworkExtrasIntent;
+    @NonNull private final Slice mSlice;
 
-    @NonNull
-    private final Slice mSlice;
+    /** @hide **/
+    @IntDef(prefix = {"STATUS_"}, value = {
+            STATUS_LOCKED,
+            STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT,
+            STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Status {}
 
-    private Entry(@NonNull Parcel in) {
-        String key = in.readString8();
-        String subkey = in.readString8();
-        Slice slice = in.readTypedObject(Slice.CREATOR);
+    /** This entry is still locked, as initially supplied by the provider. */
+    public static final int STATUS_LOCKED = 0;
+    /** This entry was unlocked but didn't contain any credential. Meanwhile, "less recent" means
+     *  there is another such entry that was unlocked more recently. */
+    public static final int STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT = 1;
+    /** This is the most recent entry that was unlocked but didn't contain any credential.
+     *  There should be at most one authentication entry with this status. */
+    public static final int STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT = 2;
 
-        mKey = key;
-        AnnotationValidations.validate(NonNull.class, null, mKey);
-        mSubkey = subkey;
-        AnnotationValidations.validate(NonNull.class, null, mSubkey);
-        mSlice = slice;
-        AnnotationValidations.validate(NonNull.class, null, mSlice);
-        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
+    private AuthenticationEntry(@NonNull Parcel in) {
+        mKey = in.readString8();
+        mSubkey = in.readString8();
+        mStatus = in.readInt();
+        mSlice = in.readTypedObject(Slice.CREATOR);
         mFrameworkExtrasIntent = in.readTypedObject(Intent.CREATOR);
+
+        AnnotationValidations.validate(NonNull.class, null, mKey);
+        AnnotationValidations.validate(NonNull.class, null, mSubkey);
+        AnnotationValidations.validate(NonNull.class, null, mSlice);
     }
 
     /** Constructor to be used for an entry that does not require further activities
      * to be invoked when selected.
      */
-    public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice) {
+    public AuthenticationEntry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
+            @Status int status) {
         mKey = key;
         mSubkey = subkey;
         mSlice = slice;
+        mStatus = status;
     }
 
     /** Constructor to be used for an entry that requires a pending intent to be invoked
      * when clicked.
      */
-    // TODO: Remove this constructor as it is no longer used
-    public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
-            @NonNull PendingIntent pendingIntent, @NonNull Intent intent) {
-        this(key, subkey, slice);
-        mPendingIntent = pendingIntent;
-        mFrameworkExtrasIntent = intent;
-    }
-
-    /** Constructor to be used for an entry that requires a pending intent to be invoked
-     * when clicked.
-     */
-    public Entry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
-            @NonNull Intent intent) {
-        this(key, subkey, slice);
+    public AuthenticationEntry(@NonNull String key, @NonNull String subkey, @NonNull Slice slice,
+            @Status int status, @NonNull Intent intent) {
+        this(key, subkey, slice, status);
         mFrameworkExtrasIntent = intent;
     }
 
@@ -112,9 +119,13 @@ public final class Entry implements Parcelable {
         return mSlice;
     }
 
-    @Nullable
-    public PendingIntent getPendingIntent() {
-        return mPendingIntent;
+    /**
+     * Returns the entry status.
+     */
+    @NonNull
+    @Status
+    public int getStatus() {
+        return mStatus;
     }
 
     @Nullable
@@ -127,8 +138,8 @@ public final class Entry implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mKey);
         dest.writeString8(mSubkey);
+        dest.writeInt(mStatus);
         dest.writeTypedObject(mSlice, flags);
-        dest.writeTypedObject(mPendingIntent, flags);
         dest.writeTypedObject(mFrameworkExtrasIntent, flags);
     }
 
@@ -137,15 +148,15 @@ public final class Entry implements Parcelable {
         return 0;
     }
 
-    public static final @NonNull Creator<Entry> CREATOR = new Creator<Entry>() {
+    public static final @NonNull Creator<AuthenticationEntry> CREATOR = new Creator<>() {
         @Override
-        public Entry createFromParcel(@NonNull Parcel in) {
-            return new Entry(in);
+        public AuthenticationEntry createFromParcel(@NonNull Parcel in) {
+            return new AuthenticationEntry(in);
         }
 
         @Override
-        public Entry[] newArray(int size) {
-            return new Entry[size];
+        public AuthenticationEntry[] newArray(int size) {
+            return new AuthenticationEntry[size];
         }
     };
 }
