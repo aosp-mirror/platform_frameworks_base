@@ -3439,10 +3439,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                     Slog.w(TAG, "Querying password metrics for unified challenge profile: "
                             + userHandle);
                 }
+                return LockSettingsService.this.getUserPasswordMetrics(userHandle);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-            return LockSettingsService.this.getUserPasswordMetrics(userHandle);
         }
 
         @Override
