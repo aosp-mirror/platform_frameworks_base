@@ -78,14 +78,15 @@ final class HsumBootUserInitializer {
         mUmi = umi;
         mAms = am;
         mContentResolver = contentResolver;
-        this.mShouldAlwaysHaveMainUser = shouldAlwaysHaveMainUser;
+        mShouldAlwaysHaveMainUser = shouldAlwaysHaveMainUser;
     }
 
     /**
      * Initialize this object, and create MainUser if needed.
      *
-     * Should be called before PHASE_SYSTEM_SERVICES_READY as services' setups may require MainUser,
-     * but probably after PHASE_LOCK_SETTINGS_READY since that may be needed for user creation.
+     * <p>Should be called before PHASE_SYSTEM_SERVICES_READY as services' setups may require
+     * MainUser, but probably after PHASE_LOCK_SETTINGS_READY since that may be needed for user
+     * creation.
      */
     public void init(TimingsTraceAndSlog t) {
         Slogf.i(TAG, "init())");
@@ -98,7 +99,7 @@ final class HsumBootUserInitializer {
     }
 
     private void createMainUserIfNeeded() {
-        int mainUser = mUmi.getMainUserId();
+        final int mainUser = mUmi.getMainUserId();
         if (mainUser != UserHandle.USER_NULL) {
             Slogf.d(TAG, "Found existing MainUser, userId=%d", mainUser);
             return;
@@ -125,8 +126,8 @@ final class HsumBootUserInitializer {
     /**
      * Put the device into the correct user state: unlock the system and switch to the boot user.
      *
-     * Should only call once PHASE_THIRD_PARTY_APPS_CAN_START is reached to ensure that privileged
-     * apps have had the chance to set the boot user, if applicable.
+     * <p>Should only call once PHASE_THIRD_PARTY_APPS_CAN_START is reached to ensure that
+     * privileged apps have had the chance to set the boot user, if applicable.
      */
     public void systemRunning(TimingsTraceAndSlog t) {
         observeDeviceProvisioning();
@@ -167,6 +168,7 @@ final class HsumBootUserInitializer {
     }
 
     // NOTE: Mostly copied from Automotive's InitialUserSetter
+    // TODO(b/266158156): Refactor how starting/unlocking works for the System.
     private void unlockSystemUser(TimingsTraceAndSlog t) {
         Slogf.i(TAG, "Unlocking system user");
         t.traceBegin("unlock-system-user");
@@ -174,18 +176,17 @@ final class HsumBootUserInitializer {
             // This is for force changing state into RUNNING_LOCKED. Otherwise unlock does not
             // update the state and USER_SYSTEM unlock happens twice.
             t.traceBegin("am.startUser");
-            boolean started = mAms.startUserInBackgroundWithListener(UserHandle.USER_SYSTEM,
+            final boolean started = mAms.startUserInBackgroundWithListener(UserHandle.USER_SYSTEM,
                             /* listener= */ null);
             t.traceEnd();
             if (!started) {
                 Slogf.w(TAG, "could not restart system user in background; trying unlock instead");
                 t.traceBegin("am.unlockUser");
-                boolean unlocked = mAms.unlockUser(UserHandle.USER_SYSTEM, /* token= */ null,
+                final boolean unlocked = mAms.unlockUser(UserHandle.USER_SYSTEM, /* token= */ null,
                         /* secret= */ null, /* listener= */ null);
                 t.traceEnd();
                 if (!unlocked) {
                     Slogf.w(TAG, "could not unlock system user either");
-                    return;
                 }
             }
         } finally {
@@ -195,7 +196,7 @@ final class HsumBootUserInitializer {
 
     private void switchToBootUser(@UserIdInt int bootUserId) {
         Slogf.i(TAG, "Switching to boot user %d", bootUserId);
-        boolean started = mAms.startUserInForegroundWithListener(bootUserId,
+        final boolean started = mAms.startUserInForegroundWithListener(bootUserId,
                 /* unlockListener= */ null);
         if (!started) {
             Slogf.wtf(TAG, "Failed to start user %d in foreground", bootUserId);
