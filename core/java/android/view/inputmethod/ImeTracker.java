@@ -320,7 +320,7 @@ public interface ImeTracker {
     /**
      * Creates an IME show request tracking token.
      *
-     * @param component the component name where the IME request was created, or {@code null}
+     * @param component the name of the component that created the IME request, or {@code null}
      *                  otherwise (defaulting to {@link ActivityThread#currentProcessName()}).
      * @param uid the uid of the client that requested the IME.
      * @param origin the origin of the IME show request.
@@ -335,7 +335,7 @@ public interface ImeTracker {
     /**
      * Creates an IME hide request tracking token.
      *
-     * @param component the component name where the IME request was created, or {@code null}
+     * @param component the name of the component that created the IME request, or {@code null}
      *                  otherwise (defaulting to {@link ActivityThread#currentProcessName()}).
      * @param uid the uid of the client that requested the IME.
      * @param origin the origin of the IME hide request.
@@ -517,7 +517,7 @@ public interface ImeTracker {
         /**
          * Returns a logging tag using the given component name.
          *
-         * @param component the component name where the IME request was created, or {@code null}
+         * @param component the name of the component that created the IME request, or {@code null}
          *                  otherwise (defaulting to {@link ActivityThread#currentProcessName()}).
          */
         @NonNull
@@ -542,7 +542,7 @@ public interface ImeTracker {
         @NonNull
         private final IBinder mBinder;
 
-        /** The logging tag. */
+        /** Logging tag, of the shape "component:random_hexadecimal". */
         @NonNull
         private final String mTag;
 

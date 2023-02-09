@@ -76,7 +76,7 @@ public final class ImeTrackerService extends IImeTracker.Stub {
             @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
         final var binder = new Binder();
         final var token = new ImeTracker.Token(binder, tag);
-        final var entry = new History.Entry(uid, ImeTracker.TYPE_SHOW, ImeTracker.STATUS_RUN,
+        final var entry = new History.Entry(tag, uid, ImeTracker.TYPE_SHOW, ImeTracker.STATUS_RUN,
                 origin, reason);
         mHistory.addEntry(binder, entry);
 
@@ -96,7 +96,7 @@ public final class ImeTrackerService extends IImeTracker.Stub {
             @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
         final var binder = new Binder();
         final var token = new ImeTracker.Token(binder, tag);
-        final var entry = new History.Entry(uid, ImeTracker.TYPE_HIDE, ImeTracker.STATUS_RUN,
+        final var entry = new History.Entry(tag, uid, ImeTracker.TYPE_HIDE, ImeTracker.STATUS_RUN,
                 origin, reason);
         mHistory.addEntry(binder, entry);
 
@@ -259,14 +259,16 @@ public final class ImeTrackerService extends IImeTracker.Stub {
                     .withZone(ZoneId.systemDefault());
 
             pw.print(prefix);
-            pw.println("ImeTrackerService#History.mLiveEntries:");
+            pw.println("ImeTrackerService#History.mLiveEntries: "
+                    + mLiveEntries.size() + " elements");
 
             for (final var entry: mLiveEntries.values()) {
                 dumpEntry(entry, pw, prefix, formatter);
             }
 
             pw.print(prefix);
-            pw.println("ImeTrackerService#History.mEntries:");
+            pw.println("ImeTrackerService#History.mEntries: "
+                    + mEntries.size() + " elements");
 
             for (final var entry: mEntries) {
                 dumpEntry(entry, pw, prefix, formatter);
@@ -277,34 +279,22 @@ public final class ImeTrackerService extends IImeTracker.Stub {
         private void dumpEntry(@NonNull Entry entry, @NonNull PrintWriter pw,
                 @NonNull String prefix, @NonNull DateTimeFormatter formatter) {
             pw.print(prefix);
-            pw.println("ImeTrackerService#History #" + entry.mSequenceNumber + ":");
+            pw.print(" #" + entry.mSequenceNumber);
+            pw.print(" " + ImeTracker.Debug.typeToString(entry.mType));
+            pw.print(" - " + ImeTracker.Debug.statusToString(entry.mStatus));
+            pw.print(" - " + entry.mTag);
+            pw.println(" (" + entry.mDuration + "ms):");
 
             pw.print(prefix);
-            pw.println(" startTime=" + formatter.format(Instant.ofEpochMilli(entry.mStartTime)));
+            pw.print("   startTime=" + formatter.format(Instant.ofEpochMilli(entry.mStartTime)));
+            pw.println(" " + ImeTracker.Debug.originToString(entry.mOrigin));
 
             pw.print(prefix);
-            pw.println(" duration=" + entry.mDuration + "ms");
+            pw.print("   reason=" + InputMethodDebug.softInputDisplayReasonToString(entry.mReason));
+            pw.println(" " + ImeTracker.Debug.phaseToString(entry.mPhase));
 
             pw.print(prefix);
-            pw.print(" type=" + ImeTracker.Debug.typeToString(entry.mType));
-
-            pw.print(prefix);
-            pw.print(" status=" + ImeTracker.Debug.statusToString(entry.mStatus));
-
-            pw.print(prefix);
-            pw.print(" origin="
-                    + ImeTracker.Debug.originToString(entry.mOrigin));
-
-            pw.print(prefix);
-            pw.print(" reason="
-                    + InputMethodDebug.softInputDisplayReasonToString(entry.mReason));
-
-            pw.print(prefix);
-            pw.print(" phase="
-                    + ImeTracker.Debug.phaseToString(entry.mPhase));
-
-            pw.print(prefix);
-            pw.print(" requestWindowName=" + entry.mRequestWindowName);
+            pw.println("   requestWindowName=" + entry.mRequestWindowName);
         }
 
         /** A history entry. */
@@ -312,6 +302,10 @@ public final class ImeTrackerService extends IImeTracker.Stub {
 
             /** The entry's sequence number in the history. */
             private final int mSequenceNumber = sSequenceNumber.getAndIncrement();
+
+            /** Logging tag, of the shape "component:random_hexadecimal". */
+            @NonNull
+            private final String mTag;
 
             /** Uid of the client that requested the IME. */
             private final int mUid;
@@ -350,8 +344,10 @@ public final class ImeTrackerService extends IImeTracker.Stub {
             @NonNull
             private String mRequestWindowName = "not set";
 
-            private Entry(int uid, @ImeTracker.Type int type, @ImeTracker.Status int status,
-                    @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
+            private Entry(@NonNull String tag, int uid, @ImeTracker.Type int type,
+                    @ImeTracker.Status int status, @ImeTracker.Origin int origin,
+                    @SoftInputShowHideReason int reason) {
+                mTag = tag;
                 mUid = uid;
                 mType = type;
                 mStatus = status;
