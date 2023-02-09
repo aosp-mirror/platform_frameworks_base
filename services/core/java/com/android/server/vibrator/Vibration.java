@@ -19,6 +19,7 @@ package com.android.server.vibrator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.CombinedVibration;
+import android.os.IBinder;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.os.vibrator.PrebakedSegment;
@@ -31,6 +32,7 @@ import android.util.proto.ProtoOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The base class for all vibrations.
@@ -38,6 +40,13 @@ import java.util.Objects;
 class Vibration {
     private static final SimpleDateFormat DEBUG_DATE_FORMAT =
             new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
+    // Used to generate globally unique vibration ids.
+    private static final AtomicInteger sNextVibrationId = new AtomicInteger(1); // 0 = no callback
+
+    public final long id;
+    public final CallerInfo callerInfo;
+    public final VibrationStats stats = new VibrationStats();
+    public final IBinder callerToken;
 
     /** Vibration status with reference to values from vibratormanagerservice.proto for logging. */
     enum Status {
@@ -80,24 +89,82 @@ class Vibration {
         }
     }
 
+    Vibration(@NonNull IBinder token, @NonNull CallerInfo callerInfo) {
+        Objects.requireNonNull(token);
+        Objects.requireNonNull(callerInfo);
+        this.id = sNextVibrationId.getAndIncrement();
+        this.callerToken = token;
+        this.callerInfo = callerInfo;
+    }
+
+    /**
+     * Holds lightweight immutable info on the process that triggered the vibration. This data
+     * could potentially be kept in memory for a long time for bugreport dumpsys operations.
+     *
+     * Since CallerInfo can be kept in memory for a long time, it shouldn't hold any references to
+     * potentially expensive or resource-linked objects, such as {@link IBinder}.
+     */
+    static final class CallerInfo {
+        public final VibrationAttributes attrs;
+        public final int uid;
+        public final int displayId;
+        public final String opPkg;
+        public final String reason;
+
+        CallerInfo(@NonNull VibrationAttributes attrs, int uid, int displayId,
+                String opPkg, String reason) {
+            Objects.requireNonNull(attrs);
+            this.attrs = attrs;
+            this.uid = uid;
+            this.displayId = displayId;
+            this.opPkg = opPkg;
+            this.reason = reason;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof CallerInfo)) return false;
+            CallerInfo that = (CallerInfo) o;
+            return Objects.equals(attrs, that.attrs)
+                    && uid == that.uid
+                    && displayId == that.displayId
+                    && Objects.equals(opPkg, that.opPkg)
+                    && Objects.equals(reason, that.reason);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(attrs, uid, displayId, opPkg, reason);
+        }
+
+        @Override
+        public String toString() {
+            return "CallerInfo{"
+                    + " attrs=" + attrs
+                    + ", uid=" + uid
+                    + ", displayId=" + displayId
+                    + ", opPkg=" + opPkg
+                    + ", reason=" + reason
+                    + '}';
+        }
+    }
+
     /** Immutable info passed as a signal to end a vibration. */
     static final class EndInfo {
         /** The {@link Status} to be set to the vibration when it ends with this info. */
         @NonNull
         public final Status status;
-        /** The UID that triggered the vibration that ended this, or -1 if undefined. */
-        public final int endedByUid;
-        /** The VibrationAttributes.USAGE_* of the vibration that ended this, or -1 if undefined. */
-        public final int endedByUsage;
+        /** Info about the process that ended the vibration. */
+        public final CallerInfo endedBy;
 
         EndInfo(@NonNull Vibration.Status status) {
-            this(status, /* endedByUid= */ -1, /* endedByUsage= */ -1);
+            this(status, null);
         }
 
-        EndInfo(@NonNull Vibration.Status status, int endedByUid, int endedByUsage) {
+        EndInfo(@NonNull Vibration.Status status, @Nullable CallerInfo endedBy) {
             this.status = status;
-            this.endedByUid = endedByUid;
-            this.endedByUsage = endedByUsage;
+            this.endedBy = endedBy;
         }
 
         @Override
@@ -105,27 +172,31 @@ class Vibration {
             if (this == o) return true;
             if (!(o instanceof EndInfo)) return false;
             EndInfo that = (EndInfo) o;
-            return endedByUid == that.endedByUid
-                    && endedByUsage == that.endedByUsage
+            return Objects.equals(endedBy, that.endedBy)
                     && status == that.status;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(status, endedByUid, endedByUsage);
+            return Objects.hash(status, endedBy);
         }
 
         @Override
         public String toString() {
             return "EndInfo{"
                     + "status=" + status
-                    + ", endedByUid=" + endedByUid
-                    + ", endedByUsage=" + endedByUsage
+                    + ", endedBy=" + endedBy
                     + '}';
         }
     }
 
-    /** Debug information about vibrations. */
+    /**
+     * Holds lightweight debug information about the vibration that could potentially be kept in
+     * memory for a long time for bugreport dumpsys operations.
+     *
+     * Since DebugInfo can be kept in memory for a long time, it shouldn't hold any references to
+     * potentially expensive or resource-linked objects, such as {@link IBinder}.
+     */
     static final class DebugInfo {
         private final long mCreateTime;
         private final long mStartTime;
@@ -134,16 +205,13 @@ class Vibration {
         private final CombinedVibration mEffect;
         private final CombinedVibration mOriginalEffect;
         private final float mScale;
-        private final VibrationAttributes mAttrs;
-        private final int mUid;
-        private final int mDisplayId;
-        private final String mOpPkg;
-        private final String mReason;
+        private final CallerInfo mCallerInfo;
         private final Status mStatus;
 
         DebugInfo(Status status, VibrationStats stats, @Nullable CombinedVibration effect,
-                @Nullable CombinedVibration originalEffect, float scale, VibrationAttributes attrs,
-                int uid, int displayId, String opPkg, String reason) {
+                @Nullable CombinedVibration originalEffect, float scale,
+                @NonNull CallerInfo callerInfo) {
+            Objects.requireNonNull(callerInfo);
             mCreateTime = stats.getCreateTimeDebug();
             mStartTime = stats.getStartTimeDebug();
             mEndTime = stats.getEndTimeDebug();
@@ -151,11 +219,7 @@ class Vibration {
             mEffect = effect;
             mOriginalEffect = originalEffect;
             mScale = scale;
-            mAttrs = attrs;
-            mUid = uid;
-            mDisplayId = displayId;
-            mOpPkg = opPkg;
-            mReason = reason;
+            mCallerInfo = callerInfo;
             mStatus = status;
         }
 
@@ -179,16 +243,8 @@ class Vibration {
                     .append(mOriginalEffect)
                     .append(", scale: ")
                     .append(String.format("%.2f", mScale))
-                    .append(", attrs: ")
-                    .append(mAttrs)
-                    .append(", uid: ")
-                    .append(mUid)
-                    .append(", displayId: ")
-                    .append(mDisplayId)
-                    .append(", opPkg: ")
-                    .append(mOpPkg)
-                    .append(", reason: ")
-                    .append(mReason)
+                    .append(", callerInfo: ")
+                    .append(mCallerInfo)
                     .toString();
         }
 
@@ -201,9 +257,10 @@ class Vibration {
             proto.write(VibrationProto.STATUS, mStatus.ordinal());
 
             final long attrsToken = proto.start(VibrationProto.ATTRIBUTES);
-            proto.write(VibrationAttributesProto.USAGE, mAttrs.getUsage());
-            proto.write(VibrationAttributesProto.AUDIO_USAGE, mAttrs.getAudioUsage());
-            proto.write(VibrationAttributesProto.FLAGS, mAttrs.getFlags());
+            final VibrationAttributes attrs = mCallerInfo.attrs;
+            proto.write(VibrationAttributesProto.USAGE, attrs.getUsage());
+            proto.write(VibrationAttributesProto.AUDIO_USAGE, attrs.getAudioUsage());
+            proto.write(VibrationAttributesProto.FLAGS, attrs.getFlags());
             proto.end(attrsToken);
 
             if (mEffect != null) {
