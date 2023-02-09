@@ -21,6 +21,7 @@ import static android.app.admin.PolicyUpdateResult.RESULT_SUCCESS;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_TARGET_USER_ID;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
 import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT;
+import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -42,6 +43,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.SparseArray;
@@ -73,6 +75,9 @@ import java.util.Set;
  */
 final class DevicePolicyEngine {
     static final String TAG = "DevicePolicyEngine";
+
+    private static final String ENABLE_COEXISTENCE_FLAG = "enable_coexistence";
+    private static final boolean DEFAULT_ENABLE_COEXISTENCE_FLAG = true;
 
     private final Context mContext;
     private final UserManager mUserManager;
@@ -820,7 +825,7 @@ final class DevicePolicyEngine {
      * each admin. Global policies are returned under {@link UserHandle#ALL}.
      */
     @NonNull
-    DevicePolicyState getParcelablePoliciesStateMap() {
+    DevicePolicyState getDevicePolicyState() {
         Map<UserHandle, Map<PolicyKey, android.app.admin.PolicyState<?>>> policies =
                 new HashMap<>();
         for (int i = 0; i < mLocalPolicies.size(); i++) {
@@ -869,11 +874,6 @@ final class DevicePolicyEngine {
     private void updateDeviceAdminServiceOnPolicyAddLocked(@NonNull EnforcingAdmin enforcingAdmin) {
         int userId = enforcingAdmin.getUserId();
 
-        // A connection is established with DPCs as soon as they are provisioned, so no need to
-        // connect when a policy is set.
-        if (enforcingAdmin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
-            return;
-        }
         if (mEnforcingAdmins.contains(userId)
                 && mEnforcingAdmins.get(userId).contains(enforcingAdmin)) {
             return;
@@ -884,6 +884,11 @@ final class DevicePolicyEngine {
         }
         mEnforcingAdmins.get(enforcingAdmin.getUserId()).add(enforcingAdmin);
 
+        // A connection is established with DPCs as soon as they are provisioned, so no need to
+        // connect when a policy is set.
+        if (enforcingAdmin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
+            return;
+        }
         mDeviceAdminServiceController.startServiceForAdmin(
                 enforcingAdmin.getPackageName(),
                 userId,
@@ -896,18 +901,10 @@ final class DevicePolicyEngine {
      */
     private void updateDeviceAdminServiceOnPolicyRemoveLocked(
             @NonNull EnforcingAdmin enforcingAdmin) {
-        // TODO(b/263364434): centralise handling in one place.
-        // DPCs rely on a constant connection being established as soon as they are provisioned,
-        // so we shouldn't disconnect it even if they no longer have policies set.
-        if (enforcingAdmin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
-            return;
-        }
         if (doesAdminHavePolicies(enforcingAdmin)) {
             return;
         }
-
         int userId = enforcingAdmin.getUserId();
-
         if (mEnforcingAdmins.contains(userId)) {
             mEnforcingAdmins.get(userId).remove(enforcingAdmin);
             if (mEnforcingAdmins.get(userId).isEmpty()) {
@@ -915,6 +912,12 @@ final class DevicePolicyEngine {
             }
         }
 
+        // TODO(b/263364434): centralise handling in one place.
+        // DPCs rely on a constant connection being established as soon as they are provisioned,
+        // so we shouldn't disconnect it even if they no longer have policies set.
+        if (enforcingAdmin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
+            return;
+        }
         mDeviceAdminServiceController.stopServiceForAdmin(
                 enforcingAdmin.getPackageName(),
                 userId,
@@ -968,14 +971,51 @@ final class DevicePolicyEngine {
         }
     }
 
+    // TODO: we need to listen for user removal and package removal and update out internal policy
+    //  map and enforcing admins for this is be accurate.
+    boolean hasActivePolicies() {
+        return mEnforcingAdmins.size() > 0;
+    }
+
+    /**
+     * Returns {@code true} if the coexistence flag is enabled or:
+     * <ul>
+     * <li>If the provided package is an admin with existing policies
+     * <li>A new admin and no other admin have policies set
+     * <li>More than one admin have policies set
+     */
+    boolean canAdminAddPolicies(String packageName, int userId) {
+        if (isCoexistenceFlagEnabled()) {
+            return true;
+        }
+
+        if (mEnforcingAdmins.contains(userId)
+                && mEnforcingAdmins.get(userId).stream().anyMatch(admin ->
+                admin.getPackageName().equals(packageName))) {
+            return true;
+        }
+
+        int numOfEnforcingAdmins = 0;
+        for (int i = 0; i < mEnforcingAdmins.size(); i++) {
+            numOfEnforcingAdmins += mEnforcingAdmins.get(i).size();
+        }
+        return numOfEnforcingAdmins == 0 || numOfEnforcingAdmins > 1;
+    }
+
+    private boolean isCoexistenceFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_DEVICE_POLICY_MANAGER,
+                ENABLE_COEXISTENCE_FLAG,
+                DEFAULT_ENABLE_COEXISTENCE_FLAG);
+    }
+
     private class DevicePoliciesReaderWriter {
-        private static final String DEVICE_POLICIES_XML = "device_policies.xml";
+        private static final String DEVICE_POLICIES_XML = "device_policy_state.xml";
         private static final String TAG_LOCAL_POLICY_ENTRY = "local-policy-entry";
         private static final String TAG_GLOBAL_POLICY_ENTRY = "global-policy-entry";
         private static final String TAG_ADMINS_POLICY_ENTRY = "admins-policy-entry";
         private static final String TAG_ENFORCING_ADMINS_ENTRY = "enforcing-admins-entry";
         private static final String ATTR_USER_ID = "user-id";
-        private static final String ATTR_POLICY_ID = "policy-id";
 
         private final File mFile;
 
