@@ -599,7 +599,7 @@ public final class Settings {
 
     /**
      * Activity Action: Show settings to allow configuration of
-     * {@link Manifest.permission#RUN_LONG_JOBS} permission
+     * {@link Manifest.permission#RUN_USER_INITIATED_JOBS} permission
      *
      * Input: Optionally, the Intent's data URI can specify the application package name to
      * directly invoke the management GUI specific to the package name. For example
