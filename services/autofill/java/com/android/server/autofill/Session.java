@@ -170,6 +170,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             "android.service.autofill.action.DELAYED_FILL";
     private static final String EXTRA_REQUEST_ID = "android.service.autofill.extra.REQUEST_ID";
 
+    private static final String PCC_HINTS_DELIMITER = ",";
+
     final Object mLock;
 
     private final AutofillManagerServiceImpl mService;
@@ -564,6 +566,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (mPendingInlineSuggestionsRequest.isServiceSupported()) {
                     mPendingFillRequest = new FillRequest(mPendingFillRequest.getId(),
                             mPendingFillRequest.getFillContexts(),
+                            mPendingFillRequest.getHints(),
                             mPendingFillRequest.getClientState(),
                             mPendingFillRequest.getFlags(),
                             mPendingInlineSuggestionsRequest,
@@ -672,8 +675,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 final ArrayList<FillContext> contexts =
                         mergePreviousSessionLocked(/* forSave= */ false);
+                final List<String> hints = getTypeHintsForProvider();
+
                 mDelayedFillPendingIntent = createPendingIntent(requestId);
-                request = new FillRequest(requestId, contexts, mClientState, flags,
+                request = new FillRequest(requestId, contexts, hints, mClientState, flags,
                         /*inlineSuggestionsRequest=*/ null,
                         /*delayedFillIntentSender=*/ mDelayedFillPendingIntent == null
                             ? null
@@ -702,6 +707,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         mService.getServicePackageName(), mLastFillRequest.getFlags());
             }
         }
+    }
+
+    /**
+     * Get the list of valid autofill hint types from Device flags
+     * Returns empty list if PCC is off or no types available
+    */
+    private List<String> getTypeHintsForProvider() {
+        if (!mService.getMaster().isPccClassificationEnabled()) {
+            return Collections.EMPTY_LIST;
+        }
+        final String typeHints = mService.getMaster().getPccProviderHints();
+        if (TextUtils.isEmpty(typeHints)) {
+            return new ArrayList<>();
+        }
+
+        return List.of(typeHints.split(PCC_HINTS_DELIMITER));
     }
 
     /**

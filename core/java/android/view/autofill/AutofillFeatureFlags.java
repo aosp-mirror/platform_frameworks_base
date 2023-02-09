@@ -82,6 +82,12 @@ public class AutofillFeatureFlags {
             "autofill_dialog_enabled";
 
     /**
+     * Indicates that PCC Autofill detection feature is enabled or not.
+     */
+    public static final String DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS =
+            "pcc_classification_hints";
+
+    /**
      * Sets the autofill hints allowed list for the fields that can trigger the fill dialog
      * feature at Activity starting.
      *
@@ -178,6 +184,22 @@ public class AutofillFeatureFlags {
     public static final String DEVICE_CONFIG_AUTOFILL_PCC_CLASSIFICATION_ENABLED =
             "pcc_classification_enabled";
 
+    /**
+     * Give preference to autofill provider's detection.
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PREFER_PROVIDER_OVER_PCC = "prefer_provider_over_pcc";
+
+
+    /**
+     * Use data from secondary source if primary not present .
+     * For eg: if we prefer PCC over provider, and PCC detection didn't classify a field, however,
+     * autofill provider did, this flag would decide whether we use that result, and show some
+     * presentation for that particular field.
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PCC_USE_FALLBACK = "pcc_use_fallback";
+
     // END AUTOFILL PCC CLASSIFICATION FLAGS
 
 
@@ -190,9 +212,11 @@ public class AutofillFeatureFlags {
             "autofill_inline_tooltip_first_show_delay";
 
     private static final String DIALOG_HINTS_DELIMITER = ":";
+    private static final String PCC_HINTS_DELIMITER = ",";
 
     private static final boolean DEFAULT_HAS_FILL_DIALOG_UI_FEATURE = false;
     private static final String DEFAULT_FILL_DIALOG_ENABLED_HINTS = "";
+    private static final String DEFAULT_PCC_FEATURE_PROVIDER_HINTS = "";
 
 
     // CREDENTIAL MANAGER DEFAULTS
@@ -206,7 +230,8 @@ public class AutofillFeatureFlags {
 
     // AUTOFILL PCC CLASSIFICATION FLAGS DEFAULTS
     // Default for whether the pcc classification is enabled for autofill.
-    private static final boolean DEFAULT_AUTOFILL_PCC_CLASSIFICATION_ENABLED = false;
+    /** @hide */
+    public static final boolean DEFAULT_AUTOFILL_PCC_CLASSIFICATION_ENABLED = false;
     // END AUTOFILL PCC CLASSIFICATION FLAGS DEFAULTS
 
 
@@ -222,6 +247,25 @@ public class AutofillFeatureFlags {
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_AUTOFILL_DIALOG_ENABLED,
                 DEFAULT_HAS_FILL_DIALOG_UI_FEATURE);
+    }
+
+    /**
+     * The list of datatypes that is supported by framework
+     * detection.
+     *
+     * @hide
+     */
+    public static String[] getTypeHintsForProvider() {
+        final String typeHints = DeviceConfig.getString(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS,
+                DEFAULT_PCC_FEATURE_PROVIDER_HINTS);
+        if (TextUtils.isEmpty(typeHints)) {
+            return new String[0];
+        }
+
+        return ArrayUtils.filter(typeHints.split(PCC_HINTS_DELIMITER), String[]::new,
+                (str) -> !TextUtils.isEmpty(str));
     }
 
     /**
