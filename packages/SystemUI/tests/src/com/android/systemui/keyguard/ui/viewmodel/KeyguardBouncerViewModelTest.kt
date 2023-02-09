@@ -16,28 +16,29 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardBouncerViewModelTest : SysuiTestCase() {
     lateinit var underTest: KeyguardBouncerViewModel
     @Mock lateinit var bouncerView: BouncerView
@@ -51,7 +52,7 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
 
     @Test
     fun setMessage() =
-        runBlocking(Dispatchers.Main.immediate) {
+        runTest {
             val flow = MutableStateFlow<BouncerShowMessageModel?>(null)
             var message: BouncerShowMessageModel? = null
             Mockito.`when`(bouncerInteractor.showMessage)
@@ -62,6 +63,8 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
             flow.value = BouncerShowMessageModel(message = "abc", colorStateList = null)
 
             val job = underTest.bouncerShowMessage.onEach { message = it }.launchIn(this)
+            // Run the tasks that are pending at this point of virtual time.
+            runCurrent()
             assertThat(message?.message).isEqualTo("abc")
             job.cancel()
         }
