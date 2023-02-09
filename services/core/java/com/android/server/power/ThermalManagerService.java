@@ -741,6 +741,9 @@ public class ThermalManagerService extends SystemService {
                     final android.hardware.thermal.Temperature[] halRet =
                             shouldFilter ? mInstance.getTemperaturesWithType(type)
                                     : mInstance.getTemperatures();
+                    if (halRet == null) {
+                        return ret;
+                    }
                     for (android.hardware.thermal.Temperature t : halRet) {
                         if (!Temperature.isValidStatus(t.throttlingStatus)) {
                             Slog.e(TAG, "Invalid temperature status " + t.throttlingStatus
@@ -774,6 +777,9 @@ public class ThermalManagerService extends SystemService {
                     final android.hardware.thermal.CoolingDevice[] halRet = shouldFilter
                             ? mInstance.getCoolingDevicesWithType(type)
                             : mInstance.getCoolingDevices();
+                    if (halRet == null) {
+                        return ret;
+                    }
                     for (android.hardware.thermal.CoolingDevice t : halRet) {
                         if (!CoolingDevice.isValidType(t.type)) {
                             Slog.e(TAG, "Invalid cooling device type " + t.type + " from AIDL HAL");
@@ -806,9 +812,14 @@ public class ThermalManagerService extends SystemService {
                     final TemperatureThreshold[] halRet =
                             shouldFilter ? mInstance.getTemperatureThresholdsWithType(type)
                                     : mInstance.getTemperatureThresholds();
-
-                    return Arrays.stream(halRet).filter(t -> t.type == type).collect(
-                            Collectors.toList());
+                    if (halRet == null) {
+                        return ret;
+                    }
+                    if (shouldFilter) {
+                        return Arrays.stream(halRet).filter(t -> t.type == type).collect(
+                                Collectors.toList());
+                    }
+                    return Arrays.asList(halRet);
                 } catch (IllegalArgumentException | IllegalStateException e) {
                     Slog.e(TAG, "Couldn't getTemperatureThresholds due to invalid status", e);
                 } catch (RemoteException e) {

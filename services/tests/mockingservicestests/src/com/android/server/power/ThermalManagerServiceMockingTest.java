@@ -120,6 +120,34 @@ public class ThermalManagerServiceMockingTest {
     }
 
     @Test
+    public void getCurrentTemperatures_aidl() throws RemoteException {
+        android.hardware.thermal.Temperature halT1 = new android.hardware.thermal.Temperature();
+        halT1.type = TemperatureType.MODEM;
+        halT1.name = "test1";
+        halT1.throttlingStatus = ThrottlingSeverity.EMERGENCY;
+        halT1.value = 99.0f;
+        android.hardware.thermal.Temperature halT2 = new android.hardware.thermal.Temperature();
+        halT2.name = "test2";
+        halT2.type = TemperatureType.SOC;
+        halT2.throttlingStatus = ThrottlingSeverity.NONE;
+
+        Mockito.when(mAidlHalMock.getTemperatures()).thenReturn(
+                new android.hardware.thermal.Temperature[]{
+                        halT2, halT1
+                });
+        List<Temperature> ret = mAidlWrapper.getCurrentTemperatures(false, TemperatureType.UNKNOWN);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatures();
+
+        Temperature expectedT1 = new Temperature(halT1.value, halT1.type, halT1.name,
+                halT1.throttlingStatus);
+        Temperature expectedT2 = new Temperature(halT2.value, halT2.type, halT2.name,
+                halT2.throttlingStatus);
+        List<Temperature> expectedRet = List.of(expectedT1, expectedT2);
+        assertTrue("Got temperature list as " + ret + " with different values compared to "
+                + expectedRet, expectedRet.containsAll(ret));
+    }
+
+    @Test
     public void getCurrentTemperatures_withFilter_aidl() throws RemoteException {
         android.hardware.thermal.Temperature halT1 = new android.hardware.thermal.Temperature();
         halT1.type = TemperatureType.MODEM;
@@ -151,6 +179,23 @@ public class ThermalManagerServiceMockingTest {
         List<Temperature> expectedRet = List.of(expectedT1, expectedT2);
         assertTrue("Got temperature list as " + ret + " with different values compared to "
                 + expectedRet, expectedRet.containsAll(ret));
+    }
+
+    @Test
+    public void getCurrentTemperatures_nullResult_aidl() throws RemoteException {
+        Mockito.when(mAidlHalMock.getTemperaturesWithType(Mockito.anyInt())).thenReturn(null);
+        List<Temperature> ret = mAidlWrapper.getCurrentTemperatures(true,
+                Temperature.TYPE_SOC);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperaturesWithType(
+                Temperature.TYPE_SOC);
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+
+        Mockito.when(mAidlHalMock.getTemperatures()).thenReturn(null);
+        ret = mAidlWrapper.getCurrentTemperatures(false, Temperature.TYPE_SOC);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatures();
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
     }
 
     @Test
@@ -205,6 +250,55 @@ public class ThermalManagerServiceMockingTest {
         ret = mAidlWrapper.getCurrentTemperatures(true, TemperatureType.MODEM);
         Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperaturesWithType(
                 TemperatureType.MODEM);
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+    }
+
+    @Test
+    public void getCurrentCoolingDevices_aidl() throws RemoteException {
+        android.hardware.thermal.CoolingDevice halC1 = new android.hardware.thermal.CoolingDevice();
+        halC1.type = CoolingType.SPEAKER;
+        halC1.name = "test1";
+        halC1.value = 10;
+        android.hardware.thermal.CoolingDevice halC2 = new android.hardware.thermal.CoolingDevice();
+        halC2.type = CoolingType.MODEM;
+        halC2.name = "test2";
+        halC2.value = 110;
+
+        Mockito.when(mAidlHalMock.getCoolingDevicesWithType(Mockito.anyInt())).thenReturn(
+                new android.hardware.thermal.CoolingDevice[]{
+                        halC1, halC2
+                }
+        );
+        Mockito.when(mAidlHalMock.getCoolingDevices()).thenReturn(
+                new android.hardware.thermal.CoolingDevice[]{
+                        halC1, halC2
+                }
+        );
+        List<CoolingDevice> ret = mAidlWrapper.getCurrentCoolingDevices(false,
+                CoolingType.COMPONENT);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getCoolingDevices();
+
+        CoolingDevice expectedC1 = new CoolingDevice(halC1.value, halC1.type, halC1.name);
+        CoolingDevice expectedC2 = new CoolingDevice(halC2.value, halC2.type, halC2.name);
+        List<CoolingDevice> expectedRet = List.of(expectedC1, expectedC2);
+        assertTrue("Got cooling device list as " + ret + " with different values compared to "
+                + expectedRet, expectedRet.containsAll(ret));
+    }
+
+    @Test
+    public void getCurrentCoolingDevices_nullResult_aidl() throws RemoteException {
+        Mockito.when(mAidlHalMock.getCoolingDevicesWithType(Mockito.anyInt())).thenReturn(null);
+        List<CoolingDevice> ret = mAidlWrapper.getCurrentCoolingDevices(true,
+                CoolingType.COMPONENT);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getCoolingDevicesWithType(
+                CoolingType.COMPONENT);
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+
+        Mockito.when(mAidlHalMock.getCoolingDevices()).thenReturn(null);
+        ret = mAidlWrapper.getCurrentCoolingDevices(false, CoolingType.COMPONENT);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getCoolingDevices();
         assertNotNull(ret);
         assertEquals(0, ret.size());
     }
@@ -292,6 +386,44 @@ public class ThermalManagerServiceMockingTest {
     }
 
     @Test
+    public void getTemperatureThresholds_aidl() throws RemoteException {
+        TemperatureThreshold halT1 = new TemperatureThreshold();
+        halT1.name = "test1";
+        halT1.type = Temperature.TYPE_SKIN;
+        halT1.hotThrottlingThresholds = new float[]{1, 2, 3};
+        halT1.coldThrottlingThresholds = new float[]{};
+
+        TemperatureThreshold halT2 = new TemperatureThreshold();
+        halT2.name = "test2";
+        halT2.type = Temperature.TYPE_SOC;
+        halT2.hotThrottlingThresholds = new float[]{};
+        halT2.coldThrottlingThresholds = new float[]{3, 2, 1};
+
+        Mockito.when(mAidlHalMock.getTemperatureThresholds()).thenReturn(
+                new TemperatureThreshold[]{halT1, halT2}
+        );
+        List<TemperatureThreshold> ret = mAidlWrapper.getTemperatureThresholds(false,
+                Temperature.TYPE_UNKNOWN);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatureThresholds();
+
+        assertEquals("Got unexpected temperature thresholds size", 2, ret.size());
+        TemperatureThreshold threshold = ret.get(0).type == Temperature.TYPE_SKIN ? ret.get(0)
+                : ret.get(1);
+
+        assertEquals(halT1.name, threshold.name);
+        assertEquals(halT1.type, threshold.type);
+        assertArrayEquals(halT1.hotThrottlingThresholds, threshold.hotThrottlingThresholds, 0.1f);
+        assertArrayEquals(halT1.coldThrottlingThresholds, threshold.coldThrottlingThresholds, 0.1f);
+
+        threshold = ret.get(0).type == Temperature.TYPE_SOC ? ret.get(0) : ret.get(1);
+
+        assertEquals(halT2.name, threshold.name);
+        assertEquals(halT2.type, threshold.type);
+        assertArrayEquals(halT2.hotThrottlingThresholds, threshold.hotThrottlingThresholds, 0.1f);
+        assertArrayEquals(halT2.coldThrottlingThresholds, threshold.coldThrottlingThresholds, 0.1f);
+    }
+
+    @Test
     public void getTemperatureThresholds_withFilter_aidl() throws RemoteException {
         TemperatureThreshold halT1 = new TemperatureThreshold();
         halT1.name = "test1";
@@ -300,18 +432,18 @@ public class ThermalManagerServiceMockingTest {
         halT1.coldThrottlingThresholds = new float[]{};
 
         TemperatureThreshold halT2 = new TemperatureThreshold();
-        halT1.name = "test2";
-        halT1.type = Temperature.TYPE_SOC;
-        halT1.hotThrottlingThresholds = new float[]{};
-        halT1.coldThrottlingThresholds = new float[]{3, 2, 1};
+        halT2.name = "test2";
+        halT2.type = Temperature.TYPE_SOC;
+        halT2.hotThrottlingThresholds = new float[]{};
+        halT2.coldThrottlingThresholds = new float[]{3, 2, 1};
 
         Mockito.when(mAidlHalMock.getTemperatureThresholdsWithType(Mockito.anyInt())).thenReturn(
                 new TemperatureThreshold[]{halT1, halT2}
         );
         List<TemperatureThreshold> ret = mAidlWrapper.getTemperatureThresholds(true,
-                Temperature.TYPE_SOC);
+                Temperature.TYPE_SKIN);
         Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatureThresholdsWithType(
-                Temperature.TYPE_SOC);
+                Temperature.TYPE_SKIN);
 
         assertEquals("Got unexpected temperature thresholds size", 1, ret.size());
         TemperatureThreshold threshold = ret.get(0);
@@ -319,6 +451,24 @@ public class ThermalManagerServiceMockingTest {
         assertEquals(halT1.type, threshold.type);
         assertArrayEquals(halT1.hotThrottlingThresholds, threshold.hotThrottlingThresholds, 0.1f);
         assertArrayEquals(halT1.coldThrottlingThresholds, threshold.coldThrottlingThresholds, 0.1f);
+    }
+
+    @Test
+    public void getTemperatureThresholds_nullResult_aidl() throws RemoteException {
+        Mockito.when(mAidlHalMock.getTemperatureThresholdsWithType(Mockito.anyInt())).thenReturn(
+                null);
+        List<TemperatureThreshold> ret = mAidlWrapper.getTemperatureThresholds(true,
+                Temperature.TYPE_SOC);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatureThresholdsWithType(
+                Temperature.TYPE_SOC);
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
+
+        Mockito.when(mAidlHalMock.getTemperatureThresholds()).thenReturn(null);
+        ret = mAidlWrapper.getTemperatureThresholds(false, Temperature.TYPE_SOC);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).getTemperatureThresholds();
+        assertNotNull(ret);
+        assertEquals(0, ret.size());
     }
 
     @Test
