@@ -104,8 +104,8 @@ public class PipTaskOrganizerTest extends ShellTestCase {
                 new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {},
                 mPipSizeSpecHandler);
         mMainExecutor = new TestShellExecutor();
-        mPipTaskOrganizer = new PipTaskOrganizer(mContext,
-                mMockSyncTransactionQueue, mPipTransitionState, mPipBoundsState,
+        mPipTaskOrganizer = new PipTaskOrganizer(mContext, mMockSyncTransactionQueue,
+                mPipTransitionState, mPipBoundsState, mPipSizeSpecHandler,
                 mPipBoundsAlgorithm, mMockPhonePipMenuController, mMockPipAnimationController,
                 mMockPipSurfaceTransactionHelper, mMockPipTransitionController,
                 mMockPipParamsChangedForwarder, mMockOptionalSplitScreen, mMockDisplayController,

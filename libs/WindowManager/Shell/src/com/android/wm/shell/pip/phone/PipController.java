@@ -1032,7 +1032,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private void onDisplayRotationChangedNotInPip(Context context, int toRotation) {
         // Update the display layout, note that we have to do this on every rotation even if we
         // aren't in PIP since we need to update the display layout to get the right resources
-        mPipBoundsState.getDisplayLayout().rotateTo(context.getResources(), toRotation);
+        DisplayLayout layoutCopy = mPipBoundsState.getDisplayLayout();
+
+        layoutCopy.rotateTo(context.getResources(), toRotation);
+        mPipBoundsState.setDisplayLayout(layoutCopy);
+        mPipSizeSpecHandler.setDisplayLayout(layoutCopy);
     }
 
     /**
@@ -1069,7 +1073,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         mPipBoundsState.getStashedState());
 
         // Update the display layout
-        mPipBoundsState.getDisplayLayout().rotateTo(context.getResources(), toRotation);
+        DisplayLayout layoutCopy = mPipBoundsState.getDisplayLayout();
+
+        layoutCopy.rotateTo(context.getResources(), toRotation);
+        mPipBoundsState.setDisplayLayout(layoutCopy);
+        mPipSizeSpecHandler.setDisplayLayout(layoutCopy);
 
         // Calculate the stack bounds in the new orientation based on same fraction along the
         // rotated movement bounds.
