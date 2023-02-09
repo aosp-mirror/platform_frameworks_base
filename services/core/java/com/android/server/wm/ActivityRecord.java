@@ -5115,6 +5115,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mDeferHidingClient;
     }
 
+    boolean canAffectSystemUiFlags() {
+        return task != null && task.canAffectSystemUiFlags() && isVisible()
+                && !inPinnedWindowingMode();
+    }
+
     @Override
     boolean isVisible() {
         // If the activity isn't hidden then it is considered visible and there is no need to check
