@@ -3747,7 +3747,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     // TODO: use these callbacks elsewhere in place of the existing notifyScreen*()
-    // (KeyguardViewMediator, KeyguardSecurityContainer)
+    // (KeyguardViewMediator, KeyguardHostView)
     /**
      * Dispatch wakeup events to:
      *  - update biometric listening states
