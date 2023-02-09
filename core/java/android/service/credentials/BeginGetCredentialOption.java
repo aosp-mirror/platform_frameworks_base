@@ -39,6 +39,8 @@ import com.android.internal.util.Preconditions;
  */
 @SuppressLint("ParcelNotFinal")
 public class BeginGetCredentialOption implements Parcelable {
+    private static final String BUNDLE_ID_KEY =
+            "android.service.credentials.BeginGetCredentialOption.BUNDLE_ID_KEY";
     /**
      * A unique id associated with this request option.
      */
@@ -129,6 +131,11 @@ public class BeginGetCredentialOption implements Parcelable {
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
         mCandidateQueryData = requireNonNull(
                 candidateQueryData, "candidateQueryData must not be null");
+        addIdToBundle();
+    }
+
+    private void addIdToBundle() {
+        mCandidateQueryData.putString(BUNDLE_ID_KEY, mId);
     }
 
     private BeginGetCredentialOption(@NonNull Parcel in) {

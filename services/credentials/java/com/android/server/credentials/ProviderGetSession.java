@@ -305,18 +305,20 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
             credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
                     credentialEntry.getSlice(),
-                    /*fillInIntent=*/setUpFillInIntent(credentialEntry.getType())));
+                    /*fillInIntent=*/setUpFillInIntent(credentialEntry
+                    .getBeginGetCredentialOption().getId())));
         }
         return credentialUiEntries;
     }
 
-    private Intent setUpFillInIntent(@Nullable String id) {
+    private Intent setUpFillInIntent(@NonNull String id) {
         // TODO: Determine if we should skip this entry if entry id is not set, or is set
         // but does not resolve to a valid option. For now, not skipping it because
         // it may be possible that the provider adds their own extras and expects to receive
         // those and complete the flow.
-        if (id == null || mBeginGetOptionToCredentialOptionMap.get(id) == null) {
+        if (mBeginGetOptionToCredentialOptionMap.get(id) == null) {
             Log.i(TAG, "Id from Credential Entry does not resolve to a valid option");
+            return new Intent();
         }
         return new Intent().putExtra(CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,
                 new GetCredentialRequest(
