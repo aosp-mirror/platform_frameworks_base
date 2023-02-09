@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -34,10 +33,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(JUnit4::class)
 class LightRevealScrimInteractorTest : SysuiTestCase() {
     private val fakeKeyguardTransitionRepository = FakeKeyguardTransitionRepository()
     private val fakeLightRevealScrimRepository = FakeLightRevealScrimRepository()
