@@ -627,7 +627,7 @@ final class Constants {
     })
     @interface HpdSignalType {}
 
-    static final String DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE = "soundbar_mode";
+    static final String DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE = "enable_soundbar_mode";
     static final String DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX = "enable_earc_tx";
     @StringDef({
             DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE,
