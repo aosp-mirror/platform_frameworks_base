@@ -335,8 +335,6 @@ cc_library_shared {
                 "libtflite",
                 "server_configurable_flags",
                 "libimage_io",
-                "libjpegdecoder",
-                "libjpegencoder",
                 "libjpegrecoverymap",
             ],
             export_shared_lib_headers: [
