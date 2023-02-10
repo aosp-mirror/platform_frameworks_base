@@ -528,7 +528,7 @@ public abstract class Context {
 
     /**
      * Flag for {@link #bindService}: allow the process hosting the target service to gain
-     * {@link ActivityManager#PROCESS_CAPABILITY_NETWORK}, which allows it be able
+     * {@link ActivityManager#PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK}, which allows it be able
      * to access network regardless of any power saving restrictions.
      *
      * @hide

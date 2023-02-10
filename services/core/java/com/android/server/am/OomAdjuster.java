@@ -22,8 +22,8 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_BFSL;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
-import static android.app.ActivityManager.PROCESS_CAPABILITY_NETWORK;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
@@ -117,6 +117,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
+import android.net.NetworkPolicyManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManagerInternal;
@@ -2276,14 +2277,15 @@ public class OomAdjuster {
                         // elevated to a high enough procstate anyway to get network unless they
                         // request otherwise, so don't propagate the network capability by default
                         // in this case unless they explicitly request it.
-                        if ((cstate.getCurCapability() & PROCESS_CAPABILITY_NETWORK) != 0) {
+                        if ((cstate.getCurCapability()
+                                & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0) {
                             if (clientProcState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
                                 // This is used to grant network access to Expedited Jobs.
                                 if (cr.hasFlag(Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS)) {
-                                    capability |= PROCESS_CAPABILITY_NETWORK;
+                                    capability |= PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
                                 }
                             } else {
-                                capability |= PROCESS_CAPABILITY_NETWORK;
+                                capability |= PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
                             }
                         }
 
@@ -2794,27 +2796,33 @@ public class OomAdjuster {
     }
 
     private int getDefaultCapability(ProcessRecord app, int procState) {
+        final int networkCapabilities =
+                NetworkPolicyManager.getDefaultProcessNetworkCapabilities(procState);
+        final int baseCapabilities;
         switch (procState) {
             case PROCESS_STATE_PERSISTENT:
             case PROCESS_STATE_PERSISTENT_UI:
             case PROCESS_STATE_TOP:
-                return PROCESS_CAPABILITY_ALL; // BFSL allowed
+                baseCapabilities = PROCESS_CAPABILITY_ALL; // BFSL allowed
+                break;
             case PROCESS_STATE_BOUND_TOP:
-                return PROCESS_CAPABILITY_NETWORK | PROCESS_CAPABILITY_BFSL;
+                baseCapabilities = PROCESS_CAPABILITY_BFSL;
+                break;
             case PROCESS_STATE_FOREGROUND_SERVICE:
                 if (app.getActiveInstrumentation() != null) {
-                    return PROCESS_CAPABILITY_ALL_IMPLICIT | PROCESS_CAPABILITY_NETWORK ;
+                    baseCapabilities = PROCESS_CAPABILITY_ALL_IMPLICIT;
                 } else {
                     // Capability from foreground service is conditional depending on
                     // foregroundServiceType in the manifest file and the
                     // mAllowWhileInUsePermissionInFgs flag.
-                    return PROCESS_CAPABILITY_NETWORK;
+                    baseCapabilities = PROCESS_CAPABILITY_NONE;
                 }
-            case PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                return PROCESS_CAPABILITY_NETWORK;
+                break;
             default:
-                return PROCESS_CAPABILITY_NONE;
+                baseCapabilities = PROCESS_CAPABILITY_NONE;
+                break;
         }
+        return baseCapabilities | networkCapabilities;
     }
 
     /**
