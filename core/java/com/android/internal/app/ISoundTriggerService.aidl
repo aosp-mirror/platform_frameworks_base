@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.media.permission.Identity;
+import android.hardware.soundtrigger.SoundTrigger;
 import com.android.internal.app.ISoundTriggerSession;
 
 /**
@@ -43,6 +44,7 @@ interface ISoundTriggerService {
      * to clean-up whenever that happens.
      */
     ISoundTriggerSession attachAsOriginator(in Identity originatorIdentity,
+                                            in SoundTrigger.ModuleProperties moduleProperties,
                                             IBinder client);
 
     /**
@@ -64,5 +66,12 @@ interface ISoundTriggerService {
      */
     ISoundTriggerSession attachAsMiddleman(in Identity middlemanIdentity,
                                            in Identity originatorIdentity,
+                                           in SoundTrigger.ModuleProperties moduleProperties,
                                            IBinder client);
+
+    /**
+     * Get available underlying SoundTrigger modules to attach to.
+     */
+    List<SoundTrigger.ModuleProperties> listModuleProperties(in Identity originatorIdentity);
+
 }

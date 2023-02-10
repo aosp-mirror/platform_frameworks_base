@@ -56,9 +56,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Helper for {@link SoundTrigger} APIs. Supports two types of models:
@@ -84,10 +87,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private static final int INVALID_VALUE = Integer.MIN_VALUE;
 
-    /** The {@link ModuleProperties} for the system, or null if none exists. */
-    final ModuleProperties mModuleProperties;
-
-    /** The properties for the DSP module */
     private SoundTriggerModule mModule;
     private final Object mLock = new Object();
     private final Context mContext;
@@ -114,7 +113,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private PowerSaveModeListener mPowerSaveModeListener;
 
-    private final SoundTriggerModuleProvider mModuleProvider;
 
     // Handler to process call state changes will delay to allow time for the audio
     // and sound trigger HALs to process the end of call notifications
@@ -123,46 +121,24 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private static final int MSG_CALL_STATE_CHANGED = 0;
     private static final int CALL_INACTIVE_MSG_DELAY_MS = 1000;
 
-    /**
-     * Provider interface for retrieving SoundTriggerModule instances
-     */
-    public interface SoundTriggerModuleProvider {
-        /**
-         * Populate module properties for all available modules
-         *
-         * @param modules List of ModuleProperties to be populated
-         * @return Status int 0 on success.
-         */
-        int listModuleProperties(@NonNull ArrayList<SoundTrigger.ModuleProperties> modules);
+    // TODO(b/269366605) Temporary solution to query correct moduleProperties
+    private final int mModuleId;
+    private final Function<SoundTrigger.StatusListener, SoundTriggerModule> mModuleProvider;
+    private final Supplier<List<ModuleProperties>> mModulePropertiesProvider;
 
-        /**
-         * Get SoundTriggerModule based on {@link SoundTrigger.ModuleProperties#getId()}
-         *
-         * @param moduleId Module ID
-         * @param statusListener Client listener to be associated with the returned module
-         * @return Module associated with moduleId
-         */
-        SoundTriggerModule getModule(int moduleId, SoundTrigger.StatusListener statusListener);
-    }
-
-    SoundTriggerHelper(Context context, SoundTriggerModuleProvider moduleProvider) {
-        ArrayList <ModuleProperties> modules = new ArrayList<>();
-        mModuleProvider = moduleProvider;
-        int status = mModuleProvider.listModuleProperties(modules);
+    SoundTriggerHelper(Context context,
+            @NonNull Function<SoundTrigger.StatusListener, SoundTriggerModule> moduleProvider,
+            int moduleId,
+            @NonNull Supplier<List<ModuleProperties>> modulePropertiesProvider) {
+        mModuleId = moduleId;
         mContext = context;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mModelDataMap = new HashMap<UUID, ModelData>();
         mKeyphraseUuidMap = new HashMap<Integer, UUID>();
-        if (status != SoundTrigger.STATUS_OK || modules.size() == 0) {
-            Slog.w(TAG, "listModules status=" + status + ", # of modules=" + modules.size());
-            mModuleProperties = null;
-            mModule = null;
-        } else {
-            // TODO: Figure out how to determine which module corresponds to the DSP hardware.
-            mModuleProperties = modules.get(0);
-        }
-
+        mModuleProvider = moduleProvider;
+        mModulePropertiesProvider = modulePropertiesProvider;
+        mModule = mModuleProvider.apply(this);
         Looper looper = Looper.myLooper();
         if (looper == null) {
             looper = Looper.getMainLooper();
@@ -245,7 +221,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                         + " soundModel=" + soundModel + ", callback=" + callback.asBinder()
                         + ", recognitionConfig=" + recognitionConfig
                         + ", runInBatterySaverMode=" + runInBatterySaverMode);
-                Slog.d(TAG, "moduleProperties=" + mModuleProperties);
                 dumpModelStateLocked();
             }
 
@@ -290,11 +265,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private int prepareForRecognition(ModelData modelData) {
         if (mModule == null) {
-            mModule = mModuleProvider.getModule(mModuleProperties.getId(), this);
-            if (mModule == null) {
-                Slog.w(TAG, "prepareForRecognition: cannot attach to sound trigger module");
-                return STATUS_ERROR;
-            }
+            Slog.w(TAG, "prepareForRecognition: cannot attach to sound trigger module");
+            return STATUS_ERROR;
         }
         // Load the model if it is not loaded.
         if (!modelData.isModelLoaded()) {
@@ -336,11 +308,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig,
             int keyphraseId, boolean runInBatterySaverMode) {
         synchronized (mLock) {
-            if (mModuleProperties == null) {
-                Slog.w(TAG, "Attempting startRecognition without the capability");
-                return STATUS_ERROR;
-            }
-
             IRecognitionStatusCallback oldCallback = modelData.getCallback();
             if (oldCallback != null && oldCallback.asBinder() != callback.asBinder()) {
                 Slog.w(TAG, "Canceling previous recognition for model id: "
@@ -486,8 +453,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             if (callback == null) {
                 return STATUS_ERROR;
             }
-            if (mModuleProperties == null || mModule == null) {
-                Slog.w(TAG, "Attempting stopRecognition without the capability");
+            if (mModule == null) {
+                Slog.w(TAG, "Attempting stopRecognition after detach");
                 return STATUS_ERROR;
             }
 
@@ -563,7 +530,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     public ModuleProperties getModuleProperties() {
-        return mModuleProperties;
+        for (ModuleProperties moduleProperties : mModulePropertiesProvider.get()) {
+            if (moduleProperties.getId() == mModuleId) {
+                return moduleProperties;
+            }
+        }
+        Slog.e(TAG, "Module properties not found for existing moduleId " + mModuleId);
+        return null;
     }
 
     int unloadKeyphraseSoundModel(int keyphraseId) {
@@ -1027,7 +1000,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             internalClearGlobalStateLocked();
             if (mModule != null) {
                 mModule.detach();
-                mModule = null;
+                mModule = mModuleProvider.apply(this);
             }
         }
     }
@@ -1098,7 +1071,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mLock) {
             pw.print("  module properties=");
-            pw.println(mModuleProperties == null ? "null" : mModuleProperties);
             pw.print("  call active=");
             pw.println(mCallActive);
             pw.println("  SoundTrigger Power State=" + mSoundTriggerPowerSaveMode);
@@ -1444,7 +1416,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     // Computes whether we have any recognition running at all (voice or generic). Sets
     // the mRecognitionRequested variable with the result.
     private boolean computeRecognitionRequestedLocked() {
-        if (mModuleProperties == null || mModule == null) {
+        if (mModule == null) {
             mRecognitionRequested = false;
             return mRecognitionRequested;
         }
