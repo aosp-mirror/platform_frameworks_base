@@ -156,6 +156,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
 
         decoration.relayout(taskInfo);
+        setupCaptionColor(taskInfo, decoration);
     }
 
     @Override
@@ -227,7 +228,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         public void onClick(View v) {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
             final int id = v.getId();
-            if (id == R.id.caption_handle) {
+            if (id == R.id.close_window || id == R.id.close_button) {
+                mTaskOperations.closeTask(mTaskToken);
+            } else if (id == R.id.back_button) {
+                mTaskOperations.injectBackKey();
+            } else if (id == R.id.caption_handle) {
                 decoration.createHandleMenu();
             } else if (id == R.id.desktop_button) {
                 mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(true));
@@ -238,6 +243,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mDesktopTasksController.ifPresent(c -> c.moveToFullscreen(mTaskId));
                 decoration.closeHandleMenu();
                 decoration.setButtonVisibility(false);
+            } else if (id == R.id.collapse_menu_button) {
+                decoration.closeHandleMenu();
             }
         }
 
@@ -508,6 +515,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
     }
 
+    private void setupCaptionColor(RunningTaskInfo taskInfo,
+            DesktopModeWindowDecoration decoration) {
+        if (taskInfo == null || taskInfo.taskDescription == null) return;
+        final int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
+        decoration.setCaptionColor(statusBarColor);
+    }
+
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
         return DesktopModeStatus.isProto2Enabled()
@@ -546,6 +560,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.setDragPositioningCallback(taskPositioner);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT);
+        setupCaptionColor(taskInfo, windowDecoration);
         incrementEventReceiverTasks(taskInfo.displayId);
     }
 

@@ -431,7 +431,7 @@ public class WindowDecorationTests extends ShellTestCase {
         verify(additionalWindowSurfaceBuilder).setParent(decorContainerSurface);
         verify(additionalWindowSurfaceBuilder).build();
         verify(mMockSurfaceControlAddWindowT).setPosition(additionalWindowSurface, 20, 40);
-        verify(mMockSurfaceControlAddWindowT).setWindowCrop(additionalWindowSurface, 432, 64);
+        verify(mMockSurfaceControlAddWindowT).setWindowCrop(additionalWindowSurface, 442, 74);
         verify(mMockSurfaceControlAddWindowT).show(additionalWindowSurface);
         verify(mMockSurfaceControlViewHostFactory, Mockito.times(2))
                 .create(any(), eq(defaultDisplay), any());
@@ -565,7 +565,7 @@ public class WindowDecorationTests extends ShellTestCase {
                             mMockSurfaceControlAddWindowT,
                             x - mRelayoutResult.mDecorContainerOffsetX,
                             y - mRelayoutResult.mDecorContainerOffsetY,
-                            width, height);
+                            width, height, 10);
             return additionalWindow;
         }
     }
