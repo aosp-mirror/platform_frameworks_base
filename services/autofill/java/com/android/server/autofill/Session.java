@@ -3840,8 +3840,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 && (mSessionFlags.mAugmentedAutofillOnly
                         || !mSessionFlags.mInlineSupportedByService
                         || mSessionFlags.mExpiredResponse)
-                && isViewFocusedLocked(flags)
-                || isFillDialogUiEnabled()) {
+                && (isViewFocusedLocked(flags) || isRequestSupportFillDialog(flags))) {
             if (sDebug) Slog.d(TAG, "Create inline request for augmented autofill");
             remoteRenderService.getInlineSuggestionsRendererInfo(new RemoteCallback(
                     (extras) -> {
