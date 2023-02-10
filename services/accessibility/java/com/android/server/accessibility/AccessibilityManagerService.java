@@ -4553,7 +4553,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final boolean isSettingsAlwaysOnEnabled = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
-                0, userState.mUserId) == 1;
+                1, userState.mUserId) == 1;
         final boolean isAlwaysOnFeatureFlagEnabled = mMagnificationController
                 .isAlwaysOnMagnificationFeatureFlagEnabled();
         final boolean isAlwaysOnEnabled = isAlwaysOnFeatureFlagEnabled && isSettingsAlwaysOnEnabled;
