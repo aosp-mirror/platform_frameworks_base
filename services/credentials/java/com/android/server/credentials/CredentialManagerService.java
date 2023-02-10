@@ -247,8 +247,13 @@ public final class CredentialManagerService
     }
 
     public static boolean isCredentialDescriptionApiEnabled() {
-        return DeviceConfig.getBoolean(
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API, false);
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
     }
 
     @SuppressWarnings("GuardedBy") // ErrorProne requires initiateProviderSessionForRequestLocked
