@@ -743,7 +743,15 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
                     mInfo.getServiceInfo().applicationInfo.uid, voiceInteractorIdentity,
                     mHotwordDetectionComponentName, mVisualQueryDetectionComponentName, mUser,
-                    /* bindInstantServiceAllowed= */ false, detectorType);
+                    /* bindInstantServiceAllowed= */ false, detectorType,
+                    (token1, detectorType1) -> {
+                        try {
+                            mService.detectorRemoteExceptionOccurred(token1, detectorType1);
+                        } catch (RemoteException e) {
+                            Slog.w(TAG, "Fail to notify client detector remote "
+                                    + "exception occurred.");
+                        }
+                    });
         } else if (detectorType != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
             // TODO: Logger events should be handled in session instead. Temporary adding the
             //  checking to prevent confusion so VisualQueryDetection events won't be logged if the
@@ -1079,5 +1087,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         // Notifies visibility change here can cause duplicate events, it is added to make sure
         // client always get the callback even if session is unexpectedly closed.
         mServiceStub.setSessionWindowVisible(connection.mToken, false);
+    }
+
+    interface DetectorRemoteExceptionListener {
+        void onDetectorRemoteException(@NonNull IBinder token, int detectorType);
     }
 }

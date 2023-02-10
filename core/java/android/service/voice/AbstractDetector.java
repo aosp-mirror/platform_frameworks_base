@@ -77,6 +77,13 @@ abstract class AbstractDetector implements HotwordDetector {
         mIsDetectorActive = new AtomicBoolean(true);
     }
 
+    boolean isSameToken(IBinder token) {
+        if (token == null) {
+            return false;
+        }
+        return mToken == token;
+    }
+
     /**
      * Method to be called for the detector to ready/register itself with underlying system
      * services.
