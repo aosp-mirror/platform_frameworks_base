@@ -104,14 +104,17 @@ public final class ApplicationStartInfo implements Parcelable {
     /** Process started due to Activity started for any reason not explicitly listed. */
     public static final int START_REASON_START_ACTIVITY = 11;
 
+    /** Start type not yet set. */
+    public static final int START_TYPE_UNSET = 0;
+
     /** Process started from scratch. */
-    public static final int START_TYPE_COLD = 0;
+    public static final int START_TYPE_COLD = 1;
 
     /** Process retained minimally SavedInstanceState. */
-    public static final int START_TYPE_WARM = 1;
+    public static final int START_TYPE_WARM = 2;
 
     /** Process brought back to foreground. */
-    public static final int START_TYPE_HOT = 2;
+    public static final int START_TYPE_HOT = 3;
 
     /**
      * Default. The system always creates a new instance of the activity in the target task and
@@ -277,6 +280,7 @@ public final class ApplicationStartInfo implements Parcelable {
     @IntDef(
             prefix = {"START_TYPE_"},
             value = {
+                START_TYPE_UNSET,
                 START_TYPE_COLD,
                 START_TYPE_WARM,
                 START_TYPE_HOT,
@@ -769,6 +773,7 @@ public final class ApplicationStartInfo implements Parcelable {
 
     private static String startTypeToString(@StartType int startType) {
         return switch (startType) {
+            case START_TYPE_UNSET -> "UNSET";
             case START_TYPE_COLD -> "COLD";
             case START_TYPE_WARM -> "WARM";
             case START_TYPE_HOT -> "HOT";
