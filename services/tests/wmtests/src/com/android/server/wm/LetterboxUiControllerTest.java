@@ -494,6 +494,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         doReturn(insets).when(mainWindow).getInsetsState();
         doReturn(attrs).when(mainWindow).getAttrs();
         doReturn(true).when(mainWindow).isDrawn();
+        doReturn(true).when(mainWindow).isOnScreen();
         doReturn(false).when(mainWindow).isLetterboxedForDisplayCutout();
         doReturn(true).when(mainWindow).areAppWindowBoundsLetterboxed();
         doReturn(true).when(mLetterboxConfiguration).isLetterboxActivityCornersRounded();
