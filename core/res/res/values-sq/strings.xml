@@ -1358,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP nëpërmjet USB-së u aktivizua"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Ndarja e internetit përmes USB-së u aktivizua"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI nëpërmjet USB-së u aktivizua"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Aksesori i USB-së u lidh"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Trokit për më shumë opsione."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pajisja e lidhur po karikohet. Trokit për opsione të tjera."</string>
@@ -1706,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"U krye"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Çaktivizo shkurtoren"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Përdor shkurtoren"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Anasjellja e ngjyrës"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Korrigjimi i ngjyrës"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modaliteti i përdorimit me një dorë"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Shumë më i zbehtë"</string>
@@ -2312,16 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Lejon një aplikacion shoqërues të fillojë shërbimet në plan të parë nga sfondi."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofoni ofrohet"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofoni është i bllokuar"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Ekran i dyfishtë"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Ekrani i dyfishtë është aktiv"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> po i përdor të dyja ekranet për të shfaqur përmbajtje"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Pajisja është shumë e nxehtë"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"\"Ekrani i dyfishtë\" nuk ofrohet sepse telefoni yt po nxehet shumë"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Çaktivizoje"</string>
 </resources>

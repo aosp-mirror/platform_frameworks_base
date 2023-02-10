@@ -1359,6 +1359,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"‏PTP באמצעות USB מופעל"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"‏שיתוף אינטרנט בין מכשירים באמצעות USB מופעל"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"‏MIDI באמצעות USB מופעל"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"‏אביזר USB מחובר"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"יש להקיש להצגת אפשרויות נוספות."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"המכשיר המחובר בטעינה. יש להקיש לאפשרויות נוספות."</string>
@@ -1707,7 +1709,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"סיום"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"השבתת קיצור הדרך"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"שימוש בקיצור הדרך"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"היפוך צבעים"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"תיקון צבע"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"מצב שימוש ביד אחת"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"מעומעם במיוחד"</string>
@@ -1858,8 +1861,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"עבודה <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> שני בעבודה"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> שלישי בעבודה"</string>
-    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
-    <skip />
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"שכפול של <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"יש לבקש קוד אימות לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"צריך לבקש קו ביטול נעילה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"יש לבקש סיסמה לפני ביטול הצמדה"</string>
@@ -2314,16 +2316,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ההרשאה הזו מאפשרת לאפליקציה נלווית להפעיל מהרקע שירותים שפועלים בחזית."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"המיקרופון זמין"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"המיקרופון חסום"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"מצב שני מסכים"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"מצב שני מסכים מופעל"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> משתמשת בשני המסכים כדי להציג תוכן"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"המכשיר חם מדי"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"מצב שני מסכים לא זמין כי הטלפון נהיה חם מדי"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"השבתה"</string>
 </resources>
