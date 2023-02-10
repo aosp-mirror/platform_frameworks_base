@@ -49,6 +49,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‏‎‎‏‎‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‏‏‎‎‎‏‏‏‎‎‎‏‎‎‎‏‏‎‏‎‏‎‎‎‏‏‏‎‎‏‎‎Top 50%‎‏‎‎‏‎"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‏‎‏‎‏‎‎‎‏‎‏‏‏‏‏‏‏‎‏‏‎‎‎‎‎‏‎‏‏‎‏‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‎‎‏‎‎‎‏‎Top 30%‎‏‎‎‏‎"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‎‎‏‏‎‎‏‏‎‏‎‎‎‏‎‏‎‎‎‎‎‏‏‎‎‎‎‏‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‎‏‏‏‏‎‎‏‏‎‎‎Bottom full screen‎‏‎‎‏‎"</string>
+    <string name="accessibility_split_left" msgid="1713683765575562458">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‏‎‎‏‎‎‎‎‎‏‏‏‎‏‎‎‏‎‎‏‏‏‎‎‎‏‎‏‎‎‎‎‏‏‏‏‏‎‎‎‎‏‏‎‏‎‎‏‏‎‏‏‎‏‎‎Split left‎‏‎‎‏‎"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‎‏‎‎‎‏‏‏‎‏‎‏‏‎‏‏‎‎‎‏‏‏‎‏‎‎‎‏‎‏‎‏‏‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‎‏‎Split right‎‏‎‎‏‎"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‏‎‏‏‎‎‎‎‏‎‎‏‎‏‎‏‏‏‏‎‎‎‏‎‏‏‎‎‎‏‏‎‎‎‏‏‎‏‏‏‏‎‎‎‏‎‏‎‎Split top‎‏‎‎‏‎"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‎‏‎‏‎‎‎‎‎‎‎‎‎‏‎‏‏‏‎‏‏‏‏‎‏‏‏‏‎‎‏‏‎‎‎‏‎‏‏‎‎‎‎‏‎‏‏‏‏‏‎Split bottom‎‏‎‎‏‎"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‏‏‏‎‎‏‎‎‎‎‎‏‎‎‎‎‏‎‎‎‎‎‏‎‎‎‎‎‏‎‏‎‏‎‎‏‎‎‎‎‎‏‎‏‏‏‎‎Using one-handed mode‎‏‎‎‏‎"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‎‏‏‎‎‎‏‎‏‏‎‏‎‏‎‎‏‎‏‎‎‎‏‏‎‎‎‏‏‏‏‎‎‏‎‎‏‏‎‏‏‎‏‏‏‎‎‎‏‏‏‎‏‎‏‏‎To exit, swipe up from the bottom of the screen or tap anywhere above the app‎‏‎‎‏‎"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‎‏‏‏‎‏‎‏‏‏‎‏‎‎‏‏‏‏‎‏‎‏‏‎‏‏‎‎‎‎‏‏‏‎‏‎‎‎‎‎‏‎‏‎‏‎‏‏‏‏‎‎‏‎‎Start one-handed mode‎‏‎‎‏‎"</string>
