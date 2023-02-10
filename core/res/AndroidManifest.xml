@@ -2922,6 +2922,15 @@
     <permission android:name="android.permission.BIND_IMS_SERVICE"
         android:protectionLevel="signature|privileged|vendorPrivileged" />
 
+    <!-- Must be required by a SatelliteService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature|privileged|vendorPrivileged
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_SATELLITE_SERVICE"
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
+
     <!-- Must be required by a telephony data service to ensure that only the
          system can bind to it.
          <p>Protection level: signature

@@ -70,6 +70,7 @@ package android {
     field public static final String BIND_RESUME_ON_REBOOT_SERVICE = "android.permission.BIND_RESUME_ON_REBOOT_SERVICE";
     field public static final String BIND_ROTATION_RESOLVER_SERVICE = "android.permission.BIND_ROTATION_RESOLVER_SERVICE";
     field public static final String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
+    field public static final String BIND_SATELLITE_SERVICE = "android.permission.BIND_SATELLITE_SERVICE";
     field public static final String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
     field public static final String BIND_SOUND_TRIGGER_DETECTION_SERVICE = "android.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE";
     field public static final String BIND_TELEPHONY_DATA_SERVICE = "android.permission.BIND_TELEPHONY_DATA_SERVICE";
