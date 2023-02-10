@@ -18,13 +18,12 @@ package com.android.keyguard.dagger;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.Handler;
-import android.os.UserHandle;
 import android.view.LayoutInflater;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Application;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -34,6 +33,8 @@ import com.android.systemui.shared.clocks.DefaultClockProvider;
 
 import dagger.Module;
 import dagger.Provides;
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.CoroutineScope;
 
 /** Dagger Module for clocks. */
 @Module
@@ -44,17 +45,23 @@ public abstract class ClockRegistryModule {
     public static ClockRegistry getClockRegistry(
             @Application Context context,
             PluginManager pluginManager,
-            @Main Handler handler,
+            @Application CoroutineScope scope,
+            @Main CoroutineDispatcher mainDispatcher,
+            @Background CoroutineDispatcher bgDispatcher,
             FeatureFlags featureFlags,
             @Main Resources resources,
             LayoutInflater layoutInflater) {
-        return new ClockRegistry(
+        ClockRegistry registry = new ClockRegistry(
                 context,
                 pluginManager,
-                handler,
+                scope,
+                mainDispatcher,
+                bgDispatcher,
                 featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
-                UserHandle.USER_ALL,
+                /* handleAllUsers= */ true,
                 new DefaultClockProvider(context, layoutInflater, resources),
                 context.getString(R.string.lockscreen_clock_id_fallback));
+        registry.registerListeners();
+        return registry;
     }
 }
