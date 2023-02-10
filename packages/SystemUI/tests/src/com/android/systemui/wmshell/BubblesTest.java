@@ -82,6 +82,8 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
@@ -282,6 +284,8 @@ public class BubblesTest extends SysuiTestCase {
     private UserManager mUserManager;
     @Mock
     private ShadeWindowLogger mShadeWindowLogger;
+    @Mock
+    private SystemUiSystemPropertiesFlags.FlagResolver mFlagResolver;
 
     private TestableBubblePositioner mPositioner;
 
@@ -294,6 +298,7 @@ public class BubblesTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        setTestFlagResolver(mFlagResolver);
 
         mTestableLooper = TestableLooper.get(this);
 
@@ -1507,7 +1512,7 @@ public class BubblesTest extends SysuiTestCase {
 
     @Test
     public void testUpdateBubble_skipsDndSuppressListNotifs() {
-        mBubbleEntry = new BubbleEntry(mRow.getSbn(), mRow.getRanking(), mRow.isDismissable(),
+        mBubbleEntry = new BubbleEntry(mRow.getSbn(), mRow.getRanking(), true, /* isDismissable */
                 mRow.shouldSuppressNotificationDot(), true /* DndSuppressNotifFromList */,
                 mRow.shouldSuppressPeek());
         mBubbleEntry.getBubbleMetadata().setFlags(
@@ -1534,7 +1539,7 @@ public class BubblesTest extends SysuiTestCase {
 
         // Send ranking update that the notif is suppressed from the list.
         HashMap<String, Pair<BubbleEntry, Boolean>> entryDataByKey = new HashMap<>();
-        mBubbleEntry = new BubbleEntry(mRow.getSbn(), mRow.getRanking(), mRow.isDismissable(),
+        mBubbleEntry = new BubbleEntry(mRow.getSbn(), mRow.getRanking(), true /* isDismissable */,
                 mRow.shouldSuppressNotificationDot(), true /* DndSuppressNotifFromList */,
                 mRow.shouldSuppressPeek());
         Pair<BubbleEntry, Boolean> pair = new Pair(mBubbleEntry, true);
@@ -1699,7 +1704,65 @@ public class BubblesTest extends SysuiTestCase {
         assertThat(mBubbleData.getBubbles().size()).isEqualTo(2);
     }
 
-    /** Creates a bubble using the userId and package. */
+    @Test
+    public void testCreateBubbleFromOngoingNotification_OngoingDismissalEnabled() {
+        when(mFlagResolver.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)).thenReturn(true);
+        NotificationEntry notif = new NotificationEntryBuilder()
+                .setFlag(mContext, Notification.FLAG_ONGOING_EVENT, true)
+                .setCanBubble(true)
+                .build();
+
+        BubbleEntry bubble = BubblesManager.notifToBubbleEntry(notif);
+
+        assertTrue("Ongoing Notifis should be dismissable", bubble.isDismissable());
+    }
+
+
+    @Test
+    public void testCreateBubbleFromNoDismissNotification_OngoingDismissalEnabled() {
+        when(mFlagResolver.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)).thenReturn(true);
+        NotificationEntry notif = new NotificationEntryBuilder()
+                .setFlag(mContext, Notification.FLAG_NO_DISMISS, true)
+                .setCanBubble(true)
+                .build();
+
+        BubbleEntry bubble = BubblesManager.notifToBubbleEntry(notif);
+
+        assertFalse("FLAG_NO_DISMISS Notifs should be non-dismissable", bubble.isDismissable());
+    }
+
+    @Test
+    public void testCreateBubbleFromOngoingNotification_OngoingDismissalDisabled() {
+        NotificationEntry notif = new NotificationEntryBuilder()
+                .setFlag(mContext, Notification.FLAG_ONGOING_EVENT, true)
+                .setCanBubble(true)
+                .build();
+
+        BubbleEntry bubble = BubblesManager.notifToBubbleEntry(notif);
+
+        assertFalse(
+                "Ongoing Notifis should be dismissable, if the feature is off",
+                bubble.isDismissable()
+        );
+    }
+
+
+    @Test
+    public void testCreateBubbleFromNoDismissNotification_OngoingDismissalDisabled() {
+        NotificationEntry notif = new NotificationEntryBuilder()
+                .setFlag(mContext, Notification.FLAG_NO_DISMISS, true)
+                .setCanBubble(true)
+                .build();
+
+        BubbleEntry bubble = BubblesManager.notifToBubbleEntry(notif);
+
+        assertTrue(
+                "FLAG_NO_DISMISS should be ignored, if the feature is off",
+                bubble.isDismissable()
+        );
+    }
+
+        /** Creates a bubble using the userId and package. */
     private Bubble createBubble(int userId, String pkg) {
         final UserHandle userHandle = new UserHandle(userId);
         NotificationEntry workEntry = new NotificationEntryBuilder()

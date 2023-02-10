@@ -90,6 +90,7 @@ import com.android.systemui.statusbar.notification.collection.PipelineDumpable;
 import com.android.systemui.statusbar.notification.collection.PipelineDumper;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProvider;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
@@ -191,6 +192,7 @@ public class NotificationStackScrollLayoutController {
     private final boolean mUseRoundnessSourceTypes;
     private final NotificationTargetsHelper mNotificationTargetsHelper;
     private final SecureSettings mSecureSettings;
+    private final NotificationDismissibilityProvider mDismissibilityProvider;
 
     private View mLongPressedView;
 
@@ -510,7 +512,7 @@ public class NotificationStackScrollLayoutController {
                                 && (parent.areGutsExposed()
                                 || mSwipeHelper.getExposedMenuView() == parent
                                 || (parent.getAttachedChildren().size() == 1
-                                && parent.getEntry().isDismissable()))) {
+                                && mDismissibilityProvider.isDismissable(parent.getEntry())))) {
                             // In this case the group is expanded and showing the menu for the
                             // group, further interaction should apply to the group, not any
                             // child notifications so we use the parent of the child. We also do the
@@ -670,7 +672,8 @@ public class NotificationStackScrollLayoutController {
             NotificationStackSizeCalculator notificationStackSizeCalculator,
             FeatureFlags featureFlags,
             NotificationTargetsHelper notificationTargetsHelper,
-            SecureSettings secureSettings) {
+            SecureSettings secureSettings,
+            NotificationDismissibilityProvider dismissibilityProvider) {
         mStackStateLogger = stackLogger;
         mLogger = logger;
         mAllowLongPress = allowLongPress;
@@ -713,6 +716,7 @@ public class NotificationStackScrollLayoutController {
         mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
         mNotificationTargetsHelper = notificationTargetsHelper;
         mSecureSettings = secureSettings;
+        mDismissibilityProvider = dismissibilityProvider;
         updateResources();
     }
 

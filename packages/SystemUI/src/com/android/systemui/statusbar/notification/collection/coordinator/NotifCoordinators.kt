@@ -55,6 +55,7 @@ class NotifCoordinatorsImpl @Inject constructor(
     viewConfigCoordinator: ViewConfigCoordinator,
     visualStabilityCoordinator: VisualStabilityCoordinator,
     sensitiveContentCoordinator: SensitiveContentCoordinator,
+    dismissibilityCoordinator: DismissibilityCoordinator
 ) : NotifCoordinators {
 
     private val mCoordinators: MutableList<Coordinator> = ArrayList()
@@ -93,6 +94,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(gutsCoordinator)
         mCoordinators.add(preparationCoordinator)
         mCoordinators.add(remoteInputCoordinator)
+        mCoordinators.add(dismissibilityCoordinator)
 
         // Manually add Ordered Sections
         // HeadsUp > FGS > People > Alerting > Silent > Minimized > Unknown/Default
