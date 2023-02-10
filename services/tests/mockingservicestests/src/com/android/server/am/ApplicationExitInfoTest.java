@@ -711,6 +711,8 @@ public class ApplicationExitInfoTest {
                 null);                                // description
 
         // Case 8: App1 gets "remove task"
+        final String app1Description = "remove task";
+
         sleep(1);
         final int app1IsolatedUidUser2 = 1099002; // isolated uid
         final long app1Pss4 = 34343;
@@ -737,7 +739,7 @@ public class ApplicationExitInfoTest {
 
         mAppExitInfoTracker.mIsolatedUidRecords.addIsolatedUid(app1IsolatedUidUser2, app1UidUser2);
         noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
-                ApplicationExitInfo.SUBREASON_REMOVE_TASK, null, now8);
+                ApplicationExitInfo.SUBREASON_UNKNOWN, app1Description, now8);
 
         updateExitInfo(app, now8);
         list.clear();
@@ -747,21 +749,21 @@ public class ApplicationExitInfoTest {
         info = list.get(0);
 
         verifyApplicationExitInfo(
-                info,                                       // info
-                now8,                                       // timestamp
-                app1PidUser2,                               // pid
-                app1IsolatedUidUser2,                       // uid
-                app1UidUser2,                               // packageUid
-                null,                                       // definingUid
-                app1ProcessName,                            // processName
-                0,                                          // connectionGroup
-                ApplicationExitInfo.REASON_OTHER,           // reason
-                ApplicationExitInfo.SUBREASON_REMOVE_TASK,  // subReason
-                0,                                          // status
-                app1Pss4,                                   // pss
-                app1Rss4,                                   // rss
-                IMPORTANCE_CACHED,                          // importance
-                null);                                      // description
+                info,                                     // info
+                now8,                                     // timestamp
+                app1PidUser2,                             // pid
+                app1IsolatedUidUser2,                     // uid
+                app1UidUser2,                             // packageUid
+                null,                                     // definingUid
+                app1ProcessName,                          // processName
+                0,                                        // connectionGroup
+                ApplicationExitInfo.REASON_OTHER,         // reason
+                ApplicationExitInfo.SUBREASON_UNKNOWN,    // subReason
+                0,                                        // status
+                app1Pss4,                                 // pss
+                app1Rss4,                                 // rss
+                IMPORTANCE_CACHED,                        // importance
+                app1Description);                         // description
 
         // App1 gets "too many empty"
         final String app1Description2 = "too many empty";
@@ -1056,18 +1058,7 @@ public class ApplicationExitInfoTest {
         if (importance != null) {
             assertEquals(importance.intValue(), info.getImportance());
         }
-
-        // info.getDescription returns a combination of subReason & description
-        if ((subReason != null) && (subReason != ApplicationExitInfo.SUBREASON_UNKNOWN)
-                && (description != null)) {
-            assertTrue(TextUtils.equals(
-                    "[" + info.subreasonToString(subReason) + "] " + description,
-                    info.getDescription()));
-        } else if ((subReason != null) && (subReason != ApplicationExitInfo.SUBREASON_UNKNOWN)) {
-            assertTrue(TextUtils.equals(
-                    "[" + info.subreasonToString(subReason) + "]",
-                    info.getDescription()));
-        } else if (description != null) {
+        if (description != null) {
             assertTrue(TextUtils.equals(description, info.getDescription()));
         }
     }

@@ -706,22 +706,7 @@ public final class ApplicationExitInfo implements Parcelable {
      * guarantees that the format is stable across devices or Android releases.</p>
      */
     public @Nullable String getDescription() {
-        final StringBuilder sb = new StringBuilder();
-
-        if (mSubReason != SUBREASON_UNKNOWN) {
-            sb.append("[");
-            sb.append(subreasonToString(mSubReason));
-            sb.append("]");
-        }
-
-        if (!TextUtils.isEmpty(mDescription)) {
-            if (sb.length() > 0) {
-                sb.append(" ");
-            }
-            sb.append(mDescription);
-        }
-
-        return sb.toString();
+        return mDescription;
     }
 
     /**
