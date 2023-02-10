@@ -601,12 +601,12 @@ final class Constants {
     })
     @interface RcProfileSource {}
 
-    static final int HDMI_EARC_STATUS_IDLE = IEArcStatus.STATUS_IDLE; // IDLE1
+    static final int HDMI_EARC_STATUS_IDLE = IEArcStatus.IDLE; // IDLE1
     static final int HDMI_EARC_STATUS_EARC_PENDING =
-            IEArcStatus.STATUS_EARC_PENDING; // DISC1 and DISC2
-    static final int HDMI_EARC_STATUS_ARC_PENDING = IEArcStatus.STATUS_ARC_PENDING; // IDLE2 for ARC
+            IEArcStatus.EARC_PENDING; // DISC1 and DISC2
+    static final int HDMI_EARC_STATUS_ARC_PENDING = IEArcStatus.ARC_PENDING; // IDLE2 for ARC
     static final int HDMI_EARC_STATUS_EARC_CONNECTED =
-            IEArcStatus.STATUS_EARC_CONNECTED; // eARC connected
+            IEArcStatus.EARC_CONNECTED; // eARC connected
 
     @IntDef({
             HDMI_EARC_STATUS_IDLE,
