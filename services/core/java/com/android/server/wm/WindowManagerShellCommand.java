@@ -34,6 +34,7 @@ import android.content.res.Resources.NotFoundException;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
@@ -46,6 +47,7 @@ import android.view.ViewDebug;
 
 import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.protolog.ProtoLogImpl;
+import com.android.server.IoThread;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 import com.android.server.wm.LetterboxConfiguration.LetterboxHorizontalReachabilityPosition;
 import com.android.server.wm.LetterboxConfiguration.LetterboxVerticalReachabilityPosition;
@@ -572,8 +574,22 @@ public class WindowManagerShellCommand extends ShellCommand {
                         ByteTransferPipe pipe = null;
                         try {
                             pipe = new ByteTransferPipe();
-                            w.mClient.executeCommand(ViewDebug.REMOTE_COMMAND_DUMP_ENCODED, null,
-                                    pipe.getWriteFd());
+                            final ParcelFileDescriptor pfd = pipe.getWriteFd();
+                            if (w.isClientLocal()) {
+                                // Make it asynchronous to avoid writer from being blocked
+                                // by waiting for the buffer to be consumed in the same process.
+                                IoThread.getExecutor().execute(() -> {
+                                    try {
+                                        w.mClient.executeCommand(
+                                                ViewDebug.REMOTE_COMMAND_DUMP_ENCODED, null, pfd);
+                                    } catch (RemoteException e) {
+                                        // Ignore for local call.
+                                    }
+                                });
+                            } else {
+                                w.mClient.executeCommand(
+                                        ViewDebug.REMOTE_COMMAND_DUMP_ENCODED, null, pfd);
+                            }
                             requestList.add(Pair.create(w.getName(), pipe));
                         } catch (IOException | RemoteException e) {
                             // Skip this window
