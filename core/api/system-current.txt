@@ -5117,7 +5117,7 @@ package android.hardware.input {
     method @NonNull public android.hardware.input.VirtualTouchEvent build();
     method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setAction(int);
     method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setMajorAxisSize(@FloatRange(from=0.0f) float);
-    method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setPointerId(int);
+    method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setPointerId(@IntRange(from=0, to=0x10 - 1) int);
     method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setPressure(@FloatRange(from=0.0f) float);
     method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setToolType(int);
     method @NonNull public android.hardware.input.VirtualTouchEvent.Builder setX(float);
