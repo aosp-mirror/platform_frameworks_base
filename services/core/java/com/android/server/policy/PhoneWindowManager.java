@@ -129,7 +129,6 @@ import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.DeviceIdleManager;
 import android.os.FactoryTest;
@@ -203,6 +202,7 @@ import com.android.internal.policy.PhoneWindow;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.ExtconStateObserver;
 import com.android.server.ExtconUEventObserver;
@@ -416,6 +416,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     AppOpsManager mAppOpsManager;
     PackageManager mPackageManager;
     SideFpsEventHandler mSideFpsEventHandler;
+    LockPatternUtils mLockPatternUtils;
     private boolean mHasFeatureAuto;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
@@ -1074,8 +1075,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         synchronized (mLock) {
-            // Lock the device after the dream transition has finished.
-            mLockAfterAppTransitionFinished = true;
+            // If the setting to lock instantly on power button press is true, then set the flag to
+            // lock after the dream transition has finished.
+            mLockAfterAppTransitionFinished =
+                    mLockPatternUtils.getPowerButtonInstantlyLocks(mCurrentUserId);
         }
 
         dreamManagerInternal.requestDream();
@@ -1993,6 +1996,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mAccessibilityShortcutController = injector.getAccessibilityShortcutController(
                 mContext, new Handler(), mCurrentUserId);
         mGlobalActionsFactory = injector.getGlobalActionsFactory();
+        mLockPatternUtils = new LockPatternUtils(mContext);
         mLogger = new MetricsLogger();
 
         mScreenOffSleepTokenAcquirer = mActivityTaskManagerInternal
