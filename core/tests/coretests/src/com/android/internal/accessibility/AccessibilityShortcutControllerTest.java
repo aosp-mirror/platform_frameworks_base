@@ -457,6 +457,7 @@ public class AccessibilityShortcutControllerTest {
         }
     }
 
+    @Test
     public void getFrameworkFeatureMap_containsExpectedDefaultKeys() {
         final Map<ComponentName, AccessibilityShortcutController.ToggleableFrameworkFeatureInfo>
                 frameworkFeatureMap =
@@ -489,6 +490,7 @@ public class AccessibilityShortcutControllerTest {
         assertFalse(frameworkFeatureMap.containsKey(ONE_HANDED_COMPONENT_NAME));
     }
 
+    @Test
     public void testOnAccessibilityShortcut_forServiceWithNoSummary_doesNotCrash()
             throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
