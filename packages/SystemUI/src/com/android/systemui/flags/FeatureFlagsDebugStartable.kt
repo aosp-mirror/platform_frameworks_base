@@ -22,6 +22,7 @@ import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.InitializationChecker
+import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -36,7 +37,9 @@ constructor(
     private val flagCommand: FlagCommand,
     private val featureFlags: FeatureFlagsDebug,
     private val broadcastSender: BroadcastSender,
-    private val initializationChecker: InitializationChecker
+    private val initializationChecker: InitializationChecker,
+    private val restartDozeListener: RestartDozeListener,
+    private val delayableExecutor: DelayableExecutor
 ) : CoreStartable {
 
     init {
@@ -52,6 +55,9 @@ constructor(
             // protected broadcast should only be sent for the main process
             val intent = Intent(FlagManager.ACTION_SYSUI_STARTED)
             broadcastSender.sendBroadcast(intent)
+
+            restartDozeListener.init()
+            delayableExecutor.executeDelayed({ restartDozeListener.maybeRestartSleep() }, 1000)
         }
     }
 }
