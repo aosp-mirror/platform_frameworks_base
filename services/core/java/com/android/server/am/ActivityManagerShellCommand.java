@@ -1402,6 +1402,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final boolean mSimpleMode;
         final String mTarget;
         final boolean mAlwaysContinue;
+        final boolean mAlwaysKill;
 
         static final int STATE_NORMAL = 0;
         static final int STATE_CRASHED = 1;
@@ -1430,7 +1431,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         MyActivityController(IActivityManager iam, PrintWriter pw, InputStream input,
                 String gdbPort, boolean monkey, boolean simpleMode, String target,
-                boolean alwaysContinue) {
+                boolean alwaysContinue, boolean alwaysKill) {
             mInterface = iam;
             mPw = pw;
             mInput = input;
@@ -1439,6 +1440,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             mSimpleMode = simpleMode;
             mTarget = target;
             mAlwaysContinue = alwaysContinue;
+            mAlwaysKill = alwaysKill;
         }
 
         private boolean shouldHandlePackageOrProcess(String packageOrProcess) {
@@ -1497,6 +1499,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 if (mAlwaysContinue) {
                     return true;
                 }
+                if (mAlwaysKill) {
+                    return false;
+                }
                 int result = waitControllerLocked(pid, STATE_CRASHED);
                 return result == RESULT_CRASH_KILL ? false : true;
             }
@@ -1520,6 +1525,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 mPw.flush();
                 if (mAlwaysContinue) {
                     return 0;
+                }
+                if (mAlwaysKill) {
+                    return -1;
                 }
                 int result = waitControllerLocked(pid, STATE_EARLY_ANR);
                 if (result == RESULT_EARLY_ANR_KILL) return -1;
@@ -1547,6 +1555,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 mPw.flush();
                 if (mAlwaysContinue) {
                     return 0;
+                }
+                if (mAlwaysKill) {
+                    return -1;
                 }
                 int result = waitControllerLocked(pid, STATE_ANR);
                 if (result == RESULT_ANR_KILL) return -1;
@@ -1672,7 +1683,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         void printMessageForState() {
-            if (mAlwaysContinue && mSimpleMode) {
+            if ((mAlwaysContinue || mAlwaysKill) && mSimpleMode) {
                 return; // In the simplest mode, we don't need to show anything.
             }
             switch (mState) {
@@ -1772,6 +1783,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         boolean monkey = false;
         boolean simpleMode = false;
         boolean alwaysContinue = false;
+        boolean alwaysKill = false;
         String target = null;
 
         while ((opt=getNextOption()) != null) {
@@ -1785,14 +1797,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 simpleMode = true;
             } else if (opt.equals("-c")) {
                 alwaysContinue = true;
+            } else if (opt.equals("-k")) {
+                alwaysKill = true;
             } else {
                 getErrPrintWriter().println("Error: Unknown option: " + opt);
                 return -1;
             }
         }
+        if (alwaysContinue && alwaysKill) {
+            getErrPrintWriter().println("Error: -k and -c options can't be used together.");
+            return -1;
+        }
 
         MyActivityController controller = new MyActivityController(mInterface, pw,
-                getRawInputStream(), gdbPort, monkey, simpleMode, target, alwaysContinue);
+                getRawInputStream(), gdbPort, monkey, simpleMode, target, alwaysContinue,
+                alwaysKill);
         controller.run();
         return 0;
     }
@@ -4078,12 +4097,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  make-uid-idle [--user <USER_ID> | all | current] <PACKAGE>");
             pw.println("      If the given application's uid is in the background and waiting to");
             pw.println("      become idle (not allowing background services), do that now.");
-            pw.println("  monitor [--gdb <port>] [-p <TARGET>] [-s] [-c]");
+            pw.println("  monitor [--gdb <port>] [-p <TARGET>] [-s] [-c] [-k]");
             pw.println("      Start monitoring for crashes or ANRs.");
             pw.println("      --gdb: start gdbserv on the given port at crash/ANR");
             pw.println("      -p: only show events related to a specific process / package");
             pw.println("      -s: simple mode, only show a summary line for each event");
             pw.println("      -c: assume the input is always [c]ontinue");
+            pw.println("      -k: assume the input is always [k]ill");
+            pw.println("         -c and -k are mutually exclusive.");
             pw.println("  watch-uids [--oom <uid>] [--mask <capabilities integer>]");
             pw.println("      Start watching for and reporting uid state changes.");
             pw.println("      --oom: specify a uid for which to report detailed change messages.");
