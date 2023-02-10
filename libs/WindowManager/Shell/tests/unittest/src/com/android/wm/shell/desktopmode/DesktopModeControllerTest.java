@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
@@ -446,7 +447,7 @@ public class DesktopModeControllerTest extends ShellTestCase {
         final ArgumentCaptor<WindowContainerTransaction> arg = ArgumentCaptor.forClass(
                 WindowContainerTransaction.class);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            verify(mTransitions).startTransition(eq(TRANSIT_TO_FRONT), arg.capture(), any());
+            verify(mTransitions).startTransition(eq(TRANSIT_NONE), arg.capture(), any());
         } else {
             verify(mShellTaskOrganizer).applyTransaction(arg.capture());
         }
