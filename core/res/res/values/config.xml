@@ -6038,6 +6038,12 @@
     <string-array translatable="false" name="config_fontManagerServiceCerts">
     </string-array>
 
+    <!-- Whether the vendor power press code need to be mapped. -->
+    <bool name="config_powerPressMapping">false</bool>
+
+    <!-- Power press vendor code. -->
+    <integer name="config_powerPressCode">-1</integer>
+
     <!-- Whether to show weather on the lock screen by default. -->
     <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
 </resources>
