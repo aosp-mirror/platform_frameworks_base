@@ -349,7 +349,7 @@ public class ArrayUtils {
      * @return A single array containing all the elements of the parameter arrays.
      */
     @SuppressWarnings("unchecked")
-    public static @NonNull <T> T[] concatElements(Class<T> kind, @Nullable T[]... arrays) {
+    public static @NonNull <T> T[] concat(Class<T> kind, @Nullable T[]... arrays) {
         if (arrays == null || arrays.length == 0) {
             return createEmptyArray(kind);
         }
