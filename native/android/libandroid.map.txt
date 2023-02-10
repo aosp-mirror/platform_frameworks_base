@@ -345,6 +345,7 @@ LIBANDROID_PLATFORM {
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;
+        ASurfaceControl_getChoreographer*;
         ASurfaceControlStats_getAcquireTime*;
         ASurfaceControlStats_getFrameNumber*;
     };

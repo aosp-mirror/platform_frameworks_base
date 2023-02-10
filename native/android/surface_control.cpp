@@ -180,6 +180,18 @@ void ASurfaceControl_unregisterSurfaceStatsListener(void* context,
             reinterpret_cast<void*>(func));
 }
 
+AChoreographer* ASurfaceControl_getChoreographer(ASurfaceControl* aSurfaceControl) {
+    LOG_ALWAYS_FATAL_IF(aSurfaceControl == nullptr, "aSurfaceControl should not be nullptr");
+    SurfaceControl* surfaceControl =
+            ASurfaceControl_to_SurfaceControl(reinterpret_cast<ASurfaceControl*>(aSurfaceControl));
+    if (!surfaceControl->isValid()) {
+        ALOGE("Attempted to get choreographer from invalid surface control");
+        return nullptr;
+    }
+    SurfaceControl_acquire(surfaceControl);
+    return reinterpret_cast<AChoreographer*>(surfaceControl->getChoreographer().get());
+}
+
 int64_t ASurfaceControlStats_getAcquireTime(ASurfaceControlStats* stats) {
     if (const auto* fence = std::get_if<sp<Fence>>(&stats->acquireTimeOrFence)) {
         // We got a fence instead of the acquire time due to latch unsignaled.
