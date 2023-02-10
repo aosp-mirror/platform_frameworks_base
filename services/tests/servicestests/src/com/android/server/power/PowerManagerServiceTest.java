@@ -81,6 +81,7 @@ import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.sysprop.PowerProperties;
 import android.test.mock.MockContentResolver;
+import android.util.IntArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 
@@ -2335,6 +2336,31 @@ public class PowerManagerServiceTest {
 
         mService.getBinderServiceInstance().setLowPowerStandbyActiveDuringMaintenance(false);
         verify(mLowPowerStandbyControllerMock).setActiveDuringMaintenance(false);
+    }
+
+    @Test
+    public void testPowerGroupInitialization_multipleDisplayGroups() {
+        IntArray displayGroupIds = IntArray.wrap(new int[]{1, 2, 3});
+        when(mDisplayManagerInternalMock.getDisplayGroupIds()).thenReturn(displayGroupIds);
+
+        createService();
+        startSystem();
+
+        // Power group for DEFAULT_DISPLAY_GROUP is added by default.
+        assertThat(mService.getPowerGroupSize()).isEqualTo(4);
+    }
+
+    @Test
+    public void testPowerGroupInitialization_multipleDisplayGroupsWithDefaultGroup() {
+        IntArray displayGroupIds = IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP, 1, 2, 3});
+        when(mDisplayManagerInternalMock.getDisplayGroupIds()).thenReturn(displayGroupIds);
+
+        createService();
+        startSystem();
+
+        // Power group for DEFAULT_DISPLAY_GROUP is added once even if getDisplayGroupIds() return
+        // an array including DEFAULT_DESIPLAY_GROUP.
+        assertThat(mService.getPowerGroupSize()).isEqualTo(4);
     }
 
     private WakeLock acquireWakeLock(String tag, int flags) {
