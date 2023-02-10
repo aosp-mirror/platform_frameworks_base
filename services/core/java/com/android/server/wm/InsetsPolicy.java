@@ -532,7 +532,8 @@ class InsetsPolicy {
             // fake control to the client, so that it can re-show the bar during this scenario.
             return mDummyControlTarget;
         }
-        if (!canBeTopFullscreenOpaqueWindow(focusedWin) && mPolicy.topAppHidesStatusBar()
+        if (!canBeTopFullscreenOpaqueWindow(focusedWin)
+                && mPolicy.topAppHidesSystemBar(Type.statusBars())
                 && (notificationShade == null || !notificationShade.canReceiveKeys())) {
             // Non-fullscreen focused window should not break the state that the top-fullscreen-app
             // window hides status bar, unless the notification shade can receive keys.
@@ -591,6 +592,14 @@ class InsetsPolicy {
             // dispatched to the client so that we can keep the layout stable. We will dispatch the
             // fake control to the client, so that it can re-show the bar during this scenario.
             return mDummyControlTarget;
+        }
+        final WindowState notificationShade = mPolicy.getNotificationShade();
+        if (!canBeTopFullscreenOpaqueWindow(focusedWin)
+                && mPolicy.topAppHidesSystemBar(Type.navigationBars())
+                && (notificationShade == null || !notificationShade.canReceiveKeys())) {
+            // Non-fullscreen focused window should not break the state that the top-fullscreen-app
+            // window hides navigation bar, unless the notification shade can receive keys.
+            return mPolicy.getTopFullscreenOpaqueWindow();
         }
         return focusedWin;
     }
