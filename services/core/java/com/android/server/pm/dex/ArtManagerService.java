@@ -580,7 +580,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      */
     private ArrayMap<String, String> getPackageProfileNames(AndroidPackage pkg) {
         ArrayMap<String, String> result = new ArrayMap<>();
-        if (pkg.isHasCode()) {
+        if (pkg.isDeclaredHavingCode()) {
             result.put(pkg.getBaseApkPath(), ArtManager.getProfileName(null));
         }
 
