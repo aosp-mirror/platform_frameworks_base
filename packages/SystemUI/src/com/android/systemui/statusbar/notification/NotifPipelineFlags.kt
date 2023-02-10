@@ -17,13 +17,16 @@
 package com.android.systemui.statusbar.notification
 
 import android.content.Context
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.FlagResolver
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import javax.inject.Inject
 
 class NotifPipelineFlags @Inject constructor(
     val context: Context,
-    val featureFlags: FeatureFlags
+    val featureFlags: FeatureFlags,
+    val sysPropFlags: FlagResolver,
 ) {
     init {
         featureFlags.addListener(Flags.DISABLE_FSI) { event -> event.requestNoRestart() }
@@ -39,11 +42,21 @@ class NotifPipelineFlags @Inject constructor(
 
     fun disableFsi(): Boolean = featureFlags.isEnabled(Flags.DISABLE_FSI)
 
-    val shouldFilterUnseenNotifsOnKeyguard: Boolean by lazy {
-        featureFlags.isEnabled(Flags.FILTER_UNSEEN_NOTIFS_ON_KEYGUARD)
-    }
+    fun forceDemoteFsi(): Boolean =
+            sysPropFlags.isEnabled(NotificationFlags.FSI_FORCE_DEMOTE)
 
-    val isNoHunForOldWhenEnabled: Boolean by lazy {
-        featureFlags.isEnabled(Flags.NO_HUN_FOR_OLD_WHEN)
-    }
+    fun showStickyHunForDeniedFsi(): Boolean =
+            sysPropFlags.isEnabled(NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI)
+
+    fun allowDismissOngoing(): Boolean =
+            sysPropFlags.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)
+
+    fun isOtpRedactionEnabled(): Boolean =
+            sysPropFlags.isEnabled(NotificationFlags.OTP_REDACTION)
+
+    val shouldFilterUnseenNotifsOnKeyguard: Boolean
+        get() = featureFlags.isEnabled(Flags.FILTER_UNSEEN_NOTIFS_ON_KEYGUARD)
+
+    val isNoHunForOldWhenEnabled: Boolean
+        get() = featureFlags.isEnabled(Flags.NO_HUN_FOR_OLD_WHEN)
 }
