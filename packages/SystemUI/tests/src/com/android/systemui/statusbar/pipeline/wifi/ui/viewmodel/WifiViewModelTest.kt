@@ -478,7 +478,6 @@ class WifiViewModelTest : SysuiTestCase() {
                 airplaneModeViewModel,
                 connectivityConstants,
                 context,
-                logger,
                 tableLogBuffer,
                 interactor,
                 scope,

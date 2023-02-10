@@ -25,7 +25,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.dagger.StatusBarConnectivityLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.toString
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -59,32 +58,6 @@ constructor(
         )
     }
 
-    /** Logs a **data transformation** that we performed within the connectivity pipeline. */
-    fun logTransformation(transformationName: String, oldValue: Any?, newValue: Any?) {
-        if (oldValue == newValue) {
-            buffer.log(
-                SB_LOGGING_TAG,
-                LogLevel.INFO,
-                {
-                    str1 = transformationName
-                    str2 = oldValue.toString()
-                },
-                { "Transform: $str1: $str2 (transformation didn't change it)" }
-            )
-        } else {
-            buffer.log(
-                SB_LOGGING_TAG,
-                LogLevel.INFO,
-                {
-                    str1 = transformationName
-                    str2 = oldValue.toString()
-                    str3 = newValue.toString()
-                },
-                { "Transform: $str1: $str2 -> $str3" }
-            )
-        }
-    }
-
     /** Logs a change in one of the **outputs** to the connectivity pipeline. */
     fun logOutputChange(outputParamName: String, changeInfo: String) {
         buffer.log(
@@ -103,25 +76,17 @@ constructor(
         networkCapabilities: NetworkCapabilities,
         isDefaultNetworkCallback: Boolean,
     ) {
-        buffer.log(
+        LoggerHelper.logOnCapabilitiesChanged(
+            buffer,
             SB_LOGGING_TAG,
-            LogLevel.INFO,
-            {
-                bool1 = isDefaultNetworkCallback
-                int1 = network.getNetId()
-                str1 = networkCapabilities.toString()
-            },
-            { "onCapabilitiesChanged[default=$bool1]: net=$int1 capabilities=$str1" }
+            network,
+            networkCapabilities,
+            isDefaultNetworkCallback,
         )
     }
 
     fun logOnLost(network: Network) {
-        buffer.log(
-            SB_LOGGING_TAG,
-            LogLevel.INFO,
-            { int1 = network.getNetId() },
-            { "onLost: net=$int1" }
-        )
+        LoggerHelper.logOnLost(buffer, SB_LOGGING_TAG, network)
     }
 
     fun logOnServiceStateChanged(serviceState: ServiceState, subId: Int) {

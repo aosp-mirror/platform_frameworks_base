@@ -125,7 +125,6 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
                     airplaneModeViewModel,
                     connectivityConstants,
                     context,
-                    logger,
                     tableLogBuffer,
                     interactor,
                     scope,

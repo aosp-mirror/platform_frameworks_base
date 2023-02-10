@@ -100,7 +100,6 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
                     airplaneModeViewModel,
                     connectivityConstants,
                     context,
-                    logger,
                     tableLogBuffer,
                     interactor,
                     scope,

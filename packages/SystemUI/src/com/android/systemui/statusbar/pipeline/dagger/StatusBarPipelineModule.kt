@@ -19,8 +19,10 @@ package com.android.systemui.statusbar.pipeline.dagger
 import android.net.wifi.WifiManager
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
@@ -103,6 +105,13 @@ abstract class StatusBarPipelineModule {
             } else {
                 wifiRepositoryImplFactory.create(wifiManager)
             }
+        }
+
+        @Provides
+        @SysUISingleton
+        @WifiInputLog
+        fun provideWifiInputLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("WifiInputLog", 50)
         }
 
         @Provides
