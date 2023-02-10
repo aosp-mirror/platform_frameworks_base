@@ -166,9 +166,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Called when the Keyguard occluded state changed.
+     *
      * @param occluded Whether Keyguard is currently occluded or not.
      */
-    void onKeyguardOccludedChangedLw(boolean occluded);
+    void onKeyguardOccludedChangedLw(boolean occluded, boolean waitAppTransition);
 
     /**
      * Applies a keyguard occlusion change if one happened.
