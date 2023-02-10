@@ -2669,8 +2669,10 @@ public class TelecomManager {
     }
 
     /**
-     * Adds a new call with the specified {@link CallAttributes} to the telecom service. This method
-     * can be used to add both incoming and outgoing calls.
+     * Reports a new call with the specified {@link CallAttributes} to the telecom service. This
+     * method can be used to report both incoming and outgoing calls.  By reporting the call, the
+     * system is aware of the call and can provide updates on services (ex. Another device wants to
+     * disconnect the call) or events (ex. a new Bluetooth route became available).
      *
      * <p>
      * The difference between this API call and {@link TelecomManager#placeCall(Uri, Bundle)} or
@@ -2693,9 +2695,20 @@ public class TelecomManager {
      * <pre>
      *
      *  // An app should first define their own construct of a Call that overrides all the
-     *  // {@link CallEventCallback}s
-     *  private class MyVoipCall implements CallEventCallback {
-     *    // override all the {@link CallEventCallback}s
+     *  // {@link CallControlCallback}s and {@link CallEventCallback}s
+     *  private class MyVoipCall {
+     *   public String callId = "";
+     *
+     *   public CallControlCallEventCallback handshakes = new
+     *                       CallControlCallEventCallback() {
+     *                         // override/ implement all {@link CallControlCallback}s
+     *                        }
+     *   public CallEventCallback events = new
+     *                       CallEventCallback() {
+     *                         // override/ implement all {@link CallEventCallback}s
+     *                        }
+     *   public MyVoipCall(String id){
+     *       callId = id;
      *  }
      *
      * PhoneAccountHandle handle = new PhoneAccountHandle(
@@ -2707,28 +2720,33 @@ public class TelecomManager {
      *                                            "John Smith", Uri.fromParts("tel", "123", null))
      *                                            .build();
      *
+     * MyVoipCall myFirstOutgoingCall = new MyVoipCall("1");
+     *
      * telecomManager.addCall(callAttributes, Runnable::run, new OutcomeReceiver() {
      *                              public void onResult(CallControl callControl) {
      *                                 // The call has been added successfully
      *                              }
-     *                           }, new MyVoipCall());
+     *                           }, myFirstOutgoingCall.handshakes, myFirstOutgoingCall.events);
      * </pre>
      *
      * @param callAttributes    attributes of the new call (incoming or outgoing, address, etc. )
      * @param executor          thread to run background CallEventCallback updates on
      * @param pendingControl    OutcomeReceiver that receives the result of addCall transaction
-     * @param callEventCallback object that overrides CallEventCallback
+     * @param handshakes        object that overrides {@link CallControlCallback}s
+     * @param events            object that overrides {@link CallEventCallback}s
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_OWN_CALLS)
     @SuppressLint("SamShouldBeLast")
     public void addCall(@NonNull CallAttributes callAttributes,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<CallControl, CallException> pendingControl,
-            @NonNull CallEventCallback callEventCallback) {
+            @NonNull CallControlCallback handshakes,
+            @NonNull CallEventCallback events) {
         Objects.requireNonNull(callAttributes);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(pendingControl);
-        Objects.requireNonNull(callEventCallback);
+        Objects.requireNonNull(handshakes);
+        Objects.requireNonNull(events);
 
         ITelecomService service = getTelecomService();
         if (service != null) {
@@ -2740,7 +2758,7 @@ public class TelecomManager {
 
                 // couple all the args passed by the client
                 String newCallId = transactionalServiceWrapper.trackCall(callAttributes, executor,
-                        pendingControl, callEventCallback);
+                        pendingControl, handshakes, events);
 
                 // send args to server to process new call
                 service.addCall(callAttributes, transactionalServiceWrapper.getCallEventCallback(),
