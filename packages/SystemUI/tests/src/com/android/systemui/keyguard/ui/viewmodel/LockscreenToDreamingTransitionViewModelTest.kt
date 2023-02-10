@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
@@ -32,10 +33,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
     private lateinit var underTest: LockscreenToDreamingTransitionViewModel
     private lateinit var repository: FakeKeyguardTransitionRepository
