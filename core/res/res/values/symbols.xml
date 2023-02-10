@@ -2655,6 +2655,8 @@
   <java-symbol type="integer" name="config_sideFpsToastTimeout"/>
   <java-symbol type="integer" name="config_sidefpsSkipWaitForPowerAcquireMessage"/>
   <java-symbol type="integer" name="config_sidefpsSkipWaitForPowerVendorAcquireMessage"/>
+  <java-symbol type="integer" name="config_powerPressCode"/>
+  <java-symbol type="bool" name="config_powerPressMapping"/>
 
   <!-- Clickable toast used during sidefps enrollment -->
   <java-symbol type="layout" name="side_fps_toast" />

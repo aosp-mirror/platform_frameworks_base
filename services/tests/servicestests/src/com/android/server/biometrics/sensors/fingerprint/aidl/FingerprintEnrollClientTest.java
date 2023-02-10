@@ -16,7 +16,7 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
-import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -28,10 +28,10 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.PointerContext;
@@ -48,6 +48,7 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.R;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
@@ -66,7 +67,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
 @Presubmit
@@ -258,11 +258,16 @@ public class FingerprintEnrollClientTest {
     @Test
     public void testPowerPressForwardsAcquireMessage() throws RemoteException {
         final FingerprintEnrollClient client = createClient();
-        client.start(mCallback);
-        client.onPowerPressed();
+        final int testVendorPowerPressCode = 1;
+        when(mContext.getOrCreateTestableResources().getResources()
+                .getBoolean(R.bool.config_powerPressMapping)).thenReturn(true);
+        when(mContext.getOrCreateTestableResources().getResources()
+                .getInteger(R.integer.config_powerPressCode)).thenReturn(testVendorPowerPressCode);
+
+        client.onAcquired(FINGERPRINT_ACQUIRED_VENDOR, testVendorPowerPressCode);
 
         verify(mClientMonitorCallbackConverter).onAcquired(anyInt(),
-                eq(FINGERPRINT_ACQUIRED_POWER_PRESSED), anyInt());
+                eq(BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED), anyInt());
     }
 
     private void showHideOverlay(Consumer<FingerprintEnrollClient> block)
