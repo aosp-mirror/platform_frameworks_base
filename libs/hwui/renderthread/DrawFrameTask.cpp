@@ -278,6 +278,11 @@ void DrawFrameTask::unblockUiThread() {
     mSignal.signal();
 }
 
+void DrawFrameTask::createHintSession(pid_t uiThreadId, pid_t renderThreadId) {
+    if (mHintSessionWrapper) return;
+    mHintSessionWrapper.emplace(uiThreadId, renderThreadId);
+}
+
 DrawFrameTask::HintSessionWrapper::HintSessionWrapper(int32_t uiThreadId, int32_t renderThreadId) {
     if (!Properties::useHintManager) return;
     if (uiThreadId < 0 || renderThreadId < 0) return;
