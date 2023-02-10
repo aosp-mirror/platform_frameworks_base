@@ -7640,6 +7640,25 @@ public class CarrierConfigManager {
         public static final String KEY_EMERGENCY_SCAN_TIMER_SEC_INT =
                 KEY_PREFIX + "emergency_scan_timer_sec_int";
 
+        /**
+         * The timer to wait for the call completion on the cellular network before attempting the
+         * call over Wi-Fi. On timer expiry, if emergency call on Wi-Fi is allowed and possible,
+         * telephony shall cancel the scan on the cellular network and place the call on Wi-Fi.
+         * If dialing over cellular network is ongoing when timer expires, dialing over Wi-Fi
+         * will be requested only when the ongoing dialing fails. If emergency call on Wi-Fi is not
+         * possible, then domain selection continues to try dialing from the radio and the timer
+         * remains expired. Later when calling over Wi-Fi is possible and dialing over cellular
+         * networks fails, calling over Wi-Fi will be requested. The timer shall be restarted from
+         * initial state if calling over Wi-Fi fails.
+         * If this value is set to {@link #REDIAL_TIMER_DISABLED}, then the timer will never be
+         * started.
+         *
+         * The default value for the timer is {@link #REDIAL_TIMER_DISABLED}.
+         * @hide
+         */
+        public static final String KEY_MAXIMUM_CELLULAR_SEARCH_TIMER_SEC_INT =
+                KEY_PREFIX + "maximum_cellular_search_timer_sec_int";
+
         /** @hide */
         @IntDef(prefix = "SCAN_TYPE_",
             value = {
@@ -7734,10 +7753,12 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "emergency_requires_volte_enabled_bool";
 
         /**
-         * This values indicates that the cross SIM redialing timer shall be disabled.
+         * This values indicates that the cross SIM redialing timer and maximum celluar search
+         * timer shall be disabled.
          *
          * @see #KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT
          * @see #KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT
+         * @see #KEY_MAXIMUM_CELLULAR_SEARCH_TIMER_SEC_INT
          * @hide
          */
         public static final int REDIAL_TIMER_DISABLED = 0;
@@ -7841,6 +7862,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_EMERGENCY_VOWIFI_REQUIRES_CONDITION_INT, VOWIFI_REQUIRES_NONE);
             defaults.putInt(KEY_MAXIMUM_NUMBER_OF_EMERGENCY_TRIES_OVER_VOWIFI_INT, 1);
             defaults.putInt(KEY_EMERGENCY_SCAN_TIMER_SEC_INT, 10);
+            defaults.putInt(KEY_MAXIMUM_CELLULAR_SEARCH_TIMER_SEC_INT, REDIAL_TIMER_DISABLED);
             defaults.putInt(KEY_EMERGENCY_NETWORK_SCAN_TYPE_INT, SCAN_TYPE_NO_PREFERENCE);
             defaults.putInt(KEY_EMERGENCY_CALL_SETUP_TIMER_ON_CURRENT_NETWORK_SEC_INT, 0);
             defaults.putBoolean(KEY_EMERGENCY_REQUIRES_IMS_REGISTRATION_BOOL, false);
