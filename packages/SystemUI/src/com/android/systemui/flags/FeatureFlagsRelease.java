@@ -57,8 +57,9 @@ public class FeatureFlagsRelease implements FeatureFlags {
     private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
             new ServerFlagReader.ChangeListener() {
                 @Override
-                public void onChange() {
-                    mRestarter.restartSystemUI();
+                public void onChange(Flag<?> flag) {
+                    mRestarter.restartSystemUI(
+                            "Server flag change: " + flag.getNamespace() + "." + flag.getName());
                 }
             };
 
