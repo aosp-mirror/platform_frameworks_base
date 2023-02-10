@@ -18,8 +18,6 @@ package com.android.systemui.shared.clocks
 import android.content.ContentResolver
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.os.Handler
-import android.os.UserHandle
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -34,6 +32,9 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.fail
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import org.json.JSONException
 import org.junit.Before
 import org.junit.Rule
@@ -49,18 +50,18 @@ import org.mockito.junit.MockitoJUnit
 class ClockRegistryTest : SysuiTestCase() {
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
+    private lateinit var dispatcher: CoroutineDispatcher
+    private lateinit var scope: TestScope
+
     @Mock private lateinit var mockContext: Context
     @Mock private lateinit var mockPluginManager: PluginManager
     @Mock private lateinit var mockClock: ClockController
     @Mock private lateinit var mockDefaultClock: ClockController
     @Mock private lateinit var mockThumbnail: Drawable
-    @Mock private lateinit var mockHandler: Handler
     @Mock private lateinit var mockContentResolver: ContentResolver
     private lateinit var fakeDefaultProvider: FakeClockPlugin
     private lateinit var pluginListener: PluginListener<ClockProviderPlugin>
     private lateinit var registry: ClockRegistry
-
-    private var settingValue: ClockSettings? = null
 
     companion object {
         private fun failFactory(): ClockController {
@@ -99,6 +100,9 @@ class ClockRegistryTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        dispatcher = StandardTestDispatcher()
+        scope = TestScope(dispatcher)
+
         fakeDefaultProvider = FakeClockPlugin()
             .addClock(DEFAULT_CLOCK_ID, DEFAULT_CLOCK_NAME, { mockDefaultClock }, { mockThumbnail })
         whenever(mockContext.contentResolver).thenReturn(mockContentResolver)
@@ -107,15 +111,22 @@ class ClockRegistryTest : SysuiTestCase() {
         registry = object : ClockRegistry(
             mockContext,
             mockPluginManager,
-            mockHandler,
+            scope = scope.backgroundScope,
+            mainDispatcher = dispatcher,
+            bgDispatcher = dispatcher,
             isEnabled = true,
-            userHandle = UserHandle.USER_ALL,
-            defaultClockProvider = fakeDefaultProvider
+            handleAllUsers = true,
+            defaultClockProvider = fakeDefaultProvider,
         ) {
-            override var settings: ClockSettings?
-                get() = settingValue
-                set(value) { settingValue = value }
+            override fun querySettings() { }
+            override fun applySettings(value: ClockSettings?) {
+                settings = value
+            }
+            // Unit Test does not validate threading
+            override fun assertMainThread() {}
+            override fun assertNotMainThread() {}
         }
+        registry.registerListeners()
 
         verify(mockPluginManager)
             .addPluginListener(captor.capture(), eq(ClockProviderPlugin::class.java), eq(true))
@@ -187,16 +198,16 @@ class ClockRegistryTest : SysuiTestCase() {
             .addClock("clock_1", "clock 1")
             .addClock("clock_2", "clock 2")
 
-        settingValue = ClockSettings("clock_3", null, null)
         val plugin2 = FakeClockPlugin()
             .addClock("clock_3", "clock 3", { mockClock })
             .addClock("clock_4", "clock 4")
 
+        registry.applySettings(ClockSettings("clock_3", null))
         pluginListener.onPluginConnected(plugin1, mockContext)
         pluginListener.onPluginConnected(plugin2, mockContext)
 
         val clock = registry.createCurrentClock()
-        assertEquals(clock, mockClock)
+        assertEquals(mockClock, clock)
     }
 
     @Test
@@ -205,11 +216,11 @@ class ClockRegistryTest : SysuiTestCase() {
             .addClock("clock_1", "clock 1")
             .addClock("clock_2", "clock 2")
 
-        settingValue = ClockSettings("clock_3", null, null)
         val plugin2 = FakeClockPlugin()
             .addClock("clock_3", "clock 3")
             .addClock("clock_4", "clock 4")
 
+        registry.applySettings(ClockSettings("clock_3", null))
         pluginListener.onPluginConnected(plugin1, mockContext)
         pluginListener.onPluginConnected(plugin2, mockContext)
         pluginListener.onPluginDisconnected(plugin2)
@@ -224,11 +235,11 @@ class ClockRegistryTest : SysuiTestCase() {
             .addClock("clock_1", "clock 1")
             .addClock("clock_2", "clock 2")
 
-        settingValue = ClockSettings("clock_3", null, null)
         val plugin2 = FakeClockPlugin()
             .addClock("clock_3", "clock 3", { mockClock })
             .addClock("clock_4", "clock 4")
 
+        registry.applySettings(ClockSettings("clock_3", null))
         pluginListener.onPluginConnected(plugin1, mockContext)
         pluginListener.onPluginConnected(plugin2, mockContext)
 
@@ -244,7 +255,7 @@ class ClockRegistryTest : SysuiTestCase() {
 
     @Test
     fun jsonDeserialization_gotExpectedObject() {
-        val expected = ClockSettings("ID", null, 500)
+        val expected = ClockSettings("ID", null).apply { _applied_timestamp = 500 }
         val actual = ClockSettings.deserialize("""{
             "clockId":"ID",
             "_applied_timestamp":500
@@ -254,14 +265,14 @@ class ClockRegistryTest : SysuiTestCase() {
 
     @Test
     fun jsonDeserialization_noTimestamp_gotExpectedObject() {
-        val expected = ClockSettings("ID", null, null)
+        val expected = ClockSettings("ID", null)
         val actual = ClockSettings.deserialize("{\"clockId\":\"ID\"}")
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonDeserialization_nullTimestamp_gotExpectedObject() {
-        val expected = ClockSettings("ID", null, null)
+        val expected = ClockSettings("ID", null)
         val actual = ClockSettings.deserialize("""{
             "clockId":"ID",
             "_applied_timestamp":null
@@ -271,7 +282,7 @@ class ClockRegistryTest : SysuiTestCase() {
 
     @Test(expected = JSONException::class)
     fun jsonDeserialization_noId_threwException() {
-        val expected = ClockSettings("ID", null, 500)
+        val expected = ClockSettings(null, null).apply { _applied_timestamp = 500 }
         val actual = ClockSettings.deserialize("{\"_applied_timestamp\":500}")
         assertEquals(expected, actual)
     }
@@ -279,14 +290,15 @@ class ClockRegistryTest : SysuiTestCase() {
     @Test
     fun jsonSerialization_gotExpectedString() {
         val expected = "{\"clockId\":\"ID\",\"_applied_timestamp\":500}"
-        val actual = ClockSettings.serialize(ClockSettings("ID", null, 500))
+        val actual = ClockSettings.serialize(ClockSettings("ID", null)
+            .apply { _applied_timestamp = 500 })
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonSerialization_noTimestamp_gotExpectedString() {
         val expected = "{\"clockId\":\"ID\"}"
-        val actual = ClockSettings.serialize(ClockSettings("ID", null, null))
+        val actual = ClockSettings.serialize(ClockSettings("ID", null))
         assertEquals(expected, actual)
     }
 }
