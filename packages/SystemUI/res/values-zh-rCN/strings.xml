@@ -91,15 +91,11 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"底部边界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"左侧边界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"右侧边界百分之 <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"已保存到工作资料名下的 <xliff:g id="APP">%1$s</xliff:g>中"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"文件"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> 检测到此屏幕截图。"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> 及其他打开的应用检测到此屏幕截图。"</string>
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"添加到备注中"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"屏幕录制器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在处理屏幕录制视频"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持续显示屏幕录制会话通知"</string>
@@ -662,7 +658,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"向右键码"</string>
     <string name="left_icon" msgid="5036278531966897006">"向左图标"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右图标"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加图块"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加功能块"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列图块"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖动到此处即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"您至少需要 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 个卡片"</string>
@@ -680,15 +676,15 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"显示低优先级的通知图标"</string>
     <string name="other" msgid="429768510980739978">"其他"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"移除图块"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"将图块添加到末尾"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"移动图块"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"添加图块"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"移除功能块"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"将功能块添加到末尾"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"移动功能块"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"添加功能块"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"移至 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"添加到位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"已添加卡片"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"已移除卡片"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"已添加功能块"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"已移除功能块"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"快捷设置编辑器。"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>通知：<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"打开设置。"</string>
@@ -893,6 +889,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"出了点问题，请重试。"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"正在加载"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"平板电脑"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"投放您的媒体"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"投放 <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"无效，请检查应用"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"未找到"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"控件不可用"</string>
@@ -929,6 +927,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"无法广播"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"无法保存，请重试。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"无法保存。"</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已将版本号复制到剪贴板。"</string>
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
@@ -995,9 +997,9 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切换网络，请断开以太网连接"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"为了提升设备的使用体验，即使 WLAN 已关闭，应用和服务仍可以随时扫描 WLAN 网络。您可以在 WLAN 扫描设置中更改此设置。"<annotation id="link">"更改"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"关闭飞行模式"</string>
-    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"“<xliff:g id="APPNAME">%1$s</xliff:g>”希望将以下图块添加到“快捷设置”"</string>
-    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加图块"</string>
-    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加图块"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"“<xliff:g id="APPNAME">%1$s</xliff:g>”希望将以下功能块添加到“快捷设置”"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加功能块"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加功能块"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"选择用户"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# 个应用处于活动状态}other{# 个应用处于活动状态}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新信息"</string>
@@ -1029,8 +1031,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"摄像头已关闭"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"麦克风已关闭"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"摄像头和麦克风已关闭"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Google 助理正在聆听"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# 条通知}other{# 条通知}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>，<xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"记录"</string>
@@ -1046,10 +1047,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"允许访问一次"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"不允许"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，它仍然可以访问自己的日志。您的设备制造商可能仍然能够访问设备上的部分日志或信息。"</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"了解详情"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"如需了解详情，请前往 <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"打开<xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• 应用已设置完毕"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• 至少已将一张银行卡添加到钱包"</string>

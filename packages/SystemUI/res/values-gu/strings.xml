@@ -91,15 +91,11 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"નીચેની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ડાબી બાજુની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"જમણી બાજુની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"ઑફિસની પ્રોફાઇલમાં <xliff:g id="APP">%1$s</xliff:g>માં સાચવવામાં આવ્યો"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ફાઇલો"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> દ્વારા આ સ્ક્રીનશૉટ લેવાયાની ભાળ મેળવવામાં આવી."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> અને કામ કરતી અન્ય ઍપ દ્વારા આ સ્ક્રીનશૉટ લેવાયાની ભાળ મેળવવામાં આવી."</string>
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"નોંધમાં ઉમેરો"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"સ્ક્રીન રેકોર્ડર"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"સ્ક્રીન રેકૉર્ડિંગ ચાલુ છે"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"સ્ક્રીન રેકોર્ડિંગ સત્ર માટે ચાલુ નોટિફિકેશન"</string>
@@ -893,6 +889,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"કંઈક ખોટું થયું. ફરી પ્રયાસ કરો."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"લોડ થઈ રહ્યું છે"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ટૅબ્લેટ"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"નિષ્ક્રિય, ઍપને ચેક કરો"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"મળ્યું નથી"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"નિયંત્રણ ઉપલબ્ધ નથી"</string>
@@ -929,6 +929,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"બ્રોડકાસ્ટ કરી શકતા નથી"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"સાચવી શકતા નથી. ફરી પ્રયાસ કરો."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"સાચવી શકતા નથી."</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"બિલ્ડ નંબર"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"બિલ્ડ નંબર ક્લિપબૉર્ડ પર કૉપિ કર્યો."</string>
     <string name="basic_status" msgid="2315371112182658176">"વાતચીત ખોલો"</string>
@@ -1029,8 +1033,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"કૅમેરા બંધ છે"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"માઇક્રોફોન બંધ છે"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"કૅમેરા અને માઇક બંધ છે"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant સાંભળી રહ્યું છે"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# નોટિફિકેશન}one{# નોટિફિકેશન}other{# નોટિફિકેશન}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"નોંધ લેવી"</string>
@@ -1046,10 +1049,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"એક-વખતના ઍક્સેસની મંજૂરી આપો"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"મંજૂરી આપશો નહીં"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"તમારા ડિવાઇસ પર થતી કામગીરીને ડિવાઇસ લૉગ રેકોર્ડ કરે છે. ઍપ આ લૉગનો ઉપયોગ સમસ્યાઓ શોધી તેનું નિરાકરણ કરવા માટે કરી શકે છે.\n\nઅમુક લૉગમાં સંવેદનશીલ માહિતી હોઈ શકે, આથી ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી માત્ર તમારી વિશ્વાસપાત્ર ઍપને જ આપો. \n\nજો તમે આ ઍપને ડિવાઇસનો બધો લૉગ ઍક્સેસ કરવાની મંજૂરી ન આપો, તો પણ તે તેના પોતાના લૉગ ઍક્સેસ કરી શકે છે. તમારા ડિવાઇસના નિર્માતા હજી પણ કદાચ તમારા ડિવાઇસ પર અમુક લૉગ અથવા માહિતી ઍક્સેસ કરી શકે છે."</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"વધુ જાણો"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g> પરથી વધુ જાણો"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ખોલો"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ઍપનું સેટઅપ કરેલું છે"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ઓછામાં ઓછું એક કાર્ડ વૉલેટમાં ઉમેરેલું છે"</string>
