@@ -38,11 +38,11 @@ import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneMod
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.LocationBasedWifiViewModel
 import com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel.WifiViewModel
 import com.android.systemui.util.mockito.whenever
@@ -62,16 +62,11 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
 
     private lateinit var testableLooper: TestableLooper
 
-    @Mock
-    private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
-    @Mock
-    private lateinit var logger: ConnectivityPipelineLogger
-    @Mock
-    private lateinit var tableLogBuffer: TableLogBuffer
-    @Mock
-    private lateinit var connectivityConstants: ConnectivityConstants
-    @Mock
-    private lateinit var wifiConstants: WifiConstants
+    @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
+    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var tableLogBuffer: TableLogBuffer
+    @Mock private lateinit var connectivityConstants: ConnectivityConstants
+    @Mock private lateinit var wifiConstants: WifiConstants
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
@@ -91,25 +86,28 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
         wifiRepository.setIsWifiEnabled(true)
         interactor = WifiInteractorImpl(connectivityRepository, wifiRepository)
         scope = CoroutineScope(Dispatchers.Unconfined)
-        airplaneModeViewModel = AirplaneModeViewModelImpl(
-            AirplaneModeInteractor(
-                airplaneModeRepository,
-                connectivityRepository,
-            ),
-            logger,
-            scope,
-        )
-        viewModel = WifiViewModel(
-            airplaneModeViewModel,
-            connectivityConstants,
-            context,
-            logger,
-            tableLogBuffer,
-            interactor,
-            scope,
-            statusBarPipelineFlags,
-            wifiConstants,
-        ).home
+        airplaneModeViewModel =
+            AirplaneModeViewModelImpl(
+                AirplaneModeInteractor(
+                    airplaneModeRepository,
+                    connectivityRepository,
+                ),
+                logger,
+                scope,
+            )
+        viewModel =
+            WifiViewModel(
+                    airplaneModeViewModel,
+                    connectivityConstants,
+                    context,
+                    logger,
+                    tableLogBuffer,
+                    interactor,
+                    scope,
+                    statusBarPipelineFlags,
+                    wifiConstants,
+                )
+                .home
     }
 
     // Note: The following tests are more like integration tests, since they stand up a full
