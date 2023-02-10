@@ -10323,7 +10323,7 @@ public final class Settings {
 
         /**
          * If active unlock triggers on unlock intents, then also request active unlock on
-         * these wake-up reasons. See PowerManager.WakeReason for value mappings.
+         * these wake-up reasons. See {@link PowerManager.WakeReason} for value mappings.
          * WakeReasons should be separated by a pipe. For example: "0|3" or "0". If this
          * setting should be disabled, then this should be set to an empty string. A null value
          * will use the system default value (WAKE_REASON_UNFOLD_DEVICE).
@@ -10331,6 +10331,17 @@ public final class Settings {
          */
         public static final String ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS =
                 "active_unlock_wakeups_considered_unlock_intents";
+
+        /**
+         * If active unlock triggers and succeeds on these wakeups, force dismiss keyguard on
+         * these wake reasons. See {@link PowerManager#WakeReason} for value mappings.
+         * WakeReasons should be separated by a pipe. For example: "0|3" or "0". If this
+         * setting should be disabled, then this should be set to an empty string. A null value
+         * will use the system default value (WAKE_REASON_UNFOLD_DEVICE).
+         * @hide
+         */
+        public static final String ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD =
+                "active_unlock_wakeups_to_force_dismiss_keyguard";
 
         /**
          * Whether the assist gesture should be enabled.

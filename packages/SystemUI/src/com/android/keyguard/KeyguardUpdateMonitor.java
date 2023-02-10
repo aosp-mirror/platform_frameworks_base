@@ -1942,11 +1942,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             FACE_AUTH_UPDATED_STARTED_WAKING_UP.setExtraInfo(pmWakeReason);
             updateFaceListeningState(BIOMETRIC_ACTION_UPDATE,
                     FACE_AUTH_UPDATED_STARTED_WAKING_UP);
-            requestActiveUnlock(
+
+            final ActiveUnlockConfig.ActiveUnlockRequestOrigin requestOrigin =
                     mActiveUnlockConfig.isWakeupConsideredUnlockIntent(pmWakeReason)
                             ? ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT
-                            : ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE,
-                    "wakingUp - " + PowerManager.wakeReasonToString(pmWakeReason));
+                            : ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE;
+            final String reason = "wakingUp - " + PowerManager.wakeReasonToString(pmWakeReason);
+            if (mActiveUnlockConfig.shouldWakeupForceDismissKeyguard(pmWakeReason)) {
+                requestActiveUnlockDismissKeyguard(
+                        requestOrigin,
+                        reason
+                );
+            } else {
+                requestActiveUnlock(
+                        requestOrigin,
+                        reason
+                );
+            }
         } else {
             mLogger.logSkipUpdateFaceListeningOnWakeup(pmWakeReason);
         }
@@ -2605,6 +2617,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     dismissKeyguard);
         }
     }
+
 
     /**
      * Attempts to trigger active unlock from trust agent.
