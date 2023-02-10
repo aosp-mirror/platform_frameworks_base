@@ -91,10 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"下方邊界 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"左方邊界 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"右方邊界 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
-    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"已儲存在工作資料夾的「<xliff:g id="APP">%1$s</xliff:g>」中"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"已儲存在工作設定檔的「<xliff:g id="APP">%1$s</xliff:g>」中"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"檔案"</string>
-    <string name="screenshot_detected_template" msgid="7940376642921719915">"「<xliff:g id="APPNAME">%1$s</xliff:g>」偵測到這張螢幕截圖。"</string>
-    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"「<xliff:g id="APPNAME">%1$s</xliff:g>」和其他開啟的應用程式偵測到這張螢幕截圖。"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> 偵測到此螢幕截圖。"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> 和其他開啟的應用程式偵測到此螢幕截圖。"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕畫面錄影工具"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示錄影畫面工作階段通知"</string>
@@ -862,6 +862,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"發生錯誤，請再試一次。"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"正在載入"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"平板電腦"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"已停用，請檢查應用程式"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"找不到"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"無法使用控制功能"</string>

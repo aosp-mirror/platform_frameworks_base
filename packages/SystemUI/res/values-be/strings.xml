@@ -91,13 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Ніжняя граніца: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Левая граніца: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Правая граніца: <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Захавана ў праграму \"<xliff:g id="APP">%1$s</xliff:g>\" (у працоўным профілі)"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Файлы"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"Праграма \"<xliff:g id="APPNAME">%1$s</xliff:g>\" выявіла гэты здымак экрана."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> і іншыя адкрытыя праграмы выявілі гэты здымак экрана."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Запіс экрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Апрацоўваецца запіс экрана"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Бягучае апавяшчэнне для сеанса запісу экрана"</string>
@@ -865,6 +862,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Нешта пайшло не так. Паўтарыце спробу."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Ідзе загрузка"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"планшэт"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактыўна, праверце праграму"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не знойдзена"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Кіраванне недаступнае"</string>

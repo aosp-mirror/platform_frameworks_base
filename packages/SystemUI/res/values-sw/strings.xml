@@ -91,13 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Mpaka wa sehemu ya chini wa asilimia <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Mpaka wa sehemu ya kushoto wa asilimia <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Mpaka wa sehemu ya kulia wa asilimia <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Imehifadhiwa kwenye <xliff:g id="APP">%1$s</xliff:g> katika wasifu wa kazini"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Faili"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> imetambua picha hii ya skrini."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> na zingine zinazotumika zimetambua picha hii ya skrini."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Kinasa Skrini"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Inachakata rekodi ya skrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Arifa inayoendelea ya kipindi cha kurekodi skrini"</string>
@@ -865,6 +862,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Hitilafu fulani imetokea. Jaribu tena."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Inapakia"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"kompyuta kibao"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Haitumiki, angalia programu"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hakipatikani"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kidhibiti hakipatikani"</string>

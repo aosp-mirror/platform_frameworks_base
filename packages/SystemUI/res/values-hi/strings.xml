@@ -91,13 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"निचले किनारे से <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"बाएं किनारे से <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"दाएं किनारे से <xliff:g id="PERCENT">%1$d</xliff:g> प्रतिशत"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"वर्क प्रोफ़ाइल में मौजूद <xliff:g id="APP">%1$s</xliff:g> में सेव किया गया है"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> को इस स्क्रीनशॉट का पता चला है."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> और खुले हुए अन्य ऐप्लिकेशन को इस स्क्रीनशॉट का पता चला है."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रिकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रिकॉर्डिंग को प्रोसेस किया जा रहा है"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रिकॉर्ड सेशन के लिए जारी सूचना"</string>
@@ -865,6 +862,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"कोई गड़बड़ी हुई. फिर से कोशिश करें."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"लोड हो रहा है"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"टैबलेट"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"काम नहीं कर रहा, ऐप जांचें"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"कंट्रोल नहीं है"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"कंट्रोल मौजूद नहीं है"</string>

@@ -91,13 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Quyi chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Chap chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Oʻng chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Ish profilidagi <xliff:g id="APP">%1$s</xliff:g> ilovasiga saqlandi"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Fayllar"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"Bu skrinshotda <xliff:g id="APPNAME">%1$s</xliff:g> aniqlandi."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"Bu skrinshotda <xliff:g id="APPNAME">%1$s</xliff:g> va boshqa ochiq ilovalar aniqlandi"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrandan yozib olish"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran yozib olinmoqda"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
@@ -865,6 +862,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Xatolik yuz berdi. Qayta urining."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Yuklanmoqda"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"planshet"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Mediani translatsiya qilish"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Translatsiya qilinmoqda: <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nofaol. Ilovani tekshiring"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Topilmadi"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Boshqarish imkonsiz"</string>
