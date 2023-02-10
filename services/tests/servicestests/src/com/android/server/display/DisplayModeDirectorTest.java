@@ -2264,6 +2264,10 @@ public class DisplayModeDirectorTest {
             .thenReturn(65);
         when(resources.getInteger(R.integer.config_defaultRefreshRateInZone))
             .thenReturn(85);
+        when(resources.getInteger(R.integer.config_defaultRefreshRateInHbmHdr))
+            .thenReturn(95);
+        when(resources.getInteger(R.integer.config_defaultRefreshRateInHbmSunlight))
+            .thenReturn(100);
         when(resources.getIntArray(R.array.config_brightnessThresholdsOfPeakRefreshRate))
             .thenReturn(new int[]{5});
         when(resources.getIntArray(R.array.config_ambientThresholdsOfPeakRefreshRate))
@@ -2274,8 +2278,21 @@ public class DisplayModeDirectorTest {
         when(
             resources.getIntArray(R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate))
             .thenReturn(new int[]{7000});
+        when(resources.getInteger(
+            com.android.internal.R.integer.config_displayWhiteBalanceBrightnessFilterHorizon))
+            .thenReturn(3);
+        ArgumentCaptor<TypedValue> valueArgumentCaptor = ArgumentCaptor.forClass(TypedValue.class);
+        doAnswer((Answer<Void>) invocation -> {
+            valueArgumentCaptor.getValue().type = 4;
+            valueArgumentCaptor.getValue().data = 13;
+            return null;
+        }).when(resources).getValue(eq(com.android.internal.R.dimen
+                .config_displayWhiteBalanceBrightnessFilterIntercept),
+                valueArgumentCaptor.capture(), eq(true));
         DisplayModeDirector director =
                 createDirectorFromRefreshRateArray(new float[]{60.0f, 90.0f}, 0);
+        SensorManager sensorManager = createMockSensorManager(createLightSensor());
+        director.start(sensorManager);
         // We don't expect any interaction with DeviceConfig when the director is initialized
         // because we explicitly avoid doing this as this can lead to a latency spike in the
         // startup of DisplayManagerService
@@ -2285,6 +2302,8 @@ public class DisplayModeDirectorTest {
                 0.0);
         assertEquals(director.getBrightnessObserver().getRefreshRateInHighZone(), 65);
         assertEquals(director.getBrightnessObserver().getRefreshRateInLowZone(), 85);
+        assertEquals(director.getHbmObserver().getRefreshRateInHbmHdr(), 95);
+        assertEquals(director.getHbmObserver().getRefreshRateInHbmSunlight(), 100);
         assertArrayEquals(director.getBrightnessObserver().getHighDisplayBrightnessThreshold(),
                 new int[]{250});
         assertArrayEquals(director.getBrightnessObserver().getHighAmbientBrightnessThreshold(),
@@ -2293,6 +2312,7 @@ public class DisplayModeDirectorTest {
                 new int[]{5});
         assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
                 new int[]{10});
+
 
         // Notify that the default display is updated, such that DisplayDeviceConfig has new values
         DisplayDeviceConfig displayDeviceConfig = mock(DisplayDeviceConfig.class);
@@ -2304,6 +2324,8 @@ public class DisplayModeDirectorTest {
         when(displayDeviceConfig.getLowAmbientBrightnessThresholds()).thenReturn(new int[]{30});
         when(displayDeviceConfig.getHighDisplayBrightnessThresholds()).thenReturn(new int[]{210});
         when(displayDeviceConfig.getHighAmbientBrightnessThresholds()).thenReturn(new int[]{2100});
+        when(displayDeviceConfig.getDefaultRefreshRateInHbmHdr()).thenReturn(65);
+        when(displayDeviceConfig.getDefaultRefreshRateInHbmSunlight()).thenReturn(75);
         director.defaultDisplayDeviceUpdated(displayDeviceConfig);
 
         assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 60, 0.0);
@@ -2319,6 +2341,8 @@ public class DisplayModeDirectorTest {
                 new int[]{25});
         assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
                 new int[]{30});
+        assertEquals(director.getHbmObserver().getRefreshRateInHbmHdr(), 65);
+        assertEquals(director.getHbmObserver().getRefreshRateInHbmSunlight(), 75);
 
         // Notify that the default display is updated, such that DeviceConfig has new values
         FakeDeviceConfig config = mInjector.getDeviceConfig();
@@ -2329,7 +2353,8 @@ public class DisplayModeDirectorTest {
         config.setLowDisplayBrightnessThresholds(new int[]{10});
         config.setHighDisplayBrightnessThresholds(new int[]{255});
         config.setHighAmbientBrightnessThresholds(new int[]{8000});
-
+        config.setRefreshRateInHbmHdr(70);
+        config.setRefreshRateInHbmSunlight(80);
         director.defaultDisplayDeviceUpdated(displayDeviceConfig);
 
         assertEquals(director.getSettingsObserver().getDefaultRefreshRate(), 60, 0.0);
@@ -2345,6 +2370,8 @@ public class DisplayModeDirectorTest {
                 new int[]{10});
         assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThreshold(),
                 new int[]{20});
+        assertEquals(director.getHbmObserver().getRefreshRateInHbmHdr(), 70);
+        assertEquals(director.getHbmObserver().getRefreshRateInHbmSunlight(), 80);
     }
 
     @Test

@@ -8045,6 +8045,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void setWallpaperShowWhenLocked(IBinder binder, boolean showWhenLocked) {
+            synchronized (mGlobalLock) {
+                final WindowToken token = mRoot.getWindowToken(binder);
+                if (token == null || token.asWallpaperToken() == null) {
+                    ProtoLog.w(WM_ERROR,
+                            "setWallpaperShowWhenLocked: non-existent wallpaper token: %s", binder);
+                    return;
+                }
+                token.asWallpaperToken().setShowWhenLocked(showWhenLocked);
+            }
+        }
+
+        @Override
         public boolean isUidFocused(int uid) {
             synchronized (mGlobalLock) {
                 for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {

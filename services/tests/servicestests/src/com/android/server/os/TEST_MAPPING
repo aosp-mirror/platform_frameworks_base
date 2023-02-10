@@ -1,7 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "BugreportManagerServiceImplTests",
+      "name": "FrameworksServicesTests",
       "options": [
         {
           "include-filter": "com.android.server.os."

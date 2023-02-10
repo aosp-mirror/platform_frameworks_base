@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.telephony.TelephonyManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -27,6 +28,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetwork
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -49,6 +51,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
 
     private lateinit var wifiRepository: FakeWifiRepository
     @Mock private lateinit var logger: TableLogBuffer
+    @Mock private lateinit var telephonyManager: TelephonyManager
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -56,13 +59,16 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(telephonyManager.subscriptionId).thenReturn(SUB_ID)
+        whenever(telephonyManager.simOperatorName).thenReturn("")
+
         wifiRepository = FakeWifiRepository()
 
         underTest =
             CarrierMergedConnectionRepository(
                 SUB_ID,
                 logger,
-                NetworkNameModel.Default("name"),
+                telephonyManager,
                 testScope.backgroundScope,
                 wifiRepository,
             )
@@ -130,6 +136,44 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
                     carrierNetworkChangeActive = false,
                 )
             assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun connectionInfo_activity_comesFromWifiActivity() =
+        testScope.runTest {
+            var latest: MobileConnectionModel? = null
+            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+
+            wifiRepository.setIsWifiEnabled(true)
+            wifiRepository.setIsWifiDefault(true)
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.CarrierMerged(
+                    networkId = NET_ID,
+                    subscriptionId = SUB_ID,
+                    level = 3,
+                )
+            )
+            wifiRepository.setWifiActivity(
+                DataActivityModel(
+                    hasActivityIn = true,
+                    hasActivityOut = false,
+                )
+            )
+
+            assertThat(latest!!.dataActivityDirection.hasActivityIn).isTrue()
+            assertThat(latest!!.dataActivityDirection.hasActivityOut).isFalse()
+
+            wifiRepository.setWifiActivity(
+                DataActivityModel(
+                    hasActivityIn = false,
+                    hasActivityOut = true,
+                )
+            )
+
+            assertThat(latest!!.dataActivityDirection.hasActivityIn).isFalse()
+            assertThat(latest!!.dataActivityDirection.hasActivityOut).isTrue()
 
             job.cancel()
         }
@@ -240,6 +284,43 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
             val job = underTest.cdmaRoaming.onEach { latest = it }.launchIn(this)
 
             assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkName_usesSimOperatorNameAsInitial() =
+        testScope.runTest {
+            whenever(telephonyManager.simOperatorName).thenReturn("Test SIM name")
+
+            var latest: NetworkNameModel? = null
+            val job = underTest.networkName.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(NetworkNameModel.SimDerived("Test SIM name"))
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkName_updatesOnNetworkUpdate() =
+        testScope.runTest {
+            whenever(telephonyManager.simOperatorName).thenReturn("Test SIM name")
+
+            var latest: NetworkNameModel? = null
+            val job = underTest.networkName.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(NetworkNameModel.SimDerived("Test SIM name"))
+
+            whenever(telephonyManager.simOperatorName).thenReturn("New SIM name")
+            wifiRepository.setWifiNetwork(
+                WifiNetworkModel.CarrierMerged(
+                    networkId = NET_ID,
+                    subscriptionId = SUB_ID,
+                    level = 3,
+                )
+            )
+
+            assertThat(latest).isEqualTo(NetworkNameModel.SimDerived("New SIM name"))
 
             job.cancel()
         }

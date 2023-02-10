@@ -31,6 +31,7 @@
         android:id="@+id/icon_container_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:alpha="0.0"
         >
         <com.android.systemui.media.taptotransfer.receiver.ReceiverChipRippleView
             android:id="@+id/icon_glow_ripple"

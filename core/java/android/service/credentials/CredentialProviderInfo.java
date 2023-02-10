@@ -175,7 +175,8 @@ public final class CredentialProviderInfo {
                         serviceInfo.packageName,
                         PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY));
                 if (appInfo != null
-                        && context.checkPermission(Manifest.permission.SYSTEM_CREDENTIAL_PROVIDER,
+                        && context.checkPermission(
+                                Manifest.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE,
                         /*pId=*/-1, appInfo.uid) == PackageManager.PERMISSION_GRANTED) {
                     services.add(new CredentialProviderInfo(context, serviceInfo,
                             /*isSystemProvider=*/true));

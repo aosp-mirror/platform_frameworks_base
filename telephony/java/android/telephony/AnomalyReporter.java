@@ -110,8 +110,15 @@ public final class AnomalyReporter {
             return;
         }
 
-        // Don't report if the server-side flag isn't loaded, as it implies other anomaly report
-        // related config hasn't loaded.
+        //always write atoms to statsd
+        TelephonyStatsLog.write(
+                TELEPHONY_ANOMALY_DETECTED,
+                carrierId,
+                eventId.getLeastSignificantBits(),
+                eventId.getMostSignificantBits());
+
+        // Don't report via Intent if the server-side flag isn't loaded, as it implies other anomaly
+        // report related config hasn't loaded.
         try {
             boolean isAnomalyReportEnabledFromServer = DeviceConfig.getBoolean(
                     DeviceConfig.NAMESPACE_TELEPHONY, KEY_IS_TELEPHONY_ANOMALY_REPORT_ENABLED,
@@ -121,12 +128,6 @@ public final class AnomalyReporter {
             Rlog.w(TAG, "Unable to read device config, dropping event=" + eventId);
             return;
         }
-
-        TelephonyStatsLog.write(
-                TELEPHONY_ANOMALY_DETECTED,
-                carrierId,
-                eventId.getLeastSignificantBits(),
-                eventId.getMostSignificantBits());
 
         // If this event has already occurred, skip sending intents for it; regardless log its
         // invocation here.

@@ -494,8 +494,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mService.deferWindowLayout();
         mService.mTaskSupervisor.setDeferRootVisibilityUpdate(true /* deferUpdate */);
         try {
-            if (transition != null && transition.applyDisplayChangeIfNeeded()) {
-                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            if (transition != null) {
+                transition.applyDisplayChangeIfNeeded();
             }
             final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
             final int hopSize = hops.size();

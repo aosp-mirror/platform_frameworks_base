@@ -25,6 +25,7 @@ import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FINGERPRINT_NOT_RECOGNIZED;
 import static com.android.keyguard.KeyguardUpdateMonitor.getCurrentUser;
@@ -1096,18 +1097,23 @@ public class KeyguardIndicationController {
                 }
             }
 
+            final boolean faceAuthUnavailable = biometricSourceType == FACE
+                    && msgId == BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
+
             // TODO(b/141025588): refactor to reduce repetition of code/comments
             // Only checking if unlocking with Biometric is allowed (no matter strong or non-strong
             // as long as primary auth, i.e. PIN/pattern/password, is not required), so it's ok to
             // pass true for isStrongBiometric to isUnlockingWithBiometricAllowed() to bypass the
             // check of whether non-strong biometric is allowed
             if (!mKeyguardUpdateMonitor
-                    .isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)) {
+                    .isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)
+                    && !faceAuthUnavailable) {
                 return;
             }
 
             final boolean faceAuthSoftError = biometricSourceType == FACE
-                    && msgId != BIOMETRIC_HELP_FACE_NOT_RECOGNIZED;
+                    && msgId != BIOMETRIC_HELP_FACE_NOT_RECOGNIZED
+                    && msgId != BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
             final boolean faceAuthFailed = biometricSourceType == FACE
                     && msgId == BIOMETRIC_HELP_FACE_NOT_RECOGNIZED; // ran through matcher & failed
             final boolean fpAuthFailed = biometricSourceType == FINGERPRINT
@@ -1149,6 +1155,13 @@ public class KeyguardIndicationController {
                     showBiometricMessage(
                             getTrustGrantedIndication(),
                             mContext.getString(R.string.keyguard_unlock)
+                    );
+                } else if (faceAuthUnavailable) {
+                    showBiometricMessage(
+                            helpString,
+                            isUnlockWithFingerprintPossible
+                                    ? mContext.getString(R.string.keyguard_suggest_fingerprint)
+                                    : mContext.getString(R.string.keyguard_unlock)
                     );
                 } else {
                     showBiometricMessage(helpString);

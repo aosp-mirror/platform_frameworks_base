@@ -173,6 +173,7 @@ public final class SurfaceControl implements Parcelable {
             boolean isTrustedOverlay);
     private static native void nativeSetDropInputMode(
             long transactionObj, long nativeObject, int flags);
+    private static native void nativeSurfaceFlushJankData(long nativeSurfaceObject);
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
     private static native boolean nativeClearAnimationFrameStats();
@@ -3882,6 +3883,15 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             nativeSetDropInputMode(mNativeObject, sc.mNativeObject, mode);
             return this;
+        }
+
+        /**
+         * Sends a flush jank data transaction for the given surface.
+         * @hide
+         */
+        public static void sendSurfaceFlushJankData(SurfaceControl sc) {
+            sc.checkNotReleased();
+            nativeSurfaceFlushJankData(sc.mNativeObject);
         }
 
         /**

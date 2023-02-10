@@ -196,6 +196,7 @@ import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.DeleteGesture;
 import android.view.inputmethod.DeleteRangeGesture;
+import android.view.inputmethod.EditorBoundsInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
@@ -209,6 +210,7 @@ import android.view.inputmethod.PreviewableHandwritingGesture;
 import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.view.inputmethod.SelectRangeGesture;
+import android.view.inputmethod.TextAppearanceInfo;
 import android.view.inputmethod.TextBoundsInfo;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
@@ -13658,7 +13660,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @return true if at least part of the text content is visible; false if the text content is
      * completely clipped or translated out of the visible area.
      */
-    boolean getContentVisibleRect(Rect rect) {
+    private boolean getContentVisibleRect(Rect rect) {
         if (!getLocalVisibleRect(rect)) {
             return false;
         }
@@ -13741,6 +13743,176 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             characterBounds[4 * offset + 3] += layoutTop;
         }
         return characterBounds;
+    }
+
+    /**
+     * Compute {@link CursorAnchorInfo} from this {@link TextView}.
+     *
+     * @param filter the {@link CursorAnchorInfo} update filter which specified the needed
+     *               information from IME.
+     * @param cursorAnchorInfoBuilder a cached {@link CursorAnchorInfo.Builder} object used to build
+     *                                the result {@link CursorAnchorInfo}.
+     * @param viewToScreenMatrix a cached {@link Matrix} object used to compute the view to screen
+     *                           matrix.
+     * @return the result {@link CursorAnchorInfo} to be passed to IME.
+     * @hide
+     */
+    @VisibleForTesting
+    @Nullable
+    public CursorAnchorInfo getCursorAnchorInfo(@InputConnection.CursorUpdateFilter int filter,
+            @NonNull CursorAnchorInfo.Builder cursorAnchorInfoBuilder,
+            @NonNull Matrix viewToScreenMatrix) {
+        Layout layout = getLayout();
+        if (layout == null) {
+            return null;
+        }
+        boolean includeEditorBounds =
+                (filter & InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS) != 0;
+        boolean includeCharacterBounds =
+                (filter & InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS) != 0;
+        boolean includeInsertionMarker =
+                (filter & InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER) != 0;
+        boolean includeVisibleLineBounds =
+                (filter & InputConnection.CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS) != 0;
+        boolean includeTextAppearance =
+                (filter & InputConnection.CURSOR_UPDATE_FILTER_TEXT_APPEARANCE) != 0;
+        boolean includeAll =
+                (!includeEditorBounds && !includeCharacterBounds && !includeInsertionMarker
+                        && !includeVisibleLineBounds && !includeTextAppearance);
+
+        includeEditorBounds |= includeAll;
+        includeCharacterBounds |= includeAll;
+        includeInsertionMarker |= includeAll;
+        includeVisibleLineBounds |= includeAll;
+        includeTextAppearance |= includeAll;
+
+        final CursorAnchorInfo.Builder builder = cursorAnchorInfoBuilder;
+        builder.reset();
+
+        final int selectionStart = getSelectionStart();
+        builder.setSelectionRange(selectionStart, getSelectionEnd());
+
+        // Construct transformation matrix from view local coordinates to screen coordinates.
+        viewToScreenMatrix.reset();
+        transformMatrixToGlobal(viewToScreenMatrix);
+        builder.setMatrix(viewToScreenMatrix);
+
+        if (includeEditorBounds) {
+            final RectF editorBounds = new RectF();
+            editorBounds.set(0 /* left */, 0 /* top */,
+                    getWidth(), getHeight());
+            final RectF handwritingBounds = new RectF(
+                    -getHandwritingBoundsOffsetLeft(),
+                    -getHandwritingBoundsOffsetTop(),
+                    getWidth() + getHandwritingBoundsOffsetRight(),
+                    getHeight() + getHandwritingBoundsOffsetBottom());
+            EditorBoundsInfo.Builder boundsBuilder = new EditorBoundsInfo.Builder();
+            EditorBoundsInfo editorBoundsInfo = boundsBuilder.setEditorBounds(editorBounds)
+                    .setHandwritingBounds(handwritingBounds).build();
+            builder.setEditorBoundsInfo(editorBoundsInfo);
+        }
+
+        if (includeCharacterBounds || includeInsertionMarker || includeVisibleLineBounds) {
+            final float viewportToContentHorizontalOffset =
+                    viewportToContentHorizontalOffset();
+            final float viewportToContentVerticalOffset =
+                    viewportToContentVerticalOffset();
+            final boolean isTextTransformed = (getTransformationMethod() != null
+                    && getTransformed() instanceof OffsetMapping);
+            if (includeCharacterBounds && !isTextTransformed) {
+                final CharSequence text = getText();
+                if (text instanceof Spannable) {
+                    final Spannable sp = (Spannable) text;
+                    int composingTextStart = EditableInputConnection.getComposingSpanStart(sp);
+                    int composingTextEnd = EditableInputConnection.getComposingSpanEnd(sp);
+                    if (composingTextEnd < composingTextStart) {
+                        final int temp = composingTextEnd;
+                        composingTextEnd = composingTextStart;
+                        composingTextStart = temp;
+                    }
+                    final boolean hasComposingText =
+                            (0 <= composingTextStart) && (composingTextStart
+                                    < composingTextEnd);
+                    if (hasComposingText) {
+                        final CharSequence composingText = text.subSequence(composingTextStart,
+                                composingTextEnd);
+                        builder.setComposingText(composingTextStart, composingText);
+                        populateCharacterBounds(builder, composingTextStart,
+                                composingTextEnd, viewportToContentHorizontalOffset,
+                                viewportToContentVerticalOffset);
+                    }
+                }
+            }
+
+            if (includeInsertionMarker) {
+                // Treat selectionStart as the insertion point.
+                if (0 <= selectionStart) {
+                    final int offsetTransformed = originalToTransformed(
+                            selectionStart, OffsetMapping.MAP_STRATEGY_CURSOR);
+                    final int line = layout.getLineForOffset(offsetTransformed);
+                    final float insertionMarkerX =
+                            layout.getPrimaryHorizontal(offsetTransformed)
+                                    + viewportToContentHorizontalOffset;
+                    final float insertionMarkerTop = layout.getLineTop(line)
+                            + viewportToContentVerticalOffset;
+                    final float insertionMarkerBaseline = layout.getLineBaseline(line)
+                            + viewportToContentVerticalOffset;
+                    final float insertionMarkerBottom =
+                            layout.getLineBottom(line, /* includeLineSpacing= */ false)
+                                    + viewportToContentVerticalOffset;
+                    final boolean isTopVisible =
+                            isPositionVisible(insertionMarkerX, insertionMarkerTop);
+                    final boolean isBottomVisible =
+                            isPositionVisible(insertionMarkerX, insertionMarkerBottom);
+                    int insertionMarkerFlags = 0;
+                    if (isTopVisible || isBottomVisible) {
+                        insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
+                    }
+                    if (!isTopVisible || !isBottomVisible) {
+                        insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
+                    }
+                    if (layout.isRtlCharAt(offsetTransformed)) {
+                        insertionMarkerFlags |= CursorAnchorInfo.FLAG_IS_RTL;
+                    }
+                    builder.setInsertionMarkerLocation(insertionMarkerX, insertionMarkerTop,
+                            insertionMarkerBaseline, insertionMarkerBottom,
+                            insertionMarkerFlags);
+                }
+            }
+
+            if (includeVisibleLineBounds) {
+                final Rect visibleRect = new Rect();
+                if (getContentVisibleRect(visibleRect)) {
+                    // Subtract the viewportToContentVerticalOffset to convert the view
+                    // coordinates to layout coordinates.
+                    final float visibleTop =
+                            visibleRect.top - viewportToContentVerticalOffset;
+                    final float visibleBottom =
+                            visibleRect.bottom - viewportToContentVerticalOffset;
+                    final int firstLine =
+                            layout.getLineForVertical((int) Math.floor(visibleTop));
+                    final int lastLine =
+                            layout.getLineForVertical((int) Math.ceil(visibleBottom));
+
+                    for (int line = firstLine; line <= lastLine; ++line) {
+                        final float left = layout.getLineLeft(line)
+                                + viewportToContentHorizontalOffset;
+                        final float top = layout.getLineTop(line)
+                                + viewportToContentVerticalOffset;
+                        final float right = layout.getLineRight(line)
+                                + viewportToContentHorizontalOffset;
+                        final float bottom = layout.getLineBottom(line, false)
+                                + viewportToContentVerticalOffset;
+                        builder.addVisibleLineBounds(left, top, right, bottom);
+                    }
+                }
+            }
+        }
+
+        if (includeTextAppearance) {
+            builder.setTextAppearanceInfo(TextAppearanceInfo.createFromTextView(this));
+        }
+        return builder.build();
     }
 
     /**

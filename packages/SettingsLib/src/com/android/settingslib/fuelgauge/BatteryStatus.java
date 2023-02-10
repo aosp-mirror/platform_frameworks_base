@@ -53,6 +53,12 @@ public class BatteryStatus {
     public final int maxChargingWattage;
     public final boolean present;
 
+    public static BatteryStatus create(Context context) {
+        final Intent batteryChangedIntent = BatteryUtils.getBatteryIntent(context);
+        return batteryChangedIntent == null
+                ? null : new BatteryStatus(batteryChangedIntent);
+    }
+
     public BatteryStatus(int status, int level, int plugged, int health,
             int maxChargingWattage, boolean present) {
         this.status = status;
@@ -87,11 +93,7 @@ public class BatteryStatus {
         }
     }
 
-    /**
-     * Determine whether the device is plugged in (USB, power, wireless or dock).
-     *
-     * @return true if the device is plugged in.
-     */
+    /** Determine whether the device is plugged. */
     public boolean isPluggedIn() {
         return plugged == BatteryManager.BATTERY_PLUGGED_AC
                 || plugged == BatteryManager.BATTERY_PLUGGED_USB
@@ -99,30 +101,19 @@ public class BatteryStatus {
                 || plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
     }
 
-    /**
-     * Determine whether the device is plugged in (USB, power).
-     *
-     * @return true if the device is plugged in wired (as opposed to wireless)
-     */
+    /** Determine whether the device is plugged in (USB, power). */
     public boolean isPluggedInWired() {
         return plugged == BatteryManager.BATTERY_PLUGGED_AC
                 || plugged == BatteryManager.BATTERY_PLUGGED_USB;
     }
 
     /**
-     * Determine whether the device is plugged in wireless.
-     *
-     * @return true if the device is plugged in wireless
-     */
+     * Determine whether the device is plugged in wireless. */
     public boolean isPluggedInWireless() {
         return plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
     }
 
-    /**
-     * Determine whether the device is plugged in dock.
-     *
-     * @return true if the device is plugged in dock
-     */
+    /** Determine whether the device is plugged in dock. */
     public boolean isPluggedInDock() {
         return plugged == BatteryManager.BATTERY_PLUGGED_DOCK;
     }
@@ -131,36 +122,22 @@ public class BatteryStatus {
      * Whether or not the device is charged. Note that some devices never return 100% for
      * battery level, so this allows either battery level or status to determine if the
      * battery is charged.
-     *
-     * @return true if the device is charged
      */
     public boolean isCharged() {
         return isCharged(status, level);
     }
 
-    /**
-     * Whether battery is low and needs to be charged.
-     *
-     * @return true if battery is low
-     */
+    /** Whether battery is low and needs to be charged. */
     public boolean isBatteryLow() {
         return level < LOW_BATTERY_THRESHOLD;
     }
 
-    /**
-     * Whether battery is overheated.
-     *
-     * @return true if battery is overheated
-     */
+    /** Whether battery is overheated. */
     public boolean isOverheated() {
         return health == BATTERY_HEALTH_OVERHEAT;
     }
 
-    /**
-     * Return current chargin speed is fast, slow or normal.
-     *
-     * @return the charing speed
-     */
+    /** Return current chargin speed is fast, slow or normal. */
     public final int getChargingSpeed(Context context) {
         final int slowThreshold = context.getResources().getInteger(
                 R.integer.config_chargingSlowlyThreshold);

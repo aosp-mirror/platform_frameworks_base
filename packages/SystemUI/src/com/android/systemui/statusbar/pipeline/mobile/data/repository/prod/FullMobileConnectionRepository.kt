@@ -86,7 +86,7 @@ class FullMobileConnectionRepository(
     }
 
     private val carrierMergedRepo: MobileConnectionRepository by lazy {
-        carrierMergedRepoFactory.build(subId, tableLogBuffer, defaultNetworkName)
+        carrierMergedRepoFactory.build(subId, tableLogBuffer)
     }
 
     @VisibleForTesting

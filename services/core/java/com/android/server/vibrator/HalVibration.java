@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.CombinedVibration;
 import android.os.IBinder;
@@ -35,13 +36,6 @@ import java.util.function.Function;
  */
 final class HalVibration extends Vibration {
 
-    public final VibrationAttributes attrs;
-    public final long id;
-    public final int uid;
-    public final int displayId;
-    public final String opPkg;
-    public final String reason;
-    public final IBinder token;
     public final SparseArray<VibrationEffect> mFallbacks = new SparseArray<>();
 
     /** The actual effect to be played. */
@@ -58,27 +52,13 @@ final class HalVibration extends Vibration {
     /** Vibration status. */
     private Vibration.Status mStatus;
 
-    /** Vibration runtime stats. */
-    private final VibrationStats mStats = new VibrationStats();
-
     /** A {@link CountDownLatch} to enable waiting for completion. */
     private final CountDownLatch mCompletionLatch = new CountDownLatch(1);
 
-    HalVibration(IBinder token, int id, CombinedVibration effect,
-            VibrationAttributes attrs, int uid, int displayId, String opPkg, String reason) {
-        this.token = token;
+    HalVibration(@NonNull IBinder token, CombinedVibration effect, @NonNull CallerInfo callerInfo) {
+        super(token, callerInfo);
         this.mEffect = effect;
-        this.id = id;
-        this.attrs = attrs;
-        this.uid = uid;
-        this.displayId = displayId;
-        this.opPkg = opPkg;
-        this.reason = reason;
         mStatus = Vibration.Status.RUNNING;
-    }
-
-    VibrationStats stats() {
-        return mStats;
     }
 
     /**
@@ -94,7 +74,7 @@ final class HalVibration extends Vibration {
             return;
         }
         mStatus = info.status;
-        mStats.reportEnded(info.endedByUid, info.endedByUsage);
+        stats.reportEnded(info.endedBy);
         mCompletionLatch.countDown();
     }
 
@@ -190,8 +170,8 @@ final class HalVibration extends Vibration {
      * Return {@link Vibration.DebugInfo} with read-only debug information about this vibration.
      */
     public Vibration.DebugInfo getDebugInfo() {
-        return new Vibration.DebugInfo(mStatus, mStats, mEffect, mOriginalEffect, /* scale= */ 0,
-                attrs, uid, displayId, opPkg, reason);
+        return new Vibration.DebugInfo(mStatus, stats, mEffect, mOriginalEffect, /* scale= */ 0,
+                callerInfo);
     }
 
     /** Return {@link VibrationStats.StatsInfo} with read-only metrics about this vibration. */
@@ -200,7 +180,8 @@ final class HalVibration extends Vibration {
                 ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__REPEATED
                 : FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE;
         return new VibrationStats.StatsInfo(
-                uid, vibrationType, attrs.getUsage(), mStatus, mStats, completionUptimeMillis);
+                callerInfo.uid, vibrationType, callerInfo.attrs.getUsage(), mStatus,
+                stats, completionUptimeMillis);
     }
 
     /**
@@ -212,8 +193,9 @@ final class HalVibration extends Vibration {
      * pipeline very short vibrations together, regardless of the flag.
      */
     public boolean canPipelineWith(HalVibration vib) {
-        return uid == vib.uid && attrs.isFlagSet(VibrationAttributes.FLAG_PIPELINED_EFFECT)
-                && vib.attrs.isFlagSet(VibrationAttributes.FLAG_PIPELINED_EFFECT)
+        return callerInfo.uid == vib.callerInfo.uid && callerInfo.attrs.isFlagSet(
+                VibrationAttributes.FLAG_PIPELINED_EFFECT)
+                && vib.callerInfo.attrs.isFlagSet(VibrationAttributes.FLAG_PIPELINED_EFFECT)
                 && !isRepeating();
     }
 }

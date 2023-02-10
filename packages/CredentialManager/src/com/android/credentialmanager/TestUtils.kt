@@ -22,6 +22,7 @@ import android.app.slice.SliceSpec
 import android.content.Context
 import android.content.Intent
 import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
+import android.credentials.ui.AuthenticationEntry
 import android.credentials.ui.Entry
 import android.net.Uri
 import android.provider.Settings
@@ -39,7 +40,8 @@ class GetTestUtils {
             key: String,
             subkey: String,
             title: String,
-        ): Entry {
+            status: Int
+        ): AuthenticationEntry {
             val slice = Slice.Builder(
                 Uri.EMPTY, SliceSpec("AuthenticationAction", 0)
             )
@@ -59,10 +61,11 @@ class GetTestUtils {
                 null,
                 listOf("androidx.credentials.provider.authenticationAction.SLICE_HINT_TITLE")
             )
-            return Entry(
+            return AuthenticationEntry(
                 key,
                 subkey,
-                slice.build()
+                slice.build(),
+                status
             )
         }
 

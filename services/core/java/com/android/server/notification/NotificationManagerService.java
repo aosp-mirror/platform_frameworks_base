@@ -114,6 +114,7 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ALLOW_DISMISS_ONGOING;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
@@ -271,6 +272,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.MetricsLogger;
@@ -577,10 +579,10 @@ public class NotificationManagerService extends SystemService {
     private float mInCallNotificationVolume;
     private Binder mCallNotificationToken = null;
 
-    private static final boolean ONGOING_DISMISSAL = SystemProperties.getBoolean(
-            "persist.sysui.notification.ongoing_dismissal", true);
     @VisibleForTesting
     protected boolean mSystemExemptFromDismissal = false;
+
+    private SystemUiSystemPropertiesFlags.FlagResolver mFlagResolver;
 
     // used as a mutex for access to all active notifications & listeners
     final Object mNotificationLock = new Object();
@@ -1208,7 +1210,8 @@ public class NotificationManagerService extends SystemService {
                 }
             }
 
-            int mustNotHaveFlags = ONGOING_DISMISSAL ? FLAG_NO_DISMISS : FLAG_ONGOING_EVENT;
+            int mustNotHaveFlags = mFlagResolver.isEnabled(ALLOW_DISMISS_ONGOING)
+                    ? FLAG_NO_DISMISS : FLAG_ONGOING_EVENT;
             cancelNotification(callingUid, callingPid, pkg, tag, id,
                     /* mustHaveFlags= */ 0,
                     /* mustNotHaveFlags= */ mustNotHaveFlags,
@@ -2219,7 +2222,8 @@ public class NotificationManagerService extends SystemService {
             TelephonyManager telephonyManager, ActivityManagerInternal ami,
             MultiRateLimiter toastRateLimiter, PermissionHelper permissionHelper,
             UsageStatsManagerInternal usageStatsManagerInternal,
-            TelecomManager telecomManager, NotificationChannelLogger channelLogger) {
+            TelecomManager telecomManager, NotificationChannelLogger channelLogger,
+            SystemUiSystemPropertiesFlags.FlagResolver flagResolver) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2417,6 +2421,8 @@ public class NotificationManagerService extends SystemService {
         mMsgPkgsAllowedAsConvos = Set.of(getStringArrayResource(
                 com.android.internal.R.array.config_notificationMsgPkgsAllowedAsConvos));
 
+        mFlagResolver = flagResolver;
+
         mStatsManager = statsManager;
 
         mToastRateLimiter = toastRateLimiter;
@@ -2548,7 +2554,7 @@ public class NotificationManagerService extends SystemService {
                         AppGlobals.getPermissionManager()),
                 LocalServices.getService(UsageStatsManagerInternal.class),
                 getContext().getSystemService(TelecomManager.class),
-                new NotificationChannelLoggerImpl());
+                new NotificationChannelLoggerImpl(), SystemUiSystemPropertiesFlags.getResolver());
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
@@ -6516,7 +6522,7 @@ public class NotificationManagerService extends SystemService {
 
         // Fix the notification as best we can.
         try {
-            fixNotification(notification, pkg, tag, id, userId);
+            fixNotification(notification, pkg, tag, id, userId, notificationUid);
         } catch (Exception e) {
             if (notification.isForegroundService()) {
                 throw new SecurityException("Invalid FGS notification", e);
@@ -6694,14 +6700,15 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void fixNotification(Notification notification, String pkg, String tag, int id,
-            int userId) throws NameNotFoundException, RemoteException {
+            @UserIdInt int userId, int notificationUid) throws NameNotFoundException,
+            RemoteException {
         final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
                 pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                 (userId == UserHandle.USER_ALL) ? USER_SYSTEM : userId);
         Notification.addFieldsFromContext(ai, notification);
 
         // Only notifications that can be non-dismissible can have the flag FLAG_NO_DISMISS
-        if (ONGOING_DISMISSAL) {
+        if (mFlagResolver.isEnabled(ALLOW_DISMISS_ONGOING)) {
             if (((notification.flags & FLAG_ONGOING_EVENT) > 0)
                     && canBeNonDismissible(ai, notification)) {
                 notification.flags |= FLAG_NO_DISMISS;
@@ -6710,17 +6717,31 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        int canColorize = mPackageManagerClient.checkPermission(
-                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, pkg);
+        int canColorize = getContext().checkPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, -1, notificationUid);
+
         if (canColorize == PERMISSION_GRANTED) {
             notification.flags |= Notification.FLAG_CAN_COLORIZE;
         } else {
             notification.flags &= ~Notification.FLAG_CAN_COLORIZE;
         }
 
+        if (notification.extras.getBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, false)) {
+            int hasShowDuringSetupPerm = getContext().checkPermission(
+                    android.Manifest.permission.NOTIFICATION_DURING_SETUP, -1, notificationUid);
+            if (hasShowDuringSetupPerm != PERMISSION_GRANTED) {
+                notification.extras.remove(Notification.EXTRA_ALLOW_DURING_SETUP);
+                if (DBG) {
+                    Slog.w(TAG, "warning: pkg " + pkg + " attempting to show during setup"
+                            + " without holding perm "
+                            + Manifest.permission.NOTIFICATION_DURING_SETUP);
+                }
+            }
+        }
+
         if (notification.fullScreenIntent != null && ai.targetSdkVersion >= Build.VERSION_CODES.Q) {
-            int fullscreenIntentPermission = mPackageManagerClient.checkPermission(
-                    android.Manifest.permission.USE_FULL_SCREEN_INTENT, pkg);
+            int fullscreenIntentPermission = getContext().checkPermission(
+                    android.Manifest.permission.USE_FULL_SCREEN_INTENT, -1, notificationUid);
             if (fullscreenIntentPermission != PERMISSION_GRANTED) {
                 notification.fullScreenIntent = null;
                 Slog.w(TAG, "Package " + pkg +
@@ -6765,8 +6786,8 @@ public class NotificationManagerService extends SystemService {
 
         // Ensure MediaStyle has correct permissions for remote device extras
         if (notification.isStyle(Notification.MediaStyle.class)) {
-            int hasMediaContentControlPermission = mPackageManager.checkPermission(
-                    android.Manifest.permission.MEDIA_CONTENT_CONTROL, pkg, userId);
+            int hasMediaContentControlPermission = getContext().checkPermission(
+                    android.Manifest.permission.MEDIA_CONTENT_CONTROL, -1, notificationUid);
             if (hasMediaContentControlPermission != PERMISSION_GRANTED) {
                 notification.extras.remove(Notification.EXTRA_MEDIA_REMOTE_DEVICE);
                 notification.extras.remove(Notification.EXTRA_MEDIA_REMOTE_ICON);
@@ -6780,8 +6801,8 @@ public class NotificationManagerService extends SystemService {
 
         // Ensure only allowed packages have a substitute app name
         if (notification.extras.containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME)) {
-            int hasSubstituteAppNamePermission = mPackageManager.checkPermission(
-                    permission.SUBSTITUTE_NOTIFICATION_APP_NAME, pkg, userId);
+            int hasSubstituteAppNamePermission = getContext().checkPermission(
+                    permission.SUBSTITUTE_NOTIFICATION_APP_NAME, -1, notificationUid);
             if (hasSubstituteAppNamePermission != PERMISSION_GRANTED) {
                 notification.extras.remove(Notification.EXTRA_SUBSTITUTE_APP_NAME);
                 if (DBG) {

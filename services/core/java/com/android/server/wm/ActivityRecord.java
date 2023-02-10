@@ -5115,6 +5115,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mDeferHidingClient;
     }
 
+    boolean canAffectSystemUiFlags() {
+        return task != null && task.canAffectSystemUiFlags() && isVisible()
+                && !inPinnedWindowingMode();
+    }
+
     @Override
     boolean isVisible() {
         // If the activity isn't hidden then it is considered visible and there is no need to check
@@ -8379,7 +8384,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void recomputeConfiguration() {
-        onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
+        // We check if the current activity is transparent. In that case we need to
+        // recomputeConfiguration of the first opaque activity beneath, to allow a
+        // proper computation of the new bounds.
+        if (!mLetterboxUiController.applyOnOpaqueActivityBelow(
+                ActivityRecord::recomputeConfiguration)) {
+            onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
+        }
     }
 
     boolean isInTransition() {

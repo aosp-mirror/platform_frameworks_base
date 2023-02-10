@@ -17,11 +17,15 @@
 package android.graphics;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Size;
+import android.annotation.SuppressLint;
 
 import libcore.util.NativeAllocationRegistry;
 
-import java.util.List;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Class responsible for holding specifications for {@link Mesh} creations. This class
@@ -43,99 +47,161 @@ public class MeshSpecification {
     long mNativeMeshSpec;
 
     /**
-     * Constants for {@link #make(List, int, List, String, String)}
+     * Constants for {@link #make(Attribute[], int, Varying[], String, String)}
      * to determine alpha type. Describes how to interpret the alpha component of a pixel.
+     *
+     * @hide
      */
-    @IntDef({UNKNOWN, OPAQUE, PREMUL, UNPREMULT})
+    @IntDef({ALPHA_TYPE_UNKNOWN, ALPHA_TYPE_OPAQUE, ALPHA_TYPE_PREMUL, ALPHA_TYPE_PREMULT})
+    @Retention(RetentionPolicy.SOURCE)
     private @interface AlphaType {}
 
     /**
      * uninitialized.
      */
-    public static final int UNKNOWN = 0;
+    public static final int ALPHA_TYPE_UNKNOWN = 0;
 
     /**
      * Pixel is opaque.
      */
-    public static final int OPAQUE = 1;
+    public static final int ALPHA_TYPE_OPAQUE = 1;
 
     /**
      * Pixel components are premultiplied by alpha.
      */
-    public static final int PREMUL = 2;
+    public static final int ALPHA_TYPE_PREMUL = 2;
 
     /**
      * Pixel components are independent of alpha.
      */
-    public static final int UNPREMULT = 3;
+    public static final int ALPHA_TYPE_PREMULT = 3;
 
     /**
      * Constants for {@link Attribute} and {@link Varying} for determining the data type.
+     *
+     * @hide
      */
-    @IntDef({FLOAT, FLOAT2, FLOAT3, FLOAT4, UBYTE4})
+    @IntDef({TYPE_FLOAT, TYPE_FLOAT2, TYPE_FLOAT3, TYPE_FLOAT4, TYPE_UBYTE4})
+    @Retention(RetentionPolicy.SOURCE)
     private @interface Type {}
 
     /**
      * Represents one float. Its equivalent shader type is float.
      */
-    public static final int FLOAT = 0;
+    public static final int TYPE_FLOAT = 0;
 
     /**
      * Represents two floats. Its equivalent shader type is float2.
      */
-    public static final int FLOAT2 = 1;
+    public static final int TYPE_FLOAT2 = 1;
 
     /**
      * Represents three floats. Its equivalent shader type is float3.
      */
-    public static final int FLOAT3 = 2;
+    public static final int TYPE_FLOAT3 = 2;
 
     /**
      * Represents four floats. Its equivalent shader type is float4.
      */
-    public static final int FLOAT4 = 3;
+    public static final int TYPE_FLOAT4 = 3;
 
     /**
      * Represents four bytes. Its equivalent shader type is half4.
      */
-    public static final int UBYTE4 = 4;
+    public static final int TYPE_UBYTE4 = 4;
 
     /**
-     * Data class to represent a single attribute in a shader. Note that type parameter must be
-     * one of {@link #FLOAT}, {@link #FLOAT2}, {@link #FLOAT3}, {@link #FLOAT4}, or {@link #UBYTE4}.
+     * Data class to represent a single attribute in a shader.
      *
      * Note that offset is the offset in number of bytes. For example, if we had two attributes
      *
+     * <pre>
      * Float3 att1
      * Float att2
+     * </pre>
      *
      * att1 would have an offset of 0, while att2 would have an offset of 12 bytes.
      */
     public static class Attribute {
         @Type
-        private int mType;
-        private int mOffset;
-        private String mName;
+        private final int mType;
+        private final int mOffset;
+        private final String mName;
 
         public Attribute(@Type int type, int offset, @NonNull String name) {
             mType = type;
             mOffset = offset;
             mName = name;
         }
+
+        /**
+         * Return the corresponding data type for this {@link Attribute}.
+         */
+        @Type
+        public int getType() {
+            return mType;
+        }
+
+        /**
+         * Return the offset of the attribute in bytes
+         */
+        public int getOffset() {
+            return mOffset;
+        }
+
+        /**
+         * Return the name of this {@link Attribute}
+         */
+        @NonNull
+        public String getName() {
+            return mName;
+        }
+
+        @Override
+        public String toString() {
+            return "Attribute{"
+                    + "mType=" + mType
+                    + ", mOffset=" + mOffset
+                    + ", mName='" + mName + '\''
+                    + '}';
+        }
     }
 
     /**
-     * Data class to represent a single varying variable. Note that type parameter must be
-     * one of {@link #FLOAT}, {@link #FLOAT2}, {@link #FLOAT3}, {@link #FLOAT4}, or {@link #UBYTE4}.
+     * Data class to represent a single varying variable.
      */
     public static class Varying {
         @Type
-        private int mType;
-        private String mName;
+        private final int mType;
+        private final String mName;
 
         public Varying(@Type int type, @NonNull String name) {
             mType = type;
             mName = name;
+        }
+
+        /**
+         * Return the corresponding data type for this {@link Varying}.
+         */
+        @Type
+        public int getType() {
+            return mType;
+        }
+
+        /**
+         * Return the name of this {@link Varying}
+         */
+        @NonNull
+        public String getName() {
+            return mName;
+        }
+
+        @Override
+        public String toString() {
+            return "Varying{"
+                    + "mType=" + mType
+                    + ", mName='" + mName + '\''
+                    + '}';
         }
     }
 
@@ -146,7 +212,9 @@ public class MeshSpecification {
     }
 
     /**
-     * Creates a {@link MeshSpecification} object for use within {@link Mesh}.
+     * Creates a {@link MeshSpecification} object for use within {@link Mesh}. This uses a default
+     * color space of {@link ColorSpace.Named#SRGB} and {@link AlphaType} of
+     * {@link #ALPHA_TYPE_PREMUL}.
      *
      * @param attributes     list of attributes represented by {@link Attribute}. Can hold a max of
      *                       8.
@@ -162,11 +230,14 @@ public class MeshSpecification {
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
      */
     @NonNull
-    public static MeshSpecification make(@NonNull List<Attribute> attributes, int vertexStride,
-            @NonNull List<Varying> varyings, @NonNull String vertexShader,
+    public static MeshSpecification make(
+            @SuppressLint("ArrayReturn") @NonNull @Size(max = 8) Attribute[] attributes,
+            @IntRange(from = 1, to = 1024) int vertexStride,
+            @SuppressLint("ArrayReturn") @NonNull @Size(max = 6) Varying[] varyings,
+            @NonNull String vertexShader,
             @NonNull String fragmentShader) {
-        long nativeMeshSpec = nativeMake(attributes.toArray(new Attribute[attributes.size()]),
-                vertexStride, varyings.toArray(new Varying[varyings.size()]), vertexShader,
+        long nativeMeshSpec = nativeMake(attributes,
+                vertexStride, varyings, vertexShader,
                 fragmentShader);
         if (nativeMeshSpec == 0) {
             throw new IllegalArgumentException("MeshSpecification construction failed");
@@ -175,7 +246,8 @@ public class MeshSpecification {
     }
 
     /**
-     * Creates a {@link MeshSpecification} object.
+     * Creates a {@link MeshSpecification} object.  This uses a default {@link AlphaType} of
+     * {@link #ALPHA_TYPE_PREMUL}.
      *
      * @param attributes     list of attributes represented by {@link Attribute}. Can hold a max of
      *                       8.
@@ -192,11 +264,16 @@ public class MeshSpecification {
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
      */
     @NonNull
-    public static MeshSpecification make(@NonNull List<Attribute> attributes, int vertexStride,
-            @NonNull List<Varying> varyings, @NonNull String vertexShader,
-            @NonNull String fragmentShader, @NonNull ColorSpace colorSpace) {
-        long nativeMeshSpec = nativeMakeWithCS(attributes.toArray(new Attribute[attributes.size()]),
-                vertexStride, varyings.toArray(new Varying[varyings.size()]), vertexShader,
+    public static MeshSpecification make(
+            @SuppressLint("ArrayReturn") @NonNull @Size(max = 8) Attribute[] attributes,
+            @IntRange(from = 1, to = 1024) int vertexStride,
+            @SuppressLint("ArrayReturn") @NonNull @Size(max = 6) Varying[] varyings,
+            @NonNull String vertexShader,
+            @NonNull String fragmentShader,
+            @NonNull ColorSpace colorSpace
+    ) {
+        long nativeMeshSpec = nativeMakeWithCS(attributes,
+                vertexStride, varyings, vertexShader,
                 fragmentShader, colorSpace.getNativeInstance());
         if (nativeMeshSpec == 0) {
             throw new IllegalArgumentException("MeshSpecification construction failed");
@@ -221,20 +298,23 @@ public class MeshSpecification {
      * @param colorSpace     {@link ColorSpace} to tell what color space to work in.
      * @param alphaType      Describes how to interpret the alpha component for a pixel. Must be
      *                       one of
-     *                       {@link MeshSpecification#UNKNOWN},
-     *                       {@link MeshSpecification#OPAQUE},
-     *                       {@link MeshSpecification#PREMUL}, or
-     *                       {@link MeshSpecification#UNPREMULT}
+     *                       {@link MeshSpecification#ALPHA_TYPE_UNKNOWN},
+     *                       {@link MeshSpecification#ALPHA_TYPE_OPAQUE},
+     *                       {@link MeshSpecification#ALPHA_TYPE_PREMUL}, or
+     *                       {@link MeshSpecification#ALPHA_TYPE_PREMULT}
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
      */
     @NonNull
-    public static MeshSpecification make(@NonNull List<Attribute> attributes, int vertexStride,
-            @NonNull List<Varying> varyings, @NonNull String vertexShader,
-            @NonNull String fragmentShader, @NonNull ColorSpace colorSpace,
+    public static MeshSpecification make(
+            @SuppressLint("ArrayReturn") @NonNull @Size(max = 8) Attribute[] attributes,
+            @IntRange(from = 1, to = 1024) int vertexStride,
+            @SuppressLint("ArrayReturn") @NonNull @Size(max = 6) Varying[] varyings,
+            @NonNull String vertexShader,
+            @NonNull String fragmentShader,
+            @NonNull ColorSpace colorSpace,
             @AlphaType int alphaType) {
         long nativeMeshSpec =
-                nativeMakeWithAlpha(attributes.toArray(new Attribute[attributes.size()]),
-                        vertexStride, varyings.toArray(new Varying[varyings.size()]), vertexShader,
+                nativeMakeWithAlpha(attributes, vertexStride, varyings, vertexShader,
                         fragmentShader, colorSpace.getNativeInstance(), alphaType);
         if (nativeMeshSpec == 0) {
             throw new IllegalArgumentException("MeshSpecification construction failed");

@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 
 import com.android.internal.util.FrameworkStatsLog;
 
-/** CounterHistogram encapsulates StatsD write API calls */
+/** Histogram encapsulates StatsD write API calls */
 public final class Histogram {
 
     private final long mMetricIdHash;
@@ -42,10 +42,10 @@ public final class Histogram {
                 /*count*/ 1, binIndex);
     }
 
-    /** Used by CounterHistogram to map data sample to corresponding bin */
+    /** Used by Histogram to map data sample to corresponding bin */
     public interface BinOptions {
         /**
-         * Returns bins count to be used by counter histogram
+         * Returns bins count to be used by a histogram
          *
          * @return bins count used to initialize Options, including overflow & underflow bins
          * @hide
@@ -62,7 +62,7 @@ public final class Histogram {
         int getBinForSample(float sample);
     }
 
-    /** Used by CounterHistogram to map data sample to corresponding bin for on uniform bins */
+    /** Used by Histogram to map data sample to corresponding bin for uniform bins */
     public static final class UniformOptions implements BinOptions {
 
         private final int mBinCount;

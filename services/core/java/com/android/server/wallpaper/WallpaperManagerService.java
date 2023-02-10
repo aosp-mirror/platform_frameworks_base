@@ -3154,8 +3154,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
 
-            final ActivityOptions clientOptions = ActivityOptions.makeBasic();
-            clientOptions.setIgnorePendingIntentCreatorForegroundState(true);
+            final ActivityOptions clientOptions = ActivityOptions.makeBasic()
+                    .setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
             PendingIntent clientIntent = PendingIntent.getActivityAsUser(
                     mContext, 0, Intent.createChooser(
                             new Intent(Intent.ACTION_SET_WALLPAPER),

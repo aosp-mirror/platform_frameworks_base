@@ -829,7 +829,15 @@ public class Transitions implements RemoteCallable<Transitions> {
         }
         mOrganizer.startTransition(transitionToken, wct != null && wct.isEmpty() ? null : wct);
         active.mToken = transitionToken;
-        mActiveTransitions.add(active);
+        int insertIdx = 0;
+        for (; insertIdx < mActiveTransitions.size(); ++insertIdx) {
+            if (mActiveTransitions.get(insertIdx).mInfo == null) {
+                // A `startNewTransition` was sent to WMCore, but wasn't acknowledged before WMCore
+                // made this request, so insert this request beforehand to keep order in sync.
+                break;
+            }
+        }
+        mActiveTransitions.add(insertIdx, active);
     }
 
     /** Start a new transition directly. */

@@ -22,6 +22,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
+import android.credentials.ui.AuthenticationEntry
 import android.credentials.ui.CreateCredentialProviderData
 import android.credentials.ui.DisabledProviderData
 import android.credentials.ui.Entry
@@ -265,7 +266,7 @@ class GetFlowUtils {
             providerId: String,
             providerDisplayName: String,
             providerIcon: Drawable,
-            authEntryList: List<Entry>,
+            authEntryList: List<AuthenticationEntry>,
         ): List<AuthenticationEntryInfo> {
             val result: MutableList<AuthenticationEntryInfo> = mutableListOf()
             authEntryList.forEach { entry ->
@@ -287,6 +288,9 @@ class GetFlowUtils {
                     fillInIntent = entry.frameworkExtrasIntent,
                     title = title,
                     icon = providerIcon,
+                    isUnlockedAndEmpty = entry.status != AuthenticationEntry.STATUS_LOCKED,
+                    isLastUnlocked =
+                    entry.status == AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT
                 ))
             }
             return result

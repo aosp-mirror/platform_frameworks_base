@@ -81,6 +81,7 @@ import static com.android.server.wm.LetterboxConfiguration.letterboxBackgroundTy
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.TaskDescription;
 import android.content.pm.ActivityInfo.ScreenOrientation;
@@ -104,7 +105,9 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.server.wm.LetterboxConfiguration.LetterboxBackgroundType;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** Controls behaviour of the letterbox UI for {@link mActivityRecord}. */
@@ -1469,6 +1472,32 @@ final class LetterboxUiController {
 
     public ActivityRecord.CompatDisplayInsets getInheritedCompatDisplayInsets() {
         return mInheritedCompatDisplayInsets;
+    }
+
+    /**
+     * In case of translucent activities, it consumes the {@link ActivityRecord} of the first opaque
+     * activity beneath using the given consumer and returns {@code true}.
+     */
+    boolean applyOnOpaqueActivityBelow(@NonNull Consumer<ActivityRecord> consumer) {
+        return findOpaqueNotFinishingActivityBelow()
+                .map(activityRecord -> {
+                    consumer.accept(activityRecord);
+                    return true;
+                }).orElse(false);
+    }
+
+    /**
+     * @return The first not finishing opaque activity beneath the current translucent activity
+     * if it exists and the strategy is enabled.
+     */
+    private Optional<ActivityRecord> findOpaqueNotFinishingActivityBelow() {
+        if (!hasInheritedLetterboxBehavior() || mActivityRecord.getTask() == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(mActivityRecord.getTask().getActivity(
+                FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE /* callback */,
+                mActivityRecord /* boundary */, false /* includeBoundary */,
+                true /* traverseTopToBottom */));
     }
 
     private void inheritConfiguration(ActivityRecord firstOpaque) {

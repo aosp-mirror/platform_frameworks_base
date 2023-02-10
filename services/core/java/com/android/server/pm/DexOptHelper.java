@@ -40,8 +40,10 @@ import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
@@ -1019,7 +1021,15 @@ public final class DexOptHelper {
                 pm.getDexOptHelper().new DexoptDoneHandler());
         LocalManagerRegistry.addManager(ArtManagerLocal.class, artManager);
 
-        artManager.scheduleBackgroundDexoptJob();
+        // Schedule the background job when boot is complete. This decouples us from when
+        // JobSchedulerService is initialized.
+        systemContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                context.unregisterReceiver(this);
+                artManager.scheduleBackgroundDexoptJob();
+            }
+        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
     }
 
     /**

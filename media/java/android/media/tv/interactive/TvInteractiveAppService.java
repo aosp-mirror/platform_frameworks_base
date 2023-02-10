@@ -145,30 +145,29 @@ public abstract class TvInteractiveAppService extends Service {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "PLAYBACK_COMMAND_STOP_MODE_", value = {
-            PLAYBACK_COMMAND_STOP_MODE_BLANK,
-            PLAYBACK_COMMAND_STOP_MODE_FREEZE
+    @IntDef(prefix = "COMMAND_PARAMETER_VALUE_STOP_MODE_", value = {
+            COMMAND_PARAMETER_VALUE_STOP_MODE_BLANK,
+            COMMAND_PARAMETER_VALUE_STOP_MODE_FREEZE
     })
     public @interface PlaybackCommandStopMode {}
 
     /**
      * Playback command stop mode: show a blank screen.
-     * @hide
+     * @see #PLAYBACK_COMMAND_TYPE_STOP
      */
-    public static final int PLAYBACK_COMMAND_STOP_MODE_BLANK = 1;
+    public static final int COMMAND_PARAMETER_VALUE_STOP_MODE_BLANK = 1;
 
     /**
      * Playback command stop mode: freeze the video.
-     * @hide
+     * @see #PLAYBACK_COMMAND_TYPE_STOP
      */
-    public static final int PLAYBACK_COMMAND_STOP_MODE_FREEZE = 2;
+    public static final int COMMAND_PARAMETER_VALUE_STOP_MODE_FREEZE = 2;
 
     /**
      * Playback command parameter: stop mode.
      * <p>Type: int
      *
      * @see #PLAYBACK_COMMAND_TYPE_STOP
-     * @hide
      */
     public static final String COMMAND_PARAMETER_KEY_STOP_MODE = "command_stop_mode";
 
@@ -550,7 +549,8 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Receives current video bounds.
-         * @hide
+         *
+         * @param bounds the rectangle area for rendering the current video.
          */
         public void onCurrentVideoBounds(@NonNull Rect bounds) {
         }
@@ -1135,7 +1135,6 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Requests the bounds of the current video.
-         * @hide
          */
         @CallSuper
         public void requestCurrentVideoBounds() {

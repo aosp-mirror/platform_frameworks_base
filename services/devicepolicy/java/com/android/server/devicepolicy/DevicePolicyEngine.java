@@ -17,16 +17,21 @@
 package com.android.server.devicepolicy;
 
 import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
+import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_CLEARED;
 import static android.app.admin.PolicyUpdateResult.RESULT_SUCCESS;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_TARGET_USER_ID;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
 import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT;
+import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
 
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyState;
+import android.app.admin.PolicyKey;
 import android.app.admin.PolicyUpdatesReceiver;
+import android.app.admin.PolicyValue;
 import android.app.admin.TargetUser;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +44,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.SparseArray;
@@ -59,6 +65,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,6 +77,9 @@ import java.util.Set;
  */
 final class DevicePolicyEngine {
     static final String TAG = "DevicePolicyEngine";
+
+    private static final String ENABLE_COEXISTENCE_FLAG = "enable_coexistence";
+    private static final boolean DEFAULT_ENABLE_COEXISTENCE_FLAG = true;
 
     private final Context mContext;
     private final UserManager mUserManager;
@@ -105,23 +115,32 @@ final class DevicePolicyEngine {
         mEnforcingAdmins = new SparseArray<>();
     }
 
-    // TODO: add more documentation on broadcasts/callbacks to use to get current enforced values
     /**
-     * Set the policy for the provided {@code policyDefinition}
-     * (see {@link PolicyDefinition}) and {@code enforcingAdmin} to the provided {@code value}.
+     * Set the policy for the provided {@code policyDefinition} (see {@link PolicyDefinition}) and
+     * {@code enforcingAdmin} to the provided {@code value}.
+     *
+     * <p>If {@code skipEnforcePolicy} is true, it sets the policies in the internal data structure
+     * but doesn't call the enforcing logic.
+     *
      */
     <V> void setLocalPolicy(
             @NonNull PolicyDefinition<V> policyDefinition,
             @NonNull EnforcingAdmin enforcingAdmin,
-            @NonNull V value,
-            int userId) {
-
+            @NonNull PolicyValue<V> value,
+            int userId,
+            boolean skipEnforcePolicy) {
         Objects.requireNonNull(policyDefinition);
         Objects.requireNonNull(enforcingAdmin);
         Objects.requireNonNull(value);
 
         synchronized (mLock) {
             PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
+
+            if (policyDefinition.isNonCoexistablePolicy()) {
+                setNonCoexistableLocalPolicy(policyDefinition, localPolicyState, enforcingAdmin,
+                        value, userId, skipEnforcePolicy);
+                return;
+            }
 
             boolean hasGlobalPolicies = hasGlobalPolicyLocked(policyDefinition);
             boolean policyChanged;
@@ -135,18 +154,21 @@ final class DevicePolicyEngine {
                 policyChanged = localPolicyState.addPolicy(enforcingAdmin, value);
             }
 
-            if (policyChanged) {
-                onLocalPolicyChanged(policyDefinition, enforcingAdmin, userId);
+            // No need to notify admins as no new policy is actually enforced, we're just filling in
+            // the data structures.
+            if (!skipEnforcePolicy) {
+                if (policyChanged) {
+                    onLocalPolicyChanged(policyDefinition, enforcingAdmin, userId);
+                }
+                boolean policyEnforced = Objects.equals(
+                        localPolicyState.getCurrentResolvedPolicy(), value);
+                sendPolicyResultToAdmin(
+                        enforcingAdmin,
+                        policyDefinition,
+                        // TODO: we're always sending this for now, should properly handle errors.
+                        policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
+                        userId);
             }
-
-            boolean policyEnforced = Objects.equals(
-                    localPolicyState.getCurrentResolvedPolicy(), value);
-            sendPolicyResultToAdmin(
-                    enforcingAdmin,
-                    policyDefinition,
-                    // TODO: we're always sending this for now, should properly handle errors.
-                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
-                    userId);
 
             updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
 
@@ -154,6 +176,49 @@ final class DevicePolicyEngine {
 
             applyToInheritableProfiles(policyDefinition, enforcingAdmin, value, userId);
         }
+    }
+
+    /**
+     * Sets a non-coexistable policy, meaning it doesn't get resolved against other policies set
+     * by other admins, and no callbacks are sent to admins, this is just storing and
+     * enforcing the policy.
+     *
+     * <p>Passing a {@code null} value means the policy set by this admin should be removed.
+     */
+    private <V> void setNonCoexistableLocalPolicy(
+            PolicyDefinition<V> policyDefinition,
+            PolicyState<V> localPolicyState,
+            EnforcingAdmin enforcingAdmin,
+            @Nullable PolicyValue<V> value,
+            int userId,
+            boolean skipEnforcePolicy) {
+        if (value == null) {
+            localPolicyState.removePolicy(enforcingAdmin);
+        } else {
+            localPolicyState.addPolicy(enforcingAdmin, value);
+        }
+        if (!skipEnforcePolicy) {
+            enforcePolicy(policyDefinition, value, userId);
+        }
+        if (localPolicyState.getPoliciesSetByAdmins().isEmpty()) {
+            removeLocalPolicyStateLocked(policyDefinition, userId);
+        }
+        updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
+        write();
+    }
+
+    // TODO: add more documentation on broadcasts/callbacks to use to get current enforced values
+    /**
+     * Set the policy for the provided {@code policyDefinition}
+     * (see {@link PolicyDefinition}) and {@code enforcingAdmin} to the provided {@code value}.
+     */
+    <V> void setLocalPolicy(
+            @NonNull PolicyDefinition<V> policyDefinition,
+            @NonNull EnforcingAdmin enforcingAdmin,
+            @NonNull PolicyValue<V> value,
+            int userId) {
+        setLocalPolicy(
+                policyDefinition, enforcingAdmin, value, userId, /* skipEnforcePolicy= */ false);
     }
 
     // TODO: add more documentation on broadcasts/callbacks to use to get current enforced values
@@ -174,6 +239,12 @@ final class DevicePolicyEngine {
             }
             PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
 
+            if (policyDefinition.isNonCoexistablePolicy()) {
+                setNonCoexistableLocalPolicy(policyDefinition, localPolicyState, enforcingAdmin,
+                        /* value= */ null, userId, /* skipEnforcePolicy= */ false);
+                return;
+            }
+
             boolean policyChanged;
             if (hasGlobalPolicyLocked(policyDefinition)) {
                 PolicyState<V> globalPolicyState = getGlobalPolicyStateLocked(policyDefinition);
@@ -189,12 +260,11 @@ final class DevicePolicyEngine {
             }
 
             // For a removePolicy to be enforced, it means no current policy exists
-            boolean policyEnforced = localPolicyState.getCurrentResolvedPolicy() == null;
             sendPolicyResultToAdmin(
                     enforcingAdmin,
                     policyDefinition,
                     // TODO: we're always sending this for now, should properly handle errors.
-                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
+                    RESULT_POLICY_CLEARED,
                     userId);
 
             if (localPolicyState.getPoliciesSetByAdmins().isEmpty()) {
@@ -215,7 +285,7 @@ final class DevicePolicyEngine {
      * else remove the policy from child.
      */
     private <V> void applyToInheritableProfiles(PolicyDefinition<V> policyDefinition,
-            EnforcingAdmin enforcingAdmin, V value, int userId) {
+            EnforcingAdmin enforcingAdmin, PolicyValue<V> value, int userId) {
         if (policyDefinition.isInheritable()) {
             Binder.withCleanCallingIdentity(() -> {
                 List<UserInfo> userInfos = mUserManager.getProfiles(userId);
@@ -280,6 +350,18 @@ final class DevicePolicyEngine {
                     userId);
         }
     }
+
+    /**
+     * Set the policy for the provided {@code policyDefinition}
+     * (see {@link PolicyDefinition}) and {@code enforcingAdmin} to the provided {@code value}.
+     */
+    <V> void setGlobalPolicy(
+            @NonNull PolicyDefinition<V> policyDefinition,
+            @NonNull EnforcingAdmin enforcingAdmin,
+            @NonNull PolicyValue<V> value) {
+        setGlobalPolicy(policyDefinition, enforcingAdmin, value, /* skipEnforcePolicy= */ false);
+    }
+
     // TODO: add more documentation on broadcasts/callbacks to use to get current enforced values
     /**
      * Set the policy for the provided {@code policyDefinition}
@@ -288,7 +370,8 @@ final class DevicePolicyEngine {
     <V> void setGlobalPolicy(
             @NonNull PolicyDefinition<V> policyDefinition,
             @NonNull EnforcingAdmin enforcingAdmin,
-            @NonNull V value) {
+            @NonNull PolicyValue<V> value,
+            boolean skipEnforcePolicy) {
 
         Objects.requireNonNull(policyDefinition);
         Objects.requireNonNull(enforcingAdmin);
@@ -298,22 +381,27 @@ final class DevicePolicyEngine {
             PolicyState<V> globalPolicyState = getGlobalPolicyStateLocked(policyDefinition);
 
             boolean policyChanged = globalPolicyState.addPolicy(enforcingAdmin, value);
-            if (policyChanged) {
-                onGlobalPolicyChanged(policyDefinition, enforcingAdmin);
+            boolean policyAppliedOnAllUsers = applyGlobalPolicyOnUsersWithLocalPoliciesLocked(
+                    policyDefinition, enforcingAdmin, value, skipEnforcePolicy);
+
+            // No need to notify admins as no new policy is actually enforced, we're just filling in
+            // the data structures.
+            if (!skipEnforcePolicy) {
+                if (policyChanged) {
+                    onGlobalPolicyChanged(policyDefinition, enforcingAdmin);
+                }
+
+                boolean policyAppliedGlobally = Objects.equals(
+                        globalPolicyState.getCurrentResolvedPolicy(), value);
+                boolean policyApplied = policyAppliedGlobally && policyAppliedOnAllUsers;
+
+                sendPolicyResultToAdmin(
+                        enforcingAdmin,
+                        policyDefinition,
+                        // TODO: we're always sending this for now, should properly handle errors.
+                        policyApplied ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
+                        UserHandle.USER_ALL);
             }
-
-            boolean policyEnforcedOnAllUsers = enforceGlobalPolicyOnUsersWithLocalPoliciesLocked(
-                    policyDefinition, enforcingAdmin, value);
-            boolean policyEnforcedGlobally = Objects.equals(
-                    globalPolicyState.getCurrentResolvedPolicy(), value);
-            boolean policyEnforced = policyEnforcedGlobally && policyEnforcedOnAllUsers;
-
-            sendPolicyResultToAdmin(
-                    enforcingAdmin,
-                    policyDefinition,
-                    // TODO: we're always sending this for now, should properly handle errors.
-                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
-                    UserHandle.USER_ALL);
 
             updateDeviceAdminServiceOnPolicyAddLocked(enforcingAdmin);
 
@@ -341,17 +429,14 @@ final class DevicePolicyEngine {
                 onGlobalPolicyChanged(policyDefinition, enforcingAdmin);
             }
 
-            boolean policyEnforcedOnAllUsers = enforceGlobalPolicyOnUsersWithLocalPoliciesLocked(
-                    policyDefinition, enforcingAdmin, /* value= */ null);
-            // For a removePolicy to be enforced, it means no current policy exists
-            boolean policyEnforcedGlobally = policyState.getCurrentResolvedPolicy() == null;
-            boolean policyEnforced = policyEnforcedGlobally && policyEnforcedOnAllUsers;
+            applyGlobalPolicyOnUsersWithLocalPoliciesLocked(
+                    policyDefinition, enforcingAdmin, /* value= */ null, /* enforcePolicy= */ true);
 
             sendPolicyResultToAdmin(
                     enforcingAdmin,
                     policyDefinition,
                     // TODO: we're always sending this for now, should properly handle errors.
-                    policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
+                    RESULT_POLICY_CLEARED,
                     UserHandle.USER_ALL);
 
             if (policyState.getPoliciesSetByAdmins().isEmpty()) {
@@ -392,15 +477,16 @@ final class DevicePolicyEngine {
      *
      * <p>Returns {@code true} if the policy is enforced successfully on all users.
      */
-    private <V> boolean enforceGlobalPolicyOnUsersWithLocalPoliciesLocked(
+    private <V> boolean applyGlobalPolicyOnUsersWithLocalPoliciesLocked(
             @NonNull PolicyDefinition<V> policyDefinition,
             @NonNull EnforcingAdmin enforcingAdmin,
-            @Nullable V value) {
+            @Nullable PolicyValue<V> value,
+            boolean skipEnforcePolicy) {
         // Global only policies can't be applied locally, return early.
         if (policyDefinition.isGlobalOnlyPolicy()) {
             return true;
         }
-        boolean isAdminPolicyEnforced = true;
+        boolean isAdminPolicyApplied = true;
         for (int i = 0; i < mLocalPolicies.size(); i++) {
             int userId = mLocalPolicies.keyAt(i);
             if (!hasLocalPolicyLocked(policyDefinition, userId)) {
@@ -412,9 +498,11 @@ final class DevicePolicyEngine {
 
             boolean policyChanged = localPolicyState.resolvePolicy(
                     globalPolicyState.getPoliciesSetByAdmins());
-            if (policyChanged) {
+            if (policyChanged && !skipEnforcePolicy) {
                 enforcePolicy(
-                        policyDefinition, localPolicyState.getCurrentResolvedPolicy(), userId);
+                        policyDefinition,
+                        localPolicyState.getCurrentResolvedPolicy(),
+                        userId);
                 sendPolicyChangedToAdmins(
                         localPolicyState,
                         enforcingAdmin,
@@ -424,10 +512,10 @@ final class DevicePolicyEngine {
                         userId);
 
             }
-            isAdminPolicyEnforced &= Objects.equals(
+            isAdminPolicyApplied &= Objects.equals(
                     value, localPolicyState.getCurrentResolvedPolicy());
         }
-        return isAdminPolicyEnforced;
+        return isAdminPolicyApplied;
     }
 
     /**
@@ -438,14 +526,16 @@ final class DevicePolicyEngine {
         Objects.requireNonNull(policyDefinition);
 
         synchronized (mLock) {
+            PolicyValue<V> resolvedValue = null;
             if (hasLocalPolicyLocked(policyDefinition, userId)) {
-                return getLocalPolicyStateLocked(
+                resolvedValue = getLocalPolicyStateLocked(
                         policyDefinition, userId).getCurrentResolvedPolicy();
             }
             if (hasGlobalPolicyLocked(policyDefinition)) {
-                return getGlobalPolicyStateLocked(policyDefinition).getCurrentResolvedPolicy();
+                resolvedValue = getGlobalPolicyStateLocked(
+                        policyDefinition).getCurrentResolvedPolicy();
             }
-            return null;
+            return resolvedValue == null ? null : resolvedValue.getValue();
         }
     }
 
@@ -466,13 +556,30 @@ final class DevicePolicyEngine {
                 return null;
             }
             return getLocalPolicyStateLocked(policyDefinition, userId)
-                    .getPoliciesSetByAdmins().get(enforcingAdmin);
+                    .getPoliciesSetByAdmins().get(enforcingAdmin).getValue();
         }
     }
 
     /**
-     * Returns the policies set by the given admin that share the same {@link PolicyKey#getKey()} as
-     * the provided {@code policyDefinition}.
+     * Retrieves the values set for the provided {@code policyDefinition} by each admin.
+     */
+    @NonNull
+    <V> LinkedHashMap<EnforcingAdmin, PolicyValue<V>> getLocalPoliciesSetByAdmins(
+            @NonNull PolicyDefinition<V> policyDefinition,
+            int userId) {
+        Objects.requireNonNull(policyDefinition);
+
+        synchronized (mLock) {
+            if (!hasLocalPolicyLocked(policyDefinition, userId)) {
+                return new LinkedHashMap<>();
+            }
+            return getLocalPolicyStateLocked(policyDefinition, userId).getPoliciesSetByAdmins();
+        }
+    }
+
+    /**
+     * Returns the policies set by the given admin that share the same
+     * {@link PolicyKey#getIdentifier()} as the provided {@code policyDefinition}.
      *
      * <p>For example, getLocalPolicyKeysSetByAdmin(PERMISSION_GRANT, admin) returns all permission
      * grants set by the given admin.
@@ -496,7 +603,7 @@ final class DevicePolicyEngine {
             }
             Set<PolicyKey> keys = new HashSet<>();
             for (PolicyKey key : mLocalPolicies.get(userId).keySet()) {
-                if (key.hasSameKeyAs(policyDefinition.getPolicyKey())
+                if (key.hasSameIdentifierAs(policyDefinition.getPolicyKey())
                         && mLocalPolicies.get(userId).get(key).getPoliciesSetByAdmins()
                         .containsKey(enforcingAdmin)) {
                     keys.add(key);
@@ -591,11 +698,12 @@ final class DevicePolicyEngine {
         }
     }
 
-    private <V> void enforcePolicy(
-            PolicyDefinition<V> policyDefinition, @Nullable V policyValue, int userId) {
+    private <V> void enforcePolicy(PolicyDefinition<V> policyDefinition,
+            @Nullable PolicyValue<V> policyValue, int userId) {
         // null policyValue means remove any enforced policies, ensure callbacks handle this
         // properly
-        policyDefinition.enforcePolicy(policyValue, mContext, userId);
+        policyDefinition.enforcePolicy(
+                policyValue == null ? null : policyValue.getValue(), mContext, userId);
     }
 
     private <V> void sendPolicyResultToAdmin(
@@ -766,7 +874,7 @@ final class DevicePolicyEngine {
         if (!policyState.getPolicyDefinition().isInheritable()) {
             return;
         }
-        for (Map.Entry<EnforcingAdmin, V> enforcingAdminEntry :
+        for (Map.Entry<EnforcingAdmin, PolicyValue<V>> enforcingAdminEntry :
                 policyState.getPoliciesSetByAdmins().entrySet()) {
             setLocalPolicy(policyState.getPolicyDefinition(),
                     enforcingAdminEntry.getKey(),
@@ -810,6 +918,34 @@ final class DevicePolicyEngine {
     }
 
     /**
+     * Returns all current enforced policies set on the device, and the individual values set by
+     * each admin. Global policies are returned under {@link UserHandle#ALL}.
+     */
+    @NonNull
+    DevicePolicyState getDevicePolicyState() {
+        Map<UserHandle, Map<PolicyKey, android.app.admin.PolicyState<?>>> policies =
+                new HashMap<>();
+        for (int i = 0; i < mLocalPolicies.size(); i++) {
+            UserHandle user = UserHandle.of(mLocalPolicies.keyAt(i));
+            policies.put(user, new HashMap<>());
+            for (PolicyKey policyKey : mLocalPolicies.valueAt(i).keySet()) {
+                policies.get(user).put(
+                        policyKey,
+                        mLocalPolicies.valueAt(i).get(policyKey).getParcelablePolicyState());
+            }
+        }
+        if (!mGlobalPolicies.isEmpty()) {
+            policies.put(UserHandle.ALL, new HashMap<>());
+            for (PolicyKey policyKey : mGlobalPolicies.keySet()) {
+                policies.get(UserHandle.ALL).put(
+                        policyKey,
+                        mGlobalPolicies.get(policyKey).getParcelablePolicyState());
+            }
+        }
+        return new DevicePolicyState(policies);
+    }
+
+    /**
      * Reestablishes the service that handles
      * {@link DevicePolicyManager#ACTION_DEVICE_ADMIN_SERVICE} in the enforcing admin if the package
      * was updated, as a package update results in the persistent connection getting reset.
@@ -835,11 +971,6 @@ final class DevicePolicyEngine {
     private void updateDeviceAdminServiceOnPolicyAddLocked(@NonNull EnforcingAdmin enforcingAdmin) {
         int userId = enforcingAdmin.getUserId();
 
-        // A connection is established with DPCs as soon as they are provisioned, so no need to
-        // connect when a policy is set.
-        if (enforcingAdmin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
-            return;
-        }
         if (mEnforcingAdmins.contains(userId)
                 && mEnforcingAdmins.get(userId).contains(enforcingAdmin)) {
             return;
@@ -850,6 +981,11 @@ final class DevicePolicyEngine {
         }
         mEnforcingAdmins.get(enforcingAdmin.getUserId()).add(enforcingAdmin);
 
+        // A connection is established with DPCs as soon as they are provisioned, so no need to
+        // connect when a policy is set.
+        if (enforcingAdmin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
+            return;
+        }
         mDeviceAdminServiceController.startServiceForAdmin(
                 enforcingAdmin.getPackageName(),
                 userId,
@@ -862,18 +998,10 @@ final class DevicePolicyEngine {
      */
     private void updateDeviceAdminServiceOnPolicyRemoveLocked(
             @NonNull EnforcingAdmin enforcingAdmin) {
-        // TODO(b/263364434): centralise handling in one place.
-        // DPCs rely on a constant connection being established as soon as they are provisioned,
-        // so we shouldn't disconnect it even if they no longer have policies set.
-        if (enforcingAdmin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
-            return;
-        }
         if (doesAdminHavePolicies(enforcingAdmin)) {
             return;
         }
-
         int userId = enforcingAdmin.getUserId();
-
         if (mEnforcingAdmins.contains(userId)) {
             mEnforcingAdmins.get(userId).remove(enforcingAdmin);
             if (mEnforcingAdmins.get(userId).isEmpty()) {
@@ -881,6 +1009,12 @@ final class DevicePolicyEngine {
             }
         }
 
+        // TODO(b/263364434): centralise handling in one place.
+        // DPCs rely on a constant connection being established as soon as they are provisioned,
+        // so we shouldn't disconnect it even if they no longer have policies set.
+        if (enforcingAdmin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
+            return;
+        }
         mDeviceAdminServiceController.stopServiceForAdmin(
                 enforcingAdmin.getPackageName(),
                 userId,
@@ -927,21 +1061,70 @@ final class DevicePolicyEngine {
         }
     }
 
+    /**
+     * Clear all policies set in the policy engine.
+     *
+     * <p>Note that this doesn't clear any enforcements, it only clears the data structures.
+     */
+    void clearAllPolicies() {
+        synchronized (mLock) {
+            clear();
+            write();
+        }
+    }
     private void clear() {
         synchronized (mLock) {
             mGlobalPolicies.clear();
             mLocalPolicies.clear();
+            mEnforcingAdmins.clear();
         }
     }
 
+    // TODO: we need to listen for user removal and package removal and update out internal policy
+    //  map and enforcing admins for this is be accurate.
+    boolean hasActivePolicies() {
+        return mEnforcingAdmins.size() > 0;
+    }
+
+    /**
+     * Returns {@code true} if the coexistence flag is enabled or:
+     * <ul>
+     * <li>If the provided package is an admin with existing policies
+     * <li>A new admin and no other admin have policies set
+     * <li>More than one admin have policies set
+     */
+    boolean canAdminAddPolicies(String packageName, int userId) {
+        if (isCoexistenceFlagEnabled()) {
+            return true;
+        }
+
+        if (mEnforcingAdmins.contains(userId)
+                && mEnforcingAdmins.get(userId).stream().anyMatch(admin ->
+                admin.getPackageName().equals(packageName))) {
+            return true;
+        }
+
+        int numOfEnforcingAdmins = 0;
+        for (int i = 0; i < mEnforcingAdmins.size(); i++) {
+            numOfEnforcingAdmins += mEnforcingAdmins.get(i).size();
+        }
+        return numOfEnforcingAdmins == 0 || numOfEnforcingAdmins > 1;
+    }
+
+    private boolean isCoexistenceFlagEnabled() {
+        return DeviceConfig.getBoolean(
+                NAMESPACE_DEVICE_POLICY_MANAGER,
+                ENABLE_COEXISTENCE_FLAG,
+                DEFAULT_ENABLE_COEXISTENCE_FLAG);
+    }
+
     private class DevicePoliciesReaderWriter {
-        private static final String DEVICE_POLICIES_XML = "device_policies.xml";
+        private static final String DEVICE_POLICIES_XML = "device_policy_state.xml";
         private static final String TAG_LOCAL_POLICY_ENTRY = "local-policy-entry";
         private static final String TAG_GLOBAL_POLICY_ENTRY = "global-policy-entry";
         private static final String TAG_ADMINS_POLICY_ENTRY = "admins-policy-entry";
         private static final String TAG_ENFORCING_ADMINS_ENTRY = "enforcing-admins-entry";
         private static final String ATTR_USER_ID = "user-id";
-        private static final String ATTR_POLICY_ID = "policy-id";
 
         private final File mFile;
 
