@@ -1393,6 +1393,8 @@ public final class ViewRootImpl implements ViewParent,
                                 listener, listener.data, mHandler, true /*waitForPresentTime*/);
                         mAttachInfo.mThreadedRenderer.addObserver(mHardwareRendererObserver);
                     }
+                    // Update unbuffered request when set the root view.
+                    mUnbufferedInputSource = mView.mUnbufferedInputSource;
                 }
 
                 view.assignParent(this);
