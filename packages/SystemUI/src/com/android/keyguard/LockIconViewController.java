@@ -466,6 +466,17 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         }
     }
 
+    /**
+     * @return whether the userUnlockedWithBiometric state changed
+     */
+    private boolean updateUserUnlockedWithBiometric() {
+        final boolean wasUserUnlockedWithBiometric = mUserUnlockedWithBiometric;
+        mUserUnlockedWithBiometric =
+                mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
+                        KeyguardUpdateMonitor.getCurrentUser());
+        return wasUserUnlockedWithBiometric != mUserUnlockedWithBiometric;
+    }
+
     private StatusBarStateController.StateListener mStatusBarStateListener =
             new StatusBarStateController.StateListener() {
                 @Override
@@ -503,11 +514,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
                 @Override
                 public void onBiometricsCleared() {
-                    final boolean wasUserUnlockedWithBiometric = mUserUnlockedWithBiometric;
-                    mUserUnlockedWithBiometric =
-                            mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
-                                    KeyguardUpdateMonitor.getCurrentUser());
-                    if (wasUserUnlockedWithBiometric != mUserUnlockedWithBiometric) {
+                    if (updateUserUnlockedWithBiometric()) {
                         updateVisibility();
                     }
                 }
@@ -516,10 +523,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 public void onBiometricRunningStateChanged(boolean running,
                         BiometricSourceType biometricSourceType) {
                     final boolean wasRunningFps = mRunningFPS;
-                    final boolean wasUserUnlockedWithBiometric = mUserUnlockedWithBiometric;
-                    mUserUnlockedWithBiometric =
-                            mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
-                                    KeyguardUpdateMonitor.getCurrentUser());
+                    final boolean userUnlockedWithBiometricChanged =
+                            updateUserUnlockedWithBiometric();
 
                     if (biometricSourceType == FINGERPRINT) {
                         mRunningFPS = running;
@@ -537,8 +542,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                         }
                     }
 
-                    if (wasUserUnlockedWithBiometric != mUserUnlockedWithBiometric
-                            || wasRunningFps != mRunningFPS) {
+                    if (userUnlockedWithBiometricChanged || wasRunningFps != mRunningFPS) {
                         updateVisibility();
                     }
                 }
@@ -549,6 +553,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         @Override
         public void onUnlockedChanged() {
             mCanDismissLockScreen = mKeyguardStateController.canDismissLockScreen();
+            updateUserUnlockedWithBiometric();
             updateKeyguardShowing();
             updateVisibility();
         }
@@ -566,9 +571,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
             updateKeyguardShowing();
             if (mIsKeyguardShowing) {
-                mUserUnlockedWithBiometric =
-                    mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
-                        KeyguardUpdateMonitor.getCurrentUser());
+                updateUserUnlockedWithBiometric();
             }
             updateVisibility();
         }
