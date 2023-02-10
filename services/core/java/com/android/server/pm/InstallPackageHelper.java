@@ -2283,14 +2283,23 @@ final class InstallPackageHelper {
                 final PermissionManagerServiceInternal.PackageInstalledParams.Builder
                         permissionParamsBuilder =
                         new PermissionManagerServiceInternal.PackageInstalledParams.Builder();
-                final boolean grantPermissions = (installRequest.getInstallFlags()
-                        & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0;
-                if (grantPermissions) {
-                    final List<String> grantedPermissions =
-                            installRequest.getInstallGrantPermissions() != null
-                                    ? Arrays.asList(installRequest.getInstallGrantPermissions())
-                                    : pkg.getRequestedPermissions();
-                    permissionParamsBuilder.setGrantedPermissions(grantedPermissions);
+                final boolean grantRequestedPermissions = (installRequest.getInstallFlags()
+                        & PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS) != 0;
+                if (grantRequestedPermissions) {
+                    var permissionStates = new ArrayMap<String, Integer>();
+                    var requestedPermissions = pkg.getRequestedPermissions();
+                    for (int index = 0; index < requestedPermissions.size(); index++) {
+                        var permissionName = requestedPermissions.get(index);
+                        permissionStates.put(permissionName,
+                                PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED);
+                    }
+                    permissionParamsBuilder.setPermissionStates(permissionStates);
+                } else {
+                    var permissionStates = installRequest.getPermissionStates();
+                    if (permissionStates != null) {
+                        permissionParamsBuilder
+                                .setPermissionStates(permissionStates);
+                    }
                 }
                 final boolean allowlistAllRestrictedPermissions =
                         (installRequest.getInstallFlags()
