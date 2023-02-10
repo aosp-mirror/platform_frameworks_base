@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2022 The Android Open Source Project
+  ~ Copyright (C) 2023 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,13 +15,16 @@
   ~ limitations under the License.
   -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="24dp"
-        android:height="24dp"
-        android:viewportWidth="24"
-        android:viewportHeight="24"
-        android:tint="@color/decor_button_dark_color">
-    <group android:translateY="8.0">
+        android:width="32.0dp"
+        android:height="32.0dp"
+        android:viewportWidth="32.0"
+        android:viewportHeight="32.0"
+>
+    <group android:scaleX="0.5"
+           android:scaleY="0.5"
+           android:translateY="4.0">
         <path
-            android:fillColor="@android:color/white" android:pathData="M3,5V3H21V5Z"/>
+            android:fillColor="@android:color/black"
+            android:pathData="M10,38V28.35H13V35H19.65V38ZM10,19.65V10H19.65V13H13V19.65ZM28.35,38V35H35V28.35H38V38ZM35,19.65V13H28.35V10H38V19.65Z"/>
     </group>
 </vector>

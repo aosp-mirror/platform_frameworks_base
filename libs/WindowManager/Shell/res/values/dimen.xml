@@ -367,8 +367,12 @@
     <!-- Width of buttons (32dp each) + padding (128dp total). -->
     <dimen name="freeform_decor_caption_menu_width">256dp</dimen>
 
+    <dimen name="freeform_decor_caption_menu_height">250dp</dimen>
+
     <dimen name="freeform_resize_handle">30dp</dimen>
 
     <dimen name="freeform_resize_corner">44dp</dimen>
+
+    <dimen name="caption_menu_elevation">4dp</dimen>
 
 </resources>
