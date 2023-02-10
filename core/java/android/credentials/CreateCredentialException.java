@@ -40,13 +40,13 @@ public class CreateCredentialException extends Exception {
             "android.credentials.CreateCredentialException.TYPE_UNKNOWN";
 
     /**
-     * The error type value for when no credential is available for the given {@link
-     * CredentialManager#createCredential(CreateCredentialRequest, Activity,
+     * The error type value for when no create options are available from any provider(s),
+     * for the given {@link CredentialManager#createCredential(CreateCredentialRequest, Activity,
      * CancellationSignal, Executor, OutcomeReceiver)} request.
      */
     @NonNull
-    public static final String TYPE_NO_CREDENTIAL =
-            "android.credentials.CreateCredentialException.TYPE_NO_CREDENTIAL";
+    public static final String TYPE_NO_CREATE_OPTIONS =
+            "android.credentials.CreateCredentialException.TYPE_NO_CREATE_OPTIONS";
     /**
      * The error type value for when the user intentionally cancelled the request.
      *

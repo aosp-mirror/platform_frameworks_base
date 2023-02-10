@@ -48,6 +48,14 @@ public final class PolicyUpdateResult {
     public static final int RESULT_FAILURE_CONFLICTING_ADMIN_POLICY = 1;
 
     /**
+     * Result code to indicate that the policy set by the admin has been successfully cleared,
+     * admins will no longer receive policy updates for this policy after this point.
+     *
+     * <p>Note that the policy can still be enforced by some other admin.
+     */
+    public static final int RESULT_POLICY_CLEARED = 2;
+
+    /**
      * Reason codes for {@link #getResultCode()}.
      *
      * @hide
@@ -56,7 +64,8 @@ public final class PolicyUpdateResult {
     @IntDef(flag = true, prefix = { "RESULT_" }, value = {
             RESULT_FAILURE_UNKNOWN,
             RESULT_SUCCESS,
-            RESULT_FAILURE_CONFLICTING_ADMIN_POLICY
+            RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
+            RESULT_POLICY_CLEARED
     })
     public @interface ResultCode {}
 

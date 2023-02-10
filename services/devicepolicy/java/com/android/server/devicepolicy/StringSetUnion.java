@@ -17,28 +17,38 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
+import android.app.admin.PolicyValue;
+import android.app.admin.StringSetPolicyValue;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Objects;
+import java.util.Set;
 
-final class IntegerUnion extends ResolutionMechanism<Integer> {
+final class StringSetUnion extends ResolutionMechanism<Set<String>> {
 
     @Override
-    Integer resolve(@NonNull LinkedHashMap<EnforcingAdmin, Integer> adminPolicies) {
+    PolicyValue<Set<String>> resolve(
+            @NonNull LinkedHashMap<EnforcingAdmin, PolicyValue<Set<String>>> adminPolicies) {
         Objects.requireNonNull(adminPolicies);
         if (adminPolicies.isEmpty()) {
             return null;
         }
-
-        Integer unionOfPolicies = 0;
-        for (Integer policy : adminPolicies.values()) {
-            unionOfPolicies |= policy;
+        Set<String> unionOfPolicies = new HashSet<>();
+        for (PolicyValue<Set<String>> policy : adminPolicies.values()) {
+            unionOfPolicies.addAll(policy.getValue());
         }
-        return unionOfPolicies;
+        return new StringSetPolicyValue(unionOfPolicies);
     }
 
     @Override
+    android.app.admin.StringSetUnion getParcelableResolutionMechanism() {
+        return new android.app.admin.StringSetUnion();
+    }
+
+
+    @Override
     public String toString() {
-        return "IntegerUnion {}";
+        return "SetUnion {}";
     }
 }

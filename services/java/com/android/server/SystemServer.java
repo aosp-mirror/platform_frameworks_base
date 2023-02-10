@@ -142,6 +142,7 @@ import com.android.server.integrity.AppIntegrityManagerService;
 import com.android.server.lights.LightsService;
 import com.android.server.locales.LocaleManagerService;
 import com.android.server.location.LocationManagerService;
+import com.android.server.location.altitude.AltitudeService;
 import com.android.server.logcat.LogcatManagerService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.metrics.MediaMetricsManagerService;
@@ -1792,6 +1793,10 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
+        t.traceBegin("ArtManagerLocal");
+        DexOptHelper.initializeArtManagerLocal(context, mPackageManagerService);
+        t.traceEnd();
+
         t.traceBegin("UpdatePackagesIfNeeded");
         try {
             Watchdog.getInstance().pauseWatchingCurrentThread("dexopt");
@@ -2116,6 +2121,14 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startService(TIME_ZONE_DETECTOR_SERVICE_CLASS);
             } catch (Throwable e) {
                 reportWtf("starting TimeZoneDetectorService service", e);
+            }
+            t.traceEnd();
+
+            t.traceBegin("StartAltitudeService");
+            try {
+                mSystemServiceManager.startService(AltitudeService.Lifecycle.class);
+            } catch (Throwable e) {
+                reportWtf("starting AltitudeService service", e);
             }
             t.traceEnd();
 
@@ -2755,10 +2768,6 @@ public final class SystemServer implements Dumpable {
         // Permission policy service
         t.traceBegin("StartPermissionPolicyService");
         mSystemServiceManager.startService(PermissionPolicyService.class);
-        t.traceEnd();
-
-        t.traceBegin("ArtManagerLocal");
-        DexOptHelper.initializeArtManagerLocal(context, mPackageManagerService);
         t.traceEnd();
 
         t.traceBegin("MakePackageManagerServiceReady");

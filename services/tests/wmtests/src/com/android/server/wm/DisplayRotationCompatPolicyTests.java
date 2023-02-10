@@ -147,6 +147,20 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    public void testOpenedCameraInSplitScreen_orientationNotFixed_doNotShowToast() {
+        configureActivity(SCREEN_ORIENTATION_UNSPECIFIED);
+        spyOn(mTask);
+        spyOn(mDisplayRotationCompatPolicy);
+        doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivity).getWindowingMode();
+        doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mTask).getWindowingMode();
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        verify(mDisplayRotationCompatPolicy, never()).showToast(
+                R.string.display_rotation_camera_compat_toast_in_split_screen);
+    }
+
+    @Test
     public void testOnScreenRotationAnimationFinished_treatmentNotEnabled_doNotShowToast() {
         when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
                     /* checkDeviceConfig */ anyBoolean()))
@@ -172,10 +186,22 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     @Test
     public void testOnScreenRotationAnimationFinished_notFullscreen_doNotShowToast() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivity).getWindowingMode();
+        doReturn(true).when(mActivity).inMultiWindowMode();
         spyOn(mDisplayRotationCompatPolicy);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+
+        mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
+
+        verify(mDisplayRotationCompatPolicy, never()).showToast(
+                R.string.display_rotation_camera_compat_toast_after_rotation);
+    }
+
+    @Test
+    public void testOnScreenRotationAnimationFinished_orientationNotFixed_doNotShowToast() {
+        configureActivity(SCREEN_ORIENTATION_UNSPECIFIED);
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        spyOn(mDisplayRotationCompatPolicy);
 
         mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
 

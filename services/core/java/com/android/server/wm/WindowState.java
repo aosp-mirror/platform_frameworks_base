@@ -2067,12 +2067,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final boolean exiting = mAnimatingExit || mDestroying;
             return shown && !exiting;
         } else {
-            final Task task = getTask();
-            final boolean canFromTask = task != null && task.canAffectSystemUiFlags();
-            return canFromTask && mActivityRecord.isVisible()
-            // Do not let snapshot window control the bar
+            return mActivityRecord.canAffectSystemUiFlags()
+                    // Do not let snapshot window control the bar
                     && (mAttrs.type != TYPE_APPLICATION_STARTING
-                    || !(mStartingData instanceof SnapshotStartingData));
+                            || !(mStartingData instanceof SnapshotStartingData));
         }
     }
 

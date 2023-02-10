@@ -157,7 +157,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         mNextSteps.offer(new StartSequentialEffectStep(this, sequentialEffect));
         // Vibration will start playing in the Vibrator, following the effect timings and delays.
         // Report current time as the vibration start time, for debugging.
-        mVibration.stats().reportStarted();
+        mVibration.stats.reportStarted();
     }
 
     public HalVibration getVibration() {

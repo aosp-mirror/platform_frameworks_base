@@ -180,6 +180,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.voice.HotwordDetectionService;
 import android.service.voice.VisualQueryDetectionService;
+import android.service.wearable.WearableSensingService;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -3813,12 +3814,14 @@ public final class ActiveServices {
                 inSharedIsolatedProcess);
     }
 
-    // TODO(b/265746493): Special case for HotwordDetectionService and
-    // VisualQueryDetectionService. Need a cleaner way to append this seInfo.
+    // TODO(b/265746493): Special case for HotwordDetectionService,
+    // VisualQueryDetectionService and WearableSensingService.
+    // Need a cleaner way to append this seInfo.
     private String generateAdditionalSeInfoFromService(Intent service) {
         if (service != null && service.getAction() != null
                 && (service.getAction().equals(HotwordDetectionService.SERVICE_INTERFACE)
-                || service.getAction().equals(VisualQueryDetectionService.SERVICE_INTERFACE))) {
+                || service.getAction().equals(VisualQueryDetectionService.SERVICE_INTERFACE)
+                || service.getAction().equals(WearableSensingService.SERVICE_INTERFACE))) {
             return ":isolatedComputeApp";
         }
         return "";

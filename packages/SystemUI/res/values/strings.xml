@@ -2561,7 +2561,10 @@
     <string name="media_output_broadcast_update_error">Can\u2019t save. Try again.</string>
     <!-- The error message when Broadcast name/code update failed and can't change again[CHAR LIMIT=60] -->
     <string name="media_output_broadcast_last_update_error">Can\u2019t save.</string>
-
+    <!-- The hint message when Broadcast code is less than 4 characters [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_code_hint_no_less_than_min">Use at least 4 characters</string>
+    <!-- The hint message when Broadcast code is more than 16 characters [CHAR LIMIT=60] -->
+    <string name="media_output_broadcast_code_hint_no_more_than_max">Use fewer than 16 characters</string>
 
     <!-- Label for clip data when copying the build number off QS [CHAR LIMIT=NONE]-->
     <string name="build_number_clip_data_label">Build number</string>
@@ -2843,7 +2846,7 @@
     </string>
 
     <!-- Learn more URL for the log access confirmation dialog. [DO NOT TRANSLATE]-->
-    <string name="log_access_confirmation_learn_more_url" translatable="false">https://support.google.com/android?p=system_logs#topic=7313011</string>
+    <string name="log_access_confirmation_learn_more_url" translatable="false">https://support.google.com/android/answer/12986432</string>
     <string name="log_access_confirmation_learn_more">Learn more</string>
     <string name="log_access_confirmation_learn_more_at">Learn more at <xliff:g id="url" example="g.co/android/devicelogs">%s</xliff:g></string>
 

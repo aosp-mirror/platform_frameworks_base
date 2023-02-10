@@ -16,28 +16,31 @@
 
 package com.android.server.devicepolicy;
 
+
 import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.app.admin.PolicyValue;
 
-import com.android.modules.utils.TypedXmlPullParser;
-import com.android.modules.utils.TypedXmlSerializer;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Set;
-
-// TODO(scottjonathan): Replace with actual implementation
-final class SetPolicySerializer<V> extends PolicySerializer<Set<V>> {
+final class MostRecent<V> extends ResolutionMechanism<V> {
 
     @Override
-    void saveToXml(TypedXmlSerializer serializer, String attributeName, @NonNull Set<V> value)
-            throws IOException {
-        Objects.requireNonNull(value);
+    PolicyValue<V> resolve(@NonNull LinkedHashMap<EnforcingAdmin, PolicyValue<V>> adminPolicies) {
+        List<Map.Entry<EnforcingAdmin, PolicyValue<V>>> policiesList = new ArrayList<>(
+                adminPolicies.entrySet());
+        return policiesList.isEmpty() ? null : policiesList.get(policiesList.size() - 1).getValue();
     }
 
-    @Nullable
     @Override
-    Set<V> readFromXml(TypedXmlPullParser parser, String attributeName) {
-        return null;
+    android.app.admin.MostRecent<V> getParcelableResolutionMechanism() {
+        return new android.app.admin.MostRecent<V>();
+    }
+
+    @Override
+    public String toString() {
+        return "MostRecent {}";
     }
 }

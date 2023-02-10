@@ -1986,10 +1986,6 @@ class UserController implements Handler.Callback {
             Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": not supported");
             return false;
         }
-        if (targetUserInfo.isProfile()) {
-            Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": not a full user");
-            return false;
-        }
         if (FactoryResetter.isFactoryResetting()) {
             Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": factory reset in progress");
             return false;

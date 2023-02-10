@@ -2144,6 +2144,7 @@ public final class NotificationPanelViewController implements Dumpable {
     void flingToHeight(float vel, boolean expand, float target,
             float collapseSpeedUpFactor, boolean expandBecauseOfFalsing) {
         mLastFlingWasExpanding = expand;
+        mShadeLog.logLastFlingWasExpanding(expand);
         mHeadsUpTouchHelper.notifyFling(!expand);
         mKeyguardStateController.notifyPanelFlingStart(!expand /* flingingToDismiss */);
         setClosingWithAlphaFadeout(!expand && !isOnKeyguard() && getFadeoutAlpha() == 1.0f);
@@ -4624,6 +4625,7 @@ public final class NotificationPanelViewController implements Dumpable {
         ipw.println(mBlockingExpansionForCurrentTouch);
         ipw.print("mExpectingSynthesizedDown="); ipw.println(mExpectingSynthesizedDown);
         ipw.print("mLastEventSynthesizedDown="); ipw.println(mLastEventSynthesizedDown);
+        ipw.print("mLastFlingWasExpanding="); ipw.println(mLastFlingWasExpanding);
         ipw.print("mInterpolatedDarkAmount="); ipw.println(mInterpolatedDarkAmount);
         ipw.print("mLinearDarkAmount="); ipw.println(mLinearDarkAmount);
         ipw.print("mPulsing="); ipw.println(mPulsing);

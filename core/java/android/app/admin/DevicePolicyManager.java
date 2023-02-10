@@ -18,6 +18,7 @@ package android.app.admin;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
@@ -3887,6 +3888,14 @@ public class DevicePolicyManager {
     public static final int EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS =  1;
 
     /**
+     * Allows an application to start an activity while running in the background.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION = 2;
+
+    /**
      * Exemptions to platform restrictions, given to an application through
      * {@link #setApplicationExemptions(String, Set)}.
      *
@@ -3894,7 +3903,8 @@ public class DevicePolicyManager {
      */
     @IntDef(prefix = { "EXEMPT_FROM_"}, value = {
             EXEMPT_FROM_APP_STANDBY,
-            EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS
+            EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
+            EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationExemptionConstants {}
@@ -4020,18 +4030,8 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    public static final String PERMISSION_GRANT_POLICY_KEY = "permissionGrant";
+    public static final String PERMISSION_GRANT_POLICY = "permissionGrant";
 
-    // TODO: Expose this as SystemAPI once we add the query API
-    /**
-     * @hide
-     */
-    public static String PERMISSION_GRANT_POLICY(
-            @NonNull String packageName, @NonNull String permission) {
-        Objects.requireNonNull(packageName);
-        Objects.requireNonNull(permission);
-        return PERMISSION_GRANT_POLICY_KEY + "_" + packageName + "_" + permission;
-    }
 
     // TODO: Expose this as SystemAPI once we add the query API
     /**
@@ -4059,6 +4059,12 @@ public class DevicePolicyManager {
      * @hide
      */
     public static final String PACKAGE_UNINSTALL_BLOCKED_POLICY = "packageUninstallBlocked";
+
+    // TODO: Expose this as SystemAPI once we add the query API
+    /**
+     * @hide
+     */
+    public static final String APPLICATION_RESTRICTIONS_POLICY = "applicationRestrictions";
 
     /**
      * This object is a single place to tack on invalidation and disable calls.  All
@@ -8488,7 +8494,8 @@ public class DevicePolicyManager {
      * higher, to set whether auto time is required. If auto time is required, no user will be able
      * set the date and time and network date and time will be used.
      * <p>
-     * Note: if auto time is required the user can still manually set the time zone.
+     * Note: If auto time is required the user can still manually set the time zone. Staring from
+     * Android 11, if auto time is required, the user cannot manually set the time zone.
      * <p>
      * The calling device admin must be a device owner, or alternatively a profile owner from
      * Android 8.0 (API level 26) or higher. If it is not, a security exception will be thrown.
@@ -13485,18 +13492,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by the device owner (since API 26) or profile owner (since API 24) to set the name of
-     * the organization under management.
+     * Called by the device owner (since API 26) or profile owner (since API 24) or, starting from
+     * Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY} to set the
+     * name of the organization under management.
      *
-     * <p>If the organization name needs to be localized, it is the responsibility of the {@link
-     * DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast and set
-     * a new version of this string accordingly.
+     * <p>If the organization name needs to be localized, it is the responsibility of the caller
+     * to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast and set a new version of this
+     * string accordingly.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or can be
+     * {@code null} if accessing with a permission without association with a DeviceAdminReceiver.
      * @param title The organization name or {@code null} to clear a previously set name.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY}.
      */
-    public void setOrganizationName(@NonNull ComponentName admin, @Nullable CharSequence title) {
+    @RequiresPermission(MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY)
+    public void setOrganizationName(@Nullable ComponentName admin, @Nullable CharSequence title) {
         throwIfParentInstance("setOrganizationName");
         try {
             mService.setOrganizationName(admin, title);
@@ -13506,14 +13519,21 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner of a managed profile to retrieve the name of the organization under
-     * management.
+     * Called by the device owner (since API 26) or profile owner (since API 24) or, starting from
+     * Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY
+     * to retrieve the name of the organization under management.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or can be
+     * {@code null} if accessing with a permission without association with a DeviceAdminReceiver.
      * @return The organization name or {@code null} if none is set.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @throws SecurityException if {@code admin} if {@code admin} is not a device or profile
+     * owner or holder of the
+     * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY}.
      */
-    public @Nullable CharSequence getOrganizationName(@NonNull ComponentName admin) {
+    @RequiresPermission(MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY)
+    public @Nullable CharSequence getOrganizationName(@Nullable ComponentName admin) {
         throwIfParentInstance("getOrganizationName");
         try {
             return mService.getOrganizationName(admin);
@@ -16293,6 +16313,49 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.shouldAllowBypassingDevicePolicyManagementRoleQualification();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns a {@link DevicePolicyState} object containing information about the current state
+     * of device policies (e.g. values set by different admins, info about the enforcing admins,
+     * resolved policy, etc).
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public DevicePolicyState getDevicePolicyState() {
+        if (mService != null) {
+            try {
+                return mService.getDevicePolicyState();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Triggers the data migration of device policies for existing DPCs to the Device Policy Engine.
+     * If {@code forceMigration} is set to {@code true} it skips the prerequisite checks before
+     * triggering the migration.
+     *
+     * <p>Returns {@code true} if migration was completed successfully, {@code false} otherwise.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean triggerDevicePolicyEngineMigration(boolean forceMigration) {
+        if (mService != null) {
+            try {
+                return mService.triggerDevicePolicyEngineMigration(forceMigration);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

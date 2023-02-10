@@ -24,7 +24,6 @@ import android.telephony.ServiceState
 import android.telephony.ServiceState.STATE_IN_SERVICE
 import android.telephony.ServiceState.STATE_OUT_OF_SERVICE
 import android.telephony.SignalStrength
-import android.telephony.SubscriptionInfo
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.DataActivityListener
 import android.telephony.TelephonyCallback.ServiceStateListener
@@ -556,15 +555,50 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `network name - broadcast not for this sub id - returns default`() =
+    fun `network name - broadcast not for this sub id - keeps old value`() =
         runBlocking(IMMEDIATE) {
             var latest: NetworkNameModel? = null
             val job = underTest.networkName.onEach { latest = it }.launchIn(this)
 
-            val intent = spnIntent(subId = 101)
-
+            val intent = spnIntent()
             fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
                 receiver.onReceive(context, intent)
+            }
+            assertThat(latest).isEqualTo(intent.toNetworkNameModel(SEP))
+
+            // WHEN an intent with a different subId is sent
+            val wrongSubIntent = spnIntent(subId = 101)
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(context, wrongSubIntent)
+            }
+
+            // THEN the previous intent's name is still used
+            assertThat(latest).isEqualTo(intent.toNetworkNameModel(SEP))
+
+            job.cancel()
+        }
+
+    @Test
+    fun `network name - broadcast has no data - updates to default`() =
+        runBlocking(IMMEDIATE) {
+            var latest: NetworkNameModel? = null
+            val job = underTest.networkName.onEach { latest = it }.launchIn(this)
+
+            val intent = spnIntent()
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(context, intent)
+            }
+            assertThat(latest).isEqualTo(intent.toNetworkNameModel(SEP))
+
+            val intentWithoutInfo =
+                spnIntent(
+                    showSpn = false,
+                    showPlmn = false,
+                )
+
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(context, intentWithoutInfo)
             }
 
             assertThat(latest).isEqualTo(DEFAULT_NAME)
@@ -573,7 +607,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `network name - operatorAlphaShort - tracked`() =
+    fun `operatorAlphaShort - tracked`() =
         runBlocking(IMMEDIATE) {
             var latest: String? = null
 
@@ -703,8 +737,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate
         private const val SUB_1_ID = 1
-        private val SUB_1 =
-            mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_1_ID) }
 
         private val DEFAULT_NAME = NetworkNameModel.Default("default name")
         private const val SEP = "-"

@@ -483,6 +483,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             Objects.requireNonNull(uids);
             mCpuWakeupStats.noteWakingActivity(subsystem, elapsedMillis, uids);
         }
+
+        @Override
+        public void noteWakingSoundTrigger(long elapsedMillis, int uid) {
+            // TODO(b/267717665): Pipe to noteCpuWakingActivity once SoundTrigger starts using this.
+            Slog.w(TAG, "Sound trigger event dispatched to uid " + uid);
+        }
     }
 
     @Override

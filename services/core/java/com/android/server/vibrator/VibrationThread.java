@@ -161,7 +161,8 @@ final class VibrationThread extends Thread {
             // for this thread.
             // No point doing this in finally, as if there's an exception, this thread will die
             // and be unusable anyway.
-            mVibratorManagerHooks.onVibrationThreadReleased(mExecutingConductor.getVibration().id);
+            mVibratorManagerHooks.onVibrationThreadReleased(
+                    mExecutingConductor.getVibration().id);
             synchronized (mLock) {
                 mLock.notifyAll();
             }
@@ -230,7 +231,8 @@ final class VibrationThread extends Thread {
 
     /** Runs the VibrationThread ensuring that the wake lock is acquired and released. */
     private void runCurrentVibrationWithWakeLock() {
-        WorkSource workSource = new WorkSource(mExecutingConductor.getVibration().uid);
+        WorkSource workSource = new WorkSource(
+                mExecutingConductor.getVibration().callerInfo.uid);
         mWakeLock.setWorkSource(workSource);
         mWakeLock.acquire();
         try {
@@ -251,7 +253,7 @@ final class VibrationThread extends Thread {
      * Called from within runWithWakeLock.
      */
     private void runCurrentVibrationWithWakeLockAndDeathLink() {
-        IBinder vibrationBinderToken = mExecutingConductor.getVibration().token;
+        IBinder vibrationBinderToken = mExecutingConductor.getVibration().callerToken;
         try {
             vibrationBinderToken.linkToDeath(mExecutingConductor, 0);
         } catch (RemoteException e) {

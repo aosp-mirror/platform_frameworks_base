@@ -100,6 +100,7 @@ package android {
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
     field public static final String CHANGE_APP_LAUNCH_TIME_ESTIMATE = "android.permission.CHANGE_APP_LAUNCH_TIME_ESTIMATE";
     field public static final String CHANGE_DEVICE_IDLE_TEMP_WHITELIST = "android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST";
+    field public static final String CHECK_REMOTE_LOCKSCREEN = "android.permission.CHECK_REMOTE_LOCKSCREEN";
     field public static final String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
     field public static final String COMPANION_APPROVE_WIFI_CONNECTIONS = "android.permission.COMPANION_APPROVE_WIFI_CONNECTIONS";
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
@@ -246,6 +247,8 @@ package android {
     field public static final String PERFORM_IMS_SINGLE_REGISTRATION = "android.permission.PERFORM_IMS_SINGLE_REGISTRATION";
     field public static final String PERFORM_SIM_ACTIVATION = "android.permission.PERFORM_SIM_ACTIVATION";
     field public static final String POWER_SAVER = "android.permission.POWER_SAVER";
+    field public static final String PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE = "android.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE";
+    field public static final String PROVIDE_HYBRID_CREDENTIAL_SERVICE = "android.permission.PROVIDE_HYBRID_CREDENTIAL_SERVICE";
     field public static final String PROVIDE_RESOLVER_RANKER_SERVICE = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
     field public static final String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
     field public static final String PROVISION_DEMO_DEVICE = "android.permission.PROVISION_DEMO_DEVICE";
@@ -919,7 +922,9 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.SHOW_KEYGUARD_MESSAGE) public void requestDismissKeyguard(@NonNull android.app.Activity, @Nullable CharSequence, @Nullable android.app.KeyguardManager.KeyguardDismissCallback);
     method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public boolean setLock(int, @NonNull byte[], int);
     method @RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS) public void setPrivateNotificationsAllowed(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CHECK_REMOTE_LOCKSCREEN) public android.app.StartLockscreenValidationRequest startRemoteLockscreenValidation();
     method @RequiresPermission(android.Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN) public boolean unregisterWeakEscrowTokenRemovedListener(@NonNull android.app.KeyguardManager.WeakEscrowTokenRemovedListener);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CHECK_REMOTE_LOCKSCREEN) public android.app.RemoteLockscreenValidationResult validateRemoteLockscreen(@NonNull byte[]);
     field public static final int PASSWORD = 0; // 0x0
     field public static final int PATTERN = 2; // 0x2
     field public static final int PIN = 1; // 0x1
@@ -996,6 +1001,25 @@ package android.app {
     field @RequiresPermission(android.Manifest.permission.STATUS_BAR_SERVICE) public static final String ACTION_TOGGLE_NOTIFICATION_HANDLER_PANEL = "android.app.action.TOGGLE_NOTIFICATION_HANDLER_PANEL";
   }
 
+  public final class RemoteLockscreenValidationResult implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getResultCode();
+    method public long getTimeoutMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.RemoteLockscreenValidationResult> CREATOR;
+    field public static final int RESULT_GUESS_INVALID = 2; // 0x2
+    field public static final int RESULT_GUESS_VALID = 1; // 0x1
+    field public static final int RESULT_LOCKOUT = 3; // 0x3
+    field public static final int RESULT_NO_REMAINING_ATTEMPTS = 4; // 0x4
+  }
+
+  public static final class RemoteLockscreenValidationResult.Builder {
+    ctor public RemoteLockscreenValidationResult.Builder();
+    method @NonNull public android.app.RemoteLockscreenValidationResult build();
+    method @NonNull public android.app.RemoteLockscreenValidationResult.Builder setResultCode(int);
+    method @NonNull public android.app.RemoteLockscreenValidationResult.Builder setTimeoutMillis(long);
+  }
+
   public final class RuntimeAppOpAccessMessage implements android.os.Parcelable {
     ctor public RuntimeAppOpAccessMessage(@IntRange(from=0L) int, @IntRange(from=0L) int, @NonNull String, @Nullable String, @NonNull String, int);
     method public int describeContents();
@@ -1011,6 +1035,23 @@ package android.app {
 
   public class SearchManager implements android.content.DialogInterface.OnCancelListener android.content.DialogInterface.OnDismissListener {
     method public void launchAssist(@Nullable android.os.Bundle);
+  }
+
+  public final class StartLockscreenValidationRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getLockscreenUiType();
+    method public int getRemainingAttempts();
+    method @NonNull public byte[] getSourcePublicKey();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.StartLockscreenValidationRequest> CREATOR;
+  }
+
+  public static final class StartLockscreenValidationRequest.Builder {
+    ctor public StartLockscreenValidationRequest.Builder();
+    method @NonNull public android.app.StartLockscreenValidationRequest build();
+    method @NonNull public android.app.StartLockscreenValidationRequest.Builder setLockscreenUiType(int);
+    method @NonNull public android.app.StartLockscreenValidationRequest.Builder setRemainingAttempts(int);
+    method @NonNull public android.app.StartLockscreenValidationRequest.Builder setSourcePublicKey(@NonNull byte[]);
   }
 
   public class StatusBarManager {
@@ -1158,6 +1199,15 @@ package android.app {
 
 package android.app.admin {
 
+  public abstract class Authority implements android.os.Parcelable {
+    method public int describeContents();
+  }
+
+  public final class DeviceAdminAuthority extends android.app.admin.Authority {
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DeviceAdminAuthority> CREATOR;
+  }
+
   public final class DevicePolicyDrawableResource implements android.os.Parcelable {
     ctor public DevicePolicyDrawableResource(@NonNull android.content.Context, @NonNull String, @NonNull String, @NonNull String, @DrawableRes int);
     ctor public DevicePolicyDrawableResource(@NonNull android.content.Context, @NonNull String, @NonNull String, @DrawableRes int);
@@ -1189,6 +1239,7 @@ package android.app.admin {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public String getDeviceOwnerNameOnAnyUser();
     method @Nullable public CharSequence getDeviceOwnerOrganizationName();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getDeviceOwnerUser();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public android.app.admin.DevicePolicyState getDevicePolicyState();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_ADMIN_POLICY}) public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_ADMIN_POLICY}) public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public java.util.List<android.os.UserHandle> getPolicyManagedProfiles(@NonNull android.os.UserHandle);
@@ -1230,6 +1281,7 @@ package android.app.admin {
     field public static final String ACTION_SET_PROFILE_OWNER = "android.app.action.SET_PROFILE_OWNER";
     field @Deprecated public static final String ACTION_STATE_USER_SETUP_COMPLETE = "android.app.action.STATE_USER_SETUP_COMPLETE";
     field @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP) public static final String ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER = "android.app.action.UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER";
+    field public static final int EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION = 2; // 0x2
     field public static final int EXEMPT_FROM_APP_STANDBY = 0; // 0x0
     field public static final int EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS = 1; // 0x1
     field public static final String EXTRA_FORCE_UPDATE_ROLE_HOLDER = "android.app.extra.FORCE_UPDATE_ROLE_HOLDER";
@@ -1316,6 +1368,14 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES) public void setStrings(@NonNull java.util.Set<android.app.admin.DevicePolicyStringResource>);
   }
 
+  public final class DevicePolicyState implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Map<android.os.UserHandle,java.util.Map<android.app.admin.PolicyKey,android.app.admin.PolicyState<?>>> getPoliciesForAllUsers();
+    method @NonNull public java.util.Map<android.app.admin.PolicyKey,android.app.admin.PolicyState<?>> getPoliciesForUser(@NonNull android.os.UserHandle);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DevicePolicyState> CREATOR;
+  }
+
   public final class DevicePolicyStringResource implements android.os.Parcelable {
     ctor public DevicePolicyStringResource(@NonNull android.content.Context, @NonNull String, @StringRes int);
     method public int describeContents();
@@ -1323,6 +1383,20 @@ package android.app.admin {
     method @NonNull public String getStringId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DevicePolicyStringResource> CREATOR;
+  }
+
+  public final class DpcAuthority extends android.app.admin.Authority {
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DpcAuthority> CREATOR;
+  }
+
+  public final class EnforcingAdmin implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.app.admin.Authority getAuthority();
+    method @NonNull public String getPackageName();
+    method @NonNull public android.os.UserHandle getUserHandle();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.EnforcingAdmin> CREATOR;
   }
 
   public final class FullyManagedDeviceProvisioningParams implements android.os.Parcelable {
@@ -1352,6 +1426,21 @@ package android.app.admin {
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setTimeZone(@Nullable String);
   }
 
+  public final class IntentFilterPolicyKey extends android.app.admin.PolicyKey {
+    method public int describeContents();
+    method @NonNull public android.content.IntentFilter getIntentFilter();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.IntentFilterPolicyKey> CREATOR;
+  }
+
+  public final class LockTaskPolicy implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getFlags();
+    method @NonNull public java.util.Set<java.lang.String> getPackages();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.LockTaskPolicy> CREATOR;
+  }
+
   public final class ManagedProfileProvisioningParams implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.accounts.Account getAccountToMigrate();
@@ -1377,6 +1466,39 @@ package android.app.admin {
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setProfileName(@Nullable String);
   }
 
+  public final class NoArgsPolicyKey extends android.app.admin.PolicyKey {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.NoArgsPolicyKey> CREATOR;
+  }
+
+  public final class PackagePermissionPolicyKey extends android.app.admin.PolicyKey {
+    method public int describeContents();
+    method @NonNull public String getPackageName();
+    method @NonNull public String getPermissionName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.PackagePermissionPolicyKey> CREATOR;
+  }
+
+  public final class PackagePolicyKey extends android.app.admin.PolicyKey {
+    method public int describeContents();
+    method @NonNull public String getPackageName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.PackagePolicyKey> CREATOR;
+  }
+
+  public abstract class PolicyKey implements android.os.Parcelable {
+    method @NonNull public String getIdentifier();
+  }
+
+  public final class PolicyState<V> implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public V getCurrentResolvedPolicy();
+    method @NonNull public java.util.LinkedHashMap<android.app.admin.EnforcingAdmin,V> getPoliciesSetByAdmins();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.PolicyState<?>> CREATOR;
+  }
+
   public class ProvisioningException extends android.util.AndroidException {
     ctor public ProvisioningException(@NonNull Exception, int);
     ctor public ProvisioningException(@NonNull Exception, int, @Nullable String);
@@ -1391,6 +1513,12 @@ package android.app.admin {
     field public static final int ERROR_UNKNOWN = 0; // 0x0
   }
 
+  public final class RoleAuthority extends android.app.admin.Authority {
+    method @NonNull public java.util.Set<java.lang.String> getRoles();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.RoleAuthority> CREATOR;
+  }
+
   public class SecurityLog {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURITY_LOG) public static int writeEvent(int, @NonNull java.lang.Object...);
   }
@@ -1403,6 +1531,11 @@ package android.app.admin {
   public static class SystemUpdatePolicy.InstallationOption {
     method public long getEffectiveTime();
     method public int getType();
+  }
+
+  public final class UnknownAuthority extends android.app.admin.Authority {
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.UnknownAuthority> CREATOR;
   }
 
 }

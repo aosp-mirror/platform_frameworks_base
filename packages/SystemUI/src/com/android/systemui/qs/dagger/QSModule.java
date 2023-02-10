@@ -22,6 +22,7 @@ import android.content.Context;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.dagger.MediaModule;
 import com.android.systemui.qs.AutoAddTracker;
@@ -53,6 +54,7 @@ import dagger.Provides;
 public interface QSModule {
 
     @Provides
+    @SysUISingleton
     static AutoTileManager provideAutoTileManager(
             Context context,
             AutoAddTracker.Builder autoAddTrackerBuilder,
