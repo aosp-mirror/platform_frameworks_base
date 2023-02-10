@@ -225,6 +225,8 @@
     <string name="back_button_text">Back</string>
     <!-- Accessibility text for the caption handle [CHAR LIMIT=NONE] -->
     <string name="handle_text">Handle</string>
+    <!-- Accessibility text for the handle menu app icon [CHAR LIMIT=NONE] -->
+    <string name="app_icon_text">App Icon</string>
     <!-- Accessibility text for the handle fullscreen button [CHAR LIMIT=NONE] -->
     <string name="fullscreen_text">Fullscreen</string>
     <!-- Accessibility text for the handle desktop button [CHAR LIMIT=NONE] -->
@@ -235,4 +237,12 @@
     <string name="more_button_text">More</string>
     <!-- Accessibility text for the handle floating window button [CHAR LIMIT=NONE] -->
     <string name="float_button_text">Float</string>
+    <!-- Accessibility text for the handle menu select button [CHAR LIMIT=NONE] -->
+    <string name="select_text">Select</string>
+    <!-- Accessibility text for the handle menu screenshot button [CHAR LIMIT=NONE] -->
+    <string name="screenshot_text">Screenshot</string>
+    <!-- Accessibility text for the handle menu close button [CHAR LIMIT=NONE] -->
+    <string name="close_text">Close</string>
+    <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->
+    <string name="collapse_menu_text">Close Menu</string>
 </resources>
