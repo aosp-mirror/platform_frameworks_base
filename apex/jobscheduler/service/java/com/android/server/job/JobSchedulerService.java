@@ -365,6 +365,16 @@ public class JobSchedulerService extends com.android.server.SystemService
      * A mapping of which uids are currently in the foreground to their effective bias.
      */
     final SparseIntArray mUidBiasOverride = new SparseIntArray();
+    /**
+     * A cached mapping of uids to their current capabilities.
+     */
+    @GuardedBy("mLock")
+    private final SparseIntArray mUidCapabilities = new SparseIntArray();
+    /**
+     * A cached mapping of uids to their proc states.
+     */
+    @GuardedBy("mLock")
+    private final SparseIntArray mUidProcStates = new SparseIntArray();
 
     /**
      * Which uids are currently performing backups, so we shouldn't allow their jobs to run.
@@ -1135,6 +1145,14 @@ public class JobSchedulerService extends com.android.server.SystemService
                     mDebuggableApps.remove(pkgName);
                     mConcurrencyManager.onAppRemovedLocked(pkgName, pkgUid);
                 }
+            } else if (Intent.ACTION_UID_REMOVED.equals(action)) {
+                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    synchronized (mLock) {
+                        mUidBiasOverride.delete(pkgUid);
+                        mUidCapabilities.delete(pkgUid);
+                        mUidProcStates.delete(pkgUid);
+                    }
+                }
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 synchronized (mLock) {
@@ -1205,7 +1223,11 @@ public class JobSchedulerService extends com.android.server.SystemService
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
                 int capability) {
-            mHandler.obtainMessage(MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = uid;
+            args.argi2 = procState;
+            args.argi3 = capability;
+            mHandler.obtainMessage(MSG_UID_STATE_CHANGED, args).sendToTarget();
         }
 
         @Override public void onUidGone(int uid, boolean disabled) {
@@ -1947,8 +1969,14 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
-    void updateUidState(int uid, int procState) {
+    void updateUidState(int uid, int procState, int capabilities) {
+        if (DEBUG) {
+            Slog.d(TAG, "UID " + uid + " proc state changed to "
+                    + ActivityManager.procStateToString(procState)
+                    + " with capabilities=" + ActivityManager.getCapabilitiesSummary(capabilities));
+        }
         synchronized (mLock) {
+            mUidProcStates.put(uid, procState);
             final int prevBias = mUidBiasOverride.get(uid, JobInfo.BIAS_DEFAULT);
             if (procState == ActivityManager.PROCESS_STATE_TOP) {
                 // Only use this if we are exactly the top app.  All others can live
@@ -1961,6 +1989,12 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mUidBiasOverride.put(uid, JobInfo.BIAS_BOUND_FOREGROUND_SERVICE);
             } else {
                 mUidBiasOverride.delete(uid);
+            }
+            if (capabilities == ActivityManager.PROCESS_CAPABILITY_NONE
+                    || procState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
+                mUidCapabilities.delete(uid);
+            } else {
+                mUidCapabilities.put(uid, capabilities);
             }
             final int newBias = mUidBiasOverride.get(uid, JobInfo.BIAS_DEFAULT);
             if (prevBias != newBias) {
@@ -1979,6 +2013,23 @@ public class JobSchedulerService extends com.android.server.SystemService
     public int getUidBias(int uid) {
         synchronized (mLock) {
             return mUidBiasOverride.get(uid, JobInfo.BIAS_DEFAULT);
+        }
+    }
+
+    /**
+     * Return the current {@link ActivityManager#PROCESS_CAPABILITY_ALL capabilities}
+     * of the given UID.
+     */
+    public int getUidCapabilities(int uid) {
+        synchronized (mLock) {
+            return mUidCapabilities.get(uid, ActivityManager.PROCESS_CAPABILITY_NONE);
+        }
+    }
+
+    /** Return the current proc state of the given UID. */
+    public int getUidProcState(int uid) {
+        synchronized (mLock) {
+            return mUidProcStates.get(uid, ActivityManager.PROCESS_STATE_UNKNOWN);
         }
     }
 
@@ -2245,6 +2296,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             filter.addDataScheme("package");
             getContext().registerReceiverAsUser(
                     mBroadcastReceiver, UserHandle.ALL, filter, null, null);
+            final IntentFilter uidFilter = new IntentFilter(Intent.ACTION_UID_REMOVED);
+            getContext().registerReceiverAsUser(
+                    mBroadcastReceiver, UserHandle.ALL, uidFilter, null, null);
             final IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_REMOVED);
             userFilter.addAction(Intent.ACTION_USER_ADDED);
             getContext().registerReceiverAsUser(
@@ -2776,15 +2830,19 @@ public class JobSchedulerService extends com.android.server.SystemService
                         break;
 
                     case MSG_UID_STATE_CHANGED: {
-                        final int uid = message.arg1;
-                        final int procState = message.arg2;
-                        updateUidState(uid, procState);
+                        final SomeArgs args = (SomeArgs) message.obj;
+                        final int uid = args.argi1;
+                        final int procState = args.argi2;
+                        final int capabilities = args.argi3;
+                        updateUidState(uid, procState, capabilities);
+                        args.recycle();
                         break;
                     }
                     case MSG_UID_GONE: {
                         final int uid = message.arg1;
                         final boolean disabled = message.arg2 != 0;
-                        updateUidState(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
+                        updateUidState(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
+                                ActivityManager.PROCESS_CAPABILITY_NONE);
                         if (disabled) {
                             cancelJobsForUid(uid,
                                     /* includeSourceApp */ true,
@@ -4836,6 +4894,25 @@ public class JobSchedulerService extends com.android.server.SystemService
                 pw.decreaseIndent();
             }
 
+            boolean procStatePrinted = false;
+            for (int i = 0; i < mUidProcStates.size(); i++) {
+                int uid = mUidProcStates.keyAt(i);
+                if (filterAppId == -1 || filterAppId == UserHandle.getAppId(uid)) {
+                    if (!procStatePrinted) {
+                        procStatePrinted = true;
+                        pw.println();
+                        pw.println("Uid proc states:");
+                        pw.increaseIndent();
+                    }
+                    pw.print(UserHandle.formatUid(uid));
+                    pw.print(": ");
+                    pw.println(ActivityManager.procStateToString(mUidProcStates.valueAt(i)));
+                }
+            }
+            if (procStatePrinted) {
+                pw.decreaseIndent();
+            }
+
             boolean overridePrinted = false;
             for (int i = 0; i < mUidBiasOverride.size(); i++) {
                 int uid = mUidBiasOverride.keyAt(i);
@@ -4851,6 +4928,25 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
             }
             if (overridePrinted) {
+                pw.decreaseIndent();
+            }
+
+            boolean capabilitiesPrinted = false;
+            for (int i = 0; i < mUidCapabilities.size(); i++) {
+                int uid = mUidCapabilities.keyAt(i);
+                if (filterAppId == -1 || filterAppId == UserHandle.getAppId(uid)) {
+                    if (!capabilitiesPrinted) {
+                        capabilitiesPrinted = true;
+                        pw.println();
+                        pw.println("Uid capabilities:");
+                        pw.increaseIndent();
+                    }
+                    pw.print(UserHandle.formatUid(uid));
+                    pw.print(": ");
+                    pw.println(ActivityManager.getCapabilitiesSummary(mUidCapabilities.valueAt(i)));
+                }
+            }
+            if (capabilitiesPrinted) {
                 pw.decreaseIndent();
             }
 

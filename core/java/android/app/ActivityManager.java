@@ -764,6 +764,7 @@ public class ActivityManager {
             PROCESS_CAPABILITY_FOREGROUND_MICROPHONE,
             PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK,
             PROCESS_CAPABILITY_BFSL,
+            PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessCapability {}
@@ -914,6 +915,13 @@ public class ActivityManager {
     public static final int PROCESS_CAPABILITY_BFSL = 1 << 4;
 
     /**
+     * @hide
+     * Process can access network at a high enough proc state despite any user restrictions.
+     */
+    @TestApi
+    public static final int PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK = 1 << 5;
+
+    /**
      * @hide all capabilities, the ORing of all flags in {@link ProcessCapability}.
      *
      * Don't expose it as TestApi -- we may add new capabilities any time, which could
@@ -923,7 +931,8 @@ public class ActivityManager {
             | PROCESS_CAPABILITY_FOREGROUND_CAMERA
             | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
             | PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
-            | PROCESS_CAPABILITY_BFSL;
+            | PROCESS_CAPABILITY_BFSL
+            | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
 
     /**
      * All implicit capabilities. There are capabilities that process automatically have.
@@ -943,6 +952,7 @@ public class ActivityManager {
         pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0 ? 'M' : '-');
         pw.print((caps & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0 ? 'N' : '-');
         pw.print((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
+        pw.print((caps & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0 ? 'U' : '-');
     }
 
     /** @hide */
@@ -952,6 +962,7 @@ public class ActivityManager {
         sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0 ? 'M' : '-');
         sb.append((caps & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0 ? 'N' : '-');
         sb.append((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
+        sb.append((caps & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0 ? 'U' : '-');
     }
 
     /**
