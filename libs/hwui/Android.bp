@@ -396,8 +396,6 @@ cc_defaults {
         "libharfbuzz_ng",
         "libimage_io",
         "libjpeg",
-        "libjpegdecoder",
-        "libjpegencoder",
         "libjpegrecoverymap",
         "liblog",
         "libminikin",
