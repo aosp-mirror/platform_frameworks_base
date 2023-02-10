@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.telephony.TelephonyManager
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -37,7 +38,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -54,10 +54,18 @@ import kotlinx.coroutines.flow.stateIn
 class CarrierMergedConnectionRepository(
     override val subId: Int,
     override val tableLogBuffer: TableLogBuffer,
-    defaultNetworkName: NetworkNameModel,
+    private val telephonyManager: TelephonyManager,
     @Application private val scope: CoroutineScope,
     val wifiRepository: WifiRepository,
 ) : MobileConnectionRepository {
+    init {
+        if (telephonyManager.subscriptionId != subId) {
+            throw IllegalStateException(
+                "CarrierMergedRepo: TelephonyManager should be created with subId($subId). " +
+                    "Found ${telephonyManager.subscriptionId} instead."
+            )
+        }
+    }
 
     /**
      * Outputs the carrier merged network to use, or null if we don't have a valid carrier merged
@@ -87,17 +95,28 @@ class CarrierMergedConnectionRepository(
         }
 
     override val connectionInfo: StateFlow<MobileConnectionModel> =
-        network
-            .map { it.toMobileConnectionModel() }
+        combine(network, wifiRepository.wifiActivity) { network, activity ->
+                if (network == null) {
+                    MobileConnectionModel()
+                } else {
+                    createCarrierMergedConnectionModel(network.level, activity)
+                }
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectionModel())
 
-    // Carrier merged is never roaming.
-    override val cdmaRoaming: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()
+    override val cdmaRoaming: StateFlow<Boolean> = MutableStateFlow(ROAMING).asStateFlow()
 
-    // TODO(b/238425913): Fetch the carrier merged network name.
     override val networkName: StateFlow<NetworkNameModel> =
-        flowOf(defaultNetworkName)
-            .stateIn(scope, SharingStarted.WhileSubscribed(), defaultNetworkName)
+        network
+            // The SIM operator name should be the same throughout the lifetime of a subId, **but**
+            // it may not be available when this repo is created because it takes time to load. To
+            // be safe, we re-fetch it each time the network has changed.
+            .map { NetworkNameModel.SimDerived(telephonyManager.simOperatorName) }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                NetworkNameModel.SimDerived(telephonyManager.simOperatorName),
+            )
 
     override val numberOfLevels: StateFlow<Int> =
         wifiRepository.wifiNetwork
@@ -112,37 +131,24 @@ class CarrierMergedConnectionRepository(
 
     override val dataEnabled: StateFlow<Boolean> = wifiRepository.isWifiEnabled
 
-    private fun WifiNetworkModel.CarrierMerged?.toMobileConnectionModel(): MobileConnectionModel {
-        if (this == null) {
-            return MobileConnectionModel()
-        }
-
-        return createCarrierMergedConnectionModel(level)
-    }
-
     companion object {
         /**
          * Creates an instance of [MobileConnectionModel] that represents a carrier merged network
-         * with the given [level].
+         * with the given [level] and [activity].
          */
-        fun createCarrierMergedConnectionModel(level: Int): MobileConnectionModel {
+        fun createCarrierMergedConnectionModel(
+            level: Int,
+            activity: DataActivityModel,
+        ): MobileConnectionModel {
             return MobileConnectionModel(
                 primaryLevel = level,
                 cdmaLevel = level,
-                // A [WifiNetworkModel.CarrierMerged] instance is always connected.
-                // (A [WifiNetworkModel.Inactive] represents a disconnected network.)
-                dataConnectionState = DataConnectionState.Connected,
-                // TODO(b/238425913): This should come from [WifiRepository.wifiActivity].
-                dataActivityDirection =
-                    DataActivityModel(
-                        hasActivityIn = false,
-                        hasActivityOut = false,
-                    ),
+                dataActivityDirection = activity,
+                // Here and below: These values are always the same for every carrier-merged
+                // connection.
                 resolvedNetworkType = ResolvedNetworkType.CarrierMergedNetworkType,
-                // Carrier merged is never roaming
-                isRoaming = false,
-
-                // TODO(b/238425913): Verify that these fields never change for carrier merged.
+                dataConnectionState = DataConnectionState.Connected,
+                isRoaming = ROAMING,
                 isEmergencyOnly = false,
                 operatorAlphaShort = null,
                 isInService = true,
@@ -150,24 +156,27 @@ class CarrierMergedConnectionRepository(
                 carrierNetworkChangeActive = false,
             )
         }
+
+        // Carrier merged is never roaming
+        private const val ROAMING = false
     }
 
     @SysUISingleton
     class Factory
     @Inject
     constructor(
+        private val telephonyManager: TelephonyManager,
         @Application private val scope: CoroutineScope,
         private val wifiRepository: WifiRepository,
     ) {
         fun build(
             subId: Int,
             mobileLogger: TableLogBuffer,
-            defaultNetworkName: NetworkNameModel,
         ): MobileConnectionRepository {
             return CarrierMergedConnectionRepository(
                 subId,
                 mobileLogger,
-                defaultNetworkName,
+                telephonyManager.createForSubscriptionId(subId),
                 scope,
                 wifiRepository,
             )

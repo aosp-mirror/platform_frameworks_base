@@ -25,6 +25,7 @@ import android.os.Handler
 import android.util.ArrayMap
 import android.util.Log
 import android.view.InputDevice
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlags
@@ -47,6 +48,7 @@ constructor(
     @Background private val handler: Handler,
     @Background private val executor: Executor,
     private val featureFlags: FeatureFlags,
+    private val uiEventLogger: UiEventLogger,
 ) :
     InputManager.InputDeviceListener,
     InputManager.InputDeviceBatteryListener,
@@ -186,6 +188,7 @@ constructor(
     }
 
     private fun onStylusBluetoothConnected(btAddress: String) {
+        uiEventLogger.log(StylusUiEvent.BLUETOOTH_STYLUS_CONNECTED)
         val device: BluetoothDevice = bluetoothAdapter?.getRemoteDevice(btAddress) ?: return
         try {
             bluetoothAdapter.addOnMetadataChangedListener(device, executor, this)
@@ -195,6 +198,7 @@ constructor(
     }
 
     private fun onStylusBluetoothDisconnected(btAddress: String) {
+        uiEventLogger.log(StylusUiEvent.BLUETOOTH_STYLUS_DISCONNECTED)
         val device: BluetoothDevice = bluetoothAdapter?.getRemoteDevice(btAddress) ?: return
         try {
             bluetoothAdapter.removeOnMetadataChangedListener(device, this)

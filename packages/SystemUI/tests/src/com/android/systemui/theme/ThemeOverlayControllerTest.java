@@ -47,8 +47,9 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
+import android.view.accessibility.AccessibilityManager;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -57,7 +58,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.monet.Style;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -115,6 +115,8 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
+    @Mock
+    private AccessibilityManager mAccessibilityManager;
     @Captor
     private ArgumentCaptor<BroadcastReceiver> mBroadcastReceiver;
     @Captor
@@ -127,13 +129,13 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     private ArgumentCaptor<UserTracker.Callback> mUserTrackerCallback;
     @Captor
     private ArgumentCaptor<ContentObserver> mSettingsObserver;
-    private Style mCurrentStyle;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mFeatureFlags.isEnabled(Flags.MONET)).thenReturn(true);
         when(mWakefulnessLifecycle.getWakefulness()).thenReturn(WAKEFULNESS_AWAKE);
+        when(mAccessibilityManager.getUiContrast()).thenReturn(0.5f);
         when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
         when(mResources.getColor(eq(android.R.color.system_accent1_500), any()))
                 .thenReturn(Color.RED);
@@ -148,15 +150,19 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, mMainExecutor, mBgExecutor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
-                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle) {
-            @Nullable
-            @Override
-            protected FabricatedOverlay getOverlay(int color, int type, Style style) {
+                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle,
+                mAccessibilityManager) {
+            @VisibleForTesting
+            protected boolean isNightMode() {
+                return false;
+            }
+
+            @VisibleForTesting
+            protected FabricatedOverlay newFabricatedOverlay(String name) {
                 FabricatedOverlay overlay = mock(FabricatedOverlay.class);
                 when(overlay.getIdentifier())
-                        .thenReturn(new OverlayIdentifier(Integer.toHexString(color | 0xff000000)));
-                mCurrentStyle = style;
-                mColorScheme = new ColorScheme(color, false /* nightMode */, style);
+                        .thenReturn(new OverlayIdentifier(
+                                Integer.toHexString(mColorScheme.getSeed() | 0xff000000)));
                 return overlay;
             }
         };
@@ -416,7 +422,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
             mSettingsObserver.getValue().onChange(true, null, 0, mUserTracker.getUserId());
 
-            assertThat(mCurrentStyle).isEqualTo(style);
+            assertThat(mThemeOverlayController.mThemeStyle).isEqualTo(style);
         }
     }
 
@@ -432,7 +438,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
         mSettingsObserver.getValue().onChange(true, null, 0, mUserTracker.getUserId());
 
-        assertThat(mCurrentStyle).isEqualTo(Style.TONAL_SPOT);
+        assertThat(mThemeOverlayController.mThemeStyle).isEqualTo(Style.TONAL_SPOT);
     }
 
     @Test
@@ -726,17 +732,20 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, executor, executor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
-                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle) {
-            @Nullable
-            @Override
-            protected FabricatedOverlay getOverlay(int color, int type, Style style) {
+                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle,
+                mAccessibilityManager) {
+            @VisibleForTesting
+            protected boolean isNightMode() {
+                return false;
+            }
+
+            @VisibleForTesting
+            protected FabricatedOverlay newFabricatedOverlay(String name) {
                 FabricatedOverlay overlay = mock(FabricatedOverlay.class);
                 when(overlay.getIdentifier())
                         .thenReturn(new OverlayIdentifier("com.thebest.livewallpaperapp.ever"));
-                mColorScheme = new ColorScheme(color, false /* nightMode */, style);
                 return overlay;
             }
-
         };
         mThemeOverlayController.start();
 
@@ -763,14 +772,19 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, executor, executor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
-                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle) {
-            @Nullable
-            @Override
-            protected FabricatedOverlay getOverlay(int color, int type, Style style) {
+                mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle,
+                mAccessibilityManager) {
+            @VisibleForTesting
+            protected boolean isNightMode() {
+                return false;
+            }
+
+            @VisibleForTesting
+            protected FabricatedOverlay newFabricatedOverlay(String name) {
                 FabricatedOverlay overlay = mock(FabricatedOverlay.class);
                 when(overlay.getIdentifier())
-                        .thenReturn(new OverlayIdentifier(Integer.toHexString(color | 0xff000000)));
-                mColorScheme = new ColorScheme(color, false /* nightMode */, style);
+                        .thenReturn(new OverlayIdentifier(
+                                Integer.toHexString(mColorScheme.getSeed() | 0xff000000)));
                 return overlay;
             }
         };

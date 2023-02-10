@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
+import android.credentials.ui.AuthenticationEntry;
 import android.credentials.ui.Entry;
 import android.credentials.ui.GetCredentialProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
@@ -108,7 +109,6 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         Log.i(TAG, "Unable to create provider session");
         return null;
     }
-
     private static BeginGetCredentialRequest constructQueryPhaseRequest(
             android.credentials.GetCredentialRequest filteredRequest,
             CallingAppInfo callingAppInfo,
@@ -279,16 +279,18 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         return remoteEntry;
     }
 
-    private List<Entry> prepareUiAuthenticationEntries(
+    private List<AuthenticationEntry> prepareUiAuthenticationEntries(
             @NonNull List<Action> authenticationEntries) {
-        List<Entry> authenticationUiEntries = new ArrayList<>();
+        List<AuthenticationEntry> authenticationUiEntries = new ArrayList<>();
 
+        // TODO: properly construct entries when they should have the unlocked status.
         for (Action authenticationAction : authenticationEntries) {
             String entryId = generateUniqueId();
             mUiAuthenticationEntries.put(entryId, authenticationAction);
-            authenticationUiEntries.add(new Entry(
+            authenticationUiEntries.add(new AuthenticationEntry(
                     AUTHENTICATION_ACTION_ENTRY_KEY, entryId,
                     authenticationAction.getSlice(),
+                    AuthenticationEntry.STATUS_LOCKED,
                     setUpFillInIntentForAuthentication()));
         }
         return authenticationUiEntries;
@@ -306,18 +308,20 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             Log.i(TAG, "in prepareUiProviderData creating ui entry with id " + entryId);
             credentialUiEntries.add(new Entry(CREDENTIAL_ENTRY_KEY, entryId,
                     credentialEntry.getSlice(),
-                    /*fillInIntent=*/setUpFillInIntent(credentialEntry.getType())));
+                    /*fillInIntent=*/setUpFillInIntent(credentialEntry
+                    .getBeginGetCredentialOption().getId())));
         }
         return credentialUiEntries;
     }
 
-    private Intent setUpFillInIntent(@Nullable String id) {
+    private Intent setUpFillInIntent(@NonNull String id) {
         // TODO: Determine if we should skip this entry if entry id is not set, or is set
         // but does not resolve to a valid option. For now, not skipping it because
         // it may be possible that the provider adds their own extras and expects to receive
         // those and complete the flow.
-        if (id == null || mBeginGetOptionToCredentialOptionMap.get(id) == null) {
+        if (mBeginGetOptionToCredentialOptionMap.get(id) == null) {
             Log.i(TAG, "Id from Credential Entry does not resolve to a valid option");
+            return new Intent();
         }
         return new Intent().putExtra(CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,
                 new GetCredentialRequest(
@@ -345,7 +349,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     }
 
     private GetCredentialProviderData prepareUiProviderData(List<Entry> actionEntries,
-            List<Entry> credentialEntries, List<Entry> authenticationActionEntries,
+            List<Entry> credentialEntries, List<AuthenticationEntry> authenticationActionEntries,
             Entry remoteEntry) {
         return new GetCredentialProviderData.Builder(
                 mComponentName.flattenToString()).setActionChips(actionEntries)
@@ -445,7 +449,22 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     /** Updates the response being maintained in state by this provider session. */
     private void onUpdateResponse(BeginGetCredentialResponse response) {
         mProviderResponse = response;
-        updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);
+        if (isEmptyResponse(response)) {
+            updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
+        } else {
+            updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);
+        }
+    }
+
+    private boolean isEmptyResponse(BeginGetCredentialResponse response) {
+        if ((response.getCredentialEntries() == null || response.getCredentialEntries().isEmpty())
+                && (response.getAuthenticationActions() == null || response
+                .getAuthenticationActions().isEmpty())
+                && (response.getActions() == null || response.getActions().isEmpty())
+                && response.getRemoteCredentialEntry() == null) {
+            return true;
+        }
+        return false;
     }
 
     private void onUpdateEmptyResponse() {

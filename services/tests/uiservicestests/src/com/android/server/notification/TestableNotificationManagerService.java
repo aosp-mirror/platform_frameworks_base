@@ -36,8 +36,6 @@ public class TestableNotificationManagerService extends NotificationManagerServi
     int countLogSmartSuggestionsVisible = 0;
     Set<Integer> mChannelToastsSent = new HashSet<>();
 
-    public boolean ONGOING_DISMISSAL = false;
-
     String stringArrayResourceValue;
     @Nullable
     NotificationAssistantAccessGrantedCallback mNotificationAssistantAccessGrantedCallback;
@@ -160,11 +158,6 @@ public class TestableNotificationManagerService extends NotificationManagerServi
         public int getStrongAuthForUser(int userId) {
             return mGetStrongAuthForUserReturnValue;
         }
-    }
-
-    // Mock SystemProperties
-    protected void setOngoingDismissal(boolean ongoingDismissal) {
-        ONGOING_DISMISSAL = ongoingDismissal;
     }
 
     protected void setSystemExemptFromDismissal(boolean isOn) {

@@ -72,7 +72,7 @@ final class ComposePwleVibratorStep extends AbstractVibratorStep {
             RampSegment[] pwlesArray = pwles.toArray(new RampSegment[pwles.size()]);
             long vibratorOnResult = controller.on(pwlesArray, getVibration().id);
             handleVibratorOnResult(vibratorOnResult);
-            getVibration().stats().reportComposePwle(vibratorOnResult, pwlesArray);
+            getVibration().stats.reportComposePwle(vibratorOnResult, pwlesArray);
 
             // The next start and off times will be calculated from mVibratorOnResult.
             return nextSteps(/* segmentsPlayed= */ pwles.size());

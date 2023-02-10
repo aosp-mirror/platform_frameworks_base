@@ -263,7 +263,8 @@ public class InputDeviceDelegateTest {
     public void vibrateIfAvailable_withNoInputDevice_returnsFalse() {
         assertFalse(mInputDeviceDelegate.isAvailable());
         assertFalse(mInputDeviceDelegate.vibrateIfAvailable(
-                UID, PACKAGE_NAME, SYNCED_EFFECT, REASON, VIBRATION_ATTRIBUTES));
+                new Vibration.CallerInfo(VIBRATION_ATTRIBUTES, UID, -1, PACKAGE_NAME, REASON),
+                SYNCED_EFFECT));
     }
 
     @Test
@@ -277,7 +278,8 @@ public class InputDeviceDelegateTest {
         mInputDeviceDelegate.updateInputDeviceVibrators(/* vibrateInputDevices= */ true);
 
         assertTrue(mInputDeviceDelegate.vibrateIfAvailable(
-                UID, PACKAGE_NAME, SYNCED_EFFECT, REASON, VIBRATION_ATTRIBUTES));
+                new Vibration.CallerInfo(VIBRATION_ATTRIBUTES, UID, -1, PACKAGE_NAME, REASON),
+                SYNCED_EFFECT));
         verify(mIInputManagerMock).vibrateCombined(eq(1), same(SYNCED_EFFECT), any());
         verify(mIInputManagerMock).vibrateCombined(eq(2), same(SYNCED_EFFECT), any());
     }

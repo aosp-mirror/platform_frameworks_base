@@ -32,7 +32,6 @@ import android.view.View;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import java.util.ArrayList;
 
 public class MeshLargeActivity extends Activity {
     @Override
@@ -131,44 +130,37 @@ public class MeshLargeActivity extends Activity {
                     + "      color = vec4(1.0, 0.0, 0.0, 1.0);"
                     + "      return varyings.position;\n"
                     + "}";
-            ArrayList<Attribute> attList = new ArrayList<>();
-            attList.add(new Attribute(MeshSpecification.FLOAT2, 0, "position"));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    8,
-                    "test"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    24,
-                    "test2"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    40,
-                    "test3"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    56,
-                    "test4"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    72,
-                    "test5"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    88,
-                    "test6"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    104,
-                    "test7"
-            ));
-            ArrayList<Varying> varyList = new ArrayList<>();
+            Attribute[] attList = new Attribute[]{
+                    new Attribute(MeshSpecification.TYPE_FLOAT2, 0, "position"),
+                    new Attribute(MeshSpecification.TYPE_FLOAT4, 8, "test"),
+                    new Attribute(MeshSpecification.TYPE_FLOAT4, 24, "test2"),
+                    new Attribute(
+                            MeshSpecification.TYPE_FLOAT4,
+                            40,
+                            "test3"
+                    ),
+                    new Attribute(
+                            MeshSpecification.TYPE_FLOAT4,
+                            56,
+                            "test4"
+                    ),
+                    new Attribute(
+                            MeshSpecification.TYPE_FLOAT4,
+                            72,
+                            "test5"
+                    ),
+                    new Attribute(
+                            MeshSpecification.TYPE_FLOAT4,
+                            88,
+                            "test6"
+                    ),
+                    new Attribute(
+                            MeshSpecification.TYPE_FLOAT4,
+                            104,
+                            "test7"
+                    )
+            };
+            Varying[] varyList = new Varying[0];
             return MeshSpecification.make(attList, 120, varyList, vs, fs);
         }
     }

@@ -173,6 +173,7 @@ public class SyncStorageEngine {
     private volatile boolean mIsClockValid;
 
     private volatile boolean mIsJobNamespaceMigrated;
+    private volatile boolean mIsJobAttributionFixed;
 
     static {
         sAuthorityRenames = new HashMap<String, String>();
@@ -850,6 +851,20 @@ public class SyncStorageEngine {
 
     boolean isJobNamespaceMigrated() {
         return mIsJobNamespaceMigrated;
+    }
+
+    void setJobAttributionFixed(boolean fixed) {
+        if (mIsJobAttributionFixed == fixed) {
+            return;
+        }
+        mIsJobAttributionFixed = fixed;
+        // This isn't urgent enough to write synchronously. Post it to the handler thread so
+        // SyncManager can move on with whatever it was doing.
+        mHandler.sendEmptyMessageDelayed(MSG_WRITE_STATUS, WRITE_STATUS_DELAY);
+    }
+
+    boolean isJobAttributionFixed() {
+        return mIsJobAttributionFixed;
     }
 
     public Pair<Long, Long> getBackoff(EndPoint info) {
@@ -2120,6 +2135,10 @@ public class SyncStorageEngine {
                     mIsJobNamespaceMigrated =
                             proto.readBoolean(SyncStatusProto.IS_JOB_NAMESPACE_MIGRATED);
                     break;
+                case (int) SyncStatusProto.IS_JOB_ATTRIBUTION_FIXED:
+                    mIsJobAttributionFixed =
+                            proto.readBoolean(SyncStatusProto.IS_JOB_ATTRIBUTION_FIXED);
+                    break;
                 case ProtoInputStream.NO_MORE_FIELDS:
                     return;
             }
@@ -2389,6 +2408,7 @@ public class SyncStorageEngine {
         }
 
         proto.write(SyncStatusProto.IS_JOB_NAMESPACE_MIGRATED, mIsJobNamespaceMigrated);
+        proto.write(SyncStatusProto.IS_JOB_ATTRIBUTION_FIXED, mIsJobAttributionFixed);
 
         proto.flush();
     }

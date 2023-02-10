@@ -25,8 +25,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.IntentResolver;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -74,7 +72,7 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
         final int N = size();
         for (int i = 0; i < N; i++) {
             final BroadcastFilter f = get(i);
-            if (IntentResolver.filterEquals(f, filter)) {
+            if (IntentFilter.filterEquals(f, filter)) {
                 return true;
             }
         }

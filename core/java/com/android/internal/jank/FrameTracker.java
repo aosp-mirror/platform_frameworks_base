@@ -68,6 +68,9 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
 
     private static final int MAX_LENGTH_EVENT_DESC = 20;
 
+    private static final int MAX_FLUSH_ATTEMPTS = 3;
+    private static final int FLUSH_DELAY_MILLISECOND = 60;
+
     static final int REASON_END_UNKNOWN = -1;
     static final int REASON_END_NORMAL = 0;
     static final int REASON_END_SURFACE_DESTROYED = 1;
@@ -358,11 +361,35 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
             // will remove it when all the frame metrics in this duration are called back.
             // See onFrameMetricsAvailable for the logic of removing the observer.
             // Waiting at most 10 seconds for all callbacks to finish.
-            mWaitForFinishTimedOut = () -> {
-                Log.e(TAG, "force finish cuj because of time out:" + mSession.getName());
-                finish();
+            mWaitForFinishTimedOut = new Runnable() {
+                private int mFlushAttempts = 0;
+
+                @Override
+                public void run() {
+                    if (mWaitForFinishTimedOut == null || mMetricsFinalized) {
+                        return;
+                    }
+
+                    // Send a flush jank data transaction.
+                    if (mSurfaceControl != null && mSurfaceControl.isValid()) {
+                        SurfaceControl.Transaction.sendSurfaceFlushJankData(mSurfaceControl);
+                    }
+
+                    long delay;
+                    if (mFlushAttempts < MAX_FLUSH_ATTEMPTS) {
+                        delay = FLUSH_DELAY_MILLISECOND;
+                        mFlushAttempts++;
+                    } else {
+                        mWaitForFinishTimedOut = () -> {
+                            Log.e(TAG, "force finish cuj, time out: " + mSession.getName());
+                            finish();
+                        };
+                        delay = TimeUnit.SECONDS.toMillis(10);
+                    }
+                    getHandler().postDelayed(mWaitForFinishTimedOut, delay);
+                }
             };
-            getHandler().postDelayed(mWaitForFinishTimedOut, TimeUnit.SECONDS.toMillis(10));
+            getHandler().postDelayed(mWaitForFinishTimedOut, FLUSH_DELAY_MILLISECOND);
             notifyCujEvent(ACTION_SESSION_END);
             return true;
         }
@@ -537,11 +564,12 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
 
     @UiThread
     private void finish() {
+        if (mMetricsFinalized || mCancelled) return;
+        mMetricsFinalized = true;
+
         getHandler().removeCallbacks(mWaitForFinishTimedOut);
         mWaitForFinishTimedOut = null;
-        if (mMetricsFinalized || mCancelled) return;
         markEvent("FT#finish#" + mJankInfos.size());
-        mMetricsFinalized = true;
 
         // The tracing has been ended, remove the observer, see if need to trigger perfetto.
         removeObservers();

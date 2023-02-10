@@ -39,13 +39,14 @@ public final class GetCredentialProviderData extends ProviderData implements Par
     @NonNull
     private final List<Entry> mActionChips;
     @NonNull
-    private final List<Entry> mAuthenticationEntries;
+    private final List<AuthenticationEntry> mAuthenticationEntries;
     @Nullable
     private final Entry mRemoteEntry;
 
     public GetCredentialProviderData(
             @NonNull String providerFlattenedComponentName, @NonNull List<Entry> credentialEntries,
-            @NonNull List<Entry> actionChips, @NonNull List<Entry> authenticationEntries,
+            @NonNull List<Entry> actionChips,
+            @NonNull List<AuthenticationEntry> authenticationEntries,
             @Nullable Entry remoteEntry) {
         super(providerFlattenedComponentName);
         mCredentialEntries = credentialEntries;
@@ -65,7 +66,7 @@ public final class GetCredentialProviderData extends ProviderData implements Par
     }
 
     @NonNull
-    public List<Entry> getAuthenticationEntries() {
+    public List<AuthenticationEntry> getAuthenticationEntries() {
         return mAuthenticationEntries;
     }
 
@@ -87,8 +88,8 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         mActionChips = actionChips;
         AnnotationValidations.validate(NonNull.class, null, mActionChips);
 
-        List<Entry> authenticationEntries  = new ArrayList<>();
-        in.readTypedList(authenticationEntries, Entry.CREATOR);
+        List<AuthenticationEntry> authenticationEntries  = new ArrayList<>();
+        in.readTypedList(authenticationEntries, AuthenticationEntry.CREATOR);
         mAuthenticationEntries = authenticationEntries;
         AnnotationValidations.validate(NonNull.class, null, mAuthenticationEntries);
 
@@ -133,7 +134,7 @@ public final class GetCredentialProviderData extends ProviderData implements Par
         @NonNull private String mProviderFlattenedComponentName;
         @NonNull private List<Entry> mCredentialEntries = new ArrayList<>();
         @NonNull private List<Entry> mActionChips = new ArrayList<>();
-        @NonNull private List<Entry> mAuthenticationEntries = new ArrayList<>();
+        @NonNull private List<AuthenticationEntry> mAuthenticationEntries = new ArrayList<>();
         @Nullable private Entry mRemoteEntry = null;
 
         /** Constructor with required properties. */
@@ -157,7 +158,8 @@ public final class GetCredentialProviderData extends ProviderData implements Par
 
         /** Sets the authentication entry to be displayed to the user. */
         @NonNull
-        public Builder setAuthenticationEntries(@NonNull List<Entry> authenticationEntry) {
+        public Builder setAuthenticationEntries(
+                @NonNull List<AuthenticationEntry> authenticationEntry) {
             mAuthenticationEntries = authenticationEntry;
             return this;
         }

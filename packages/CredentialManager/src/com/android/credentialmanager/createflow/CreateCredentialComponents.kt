@@ -5,6 +5,7 @@ package com.android.credentialmanager.createflow
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -165,8 +166,16 @@ fun ConfirmationCard(
 ) {
     ContainerCard() {
         Column() {
+            val onboardingImageResource = remember {
+                mutableStateOf(R.drawable.ic_passkeys_onboarding)
+            }
+            if (isSystemInDarkTheme()) {
+                onboardingImageResource.value = R.drawable.ic_passkeys_onboarding_dark
+            } else {
+                onboardingImageResource.value = R.drawable.ic_passkeys_onboarding
+            }
             Image(
-                painter = painterResource(R.drawable.ic_passkeys_onboarding),
+                painter = painterResource(onboardingImageResource.value),
                 contentDescription = null,
                 modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
                     .padding(top = 24.dp, bottom = 12.dp).size(316.dp, 168.dp)
@@ -831,7 +840,6 @@ fun PrimaryCreateOptionRow(
         },
         label = {
             Column() {
-                // TODO: Add the function to hide/view password when the type is create password
                 when (requestDisplayInfo.type) {
                     CredentialType.PASSKEY -> {
                         TextOnSurfaceVariant(

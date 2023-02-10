@@ -75,7 +75,7 @@ class AppStorageSizeTest {
             }
         }
 
-        composeTestRule.waitUntil { storageSize.value == "123 B" }
+        composeTestRule.waitUntil { storageSize.value == "120 B" }
     }
 
     companion object {

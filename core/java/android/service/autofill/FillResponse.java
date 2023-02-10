@@ -34,6 +34,7 @@ import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.assist.classification.FieldClassification;
 import android.view.autofill.AutofillId;
 import android.widget.RemoteViews;
 
@@ -45,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Response for an {@link
@@ -113,6 +115,81 @@ public final class FillResponse implements Parcelable {
     private final @StringRes int mServiceDisplayNameResourceId;
     private final boolean mShowFillDialogIcon;
     private final boolean mShowSaveDialogIcon;
+    private final @Nullable FieldClassification[] mDetectedFieldTypes;
+
+    /**
+    * Creates a shollow copy of the provided FillResponse.
+    *
+    * @hide
+    */
+    public static FillResponse shallowCopy(FillResponse r, List<Dataset> datasets) {
+        return new FillResponse(
+                (datasets != null) ? new ParceledListSlice<>(datasets) : null,
+                r.mSaveInfo,
+                r.mClientState,
+                r.mPresentation,
+                r.mInlinePresentation,
+                r.mInlineTooltipPresentation,
+                r.mDialogPresentation,
+                r.mDialogHeader,
+                r.mHeader,
+                r.mFooter,
+                r.mAuthentication,
+                r.mAuthenticationIds,
+                r.mIgnoredIds,
+                r.mFillDialogTriggerIds,
+                r.mDisableDuration,
+                r.mFieldClassificationIds,
+                r.mFlags,
+                r.mRequestId,
+                r.mUserData,
+                r.mCancelIds,
+                r.mSupportsInlineSuggestions,
+                r.mIconResourceId,
+                r.mServiceDisplayNameResourceId,
+                r.mShowFillDialogIcon,
+                r.mShowSaveDialogIcon,
+                r.mDetectedFieldTypes);
+    }
+
+    private FillResponse(ParceledListSlice<Dataset> datasets, SaveInfo saveInfo, Bundle clientState,
+            RemoteViews presentation, InlinePresentation inlinePresentation,
+            InlinePresentation inlineTooltipPresentation, RemoteViews dialogPresentation,
+            RemoteViews dialogHeader, RemoteViews header, RemoteViews footer,
+            IntentSender authentication, AutofillId[] authenticationIds, AutofillId[] ignoredIds,
+            AutofillId[] fillDialogTriggerIds, long disableDuration,
+            AutofillId[] fieldClassificationIds, int flags, int requestId, UserData userData,
+            int[] cancelIds, boolean supportsInlineSuggestions, int iconResourceId,
+            int serviceDisplayNameResourceId, boolean showFillDialogIcon,
+            boolean showSaveDialogIcon,
+            FieldClassification[] detectedFieldTypes) {
+        mDatasets = datasets;
+        mSaveInfo = saveInfo;
+        mClientState = clientState;
+        mPresentation = presentation;
+        mInlinePresentation = inlinePresentation;
+        mInlineTooltipPresentation = inlineTooltipPresentation;
+        mDialogPresentation = dialogPresentation;
+        mDialogHeader = dialogHeader;
+        mHeader = header;
+        mFooter = footer;
+        mAuthentication = authentication;
+        mAuthenticationIds = authenticationIds;
+        mIgnoredIds = ignoredIds;
+        mFillDialogTriggerIds = fillDialogTriggerIds;
+        mDisableDuration = disableDuration;
+        mFieldClassificationIds = fieldClassificationIds;
+        mFlags = flags;
+        mRequestId = requestId;
+        mUserData = userData;
+        mCancelIds = cancelIds;
+        mSupportsInlineSuggestions = supportsInlineSuggestions;
+        mIconResourceId = iconResourceId;
+        mServiceDisplayNameResourceId = serviceDisplayNameResourceId;
+        mShowFillDialogIcon = showFillDialogIcon;
+        mShowSaveDialogIcon = showSaveDialogIcon;
+        mDetectedFieldTypes = detectedFieldTypes;
+    }
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
@@ -140,6 +217,14 @@ public final class FillResponse implements Parcelable {
         mServiceDisplayNameResourceId = builder.mServiceDisplayNameResourceId;
         mShowFillDialogIcon = builder.mShowFillDialogIcon;
         mShowSaveDialogIcon = builder.mShowSaveDialogIcon;
+        mDetectedFieldTypes = builder.mDetectedFieldTypes;
+    }
+
+    /** @hide */
+    @TestApi
+    @NonNull
+    public Set<FieldClassification> getDetectedFieldClassifications() {
+        return Set.of(mDetectedFieldTypes);
     }
 
     /** @hide */
@@ -312,6 +397,28 @@ public final class FillResponse implements Parcelable {
         private int mServiceDisplayNameResourceId;
         private boolean mShowFillDialogIcon = true;
         private boolean mShowSaveDialogIcon = true;
+        private FieldClassification[] mDetectedFieldTypes;
+
+        /**
+         * Adds a new {@link FieldClassification} to this response, to
+         * help the platform provide more accurate detection results.
+         *
+         * Call this when a field has been detected with a type.
+         *
+         * Altough similiarly named with {@link setFieldClassificationIds},
+         * it provides a different functionality - setFieldClassificationIds should
+         * be used when a field is only suspected to be Autofillable.
+         * This method should be used when a field is certainly Autofillable
+         * with a certain type.
+         */
+        @NonNull
+        public Builder setDetectedFieldClassifications(
+                @NonNull Set<FieldClassification> fieldInfos) {
+            throwIfDestroyed();
+            throwIfDisableAutofillCalled();
+            mDetectedFieldTypes = fieldInfos.toArray(new FieldClassification[0]);
+            return this;
+        }
 
         /**
          * Triggers a custom UI before autofilling the screen with any data set in this
@@ -637,6 +744,15 @@ public final class FillResponse implements Parcelable {
             if (!mDatasets.add(dataset)) {
                 return this;
             }
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        @NonNull
+        public Builder setDatasets(ArrayList<Dataset> dataset) {
+            mDatasets = dataset;
             return this;
         }
 
@@ -1122,6 +1238,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelableArray(mIgnoredIds, flags);
         parcel.writeLong(mDisableDuration);
         parcel.writeParcelableArray(mFieldClassificationIds, flags);
+        parcel.writeParcelableArray(mDetectedFieldTypes, flags);
         parcel.writeInt(mIconResourceId);
         parcel.writeInt(mServiceDisplayNameResourceId);
         parcel.writeBoolean(mShowFillDialogIcon);
@@ -1190,6 +1307,12 @@ public final class FillResponse implements Parcelable {
                     parcel.readParcelableArray(null, AutofillId.class);
             if (fieldClassifactionIds != null) {
                 builder.setFieldClassificationIds(fieldClassifactionIds);
+            }
+
+            final FieldClassification[] detectedFields =
+                    parcel.readParcelableArray(null, FieldClassification.class);
+            if (detectedFields != null) {
+                builder.setDetectedFieldClassifications(Set.of(detectedFields));
             }
 
             builder.setIconResourceId(parcel.readInt());

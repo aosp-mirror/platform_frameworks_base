@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.os.ICancellationSignal;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
@@ -66,13 +67,14 @@ import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
-import android.telephony.satellite.ISatellitePositionUpdateCallback;
+import android.telephony.satellite.ISatelliteStateListener;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.ICallForwardingInfoCallback;
 import com.android.internal.telephony.IccLogicalChannelRequest;
 import com.android.internal.telephony.IImsStateCallback;
+import com.android.internal.telephony.IIntArrayConsumer;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
@@ -2702,16 +2704,52 @@ interface ITelephony {
     /**
      * Start receiving satellite pointing updates.
      */
-    int startSatellitePositionUpdates(int subId, int callbackId,
-            in ISatellitePositionUpdateCallback callback);
+    int startSatellitePositionUpdates(int subId, in ISatelliteStateListener callback);
 
     /**
      * Stop receiving satellite pointing updates.
      */
-    int stopSatellitePositionUpdates(int subId, int callbackId);
+    int stopSatellitePositionUpdates(int subId, ISatelliteStateListener callback);
 
     /**
      * Get maximum number of characters per text message on satellite.
      */
     int getMaxCharactersPerSatelliteTextMessage(int subId, IIntegerConsumer internalCallback);
+
+    /**
+     * Register the subscription with a satellite provider.
+     * This is needed to register the subscription if the provider allows dynamic registration.
+     *
+     * @param subId The subId of the subscription to be provisioned.
+     * @param features List of features to be provisioned.
+     * @param callback The callback to get the error code of the request.
+     * @return The signal transport used by callers to cancel the provision request.
+     */
+    ICancellationSignal provisionSatelliteService(int subId, in int[] features,
+            in IIntegerConsumer callback);
+
+    /**
+     * Register for the satellite provision state change.
+     *
+     * @param subId The subId of the subscription to be provisioned.
+     * @param callback The callback to handle the satellite provision state changed event.
+     */
+    int registerForSatelliteProvisionStateChanged(int subId, ISatelliteStateListener callback);
+
+    /**
+     * Unregister for the satellite provision state change.
+     *
+     * @param subId The subId of the subscription associated with the satellite service.
+     * @param callback The callback that was passed to
+     *                   registerForSatelliteProvisionStateChanged.
+     */
+    int unregisterForSatelliteProvisionStateChanged(int subId, ISatelliteStateListener callback);
+
+    /**
+     * Get the list of provisioned satellite features.
+     *
+     * @param subId The subId of the subscription to be provisioned.
+     * @param callback The callback to get the list of provisioned satellite features.
+     */
+    int getProvisionedSatelliteFeatures(int subId, IIntArrayConsumer callback);
 }

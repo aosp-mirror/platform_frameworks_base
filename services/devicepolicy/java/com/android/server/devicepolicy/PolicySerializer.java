@@ -17,6 +17,8 @@
 package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
+import android.app.admin.PolicyKey;
+import android.app.admin.PolicyValue;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -24,7 +26,8 @@ import com.android.modules.utils.TypedXmlSerializer;
 import java.io.IOException;
 
 abstract class PolicySerializer<V> {
-    abstract void saveToXml(TypedXmlSerializer serializer, String attributeName, @NonNull V value)
+    abstract void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
+            String attributeName, @NonNull V value)
             throws IOException;
-    abstract V readFromXml(TypedXmlPullParser parser, String attributeName);
+    abstract PolicyValue<V> readFromXml(TypedXmlPullParser parser, String attributeName);
 }

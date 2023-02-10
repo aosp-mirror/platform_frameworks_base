@@ -458,6 +458,9 @@ public class HdmiControlService extends SystemService {
     private boolean mEarcTxFeatureFlagEnabled = false;
 
     @ServiceThreadOnly
+    private boolean mTransitionFromArcToEarcTxEnabled = false;
+
+    @ServiceThreadOnly
     private int mActivePortId = Constants.INVALID_PORT_ID;
 
     // Set to true while the input change by MHL is allowed.
@@ -675,6 +678,8 @@ public class HdmiControlService extends SystemService {
                 Constants.DEVICE_CONFIG_FEATURE_FLAG_SOUNDBAR_MODE, false);
         mEarcTxFeatureFlagEnabled = mDeviceConfig.getBoolean(
                 Constants.DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX, false);
+        mTransitionFromArcToEarcTxEnabled = mDeviceConfig.getBoolean(
+                Constants.DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX, false);
 
         synchronized (mLock) {
             mEarcEnabled = (mHdmiCecConfig.getIntValue(
@@ -886,6 +891,16 @@ public class HdmiControlService extends SystemService {
                                 ? SOUNDBAR_MODE_ENABLED : SOUNDBAR_MODE_DISABLED);
                     }
                 }, mServiceThreadExecutor);
+
+        mDeviceConfig.addOnPropertiesChangedListener(getContext().getMainExecutor(),
+                new DeviceConfig.OnPropertiesChangedListener() {
+                    @Override
+                    public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                        mTransitionFromArcToEarcTxEnabled = properties.getBoolean(
+                                Constants.DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX,
+                                false);
+                    }
+                });
     }
     /** Returns true if the device screen is off */
     boolean isScreenOff() {
@@ -1618,6 +1633,11 @@ public class HdmiControlService extends SystemService {
     }
 
     void enableAudioReturnChannel(int portId, boolean enabled) {
+        if (!mTransitionFromArcToEarcTxEnabled && enabled && mEarcController != null) {
+            // If the feature flag is set to false, prevent eARC from establishing if ARC is already
+            // established.
+            setEarcEnabledInHal(false, false);
+        }
         mCecController.enableAudioReturnChannel(portId, enabled);
     }
 

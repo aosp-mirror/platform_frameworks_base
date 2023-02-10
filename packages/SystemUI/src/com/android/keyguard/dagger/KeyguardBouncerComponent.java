@@ -18,7 +18,7 @@ package com.android.keyguard.dagger;
 
 import android.view.ViewGroup;
 
-import com.android.keyguard.KeyguardSecurityContainerController;
+import com.android.keyguard.KeyguardHostViewController;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 
@@ -37,6 +37,6 @@ public interface KeyguardBouncerComponent {
         KeyguardBouncerComponent create(@BindsInstance @RootView ViewGroup bouncerContainer);
     }
 
-    /** Returns a {@link KeyguardSecurityContainerController}. */
-    KeyguardSecurityContainerController getSecurityContainerController();
+    /** Returns a {@link KeyguardHostViewController}. */
+    KeyguardHostViewController getKeyguardHostViewController();
 }

@@ -2553,7 +2553,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      */
     @NonNull
     public RemoteLockscreenValidationResult
-            validateRemoteLockScreen2(@NonNull byte[] encryptedCredential) {
+            validateRemoteLockscreen(@NonNull byte[] encryptedCredential) {
         return mRecoverableKeyStoreManager.validateRemoteLockscreen(encryptedCredential, this);
     }
 
@@ -3439,10 +3439,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                     Slog.w(TAG, "Querying password metrics for unified challenge profile: "
                             + userHandle);
                 }
+                return LockSettingsService.this.getUserPasswordMetrics(userHandle);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
-            return LockSettingsService.this.getUserPasswordMetrics(userHandle);
         }
 
         @Override

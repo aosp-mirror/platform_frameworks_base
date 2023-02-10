@@ -46,6 +46,38 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 public class SystemUiSystemPropertiesFlags {
 
+    /** The teamfood flag allows multiple features to be opted into at once. */
+    public static final Flag TEAMFOOD = devFlag("persist.sysui.teamfood");
+
+    /**
+     * Flags related to notification features
+     */
+    public static final class NotificationFlags {
+
+        /**
+         * FOR DEVELOPMENT / TESTING ONLY!!!
+         * Forcibly demote *ALL* FSI notifications as if no apps have the app op permission.
+         * NOTE: enabling this implies SHOW_STICKY_HUN_FOR_DENIED_FSI in SystemUI
+         */
+        public static final Flag FSI_FORCE_DEMOTE =
+                devFlag("persist.sysui.notification.fsi_force_demote");
+
+        /** Gating the feature which shows FSI-denied notifications as Sticky HUNs */
+        public static final Flag SHOW_STICKY_HUN_FOR_DENIED_FSI =
+                devFlag("persist.sysui.notification.show_sticky_hun_for_denied_fsi");
+
+        /** Gating the ability for users to dismiss ongoing event notifications */
+        public static final Flag ALLOW_DISMISS_ONGOING =
+                devFlag("persist.sysui.notification.ongoing_dismissal");
+
+        /** Gating the redaction of OTP notifications on the lockscreen */
+        public static final Flag OTP_REDACTION =
+                devFlag("persist.sysui.notification.otp_redaction");
+
+    }
+
+    //// == End of flags.  Everything below this line is the implementation. == ////
+
     /** The interface used for resolving SystemUI SystemProperties Flags to booleans. */
     public interface FlagResolver {
         /** Is the flag enabled? */
@@ -74,33 +106,6 @@ public class SystemUiSystemPropertiesFlags {
         }
         return MAIN_RESOLVER;
     }
-
-    /** The teamfood flag allows multiple features to be opted into at once. */
-    public static final Flag TEAMFOOD = devFlag("persist.sysui.teamfood");
-
-    /**
-     * Flags related to notification features
-     */
-    public static final class NotificationFlags {
-
-        /**
-         * FOR DEVELOPMENT / TESTING ONLY!!!
-         * Forcibly demote *ALL* FSI notifications as if no apps have the app op permission.
-         */
-        public static final Flag FSI_FORCE_DEMOTE =
-                devFlag("persist.sysui.notification.fsi_force_demote");
-
-        /** Gating the ability for users to dismiss ongoing event notifications */
-        public static final Flag ALLOW_DISMISS_ONGOING =
-                devFlag("persist.sysui.notification.ongoing_dismissal");
-
-        /** Gating the redaction of OTP notifications on the lockscreen */
-        public static final Flag OTP_REDACTION =
-                devFlag("persist.sysui.notification.otp_redaction");
-
-    }
-
-    //// == Everything below this line is the implementation == ////
 
     /**
      * Creates a flag that is enabled by default in debuggable builds.

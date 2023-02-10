@@ -23,6 +23,7 @@ import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.view.InputDevice
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -53,7 +54,10 @@ class StylusManagerTest : SysuiTestCase() {
     @Mock lateinit var bluetoothAdapter: BluetoothAdapter
     @Mock lateinit var bluetoothDevice: BluetoothDevice
     @Mock lateinit var handler: Handler
+
     @Mock lateinit var featureFlags: FeatureFlags
+
+    @Mock lateinit var uiEventLogger: UiEventLogger
 
     @Mock lateinit var stylusCallback: StylusManager.StylusCallback
 
@@ -75,7 +79,15 @@ class StylusManagerTest : SysuiTestCase() {
         }
 
         stylusManager =
-            StylusManager(mContext, inputManager, bluetoothAdapter, handler, EXECUTOR, featureFlags)
+            StylusManager(
+                mContext,
+                inputManager,
+                bluetoothAdapter,
+                handler,
+                EXECUTOR,
+                featureFlags,
+                uiEventLogger
+            )
 
         whenever(otherDevice.supportsSource(InputDevice.SOURCE_STYLUS)).thenReturn(false)
         whenever(stylusDevice.supportsSource(InputDevice.SOURCE_STYLUS)).thenReturn(true)
@@ -104,7 +116,15 @@ class StylusManagerTest : SysuiTestCase() {
     @Test
     fun startListener_hasNotStarted_registersInputDeviceListener() {
         stylusManager =
-            StylusManager(mContext, inputManager, bluetoothAdapter, handler, EXECUTOR, featureFlags)
+            StylusManager(
+                mContext,
+                inputManager,
+                bluetoothAdapter,
+                handler,
+                EXECUTOR,
+                featureFlags,
+                uiEventLogger
+            )
 
         stylusManager.startListener()
 
@@ -121,7 +141,15 @@ class StylusManagerTest : SysuiTestCase() {
     @Test
     fun onInputDeviceAdded_hasNotStarted_doesNothing() {
         stylusManager =
-            StylusManager(mContext, inputManager, bluetoothAdapter, handler, EXECUTOR, featureFlags)
+            StylusManager(
+                mContext,
+                inputManager,
+                bluetoothAdapter,
+                handler,
+                EXECUTOR,
+                featureFlags,
+                uiEventLogger
+            )
 
         stylusManager.onInputDeviceAdded(STYLUS_DEVICE_ID)
 
@@ -203,7 +231,15 @@ class StylusManagerTest : SysuiTestCase() {
     @Test
     fun onInputDeviceChanged_hasNotStarted_doesNothing() {
         stylusManager =
-            StylusManager(mContext, inputManager, bluetoothAdapter, handler, EXECUTOR, featureFlags)
+            StylusManager(
+                mContext,
+                inputManager,
+                bluetoothAdapter,
+                handler,
+                EXECUTOR,
+                featureFlags,
+                uiEventLogger
+            )
 
         stylusManager.onInputDeviceChanged(STYLUS_DEVICE_ID)
 
@@ -268,7 +304,15 @@ class StylusManagerTest : SysuiTestCase() {
     @Test
     fun onInputDeviceRemoved_hasNotStarted_doesNothing() {
         stylusManager =
-            StylusManager(mContext, inputManager, bluetoothAdapter, handler, EXECUTOR, featureFlags)
+            StylusManager(
+                mContext,
+                inputManager,
+                bluetoothAdapter,
+                handler,
+                EXECUTOR,
+                featureFlags,
+                uiEventLogger
+            )
         stylusManager.onInputDeviceAdded(STYLUS_DEVICE_ID)
 
         stylusManager.onInputDeviceRemoved(STYLUS_DEVICE_ID)
@@ -337,12 +381,28 @@ class StylusManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun onStylusBluetoothConnected_logsEvent() {
+        stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
+
+        verify(uiEventLogger, times(1)).log(StylusUiEvent.BLUETOOTH_STYLUS_CONNECTED)
+    }
+
+    @Test
     fun onStylusBluetoothDisconnected_unregistersMetadataListener() {
         stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
 
         stylusManager.onInputDeviceRemoved(BT_STYLUS_DEVICE_ID)
 
         verify(bluetoothAdapter, times(1)).removeOnMetadataChangedListener(any(), any())
+    }
+
+    @Test
+    fun onStylusBluetoothDisconnected_logsEvent() {
+        stylusManager.onInputDeviceAdded(BT_STYLUS_DEVICE_ID)
+
+        stylusManager.onInputDeviceRemoved(BT_STYLUS_DEVICE_ID)
+
+        verify(uiEventLogger, times(1)).log(StylusUiEvent.BLUETOOTH_STYLUS_DISCONNECTED)
     }
 
     @Test
