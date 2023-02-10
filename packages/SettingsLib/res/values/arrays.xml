@@ -616,4 +616,16 @@
     <!-- Content descriptions for each of the images in the avatar_images array. -->
     <string-array name="avatar_image_descriptions"/>
 
+    <!-- NOTE: if you change this, you must also add the corresponding scale key and lookup table to
+     frameworks/base/core/java/android/content/res/FontScaleLookupTableFactory.java -->
+    <string-array name="entryvalues_font_size" translatable="false">
+        <item>0.85</item>
+        <item>1.0</item>
+        <item>1.15</item>
+        <item>1.30</item>
+        <item>1.50</item>
+        <item>1.80</item>
+        <item>2.0</item>
+    </string-array>
+
 </resources>
