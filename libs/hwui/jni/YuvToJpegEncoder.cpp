@@ -294,7 +294,7 @@ bool P010Yuv420ToJpegREncoder::encode(JNIEnv* env,
         return false;
     }
 
-    RecoveryMap recoveryMap;
+    JpegR jpegREncoder;
 
     jpegr_uncompressed_struct p010;
     p010.data = hdr;
@@ -314,7 +314,7 @@ bool P010Yuv420ToJpegREncoder::encode(JNIEnv* env,
     std::unique_ptr<uint8_t[]> jpegr_data = std::make_unique<uint8_t[]>(jpegR.maxLength);
     jpegR.data = jpegr_data.get();
 
-    if (int success = recoveryMap.encodeJPEGR(&p010, &yuv420,
+    if (int success = jpegREncoder.encodeJPEGR(&p010, &yuv420,
             hdrTransferFunction,
             &jpegR, jpegQuality, nullptr); success != android::OK) {
         ALOGW("Encode JPEG/R failed, error code: %d.", success);
