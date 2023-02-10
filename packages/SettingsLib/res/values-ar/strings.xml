@@ -540,11 +540,16 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"هذا الهاتف"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"هذا الجهاز اللوحي"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"هذا الهاتف"</string>
-    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
     <skip />
-    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"يجب ترقية الحساب للتبديل."</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"لا يمكن تشغيل المحتوى الذي تم تنزيله هنا."</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"يمكنك إعادة المحاولة بعد الإعلان."</string>
+    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
     <skip />
-    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
+    <skip />
+    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
     <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"حدثت مشكلة أثناء الاتصال. يُرجى إيقاف الجهاز ثم إعادة تشغيله."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"جهاز سماعي سلكي"</string>
@@ -672,8 +677,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"صور متحركة تعرض إيماءة الرجوع إلى الخلف التنبؤية"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"فعِّل الصور المتحركة في النظام لإيماءة الرجوع إلى الخلف التنبؤية."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"‏يفعّل هذا الإعداد الصور المتحركة في النظام للصور المتحركة التي تعرض إيماءة الرجوع إلى الخلف التنبؤية. يتطلب الإعداد ضبط enableOnBackInvokedCallback إلى true لكل تطبيق في ملف البيان."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"نقل لليسار"</item>
+    <item msgid="5425394847942513942">"نقل للأسفل"</item>
+    <item msgid="7728484337962740316">"نقل لليمين"</item>
+    <item msgid="324200556467459329">"نقل للأعلى"</item>
+  </string-array>
 </resources>
