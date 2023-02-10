@@ -349,9 +349,7 @@ package android.app {
   }
 
   public class NotificationManager {
-    method public void allowAssistantAdjustment(String);
     method public void cleanUpCallersAfter(long);
-    method public void disallowAssistantAdjustment(String);
     method public android.content.ComponentName getEffectsSuppressor();
     method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);

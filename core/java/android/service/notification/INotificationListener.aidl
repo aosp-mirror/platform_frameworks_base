@@ -58,6 +58,7 @@ oneway interface INotificationListener
     void onSuggestedReplySent(String key, in CharSequence reply, int source);
     void onActionClicked(String key, in Notification.Action action, int source);
     void onNotificationClicked(String key);
+    // @deprecated changing allowed adjustments is no longer supported.
     void onAllowedAdjustmentsChanged();
     void onNotificationFeedbackReceived(String key, in NotificationRankingUpdate update, in Bundle feedback);
 }

@@ -48,24 +48,9 @@ public final class SystemUiDeviceConfigFlags {
     public static final String NAS_MAX_SUGGESTIONS = "nas_max_suggestions";
 
     /**
-     * Whether the Notification Assistant can change ranking.
-     */
-    public static final String ENABLE_NAS_RANKING = "enable_nas_ranking";
-
-    /**
-     * Whether the Notification Assistant can prioritize notification.
-     */
-    public static final String ENABLE_NAS_PRIORITIZER = "enable_nas_prioritizer";
-
-    /**
      * Whether to enable feedback UI for Notification Assistant
      */
     public static final String ENABLE_NAS_FEEDBACK = "enable_nas_feedback";
-
-    /**
-     * Whether the Notification Assistant can label a notification not a conversation
-     */
-    public static final String ENABLE_NAS_NOT_CONVERSATION = "enable_nas_not_conversation";
 
     // Flags related to screenshot intelligence
 
