@@ -189,8 +189,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsView mUdfpsView;
     @Mock
-    private UdfpsEnrollView mEnrollView;
-    @Mock
     private UdfpsBpView mBpView;
     @Mock
     private UdfpsFpmEmptyView mFpmEmptyView;
@@ -241,15 +239,12 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false))
                 .thenReturn(mUdfpsView);
-        when(mLayoutInflater.inflate(R.layout.udfps_enroll_view, null))
-                .thenReturn(mEnrollView); // for showOverlay REASON_ENROLL_ENROLLING
         when(mLayoutInflater.inflate(R.layout.udfps_keyguard_view, null))
                 .thenReturn(mKeyguardView); // for showOverlay REASON_AUTH_FPM_KEYGUARD
         when(mLayoutInflater.inflate(R.layout.udfps_bp_view, null))
                 .thenReturn(mBpView);
         when(mLayoutInflater.inflate(R.layout.udfps_fpm_empty_view, null))
                 .thenReturn(mFpmEmptyView);
-        when(mEnrollView.getContext()).thenReturn(mContext);
         when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         when(mSessionTracker.getSessionId(anyInt())).thenReturn(
                 (new InstanceIdSequence(1 << 20)).newInstanceId());

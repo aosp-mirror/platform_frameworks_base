@@ -34,7 +34,6 @@ import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
 import android.os.Build
 import android.os.RemoteException
 import android.provider.Settings
-import android.util.FeatureFlagUtils
 import android.util.Log
 import android.util.RotationUtils
 import android.view.LayoutInflater
@@ -135,14 +134,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         }
     }
 
-    /** A helper if the [requestReason] was due to enrollment. */
-    val enrollHelper: UdfpsEnrollHelper? =
-        if (requestReason.isEnrollmentReason() && !shouldRemoveEnrollmentUi()) {
-            UdfpsEnrollHelper(context, fingerprintManager, secureSettings, requestReason)
-        } else {
-            null
-        }
-
     /** If the overlay is currently showing. */
     val isShowing: Boolean
         get() = overlayView != null
@@ -239,32 +230,16 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         return when (filteredRequestReason) {
             REASON_ENROLL_FIND_SENSOR,
             REASON_ENROLL_ENROLLING -> {
-                if (FeatureFlagUtils.isEnabled(context,
-                                FeatureFlagUtils.SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS)) {
-                    // Enroll udfps UI is handled by settings, so use empty view here
-                    UdfpsFpmEmptyViewController(
-                            view.addUdfpsView(R.layout.udfps_fpm_empty_view){
-                                updateAccessibilityViewLocation(sensorBounds)
-                            },
-                            statusBarStateController,
-                            shadeExpansionStateManager,
-                            dialogManager,
-                            dumpManager
-                    )
-                } else {
-                    UdfpsEnrollViewController(
-                            view.addUdfpsView(R.layout.udfps_enroll_view) {
-                                updateSensorLocation(sensorBounds)
-                            },
-                            enrollHelper ?: throw IllegalStateException("no enrollment helper"),
-                            statusBarStateController,
-                            shadeExpansionStateManager,
-                            dialogManager,
-                            dumpManager,
-                            featureFlags,
-                            overlayParams.scaleFactor
-                    )
-                }
+                // Enroll udfps UI is handled by settings, so use empty view here
+                UdfpsFpmEmptyViewController(
+                    view.addUdfpsView(R.layout.udfps_fpm_empty_view){
+                        updateAccessibilityViewLocation(sensorBounds)
+                    },
+                    statusBarStateController,
+                    shadeExpansionStateManager,
+                    dialogManager,
+                    dumpManager
+                )
             }
             REASON_AUTH_KEYGUARD -> {
                 UdfpsKeyguardViewController(
@@ -335,18 +310,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         overlayTouchListener = null
 
         return wasShowing
-    }
-
-    fun onEnrollmentProgress(remaining: Int) {
-        enrollHelper?.onEnrollmentProgress(remaining)
-    }
-
-    fun onAcquiredGood() {
-        enrollHelper?.animateIfLastStep()
-    }
-
-    fun onEnrollmentHelp() {
-        enrollHelper?.onEnrollmentHelp()
     }
 
     /**
@@ -455,10 +418,6 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
         return subView
     }
 }
-
-@ShowReason
-private fun Int.isEnrollmentReason() =
-    this == REASON_ENROLL_FIND_SENSOR || this == REASON_ENROLL_ENROLLING
 
 @ShowReason
 private fun Int.isImportantForAccessibility() =
