@@ -244,8 +244,6 @@ final class DreamController {
                 }
 
                 mListener.onDreamStopped(dream.mToken);
-            } else if (dream.mCanDoze && !mCurrentDream.mCanDoze) {
-                mListener.stopDozing(dream.mToken);
             }
 
         } finally {
@@ -292,7 +290,6 @@ final class DreamController {
      */
     public interface Listener {
         void onDreamStopped(Binder token);
-        void stopDozing(Binder token);
     }
 
     private final class DreamRecord implements DeathRecipient, ServiceConnection {
