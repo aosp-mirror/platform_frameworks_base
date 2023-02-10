@@ -65,14 +65,25 @@ public class DeviceStateToLayoutMapTest {
         Layout testLayout = new Layout();
         testLayout.createDisplayLocked(
                 DisplayAddress.fromPhysicalDisplayId(123456L), /* isDefault= */ true,
-                /* isEnabled= */ true, mDisplayIdProducerMock,
+                /* isEnabled= */ true, /* displayGroup= */ null, mDisplayIdProducerMock,
                 /* brightnessThrottlingMapId= */ null,
                 /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
         testLayout.createDisplayLocked(
                 DisplayAddress.fromPhysicalDisplayId(78910L), /* isDefault= */ false,
-                /* isEnabled= */ false, mDisplayIdProducerMock,
+                /* isEnabled= */ false, /* displayGroup= */ null, mDisplayIdProducerMock,
                 /* brightnessThrottlingMapId= */ null,
                 /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
+        testLayout.createDisplayLocked(
+                DisplayAddress.fromPhysicalDisplayId(98765L), /* isDefault= */ false,
+                /* isEnabled= */ true, "group1", mDisplayIdProducerMock,
+                /* brightnessThrottlingMapId= */ null,
+                /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
+        testLayout.createDisplayLocked(
+                DisplayAddress.fromPhysicalDisplayId(786L), /* isDefault= */ false,
+                /* isEnabled= */ false, "group2", mDisplayIdProducerMock,
+                /* brightnessThrottlingMapId= */ null,
+                /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
+
         assertEquals(testLayout, configLayout);
     }
 
@@ -83,12 +94,12 @@ public class DeviceStateToLayoutMapTest {
         Layout testLayout = new Layout();
         testLayout.createDisplayLocked(
                 DisplayAddress.fromPhysicalDisplayId(78910L), /* isDefault= */ true,
-                /* isEnabled= */ true, mDisplayIdProducerMock,
+                /* isEnabled= */ true, /* displayGroup= */ null, mDisplayIdProducerMock,
                 /* brightnessThrottlingMapId= */ null,
                 /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
         testLayout.createDisplayLocked(
                 DisplayAddress.fromPhysicalDisplayId(123456L), /* isDefault= */ false,
-                /* isEnabled= */ false, mDisplayIdProducerMock,
+                /* isEnabled= */ false, /* displayGroup= */ null, mDisplayIdProducerMock,
                 /* brightnessThrottlingMapId= */ null,
                 /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
 
@@ -103,14 +114,14 @@ public class DeviceStateToLayoutMapTest {
 
         Layout.Display display1 = testLayout.createDisplayLocked(
                 DisplayAddress.fromPhysicalDisplayId(345L), /* isDefault= */ true,
-                /* isEnabled= */ true, mDisplayIdProducerMock,
+                /* isEnabled= */ true, /* displayGroup= */ null, mDisplayIdProducerMock,
                 /* brightnessThrottlingMapId= */ "concurrent",
                 /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
         display1.setPosition(Layout.Display.POSITION_FRONT);
 
         Layout.Display display2 = testLayout.createDisplayLocked(
                 DisplayAddress.fromPhysicalDisplayId(678L), /* isDefault= */ false,
-                /* isEnabled= */ true, mDisplayIdProducerMock,
+                /* isEnabled= */ true, /* displayGroup= */ null, mDisplayIdProducerMock,
                 /* brightnessThrottlingMapId= */ "concurrent",
                 /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
         display2.setPosition(Layout.Display.POSITION_REAR);
@@ -133,13 +144,13 @@ public class DeviceStateToLayoutMapTest {
         Layout testLayout = new Layout();
         Layout.Display display1 = testLayout.createDisplayLocked(
                 DisplayAddress.fromPhysicalDisplayId(345L), /* isDefault= */ true,
-                /* isEnabled= */ true, mDisplayIdProducerMock,
+                /* isEnabled= */ true, /* displayGroup= */ null, mDisplayIdProducerMock,
                 /* brightnessThrottlingMapId= */ null,
                 /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
         display1.setRefreshRateZoneId("test1");
         testLayout.createDisplayLocked(
                 DisplayAddress.fromPhysicalDisplayId(678L), /* isDefault= */ false,
-                /* isEnabled= */ true, mDisplayIdProducerMock,
+                /* isEnabled= */ true, /* displayGroup= */ null, mDisplayIdProducerMock,
                 /* brightnessThrottlingMapId= */ null,
                 /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
 
@@ -167,6 +178,12 @@ public class DeviceStateToLayoutMapTest {
                 +      "</display>\n"
                 +      "<display enabled=\"false\">\n"
                 +        "<address>78910</address>\n"
+                +      "</display>\n"
+                +      "<display enabled=\"true\" displayGroup=\"group1\">\n"
+                +        "<address>98765</address>\n"
+                +      "</display>\n"
+                +      "<display enabled=\"false\" displayGroup=\"group2\">\n"
+                +        "<address>786</address>\n"
                 +      "</display>\n"
                 +    "</layout>\n"
 
@@ -207,4 +224,3 @@ public class DeviceStateToLayoutMapTest {
                 +  "</layouts>\n";
     }
 }
-

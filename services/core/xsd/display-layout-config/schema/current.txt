@@ -5,6 +5,7 @@ package com.android.server.display.config.layout {
     ctor public Display();
     method public java.math.BigInteger getAddress();
     method public String getBrightnessThrottlingMapId();
+    method public String getDisplayGroup();
     method public String getPosition();
     method public String getRefreshRateZoneId();
     method public boolean isDefaultDisplay();
@@ -12,6 +13,7 @@ package com.android.server.display.config.layout {
     method public void setAddress(java.math.BigInteger);
     method public void setBrightnessThrottlingMapId(String);
     method public void setDefaultDisplay(boolean);
+    method public void setDisplayGroup(String);
     method public void setEnabled(boolean);
     method public void setPosition(String);
     method public void setRefreshRateZoneId(String);
