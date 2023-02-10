@@ -22,9 +22,9 @@ import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
 import android.hardware.Sensor;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
-
-import java.time.Duration;
 
 /**
  * Representation of a sensor on a remote device, capable of sending events, such as an
@@ -35,24 +35,8 @@ import java.time.Duration;
  * @hide
  */
 @SystemApi
-public class VirtualSensor {
-
-    /**
-     * Interface for notification of listener registration changes for a virtual sensor.
-     */
-    public interface SensorStateChangeCallback {
-        /**
-         * Called when the registered listeners to a virtual sensor have changed.
-         *
-         * @param enabled Whether the sensor is enabled.
-         * @param samplingPeriod The requested sampling period of the sensor.
-         * @param batchReportLatency The requested maximum time interval between the delivery of two
-         * batches of sensor events.
-         */
-        void onStateChanged(boolean enabled, @NonNull Duration samplingPeriod,
-                @NonNull Duration batchReportLatency);
-    }
-
+public final class VirtualSensor implements Parcelable {
+    private final int mHandle;
     private final int mType;
     private final String mName;
     private final IVirtualDevice mVirtualDevice;
@@ -61,11 +45,30 @@ public class VirtualSensor {
     /**
      * @hide
      */
-    public VirtualSensor(int type, String name, IVirtualDevice virtualDevice, IBinder token) {
+    public VirtualSensor(int handle, int type, String name, IVirtualDevice virtualDevice,
+            IBinder token) {
+        mHandle = handle;
         mType = type;
         mName = name;
         mVirtualDevice = virtualDevice;
         mToken = token;
+    }
+
+    private VirtualSensor(Parcel parcel) {
+        mHandle = parcel.readInt();
+        mType = parcel.readInt();
+        mName = parcel.readString8();
+        mVirtualDevice = IVirtualDevice.Stub.asInterface(parcel.readStrongBinder());
+        mToken = parcel.readStrongBinder();
+    }
+
+    /**
+     * Returns the unique handle of the sensor.
+     *
+     * @hide
+     */
+    public int getHandle() {
+        return mHandle;
     }
 
     /**
@@ -87,6 +90,32 @@ public class VirtualSensor {
     }
 
     /**
+     * Returns the identifier of the
+     * {@link android.companion.virtual.VirtualDeviceManager.VirtualDevice} this sensor belongs to.
+     */
+    public int getDeviceId() {
+        try {
+            return mVirtualDevice.getDeviceId();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
+        parcel.writeInt(mHandle);
+        parcel.writeInt(mType);
+        parcel.writeString8(mName);
+        parcel.writeStrongBinder(mVirtualDevice.asBinder());
+        parcel.writeStrongBinder(mToken);
+    }
+
+    /**
      * Send a sensor event to the system.
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
@@ -97,4 +126,16 @@ public class VirtualSensor {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    @NonNull
+    public static final Parcelable.Creator<VirtualSensor> CREATOR =
+            new Parcelable.Creator<VirtualSensor>() {
+                public VirtualSensor createFromParcel(Parcel in) {
+                    return new VirtualSensor(in);
+                }
+
+                public VirtualSensor[] newArray(int size) {
+                    return new VirtualSensor[size];
+                }
+            };
 }

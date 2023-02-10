@@ -35,7 +35,6 @@ import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChan
 import android.companion.virtual.camera.VirtualCameraDevice;
 import android.companion.virtual.camera.VirtualCameraInput;
 import android.companion.virtual.sensor.VirtualSensor;
-import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -428,8 +427,6 @@ public final class VirtualDeviceManager {
                 };
         @Nullable
         private VirtualCameraDevice mVirtualCameraDevice;
-        @NonNull
-        private final List<VirtualSensor> mVirtualSensors = new ArrayList<>();
         @Nullable
         private VirtualAudioDevice mVirtualAudioDevice;
 
@@ -448,10 +445,6 @@ public final class VirtualDeviceManager {
                     params,
                     mActivityListenerBinder,
                     mSoundEffectListener);
-            final List<VirtualSensorConfig> virtualSensorConfigs = params.getVirtualSensorConfigs();
-            for (int i = 0; i < virtualSensorConfigs.size(); ++i) {
-                mVirtualSensors.add(createVirtualSensor(virtualSensorConfigs.get(i)));
-            }
         }
 
         /**
@@ -478,20 +471,19 @@ public final class VirtualDeviceManager {
         }
 
         /**
-         * Returns this device's sensor with the given type and name, if any.
+         * Returns this device's sensors.
          *
          * @see VirtualDeviceParams.Builder#addVirtualSensorConfig
          *
-         * @param type The type of the sensor.
-         * @param name The name of the sensor.
-         * @return The matching sensor if found, {@code null} otherwise.
+         * @return A list of all sensors for this device, or an empty list if no sensors exist.
          */
-        @Nullable
-        public VirtualSensor getVirtualSensor(int type, @NonNull String name) {
-            return mVirtualSensors.stream()
-                    .filter(sensor -> sensor.getType() == type && sensor.getName().equals(name))
-                    .findAny()
-                    .orElse(null);
+        @NonNull
+        public List<VirtualSensor> getVirtualSensorList() {
+            try {
+                return mVirtualDevice.getVirtualSensorList();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**
@@ -935,28 +927,6 @@ public final class VirtualDeviceManager {
                 // only be used for informational purposes, and not for identifying the display in
                 // code.
                 return "VirtualDevice_" + mVirtualDevice.getDeviceId();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        /**
-         * Creates a virtual sensor, capable of injecting sensor events into the system. Only for
-         * internal use, since device sensors must remain valid for the entire lifetime of the
-         * device.
-         *
-         * @param config The configuration of the sensor.
-         * @hide
-         */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-        @NonNull
-        public VirtualSensor createVirtualSensor(@NonNull VirtualSensorConfig config) {
-            Objects.requireNonNull(config);
-            try {
-                final IBinder token = new Binder(
-                        "android.hardware.sensor.VirtualSensor:" + config.getName());
-                mVirtualDevice.createVirtualSensor(token, config);
-                return new VirtualSensor(config.getType(), config.getName(), mVirtualDevice, token);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -58,7 +58,7 @@ public abstract class SensorManagerInternal {
      * @return The sensor handle.
      */
     public abstract int createRuntimeSensor(int deviceId, int type, @NonNull String name,
-            @NonNull String vendor, @NonNull RuntimeSensorStateChangeCallback callback);
+            @NonNull String vendor, @NonNull RuntimeSensorCallback callback);
 
     /**
      * Unregisters the sensor with the given handle from the framework.
@@ -95,11 +95,12 @@ public abstract class SensorManagerInternal {
      * {@link #createRuntimeSensor}, i.e. the dynamic sensors created via the dynamic sensor HAL are
      * not covered.
      */
-    public interface RuntimeSensorStateChangeCallback {
+    public interface RuntimeSensorCallback {
         /**
          * Invoked when the listeners of the runtime sensor have changed.
+         * Returns an error code if the invocation was unsuccessful, zero otherwise.
          */
-        void onStateChanged(boolean enabled, int samplingPeriodMicros,
+        int onConfigurationChanged(int handle, boolean enabled, int samplingPeriodMicros,
                 int batchReportLatencyMicros);
     }
 }
