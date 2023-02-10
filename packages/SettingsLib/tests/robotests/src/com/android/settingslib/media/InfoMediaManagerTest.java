@@ -289,42 +289,42 @@ public class InfoMediaManagerTest {
         when(mRouterManager.getRoutingSessions(TEST_PACKAGE_NAME)).thenReturn(routingSessionInfos);
         when(sessionInfo.getSelectedRoutes()).thenReturn(ImmutableList.of(TEST_ID));
 
-        setTransferableRoutesList();
+        setAvailableRoutesList();
 
         mInfoMediaManager.mRouterManager = mRouterManager;
         mInfoMediaManager.mMediaRouterCallback.onRouteListingPreferenceUpdated(TEST_PACKAGE_NAME,
                 routeListingPreference);
         mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
 
+        assertThat(mInfoMediaManager.mMediaDevices).hasSize(3);
         assertThat(mInfoMediaManager.mMediaDevices.get(0).getId()).isEqualTo(TEST_ID);
         assertThat(mInfoMediaManager.mMediaDevices.get(1).getId()).isEqualTo(TEST_ID_4);
         assertThat(mInfoMediaManager.mMediaDevices.get(1).isSuggestedDevice()).isTrue();
         assertThat(mInfoMediaManager.mMediaDevices.get(2).getId()).isEqualTo(TEST_ID_3);
-        assertThat(mInfoMediaManager.mMediaDevices).hasSize(3);
     }
 
-    private List<MediaRoute2Info> setTransferableRoutesList() {
-        final List<MediaRoute2Info> transferableRoutes = new ArrayList<>();
-        final MediaRoute2Info transferableInfo1 = mock(MediaRoute2Info.class);
-        when(transferableInfo1.getId()).thenReturn(TEST_ID_2);
-        when(transferableInfo1.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
-        when(transferableInfo1.getType()).thenReturn(TYPE_REMOTE_TV);
-        transferableRoutes.add(transferableInfo1);
+    private List<MediaRoute2Info> setAvailableRoutesList() {
+        final List<MediaRoute2Info> availableRoutes = new ArrayList<>();
+        final MediaRoute2Info availableInfo1 = mock(MediaRoute2Info.class);
+        when(availableInfo1.getId()).thenReturn(TEST_ID_2);
+        when(availableInfo1.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        when(availableInfo1.getType()).thenReturn(TYPE_REMOTE_TV);
+        availableRoutes.add(availableInfo1);
 
-        final MediaRoute2Info transferableInfo2 = mock(MediaRoute2Info.class);
-        when(transferableInfo2.getId()).thenReturn(TEST_ID_3);
-        when(transferableInfo2.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
-        transferableRoutes.add(transferableInfo2);
+        final MediaRoute2Info availableInfo2 = mock(MediaRoute2Info.class);
+        when(availableInfo2.getId()).thenReturn(TEST_ID_3);
+        when(availableInfo2.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        availableRoutes.add(availableInfo2);
 
-        final MediaRoute2Info transferableInfo3 = mock(MediaRoute2Info.class);
-        when(transferableInfo3.getId()).thenReturn(TEST_ID_4);
-        when(transferableInfo3.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
-        transferableRoutes.add(transferableInfo3);
+        final MediaRoute2Info availableInfo3 = mock(MediaRoute2Info.class);
+        when(availableInfo3.getId()).thenReturn(TEST_ID_4);
+        when(availableInfo3.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+        availableRoutes.add(availableInfo3);
 
-        when(mRouterManager.getTransferableRoutes(TEST_PACKAGE_NAME)).thenReturn(
-                transferableRoutes);
+        when(mRouterManager.getAvailableRoutes(TEST_PACKAGE_NAME)).thenReturn(
+                availableRoutes);
 
-        return transferableRoutes;
+        return availableRoutes;
     }
 
     @Test
