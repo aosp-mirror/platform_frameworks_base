@@ -308,7 +308,6 @@ public final class WindowContainerTransaction implements Parcelable {
     /**
      * Resizes a container by providing a bounds in its parent coordinate.
      * This is only used by {@link TaskFragmentOrganizer}.
-     * @hide
      */
     @NonNull
     public WindowContainerTransaction setRelativeBounds(

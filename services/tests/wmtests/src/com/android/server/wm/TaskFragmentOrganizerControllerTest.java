@@ -511,7 +511,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     public void testApplyTransaction_enforceConfigurationChangeOnOrganizedTaskFragment() {
         // Throw exception if the transaction is trying to change a window that is not organized by
         // the organizer.
-        mTransaction.setBounds(mFragmentWindowToken, new Rect(0, 0, 100, 100));
+        mTransaction.setRelativeBounds(mFragmentWindowToken, new Rect(0, 0, 100, 100));
 
         assertApplyTransactionDisallowed(mTransaction);
 
@@ -1154,10 +1154,12 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         setupTaskFragmentInPip();
         spyOn(mWindowOrganizerController);
 
-        // Set bounds is ignored on a TaskFragment that is in a PIP Task.
-        mTransaction.setBounds(mFragmentWindowToken, new Rect(0, 0, 100, 100));
+        // Set relative bounds is ignored on a TaskFragment that is in a PIP Task.
+        mTransaction.setRelativeBounds(mFragmentWindowToken, new Rect(0, 0, 100, 100));
 
-        verify(mTaskFragment, never()).setBounds(any());
+        assertApplyTransactionAllowed(mTransaction);
+
+        verify(mTaskFragment, never()).setRelativeEmbeddedBounds(any());
     }
 
     @Test
@@ -1368,7 +1370,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     /**
-     * For config change to untrusted embedded TaskFragment, we only allow bounds change within
+     * For config change to untrusted embedded TaskFragment, the bounds should be always within
      * its parent bounds.
      */
     @Test
@@ -1378,51 +1380,17 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         doReturn(false).when(mTaskFragment).isAllowedToBeEmbeddedInTrustedMode();
         final Task task = createTask(mDisplayContent);
         final Rect taskBounds = new Rect(task.getBounds());
-        final Rect taskAppBounds = new Rect(task.getWindowConfiguration().getAppBounds());
-        final int taskScreenWidthDp = task.getConfiguration().screenWidthDp;
-        final int taskScreenHeightDp = task.getConfiguration().screenHeightDp;
-        final int taskSmallestScreenWidthDp = task.getConfiguration().smallestScreenWidthDp;
         task.addChild(mTaskFragment, POSITION_TOP);
 
-        // Throw exception if the transaction is trying to change bounds of an untrusted outside of
-        // its parent's.
-
-        // setBounds
+        // When set a relative bounds outside of its parent's, it is allowed, but the actual
+        // TaskFragment bounds will be updated to be fit the parent's bounds.
         final Rect tfBounds = new Rect(taskBounds);
         tfBounds.right++;
-        mTransaction.setBounds(mFragmentWindowToken, tfBounds);
-        assertApplyTransactionDisallowed(mTransaction);
-
-        mTransaction.setBounds(mFragmentWindowToken, taskBounds);
+        mTransaction.setRelativeBounds(mFragmentWindowToken, tfBounds);
         assertApplyTransactionAllowed(mTransaction);
 
-        // setAppBounds
-        final Rect tfAppBounds = new Rect(taskAppBounds);
-        tfAppBounds.right++;
-        mTransaction.setAppBounds(mFragmentWindowToken, tfAppBounds);
-        assertApplyTransactionDisallowed(mTransaction);
-
-        mTransaction.setAppBounds(mFragmentWindowToken, taskAppBounds);
-        assertApplyTransactionAllowed(mTransaction);
-
-        // setScreenSizeDp
-        mTransaction.setScreenSizeDp(mFragmentWindowToken, taskScreenWidthDp + 1,
-                taskScreenHeightDp + 1);
-        assertApplyTransactionDisallowed(mTransaction);
-
-        mTransaction.setScreenSizeDp(mFragmentWindowToken, taskScreenWidthDp, taskScreenHeightDp);
-        assertApplyTransactionAllowed(mTransaction);
-
-        // setSmallestScreenWidthDp
-        mTransaction.setSmallestScreenWidthDp(mFragmentWindowToken, taskSmallestScreenWidthDp + 1);
-        assertApplyTransactionDisallowed(mTransaction);
-
-        mTransaction.setSmallestScreenWidthDp(mFragmentWindowToken, taskSmallestScreenWidthDp);
-        assertApplyTransactionAllowed(mTransaction);
-
-        // Any of the change mask is not allowed.
-        mTransaction.setFocusable(mFragmentWindowToken, false);
-        assertApplyTransactionDisallowed(mTransaction);
+        assertEquals(tfBounds, mTaskFragment.getRelativeEmbeddedBounds());
+        assertEquals(taskBounds, mTaskFragment.getBounds());
     }
 
     // TODO(b/232871351): add test for minimum dimension violation in startActivityInTaskFragment
@@ -1454,7 +1422,7 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testMinDimensionViolation_SetBounds() {
+    public void testMinDimensionViolation_setRelativeBounds() {
         final Task task = createTask(mDisplayContent);
         mTaskFragment = new TaskFragmentBuilder(mAtm)
                 .setParentTask(task)
@@ -1472,12 +1440,14 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
 
         // Shrink the TaskFragment to mTaskFragBounds to make its bounds smaller than activity's
         // minimum dimensions.
-        mTransaction.setBounds(mTaskFragment.mRemoteToken.toWindowContainerToken(), mTaskFragBounds)
+        mTransaction.setRelativeBounds(mTaskFragment.mRemoteToken.toWindowContainerToken(),
+                        mTaskFragBounds)
                 .setErrorCallbackToken(mErrorToken);
         assertApplyTransactionAllowed(mTransaction);
 
-        assertWithMessage("setBounds must not be performed.")
-                .that(mTaskFragment.getBounds()).isEqualTo(task.getBounds());
+        // When the requested bounds do not satisfy the min dimension, it will be reset to empty.
+        assertWithMessage("setRelativeBounds must not be performed.")
+                .that(mTaskFragment.getRelativeEmbeddedBounds()).isEqualTo(new Rect());
     }
 
     @Test

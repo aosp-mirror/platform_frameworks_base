@@ -38,8 +38,8 @@ import java.util.Objects;
 public final class TaskFragmentOperation implements Parcelable {
 
     /**
-     * Type for tracking other {@link WindowContainerTransaction} to TaskFragment that is not set
-     * through {@link TaskFragmentOperation}, such as {@link WindowContainerTransaction#setBounds}.
+     * Type for tracking other unknown TaskFragment operation that is not set through
+     * {@link TaskFragmentOperation}, such as invalid request.
      */
     public static final int OP_TYPE_UNKNOWN = -1;
 
@@ -70,6 +70,9 @@ public final class TaskFragmentOperation implements Parcelable {
     /** Sets the {@link TaskFragmentAnimationParams} for the given TaskFragment. */
     public static final int OP_TYPE_SET_ANIMATION_PARAMS = 8;
 
+    /** Sets the relative bounds with {@link WindowContainerTransaction#setRelativeBounds}. */
+    public static final int OP_TYPE_SET_RELATIVE_BOUNDS = 9;
+
     @IntDef(prefix = { "OP_TYPE_" }, value = {
             OP_TYPE_UNKNOWN,
             OP_TYPE_CREATE_TASK_FRAGMENT,
@@ -80,7 +83,8 @@ public final class TaskFragmentOperation implements Parcelable {
             OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS,
             OP_TYPE_REQUEST_FOCUS_ON_TASK_FRAGMENT,
             OP_TYPE_SET_COMPANION_TASK_FRAGMENT,
-            OP_TYPE_SET_ANIMATION_PARAMS
+            OP_TYPE_SET_ANIMATION_PARAMS,
+            OP_TYPE_SET_RELATIVE_BOUNDS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OperationType {}
