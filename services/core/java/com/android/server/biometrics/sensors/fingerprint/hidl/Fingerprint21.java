@@ -741,14 +741,12 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
-            final List<Fingerprint> enrolledList = getEnrolledFingerprints(
-                    mSensorProperties.sensorId, userId);
             final FingerprintInternalCleanupClient client = new FingerprintInternalCleanupClient(
                     mContext, mLazyDaemon, userId, mContext.getOpPackageName(),
                     mSensorProperties.sensorId,
                     createLogger(BiometricsProtoEnums.ACTION_ENUMERATE,
                             BiometricsProtoEnums.CLIENT_UNKNOWN),
-                    mBiometricContext, enrolledList,
+                    mBiometricContext,
                     FingerprintUtils.getLegacyInstance(mSensorId), mAuthenticatorIds);
             mScheduler.scheduleClientMonitor(client, callback);
         });

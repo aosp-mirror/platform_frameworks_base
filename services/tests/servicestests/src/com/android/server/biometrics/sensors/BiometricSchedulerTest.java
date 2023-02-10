@@ -39,7 +39,9 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricService;
+import android.hardware.fingerprint.Fingerprint;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -48,6 +50,7 @@ import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
+import android.util.Slog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,6 +61,8 @@ import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.nano.BiometricSchedulerProto;
 import com.android.server.biometrics.nano.BiometricsProto;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
+import com.android.server.biometrics.sensors.fingerprint.aidl.AidlSession;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -67,6 +72,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 @Presubmit
@@ -78,6 +86,9 @@ public class BiometricSchedulerTest {
     private static final String TAG = "BiometricSchedulerTest";
     private static final int TEST_SENSOR_ID = 1;
     private static final int LOG_NUM_RECENT_OPERATIONS = 2;
+    private static final Fingerprint TEST_FINGERPRINT = new Fingerprint("" /* name */,
+            1 /* fingerId */, TEST_SENSOR_ID);
+
     @Rule
     public final TestableContext mContext = new TestableContext(
             InstrumentationRegistry.getContext(), null);
@@ -673,6 +684,56 @@ public class BiometricSchedulerTest {
 
     }
 
+    @Test
+    public void testTwoInternalCleanupOps_withFirstFavorHalEnrollment() throws Exception {
+        final String owner = "test.owner";
+        final int userId = 1;
+        final Supplier<Object> daemon = () -> mock(AidlSession.class);
+        final FingerprintUtils utils = mock(FingerprintUtils.class);
+        final Map<Integer, Long> authenticatorIds = new HashMap<>();
+        final ClientMonitorCallback callback0 = mock(ClientMonitorCallback.class);
+        final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
+        final ClientMonitorCallback callback2 = mock(ClientMonitorCallback.class);
+
+        final TestInternalCleanupClient client1 = new
+                TestInternalCleanupClient(mContext, daemon, userId,
+                owner, TEST_SENSOR_ID, mock(BiometricLogger.class),
+                mBiometricContext, utils, authenticatorIds);
+        final TestInternalCleanupClient client2 = new
+                TestInternalCleanupClient(mContext, daemon, userId,
+                owner, TEST_SENSOR_ID, mock(BiometricLogger.class),
+                mBiometricContext, utils, authenticatorIds);
+
+        //add initial start client to scheduler, so later clients will be on pending operation queue
+        final TestHalClientMonitor startClient = new TestHalClientMonitor(mContext, mToken,
+                daemon);
+        mScheduler.scheduleClientMonitor(startClient, callback0);
+
+        //add first cleanup client which favors enrollments from HAL
+        client1.setFavorHalEnrollments();
+        mScheduler.scheduleClientMonitor(client1, callback1);
+        assertEquals(1, mScheduler.mPendingOperations.size());
+
+        when(utils.getBiometricsForUser(mContext, userId)).thenAnswer(i ->
+                new ArrayList<>(client1.getFingerprints()));
+
+        //add second cleanup client
+        mScheduler.scheduleClientMonitor(client2, callback2);
+
+        //finish the start client, so other pending clients are processed
+        startClient.getCallback().onClientFinished(startClient, true);
+
+        waitForIdle();
+
+        assertTrue(client1.isAlreadyDone());
+        assertTrue(client2.isAlreadyDone());
+        assertNull(mScheduler.mCurrentOperation);
+        verify(utils, never()).removeBiometricForUser(mContext, userId,
+                TEST_FINGERPRINT.getBiometricId());
+        assertEquals(1,  client1.getFingerprints().size());
+    }
+
+
     private BiometricSchedulerProto getDump(boolean clearSchedulerBuffer) throws Exception {
         return BiometricSchedulerProto.parseFrom(mScheduler.dumpProtoState(clearSchedulerBuffer));
     }
@@ -833,6 +894,92 @@ public class BiometricSchedulerTest {
         public void destroy() {
             super.destroy();
             mDestroyed = true;
+        }
+    }
+
+    private static class TestInternalEnumerateClient extends InternalEnumerateClient<Object> {
+        private static final String TAG = "TestInternalEnumerateClient";
+
+
+        protected TestInternalEnumerateClient(@NonNull Context context,
+                @NonNull Supplier<Object> lazyDaemon, @NonNull IBinder token, int userId,
+                @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
+                @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
+                @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+            super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
+                    logger, biometricContext);
+        }
+
+        @Override
+        protected void startHalOperation() {
+            Slog.d(TAG, "TestInternalEnumerateClient#startHalOperation");
+            onEnumerationResult(TEST_FINGERPRINT, 0 /* remaining */);
+        }
+    }
+
+    private static class TestRemovalClient extends RemovalClient<Fingerprint, Object> {
+        private static final String TAG = "TestRemovalClient";
+
+        TestRemovalClient(@NonNull Context context,
+                @NonNull Supplier<Object> lazyDaemon, @NonNull IBinder token,
+                @Nullable ClientMonitorCallbackConverter listener, int[] biometricIds, int userId,
+                @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
+                @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+                @NonNull Map<Integer, Long> authenticatorIds) {
+            super(context, lazyDaemon, token, listener, userId, owner, utils, sensorId,
+                    logger, biometricContext, authenticatorIds);
+        }
+
+        @Override
+        protected void startHalOperation() {
+            Slog.d(TAG, "Removing template from hw");
+            onRemoved(TEST_FINGERPRINT, 0);
+        }
+    }
+
+    private static class TestInternalCleanupClient extends
+            InternalCleanupClient<Fingerprint, Object> {
+        private List<Fingerprint> mFingerprints = new ArrayList<>();
+
+        TestInternalCleanupClient(@NonNull Context context,
+                @NonNull Supplier<Object> lazyDaemon,
+                int userId, @NonNull String owner, int sensorId,
+                @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+                @NonNull FingerprintUtils utils, @NonNull Map<Integer, Long> authenticatorIds) {
+            super(context, lazyDaemon, userId, owner, sensorId, logger, biometricContext,
+                    utils, authenticatorIds);
+        }
+
+        @Override
+        protected InternalEnumerateClient<Object> getEnumerateClient(Context context,
+                Supplier<Object> lazyDaemon, IBinder token, int userId, String owner,
+                List<Fingerprint> enrolledList, BiometricUtils<Fingerprint> utils, int sensorId,
+                @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+            return new TestInternalEnumerateClient(context, lazyDaemon, token, userId, owner,
+                    enrolledList, utils, sensorId,
+                    logger.swapAction(context, BiometricsProtoEnums.ACTION_ENUMERATE),
+                    biometricContext);
+        }
+
+        @Override
+        protected RemovalClient<Fingerprint, Object> getRemovalClient(Context context,
+                Supplier<Object> lazyDaemon, IBinder token, int biometricId, int userId,
+                String owner, BiometricUtils<Fingerprint> utils, int sensorId,
+                @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+                Map<Integer, Long> authenticatorIds) {
+            return new TestRemovalClient(context, lazyDaemon, token, null,
+                    new int[]{biometricId}, userId, owner, utils, sensorId, logger,
+                    biometricContext, authenticatorIds);
+        }
+
+        @Override
+        protected void onAddUnknownTemplate(int userId,
+                @NonNull BiometricAuthenticator.Identifier identifier) {
+            mFingerprints.add((Fingerprint) identifier);
+        }
+
+        public List<Fingerprint> getFingerprints() {
+            return mFingerprints;
         }
     }
 }
