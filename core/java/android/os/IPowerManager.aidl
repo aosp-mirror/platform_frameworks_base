@@ -48,6 +48,8 @@ interface IPowerManager
     void wakeUp(long time, int reason, String details, String opPackageName);
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void goToSleep(long time, int reason, int flags);
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    void goToSleepWithDisplayId(int displayId, long time, int reason, int flags);
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void nap(long time);
     float getBrightnessConstraint(int constraint);
