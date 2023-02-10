@@ -253,7 +253,8 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
      */
     void showDesktopApps() {
         // Bring apps to front, ignoring their visibility status to always ensure they are on top.
-        WindowContainerTransaction wct = bringDesktopAppsToFront(true /* ignoreVisibility */);
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        bringDesktopAppsToFront(wct);
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTransitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */);
@@ -267,9 +268,7 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         return mDesktopModeTaskRepository.getVisibleTaskCount();
     }
 
-    @NonNull
-    private WindowContainerTransaction bringDesktopAppsToFront(boolean force) {
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
+    private void bringDesktopAppsToFront(WindowContainerTransaction wct) {
         final ArraySet<Integer> activeTasks = mDesktopModeTaskRepository.getActiveTasks();
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "bringDesktopAppsToFront: tasks=%s", activeTasks.size());
 
@@ -282,18 +281,11 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         }
 
         if (taskInfos.isEmpty()) {
-            return wct;
+            return;
         }
 
-        if (!force) {
-            final boolean allActiveTasksAreVisible = taskInfos.stream()
-                    .allMatch(info -> mDesktopModeTaskRepository.isVisibleTask(info.taskId));
-            if (allActiveTasksAreVisible) {
-                ProtoLog.d(WM_SHELL_DESKTOP_MODE,
-                        "bringDesktopAppsToFront: active tasks are already in front, skipping.");
-                return wct;
-            }
-        }
+        moveHomeTaskToFront(wct);
+
         ProtoLog.d(WM_SHELL_DESKTOP_MODE,
                 "bringDesktopAppsToFront: reordering all active tasks to the front");
         final List<Integer> allTasksInZOrder =
@@ -304,7 +296,15 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         for (RunningTaskInfo task : taskInfos) {
             wct.reorder(task.token, true);
         }
-        return wct;
+    }
+
+    private void moveHomeTaskToFront(WindowContainerTransaction wct) {
+        for (RunningTaskInfo task : mShellTaskOrganizer.getRunningTasks(mContext.getDisplayId())) {
+            if (task.getActivityType() == ACTIVITY_TYPE_HOME) {
+                wct.reorder(task.token, true /* onTop */);
+                return;
+            }
+        }
     }
 
     /**
@@ -363,7 +363,7 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         if (wct == null) {
             wct = new WindowContainerTransaction();
         }
-        wct.merge(bringDesktopAppsToFront(false /* ignoreVisibility */), true /* transfer */);
+        bringDesktopAppsToFront(wct);
         wct.reorder(request.getTriggerTask().token, true /* onTop */);
 
         return wct;

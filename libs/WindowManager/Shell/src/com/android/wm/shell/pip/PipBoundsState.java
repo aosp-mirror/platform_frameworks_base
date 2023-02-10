@@ -311,10 +311,10 @@ public class PipBoundsState {
         mDisplayLayout.set(displayLayout);
     }
 
-    /** Get the display layout. */
+    /** Get a copy of the display layout. */
     @NonNull
     public DisplayLayout getDisplayLayout() {
-        return mDisplayLayout;
+        return new DisplayLayout(mDisplayLayout);
     }
 
     @VisibleForTesting

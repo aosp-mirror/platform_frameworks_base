@@ -8630,6 +8630,8 @@ public final class ViewRootImpl implements ViewParent,
 
         mInsetsController.dump(prefix, writer);
 
+        mOnBackInvokedDispatcher.dump(prefix, writer);
+
         writer.println(prefix + "View Hierarchy:");
         dumpViewHierarchy(innerPrefix, writer, mView);
     }

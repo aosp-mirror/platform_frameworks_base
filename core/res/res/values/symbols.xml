@@ -3304,7 +3304,10 @@
   <java-symbol type="id" name="notification_action_list_margin_target" />
   <java-symbol type="dimen" name="notification_actions_padding_start"/>
   <java-symbol type="dimen" name="notification_actions_collapsed_priority_width"/>
+  <!--prefer to use disabled content and surface alpha values for disabled actions-->
   <java-symbol type="dimen" name="notification_action_disabled_alpha" />
+  <java-symbol type="dimen" name="notification_action_disabled_content_alpha" />
+  <java-symbol type="dimen" name="notification_action_disabled_container_alpha" />
   <java-symbol type="id" name="tag_margin_end_when_icon_visible" />
   <java-symbol type="id" name="tag_margin_end_when_icon_gone" />
   <java-symbol type="id" name="tag_uses_right_icon_drawable" />
@@ -3356,6 +3359,7 @@
   <java-symbol type="string" name="unsupported_display_size_message" />
 
   <java-symbol type="layout" name="notification_material_action_emphasized" />
+  <java-symbol type="layout" name="notification_material_action_emphasized_tombstone" />
 
   <!-- Package name for the device provisioning package -->
   <java-symbol type="string" name="config_deviceProvisioningPackage" />

@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -119,6 +120,15 @@ constructor(
                 scope,
                 SharingStarted.WhileSubscribed(),
                 subscriptions.value.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
+            )
+
+    override val activeMobileDataRepository: StateFlow<MobileConnectionRepository?> =
+        activeMobileDataSubscriptionId
+            .map { getRepoForSubId(it) }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                getRepoForSubId(activeMobileDataSubscriptionId.value)
             )
 
     // TODO(b/261029387): consider adding a demo command for this
@@ -240,7 +250,7 @@ constructor(
 
         // This is always true here, because we split out disabled states at the data-source level
         connection.dataEnabled.value = true
-        connection.networkName.value = NetworkNameModel.Derived(state.name)
+        connection.networkName.value = NetworkNameModel.IntentDerived(state.name)
 
         connection.cdmaRoaming.value = state.roaming
         connection.connectionInfo.value = state.toMobileConnectionModel()
@@ -258,10 +268,13 @@ constructor(
         maybeCreateSubscription(subId)
         carrierMergedSubId = subId
 
+        // TODO(b/261029387): until we have a command, use the most recent subId
+        defaultDataSubId.value = subId
+
         val connection = getRepoForSubId(subId)
         // This is always true here, because we split out disabled states at the data-source level
         connection.dataEnabled.value = true
-        connection.networkName.value = NetworkNameModel.Derived(CARRIER_MERGED_NAME)
+        connection.networkName.value = NetworkNameModel.IntentDerived(CARRIER_MERGED_NAME)
         connection.numberOfLevels.value = event.numberOfLevels
         connection.cdmaRoaming.value = false
         connection.connectionInfo.value = event.toMobileConnectionModel()
@@ -336,7 +349,10 @@ constructor(
     }
 
     private fun FakeWifiEventModel.CarrierMerged.toMobileConnectionModel(): MobileConnectionModel {
-        return createCarrierMergedConnectionModel(this.level)
+        return createCarrierMergedConnectionModel(
+            this.level,
+            activity.toMobileDataActivityModel(),
+        )
     }
 
     private fun SignalIcon.MobileIconGroup?.toResolvedNetworkType(): ResolvedNetworkType {
@@ -371,5 +387,5 @@ class DemoMobileConnectionRepository(
 
     override val cdmaRoaming = MutableStateFlow(false)
 
-    override val networkName = MutableStateFlow(NetworkNameModel.Derived("demo network"))
+    override val networkName = MutableStateFlow(NetworkNameModel.IntentDerived("demo network"))
 }
