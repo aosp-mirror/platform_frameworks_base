@@ -99,6 +99,7 @@ import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.clipboardoverlay.ClipboardOverlayController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
 import com.android.systemui.settings.DisplayTracker;
@@ -480,7 +481,7 @@ public class ScreenshotController {
         }
         mScreenshotView.setScreenshot(screenshot);
 
-        if (screenshot.getTaskId() >= 0) {
+        if (mFlags.isEnabled(Flags.SCREENSHOT_METADATA) && screenshot.getTaskId() >= 0) {
             mAssistContentRequester.requestAssistContent(screenshot.getTaskId(),
                     new AssistContentRequester.Callback() {
                         @Override
