@@ -1462,7 +1462,7 @@ public class RecoverableKeyStoreManagerTest {
         return SecureBox.encrypt(
               publicKey,
               /* sharedSecret= */ null,
-              RecoverableKeyStoreManager.ENCRYPTED_REMOTE_CREDENTIALS_HEADER,
+              LockPatternUtils.ENCRYPTED_REMOTE_CREDENTIALS_HEADER,
               credentials);
     }
 

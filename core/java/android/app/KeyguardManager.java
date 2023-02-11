@@ -31,6 +31,7 @@ import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.PasswordMetrics;
 import android.app.trust.ITrustManager;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -109,6 +110,13 @@ public class KeyguardManager {
             "android.app.action.CONFIRM_FRP_CREDENTIAL";
 
     /**
+     * Intent used to prompt user to to validate the credentials of a remote device.
+     * @hide
+     */
+    public static final String ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL =
+            "android.app.action.CONFIRM_REMOTE_DEVICE_CREDENTIAL";
+
+    /**
      * A CharSequence dialog title to show to the user when used with a
      * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL}.
      * @hide
@@ -131,9 +139,26 @@ public class KeyguardManager {
             "android.app.extra.ALTERNATE_BUTTON_LABEL";
 
     /**
+     * A CharSequence label for the checkbox when used with
+     * {@link #ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL}
+     * @hide
+     */
+    public static final String EXTRA_CHECKBOX_LABEL = "android.app.extra.CHECKBOX_LABEL";
+
+    /**
+     * A {@link StartLockscreenValidationRequest} extra to be sent along with
+     * {@link #ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL} containing the data needed to prompt for
+     * a remote device's lock screen.
+     * @hide
+     */
+    public static final String EXTRA_START_LOCKSCREEN_VALIDATION_REQUEST =
+            "android.app.extra.START_LOCKSCREEN_VALIDATION_REQUEST";
+
+    /**
      * Result code returned by the activity started by
-     * {@link #createConfirmFactoryResetCredentialIntent} indicating that the user clicked the
-     * alternate button.
+     * {@link #createConfirmFactoryResetCredentialIntent} or
+     * {@link #createConfirmDeviceCredentialForRemoteValidationIntent}
+     * indicating that the user clicked the alternate button.
      *
      * @hide
      */
@@ -324,6 +349,47 @@ public class KeyguardManager {
         intent.putExtra(EXTRA_TITLE, title);
         intent.putExtra(EXTRA_DESCRIPTION, description);
         intent.putExtra(EXTRA_ALTERNATE_BUTTON_LABEL, alternateButtonLabel);
+
+        // explicitly set the package for security
+        intent.setPackage(getSettingsPackageForIntent(intent));
+
+        return intent;
+    }
+
+    /**
+     * Get an Intent to launch an activity to prompt the user to confirm the
+     * credentials (pin, pattern or password) of a remote device.
+     * @param startLockscreenValidationRequest contains information necessary to start remote device
+     *                                         credential validation.
+     * @param remoteLockscreenValidationServiceComponent
+     *          the {@link ComponentName} of the implementation of
+     *          {@link android.service.remotelockscreenvalidation.RemoteLockscreenValidationService}
+     * @param checkboxLabel if not empty, a checkbox is provided with the given label. When checked,
+     *                      the validated remote device credential will be set as the device lock of
+     *                      the current device.
+     * @param alternateButtonLabel if not empty, a button is provided with the given label. Upon
+     *                             clicking this button, the activity returns
+     *                             {@link #RESULT_ALTERNATE}.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CHECK_REMOTE_LOCKSCREEN)
+    @NonNull
+    public Intent createConfirmDeviceCredentialForRemoteValidationIntent(
+            @NonNull StartLockscreenValidationRequest startLockscreenValidationRequest,
+            @NonNull ComponentName remoteLockscreenValidationServiceComponent,
+            @Nullable CharSequence title,
+            @Nullable CharSequence description,
+            @Nullable CharSequence checkboxLabel,
+            @Nullable CharSequence alternateButtonLabel) {
+        Intent intent = new Intent(ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL)
+                .putExtra(
+                        EXTRA_START_LOCKSCREEN_VALIDATION_REQUEST, startLockscreenValidationRequest)
+                .putExtra(Intent.EXTRA_COMPONENT_NAME, remoteLockscreenValidationServiceComponent)
+                .putExtra(EXTRA_TITLE, title)
+                .putExtra(EXTRA_DESCRIPTION, description)
+                .putExtra(EXTRA_CHECKBOX_LABEL, checkboxLabel)
+                .putExtra(EXTRA_ALTERNATE_BUTTON_LABEL, alternateButtonLabel);
 
         // explicitly set the package for security
         intent.setPackage(getSettingsPackageForIntent(intent));
