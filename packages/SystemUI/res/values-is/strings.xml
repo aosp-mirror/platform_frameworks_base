@@ -91,15 +91,11 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Neðri mörk <xliff:g id="PERCENT">%1$d</xliff:g> prósent"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Vinstri mörk <xliff:g id="PERCENT">%1$d</xliff:g> prósent"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Hægri mörk <xliff:g id="PERCENT">%1$d</xliff:g> prósent"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Vistað á vinnusniði í <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Skrár"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> greindi skjámyndina."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> og önnur opin forrit greindu skjámyndina."</string>
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Bæta við glósu"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skjáupptaka"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Vinnur úr skjáupptöku"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Áframhaldandi tilkynning fyrir skjáupptökulotu"</string>
@@ -893,6 +889,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Eitthvað fór úrskeiðis. Reyndu aftur."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Hleður"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"spjaldtölva"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Óvirkt, athugaðu forrit"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Fannst ekki"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Stýring er ekki tiltæk"</string>
@@ -929,6 +929,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Ekki hægt að senda út"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Ekki hægt að vista. Reyndu aftur."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Ekki hægt að vista."</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Útgáfunúmer smíðar"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Útgáfunúmer smíðar afritað á klippiborð."</string>
     <string name="basic_status" msgid="2315371112182658176">"Opna samtal"</string>
@@ -1029,8 +1033,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Slökkt er á myndavél"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Slökkt er á hljóðnema"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Slökkt á myndavél og hljóðnema"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Hjálparinn er að hlusta"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# tilkynning}one{# tilkynning}other{# tilkynningar}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Glósugerð"</string>
@@ -1046,10 +1049,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Leyfa aðgang í eitt skipti"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Ekki leyfa"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Annálar tækisins skrá það sem gerist í tækinu. Forrit geta notað þessa annála til að finna og lagfæra vandamál.\n\nTilteknir annálar innihalda viðkvæmar upplýsingar og því skaltu einungis veita forritum sem þú treystir aðgang að öllum annálum tækisins. \n\nEf þú veitir þessu forriti ekki aðgang að öllum annálum tækisins hefur það áfram aðgang að eigin annálum. Framleiðandi tækisins getur þó hugsanlega opnað tiltekna annála eða upplýsingar í tækinu."</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Nánar"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Nánar á <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Opna <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Forritið er uppsett"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Að minnsta kosti einu korti var bætt við Veski"</string>

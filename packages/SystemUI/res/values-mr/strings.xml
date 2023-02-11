@@ -95,8 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"फाइल"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ने हा स्क्रीनशॉट डिटेक्ट केला."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> आणि उघडलेल्या इतर अ‍ॅप्सनी हा स्क्रीनशॉट डिटेक्ट केला."</string>
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"टीप जोडा"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रेकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रेकॉर्डिंग प्रोसेस सुरू"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रेकॉर्ड सत्रासाठी सुरू असलेली सूचना"</string>
@@ -890,6 +889,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"काहीतरी चूक झाली. पुन्हा प्रयत्न करा."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"लोड करत आहे"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"टॅबलेट"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"आढळले नाही"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"नियंत्रण उपलब्ध नाही"</string>
@@ -926,6 +929,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ब्रॉडकास्ट करू शकत नाही"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"सेव्ह करू शकत नाही. पुन्हा प्रयत्न करा."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"सेव्ह करू शकत नाही."</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"बिल्ड नंबर"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"बिल्ड नंबर क्लिपबोर्डवर कॉपी केला."</string>
     <string name="basic_status" msgid="2315371112182658176">"संभाषण उघडा"</string>
@@ -1026,8 +1033,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"कॅमेरा बंद आहे"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"माइक बंद आहे"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"कॅमेरा आणि माइक बंद आहेत"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant ऐकत आहे"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# सूचना}other{# सूचना}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"नोटटेकिंग"</string>
@@ -1043,10 +1049,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"एक वेळ अ‍ॅक्सेसची अनुमती द्या"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"अनुमती देऊ नका"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"तुमच्या डिव्हाइसवर काय होते ते डिव्हाइस लॉग रेकॉर्ड करते. समस्या शोधण्यासाठी आणि त्यांचे निराकरण करण्यासाठी ॲप्स हे लॉग वापरू शकतात.\n\nकाही लॉगमध्ये संवेदनशील माहिती असू शकते, त्यामुळे फक्त तुमचा विश्वास असलेल्या ॲप्सना सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती द्या. \n\nतुम्ही या ॲपला सर्व डिव्हाइस लॉग अ‍ॅक्सेस करण्याची अनुमती न दिल्यास, ते तरीही त्याचा स्वतःचा लॉग अ‍ॅक्सेस करू शकते. तुमच्या डिव्हाइसचा उत्पादक तरीही काही लॉग किंवा तुमच्या डिव्हाइसवरील माहिती अ‍ॅक्सेस करू शकतो."</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"अधिक जाणून घ्या"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g> येथे अधिक जाणून घ्या"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> उघडा"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• अ‍ॅप सेट करणे"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet मध्ये किमान एक कार्ड जोडणे"</string>

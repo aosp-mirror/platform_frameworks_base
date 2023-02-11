@@ -95,8 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"檔案"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"「<xliff:g id="APPNAME">%1$s</xliff:g>」偵測到這張螢幕截圖。"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"「<xliff:g id="APPNAME">%1$s</xliff:g>」和其他開啟的應用程式偵測到這張螢幕截圖。"</string>
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"新增至記事"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕錄影器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示螢幕畫面錄製工作階段通知"</string>
@@ -890,6 +889,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"發生錯誤，請再試一次。"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"載入中"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"平板電腦"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"無效，請查看應用程式"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"找不到控制項"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"無法使用控制項"</string>
@@ -926,6 +929,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"無法廣播"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"無法儲存，請再試一次。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"無法儲存。"</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本號碼"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已將版本號碼複製到剪貼簿。"</string>
     <string name="basic_status" msgid="2315371112182658176">"開放式對話"</string>

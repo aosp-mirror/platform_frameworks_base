@@ -95,8 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"File"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> mendeteksi screenshot ini."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dan aplikasi terbuka lainnya mendeteksi screenshot ini."</string>
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Tambahkan ke catatan"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Perekam Layar"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Memproses perekaman layar"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notifikasi yang sedang berjalan untuk sesi rekaman layar"</string>
@@ -890,6 +889,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Terjadi error. Coba lagi."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Memuat"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Nonaktif, periksa aplikasi"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Tidak ditemukan"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrol tidak tersedia"</string>
@@ -926,6 +929,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Tidak dapat menyiarkan"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Tidak dapat menyimpan. Coba lagi."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Tidak dapat menyimpan."</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nomor build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nomor versi disalin ke papan klip."</string>
     <string name="basic_status" msgid="2315371112182658176">"Membuka percakapan"</string>
@@ -1026,8 +1033,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera nonaktif"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofon nonaktif"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera dan mikrofon nonaktif"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant sedang mendengarkan"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notifikasi}other{# notifikasi}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Pembuatan catatan"</string>
@@ -1043,10 +1049,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Izinkan akses satu kali"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Jangan izinkan"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Log perangkat merekam hal-hal yang terjadi di perangkat Anda. Aplikasi dapat menggunakan log ini untuk menemukan dan memperbaiki masalah.\n\nBeberapa log mungkin berisi info sensitif, jadi hanya izinkan aplikasi yang Anda percayai untuk mengakses semua log perangkat. \n\nJika Anda tidak mengizinkan aplikasi ini mengakses semua log perangkat, aplikasi masih dapat mengakses log-nya sendiri. Produsen perangkat masih dapat mengakses beberapa log atau info di perangkat Anda."</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Pelajari lebih lanjut"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Pelajari lebih lanjut di <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Buka <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Aplikasi disiapkan"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Minimal satu kartu telah ditambahkan ke Wallet"</string>

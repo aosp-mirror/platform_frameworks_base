@@ -95,8 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Lêers"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> het hierdie skermskoot bespeur."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> en ander oop apps het hierdie skermskoot bespeur."</string>
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Voeg by nota"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skermopnemer"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Verwerk tans skermopname"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Deurlopende kennisgewing vir \'n skermopnamesessie"</string>
@@ -890,6 +889,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Iets is fout. Probeer weer."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Laai tans"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Saai jou media uit"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Saai tans <xliff:g id="APP_LABEL">%1$s</xliff:g> uit"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Onaktief, gaan program na"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nie gekry nie"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrole is nie beskikbaar nie"</string>
@@ -926,6 +927,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Kan nie uitsaai nie"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Kan nie stoor nie. Probeer weer."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Kan nie stoor nie."</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Bounommer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Bounommer is na knipbord gekopieer."</string>
     <string name="basic_status" msgid="2315371112182658176">"Maak gesprek oop"</string>
@@ -1026,8 +1031,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera is af"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofoon is af"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera en mikrofoon is af"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistent luister"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# kennisgewing}other{# kennisgewings}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Neem notas"</string>
@@ -1043,10 +1047,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Gee eenmalige toegang"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Moenie toelaat nie"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Toestelloglêers teken aan wat op jou toestel gebeur. Apps kan hierdie loglêers gebruik om kwessies op te spoor en reg te stel.\n\nSommige loglêers bevat dalk sensitiewe inligting, en daarom moet jy toegang tot alle toestelloglêers net gee aan apps wat jy vertrou. \n\nHierdie app het steeds toegang tot sy eie loglêers as jy nie vir hierdie app toegang tot alle toestelloglêers gee nie. Jou toestelvervaardiger het dalk steeds toegang tot sommige loglêers of inligting op jou toestel."</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Kom meer te wete"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Kom meer te wete by <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Maak <xliff:g id="APPNAME">%1$s</xliff:g> oop"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Die app opgestel is"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Minstens een kaart by Wallet gevoeg is"</string>
