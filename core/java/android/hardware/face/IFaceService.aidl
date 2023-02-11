@@ -24,6 +24,7 @@ import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.view.Surface;
 
@@ -52,14 +53,14 @@ interface IFaceService {
 
     // Authenticate with a face. A requestId is returned that can be used to cancel this operation.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    long authenticate(IBinder token, long operationId, int userId, IFaceServiceReceiver receiver,
-            String opPackageName, boolean isKeyguardBypassEnabled);
+    long authenticate(IBinder token, long operationId, IFaceServiceReceiver receiver,
+            in FaceAuthenticateOptions options);
 
     // Uses the face hardware to detect for the presence of a face, without giving details
     // about accept/reject/lockout. A requestId is returned that can be used to cancel this
     // operation.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    long detectFace(IBinder token, int userId, IFaceServiceReceiver receiver, String opPackageName);
+    long detectFace(IBinder token, IFaceServiceReceiver receiver, in FaceAuthenticateOptions options);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signatuer permission. This method should only be
@@ -68,8 +69,8 @@ interface IFaceService {
     // startPreparedClient().
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
     void prepareForAuthentication(int sensorId, boolean requireConfirmation, IBinder token,
-            long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
-            String opPackageName, long requestId, int cookie,
+            long operationId, IBiometricSensorReceiver sensorReceiver,
+            in FaceAuthenticateOptions options, long requestId, int cookie,
             boolean allowBackgroundAuthentication);
 
     // Starts authentication with the previously prepared client.

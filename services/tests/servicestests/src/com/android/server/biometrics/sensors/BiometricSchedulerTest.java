@@ -705,7 +705,7 @@ public class BiometricSchedulerTest {
                     TEST_SENSOR_ID, mock(BiometricLogger.class), biometricContext,
                     true /* isStrongBiometric */, null /* taskStackListener */,
                     null /* lockoutTracker */, false /* isKeyguard */,
-                    true /* shouldVibrate */, false /* isKeyguardBypassEnabled */,
+                    true /* shouldVibrate */,
                     0 /* sensorStrength */);
         }
 
