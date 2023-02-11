@@ -35,6 +35,8 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.R;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +53,6 @@ import java.util.concurrent.Executor;
 public class SharedConnectivityManager {
     private static final String TAG = SharedConnectivityManager.class.getSimpleName();
     private static final boolean DEBUG = true;
-    private static final String SERVICE_PACKAGE_NAME = "sharedconnectivity_service_package";
-    private static final String SERVICE_CLASS_NAME = "sharedconnectivity_service_class";
 
     private static final class SharedConnectivityCallbackProxy extends
             ISharedConnectivityCallback.Stub {
@@ -101,7 +101,7 @@ public class SharedConnectivityManager {
                     Binder.restoreCallingIdentity(token);
                 }
             }
-        };
+        }
 
         @Override
         public void onTetherNetworkConnectionStatusChanged(
@@ -115,7 +115,7 @@ public class SharedConnectivityManager {
                     Binder.restoreCallingIdentity(token);
                 }
             }
-        };
+        }
 
         @Override
         public void onKnownNetworkConnectionStatusChanged(
@@ -129,7 +129,7 @@ public class SharedConnectivityManager {
                     Binder.restoreCallingIdentity(token);
                 }
             }
-        };
+        }
     }
 
     private ISharedConnectivityService mService;
@@ -137,14 +137,33 @@ public class SharedConnectivityManager {
             mProxyMap = new HashMap<>();
 
     /**
-     * Constructor for new instance of {@link SharedConnectivityManager}.
+     * Creates a new instance of {@link SharedConnectivityManager}.
      *
      * Automatically binds to implementation of {@link SharedConnectivityService} specified in
      * device overlay.
      *
+     * @return An instance of {@link SharedConnectivityManager} or null if the shared connectivity
+     * service is not found.
      * @hide
      */
-    public SharedConnectivityManager(@NonNull Context context) {
+    @Nullable
+    public static SharedConnectivityManager create(@NonNull Context context) {
+        Resources resources = context.getResources();
+        try {
+            String servicePackageName = resources.getString(
+                    R.string.shared_connectivity_service_package);
+            String serviceIntentAction = resources.getString(
+                    R.string.shared_connectivity_service_intent_action);
+            return new SharedConnectivityManager(context, servicePackageName, serviceIntentAction);
+        } catch (Resources.NotFoundException e) {
+            Log.e(TAG, "To support shared connectivity service on this device, the service's"
+                    + " package name and intent action string must be defined");
+        }
+        return null;
+    }
+
+    private SharedConnectivityManager(@NonNull Context context, String servicePackageName,
+            String serviceIntentAction) {
         ServiceConnection serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -158,7 +177,10 @@ public class SharedConnectivityManager {
                 mProxyMap.clear();
             }
         };
-        bind(context, serviceConnection);
+
+        context.bindService(
+                new Intent().setPackage(servicePackageName).setAction(serviceIntentAction),
+                serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     /**
@@ -167,25 +189,6 @@ public class SharedConnectivityManager {
     @TestApi
     public void setService(@Nullable IInterface service) {
         mService = (ISharedConnectivityService) service;
-    }
-
-    private void bind(Context context, ServiceConnection serviceConnection) {
-        Resources resources = context.getResources();
-        int packageNameId = resources.getIdentifier(SERVICE_PACKAGE_NAME, "string",
-                context.getPackageName());
-        int classNameId = resources.getIdentifier(SERVICE_CLASS_NAME, "string",
-                context.getPackageName());
-        if (packageNameId == 0 || classNameId == 0) {
-            throw new Resources.NotFoundException("Package and class names for"
-                    + " shared connectivity service must be defined");
-        }
-
-        Intent intent = new Intent();
-        intent.setComponent(new ComponentName(resources.getString(packageNameId),
-                resources.getString(classNameId)));
-        context.bindService(
-                intent,
-                serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     /**
