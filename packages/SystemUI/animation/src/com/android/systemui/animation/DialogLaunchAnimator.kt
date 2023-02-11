@@ -33,13 +33,9 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
 import android.widget.FrameLayout
-import android.window.OnBackInvokedDispatcher
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CujType
-import com.android.systemui.animation.back.BackAnimationSpec
-import com.android.systemui.animation.back.applyTo
-import com.android.systemui.animation.back.floatingSystemSurfacesForSysUi
-import com.android.systemui.animation.back.onBackAnimationCallbackFrom
+import com.android.systemui.util.registerAnimationOnBackInvoked
 import java.lang.IllegalArgumentException
 import kotlin.math.roundToInt
 
@@ -798,41 +794,12 @@ private class AnimatedDialog(
 
         if (featureFlags.isPredictiveBackQsDialogAnim) {
             // TODO(b/265923095) Improve animations for QS dialogs on configuration change
-            registerOnBackInvokedCallback(targetView = dialogContentWithBackground)
+            dialog.registerAnimationOnBackInvoked(targetView = dialogContentWithBackground)
         }
 
         // Show the dialog.
         dialog.show()
         moveSourceDrawingToDialog()
-    }
-
-    private fun registerOnBackInvokedCallback(targetView: View) {
-        val metrics = targetView.resources.displayMetrics
-
-        val onBackAnimationCallback =
-            onBackAnimationCallbackFrom(
-                backAnimationSpec = BackAnimationSpec.floatingSystemSurfacesForSysUi(metrics),
-                displayMetrics = metrics, // TODO(b/265060720): We could remove this
-                onBackProgressed = { backTransformation -> backTransformation.applyTo(targetView) },
-                onBackInvoked = { dialog.dismiss() },
-            )
-
-        val dispatcher = dialog.onBackInvokedDispatcher
-        targetView.addOnAttachStateChangeListener(
-            object : View.OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(v: View) {
-                    dispatcher.registerOnBackInvokedCallback(
-                        OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                        onBackAnimationCallback
-                    )
-                }
-
-                override fun onViewDetachedFromWindow(v: View) {
-                    targetView.removeOnAttachStateChangeListener(this)
-                    dispatcher.unregisterOnBackInvokedCallback(onBackAnimationCallback)
-                }
-            }
-        )
     }
 
     private fun moveSourceDrawingToDialog() {

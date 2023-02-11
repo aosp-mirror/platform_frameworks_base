@@ -13,8 +13,9 @@ import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
 @SmallTest
-internal class FloatingRotationButtonPositionCalculatorTest(private val testCase: TestCase)
-    : SysuiTestCase() {
+internal class FloatingRotationButtonPositionCalculatorTest(
+        private val testCase: TestCase,
+) : SysuiTestCase() {
 
     @Test
     fun calculatePosition() {
@@ -34,11 +35,18 @@ internal class FloatingRotationButtonPositionCalculatorTest(private val testCase
         val expectedPosition: Position
     ) {
         override fun toString(): String =
-            "when calculator = $calculator, " +
-                "rotation = $rotation, " +
-                "taskbarVisible = $taskbarVisible, " +
-                "taskbarStashed = $taskbarStashed - " +
-                "expected $expectedPosition"
+                buildString {
+                    append("when calculator = ")
+                    append(when (calculator) {
+                        posLeftCalculator -> "LEFT"
+                        posRightCalculator -> "RIGHT"
+                        else -> error("Unknown calculator: $calculator")
+                    })
+                    append(", rotation = $rotation")
+                    append(", taskbarVisible = $taskbarVisible")
+                    append(", taskbarStashed = $taskbarStashed")
+                    append(" - expected $expectedPosition")
+                }
     }
 
     companion object {
