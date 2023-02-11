@@ -65,6 +65,7 @@ package android {
     field public static final String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE = "android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE";
     field public static final String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
+    field public static final String BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE = "android.permission.BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE";
     field public static final String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final String BIND_RESUME_ON_REBOOT_SERVICE = "android.permission.BIND_RESUME_ON_REBOOT_SERVICE";
     field public static final String BIND_ROTATION_RESOLVER_SERVICE = "android.permission.BIND_ROTATION_RESOLVER_SERVICE";
@@ -12561,6 +12562,17 @@ package android.service.quicksettings {
 
   public class TileService extends android.app.Service {
     method public final void setStatusIcon(android.graphics.drawable.Icon, String);
+  }
+
+}
+
+package android.service.remotelockscreenvalidation {
+
+  public abstract class RemoteLockscreenValidationService extends android.app.Service {
+    ctor public RemoteLockscreenValidationService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onValidateLockscreenGuess(@NonNull byte[], @NonNull android.os.OutcomeReceiver<android.app.RemoteLockscreenValidationResult,java.lang.Exception>);
+    field public static final String SERVICE_INTERFACE = "android.service.remotelockscreenvalidation.RemoteLockscreenValidationService";
   }
 
 }
