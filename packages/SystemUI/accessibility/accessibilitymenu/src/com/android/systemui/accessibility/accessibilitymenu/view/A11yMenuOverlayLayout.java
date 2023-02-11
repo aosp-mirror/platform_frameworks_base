@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Display;
@@ -73,6 +74,7 @@ public class A11yMenuOverlayLayout {
 
     private final AccessibilityMenuService mService;
     private final WindowManager mWindowManager;
+    private final DisplayManager mDisplayManager;
     private ViewGroup mLayout;
     private WindowManager.LayoutParams mLayoutParameter;
     private A11yMenuViewPager mA11yMenuViewPager;
@@ -82,6 +84,7 @@ public class A11yMenuOverlayLayout {
     public A11yMenuOverlayLayout(AccessibilityMenuService service) {
         mService = service;
         mWindowManager = mService.getSystemService(WindowManager.class);
+        mDisplayManager = mService.getSystemService(DisplayManager.class);
         configureLayout();
         mHandler = new Handler(Looper.getMainLooper());
         mAccessibilityManager = mService.getSystemService(AccessibilityManager.class);
@@ -161,9 +164,9 @@ public class A11yMenuOverlayLayout {
 
     /** Updates a11y menu layout position by configuring layout params. */
     private void updateLayoutPosition() {
-        Display display = mLayout.getDisplay();
+        final Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
         final int orientation = mService.getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (display != null && orientation == Configuration.ORIENTATION_LANDSCAPE) {
             switch (display.getRotation()) {
                 case Surface.ROTATION_90:
                 case Surface.ROTATION_180:
