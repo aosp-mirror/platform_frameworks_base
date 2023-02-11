@@ -136,15 +136,6 @@
     <!-- SFPS colors -->
     <color name="sfps_chevron_fill">@color/material_dynamic_primary90</color>
 
-    <!-- UDFPS colors -->
-    <color name="udfps_enroll_icon">#699FF3</color>
-    <color name="udfps_moving_target_fill">#C2D7F7</color>
-    <!-- 50% of udfps_moving_target_fill-->
-    <color name="udfps_moving_target_fill_error">#80C2D7F7</color>
-    <color name="udfps_enroll_progress">#699FF3</color>
-    <color name="udfps_enroll_progress_help">#70699FF3</color>
-    <color name="udfps_enroll_progress_help_with_talkback">#FFEE675C</color>
-
     <!-- Floating overlay actions -->
     <color name="overlay_button_ripple">#1f000000</color>
     <color name="overlay_background_protection_start">#40000000</color> <!-- 25% black -->

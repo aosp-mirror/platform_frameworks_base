@@ -68,6 +68,8 @@ import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.satellite.ISatelliteStateListener;
+import android.telephony.satellite.ISatelliteCapabilitiesConsumer;
+import android.telephony.satellite.SatelliteCapabilities;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
@@ -1536,7 +1538,7 @@ interface ITelephony {
      */
     CarrierRestrictionRules getAllowedCarriers();
 
-   /**
+    /**
      * Returns carrier id of the given subscription.
      * <p>To recognize carrier as a first class identity, assign each carrier with a canonical
      * integer a.k.a carrier id.
@@ -2700,6 +2702,26 @@ interface ITelephony {
      * Get the carrier restriction status of the device.
      */
     void getCarrierRestrictionStatus(IIntegerConsumer internalCallback, String packageName);
+
+    /**
+     * Power on or off the satellite modem.
+     */
+    int setSatellitePower(int subId, boolean powerOn);
+
+    /**
+     * Check whether the satellite modem is powered on.
+     */
+    int isSatellitePowerOn(int subId, IBooleanConsumer internalCallback);
+
+    /**
+     * Check whether the satellite service is supported on the device.
+     */
+    int isSatelliteSupported(int subId, IBooleanConsumer internalCallback);
+
+    /**
+     * Get the capabilities of the satellite service.
+     */
+    int getSatelliteCapabilities(int subId, ISatelliteCapabilitiesConsumer internalCallback);
 
     /**
      * Start receiving satellite pointing updates.

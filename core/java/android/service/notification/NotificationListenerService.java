@@ -1732,10 +1732,13 @@ public abstract class NotificationListenerService extends Service {
         private boolean mIsBubble;
         // Notification assistant importance suggestion
         private int mProposedImportance;
+        // Sensitive info detected by the notification assistant
+        private boolean mSensitiveContent;
 
         private static final int PARCEL_VERSION = 2;
 
-        public Ranking() { }
+        public Ranking() {
+        }
 
         // You can parcel it, but it's not Parcelable
         /** @hide */
@@ -1770,6 +1773,7 @@ public abstract class NotificationListenerService extends Service {
             out.writeInt(mRankingAdjustment);
             out.writeBoolean(mIsBubble);
             out.writeInt(mProposedImportance);
+            out.writeBoolean(mSensitiveContent);
         }
 
         /** @hide */
@@ -1809,6 +1813,7 @@ public abstract class NotificationListenerService extends Service {
             mRankingAdjustment = in.readInt();
             mIsBubble = in.readBoolean();
             mProposedImportance = in.readInt();
+            mSensitiveContent = in.readBoolean();
         }
 
 
@@ -1915,6 +1920,17 @@ public abstract class NotificationListenerService extends Service {
         @SystemApi
         public @NotificationManager.Importance int getProposedImportance() {
             return mProposedImportance;
+        }
+
+        /**
+         * Returns true if the notification text is sensitive (e.g. containing an OTP).
+         *
+         * @return whether the notification contains sensitive content
+         * @hide
+         */
+        @SystemApi
+        public boolean hasSensitiveContent() {
+            return mSensitiveContent;
         }
 
         /**
@@ -2081,7 +2097,8 @@ public abstract class NotificationListenerService extends Service {
                 boolean noisy, ArrayList<Notification.Action> smartActions,
                 ArrayList<CharSequence> smartReplies, boolean canBubble,
                 boolean isTextChanged, boolean isConversation, ShortcutInfo shortcutInfo,
-                int rankingAdjustment, boolean isBubble, int proposedImportance) {
+                int rankingAdjustment, boolean isBubble, int proposedImportance,
+                boolean sensitiveContent) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -2108,6 +2125,7 @@ public abstract class NotificationListenerService extends Service {
             mRankingAdjustment = rankingAdjustment;
             mIsBubble = isBubble;
             mProposedImportance = proposedImportance;
+            mSensitiveContent = sensitiveContent;
         }
 
         /**
@@ -2149,7 +2167,8 @@ public abstract class NotificationListenerService extends Service {
                     other.mShortcutInfo,
                     other.mRankingAdjustment,
                     other.mIsBubble,
-                    other.mProposedImportance);
+                    other.mProposedImportance,
+                    other.mSensitiveContent);
         }
 
         /**
@@ -2209,7 +2228,8 @@ public abstract class NotificationListenerService extends Service {
                     (other.mShortcutInfo == null ? 0 : other.mShortcutInfo.getId()))
                     && Objects.equals(mRankingAdjustment, other.mRankingAdjustment)
                     && Objects.equals(mIsBubble, other.mIsBubble)
-                    && Objects.equals(mProposedImportance, other.mProposedImportance);
+                    && Objects.equals(mProposedImportance, other.mProposedImportance)
+                    && Objects.equals(mSensitiveContent, other.mSensitiveContent);
         }
     }
 

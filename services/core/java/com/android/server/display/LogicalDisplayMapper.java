@@ -133,6 +133,11 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
      */
     private final SparseIntArray mDeviceDisplayGroupIds = new SparseIntArray();
 
+    /**
+     * Map of display group ids indexed by display group name.
+     */
+    private final ArrayMap<String, Integer> mDisplayGroupIdsByName = new ArrayMap<>();
+
     private final DisplayDeviceRepository mDisplayDeviceRepo;
     private final DeviceStateToLayoutMap mDeviceStateToLayoutMap;
     private final Listener mListener;
@@ -640,7 +645,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                         & DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY) != 0
                         && !nextDeviceInfo.address.equals(deviceInfo.address)) {
                     layout.createDisplayLocked(nextDeviceInfo.address,
-                            /* isDefault= */ true, /* isEnabled= */ true, mIdProducer,
+                            /* isDefault= */ true, /* isEnabled= */ true,
+                            Layout.DEFAULT_DISPLAY_GROUP_NAME, mIdProducer,
                             /* brightnessThrottlingMapId= */ null, DEFAULT_DISPLAY);
                     applyLayoutLocked();
                     return;
@@ -843,8 +849,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         final DisplayGroup oldGroup = getDisplayGroupLocked(groupId);
 
         // Get the new display group if a change is needed
-        final DisplayInfo info = display.getDisplayInfoLocked();
-        final boolean needsOwnDisplayGroup = (info.flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0;
+        final boolean needsOwnDisplayGroup = display.needsOwnDisplayGroupLocked();
         final boolean hasOwnDisplayGroup = groupId != Display.DEFAULT_DISPLAY_GROUP;
         final boolean needsDeviceDisplayGroup =
                 !needsOwnDisplayGroup && linkedDeviceUniqueId != null;
@@ -854,8 +859,9 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 || hasOwnDisplayGroup != needsOwnDisplayGroup
                 || hasDeviceDisplayGroup != needsDeviceDisplayGroup) {
             groupId =
-                    assignDisplayGroupIdLocked(
-                            needsOwnDisplayGroup, needsDeviceDisplayGroup, linkedDeviceUniqueId);
+                    assignDisplayGroupIdLocked(needsOwnDisplayGroup,
+                            display.getDisplayGroupNameLocked(), needsDeviceDisplayGroup,
+                            linkedDeviceUniqueId);
         }
 
         // Create a new group if needed
@@ -1000,6 +1006,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                     displayLayout.getBrightnessThrottlingMapId() == null
                             ? DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID
                             : displayLayout.getBrightnessThrottlingMapId());
+
+            newDisplay.setDisplayGroupNameLocked(displayLayout.getDisplayGroupName());
         }
     }
 
@@ -1053,8 +1061,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
     }
 
-    private int assignDisplayGroupIdLocked(
-            boolean isOwnDisplayGroup, boolean isDeviceDisplayGroup, Integer linkedDeviceUniqueId) {
+    private int assignDisplayGroupIdLocked(boolean isOwnDisplayGroup, String displayGroupName,
+            boolean isDeviceDisplayGroup, Integer linkedDeviceUniqueId) {
         if (isDeviceDisplayGroup && linkedDeviceUniqueId != null) {
             int deviceDisplayGroupId = mDeviceDisplayGroupIds.get(linkedDeviceUniqueId);
             // A value of 0 indicates that no device display group was found.
@@ -1064,7 +1072,13 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             }
             return deviceDisplayGroupId;
         }
-        return isOwnDisplayGroup ? mNextNonDefaultGroupId++ : Display.DEFAULT_DISPLAY_GROUP;
+        if (!isOwnDisplayGroup) return Display.DEFAULT_DISPLAY_GROUP;
+        Integer displayGroupId = mDisplayGroupIdsByName.get(displayGroupName);
+        if (displayGroupId == null) {
+            displayGroupId = Integer.valueOf(mNextNonDefaultGroupId++);
+            mDisplayGroupIdsByName.put(displayGroupName, displayGroupId);
+        }
+        return displayGroupId;
     }
 
     private void initializeDefaultDisplayDeviceLocked(DisplayDevice device) {
@@ -1079,7 +1093,8 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         layout.createDisplayLocked(info.address, /* isDefault= */ true, /* isEnabled= */ true,
-                mIdProducer, /* brightnessThrottlingMapId= */ null, NO_LEAD_DISPLAY);
+                Layout.DEFAULT_DISPLAY_GROUP_NAME, mIdProducer,
+                /* brightnessThrottlingMapId= */ null, NO_LEAD_DISPLAY);
     }
 
     private int assignLayerStackLocked(int displayId) {

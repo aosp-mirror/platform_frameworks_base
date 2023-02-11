@@ -95,6 +95,7 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
+import android.hardware.biometrics.SensorProperties;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
@@ -312,7 +313,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean mGoingToSleep;
     private boolean mPrimaryBouncerFullyShown;
     private boolean mPrimaryBouncerIsOrWillBeShowing;
-    private boolean mUdfpsBouncerShowing;
+    private boolean mAlternateBouncerShowing;
     private boolean mAuthInterruptActive;
     private boolean mNeedsSlowUnlockTransition;
     private boolean mAssistantVisible;
@@ -537,7 +538,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * It's assumed that the trust was granted for the current user.
      */
     private boolean shouldDismissKeyguardOnTrustGrantedWithCurrentUser(TrustGrantFlags flags) {
-        final boolean isBouncerShowing = mPrimaryBouncerIsOrWillBeShowing || mUdfpsBouncerShowing;
+        final boolean isBouncerShowing =
+                mPrimaryBouncerIsOrWillBeShowing || mAlternateBouncerShowing;
         return (flags.isInitiatedByUser() || flags.dismissKeyguardRequested())
                 && (mDeviceInteractive || flags.temporaryAndRenewable())
                 && (isBouncerShowing || flags.dismissKeyguardRequested());
@@ -1743,7 +1745,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 public void onAuthenticationFailed() {
                         String reason =
                                 mKeyguardBypassController.canBypass() ? "bypass"
-                                        : mUdfpsBouncerShowing ? "udfpsBouncer"
+                                        : mAlternateBouncerShowing ? "alternateBouncer"
                                                 : mPrimaryBouncerFullyShown ? "bouncer"
                                                         : "udfpsFpDown";
                         requestActiveUnlock(
@@ -2602,7 +2604,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         requestActiveUnlock(
                 requestOrigin,
                 extraReason, canFaceBypass
-                        || mUdfpsBouncerShowing
+                        || mAlternateBouncerShowing
                         || mPrimaryBouncerFullyShown
                         || mAuthController.isUdfpsFingerDown());
     }
@@ -2620,23 +2622,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * Whether the UDFPS bouncer is showing.
+     * Whether the alternate bouncer is showing.
      */
-    public void setUdfpsBouncerShowing(boolean showing) {
-        mUdfpsBouncerShowing = showing;
-        if (mUdfpsBouncerShowing) {
+    public void setAlternateBouncerShowing(boolean showing) {
+        mAlternateBouncerShowing = showing;
+        if (mAlternateBouncerShowing) {
             updateFaceListeningState(BIOMETRIC_ACTION_START,
                     FACE_AUTH_TRIGGERED_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN);
             requestActiveUnlock(
                     ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
-                    "udfpsBouncer");
+                    "alternateBouncer");
         }
     }
 
     private boolean shouldTriggerActiveUnlock() {
         // Triggers:
         final boolean triggerActiveUnlockForAssistant = shouldTriggerActiveUnlockForAssistant();
-        final boolean awakeKeyguard = mPrimaryBouncerFullyShown || mUdfpsBouncerShowing
+        final boolean awakeKeyguard = mPrimaryBouncerFullyShown || mAlternateBouncerShowing
                 || (isKeyguardVisible() && !mGoingToSleep
                 && mStatusBarState != StatusBarState.SHADE_LOCKED);
 
@@ -2820,7 +2822,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean isPostureAllowedForFaceAuth =
                 mConfigFaceAuthSupportedPosture == 0 /* DEVICE_POSTURE_UNKNOWN */ ? true
                         : (mPostureState == mConfigFaceAuthSupportedPosture);
-
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen =
@@ -2830,11 +2831,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         || awakeKeyguard
                         || shouldListenForFaceAssistant
                         || isUdfpsFingerDown
-                        || mUdfpsBouncerShowing)
+                        || mAlternateBouncerShowing)
                 && !mSwitchingUser && !faceDisabledForUser && userNotTrustedOrDetectionIsNeeded
                 && !mKeyguardGoingAway && biometricEnabledForUser
                 && faceAuthAllowedOrDetectionIsNeeded && mIsPrimaryUser
-                && (!mSecureCameraLaunched || mOccludingAppRequestingFace)
+                && (!mSecureCameraLaunched || mAlternateBouncerShowing)
                 && faceAndFpNotAuthenticated
                 && !mGoingToSleep
                 && isPostureAllowedForFaceAuth;
@@ -2845,6 +2846,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     System.currentTimeMillis(),
                     user,
                     shouldListen,
+                    mAlternateBouncerShowing,
                     mAuthInterruptActive,
                     biometricEnabledForUser,
                     mPrimaryBouncerFullyShown,
@@ -2862,7 +2864,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mSecureCameraLaunched,
                     supportsDetect,
                     mSwitchingUser,
-                    mUdfpsBouncerShowing,
                     isUdfpsFingerDown,
                     userNotTrustedOrDetectionIsNeeded));
 
@@ -2998,6 +2999,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public boolean isUnlockingWithBiometricsPossible(int userId) {
         return isUnlockWithFacePossible(userId) || isUnlockWithFingerprintPossible(userId);
+    }
+
+    /**
+     * If non-strong (i.e. weak or convenience) biometrics hardware is available, not disabled, and
+     * user has enrolled templates. This does NOT check if the device is encrypted or in lockdown.
+     *
+     * @param userId User that's trying to unlock.
+     * @return {@code true} if possible.
+     */
+    public boolean isUnlockingWithNonStrongBiometricsPossible(int userId) {
+        // This assumes that there is at most one face and at most one fingerprint sensor
+        return (mFaceManager != null && !mFaceSensorProperties.isEmpty()
+                && (mFaceSensorProperties.get(0).sensorStrength != SensorProperties.STRENGTH_STRONG)
+                && isUnlockWithFacePossible(userId))
+                || (mFpm != null && !mFingerprintSensorProperties.isEmpty()
+                && (mFingerprintSensorProperties.get(0).sensorStrength
+                != SensorProperties.STRENGTH_STRONG) && isUnlockWithFingerprintPossible(userId));
     }
 
     @SuppressLint("MissingPermission")
@@ -3974,7 +3992,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 pw.println("        mPrimaryBouncerIsOrWillBeShowing="
                         + mPrimaryBouncerIsOrWillBeShowing);
                 pw.println("        mStatusBarState=" + StatusBarState.toString(mStatusBarState));
-                pw.println("        mUdfpsBouncerShowing=" + mUdfpsBouncerShowing);
+                pw.println("        mAlternateBouncerShowing=" + mAlternateBouncerShowing);
             } else if (isSfpsSupported()) {
                 pw.println("        sfpsEnrolled=" + isSfpsEnrolled());
                 pw.println("        shouldListenForSfps=" + shouldListenForFingerprint(false));

@@ -1305,6 +1305,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return mDefaultDisplay;
     }
 
+    @NonNull
     DisplayRotationCoordinator getDisplayRotationCoordinator() {
         return mDisplayRotationCoordinator;
     }

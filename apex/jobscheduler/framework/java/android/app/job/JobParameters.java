@@ -424,7 +424,7 @@ public class JobParameters implements Parcelable {
      * {@code true}. This will return {@code false} if the job wasn't requested to run as a
      * user-initiated job, or if it was requested to run as a user-initiated job but the app didn't
      * meet any of the requirements at the time of execution, such as having the
-     * {@link android.Manifest.permission#RUN_LONG_JOBS} permission.
+     * {@link android.Manifest.permission#RUN_USER_INITIATED_JOBS} permission.
      *
      * @see JobInfo.Builder#setUserInitiated(boolean)
      */

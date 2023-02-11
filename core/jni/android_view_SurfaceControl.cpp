@@ -609,7 +609,7 @@ static void nativeSetBuffer(JNIEnv* env, jclass clazz, jlong transactionObj, jlo
     if (fencePtr != 0) {
         optFence = sp<Fence>{reinterpret_cast<Fence*>(fencePtr)};
     }
-    transaction->setBuffer(ctrl, graphicBuffer, optFence, std::nullopt,
+    transaction->setBuffer(ctrl, graphicBuffer, optFence, std::nullopt, 0 /* producerId */,
                            genReleaseCallback(env, releaseCallback));
 }
 

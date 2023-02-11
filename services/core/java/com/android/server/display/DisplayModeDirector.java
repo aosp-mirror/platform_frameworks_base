@@ -123,10 +123,6 @@ public class DisplayModeDirector {
     private final DeviceConfigInterface mDeviceConfig;
     private final DeviceConfigDisplaySettings mDeviceConfigDisplaySettings;
 
-    @GuardedBy("mLock")
-    @Nullable
-    private DisplayDeviceConfig mDefaultDisplayDeviceConfig;
-
     // A map from the display ID to the collection of votes and their priority. The latter takes
     // the form of another map from the priority to the vote itself so that each priority is
     // guaranteed to have exactly one vote, which is also easily and efficiently replaceable.
@@ -167,7 +163,6 @@ public class DisplayModeDirector {
         mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
         mSettingsObserver = new SettingsObserver(context, handler);
         mBrightnessObserver = new BrightnessObserver(context, handler, injector);
-        mDefaultDisplayDeviceConfig = null;
         mUdfpsObserver = new UdfpsObserver();
         final BallotBox ballotBox = (displayId, priority, vote) -> {
             synchronized (mLock) {
@@ -706,15 +701,11 @@ public class DisplayModeDirector {
      * @param displayDeviceConfig configurations relating to the underlying display device.
      */
     public void defaultDisplayDeviceUpdated(DisplayDeviceConfig displayDeviceConfig) {
-        synchronized (mLock) {
-            mDefaultDisplayDeviceConfig = displayDeviceConfig;
-            mSettingsObserver.setRefreshRates(displayDeviceConfig,
-                /* attemptLoadingFromDeviceConfig= */ true);
-            mBrightnessObserver.updateBlockingZoneThresholds(displayDeviceConfig,
-                /* attemptLoadingFromDeviceConfig= */ true);
-            mBrightnessObserver.reloadLightSensor(displayDeviceConfig);
-            mHbmObserver.setupHdrRefreshRates(displayDeviceConfig);
-        }
+        mSettingsObserver.setRefreshRates(displayDeviceConfig,
+            /* attemptLoadingFromDeviceConfig= */ true);
+        mBrightnessObserver.updateBlockingZoneThresholds(displayDeviceConfig,
+            /* attemptLoadingFromDeviceConfig= */ true);
+        mBrightnessObserver.reloadLightSensor(displayDeviceConfig);
     }
 
     /**
@@ -2775,7 +2766,7 @@ public class DisplayModeDirector {
      * HBM that are associated with that display. Restrictions are retrieved from
      * DisplayManagerInternal but originate in the display-device-config file.
      */
-    public class HbmObserver implements DisplayManager.DisplayListener {
+    public static class HbmObserver implements DisplayManager.DisplayListener {
         private final BallotBox mBallotBox;
         private final Handler mHandler;
         private final SparseIntArray mHbmMode = new SparseIntArray();
@@ -2795,24 +2786,10 @@ public class DisplayModeDirector {
             mDeviceConfigDisplaySettings = displaySettings;
         }
 
-        /**
-         * Sets up the refresh rate to be used when HDR is enabled
-         */
-        public void setupHdrRefreshRates(DisplayDeviceConfig displayDeviceConfig) {
-            mRefreshRateInHbmHdr = mDeviceConfigDisplaySettings
-                .getRefreshRateInHbmHdr(displayDeviceConfig);
-            mRefreshRateInHbmSunlight = mDeviceConfigDisplaySettings
-                .getRefreshRateInHbmSunlight(displayDeviceConfig);
-        }
-
-        /**
-         * Sets up the HDR refresh rates, and starts observing for the changes in the display that
-         * might impact it
-         */
         public void observe() {
-            synchronized (mLock) {
-                setupHdrRefreshRates(mDefaultDisplayDeviceConfig);
-            }
+            mRefreshRateInHbmSunlight = mDeviceConfigDisplaySettings.getRefreshRateInHbmSunlight();
+            mRefreshRateInHbmHdr = mDeviceConfigDisplaySettings.getRefreshRateInHbmHdr();
+
             mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
             mInjector.registerDisplayListener(this, mHandler,
                     DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS
@@ -3044,33 +3021,26 @@ public class DisplayModeDirector {
                     -1);
         }
 
-        public int getRefreshRateInHbmHdr(DisplayDeviceConfig displayDeviceConfig) {
-            int refreshRate =
-                    (displayDeviceConfig == null) ? mContext.getResources().getInteger(
-                            R.integer.config_defaultRefreshRateInHbmHdr)
-                            : displayDeviceConfig.getDefaultRefreshRateInHbmHdr();
-            try {
-                refreshRate = mDeviceConfig.getInt(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                    DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HBM_HDR,
-                    refreshRate);
-            } catch (NullPointerException e) {
-                // Do Nothing
-            }
+        public int getRefreshRateInHbmSunlight() {
+            final int defaultRefreshRateInHbmSunlight =
+                    mContext.getResources().getInteger(
+                            R.integer.config_defaultRefreshRateInHbmSunlight);
+
+            final int refreshRate = mDeviceConfig.getInt(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                    DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HBM_SUNLIGHT,
+                    defaultRefreshRateInHbmSunlight);
+
             return refreshRate;
         }
 
-        public int getRefreshRateInHbmSunlight(DisplayDeviceConfig displayDeviceConfig) {
-            int refreshRate =
-                    (displayDeviceConfig == null) ? mContext.getResources()
-                        .getInteger(R.integer.config_defaultRefreshRateInHbmSunlight)
-                        : displayDeviceConfig.getDefaultRefreshRateInHbmSunlight();
-            try {
-                refreshRate = mDeviceConfig.getInt(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
-                    DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HBM_SUNLIGHT,
-                    refreshRate);
-            } catch (NullPointerException e) {
-                // Do Nothing
-            }
+        public int getRefreshRateInHbmHdr() {
+            final int defaultRefreshRateInHbmHdr =
+                    mContext.getResources().getInteger(R.integer.config_defaultRefreshRateInHbmHdr);
+
+            final int refreshRate = mDeviceConfig.getInt(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+                    DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HBM_HDR,
+                    defaultRefreshRateInHbmHdr);
+
             return refreshRate;
         }
 
@@ -3120,18 +3090,14 @@ public class DisplayModeDirector {
                         0).sendToTarget();
             }
 
-            synchronized (mLock) {
-                final int refreshRateInHbmSunlight =
-                        getRefreshRateInHbmSunlight(mDefaultDisplayDeviceConfig);
-                mHandler.obtainMessage(MSG_REFRESH_RATE_IN_HBM_SUNLIGHT_CHANGED,
-                        refreshRateInHbmSunlight, 0)
+            final int refreshRateInHbmSunlight = getRefreshRateInHbmSunlight();
+            mHandler.obtainMessage(MSG_REFRESH_RATE_IN_HBM_SUNLIGHT_CHANGED,
+                    refreshRateInHbmSunlight, 0)
                     .sendToTarget();
 
-                final int refreshRateInHbmHdr =
-                        getRefreshRateInHbmHdr(mDefaultDisplayDeviceConfig);
-                mHandler.obtainMessage(MSG_REFRESH_RATE_IN_HBM_HDR_CHANGED, refreshRateInHbmHdr, 0)
+            final int refreshRateInHbmHdr = getRefreshRateInHbmHdr();
+            mHandler.obtainMessage(MSG_REFRESH_RATE_IN_HBM_HDR_CHANGED, refreshRateInHbmHdr, 0)
                     .sendToTarget();
-            }
         }
 
         private int[] getIntArrayProperty(String prop) {

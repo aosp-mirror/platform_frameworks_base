@@ -33,6 +33,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.satellite.stub.SatelliteImplBase;
 
+import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.IIntArrayConsumer;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
@@ -342,6 +343,161 @@ public class SatelliteManager {
     public @interface SatelliteServiceResult {}
 
     /**
+     * Power on or off the satellite modem.
+     *
+     * @param powerOn {@code true} to power on the satellite modem and {@code false} to power off.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @return The result of the operation.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteServiceResult public int setSatellitePower(boolean powerOn) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.setSatellitePower(mSubId, powerOn);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setSatellitePower RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_SERVICE_REQUEST_FAILED;
+    }
+
+    /**
+     * Check whether the satellite modem is powered on.
+     *
+     * @param executor The executor on which the result listener will be called.
+     * @param resultListener Listener with the result if the operation is successful.
+     *                       If this method returns {@link #SATELLITE_SERVICE_SUCCESS}, the result
+     *                       listener will return {@code true} if the satellite modem is powered on
+     *                       and {@code false} otherwise.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @return The result of the operation.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteServiceResult public int isSatellitePowerOn(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> resultListener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(resultListener);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IBooleanConsumer internalCallback = new IBooleanConsumer.Stub() {
+                    @Override
+                    public void accept(boolean result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> resultListener.accept(result)));
+                    }
+                };
+
+                return telephony.isSatellitePowerOn(mSubId, internalCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("isSatellitePowerOn() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_SERVICE_REQUEST_FAILED;
+    }
+
+    /**
+     * Check whether the satellite service is supported on the device.
+     *
+     * @param executor The executor on which the result listener will be called.
+     * @param resultListener Listener with the result if the operation is successful.
+     *                       If this method returns {@link #SATELLITE_SERVICE_SUCCESS}, the result
+     *                       listener will return {@code true} if the satellite service is supported
+     *                       and {@code false} otherwise.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @return The result of the operation.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteServiceResult public int isSatelliteSupported(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> resultListener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(resultListener);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IBooleanConsumer internalCallback = new IBooleanConsumer.Stub() {
+                    @Override
+                    public void accept(boolean result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> resultListener.accept(result)));
+                    }
+                };
+
+                return telephony.isSatelliteSupported(mSubId, internalCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("isSatelliteSupported() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_SERVICE_REQUEST_FAILED;
+    }
+
+    /**
+     * Get the {@link SatelliteCapabilities} with all capabilities of the satellite service.
+     *
+     * @param executor The executor on which the result listener will be called.
+     * @param resultListener Listener with the result if the operation is successful.
+     *                       If this method returns {@link #SATELLITE_SERVICE_SUCCESS}, the result
+     *                       listener will return the current {@link SatelliteCapabilities}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @return The result of the operation.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteServiceResult public int getSatelliteCapabilities(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<SatelliteCapabilities> resultListener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(resultListener);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ISatelliteCapabilitiesConsumer internalCallback =
+                        new ISatelliteCapabilitiesConsumer.Stub() {
+                    @Override
+                    public void accept(SatelliteCapabilities result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> resultListener.accept(result)));
+                    }
+                };
+
+                return telephony.getSatelliteCapabilities(mSubId, internalCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("getSatelliteCapabilities() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_SERVICE_REQUEST_FAILED;
+    }
+
+    /**
      * Message transfer is waiting to acquire.
      */
     public static final int SATELLITE_MESSAGE_TRANSFER_STATE_WAITING_TO_ACQUIRE = 0;
@@ -379,10 +535,14 @@ public class SatelliteManager {
      * Satellite position updates are started only on {@link #SATELLITE_SERVICE_SUCCESS}.
      * All other results indicate that this operation failed.
      *
-     * @param executor - The executor on which the callback will be called.
+     * @param executor The executor on which the callback will be called.
      * @param callback The callback to notify of changes in satellite position. This
      *                 SatelliteCallback should implement the interface
      *                 {@link SatelliteCallback.SatellitePositionUpdateListener}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
      * @return The result of the operation.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
@@ -414,8 +574,12 @@ public class SatelliteManager {
      *
      * @param callback The callback that was passed in {@link
      *                 #startSatellitePositionUpdates(Executor, SatelliteCallback)}.
-     * @return The result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalArgumentException if the callback is invalid.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     *
+     * @return The result of the operation.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @SatelliteServiceResult public int stopSatellitePositionUpdates(
@@ -445,8 +609,9 @@ public class SatelliteManager {
      *                       will be called with maximum characters limit.
      *
      * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
      *
-     * @return The result of the operation
+     * @return The result of the operation.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     @SatelliteServiceResult

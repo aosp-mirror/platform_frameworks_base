@@ -7087,11 +7087,11 @@
     <permission android:name="android.permission.MANAGE_WEARABLE_SENSING_SERVICE"
                 android:protectionLevel="signature|privileged" />
 
-    <!-- Allows applications to use the long running jobs APIs. For more details
+    <!-- Allows applications to use the user-initiated jobs API. For more details
          see {@link android.app.job.JobInfo.Builder#setUserInitiated}.
          <p>Protection level: normal
      -->
-    <permission android:name="android.permission.RUN_LONG_JOBS"
+    <permission android:name="android.permission.RUN_USER_INITIATED_JOBS"
                 android:protectionLevel="normal"/>
 
     <!-- Allows an app access to the installer provided app metadata.

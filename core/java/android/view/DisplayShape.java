@@ -218,7 +218,7 @@ public final class DisplayShape implements Parcelable {
     @Override
     public String toString() {
         return "DisplayShape{"
-                + " spec=" + mDisplayShapeSpec
+                + " spec=" + mDisplayShapeSpec.hashCode()
                 + " displayWidth=" + mDisplayWidth
                 + " displayHeight=" + mDisplayHeight
                 + " physicalPixelDisplaySizeRatio=" + mPhysicalPixelDisplaySizeRatio

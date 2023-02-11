@@ -953,8 +953,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     properties.getLong(
                             KEY_RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS,
                             DEFAULT_RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS));
-            // Data transfer requires RUN_LONG_JOBS permission, so the upper limit will be higher
-            // than other jobs.
+            // User-initiated requires RUN_USER_INITIATED_JOBS permission, so the upper limit will
+            // be higher than other jobs.
             // Max limit should be the min guarantee and the max of other user-initiated jobs.
             RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS = Math.max(
                     RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS,
@@ -3305,7 +3305,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     public long getMinJobExecutionGuaranteeMs(JobStatus job) {
         synchronized (mLock) {
             if (job.shouldTreatAsUserInitiatedJob()
-                    && checkRunLongJobsPermission(job.getSourceUid(), job.getSourcePackageName())) {
+                    && checkRunUserInitiatedJobsPermission(
+                            job.getSourceUid(), job.getSourcePackageName())) {
                 if (job.getJob().isDataTransfer()) {
                     final long estimatedTransferTimeMs =
                             mConnectivityController.getEstimatedTransferTimeMs(job);
@@ -3343,7 +3344,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     public long getMaxJobExecutionTimeMs(JobStatus job) {
         synchronized (mLock) {
             final boolean allowLongerJob = job.shouldTreatAsUserInitiatedJob()
-                    && checkRunLongJobsPermission(job.getSourceUid(), job.getSourcePackageName());
+                    && checkRunUserInitiatedJobsPermission(
+                            job.getSourceUid(), job.getSourcePackageName());
             if (job.getJob().isDataTransfer() && allowLongerJob) { // UI+DT
                 return mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS;
             }
@@ -3824,7 +3826,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (sourceUid != -1) {
                     // Check the permission of the source app.
                     final int sourceResult =
-                            validateRunLongJobsPermission(sourceUid, sourcePkgName);
+                            validateRunUserInitiatedJobsPermission(sourceUid, sourcePkgName);
                     if (sourceResult != JobScheduler.RESULT_SUCCESS) {
                         return sourceResult;
                     }
@@ -3834,7 +3836,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     // Source app is different from calling app. Make sure the calling app also has
                     // the permission.
                     final int callingResult =
-                            validateRunLongJobsPermission(callingUid, callingPkgName);
+                            validateRunUserInitiatedJobsPermission(callingUid, callingPkgName);
                     if (callingResult != JobScheduler.RESULT_SUCCESS) {
                         return callingResult;
                     }
@@ -3871,10 +3873,10 @@ public class JobSchedulerService extends com.android.server.SystemService
             return JobScheduler.RESULT_SUCCESS;
         }
 
-        private int validateRunLongJobsPermission(int uid, String packageName) {
-            final int state = getRunLongJobsPermissionState(uid, packageName);
+        private int validateRunUserInitiatedJobsPermission(int uid, String packageName) {
+            final int state = getRunUserInitiatedJobsPermissionState(uid, packageName);
             if (state == PermissionChecker.PERMISSION_HARD_DENIED) {
-                throw new SecurityException(android.Manifest.permission.RUN_LONG_JOBS
+                throw new SecurityException(android.Manifest.permission.RUN_USER_INITIATED_JOBS
                         + " required to schedule user-initiated jobs.");
             }
             if (state == PermissionChecker.PERMISSION_SOFT_DENIED) {
@@ -4091,30 +4093,29 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         }
 
-        @Override
-        public boolean canRunLongJobs(@NonNull String packageName) {
+        public boolean canRunUserInitiatedJobs(@NonNull String packageName) {
             final int callingUid = Binder.getCallingUid();
             final int userId = UserHandle.getUserId(callingUid);
             final int packageUid = mLocalPM.getPackageUid(packageName, 0, userId);
             if (callingUid != packageUid) {
                 throw new SecurityException("Uid " + callingUid
-                        + " cannot query canRunLongJobs for package " + packageName);
+                        + " cannot query canRunUserInitiatedJobs for package " + packageName);
             }
 
-            return checkRunLongJobsPermission(packageUid, packageName);
+            return checkRunUserInitiatedJobsPermission(packageUid, packageName);
         }
 
-        @Override
-        public boolean hasRunLongJobsPermission(@NonNull String packageName,
+        public boolean hasRunUserInitiatedJobsPermission(@NonNull String packageName,
                 @UserIdInt int userId) {
             final int uid = mLocalPM.getPackageUid(packageName, 0, userId);
             final int callingUid = Binder.getCallingUid();
             if (callingUid != uid && !UserHandle.isCore(callingUid)) {
                 throw new SecurityException("Uid " + callingUid
-                        + " cannot query hasRunLongJobsPermission for package " + packageName);
+                        + " cannot query hasRunUserInitiatedJobsPermission for package "
+                        + packageName);
             }
 
-            return checkRunLongJobsPermission(uid, packageName);
+            return checkRunUserInitiatedJobsPermission(uid, packageName);
         }
 
         /**
@@ -4494,14 +4495,14 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     /** Returns true if both the appop and permission are granted. */
-    private boolean checkRunLongJobsPermission(int packageUid, String packageName) {
-        return getRunLongJobsPermissionState(packageUid, packageName)
+    private boolean checkRunUserInitiatedJobsPermission(int packageUid, String packageName) {
+        return getRunUserInitiatedJobsPermissionState(packageUid, packageName)
                 == PermissionChecker.PERMISSION_GRANTED;
     }
 
-    private int getRunLongJobsPermissionState(int packageUid, String packageName) {
+    private int getRunUserInitiatedJobsPermissionState(int packageUid, String packageName) {
         return PermissionChecker.checkPermissionForPreflight(getTestableContext(),
-                android.Manifest.permission.RUN_LONG_JOBS, PermissionChecker.PID_UNKNOWN,
+                android.Manifest.permission.RUN_USER_INITIATED_JOBS, PermissionChecker.PID_UNKNOWN,
                 packageUid, packageName);
     }
 

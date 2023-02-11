@@ -335,13 +335,14 @@ public final class JobConcurrencyManagerTest {
         mConfigBuilder.setBoolean(JobConcurrencyManager.KEY_ENABLE_MAX_WAIT_TIME_BYPASS, true);
         setConcurrencyConfig(JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT,
                 new TypeConfig(WORK_TYPE_BG, 0, JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT));
-        for (int i = 0; i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT * 2; ++i) {
+        for (int i = 0; i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT * 3; ++i) {
             final int uid = mDefaultUserId * UserHandle.PER_USER_RANGE + i;
             final String sourcePkgName = "com.source.package." + UserHandle.getAppId(uid);
             setPackageUid(sourcePkgName, uid);
             final JobStatus job = createJob(uid, sourcePkgName);
             spyOn(job);
-            doReturn(i % 2 == 0).when(job).shouldTreatAsExpeditedJob();
+            doReturn(i % 3 == 0).when(job).shouldTreatAsUserInitiatedJob();
+            doReturn(i % 3 == 1).when(job).shouldTreatAsExpeditedJob();
             if (i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT) {
                 mJobConcurrencyManager.addRunningJobForTesting(job);
             } else {
@@ -350,7 +351,7 @@ public final class JobConcurrencyManagerTest {
         }
 
         // Waiting time is too short, so we shouldn't create any extra contexts.
-        final long remainingTimeMs = JobConcurrencyManager.DEFAULT_MAX_WAIT_EJ_MS / 2;
+        final long remainingTimeMs = JobConcurrencyManager.DEFAULT_MAX_WAIT_UI_MS / 2;
         for (int i = 0; i < mInjector.contexts.size(); ++i) {
             doReturn(true).when(mInjector.contexts.keyAt(i)).isWithinExecutionGuaranteeTime();
             doReturn(remainingTimeMs)
@@ -378,19 +379,25 @@ public final class JobConcurrencyManagerTest {
     }
 
     @Test
-    public void testDetermineAssignments_allPreferredUidOnly_mediumTimeLeft() throws Exception {
+    public void testDetermineAssignments_allPreferredUidOnly_mediumTimeLeft_onlyRegRunning()
+            throws Exception {
         mConfigBuilder.setBoolean(JobConcurrencyManager.KEY_ENABLE_MAX_WAIT_TIME_BYPASS, true);
+        // Set the waiting time to be less than an EJ's min execution time.
+        mConfigBuilder.setLong(JobConcurrencyManager.KEY_MAX_WAIT_UI_MS, 2 * 60_000L);
         setConcurrencyConfig(JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT,
                 new TypeConfig(WORK_TYPE_BG, 0, JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT));
         final ArraySet<JobStatus> jobs = new ArraySet<>();
-        for (int i = 0; i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT * 2; ++i) {
+        for (int i = 0; i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT * 4; ++i) {
             final int uid = mDefaultUserId * UserHandle.PER_USER_RANGE + i;
             final String sourcePkgName = "com.source.package." + UserHandle.getAppId(uid);
             setPackageUid(sourcePkgName, uid);
             final JobStatus job = createJob(uid, sourcePkgName);
             spyOn(job);
-            doReturn(i % 2 == 0).when(job).shouldTreatAsExpeditedJob();
-            if (i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT) {
+            doReturn(i % 3 == 0).when(job).shouldTreatAsUserInitiatedJob();
+            doReturn(i % 3 == 1).when(job).shouldTreatAsExpeditedJob();
+            if (i % 3 == 2
+                    && mJobConcurrencyManager.mActiveServices.size()
+                            < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT) {
                 mJobConcurrencyManager.addRunningJobForTesting(job);
             } else {
                 mPendingJobQueue.add(job);
@@ -398,8 +405,8 @@ public final class JobConcurrencyManagerTest {
             }
         }
 
-        // Waiting time is longer than the EJ waiting time, but shorter than regular job waiting
-        // time, so we should only create an extra context for an EJ.
+        // Waiting time is longer than the EJ & UI waiting time, but shorter than regular job
+        // waiting time, so we should only create 2 extra contexts (one for EJ, one for UIJ).
         final long remainingTimeMs = (JobConcurrencyManager.DEFAULT_MAX_WAIT_EJ_MS
                 + JobConcurrencyManager.DEFAULT_MAX_WAIT_REGULAR_MS) / 2;
         for (int i = 0; i < mInjector.contexts.size(); ++i) {
@@ -428,7 +435,81 @@ public final class JobConcurrencyManagerTest {
         for (int i = changed.size() - 1; i >= 0; --i) {
             jobs.remove(changed.valueAt(i).newJob);
         }
-        assertEquals(JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT - 1, jobs.size());
+        // 1 EJ & 1 UIJ removed from the pending list.
+        assertEquals(3 * JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT - 2, jobs.size());
+        assertEquals(2, changed.size());
+        JobStatus assignedJob1 = changed.valueAt(0).newJob;
+        JobStatus assignedJob2 = changed.valueAt(1).newJob;
+        boolean ejFirst = assignedJob1.shouldTreatAsExpeditedJob();
+        if (ejFirst) {
+            assertTrue(assignedJob1.shouldTreatAsExpeditedJob());
+            assertTrue(assignedJob2.shouldTreatAsUserInitiatedJob());
+        } else {
+            assertTrue(assignedJob1.shouldTreatAsUserInitiatedJob());
+            assertTrue(assignedJob2.shouldTreatAsExpeditedJob());
+        }
+    }
+
+    @Test
+    public void testDetermineAssignments_allPreferredUidOnly_mediumTimeLeft_onlyUiRunning()
+            throws Exception {
+        mConfigBuilder.setBoolean(JobConcurrencyManager.KEY_ENABLE_MAX_WAIT_TIME_BYPASS, true);
+        // Set the waiting time to be less than an EJ's min execution time.
+        mConfigBuilder.setLong(JobConcurrencyManager.KEY_MAX_WAIT_UI_MS, 2 * 60_000L);
+        setConcurrencyConfig(JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT,
+                new TypeConfig(WORK_TYPE_BG, 0, JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT));
+        final ArraySet<JobStatus> jobs = new ArraySet<>();
+        for (int i = 0; i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT * 4; ++i) {
+            final int uid = mDefaultUserId * UserHandle.PER_USER_RANGE + i;
+            final String sourcePkgName = "com.source.package." + UserHandle.getAppId(uid);
+            setPackageUid(sourcePkgName, uid);
+            final JobStatus job = createJob(uid, sourcePkgName);
+            spyOn(job);
+            doReturn(i % 3 == 0).when(job).shouldTreatAsUserInitiatedJob();
+            doReturn(i % 3 == 1).when(job).shouldTreatAsExpeditedJob();
+            if (i % 3 == 0
+                    && mJobConcurrencyManager.mActiveServices.size()
+                            < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT) {
+                mJobConcurrencyManager.addRunningJobForTesting(job);
+            } else {
+                mPendingJobQueue.add(job);
+                jobs.add(job);
+            }
+        }
+
+        // Waiting time is longer than the EJ & UI waiting time, but shorter than regular job
+        // waiting time, so we should only create 2 extra contexts (one for EJ, one for UIJ).
+        final long remainingTimeMs = (JobConcurrencyManager.DEFAULT_MAX_WAIT_EJ_MS
+                + JobConcurrencyManager.DEFAULT_MAX_WAIT_REGULAR_MS) / 2;
+        for (int i = 0; i < mInjector.contexts.size(); ++i) {
+            doReturn(true).when(mInjector.contexts.keyAt(i)).isWithinExecutionGuaranteeTime();
+            doReturn(remainingTimeMs)
+                    .when(mInjector.contexts.keyAt(i)).getRemainingGuaranteedTimeMs(anyLong());
+        }
+
+        final ArraySet<JobConcurrencyManager.ContextAssignment> changed = new ArraySet<>();
+        final ArraySet<JobConcurrencyManager.ContextAssignment> idle = new ArraySet<>();
+        final List<JobConcurrencyManager.ContextAssignment> preferredUidOnly = new ArrayList<>();
+        final List<JobConcurrencyManager.ContextAssignment> stoppable = new ArrayList<>();
+        final JobConcurrencyManager.AssignmentInfo assignmentInfo =
+                new JobConcurrencyManager.AssignmentInfo();
+
+        mJobConcurrencyManager.prepareForAssignmentDeterminationLocked(
+                idle, preferredUidOnly, stoppable, assignmentInfo);
+        assertEquals(remainingTimeMs, assignmentInfo.minPreferredUidOnlyWaitingTimeMs);
+        assertEquals(JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT, preferredUidOnly.size());
+
+        mJobConcurrencyManager
+                .determineAssignmentsLocked(changed, idle, preferredUidOnly, stoppable,
+                        assignmentInfo);
+
+        assertEquals(JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT, preferredUidOnly.size());
+        for (int i = changed.size() - 1; i >= 0; --i) {
+            jobs.remove(changed.valueAt(i).newJob);
+        }
+        // There are already UIJs running, and wait time is too long for regular jobs, so
+        // only 1 EJ removed from the pending list.
+        assertEquals(3 * JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT - 1, jobs.size());
         assertEquals(1, changed.size());
         JobStatus assignedJob = changed.valueAt(0).newJob;
         assertTrue(assignedJob.shouldTreatAsExpeditedJob());
@@ -446,7 +527,8 @@ public final class JobConcurrencyManagerTest {
             setPackageUid(sourcePkgName, uid);
             final JobStatus job = createJob(uid, sourcePkgName);
             spyOn(job);
-            doReturn(i % 2 == 0).when(job).shouldTreatAsExpeditedJob();
+            doReturn(i % 3 == 0).when(job).shouldTreatAsUserInitiatedJob();
+            doReturn(i % 3 == 1).when(job).shouldTreatAsExpeditedJob();
             if (i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT) {
                 mJobConcurrencyManager.addRunningJobForTesting(job);
             } else {
@@ -481,21 +563,39 @@ public final class JobConcurrencyManagerTest {
                         assignmentInfo);
 
         assertEquals(JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT, preferredUidOnly.size());
-        // Depending on iteration order, we may create 1 or 2 contexts.
+        // Depending on iteration order, we may create 1-3 contexts.
         final long numAssignedJobs = changed.size();
         assertTrue(numAssignedJobs > 0);
-        assertTrue(numAssignedJobs <= 2);
+        assertTrue(numAssignedJobs <= 3);
+        int numUi = 0, numEj = 0, numReg = 0;
         for (int i = 0; i < numAssignedJobs; ++i) {
-            jobs.remove(changed.valueAt(i).newJob);
+            JobStatus assignedJob = changed.valueAt(i).newJob;
+            jobs.remove(assignedJob);
+            if (assignedJob.shouldTreatAsUserInitiatedJob()) {
+                numUi++;
+            } else if (assignedJob.shouldTreatAsExpeditedJob()) {
+                numEj++;
+            } else {
+                numReg++;
+            }
         }
         assertEquals(numAssignedJobs,
                 JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT - jobs.size());
-        JobStatus firstAssignedJob = changed.valueAt(0).newJob;
-        if (!firstAssignedJob.shouldTreatAsExpeditedJob()) {
-            assertEquals(2, numAssignedJobs);
-            assertTrue(changed.valueAt(1).newJob.shouldTreatAsExpeditedJob());
-        } else if (numAssignedJobs == 2) {
-            assertFalse(changed.valueAt(1).newJob.shouldTreatAsExpeditedJob());
+        if (numReg > 0) {
+            assertEquals(1, numReg);
+            assertEquals(1, numEj);
+            assertEquals(1, numUi);
+            assertEquals(3, numAssignedJobs);
+        } else {
+            if (numEj > 0) {
+                assertEquals(1, numEj);
+            }
+            // If the manager looks at an EJ before a UIJ, the waiting time for the UIJ will drop
+            // to 3 minutes and be below the threshold to create a new context.
+            if (numUi > 0) {
+                assertEquals(1, numUi);
+            }
+            assertEquals(numEj + numUi, numAssignedJobs);
         }
     }
 

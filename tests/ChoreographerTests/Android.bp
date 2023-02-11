@@ -36,6 +36,9 @@ android_test {
         "com.google.android.material_material",
         "truth-prebuilt",
     ],
+    jni_libs: [
+        "libchoreographertests_jni",
+    ],
     resource_dirs: ["src/main/res"],
     certificate: "platform",
     platform_apis: true,

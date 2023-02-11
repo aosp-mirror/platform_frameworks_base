@@ -20,6 +20,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
 import static com.android.server.pm.UserVisibilityChangedEvent.onInvisible;
@@ -229,6 +230,38 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
         expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, OTHER_USER_ID);
 
         assertUserCannotBeAssignedExtraDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+
+        listener.verify();
+    }
+
+    @Test
+    public final void testStartVisibleBgUser_onSecondaryDisplay_displayAlreadyAssignedToSameUser()
+            throws Exception {
+        AsyncUserVisibilityListener listener = addListenerForEvents(onVisible(USER_ID));
+        startUserInSecondaryDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+
+        expectUserIsVisible(USER_ID);
+        expectUserIsVisibleOnDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsNotVisibleOnDisplay(USER_ID, INVALID_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(USER_ID, DEFAULT_DISPLAY);
+        expectVisibleUsers(INITIAL_CURRENT_USER_ID, USER_ID);
+        expectDisplayAssignedToUser(USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, USER_ID);
+        assertUserCanBeAssignedExtraDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
+
+        int result = mMediator.assignUserToDisplayOnStart(USER_ID, USER_ID, BG_VISIBLE,
+                SECONDARY_DISPLAY_ID);
+        assertStartUserResult(result, USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE);
+
+        // Run same assertions above
+        expectUserIsVisible(USER_ID);
+        expectUserIsVisibleOnDisplay(USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserIsNotVisibleOnDisplay(USER_ID, INVALID_DISPLAY);
+        expectUserIsNotVisibleOnDisplay(USER_ID, DEFAULT_DISPLAY);
+        expectVisibleUsers(INITIAL_CURRENT_USER_ID, USER_ID);
+        expectDisplayAssignedToUser(USER_ID, SECONDARY_DISPLAY_ID);
+        expectUserAssignedToDisplay(SECONDARY_DISPLAY_ID, USER_ID);
+        assertUserCanBeAssignedExtraDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         listener.verify();
     }
