@@ -112,11 +112,7 @@ final class HsumBootUserInitializer {
                     UserInfo.FLAG_ADMIN | UserInfo.FLAG_MAIN,
                     /* disallowedPackages= */ null,
                     /* token= */ null);
-            if (newInitialUser == null) {
-                Slogf.wtf(TAG, "Initial bootable MainUser creation failed: returned null");
-            } else {
-                Slogf.i(TAG, "Successfully created MainUser, userId=%d", newInitialUser.id);
-            }
+            Slogf.i(TAG, "Successfully created MainUser, userId=%d", newInitialUser.id);
         } catch (UserManager.CheckedUserOperationException e) {
             Slogf.wtf(TAG, "Initial bootable MainUser creation failed", e);
         }
