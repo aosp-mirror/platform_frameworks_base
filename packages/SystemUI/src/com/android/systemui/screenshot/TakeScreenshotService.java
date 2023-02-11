@@ -225,7 +225,7 @@ public class TakeScreenshotService extends Service {
             return;
         }
 
-        if (mFeatureFlags.isEnabled(Flags.SCREENSHOT_METADATA)) {
+        if (mFeatureFlags.isEnabled(Flags.SCREENSHOT_METADATA_REFACTOR)) {
             Log.d(TAG, "Processing screenshot data");
             ScreenshotData screenshotData = ScreenshotData.fromRequest(request);
             try {
