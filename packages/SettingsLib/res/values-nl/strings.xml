@@ -540,11 +540,16 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Deze telefoon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Deze tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Deze telefoon"</string>
-    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
     <skip />
-    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Upgrade het account om te schakelen"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Kan hier geen downloads afspelen"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Probeer het na de advertentie nog een keer"</string>
+    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
     <skip />
-    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
+    <skip />
+    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
     <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Probleem bij verbinding maken. Zet het apparaat uit en weer aan."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Bedraad audioapparaat"</string>
@@ -569,7 +574,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Beperkt profiel"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Nieuwe gebruiker toevoegen?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Je kunt dit apparaat met anderen delen door extra gebruikers te maken. Elke gebruiker heeft een eigen profiel met zelf gekozen apps, achtergrond, enzovoort. Gebruikers kunnen ook apparaatinstellingen aanpassen die van invloed zijn op alle gebruikers, zoals wifi.\n\nWanneer je een nieuwe gebruiker toevoegt, moet die persoon een eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers. Toegankelijkheidsinstellingen en -services worden mogelijk niet overgezet naar de nieuwe gebruiker."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer je een nieuwe gebruiker toevoegt, moet die persoon diens eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer je een nieuwe gebruiker toevoegt, moet die persoon hun eigen profiel instellen.\n\nElke gebruiker kan apps updaten voor alle andere gebruikers."</string>
     <string name="user_grant_admin_title" msgid="5565796912475193314">"Deze gebruiker beheerdersrechten geven?"</string>
     <string name="user_grant_admin_message" msgid="7925257971286380976">"Als beheerder kan deze persoon andere gebruikers beheren, apparaatinstellingen aanpassen en het apparaat terugzetten op de fabrieksinstellingen."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Gebruiker nu instellen?"</string>
@@ -672,8 +677,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Voorspellende animaties voor gebaren voor terug"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Systeemanimaties aanzetten voor voorspellende animaties voor gebaren voor terug."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Met deze instelling zet je systeemanimaties aan voor voorspellende gebaaranimaties. Je moet enableOnBackInvokedCallback per app instellen op True in het manifestbestand."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Naar links verplaatsen"</item>
+    <item msgid="5425394847942513942">"Omlaag verplaatsen"</item>
+    <item msgid="7728484337962740316">"Naar rechts verplaatsen"</item>
+    <item msgid="324200556467459329">"Omhoog verplaatsen"</item>
+  </string-array>
 </resources>

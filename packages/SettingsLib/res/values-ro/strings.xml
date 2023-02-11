@@ -540,11 +540,16 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Acest telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Această tabletă"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Acest telefon"</string>
-    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
     <skip />
-    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Fă upgrade contului pentru a comuta"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Aici nu se pot reda descărcări"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Încearcă din nou după anunț"</string>
+    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
     <skip />
-    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
+    <skip />
+    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
     <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problemă la conectare. Oprește și repornește dispozitivul."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispozitiv audio cu fir"</string>
@@ -672,8 +677,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animații pentru gestul înapoi predictiv"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activează animațiile de sistem pentru gestul înapoi predictiv."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Această setare activează animațiile de sistem pentru animația gesturilor predictive. Necesită setarea valorii true în cazul atributului enableOnBackInvokedCallback pentru fiecare aplicație în fișierul manifest."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Deplasează la stânga"</item>
+    <item msgid="5425394847942513942">"Deplasează în jos"</item>
+    <item msgid="7728484337962740316">"Deplasează la dreapta"</item>
+    <item msgid="324200556467459329">"Deplasează în sus"</item>
+  </string-array>
 </resources>
