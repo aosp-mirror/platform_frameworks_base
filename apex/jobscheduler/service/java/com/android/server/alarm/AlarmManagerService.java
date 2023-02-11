@@ -766,11 +766,11 @@ public class AlarmManagerService extends SystemService {
          * Default quota for pre-S apps. The same as allowing an alarm slot once
          * every ALLOW_WHILE_IDLE_LONG_DELAY, which was 9 minutes.
          */
-        private static final int DEFAULT_ALLOW_WHILE_IDLE_COMPAT_QUOTA = 1;
+        private static final int DEFAULT_ALLOW_WHILE_IDLE_COMPAT_QUOTA = 7;
         private static final int DEFAULT_ALLOW_WHILE_IDLE_QUOTA = 72;
 
         private static final long DEFAULT_ALLOW_WHILE_IDLE_WINDOW = 60 * 60 * 1000; // 1 hour.
-        private static final long DEFAULT_ALLOW_WHILE_IDLE_COMPAT_WINDOW = 9 * 60 * 1000; // 9 mins.
+        private static final long DEFAULT_ALLOW_WHILE_IDLE_COMPAT_WINDOW = 60 * 60 * 1000;
 
         private static final long DEFAULT_PRIORITY_ALARM_DELAY = 9 * 60_000;
 
