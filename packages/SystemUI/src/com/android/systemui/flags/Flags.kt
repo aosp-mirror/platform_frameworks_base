@@ -514,9 +514,7 @@ object Flags {
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag(1304, "screenshot_app_clips")
 
     // TODO(b/268484562): Tracking bug
-    @JvmField
-    val SCREENSHOT_METADATA_REFACTOR =
-        unreleasedFlag(1305, "screenshot_metadata_refactor", teamfood = true)
+    @JvmField val SCREENSHOT_METADATA_REFACTOR = releasedFlag(1305, "screenshot_metadata_refactor")
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
