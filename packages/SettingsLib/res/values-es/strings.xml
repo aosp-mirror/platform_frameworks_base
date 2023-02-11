@@ -584,7 +584,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restringido, debes configurar una pantalla de bloqueo que proteja tus aplicaciones y datos personales."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Establecer bloqueo"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Cambiar a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creando usuario…"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creando usuario nuevo…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Creando nuevo invitado…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"No se ha podido crear el usuario"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"No se ha podido crear un nuevo invitado"</string>
