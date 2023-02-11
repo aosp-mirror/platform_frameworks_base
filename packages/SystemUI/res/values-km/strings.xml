@@ -91,13 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"បន្ទាត់បែងចែក​ខាងក្រោម <xliff:g id="PERCENT">%1$d</xliff:g> ភាគរយ"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"បន្ទាត់បែងចែក​ខាងឆ្វេង <xliff:g id="PERCENT">%1$d</xliff:g> ភាគរយ"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"បន្ទាត់បែងចែក​ខាងស្ដាំ <xliff:g id="PERCENT">%1$d</xliff:g> ភាគរយ"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"បានរក្សាទុកនៅក្នុង <xliff:g id="APP">%1$s</xliff:g> ក្នុងកម្រងព័ត៌មានការងារ"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ឯកសារ"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> បានរកឃើញ​រូបថតអេក្រង់នេះ។"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> និងកម្មវិធីដែលបើក​ផ្សេងទៀតបានរកឃើញ​រូបថតអេក្រង់នេះ។"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"មុខងារថត​វីដេអូអេក្រង់"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"កំពុង​ដំណើរការ​ការថតអេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
@@ -865,6 +862,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"មានអ្វីមួយខុសប្រក្រតី។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"កំពុងផ្ទុក"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ថេប្លេត"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"អសកម្ម ពិនិត្យមើល​កម្មវិធី"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"រកមិន​ឃើញទេ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"មិនអាច​គ្រប់គ្រង​បានទេ"</string>

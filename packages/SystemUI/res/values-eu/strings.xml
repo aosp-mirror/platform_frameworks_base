@@ -32,13 +32,13 @@
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Aktibatu"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Ez, eskerrik asko"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Biratu pantaila automatikoki"</string>
-    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> atzitzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
+    <string name="usb_device_permission_prompt" msgid="4414719028369181772">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> erabiltzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
     <string name="usb_device_permission_prompt_warn" msgid="2309129784984063656">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> erabiltzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?\nAplikazioak ez du grabatzeko baimenik, baina baliteke USB bidezko gailu horren bidez audioa grabatzea."</string>
-    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> atzitzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
+    <string name="usb_audio_device_permission_prompt_title" msgid="4221351137250093451">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> erabiltzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
     <string name="usb_audio_device_confirm_prompt_title" msgid="8828406516732985696">"<xliff:g id="APPLICATION">%1$s</xliff:g> ireki nahi duzu <xliff:g id="USB_DEVICE">%2$s</xliff:g> kudeatzeko?"</string>
     <string name="usb_audio_device_prompt_warn" msgid="2504972133361130335">"Aplikazioak ez du grabatzeko baimenik, baina baliteke USB bidezko gailu honen bidez audioa grabatzea. <xliff:g id="APPLICATION">%1$s</xliff:g> gailu honekin erabiliz gero, baliteke deiak, jakinarazpenak eta alarmak ez entzutea."</string>
     <string name="usb_audio_device_prompt" msgid="7944987408206252949">"<xliff:g id="APPLICATION">%1$s</xliff:g> gailu honekin erabiliz gero, baliteke deiak, jakinarazpenak eta alarmak ez entzutea."</string>
-    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> atzitzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="717963550388312123">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> erabiltzeko baimena eman nahi diozu <xliff:g id="APPLICATION">%1$s</xliff:g> aplikazioari?"</string>
     <string name="usb_device_confirm_prompt" msgid="4091711472439910809">"<xliff:g id="APPLICATION">%1$s</xliff:g> ireki nahi duzu <xliff:g id="USB_DEVICE">%2$s</xliff:g> kudeatzeko?"</string>
     <string name="usb_device_confirm_prompt_warn" msgid="990208659736311769">"<xliff:g id="APPLICATION">%1$s</xliff:g> ireki nahi duzu <xliff:g id="USB_DEVICE">%2$s</xliff:g> erabiltzeko?\nAplikazioak ez du grabatzeko baimenik, baina baliteke audioa grabatzea USB bidezko gailu horren bidez."</string>
     <string name="usb_accessory_confirm_prompt" msgid="5728408382798643421">"<xliff:g id="APPLICATION">%1$s</xliff:g> ireki nahi duzu <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> kudeatzeko?"</string>
@@ -91,13 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Beheko ertza: ehuneko <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Ezkerreko ertza: ehuneko <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Eskuineko ertza: ehuneko <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Laneko profilaren <xliff:g id="APP">%1$s</xliff:g> aplikazioan gorde da"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Fitxategiak"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioak pantaila-argazkia hauteman du."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> aplikazioak eta irekitako beste aplikazio batzuek pantaila-argazkia hauteman dute."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Pantaila-grabagailua"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pantaila-grabaketa prozesatzen"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pantailaren grabaketa-saioaren jakinarazpen jarraitua"</string>
@@ -303,9 +300,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Gailuaren mikrofonoa desblokeatu nahi duzu?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Gailuaren kamera desblokeatu nahi duzu?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Gailuaren kamera eta mikrofonoa desblokeatu nahi dituzu?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Mikrofonoa atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dute."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Kamera atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dute."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Kamera edo mikrofonoa atzitzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dituzte."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Mikrofonoa erabiltzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dute."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Kamera erabiltzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dute."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Kamera edo mikrofonoa erabiltzeko baimena duten aplikazio eta zerbitzu guztiek erabili ahalko dituzte."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Blokeatuta dago mikrofonoa"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Blokeatuta dago kamera"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Blokeatuta daude mikrofonoa eta kamera"</string>
@@ -865,6 +862,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Arazoren bat izan da. Saiatu berriro."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Kargatzen"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tableta"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktibo; egiaztatu aplikazioa"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ez da aurkitu"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Ez dago erabilgarri kontrolatzeko aukera"</string>

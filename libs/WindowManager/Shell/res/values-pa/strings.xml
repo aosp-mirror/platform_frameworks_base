@@ -47,6 +47,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ਉੱਪਰ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ਉੱਪਰ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"ਹੇਠਾਂ ਪੂਰੀ ਸਕ੍ਰੀਨ"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"ਇੱਕ ਹੱਥ ਮੋਡ ਵਰਤਣਾ"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ਬਾਹਰ ਜਾਣ ਲਈ, ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ ਜਾਂ ਐਪ \'ਤੇ ਕਿਤੇ ਵੀ ਟੈਪ ਕਰੋ"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ਇੱਕ ਹੱਥ ਮੋਡ ਸ਼ੁਰੂ ਕਰੋ"</string>

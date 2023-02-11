@@ -91,13 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"<xliff:g id="PERCENT">%1$d</xliff:g> %% dolnej hranice"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"<xliff:g id="PERCENT">%1$d</xliff:g> %% ľavej hranice"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"<xliff:g id="PERCENT">%1$d</xliff:g> %% pravej hranice"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Uložená v aplikácii <xliff:g id="APP">%1$s</xliff:g> v pracovnom profile"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"Aplikácia <xliff:g id="APPNAME">%1$s</xliff:g> zaznamenala túto snímku obrazovky."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> a ďalšie otvorené aplikácie zaznamenali túto snímku obrazovky."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Spracúva sa záznam obrazovky"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Zobrazuje sa upozornenie týkajúce sa relácie záznamu obrazovky"</string>
@@ -865,6 +862,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Niečo sa pokazilo. Skúste to znova."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Načítava sa"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Prenášajú sa médiá"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Prenáša sa <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktívne, preverte aplikáciu"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nenájdené"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Ovládač nie je k dispozícii"</string>

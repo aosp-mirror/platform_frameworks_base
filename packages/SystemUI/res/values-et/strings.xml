@@ -91,13 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Alapiir: <xliff:g id="PERCENT">%1$d</xliff:g> protsenti"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Vasak piir: <xliff:g id="PERCENT">%1$d</xliff:g> protsenti"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Parem piir: <xliff:g id="PERCENT">%1$d</xliff:g> protsenti"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Salvestati tööprofiilil rakendusse <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> tuvastas selle ekraanipildi."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ja muud avatud rakendused tuvastasid selle ekraanipildi."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekraanisalvesti"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekraanisalvestuse töötlemine"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pooleli märguanne ekraanikuva salvestamise seansi puhul"</string>
@@ -865,6 +862,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Midagi läks valesti. Proovige uuesti."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Laadimine"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tahvelarvuti"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Passiivne, vaadake rakendust"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ei leitud"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Juhtelement pole saadaval"</string>

@@ -217,7 +217,7 @@
     <string name="silent_mode" msgid="8796112363642579333">"Lydløs"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"Slå trådløs til"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Slå trådløs fra"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"Skærmlås"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"Skærm­lås"</string>
     <string name="power_off" msgid="4111692782492232778">"Sluk"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Ringeren er deaktiveret"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Ringervibrering"</string>
@@ -241,7 +241,7 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Valgmuligheder for tabletcomputeren"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Valgmuligheder for Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Indstillinger for telefon"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"Skærmlås"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"Skærm­lås"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Sluk"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Afbryderknap"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Genstart"</string>

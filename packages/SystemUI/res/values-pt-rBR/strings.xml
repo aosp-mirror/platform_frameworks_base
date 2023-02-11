@@ -862,6 +862,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Algo deu errado. Tente novamente."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Carregando"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Transmitindo sua mídia"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Transmitindo o app <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inativo, verifique o app"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Não encontrado"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"O controle está indisponível"</string>
@@ -1016,7 +1018,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Um app de câmera está instalado"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• O app está disponível"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Pelo menos um dispositivo está disponível"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantenha o atalho pressionado"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Toque e pressione o atalho"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Virar agora"</string>
     <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Abra o smartphone para tirar uma selfie melhor"</string>

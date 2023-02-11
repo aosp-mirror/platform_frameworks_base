@@ -47,6 +47,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"顶部 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"顶部 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"底部全屏"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"使用单手模式"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"如需退出，请从屏幕底部向上滑动，或点按应用上方的任意位置"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"启动单手模式"</string>

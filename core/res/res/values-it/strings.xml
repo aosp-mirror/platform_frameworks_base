@@ -52,7 +52,7 @@
     <string name="needPuk2" msgid="7032612093451537186">"Digita il PUK2 per sbloccare la SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Operazione non riuscita; attiva blocco SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata.</item>
       <item quantity="other">Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM venga bloccata.</item>
       <item quantity="one">Hai ancora <xliff:g id="NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM venga bloccata.</item>
     </plurals>

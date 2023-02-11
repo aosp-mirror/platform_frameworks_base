@@ -52,7 +52,7 @@
     <string name="needPuk2" msgid="7032612093451537186">"Introduce el código PUK2 para desbloquear la tarjeta SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Error, habilitar bloqueo de SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos para bloquear la tarjeta SIM.</item>
       <item quantity="other">Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos para bloquear la tarjeta SIM.</item>
       <item quantity="one">Te queda <xliff:g id="NUMBER_0">%d</xliff:g> intento para bloquear la tarjeta SIM.</item>
     </plurals>
