@@ -2829,4 +2829,19 @@
     [CHAR LIMIT=32]
     -->
     <string name="lock_screen_settings">Lock screen settings</string>
+
+    <!-- Content description for Wi-Fi not available icon on dream [CHAR LIMIT=NONE]-->
+    <string name="wifi_unavailable_dream_overlay_content_description">Wi-Fi not available</string>
+
+    <!-- Content description for camera blocked icon on dream [CHAR LIMIT=NONE] -->
+    <string name="camera_blocked_dream_overlay_content_description">Camera blocked</string>
+
+    <!-- Content description for camera and microphone blocked icon on dream [CHAR LIMIT=NONE] -->
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description">Camera and microphone blocked</string>
+
+    <!-- Content description for camera and microphone disabled icon on dream [CHAR LIMIT=NONE] -->
+    <string name="microphone_blocked_dream_overlay_content_description">Microphone blocked</string>
+
+    <!-- Content description for priority mode icon on dream [CHAR LIMIT=NONE] -->
+    <string name="priority_mode_dream_overlay_content_description">Priority mode on</string>
 </resources>
