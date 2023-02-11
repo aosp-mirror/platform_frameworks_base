@@ -102,6 +102,34 @@ public class SharedConnectivityManager {
                 }
             }
         };
+
+        @Override
+        public void onTetherNetworkConnectionStatusChanged(
+                @NonNull TetherNetworkConnectionStatus status) {
+            if (mCallback != null) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() ->
+                            mCallback.onTetherNetworkConnectionStatusChanged(status));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        };
+
+        @Override
+        public void onKnownNetworkConnectionStatusChanged(
+                @NonNull KnownNetworkConnectionStatus status) {
+            if (mCallback != null) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() ->
+                            mCallback.onKnownNetworkConnectionStatusChanged(status));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        };
     }
 
     private ISharedConnectivityService mService;

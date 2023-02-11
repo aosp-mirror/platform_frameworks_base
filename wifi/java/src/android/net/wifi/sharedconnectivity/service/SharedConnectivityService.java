@@ -27,9 +27,11 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.sharedconnectivity.app.KnownNetwork;
+import android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState;
 import android.net.wifi.sharedconnectivity.app.TetherNetwork;
+import android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -66,6 +68,8 @@ public abstract class SharedConnectivityService extends Service {
     private List<TetherNetwork> mTetherNetworks = Collections.emptyList();
     private List<KnownNetwork> mKnownNetworks = Collections.emptyList();
     private SharedConnectivitySettingsState mSettingsState;
+    private TetherNetworkConnectionStatus mTetherNetworkConnectionStatus;
+    private KnownNetworkConnectionStatus mKnownNetworkConnectionStatus;
 
     public SharedConnectivityService() {
         mHandler = new Handler(getMainLooper());
@@ -145,7 +149,10 @@ public abstract class SharedConnectivityService extends Service {
 
     private void registerCallback(ISharedConnectivityCallback callback) {
         // Listener gets triggered on first register using cashed data
-        if (!notifyTetherNetworkUpdate(callback) || !notifyKnownNetworkUpdate(callback)) {
+        if (!notifyTetherNetworkUpdate(callback) || !notifyKnownNetworkUpdate(callback)
+                || !notifySettingsStateUpdate(callback)
+                || !notifyTetherNetworkConnectionStatusChanged(callback)
+                || !notifyKnownNetworkConnectionStatusChanged(callback)) {
             if (DEBUG) Log.w(TAG, "Failed to notify client");
             return;
         }
@@ -199,6 +206,27 @@ public abstract class SharedConnectivityService extends Service {
         return true;
     }
 
+    private boolean notifyTetherNetworkConnectionStatusChanged(
+            ISharedConnectivityCallback callback) {
+        try {
+            callback.onTetherNetworkConnectionStatusChanged(mTetherNetworkConnectionStatus);
+        } catch (RemoteException e) {
+            if (DEBUG) Log.w(TAG, "Exception in notifyTetherNetworkConnectionStatusChanged", e);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean notifyKnownNetworkConnectionStatusChanged(
+            ISharedConnectivityCallback callback) {
+        try {
+            callback.onKnownNetworkConnectionStatusChanged(mKnownNetworkConnectionStatus);
+        } catch (RemoteException e) {
+            if (DEBUG) Log.w(TAG, "Exception in notifyKnownNetworkConnectionStatusChanged", e);
+            return false;
+        }
+        return true;
+    }
     /**
      * Implementing application should call this method to provide an up-to-date list of Tether
      * Networks to be displayed to the user.
@@ -248,6 +276,37 @@ public abstract class SharedConnectivityService extends Service {
 
         for (ISharedConnectivityCallback callback:mCallbacks) {
             notifySettingsStateUpdate(callback);
+        }
+    }
+
+    /**
+     * Implementing application should call this method to provide an up-to-date status of enabling
+     * and connecting to the tether network.
+     *
+     * @param status The updated status {@link TetherNetworkConnectionStatus} of the connection.
+     *
+     */
+    public final void updateTetherNetworkConnectionStatus(
+            @NonNull TetherNetworkConnectionStatus status) {
+        mTetherNetworkConnectionStatus = status;
+        for (ISharedConnectivityCallback callback:mCallbacks) {
+            notifyTetherNetworkConnectionStatusChanged(callback);
+        }
+    }
+
+    /**
+     * Implementing application should call this method to provide an up-to-date status of
+     * connecting to a known network.
+     *
+     * @param status The updated status {@link KnownNetworkConnectionStatus} of the connection.
+     *
+     */
+    public final void updateKnownNetworkConnectionStatus(
+            @NonNull KnownNetworkConnectionStatus status) {
+        mKnownNetworkConnectionStatus = status;
+
+        for (ISharedConnectivityCallback callback:mCallbacks) {
+            notifyKnownNetworkConnectionStatusChanged(callback);
         }
     }
 
