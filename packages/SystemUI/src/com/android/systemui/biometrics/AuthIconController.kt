@@ -24,14 +24,15 @@ import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
 import android.util.Log
 import com.airbnb.lottie.LottieAnimationView
+import com.airbnb.lottie.LottieCompositionFactory
 import com.android.systemui.biometrics.AuthBiometricView.BiometricState
 
 private const val TAG = "AuthIconController"
 
 /** Controller for animating the BiometricPrompt icon/affordance. */
 abstract class AuthIconController(
-        protected val context: Context,
-        protected val iconView: LottieAnimationView
+    protected val context: Context,
+    protected val iconView: LottieAnimationView
 ) : Animatable2.AnimationCallback() {
 
     /** If this controller should ignore events and pause. */
@@ -94,4 +95,12 @@ abstract class AuthIconController(
     open fun handleAnimationEnd(drawable: Drawable) {}
 
     open fun onConfigurationChanged(newConfig: Configuration) {}
+
+    // TODO(b/251476085): Migrate this to an extension at the appropriate level?
+    /** Load the given [rawResources] immediately so they are cached for use in the [context]. */
+    protected fun cacheLottieAssetsInContext(context: Context, vararg rawResources: Int) {
+        for (res in rawResources) {
+            LottieCompositionFactory.fromRawRes(context, res)
+        }
+    }
 }

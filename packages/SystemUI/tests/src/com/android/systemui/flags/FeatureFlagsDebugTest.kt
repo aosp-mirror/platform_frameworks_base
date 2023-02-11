@@ -28,7 +28,6 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.GlobalSettings
-import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert
 import org.junit.Before
@@ -63,8 +62,6 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     @Mock
     private lateinit var globalSettings: GlobalSettings
     @Mock
-    private lateinit var secureSettings: SecureSettings
-    @Mock
     private lateinit var systemProperties: SystemPropertiesHelper
     @Mock
     private lateinit var resources: Resources
@@ -92,7 +89,6 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             flagManager,
             mockContext,
             globalSettings,
-            secureSettings,
             systemProperties,
             resources,
             serverFlagReader,

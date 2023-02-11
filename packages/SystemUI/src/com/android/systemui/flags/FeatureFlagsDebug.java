@@ -40,7 +40,6 @@ import androidx.annotation.Nullable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.settings.GlobalSettings;
-import com.android.systemui.util.settings.SecureSettings;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -74,7 +73,6 @@ public class FeatureFlagsDebug implements FeatureFlags {
     private final FlagManager mFlagManager;
     private final Context mContext;
     private final GlobalSettings mGlobalSettings;
-    private final SecureSettings mSecureSettings;
     private final Resources mResources;
     private final SystemPropertiesHelper mSystemProperties;
     private final ServerFlagReader mServerFlagReader;
@@ -87,8 +85,9 @@ public class FeatureFlagsDebug implements FeatureFlags {
     private final ServerFlagReader.ChangeListener mOnPropertiesChanged =
             new ServerFlagReader.ChangeListener() {
                 @Override
-                public void onChange() {
-                    mRestarter.restartSystemUI();
+                public void onChange(Flag<?> flag) {
+                    mRestarter.restartSystemUI(
+                            "Server flag change: " + flag.getNamespace() + "." + flag.getName());
                 }
             };
 
@@ -97,7 +96,6 @@ public class FeatureFlagsDebug implements FeatureFlags {
             FlagManager flagManager,
             Context context,
             GlobalSettings globalSettings,
-            SecureSettings secureSettings,
             SystemPropertiesHelper systemProperties,
             @Main Resources resources,
             ServerFlagReader serverFlagReader,
@@ -106,7 +104,6 @@ public class FeatureFlagsDebug implements FeatureFlags {
         mFlagManager = flagManager;
         mContext = context;
         mGlobalSettings = globalSettings;
-        mSecureSettings = secureSettings;
         mResources = resources;
         mSystemProperties = systemProperties;
         mServerFlagReader = serverFlagReader;
@@ -119,7 +116,8 @@ public class FeatureFlagsDebug implements FeatureFlags {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_SET_FLAG);
         filter.addAction(ACTION_GET_FLAGS);
-        mFlagManager.setOnSettingsChangedAction(this::restartSystemUI);
+        mFlagManager.setOnSettingsChangedAction(
+                suppressRestart -> restartSystemUI(suppressRestart, "Settings changed"));
         mFlagManager.setClearCacheAction(this::removeFromCache);
         mContext.registerReceiver(mReceiver, filter, null, null,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
@@ -233,6 +231,10 @@ public class FeatureFlagsDebug implements FeatureFlags {
         Boolean result = readBooleanFlagOverride(flag.getName());
         if (result == null) {
             result = readBooleanFlagOverride(flag.getId());
+            if (result != null) {
+                // Move overrides from id to name
+                setFlagValueInternal(flag.getName(), result, BooleanFlagSerializer.INSTANCE);
+            }
         }
         boolean hasServerOverride = mServerFlagReader.hasOverride(
                 flag.getNamespace(), flag.getName());
@@ -305,25 +307,38 @@ public class FeatureFlagsDebug implements FeatureFlags {
         requireNonNull(value, "Cannot set a null value");
         T currentValue = readFlagValueInternal(name, serializer);
         if (Objects.equals(currentValue, value)) {
-            Log.i(TAG, "Flag id " + name + " is already " + value);
+            Log.i(TAG, "Flag \"" + name + "\" is already " + value);
             return;
         }
+        setFlagValueInternal(name, value, serializer);
+        Log.i(TAG, "Set flag \"" + name + "\" to " + value);
+        removeFromCache(name);
+        mFlagManager.dispatchListenersAndMaybeRestart(
+                name,
+                suppressRestart -> restartSystemUI(
+                        suppressRestart, "Flag \"" + name + "\" changed to " + value));
+    }
+
+    private <T> void setFlagValueInternal(
+            String name, @NonNull T value, FlagSerializer<T> serializer) {
         final String data = serializer.toSettingsData(value);
         if (data == null) {
-            Log.w(TAG, "Failed to set id " + name + " to " + value);
+            Log.w(TAG, "Failed to set flag " + name + " to " + value);
             return;
         }
         mGlobalSettings.putStringForUser(mFlagManager.nameToSettingsKey(name), data,
                 UserHandle.USER_CURRENT);
-        Log.i(TAG, "Set id " + name + " to " + value);
-        removeFromCache(name);
-        mFlagManager.dispatchListenersAndMaybeRestart(name, this::restartSystemUI);
     }
 
     <T> void eraseFlag(Flag<T> flag) {
         if (flag instanceof SysPropFlag) {
-            mSystemProperties.erase(((SysPropFlag<T>) flag).getName());
-            dispatchListenersAndMaybeRestart(flag.getName(), this::restartAndroid);
+            mSystemProperties.erase(flag.getName());
+            dispatchListenersAndMaybeRestart(
+                    flag.getName(),
+                    suppressRestart -> restartSystemUI(
+                            suppressRestart,
+                            "SysProp Flag \"" + flag.getNamespace() + "."
+                                    + flag.getName() + "\" reset to default."));
         } else {
             eraseFlag(flag.getName());
         }
@@ -333,7 +348,10 @@ public class FeatureFlagsDebug implements FeatureFlags {
     private void eraseFlag(String name) {
         eraseInternal(name);
         removeFromCache(name);
-        dispatchListenersAndMaybeRestart(name, this::restartSystemUI);
+        dispatchListenersAndMaybeRestart(
+                name,
+                suppressRestart -> restartSystemUI(
+                        suppressRestart, "Flag \"" + name + "\" reset to default"));
     }
 
     private void dispatchListenersAndMaybeRestart(String name, Consumer<Boolean> restartAction) {
@@ -367,20 +385,20 @@ public class FeatureFlagsDebug implements FeatureFlags {
         mFlagManager.removeListener(listener);
     }
 
-    private void restartSystemUI(boolean requestSuppress) {
+    private void restartSystemUI(boolean requestSuppress, String reason) {
         if (requestSuppress) {
             Log.i(TAG, "SystemUI Restart Suppressed");
             return;
         }
-        mRestarter.restartSystemUI();
+        mRestarter.restartSystemUI(reason);
     }
 
-    private void restartAndroid(boolean requestSuppress) {
+    private void restartAndroid(boolean requestSuppress, String reason) {
         if (requestSuppress) {
             Log.i(TAG, "Android Restart Suppressed");
             return;
         }
-        mRestarter.restartAndroid();
+        mRestarter.restartAndroid(reason);
     }
 
     void setBooleanFlagInternal(Flag<?> flag, boolean value) {
@@ -391,8 +409,11 @@ public class FeatureFlagsDebug implements FeatureFlags {
         } else if (flag instanceof SysPropBooleanFlag) {
             // Store SysProp flags in SystemProperties where they can read by outside parties.
             mSystemProperties.setBoolean(((SysPropBooleanFlag) flag).getName(), value);
-            dispatchListenersAndMaybeRestart(flag.getName(),
-                    FeatureFlagsDebug.this::restartAndroid);
+            dispatchListenersAndMaybeRestart(
+                    flag.getName(),
+                    suppressRestart -> restartSystemUI(
+                            suppressRestart,
+                            "Flag \"" + flag.getName() + "\" changed to " + value));
         } else {
             throw new IllegalArgumentException("Unknown flag type");
         }

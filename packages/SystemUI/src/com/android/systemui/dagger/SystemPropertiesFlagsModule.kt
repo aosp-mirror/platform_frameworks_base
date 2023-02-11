@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package android.service.dreams;
+package com.android.systemui.dagger
 
-import android.os.IRemoteCallback;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags
+import dagger.Module
+import dagger.Provides
 
-/**
- * @hide
- */
-oneway interface IDreamService {
-    void attach(IBinder windowToken, boolean canDoze, boolean isPreviewMode, IRemoteCallback started);
-    void detach();
-    void wakeUp();
+/** A module which provides access to the default [SystemUiSystemPropertiesFlags.FlagResolver] */
+@Module
+object SystemPropertiesFlagsModule {
+    /** provide the default FlagResolver. */
+    @Provides
+    fun provideFlagResolver(): SystemUiSystemPropertiesFlags.FlagResolver =
+        SystemUiSystemPropertiesFlags.getResolver()
 }
