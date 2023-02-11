@@ -49,6 +49,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ স্ক্ৰীনখন ৫০% কৰক"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ স্ক্ৰীনখন ৩০% কৰক"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"তলৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"এখন হাতেৰে ব্যৱহাৰ কৰা ম’ড ব্যৱহাৰ কৰা"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"বাহিৰ হ’বলৈ স্ক্ৰীনখনৰ একেবাৰে তলৰ পৰা ওপৰলৈ ছোৱাইপ কৰক অথবা এপ্‌টোৰ ওপৰত যিকোনো ঠাইত টিপক"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"এখন হাতেৰে ব্যৱহাৰ কৰা ম\'ডটো আৰম্ভ কৰক"</string>

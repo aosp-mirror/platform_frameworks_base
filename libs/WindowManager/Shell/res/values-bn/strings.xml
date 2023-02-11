@@ -49,6 +49,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ ৫০%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ ৩০%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"নীচের অংশ নিয়ে পূর্ণ স্ক্রিন"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"\'এক হাতে ব্যবহার করার মোড\'-এর ব্যবহার"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"বেরিয়ে আসার জন্য, স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করুন অথবা অ্যাপ আইকনের উপরে যেকোনও জায়গায় ট্যাপ করুন"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"\'এক হাতে ব্যবহার করার মোড\' শুরু করুন"</string>

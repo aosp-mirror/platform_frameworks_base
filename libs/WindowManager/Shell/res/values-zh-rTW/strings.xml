@@ -49,6 +49,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"以 50% 的螢幕空間顯示頂端畫面"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"以 30% 的螢幕空間顯示頂端畫面"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"以全螢幕顯示底部畫面"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"使用單手模式"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"如要退出，請從螢幕底部向上滑動，或輕觸應用程式上方的任何位置"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"啟動單手模式"</string>
