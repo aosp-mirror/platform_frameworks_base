@@ -1358,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB ਰਾਹੀਂ PTP ਚਾਲੂ ਹੈ"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB ਟੈਦਰਿੰਗ ਚਾਲੂ ਹੈ"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB ਰਾਹੀਂ MIDI ਚਾਲੂ ਹੈ"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ਐਕਸੈਸਰੀ ਕਨੈਕਟ ਹੋਈ"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ਕਨੈਕਟ ਕੀਤਾ ਡੀਵਾਈਸ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ। ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ।"</string>
@@ -1706,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ਹੋ ਗਿਆ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ਸ਼ਾਰਟਕੱਟ ਬੰਦ ਕਰੋ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"ਰੰਗ ਪਲਟਨਾ"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"ਰੰਗ ਸੁਧਾਈ"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ਇੱਕ ਹੱਥ ਮੋਡ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ਜ਼ਿਆਦਾ ਘੱਟ ਚਮਕ"</string>
@@ -1857,8 +1860,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"ਕੰਮ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"ਦੂਸਰੀ ਕਾਰਜ-ਸਥਾਨ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"ਤੀਸਰੀ ਕਾਰਜ-ਸਥਾਨ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
-    <skip />
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> ਦਾ ਕਲੋਨ"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"ਅਨਪਿੰਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਿੰਨ ਮੰਗੋ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"ਅਨਪਿੰਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਅਣਲਾਕ ਪੈਟਰਨ ਵਾਸਤੇ ਪੁੱਛੋ"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"ਅਣਪਿੰਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਪਾਸਵਰਡ ਮੰਗੋ"</string>
@@ -2313,16 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ਸੰਬੰਧੀ ਐਪ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਤੋਂ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾਵਾਂ ਸ਼ੁਰੂ ਕਰਨ ਦੀ ਆਗਿਆ ਮਿਲਦੀ ਹੈ।"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਉਪਲਬਧ ਹੈ"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ਦੋਹਰੀ ਸਕ੍ਰੀਨ"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ਦੋਹਰੀ ਸਕ੍ਰੀਨ ਚਾਲੂ ਹੈ"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਸਮੱਗਰੀ ਨੂੰ ਦਿਖਾਉਣ ਲਈ ਦੋਵੇਂ ਡਿਸਪਲੇਆਂ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ਡੀਵਾਈਸ ਬਹੁਤ ਗਰਮ ਹੈ"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ਦੋਹਰੀ ਸਕ੍ਰੀਨ ਵਿਸ਼ੇਸ਼ਤਾ ਉਪਲਬਧ ਨਹੀਂ ਹੈ ਕਿਉਂਕਿ ਤੁਹਾਡਾ ਫ਼ੋਨ ਬਹੁਤ ਗਰਮ ਹੋ ਰਿਹਾ ਹੈ"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ਬੰਦ ਕਰੋ"</string>
 </resources>

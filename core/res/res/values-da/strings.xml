@@ -214,7 +214,7 @@
     <string name="silent_mode" msgid="8796112363642579333">"Lydløs"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"Slå trådløs til"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Slå trådløs fra"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"Skærmlås"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"Skærm­lås"</string>
     <string name="power_off" msgid="4111692782492232778">"Sluk"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Ringeren er deaktiveret"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Ringervibrering"</string>
@@ -238,7 +238,7 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Valgmuligheder for tabletcomputeren"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Valgmuligheder for Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Indstillinger for telefon"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"Skærmlås"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"Skærm­lås"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Sluk"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Afbryderknap"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Genstart"</string>
@@ -1358,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB er slået til"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Netdeling via USB er slået til"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB er slået til"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-tilbehør er tilsluttet"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Tryk for at se flere muligheder."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Den tilsluttede enhed oplades. Tryk for at få flere valgmuligheder."</string>
@@ -1706,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Udfør"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Deaktiver genvej"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Brug genvej"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Ombytning af farver"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Farvekorrigering"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enhåndstilstand"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Ekstra dæmpet belysning"</string>
@@ -2312,16 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tillader, at en medfølgende app kan starte tjenester i forgrunden via tilladelser til tjenester i baggrunden."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofonen er tilgængelig"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofonen er blokeret"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dobbeltskærm"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dobbeltskærm er aktiveret"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruger begge skærme til at vise indhold"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Enheden er for varm"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dobbeltskærm er ikke tilgængelig, fordi din telefon er for varm"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Deaktiver"</string>
 </resources>

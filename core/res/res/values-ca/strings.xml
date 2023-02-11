@@ -47,7 +47,7 @@
     <string name="needPuk2" msgid="3910763547447344963">"Escriu el PUK2 per desbloquejar la SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"No és correcte; activa el bloqueig de RUIM/SIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents; si no l\'encertes, la SIM es bloquejarà.</item>
       <item quantity="other">Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents; si no l\'encertes, la SIM es bloquejarà.</item>
       <item quantity="one">Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, la SIM es bloquejarà.</item>
     </plurals>
@@ -179,7 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"L\'emmagatzematge del rellotge està ple. Suprimeix uns quants fitxers per alliberar espai."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"L\'espai d\'emmagatzematge del dispositiu Android TV és ple. Suprimeix alguns fitxers per alliberar espai."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"L\'emmagatzematge del telèfon és ple. Suprimeix uns quants fitxers per alliberar espai."</string>
-    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{L\'autoritat de certificació s\'ha instal·lat}many{Certificate authorities installed}other{Les autoritats de certificació s\'han instal·lat}}"</string>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{L\'autoritat de certificació s\'ha instal·lat}many{Les autoritats de certificació s\'han instal·lat}other{Les autoritats de certificació s\'han instal·lat}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Per un tercer desconegut"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Per l\'administrador del teu perfil de treball"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Per <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -253,7 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Utilitza aquesta opció en la majoria de circumstàncies. Et permet fer un seguiment del progrés de l\'informe, introduir més dades sobre el problema i fer captures de pantalla. És possible que ometi seccions poc utilitzades que requereixen molt de temps."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Informe complet"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Utilitza aquesta opció perquè la interferència en el sistema sigui mínima si el dispositiu no respon o va massa lent, o bé si necessites totes les seccions de l\'informe. No et permet introduir més dades ni fer més captures de pantalla."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a # segon.}many{Taking screenshot for bug report in # seconds.}other{Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a # segons.}}"</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a # segon.}many{Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a # segons.}other{Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a # segons.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"S\'ha fet la captura de pantalla amb l\'informe d\'errors"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"No s\'ha pogut fer la captura de pantalla amb l\'informe d\'errors"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Mode silenciós"</string>
@@ -1090,7 +1090,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vol activar l\'exploració tàctil. Quan l\'exploració per tàctil està activada, pots escoltar o veure les descripcions del contingut seleccionat o utilitzar gestos per interaccionar amb el telèfon."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Fa 1 mes"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Fa més d\'1 mes"</string>
-    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Darrer dia (#)}many{Last # days}other{# darrers dies}}"</string>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Darrer dia (#)}many{# darrers dies}other{# darrers dies}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Darrer mes"</string>
     <string name="older" msgid="1645159827884647400">"Més antigues"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"el <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1117,14 +1117,14 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"d\'aquí a <xliff:g id="COUNT">%d</xliff:g> a"</string>
-    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Fa # minut}many{# minutes ago}other{Fa # minuts}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Fa # hora}many{# hours ago}other{Fa # hores}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Fa # dia}many{# days ago}other{Fa # dies}}"</string>
-    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Fa # any}many{# years ago}other{Fa # anys}}"</string>
-    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minut}many{# minutes}other{# minuts}}"</string>
-    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# hora}many{# hours}other{# hores}}"</string>
-    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# dia}many{# days}other{# dies}}"</string>
-    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# any}many{# years}other{# anys}}"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Fa # minut}many{Fa # minuts}other{Fa # minuts}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Fa # hora}many{Fa # hores}other{Fa # hores}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Fa # dia}many{Fa # dies}other{Fa # dies}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Fa # any}many{Fa # anys}other{Fa # anys}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minut}many{# minuts}other{# minuts}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# hora}many{# hores}other{# hores}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# dia}many{# dies}other{# dies}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# any}many{# anys}other{# anys}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problema amb el vídeo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Aquest vídeo no és vàlid per a la reproducció en aquest dispositiu."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"No es pot reproduir aquest vídeo."</string>
@@ -1173,7 +1173,7 @@
     <string name="not_checked" msgid="7972320087569023342">"no seleccionat"</string>
     <string name="selected" msgid="6614607926197755875">"seleccionat"</string>
     <string name="not_selected" msgid="410652016565864475">"no seleccionat"</string>
-    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{1 estrella de {max}}many{# stars out of {max}}other{# estrelles de {max}}}"</string>
+    <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{1 estrella de {max}}many{# estrelles de {max}}other{# estrelles de {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"en curs"</string>
     <string name="whichApplication" msgid="5432266899591255759">"Completa l\'acció mitjançant"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Completa l\'acció amb %1$s"</string>
@@ -1359,6 +1359,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"S\'ha activat el mode PTP per USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"S\'ha activat la compartició de xarxa per USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"S\'ha activat el mode MIDI per USB"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"S\'ha connectat un accessori USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Toca per veure més opcions."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"S\'està carregant el dispositiu connectat. Toca per veure més opcions."</string>
@@ -1510,7 +1512,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Omet"</string>
     <string name="no_matches" msgid="6472699895759164599">"No s\'ha trobat cap coincidència"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Troba-ho a la pàgina"</string>
-    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# coincidència}many{# of {total}}other{# de {total}}}"</string>
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{# coincidència}many{# de {total}}other{# de {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Fet"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"S\'està esborrant l\'emmagatzematge compartit…"</string>
     <string name="share" msgid="4157615043345227321">"Comparteix"</string>
@@ -1707,7 +1709,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fet"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactiva la drecera"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilitza la drecera"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió de colors"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correcció de color"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode d\'una mà"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Atenuació extra"</string>
@@ -1858,8 +1861,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2n <xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3r <xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
-    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
-    <skip />
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Clon de <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Sol·licita el PIN per deixar de fixar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Sol·licita el patró de desbloqueig per deixar de fixar"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demana la contrasenya per deixar de fixar"</string>
@@ -1872,14 +1874,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Per reduir l\'ús de dades, la funció Estalvi de dades evita que determinades aplicacions enviïn o rebin dades en segon pla. L\'aplicació que estiguis fent servir podrà accedir a les dades, però menys sovint. Això vol dir, per exemple, que les imatges no es mostraran fins que no les toquis."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Vols activar l\'Estalvi de dades?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activa"</string>
-    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durant 1 minut (fins a les {formattedTime})}many{For # minutes (until {formattedTime})}other{Durant # minuts (fins a les {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Durant 1 min (fins a les {formattedTime})}many{For # min (until {formattedTime})}other{Durant # min (fins a les {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Durant 1 hora (fins a les {formattedTime})}many{For # hours (until {formattedTime})}other{Durant # hores (fins a les {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Durant 1 h (fins a les {formattedTime})}many{For # hr (until {formattedTime})}other{Durant # h (fins a les {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Durant 1 minut}many{For # minutes}other{Durant # minuts}}"</string>
-    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Durant 1 min}many{For # min}other{Durant # min}}"</string>
-    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durant 1 hora}many{For # hours}other{Durant # hores}}"</string>
-    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durant 1 h}many{For # hr}other{Durant # h}}"</string>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Durant 1 minut (fins a les {formattedTime})}many{Durant # minuts (fins a les {formattedTime})}other{Durant # minuts (fins a les {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Durant 1 min (fins a les {formattedTime})}many{Durant # min (fins a les {formattedTime})}other{Durant # min (fins a les {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Durant 1 hora (fins a les {formattedTime})}many{Durant # hores (fins a les {formattedTime})}other{Durant # hores (fins a les {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Durant 1 h (fins a les {formattedTime})}many{Durant # h (fins a les {formattedTime})}other{Durant # h (fins a les {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Durant 1 minut}many{Durant # minuts}other{Durant # minuts}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Durant 1 min}many{Durant # min}other{Durant # min}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durant 1 hora}many{Durant # hores}other{Durant # hores}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durant 1 h}many{Durant # h}other{Durant # h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Finalitza: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (propera alarma)"</string>
@@ -2014,7 +2016,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Desa per a emplenament automàtic"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"El contingut no es pot emplenar automàticament"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Cap suggeriment d\'emplenament automàtic"</string>
-    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 suggeriment d\'emplenament automàtic}many{# autofill suggestions}other{# suggeriments d\'emplenament automàtic}}"</string>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 suggeriment d\'emplenament automàtic}many{# suggeriments d\'emplenament automàtic}other{# suggeriments d\'emplenament automàtic}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Vols desar-ho a "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Vols desar <xliff:g id="TYPE">%1$s</xliff:g> a "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Vols desar <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> a "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2119,7 +2121,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Presentació <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"El Bluetooth es mantindrà activat durant el mode d\'avió"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"S\'està carregant"</string>
-    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} i # fitxer}many{{file_name} + # files}other{{file_name} i # fitxers}}"</string>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} i # fitxer}many{{file_name} i # fitxers}other{{file_name} i # fitxers}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"No hi ha cap suggeriment de persones amb qui compartir"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Llista d\'aplicacions"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Aquesta aplicació no té permís de gravació, però pot capturar àudio a través d\'aquest dispositiu USB."</string>
@@ -2301,7 +2303,7 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"No es pot accedir a la càmera del telèfon des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"No es pot accedir a la càmera de la tauleta des del teu <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"No s\'hi pot accedir mentre s\'està reproduint en continu. Prova-ho al telèfon."</string>
-    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No es pot veure el mode de pantalla en pantalla durant la reproducció en continu"</string>
+    <string name="vdm_pip_blocked" msgid="4036107522497281397">"No es pot veure el mode d\'imatge sobre imatge durant la reproducció en continu"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Valor predeterminat del sistema"</string>
     <string name="default_card_name" msgid="9198284935962911468">"TARGETA <xliff:g id="CARDNUMBER">%d</xliff:g>"</string>
     <string name="permlab_companionProfileWatch" msgid="2457738382085872542">"Permís del perfil del rellotge perquè l\'aplicació complementària gestioni els rellotges"</string>
@@ -2314,16 +2316,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permet que una aplicació complementària iniciï serveis en primer pla des d\'un segon pla."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"El micròfon està disponible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"El micròfon està bloquejat"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Pantalla dual"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La pantalla dual està activada"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> està utilitzant les dues pantalles per mostrar contingut"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"El dispositiu està massa calent"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"La pantalla dual no està disponible perquè el telèfon està massa calent"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactiva"</string>
 </resources>

@@ -1358,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Вклучен е PTP преку USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Вклучен е интернет преку USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Вклучен е MIDI преку USB"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Поврзан е USB-додаток"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Допрете за повеќе опции."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Се полни поврзаниот уред. Допрете за повеќе опции."</string>
@@ -1706,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Исклучи ја кратенката"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Користи кратенка"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија на бои"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Корекција на боите"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим со една рака"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дополнително затемнување"</string>
