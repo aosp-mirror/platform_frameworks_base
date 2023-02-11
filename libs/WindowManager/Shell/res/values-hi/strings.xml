@@ -47,6 +47,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ऊपर की स्क्रीन को 50% बनाएं"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ऊपर की स्क्रीन को 30% बनाएं"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"नीचे की स्क्रीन को फ़ुल स्क्रीन बनाएं"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"वन-हैंडेड मोड का इस्तेमाल करना"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"इस मोड से बाहर निकलने के लिए, स्क्रीन के सबसे निचले हिस्से से ऊपर की ओर स्वाइप करें या ऐप्लिकेशन के बाहर कहीं भी टैप करें"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"वन-हैंडेड मोड चालू करें"</string>
