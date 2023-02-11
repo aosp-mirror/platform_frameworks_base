@@ -42,7 +42,6 @@ import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
-import static android.app.AppOpsManager.OP_SCHEDULE_EXACT_ALARM;
 import static android.app.AppOpsManager.OP_VIBRATE;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
@@ -161,7 +160,6 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -202,7 +200,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
-public class AppOpsService extends IAppOpsService.Stub implements PersistenceScheduler {
+public class AppOpsService extends IAppOpsService.Stub {
     static final String TAG = "AppOps";
     static final boolean DEBUG = false;
 
@@ -212,26 +210,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     private final ArraySet<NoteOpTrace> mNoteOpCallerStacktraces = new ArraySet<>();
 
     /**
-     * Sentinel integer version to denote that there was no appops.xml found on boot.
-     * This will happen when a device boots with no existing userdata.
+     * Version of the mRecentAccessesFile.
+     * Increment by one every time an upgrade step is added at boot, none currently exists.
      */
-    private static final int NO_FILE_VERSION = -2;
-
-    /**
-     * Sentinel integer version to denote that there was no version in the appops.xml found on boot.
-     * This means the file is coming from a build before versioning was added.
-     */
-    private static final int NO_VERSION = -1;
-
-    /** Increment by one every time and add the corresponding upgrade logic in
-     *  {@link #upgradeLocked(int)} below. The first version was 1 */
-    static final int CURRENT_VERSION = 2;
-
-    /**
-     * This stores the version of appops.xml seen at boot. If this is smaller than
-     * {@link #CURRENT_VERSION}, then we will run {@link #upgradeLocked(int)} on startup.
-     */
-    private int mVersionAtBoot = NO_FILE_VERSION;
+    private static final int CURRENT_VERSION = 1;
 
     // Write at most every 30 minutes.
     static final long WRITE_DELAY = DEBUG ? 1000 : 30*60*1000;
@@ -251,7 +233,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
 
     final Context mContext;
-    final AtomicFile mFile;
+    final AtomicFile mStorageFile;
+    final AtomicFile mRecentAccessesFile;
     private final @Nullable File mNoteOpCallerStacktracesFile;
     final Handler mHandler;
 
@@ -314,7 +297,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 mFastWriteScheduled = false;
                 AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
                     @Override protected Void doInBackground(Void... params) {
-                        writeState();
+                        writeRecentAccesses();
                         return null;
                     }
                 };
@@ -936,7 +919,9 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
     }
 
-    public AppOpsService(File storagePath, Handler handler, Context context) {
+    @VisibleForTesting
+    public AppOpsService(File recentAccessesFile, File storageFile, Handler handler,
+            Context context) {
         mContext = context;
 
         for (int switchedCode = 0; switchedCode < _NUM_OP; switchedCode++) {
@@ -944,15 +929,17 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             mSwitchedOps.put(switchCode,
                     ArrayUtils.appendInt(mSwitchedOps.get(switchCode), switchedCode));
         }
-        mAppOpsCheckingService =
-                new AppOpsCheckingServiceImpl(this, this, handler, context, mSwitchedOps);
+        mAppOpsCheckingService = new AppOpsCheckingServiceTracingDecorator(
+                new AppOpsCheckingServiceImpl(
+                        storageFile, this, handler, context,  mSwitchedOps));
         //mAppOpsCheckingService = new AppOpsCheckingServiceLoggingDecorator(
         //        LocalServices.getService(AppOpsCheckingServiceInterface.class));
-        mAppOpsRestrictions = new AppOpsRestrictionsImpl(context, handler,
-                mAppOpsCheckingService);
+        mAppOpsRestrictions = new AppOpsRestrictionsImpl(context, handler, mAppOpsCheckingService);
 
         LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
-        mFile = new AtomicFile(storagePath, "appops");
+        mStorageFile = new AtomicFile(storageFile, "appops_legacy");
+        mRecentAccessesFile = new AtomicFile(recentAccessesFile, "appops_accesses");
+
         if (AppOpsManager.NOTE_OP_COLLECTION_ENABLED) {
             mNoteOpCallerStacktracesFile = new File(SystemServiceManager.ensureSystemDir(),
                     "noteOpStackTraces.json");
@@ -962,7 +949,9 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
         mHandler = handler;
         mConstants = new Constants(mHandler);
-        readState();
+        // To migrate storageFile to recentAccessesFile, these reads must be called in this order.
+        readRecentAccesses();
+        mAppOpsCheckingService.readState();
     }
 
     public void publish() {
@@ -1063,9 +1052,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     };
 
     public void systemReady() {
-        synchronized (this) {
-            upgradeLocked(mVersionAtBoot);
-        }
+        mAppOpsCheckingService.systemReady();
         initializeUidStates();
 
         getUserManagerInternal().addUserLifecycleListener(
@@ -1243,6 +1230,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 int code = packageModes.get(k);
                 ops.put(code, new Op(uidState, packageName, code, uid));
             }
+            uidState.evalForegroundOps();
         }
     }
 
@@ -1317,7 +1305,7 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         }
     }
 
-    // The callback method from ForegroundPolicyInterface
+    // The callback method from AppOpsUidStateTracker
     private void onUidStateChanged(int uid, int state, boolean foregroundModeMayChange) {
         synchronized (this) {
             UidState uidState = getUidStateLocked(uid, true);
@@ -1414,12 +1402,12 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
             }
         }
         if (doWrite) {
-            writeState();
+            writeRecentAccesses();
         }
+        mAppOpsCheckingService.shutdown();
         if (AppOpsManager.NOTE_OP_COLLECTION_ENABLED && mWriteNoteOpsScheduled) {
             writeNoteOps();
         }
-
         mHistoricalRegistry.shutdown();
     }
 
@@ -1691,8 +1679,13 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
     public void reloadNonHistoricalState() {
         mContext.enforcePermission(Manifest.permission.MANAGE_APPOPS,
                 Binder.getCallingPid(), Binder.getCallingUid(), "reloadNonHistoricalState");
-        writeState();
-        readState();
+        mAppOpsCheckingService.writeState();
+        mAppOpsCheckingService.readState();
+    }
+
+    @VisibleForTesting
+    void readState() {
+        mAppOpsCheckingService.readState();
     }
 
     @Override
@@ -3616,6 +3609,9 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         if (mPackageManagerInternal == null) {
             mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         }
+        if (mPackageManagerInternal == null) {
+            throw new IllegalStateException("PackageManagerInternal not loaded");
+        }
 
         return mPackageManagerInternal;
     }
@@ -3865,16 +3861,14 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         return ops;
     }
 
-    @Override
-    public void scheduleWriteLocked() {
+    private void scheduleWriteLocked() {
         if (!mWriteScheduled) {
             mWriteScheduled = true;
             mHandler.postDelayed(mWriteRunner, WRITE_DELAY);
         }
     }
 
-    @Override
-    public void scheduleFastWriteLocked() {
+    private void scheduleFastWriteLocked() {
         if (!mFastWriteScheduled) {
             mWriteScheduled = true;
             mFastWriteScheduled = true;
@@ -3972,14 +3966,28 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         return false;
     }
 
-    void readState() {
-        synchronized (mFile) {
+    /**
+     * Read recent accesses from persistence (mRecentAccessesFile).
+     * If there is no mRecentAccessesFile yet, we'll need migrate from mStorageFile: first read from
+     * mStorageFile, then all subsequent reads/writes will use mRecentAccessesFile.
+     * If neither file exists, there's nothing to migrate.
+     */
+    private void readRecentAccesses() {
+        if (!mRecentAccessesFile.exists()) {
+            readRecentAccesses(mStorageFile);
+        } else {
+            readRecentAccesses(mRecentAccessesFile);
+        }
+    }
+
+    private void readRecentAccesses(AtomicFile file) {
+        synchronized (file) {
             synchronized (this) {
                 FileInputStream stream;
                 try {
-                    stream = mFile.openRead();
+                    stream = file.openRead();
                 } catch (FileNotFoundException e) {
-                    Slog.i(TAG, "No existing app ops " + mFile.getBaseFile() + "; starting empty");
+                    Slog.i(TAG, "No existing app ops " + file.getBaseFile() + "; starting empty");
                     return;
                 }
                 boolean success = false;
@@ -3990,14 +3998,12 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     int type;
                     while ((type = parser.next()) != XmlPullParser.START_TAG
                             && type != XmlPullParser.END_DOCUMENT) {
-                        ;
+                        // Parse next until we reach the start or end
                     }
 
                     if (type != XmlPullParser.START_TAG) {
                         throw new IllegalStateException("no start tag found");
                     }
-
-                    mVersionAtBoot = parser.getAttributeInt(null, "v", NO_VERSION);
 
                     int outerDepth = parser.getDepth();
                     while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -4010,13 +4016,15 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                         if (tagName.equals("pkg")) {
                             readPackage(parser);
                         } else if (tagName.equals("uid")) {
-                            readUidOps(parser);
+                            // uid tag may be present during migration, don't print warning.
+                            XmlUtils.skipCurrentTag(parser);
                         } else {
                             Slog.w(TAG, "Unknown element under <app-ops>: "
                                     + parser.getName());
                             XmlUtils.skipCurrentTag(parser);
                         }
                     }
+
                     success = true;
                 } catch (IllegalStateException e) {
                     Slog.w(TAG, "Failed parsing " + e);
@@ -4040,123 +4048,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                     } catch (IOException e) {
                     }
                 }
-            }
-        }
-    }
-
-    @VisibleForTesting
-    @GuardedBy("this")
-    void upgradeRunAnyInBackgroundLocked() {
-        for (int i = 0; i < mUidStates.size(); i++) {
-            final UidState uidState = mUidStates.valueAt(i);
-            if (uidState == null) {
-                continue;
-            }
-            SparseIntArray opModes = uidState.getNonDefaultUidModes();
-            if (opModes != null) {
-                final int idx = opModes.indexOfKey(AppOpsManager.OP_RUN_IN_BACKGROUND);
-                if (idx >= 0) {
-                    uidState.setUidMode(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
-                            opModes.valueAt(idx));
-                }
-            }
-            if (uidState.pkgOps == null) {
-                continue;
-            }
-            boolean changed = false;
-            for (int j = 0; j < uidState.pkgOps.size(); j++) {
-                Ops ops = uidState.pkgOps.valueAt(j);
-                if (ops != null) {
-                    final Op op = ops.get(AppOpsManager.OP_RUN_IN_BACKGROUND);
-                    if (op != null && op.getMode() != AppOpsManager.opToDefaultMode(op.op)) {
-                        final Op copy = new Op(op.uidState, op.packageName,
-                                AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uidState.uid);
-                        copy.setMode(op.getMode());
-                        ops.put(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, copy);
-                        changed = true;
-                    }
-                }
-            }
-            if (changed) {
-                uidState.evalForegroundOps();
-            }
-        }
-    }
-
-    /**
-     * The interpretation of the default mode - MODE_DEFAULT - for OP_SCHEDULE_EXACT_ALARM is
-     * changing. Simultaneously, we want to change this op's mode from MODE_DEFAULT to MODE_ALLOWED
-     * for already installed apps. For newer apps, it will stay as MODE_DEFAULT.
-     */
-    @VisibleForTesting
-    @GuardedBy("this")
-    void upgradeScheduleExactAlarmLocked() {
-        final PermissionManagerServiceInternal pmsi = LocalServices.getService(
-                PermissionManagerServiceInternal.class);
-        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
-        final PackageManagerInternal pmi = getPackageManagerInternal();
-
-        final String[] packagesDeclaringPermission = pmsi.getAppOpPermissionPackages(
-                AppOpsManager.opToPermission(OP_SCHEDULE_EXACT_ALARM));
-        final int[] userIds = umi.getUserIds();
-
-        for (final String pkg : packagesDeclaringPermission) {
-            for (int userId : userIds) {
-                final int uid = pmi.getPackageUid(pkg, 0, userId);
-
-                UidState uidState = mUidStates.get(uid);
-                if (uidState == null) {
-                    uidState = new UidState(uid);
-                    mUidStates.put(uid, uidState);
-                }
-                final int oldMode = uidState.getUidMode(OP_SCHEDULE_EXACT_ALARM);
-                if (oldMode == AppOpsManager.opToDefaultMode(OP_SCHEDULE_EXACT_ALARM)) {
-                    uidState.setUidMode(OP_SCHEDULE_EXACT_ALARM, MODE_ALLOWED);
-                }
-            }
-            // This appop is meant to be controlled at a uid level. So we leave package modes as
-            // they are.
-        }
-    }
-
-    private void upgradeLocked(int oldVersion) {
-        if (oldVersion >= CURRENT_VERSION) {
-            return;
-        }
-        Slog.d(TAG, "Upgrading app-ops xml from version " + oldVersion + " to " + CURRENT_VERSION);
-        switch (oldVersion) {
-            case NO_VERSION:
-                upgradeRunAnyInBackgroundLocked();
-                // fall through
-            case 1:
-                upgradeScheduleExactAlarmLocked();
-                // fall through
-            case 2:
-                // for future upgrades
-        }
-        scheduleFastWriteLocked();
-    }
-
-    private void readUidOps(TypedXmlPullParser parser) throws NumberFormatException,
-            XmlPullParserException, IOException {
-        final int uid = parser.getAttributeInt(null, "n");
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if (tagName.equals("op")) {
-                final int code = parser.getAttributeInt(null, "n");
-                final int mode = parser.getAttributeInt(null, "m");
-                setUidMode(code, uid, mode);
-            } else {
-                Slog.w(TAG, "Unknown element under <uid-ops>: "
-                        + parser.getName());
-                XmlUtils.skipCurrentTag(parser);
             }
         }
     }
@@ -4203,7 +4094,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 XmlUtils.skipCurrentTag(parser);
             }
         }
-        uidState.evalForegroundOps();
     }
 
     private void readAttributionOp(TypedXmlPullParser parser, @NonNull Op parent,
@@ -4237,9 +4127,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         int opCode = parser.getAttributeInt(null, "n");
         Op op = new Op(uidState, pkgName, opCode, uidState.uid);
 
-        final int mode = parser.getAttributeInt(null, "m", AppOpsManager.opToDefaultMode(op.op));
-        op.setMode(mode);
-
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -4268,11 +4155,12 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
         ops.put(op.op, op);
     }
 
-    void writeState() {
-        synchronized (mFile) {
+    @VisibleForTesting
+    void writeRecentAccesses() {
+        synchronized (mRecentAccessesFile) {
             FileOutputStream stream;
             try {
-                stream = mFile.startWrite();
+                stream = mRecentAccessesFile.startWrite();
             } catch (IOException e) {
                 Slog.w(TAG, "Failed to write state: " + e);
                 return;
@@ -4285,41 +4173,6 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                 out.startDocument(null, true);
                 out.startTag(null, "app-ops");
                 out.attributeInt(null, "v", CURRENT_VERSION);
-
-                SparseArray<SparseIntArray> uidStatesClone;
-                synchronized (this) {
-                    uidStatesClone = new SparseArray<>(mUidStates.size());
-
-                    final int uidStateCount = mUidStates.size();
-                    for (int uidStateNum = 0; uidStateNum < uidStateCount; uidStateNum++) {
-                        UidState uidState = mUidStates.valueAt(uidStateNum);
-                        int uid = mUidStates.keyAt(uidStateNum);
-
-                        SparseIntArray opModes = uidState.getNonDefaultUidModes();
-                        if (opModes != null && opModes.size() > 0) {
-                            uidStatesClone.put(uid, opModes);
-                        }
-                    }
-                }
-
-                final int uidStateCount = uidStatesClone.size();
-                for (int uidStateNum = 0; uidStateNum < uidStateCount; uidStateNum++) {
-                    SparseIntArray opModes = uidStatesClone.valueAt(uidStateNum);
-                    if (opModes != null && opModes.size() > 0) {
-                        out.startTag(null, "uid");
-                        out.attributeInt(null, "n", uidStatesClone.keyAt(uidStateNum));
-                        final int opCount = opModes.size();
-                        for (int opCountNum = 0; opCountNum < opCount; opCountNum++) {
-                            final int op = opModes.keyAt(opCountNum);
-                            final int mode = opModes.valueAt(opCountNum);
-                            out.startTag(null, "op");
-                            out.attributeInt(null, "n", op);
-                            out.attributeInt(null, "m", mode);
-                            out.endTag(null, "op");
-                        }
-                        out.endTag(null, "uid");
-                    }
-                }
 
                 if (allOps != null) {
                     String lastPkg = null;
@@ -4421,10 +4274,10 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
 
                 out.endTag(null, "app-ops");
                 out.endDocument();
-                mFile.finishWrite(stream);
+                mRecentAccessesFile.finishWrite(stream);
             } catch (IOException e) {
                 Slog.w(TAG, "Failed to write state, restoring backup.", e);
-                mFile.failWrite(stream);
+                mRecentAccessesFile.failWrite(stream);
             }
         }
         mHistoricalRegistry.writeAndClearDiscreteHistory();
@@ -4871,7 +4724,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                         synchronized (shell.mInternal) {
                             shell.mInternal.mHandler.removeCallbacks(shell.mInternal.mWriteRunner);
                         }
-                        shell.mInternal.writeState();
+                        shell.mInternal.writeRecentAccesses();
+                        shell.mInternal.mAppOpsCheckingService.writeState();
                         pw.println("Current settings written.");
                     } finally {
                         Binder.restoreCallingIdentity(token);
@@ -4883,7 +4737,8 @@ public class AppOpsService extends IAppOpsService.Stub implements PersistenceSch
                             Binder.getCallingUid(), -1);
                     final long token = Binder.clearCallingIdentity();
                     try {
-                        shell.mInternal.readState();
+                        shell.mInternal.readRecentAccesses();
+                        shell.mInternal.mAppOpsCheckingService.readState();
                         pw.println("Last settings read.");
                     } finally {
                         Binder.restoreCallingIdentity(token);

@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -119,6 +120,15 @@ constructor(
                 scope,
                 SharingStarted.WhileSubscribed(),
                 subscriptions.value.firstOrNull()?.subscriptionId ?: INVALID_SUBSCRIPTION_ID
+            )
+
+    override val activeMobileDataRepository: StateFlow<MobileConnectionRepository?> =
+        activeMobileDataSubscriptionId
+            .map { getRepoForSubId(it) }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                getRepoForSubId(activeMobileDataSubscriptionId.value)
             )
 
     // TODO(b/261029387): consider adding a demo command for this

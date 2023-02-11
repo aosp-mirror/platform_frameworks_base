@@ -25,8 +25,6 @@ import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
-import java.util.Objects;
-
 /**
  * Request for beginning a create credential request.
  *
@@ -54,7 +52,9 @@ public class BeginCreateCredentialRequest implements Parcelable {
             @Nullable CallingAppInfo callingAppInfo) {
         mType = Preconditions.checkStringNotEmpty(type,
                 "type must not be null or empty");
-        mData = Objects.requireNonNull(data, "data must not be null");
+        Bundle dataCopy = new Bundle();
+        dataCopy.putAll(data);
+        mData = dataCopy;
         mCallingAppInfo = callingAppInfo;
     }
 

@@ -39,8 +39,8 @@ interface IJobScheduler {
     ParceledListSlice<JobInfo> getAllPendingJobsInNamespace(String namespace);
     JobInfo getPendingJob(String namespace, int jobId);
     int getPendingJobReason(String namespace, int jobId);
-    boolean canRunLongJobs(String packageName);
-    boolean hasRunLongJobsPermission(String packageName, int userId);
+    boolean canRunUserInitiatedJobs(String packageName);
+    boolean hasRunUserInitiatedJobsPermission(String packageName, int userId);
     List<JobInfo> getStartedJobs();
     ParceledListSlice getAllJobSnapshots();
     @EnforcePermission(allOf={"MANAGE_ACTIVITY_TASKS", "INTERACT_ACROSS_USERS_FULL"})

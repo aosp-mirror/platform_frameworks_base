@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.util.ArraySet;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.animation.Animation;
 import android.window.TransitionInfo;
@@ -130,11 +131,13 @@ class ActivityEmbeddingAnimationRunner {
             animator.addUpdateListener((anim) -> {
                 // Update all adapters in the same transaction.
                 final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
                 for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
                     adapter.onAnimationUpdate(t, animator.getCurrentPlayTime());
                 }
                 t.apply();
             });
+            prepareForFirstFrame(startTransaction, adapters);
         }
         animator.setDuration(duration);
         animator.addListener(new Animator.AnimatorListener() {
@@ -246,6 +249,15 @@ class ActivityEmbeddingAnimationRunner {
             adapters.add(adapter);
         }
         return adapters;
+    }
+
+    /** Sets the first frame to the {@code startTransaction} to avoid any flicker on start. */
+    private void prepareForFirstFrame(@NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull List<ActivityEmbeddingAnimationAdapter> adapters) {
+        startTransaction.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+        for (ActivityEmbeddingAnimationAdapter adapter : adapters) {
+            adapter.prepareForFirstFrame(startTransaction);
+        }
     }
 
     /** Adds edge extension to the surfaces that have such an animation property. */

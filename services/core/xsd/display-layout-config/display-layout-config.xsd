@@ -56,5 +56,12 @@
         <xs:attribute name="enabled" type="xs:boolean" use="optional" />
         <xs:attribute name="defaultDisplay" type="xs:boolean" use="optional" />
         <xs:attribute name="refreshRateZoneId" type="xs:string" use="optional" />
+        <xs:attribute name="displayGroup" use="optional" default="">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="|[_a-zA-Z0-9]+(\.[_a-zA-Z0-9]+)*" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
     </xs:complexType>
 </xs:schema>

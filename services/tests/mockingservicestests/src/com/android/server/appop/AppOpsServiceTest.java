@@ -57,7 +57,6 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.server.LocalServices;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.testutils.MockitoUtilsKt;
 
 import org.junit.After;
 import org.junit.Before;
@@ -80,12 +79,14 @@ public class AppOpsServiceTest {
 
     private static final String TAG = AppOpsServiceTest.class.getSimpleName();
     // State will be persisted into this XML file.
-    private static final String APP_OPS_FILENAME = "appops-service-test.xml";
+    private static final String APP_OPS_FILENAME = "appops.test.xml";
+    private static final String APP_OPS_ACCESSES_FILENAME = "appops_accesses.test.xml";
 
     private static final Context sContext = InstrumentationRegistry.getTargetContext();
     private static final String sMyPackageName = sContext.getOpPackageName();
 
-    private File mAppOpsFile;
+    private File mStorageFile;
+    private File mRecentAccessesFile;
     private Handler mHandler;
     private AppOpsService mAppOpsService;
     private int mMyUid;
@@ -93,7 +94,8 @@ public class AppOpsServiceTest {
     private StaticMockitoSession mMockingSession;
 
     private void setupAppOpsService() {
-        mAppOpsService = new AppOpsService(mAppOpsFile, mHandler, spy(sContext));
+        mAppOpsService = new AppOpsService(mRecentAccessesFile, mStorageFile, mHandler,
+                spy(sContext));
         mAppOpsService.mHistoricalRegistry.systemReady(sContext.getContentResolver());
 
         // Always approve all permission checks
@@ -103,11 +105,10 @@ public class AppOpsServiceTest {
 
     @Before
     public void setUp() {
-        mAppOpsFile = new File(sContext.getFilesDir(), APP_OPS_FILENAME);
-        if (mAppOpsFile.exists()) {
-            // Start with a clean state (persisted into XML).
-            mAppOpsFile.delete();
-        }
+        mStorageFile = new File(sContext.getFilesDir(), APP_OPS_FILENAME);
+        mRecentAccessesFile = new File(sContext.getFilesDir(), APP_OPS_ACCESSES_FILENAME);
+        mStorageFile.delete();
+        mRecentAccessesFile.delete();
 
         HandlerThread handlerThread = new HandlerThread(TAG);
         handlerThread.start();
@@ -212,10 +213,12 @@ public class AppOpsServiceTest {
         mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
         mAppOpsService.noteOperation(OP_WRITE_SMS, mMyUid, sMyPackageName, null, false, null,
                 false);
-        mAppOpsService.writeState();
+
+        mAppOpsService.shutdown();
 
         // Create a new app ops service which will initialize its state from XML.
         setupAppOpsService();
+        mAppOpsService.readState();
 
         // Query the state of the 2nd service.
         List<PackageOps> loggedOps = getLoggedOps();

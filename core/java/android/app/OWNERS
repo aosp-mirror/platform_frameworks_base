@@ -4,12 +4,12 @@ per-file ContextImpl.java = *
 
 # ActivityManager
 per-file ActivityManager* = file:/services/core/java/com/android/server/am/OWNERS
+per-file ApplicationStartInfo* = file:/services/core/java/com/android/server/am/OWNERS
 per-file ApplicationErrorReport* = file:/services/core/java/com/android/server/am/OWNERS
 per-file ApplicationExitInfo* = file:/services/core/java/com/android/server/am/OWNERS
 per-file Application.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file ApplicationLoaders.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file ApplicationThreadConstants.java = file:/services/core/java/com/android/server/am/OWNERS
-per-file BroadcastOptions.java = file:/services/core/java/com/android/server/am/OWNERS
 per-file ContentProviderHolder* = file:/services/core/java/com/android/server/am/OWNERS
 per-file *ForegroundService* = file:/services/core/java/com/android/server/am/OWNERS
 per-file IActivityController.aidl = file:/services/core/java/com/android/server/am/OWNERS
@@ -49,6 +49,10 @@ per-file *AppOp* = file:/core/java/android/permission/OWNERS
 
 # Backup and Restore
 per-file IBackupAgent.aidl = file:/services/backup/OWNERS
+
+# Broadcasts
+per-file Broadcast* = file:/BROADCASTS_OWNERS
+per-file ReceiverInfo* = file:/BROADCASTS_OWNERS
 
 # LocaleManager
 per-file *Locale* = file:/services/core/java/com/android/server/locales/OWNERS

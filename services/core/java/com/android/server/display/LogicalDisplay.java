@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.Display;
@@ -135,6 +136,11 @@ final class LogicalDisplay {
     // Temporary rectangle used when needed.
     private final Rect mTempLayerStackRect = new Rect();
     private final Rect mTempDisplayRect = new Rect();
+
+    /**
+     * Name of a display group to which the display is assigned.
+     */
+    private String mDisplayGroupName;
 
     /**
      * The UID mappings for refresh rate override
@@ -869,6 +875,32 @@ final class LogicalDisplay {
         return mLeadDisplayId;
     }
 
+    /**
+     * Sets the name of display group to which the display is assigned.
+     */
+    public void setDisplayGroupNameLocked(String displayGroupName) {
+        mDisplayGroupName = displayGroupName;
+    }
+
+    /**
+     * Gets the name of display group to which the display is assigned.
+     */
+    public String getDisplayGroupNameLocked() {
+        return mDisplayGroupName;
+    }
+
+    /**
+     * Returns whether a display group other than the default display group needs to be assigned.
+     *
+     * <p>If display group name is empty or {@code Display.FLAG_OWN_DISPLAY_GROUP} is set, the
+     * display is assigned to the default display group.
+     */
+    public boolean needsOwnDisplayGroupLocked() {
+        DisplayInfo info = getDisplayInfoLocked();
+        return (info.flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0
+                || !TextUtils.isEmpty(mDisplayGroupName);
+    }
+
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mIsEnabled=" + mIsEnabled);
@@ -887,6 +919,7 @@ final class LogicalDisplay {
         pw.println("mRequestedMinimalPostProcessing=" + mRequestedMinimalPostProcessing);
         pw.println("mFrameRateOverrides=" + Arrays.toString(mFrameRateOverrides));
         pw.println("mPendingFrameRateOverrideUids=" + mPendingFrameRateOverrideUids);
+        pw.println("mDisplayGroupName=" + mDisplayGroupName);
         pw.println("mBrightnessThrottlingDataId=" + mBrightnessThrottlingDataId);
         pw.println("mLeadDisplayId=" + mLeadDisplayId);
     }

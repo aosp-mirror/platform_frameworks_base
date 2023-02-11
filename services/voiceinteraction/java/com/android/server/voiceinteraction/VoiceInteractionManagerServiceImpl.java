@@ -986,6 +986,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (mHotwordDetectionConnection != null) {
             pw.println("  Hotword detection connection:");
             mHotwordDetectionConnection.dump("    ", pw);
+        } else {
+            pw.println("  No Hotword detection connection");
         }
         if (mActiveSession != null) {
             pw.println("  Active session:");

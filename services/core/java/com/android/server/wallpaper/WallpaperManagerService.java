@@ -1599,14 +1599,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         dm.registerDisplayListener(mDisplayListener, null /* handler */);
         mWallpaperDisplayHelper = new WallpaperDisplayHelper(dm, mWindowManagerInternal);
         mWallpaperCropper = new WallpaperCropper(mWallpaperDisplayHelper);
-        mWallpaperDataParser = new WallpaperDataParser(
-                mContext, mWallpaperDisplayHelper, mWallpaperCropper);
         mActivityManager = mContext.getSystemService(ActivityManager.class);
         mMonitor = new MyPackageMonitor();
         mColorsChangedListeners = new SparseArray<>();
 
         mEnableSeparateLockScreenEngine = mContext.getResources().getBoolean(
                 R.bool.config_independentLockscreenLiveWallpaper);
+        mWallpaperDataParser = new WallpaperDataParser(mContext, mWallpaperDisplayHelper,
+                mWallpaperCropper, mEnableSeparateLockScreenEngine);
         if (DEBUG) {
             Slog.v(TAG, "Separate lock screen engine enabled: " + mEnableSeparateLockScreenEngine);
         }

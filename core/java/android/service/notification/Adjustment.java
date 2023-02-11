@@ -52,7 +52,7 @@ public final class Adjustment implements Parcelable {
     /** @hide */
     @StringDef (prefix = { "KEY_" }, value = {
             KEY_CONTEXTUAL_ACTIONS, KEY_GROUP_KEY, KEY_IMPORTANCE, KEY_PEOPLE, KEY_SNOOZE_CRITERIA,
-            KEY_TEXT_REPLIES, KEY_USER_SENTIMENT, KEY_IMPORTANCE_PROPOSAL
+            KEY_TEXT_REPLIES, KEY_USER_SENTIMENT, KEY_IMPORTANCE_PROPOSAL, KEY_SENSITIVE_CONTENT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Keys {}
@@ -132,6 +132,13 @@ public final class Adjustment implements Parcelable {
      * {@link android.app.NotificationManager#IMPORTANCE_MIN}.
      */
     public static final String KEY_IMPORTANCE_PROPOSAL = "key_importance_proposal";
+
+    /**
+     * Data type: boolean, when true it suggests that the content text of this notification is
+     * sensitive. A notification listener can use this information to redact notifications on locked
+     * devices.
+     */
+    public static final String KEY_SENSITIVE_CONTENT = "key_sensitive_content";
 
     /**
      * Data type: float, a ranking score from 0 (lowest) to 1 (highest).

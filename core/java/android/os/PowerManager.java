@@ -1502,6 +1502,43 @@ public final class PowerManager {
     }
 
     /**
+     * Forces the {@link com.android.server.display.DisplayGroup} of the provided {@code displayId}
+     * to turn off.
+     *
+     * <p>If the {@link com.android.server.display.DisplayGroup} of the provided {@code displayId}
+     * is turned on it will be turned off. If all displays are off as a result of this action the
+     * device will be put to sleep. If the {@link com.android.server.display.DisplayGroup} of
+     * the provided {@code displayId} is already off then nothing will happen.
+     *
+     * <p>Overrides all the wake locks that are held.
+     * This is what happens when the power key is pressed to turn off the screen.
+     *
+     * <p>Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     *
+     * @param displayId The display ID to turn off. If {@code displayId} is
+     * {@link Display#INVALID_DISPLAY}, then all displays are turned off.
+     * @param time The time when the request to go to sleep was issued, in the
+     * {@link SystemClock#uptimeMillis()} time base. This timestamp is used to correctly
+     * order the go to sleep request with other power management functions.  It should be set
+     * to the timestamp of the input event that caused the request to go to sleep.
+     * @param reason The reason the device is going to sleep.
+     * @param flags Optional flags to apply when going to sleep.
+     *
+     * @see #userActivity
+     * @see #wakeUp
+     *
+     * @hide Requires signature permission.
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void goToSleep(int displayId, long time, @GoToSleepReason int reason, int flags) {
+        try {
+            mService.goToSleepWithDisplayId(displayId, time, reason, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Forces the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group}
      * to turn on.
      *

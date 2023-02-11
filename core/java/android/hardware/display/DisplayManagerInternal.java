@@ -412,6 +412,11 @@ public abstract class DisplayManagerInternal {
     public abstract HostUsiVersion getHostUsiVersion(int displayId);
 
     /**
+     * Get all available DisplayGroupIds.
+     */
+    public abstract IntArray getDisplayGroupIds();
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the

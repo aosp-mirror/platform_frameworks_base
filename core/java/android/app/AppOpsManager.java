@@ -1355,11 +1355,12 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO;
 
     /**
-     * App can schedule long running jobs.
+     * App can schedule user-initiated jobs.
      *
      * @hide
      */
-    public static final int OP_RUN_LONG_JOBS = AppProtoEnums.APP_OP_RUN_LONG_JOBS;
+    public static final int OP_RUN_USER_INITIATED_JOBS =
+            AppProtoEnums.APP_OP_RUN_USER_INITIATED_JOBS;
 
     /**
      * Notify apps that they have been granted URI permission photos
@@ -1965,11 +1966,11 @@ public class AppOpsManager {
             "android:receive_explicit_user_interaction_audio";
 
     /**
-     * App can schedule long running jobs.
+     * App can schedule user-initiated jobs.
      *
      * @hide
      */
-    public static final String OPSTR_RUN_LONG_JOBS = "android:run_long_jobs";
+    public static final String OPSTR_RUN_USER_INITIATED_JOBS = "android:run_user_initiated_jobs";
 
     /**
      * Prevent an app from being placed into app standby buckets.
@@ -2151,7 +2152,7 @@ public class AppOpsManager {
             OP_SCHEDULE_EXACT_ALARM,
             OP_MANAGE_MEDIA,
             OP_TURN_SCREEN_ON,
-            OP_RUN_LONG_JOBS,
+            OP_RUN_USER_INITIATED_JOBS,
             OP_READ_MEDIA_VISUAL_USER_SELECTED,
             OP_FOREGROUND_SERVICE_SPECIAL_USE,
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
@@ -2537,8 +2538,9 @@ public class AppOpsManager {
                 OPSTR_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
                 "RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO").setDefaultMode(
                 AppOpsManager.MODE_ALLOWED).build(),
-        new AppOpInfo.Builder(OP_RUN_LONG_JOBS, OPSTR_RUN_LONG_JOBS, "RUN_LONG_JOBS")
-                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RUN_USER_INITIATED_JOBS, OPSTR_RUN_USER_INITIATED_JOBS,
+                "RUN_USER_INITIATED_JOBS").setDefaultMode(AppOpsManager.MODE_ALLOWED)
+                .build(),
             new AppOpInfo.Builder(OP_READ_MEDIA_VISUAL_USER_SELECTED,
                     OPSTR_READ_MEDIA_VISUAL_USER_SELECTED, "READ_MEDIA_VISUAL_USER_SELECTED")
                     .setPermission(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)

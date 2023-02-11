@@ -518,7 +518,7 @@ public class InfoMediaManager extends MediaManager {
                         Api34Impl.composePreferenceRouteListing(
                                 routeListingPreference);
                 infos = Api34Impl.arrangeRouteListByPreference(selectedRouteInfos,
-                                infos,
+                                mRouterManager.getAvailableRoutes(packageName),
                                 preferenceRouteListing);
             }
             return Api34Impl.filterDuplicatedIds(infos);
