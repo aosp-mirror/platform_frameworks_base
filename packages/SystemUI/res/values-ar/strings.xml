@@ -91,13 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"الحد السفلى <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"الحد الأيسر <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"الحد الأيمن <xliff:g id="PERCENT">%1$d</xliff:g> في المئة"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"تم حفظ لقطة الشاشة في \"<xliff:g id="APP">%1$s</xliff:g>\" في الملف الشخصي للعمل."</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"الملفات"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"رصَد تطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\" لقطة الشاشة هذه."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"رصَد تطبيق \"<xliff:g id="APPNAME">%1$s</xliff:g>\" والتطبيقات المفتوحة الأخرى لقطة الشاشة هذه."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"مسجّل الشاشة"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"جارٍ معالجة تسجيل الشاشة"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"إشعار مستمر لجلسة تسجيل شاشة"</string>
@@ -794,11 +791,11 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"تبديل"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"انقر لفتح ميزات تسهيل الاستخدام. يمكنك تخصيص هذا الزر أو استبداله من الإعدادات.\n\n"<annotation id="link">"عرض الإعدادات"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"يمكنك نقل الزر إلى الحافة لإخفائه مؤقتًا."</string>
-    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"نقل إلى أعلى يمين الشاشة"</string>
-    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"نقل إلى أعلى يسار الشاشة"</string>
-    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"نقل إلى أسفل يمين الشاشة"</string>
-    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"نقل إلى أسفل يسار الشاشة"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"نقله إلى الحافة وإخفاؤه"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"النقل إلى أعلى يمين الشاشة"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"النقل إلى أعلى يسار الشاشة"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"النقل إلى أسفل يمين الشاشة"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"النقل إلى أسفل يسار الشاشة"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"النقل إلى الحافة والإخفاء"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"نقله إلى خارج الحافة وإظهاره"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"إيقاف/تفعيل"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"التحكم بالجهاز"</string>
@@ -865,6 +862,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"حدث خطأ. يُرجى إعادة المحاولة."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"جارٍ التحميل"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"جهاز لوحي"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"لم يتم العثور عليه."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"عنصر التحكّم غير متوفّر"</string>

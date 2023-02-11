@@ -862,6 +862,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"काहीतरी चूक झाली. पुन्हा प्रयत्न करा."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"लोड करत आहे"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"टॅबलेट"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"आढळले नाही"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"नियंत्रण उपलब्ध नाही"</string>

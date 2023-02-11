@@ -91,13 +91,10 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"નીચેની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"ડાબી બાજુની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"જમણી બાજુની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
-    <!-- no translation found for screenshot_work_profile_notification (203041724052970693) -->
-    <skip />
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"ઑફિસની પ્રોફાઇલમાં <xliff:g id="APP">%1$s</xliff:g>માં સાચવવામાં આવ્યો"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ફાઇલો"</string>
-    <!-- no translation found for screenshot_detected_template (7940376642921719915) -->
-    <skip />
-    <!-- no translation found for screenshot_detected_multiple_template (7644827792093819241) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> દ્વારા આ સ્ક્રીનશૉટ લેવાયાની ભાળ મેળવવામાં આવી."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> અને કામ કરતી અન્ય ઍપ દ્વારા આ સ્ક્રીનશૉટ લેવાયાની ભાળ મેળવવામાં આવી."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"સ્ક્રીન રેકોર્ડર"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"સ્ક્રીન રેકૉર્ડિંગ ચાલુ છે"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"સ્ક્રીન રેકોર્ડિંગ સત્ર માટે ચાલુ નોટિફિકેશન"</string>
@@ -865,6 +862,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"કંઈક ખોટું થયું. ફરી પ્રયાસ કરો."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"લોડ થઈ રહ્યું છે"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ટૅબ્લેટ"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"નિષ્ક્રિય, ઍપને ચેક કરો"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"મળ્યું નથી"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"નિયંત્રણ ઉપલબ્ધ નથી"</string>
