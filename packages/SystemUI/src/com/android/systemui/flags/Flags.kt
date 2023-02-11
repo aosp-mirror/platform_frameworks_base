@@ -515,6 +515,11 @@ object Flags {
     @JvmField
     val SCREENSHOT_DETECTION = unreleasedFlag(1303, "screenshot_detection", teamfood = true)
 
+    // TODO(b/268484562): Tracking bug
+    @JvmField
+    val SCREENSHOT_METADATA_REFACTOR =
+        unreleasedFlag(1305, "screenshot_metadata_refactor", teamfood = true)
+
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
     val QUICK_TAP_IN_PCC = releasedFlag(1400, "quick_tap_in_pcc")
