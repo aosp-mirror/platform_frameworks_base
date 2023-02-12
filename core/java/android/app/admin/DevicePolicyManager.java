@@ -11442,9 +11442,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to set a user restriction specified by the key.
+     * Called by a profile owner, device owner or a holder of any permission that is associated with
+     * a user restriction to set a user restriction specified by the key.
      * <p>
-     * The calling device admin must be a profile or device owner; if it is not, a security
+     * The calling device admin must be a profile owner, device owner or holder of any permission
+     * that is associated with a user restriction; if it is not, a security
      * exception will be thrown.
      * <p>
      * The profile owner of an organization-owned managed profile may invoke this method on
@@ -11452,7 +11454,8 @@ public class DevicePolicyManager {
      * {@link #getParentProfileInstance(ComponentName)}, for enforcing device-wide restrictions.
      * <p>
      * See the constants in {@link android.os.UserManager} for the list of restrictions that can
-     * be enforced device-wide.
+     * be enforced device-wide. These constants will also state in their documentation which
+     * permission is required to manage the restriction using this API.
      *
      * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
      * above, calling this API will result in applying the restriction locally on the calling user,
@@ -11463,7 +11466,8 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param key   The key of the restriction.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner and if the caller
+     * has not been granted the permission to set the given user restriction.
      */
     public void addUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
@@ -11478,21 +11482,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to set a user restriction specified by the provided
-     * {@code key} globally on all users. To clear the restriction use
-     * {@link #clearUserRestriction}.
+     * Called by a profile owner, device owner or a holder of any permission that is associated with
+     *  a user restriction to set a user restriction specified by the provided {@code key} globally
+     *  on all users. To clear the restriction use {@link #clearUserRestriction}.
      *
      * <p>For a given user, a restriction will be set if it was applied globally or locally by any
      * admin.
      *
-     * <p> The calling device admin must be a profile or device owner; if it is not, a security
+     * <p> The calling device admin must be a profile owner, device owner or or a holder of any
+     * permission that is associated with a user restriction; if it is not, a security
      * exception will be thrown.
      *
      * <p> See the constants in {@link android.os.UserManager} for the list of restrictions that can
-     * be enforced device-wide.
+     * be enforced device-wide. These constants will also state in their documentation which
+     * permission is required to manage the restriction using this API.
      *
      * @param key The key of the restriction.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner and if the
+     * caller has not been granted the permission to set the given user restriction.
      * @throws IllegalStateException if caller is not targeting Android
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or above.
      */
@@ -11508,7 +11515,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to clear a user restriction specified by the key.
+     * Called by a profile owner, device owner or a holder of any permission that is associated with
+     * a user restriction to clear a user restriction specified by the key.
      * <p>
      * The calling device admin must be a profile or device owner; if it is not, a security
      * exception will be thrown.
@@ -11517,7 +11525,9 @@ public class DevicePolicyManager {
      * the {@link DevicePolicyManager} instance it obtained from
      * {@link #getParentProfileInstance(ComponentName)}, for clearing device-wide restrictions.
      * <p>
-     * See the constants in {@link android.os.UserManager} for the list of restrictions.
+     * See the constants in {@link android.os.UserManager} for the list of restrictions. These
+     * constants state in their documentation which permission is required to manage the restriction
+     * using this API.
      *
      * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
      * above, calling this API will result in clearing any local and global restriction with the
@@ -11525,7 +11535,8 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param key   The key of the restriction.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner  and if the
+     *  caller has not been granted the permission to set the given user restriction.
      */
     public void clearUserRestriction(@NonNull ComponentName admin,
             @UserManager.UserRestrictionKey String key) {
@@ -11540,11 +11551,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to get user restrictions set with
+     * Called by an admin to get user restrictions set by themselves with
      * {@link #addUserRestriction(ComponentName, String)}.
      * <p>
-     * The target user may have more restrictions set by the system or other device owner / profile
-     * owner. To get all the user restrictions currently set, use
+     * The target user may have more restrictions set by the system or other admin.
+     * To get all the user restrictions currently set, use
      * {@link UserManager#getUserRestrictions()}.
      * <p>
      * The profile owner of an organization-owned managed profile may invoke this method on
