@@ -99,6 +99,7 @@ import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorCon
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
@@ -179,6 +180,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     private Optional<BubblesManager> mBubblesManagerOptional;
     private MetricsLogger mMetricsLogger;
+    private NotificationDismissibilityProvider mDismissibilityProvider;
     private FeatureFlags mFeatureFlags;
     private int mIconTransformContentShift;
     private int mMaxHeadsUpHeightBeforeN;
@@ -1543,7 +1545,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void performDismiss(boolean fromAccessibility) {
         mMetricsLogger.count(NotificationCounters.NOTIFICATION_DISMISSED, 1);
         dismiss(fromAccessibility);
-        if (mEntry.isDismissable()) {
+        if (canEntryBeDismissed()) {
             if (mOnUserInteractionCallback != null) {
                 mOnUserInteractionCallback.registerFutureDismissal(mEntry, REASON_CANCEL).run();
             }
@@ -1703,6 +1705,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             OnUserInteractionCallback onUserInteractionCallback,
             Optional<BubblesManager> bubblesManagerOptional,
             NotificationGutsManager gutsManager,
+            NotificationDismissibilityProvider dismissibilityProvider,
             MetricsLogger metricsLogger,
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
@@ -1741,6 +1744,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mBubblesManagerOptional = bubblesManagerOptional;
         mNotificationGutsManager = gutsManager;
         mMetricsLogger = metricsLogger;
+        mDismissibilityProvider = dismissibilityProvider;
         mFeatureFlags = featureFlags;
     }
 
@@ -2881,11 +2885,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     /**
      * @return Whether this view is allowed to be dismissed. Only valid for visible notifications as
-     * otherwise some state might not be updated. To request about the general clearability
-     * see {@link NotificationEntry#isDismissable()}.
+     * otherwise some state might not be updated.
      */
     public boolean canViewBeDismissed() {
-        return mEntry.isDismissable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
+        return canEntryBeDismissed() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
+    }
+
+    private boolean canEntryBeDismissed() {
+        return mDismissibilityProvider.isDismissable(mEntry);
     }
 
     /**
@@ -3685,7 +3692,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print("visibility: " + getVisibility());
             pw.print(", alpha: " + getAlpha());
             pw.print(", translation: " + getTranslation());
-            pw.print(", Entry isDismissable: " + mEntry.isDismissable());
+            pw.print(", entry dismissable: " + canEntryBeDismissed());
             pw.print(", mOnUserInteractionCallback null: " + (mOnUserInteractionCallback == null));
             pw.print(", removed: " + isRemoved());
             pw.print(", expandAnimationRunning: " + mExpandAnimationRunning);

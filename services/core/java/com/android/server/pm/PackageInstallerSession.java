@@ -220,6 +220,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     static final String TAG_SESSION_CHECKSUM = "sessionChecksum";
     static final String TAG_SESSION_CHECKSUM_SIGNATURE = "sessionChecksumSignature";
     private static final String TAG_GRANTED_RUNTIME_PERMISSION = "granted-runtime-permission";
+    private static final String TAG_GRANT_PERMISSION = "grant-permission";
+    private static final String TAG_DENY_PERMISSION = "deny-permission";
     private static final String TAG_WHITELISTED_RESTRICTED_PERMISSION =
             "whitelisted-restricted-permission";
     private static final String TAG_AUTO_REVOKE_PERMISSIONS_MODE =
@@ -1146,7 +1148,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (!scrubData) {
                 info.referrerUri = params.referrerUri;
             }
-            info.grantedRuntimePermissions = params.grantedRuntimePermissions;
+            info.grantedRuntimePermissions = params.getLegacyGrantedRuntimePermissions();
             info.whitelistedRestrictedPermissions = params.whitelistedRestrictedPermissions;
             info.autoRevokePermissionsMode = params.autoRevokePermissionsMode;
             info.installFlags = params.installFlags;
@@ -4874,15 +4876,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private static void writeGrantedRuntimePermissionsLocked(TypedXmlSerializer out,
-            String[] grantedRuntimePermissions) throws IOException {
-        if (grantedRuntimePermissions != null) {
-            for (String permission : grantedRuntimePermissions) {
-                out.startTag(null, TAG_GRANTED_RUNTIME_PERMISSION);
-                writeStringAttribute(out, ATTR_NAME, permission);
-                out.endTag(null, TAG_GRANTED_RUNTIME_PERMISSION);
-            }
-        }
+    private static void writePermissionsLocked(@NonNull TypedXmlSerializer out,
+            @NonNull SessionParams params) throws IOException {
+        params.writePermissionStateXml(out, TAG_GRANT_PERMISSION, TAG_DENY_PERMISSION, ATTR_NAME);
     }
 
     private static void writeWhitelistedRestrictedPermissionsLocked(@NonNull TypedXmlSerializer out,
@@ -4990,7 +4986,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         params.dataLoaderParams.getArguments());
             }
 
-            writeGrantedRuntimePermissionsLocked(out, params.grantedRuntimePermissions);
+            writePermissionsLocked(out, params);
             writeWhitelistedRestrictedPermissionsLocked(out,
                     params.whitelistedRestrictedPermissions);
             writeAutoRevokePermissionsMode(out, params.autoRevokePermissionsMode);
@@ -5174,7 +5170,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Store the current depth. We should stop parsing when we reach an end tag at the same
         // depth.
-        List<String> grantedRuntimePermissions = new ArrayList<>();
+        List<String> legacyGrantedRuntimePermissions = new ArrayList<>();
+        ArraySet<String> grantPermissions = new ArraySet<>();
+        ArraySet<String> denyPermissions = new ArraySet<>();
         List<String> whitelistedRestrictedPermissions = new ArrayList<>();
         int autoRevokePermissionsMode = MODE_DEFAULT;
         IntArray childSessionIds = new IntArray();
@@ -5188,51 +5186,59 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
                 continue;
             }
-            if (TAG_GRANTED_RUNTIME_PERMISSION.equals(in.getName())) {
-                grantedRuntimePermissions.add(readStringAttribute(in, ATTR_NAME));
-            }
-            if (TAG_WHITELISTED_RESTRICTED_PERMISSION.equals(in.getName())) {
-                whitelistedRestrictedPermissions.add(readStringAttribute(in, ATTR_NAME));
+            switch (in.getName()) {
+                case TAG_GRANTED_RUNTIME_PERMISSION:
+                    legacyGrantedRuntimePermissions.add(readStringAttribute(in, ATTR_NAME));
+                    break;
+                case TAG_GRANT_PERMISSION:
+                    grantPermissions.add(readStringAttribute(in, ATTR_NAME));
+                    break;
+                case TAG_DENY_PERMISSION:
+                    denyPermissions.add(readStringAttribute(in, ATTR_NAME));
+                    break;
+                case TAG_WHITELISTED_RESTRICTED_PERMISSION:
+                    whitelistedRestrictedPermissions.add(readStringAttribute(in, ATTR_NAME));
+                    break;
+                case TAG_AUTO_REVOKE_PERMISSIONS_MODE:
+                    autoRevokePermissionsMode = in.getAttributeInt(null, ATTR_MODE);
+                    break;
+                case TAG_CHILD_SESSION:
+                    childSessionIds.add(in.getAttributeInt(null, ATTR_SESSION_ID,
+                            SessionInfo.INVALID_ID));
+                    break;
+                case TAG_SESSION_FILE:
+                    files.add(new InstallationFile(
+                            in.getAttributeInt(null, ATTR_LOCATION, 0),
+                            readStringAttribute(in, ATTR_NAME),
+                            in.getAttributeLong(null, ATTR_LENGTH_BYTES, -1),
+                            readByteArrayAttribute(in, ATTR_METADATA),
+                            readByteArrayAttribute(in, ATTR_SIGNATURE)));
+                    break;
+                case TAG_SESSION_CHECKSUM:
+                    final String fileName = readStringAttribute(in, ATTR_NAME);
+                    final Checksum checksum = new Checksum(
+                            in.getAttributeInt(null, ATTR_CHECKSUM_KIND, 0),
+                            readByteArrayAttribute(in, ATTR_CHECKSUM_VALUE));
 
-            }
-            if (TAG_AUTO_REVOKE_PERMISSIONS_MODE.equals(in.getName())) {
-                autoRevokePermissionsMode = in.getAttributeInt(null, ATTR_MODE);
-            }
-            if (TAG_CHILD_SESSION.equals(in.getName())) {
-                childSessionIds.add(in.getAttributeInt(null, ATTR_SESSION_ID,
-                        SessionInfo.INVALID_ID));
-            }
-            if (TAG_SESSION_FILE.equals(in.getName())) {
-                files.add(new InstallationFile(
-                        in.getAttributeInt(null, ATTR_LOCATION, 0),
-                        readStringAttribute(in, ATTR_NAME),
-                        in.getAttributeLong(null, ATTR_LENGTH_BYTES, -1),
-                        readByteArrayAttribute(in, ATTR_METADATA),
-                        readByteArrayAttribute(in, ATTR_SIGNATURE)));
-            }
-            if (TAG_SESSION_CHECKSUM.equals(in.getName())) {
-                final String fileName = readStringAttribute(in, ATTR_NAME);
-                final Checksum checksum = new Checksum(
-                        in.getAttributeInt(null, ATTR_CHECKSUM_KIND, 0),
-                        readByteArrayAttribute(in, ATTR_CHECKSUM_VALUE));
-
-                List<Checksum> fileChecksums = checksums.get(fileName);
-                if (fileChecksums == null) {
-                    fileChecksums = new ArrayList<>();
-                    checksums.put(fileName, fileChecksums);
-                }
-                fileChecksums.add(checksum);
-            }
-            if (TAG_SESSION_CHECKSUM_SIGNATURE.equals(in.getName())) {
-                final String fileName = readStringAttribute(in, ATTR_NAME);
-                final byte[] signature = readByteArrayAttribute(in, ATTR_SIGNATURE);
-                signatures.put(fileName, signature);
+                    List<Checksum> fileChecksums = checksums.get(fileName);
+                    if (fileChecksums == null) {
+                        fileChecksums = new ArrayList<>();
+                        checksums.put(fileName, fileChecksums);
+                    }
+                    fileChecksums.add(checksum);
+                    break;
+                case TAG_SESSION_CHECKSUM_SIGNATURE:
+                    final String fileName1 = readStringAttribute(in, ATTR_NAME);
+                    final byte[] signature = readByteArrayAttribute(in, ATTR_SIGNATURE);
+                    signatures.put(fileName1, signature);
+                    break;
             }
         }
 
-        if (grantedRuntimePermissions.size() > 0) {
-            params.grantedRuntimePermissions =
-                    grantedRuntimePermissions.toArray(EmptyArray.STRING);
+        if (legacyGrantedRuntimePermissions.size() > 0) {
+            params.setPermissionStates(legacyGrantedRuntimePermissions, Collections.emptyList());
+        } else {
+            params.setPermissionStates(grantPermissions, denyPermissions);
         }
 
         if (whitelistedRestrictedPermissions.size() > 0) {

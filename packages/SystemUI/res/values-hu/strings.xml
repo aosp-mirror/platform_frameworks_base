@@ -95,8 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Fájlok"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> észlelte ezt a képernyőképet."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> és más nyitott alkalmazások észlelték ezt a képernyőképet."</string>
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Hozzáadás jegyzethez"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Képernyőrögzítő"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Képernyőrögzítés feldolgozása"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Folyamatban lévő értesítés képernyőrögzítési munkamenethez"</string>
@@ -890,6 +889,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Hiba történt. Próbálkozzon újra."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Betöltés…"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"táblagép"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"A médiatartalom átküldése folyamatban van"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"<xliff:g id="APP_LABEL">%1$s</xliff:g> átküldése"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktív, ellenőrizze az appot"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nem található"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Nem hozzáférhető vezérlő"</string>
@@ -926,6 +927,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Nem sikerült a közvetítés"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"A mentés nem sikerült. Próbálja újra."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"A mentés nem sikerült."</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildszám"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildszám a vágólapra másolva."</string>
     <string name="basic_status" msgid="2315371112182658176">"Beszélgetés megnyitása"</string>
@@ -1026,8 +1031,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"A kamera ki van kapcsolva"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"A mikrofon ki van kapcsolva"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"A kamera és a mikrofon ki vannak kapcsolva"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"A Segéd figyel"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# értesítés}other{# értesítés}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Jegyzetelés"</string>
@@ -1043,10 +1047,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Egyszeri hozzáférés engedélyezése"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Tiltás"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Az eszköznaplók rögzítik, hogy mi történik az eszközén. Az alkalmazások ezeket a naplókat használhatják a problémák megkeresésére és kijavítására.\n\nBizonyos naplók bizalmas adatokat is tartalmazhatnak, ezért csak olyan alkalmazások számára engedélyezze az összes eszköznaplóhoz való hozzáférést, amelyekben megbízik. \n\nHa nem engedélyezi ennek az alkalmazásnak, hogy hozzáférjen az összes eszköznaplójához, az app továbbra is hozzáférhet a saját naplóihoz. Előfordulhat, hogy az eszköz gyártója továbbra is hozzáfér az eszközön található bizonyos naplókhoz és adatokhoz."</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"További információ"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"További információ: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> megnyitása"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Az alkalmazás be van állítva"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Legalább egy kártya hozzá lett adva a Wallethez"</string>

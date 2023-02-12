@@ -39,6 +39,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 
@@ -131,11 +132,10 @@ final class InstallRequest {
         mInstallArgs = new InstallArgs(params.mOriginInfo, params.mMoveInfo, params.mObserver,
                 params.mInstallFlags, params.mInstallSource, params.mVolumeUuid,
                 params.getUser(), null /*instructionSets*/, params.mPackageAbiOverride,
-                params.mGrantedRuntimePermissions, params.mAllowlistedRestrictedPermissions,
-                params.mAutoRevokePermissionsMode,
-                params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
-                params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
-                params.mDataLoaderType, params.mPackageSource,
+                params.mPermissionStates, params.mAllowlistedRestrictedPermissions,
+                params.mAutoRevokePermissionsMode, params.mTraceMethod, params.mTraceCookie,
+                params.mSigningDetails, params.mInstallReason, params.mInstallScenario,
+                params.mForceQueryableOverride, params.mDataLoaderType, params.mPackageSource,
                 params.mApplicationEnabledSettingPersistent);
         mPackageMetrics = new PackageMetrics(this);
         mIsInstallInherit = params.mIsInherit;
@@ -384,8 +384,8 @@ final class InstallRequest {
     }
 
     @Nullable
-    public String[] getInstallGrantPermissions() {
-        return mInstallArgs == null ? null : mInstallArgs.mInstallGrantPermissions;
+    public ArrayMap<String, Integer> getPermissionStates() {
+        return mInstallArgs == null ? null : mInstallArgs.mPermissionStates;
     }
 
     @Nullable

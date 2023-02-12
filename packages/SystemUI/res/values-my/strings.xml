@@ -95,8 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ဖိုင်များ"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> က ဤဖန်သားပြင်ဓာတ်ပုံကို တွေ့ရှိသည်။"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> နှင့် အခြားဖွင့်ထားသော အက်ပ်များက ဤဖန်သားပြင်ဓာတ်ပုံကို တွေ့ရှိသည်။"</string>
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"မှတ်စုတွင် ထည့်ရန်"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ဖန်သားပြင် ရိုက်ကူးမှု"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"စကရင်ရိုက်ကူးမှု အပြီးသတ်နေသည်"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ဖန်သားပြင် ရိုက်ကူးသည့် စက်ရှင်အတွက် ဆက်တိုက်လာနေသော အကြောင်းကြားချက်"</string>
@@ -890,6 +889,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"တစ်ခုခုမှားသွားသည်။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"ဖွင့်နေသည်"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"တက်ဘလက်"</string>
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"သင့်မီဒီယာကို ကာစ်လုပ်နေသည်"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"<xliff:g id="APP_LABEL">%1$s</xliff:g> ကို ကာစ်လုပ်နေသည်"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ရပ်နေသည်၊ အက်ပ်ကို စစ်ဆေးပါ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"မတွေ့ပါ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ထိန်းချုပ်မှု မရနိုင်ပါ"</string>
@@ -926,6 +927,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ထုတ်လွှင့်၍ မရပါ"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"သိမ်း၍မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"သိမ်း၍မရပါ။"</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"တည်ဆောက်မှုနံပါတ်"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"တည်ဆောက်မှုနံပါတ်ကို ကလစ်ဘုတ်သို့ မိတ္တူကူးပြီးပါပြီ။"</string>
     <string name="basic_status" msgid="2315371112182658176">"စကားဝိုင်းကို ဖွင့်ရန်"</string>
@@ -1026,8 +1031,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"ကင်မရာ ပိတ်ထားသည်"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"မိုက်ပိတ်ထားသည်"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"ကင်မရာနှင့် မိုက် ပိတ်ထားသည်"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant နားထောင်နေသည်"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{အကြောင်းကြားချက် # ခု}other{အကြောင်းကြားချက် # ခု}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>၊ <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"မှတ်စုလိုက်ခြင်း"</string>
@@ -1043,10 +1047,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"တစ်ခါသုံး ဝင်ခွင့်ပေးရန်"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ခွင့်မပြုပါ"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"သင့်စက်ရှိ အဖြစ်အပျက်များကို စက်မှတ်တမ်းများက မှတ်တမ်းတင်သည်။ အက်ပ်များက ပြဿနာများ ရှာဖွေပြီးဖြေရှင်းရန် ဤမှတ်တမ်းများကို သုံးနိုင်သည်။\n\nအချို့မှတ်တမ်းများတွင် သတိထားရမည့်အချက်အလက်များ ပါဝင်နိုင်သဖြင့် ယုံကြည်ရသည့် အက်ပ်များကိုသာ စက်မှတ်တမ်းအားလုံး သုံးခွင့်ပြုပါ။ \n\nဤအက်ပ်ကို စက်မှတ်တမ်းအားလုံး သုံးခွင့်မပြုသော်လည်း ၎င်းက ကိုယ်ပိုင်မှတ်တမ်းများ သုံးနိုင်သေးသည်။ သင့်စက်ရှိ အချို့မှတ်တမ်းများ (သို့) အချက်အလက်များကို သင့်စက်ထုတ်လုပ်သူက သုံးနိုင်ပါသေးသည်။"</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ပိုမိုလေ့လာရန်"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g> တွင် ပိုမိုလေ့လာရန်"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ဖွင့်ရန်"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• အက်ပ်ကို စနစ်ထည့်သွင်းထားရမည်"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet တွင် အနည်းဆုံးကတ်တစ်ခု ထည့်ထားရမည်"</string>

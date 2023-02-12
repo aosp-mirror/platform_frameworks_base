@@ -540,11 +540,16 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Dieses Smartphone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Dieses Tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Dieses Smartphone"</string>
-    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
     <skip />
-    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Zum Umstellen Kontoupgrade durchführen"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Downloads können hier nicht abgespielt werden"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Nach Werbung noch einmal versuchen"</string>
+    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
     <skip />
-    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
+    <skip />
+    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
     <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Verbindung kann nicht hergestellt werden. Schalte das Gerät aus &amp; und wieder ein."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Netzbetriebenes Audiogerät"</string>
@@ -672,8 +677,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animationen für intelligente „Zurück“-Touch-Geste"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Du kannst Systemanimationen für die intelligente „Zurück“-Touch-Geste aktivieren."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Diese Einstellung aktiviert Systemanimationen für intelligente Touch-Gesten. Dazu muss in der Manifestdatei enableOnBackInvokedCallback auf App-Ebene auf „true“ gesetzt werden."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Nach links"</item>
+    <item msgid="5425394847942513942">"Nach unten"</item>
+    <item msgid="7728484337962740316">"Nach rechts"</item>
+    <item msgid="324200556467459329">"Nach oben"</item>
+  </string-array>
 </resources>

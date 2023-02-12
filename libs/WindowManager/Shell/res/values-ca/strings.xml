@@ -22,8 +22,8 @@
     <string name="pip_phone_settings" msgid="5468987116750491918">"Configuració"</string>
     <string name="pip_phone_enter_split" msgid="7042877263880641911">"Entra al mode de pantalla dividida"</string>
     <string name="pip_menu_title" msgid="5393619322111827096">"Menú"</string>
-    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menú de pantalla en pantalla"</string>
-    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> està en pantalla en pantalla"</string>
+    <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Menú d\'imatge sobre imatge"</string>
+    <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> està en mode d\'imatge sobre imatge"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"Si no vols que <xliff:g id="NAME">%s</xliff:g> utilitzi aquesta funció, toca per obrir la configuració i desactiva-la."</string>
     <string name="pip_play" msgid="3496151081459417097">"Reprodueix"</string>
     <string name="pip_pause" msgid="690688849510295232">"Posa en pausa"</string>
@@ -49,6 +49,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Pantalla superior al 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Pantalla superior al 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Pantalla inferior completa"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"S\'està utilitzant el mode d\'una mà"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Per sortir, llisca cap amunt des de la part inferior de la pantalla o toca qualsevol lloc a sobre de l\'aplicació"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Inicia el mode d\'una mà"</string>

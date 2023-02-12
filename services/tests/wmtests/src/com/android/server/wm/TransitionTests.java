@@ -662,6 +662,10 @@ public class TransitionTests extends WindowTestsBase {
         changeInChange.setVisibleRequested(true);
         openInOpen.setVisibleRequested(true);
         openInChange.setVisibleRequested(true);
+        // Force the change-type changes to be "dirty" so they aren't skipped
+        changes.get(changeTask).mKnownConfigChanges = 1;
+        changes.get(changeInChangeTask).mKnownConfigChanges = 1;
+        changes.get(changeInChange).mKnownConfigChanges = 1;
 
         final int transit = transition.mType;
         int flags = 0;
@@ -716,7 +720,7 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, false /* exChg */));
         fillChangeMap(changes, newTask);
         // End states.
-        closing.setVisibleRequested(true);
+        closing.setVisibleRequested(false);
         opening.setVisibleRequested(true);
 
         final int transit = transition.mType;
@@ -757,7 +761,7 @@ public class TransitionTests extends WindowTestsBase {
         changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, false /* exChg */));
         fillChangeMap(changes, newTask);
         // End states.
-        closing.setVisibleRequested(true);
+        closing.setVisibleRequested(false);
         opening.setVisibleRequested(true);
 
         final int transit = transition.mType;
@@ -1350,7 +1354,7 @@ public class TransitionTests extends WindowTestsBase {
         assertEquals(2, info.getChanges().size());
         assertFalse(info.getChanges().get(0).hasFlags(FLAG_FILLS_TASK));
         assertEquals(embeddedTf.getBounds(), info.getChanges().get(0).getEndAbsBounds());
-        assertFalse(info.getChanges().get(1).hasFlags(FLAG_FILLS_TASK));
+        assertTrue(info.getChanges().get(1).hasFlags(FLAG_FILLS_TASK));
     }
 
     @Test

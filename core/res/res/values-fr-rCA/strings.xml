@@ -48,7 +48,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Opération infructueuse. Activez le verrouillage SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM soit verrouillée.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM soit verrouillée.</item>
       <item quantity="other">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM soit verrouillée.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"Code IIEM"</string>
@@ -1359,6 +1359,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Mode PTP par USB activé"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Partage de connexion USB activé"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Mode MIDI par USB activé"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Accessoire USB connecté"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Touchez pour afficher plus d\'options."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Chargement de l\'appareil connecté. Touchez l\'écran pour afficher plus d\'options."</string>
@@ -1707,7 +1709,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"OK"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Désactiver le raccourci"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utiliser le raccourci"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversion des couleurs"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correction des couleurs"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode Une main"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Très sombre"</string>
@@ -1858,8 +1861,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (travail)"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2e <xliff:g id="LABEL">%1$s</xliff:g> professionnel(le)"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3e <xliff:g id="LABEL">%1$s</xliff:g> professionnel(le)"</string>
-    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
-    <skip />
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"Clone de <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Demander le NIP avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Demander le schéma de déverrouillage avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
@@ -2314,16 +2316,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permet à une application compagnon en arrière-plan de lancer des services d\'avant-plan."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Le microphone est accessible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Le microphone est bloqué"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Double écran"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Le double écran est activé"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> utilise les deux écrans pour afficher le contenu"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"L\'appareil est trop chaud"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Le double écran n\'est pas accessible, car votre téléphone est trop chaud"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Désactiver"</string>
 </resources>

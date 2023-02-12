@@ -540,11 +540,16 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Denne telefonen"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Dette nettbrettet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Denne telefonen"</string>
-    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
     <skip />
-    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Oppgrader kontoen for å bytte"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Kan ikke spille av nedlastinger her"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Prøv igjen etter annonsen"</string>
+    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
     <skip />
-    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
+    <skip />
+    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
     <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Tilkoblingsproblemer. Slå enheten av og på igjen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhet med kabel"</string>
@@ -572,7 +577,7 @@
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du legger til en ny bruker, må hen konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
     <string name="user_grant_admin_title" msgid="5565796912475193314">"Gi administratorrettigheter?"</string>
     <string name="user_grant_admin_message" msgid="7925257971286380976">"Som administrator kan hen administrere andre brukere, endre enhetsinnstillinger og tilbakestille enheten til fabrikkstandard."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Konfigurere brukeren nå?"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brukeren?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for at brukeren er tilgjengelig for å konfigurere området sitt på enheten"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du konfigurere profilen nå?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Konfigurer nå"</string>
@@ -672,8 +677,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Tilbake-animasjoner med forslag"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Slå på systemanimasjoner for tilbakebevegelser med forslag."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Denne innstillingen slår på systemanimasjoner for bevegelsesanimasjoner med forslag. Den krever at enableOnBackInvokedCallback settes til sann i manifestfilen for hver app."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Flytt til venstre"</item>
+    <item msgid="5425394847942513942">"Flytt ned"</item>
+    <item msgid="7728484337962740316">"Flytt til høyre"</item>
+    <item msgid="324200556467459329">"Flytt opp"</item>
+  </string-array>
 </resources>

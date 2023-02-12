@@ -540,11 +540,16 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"이 휴대전화"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"태블릿"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"이 휴대전화"</string>
-    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
     <skip />
-    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"전환하려면 계정을 업그레이드하세요."</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"여기서 다운로드한 콘텐츠를 재생할 수 없습니다."</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"광고 후에 다시 시도해 주세요."</string>
+    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
     <skip />
-    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
+    <skip />
+    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
     <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"연결 중에 문제가 발생했습니다. 기기를 껐다가 다시 켜 보세요."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"유선 오디오 기기"</string>
@@ -672,8 +677,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"예측된 뒤로 동작 애니메이션"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"예측된 뒤로 동작에 시스템 애니메이션을 사용하도록 설정합니다."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"이 설정은 예측된 동작 애니메이션에 시스템 애니메이션을 사용하도록 합니다. 매니페스트 파일에서 앱별 enableOnBackInvokedCallback을 True로 설정해야 합니다."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"왼쪽으로 이동"</item>
+    <item msgid="5425394847942513942">"아래로 이동"</item>
+    <item msgid="7728484337962740316">"오른쪽으로 이동"</item>
+    <item msgid="324200556467459329">"위로 이동"</item>
+  </string-array>
 </resources>

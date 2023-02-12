@@ -70,6 +70,7 @@ import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionGroupInfo;
@@ -3654,7 +3655,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 shouldGrantPermission = bp != null && (bp.isRuntime() || bp.isDevelopment())
                         && (!instantApp || bp.isInstant())
                         && (supportsRuntimePermissions || !bp.isRuntimeOnly())
-                        && (permissions == null || permissions.contains(permission));
+                        && (permissions.contains(permission));
             }
             if (shouldGrantPermission) {
                 final int flags = getPermissionFlagsInternal(pkg.getPackageName(), permission,
@@ -4990,7 +4991,15 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             addAllowlistedRestrictedPermissionsInternal(pkg,
                     params.getAllowlistedRestrictedPermissions(),
                     FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
-            grantRequestedRuntimePermissionsInternal(pkg, params.getGrantedPermissions(), userId);
+            var grantedPermissions = new ArrayList<String>();
+            var permissionStates = params.getPermissionStates();
+            for (int index = 0; index < permissionStates.size(); index++) {
+                if (permissionStates.valueAt(index)
+                        == PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED) {
+                    grantedPermissions.add(permissionStates.keyAt(index));
+                }
+            }
+            grantRequestedRuntimePermissionsInternal(pkg, grantedPermissions, userId);
         }
     }
 

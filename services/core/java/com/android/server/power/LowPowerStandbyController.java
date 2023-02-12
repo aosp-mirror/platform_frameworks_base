@@ -16,36 +16,67 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManager.lowPowerStandbyAllowedReasonsToString;
+
+import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.PowerManager.LowPowerStandbyAllowedReason;
+import android.os.PowerManager.LowPowerStandbyPolicy;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
-import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
+import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * Controls Low Power Standby state.
@@ -56,11 +87,13 @@ import java.util.Arrays;
  * <ul>
  *   <li>Low Power Standby is enabled
  *   <li>The device is not interactive, and has been non-interactive for a given timeout
- *   <li>The device is not in a doze maintenance window
+ *   <li>The device is not in a doze maintenance window (devices may be configured to also
+ *   apply restrictions during doze maintenance windows, see {@link #setActiveDuringMaintenance})
  * </ul>
  *
  * <p>When Low Power Standby is active, the following restrictions are applied to applications
- * with procstate less important than {@link android.app.ActivityManager#PROCESS_STATE_BOUND_TOP}:
+ * with procstate less important than {@link android.app.ActivityManager#PROCESS_STATE_BOUND_TOP}
+ * unless they are exempted (see {@link LowPowerStandbyPolicy}):
  * <ul>
  *   <li>Network access is blocked
  *   <li>Wakelocks are disabled
@@ -76,9 +109,19 @@ public class LowPowerStandbyController {
     private static final int MSG_STANDBY_TIMEOUT = 0;
     private static final int MSG_NOTIFY_ACTIVE_CHANGED = 1;
     private static final int MSG_NOTIFY_ALLOWLIST_CHANGED = 2;
+    private static final int MSG_NOTIFY_POLICY_CHANGED = 3;
+
+    private static final String TAG_ROOT = "low-power-standby-policy";
+    private static final String TAG_IDENTIFIER = "identifier";
+    private static final String TAG_EXEMPT_PACKAGE = "exempt-package";
+    private static final String TAG_ALLOWED_REASONS = "allowed-reasons";
+    private static final String TAG_ALLOWED_FEATURES = "allowed-features";
+    private static final String ATTR_VALUE = "value";
 
     private final Handler mHandler;
     private final SettingsObserver mSettingsObserver;
+    private final DeviceConfigWrapper mDeviceConfig;
+    private final File mPolicyFile;
     private final Object mLock = new Object();
 
     private final Context mContext;
@@ -86,9 +129,12 @@ public class LowPowerStandbyController {
     private final AlarmManager.OnAlarmListener mOnStandbyTimeoutExpired =
             this::onStandbyTimeoutExpired;
     private final LowPowerStandbyControllerInternal mLocalService = new LocalService();
-    private final SparseBooleanArray mAllowlistUids = new SparseBooleanArray();
+    private final SparseIntArray mUidAllowedReasons = new SparseIntArray();
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    @GuardedBy("mLock")
+    private boolean mEnableCustomPolicy;
+
+    private final BroadcastReceiver mIdleBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
@@ -101,6 +147,41 @@ public class LowPowerStandbyController {
                 case PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED:
                     onDeviceIdleModeChanged();
                     break;
+            }
+        }
+    };
+
+    private final BroadcastReceiver mPackageBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Slog.d(TAG, "Received package intent: action=" + intent.getAction() + ", data="
+                        + intent.getData());
+            }
+            final boolean replacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+            if (replacing) {
+                return;
+            }
+            final Uri intentUri = intent.getData();
+            final String packageName = (intentUri != null) ? intentUri.getSchemeSpecificPart()
+                    : null;
+            synchronized (mLock) {
+                final LowPowerStandbyPolicy policy = getPolicy();
+                if (policy.getExemptPackages().contains(packageName)) {
+                    enqueueNotifyAllowlistChangedLocked();
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver mUserReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Slog.d(TAG, "Received user intent: action=" + intent.getAction());
+            }
+            synchronized (mLock) {
+                enqueueNotifyAllowlistChangedLocked();
             }
         }
     };
@@ -159,6 +240,18 @@ public class LowPowerStandbyController {
     @GuardedBy("mLock")
     private boolean mForceActive;
 
+    /** Current Low Power Standby policy. */
+    @GuardedBy("mLock")
+    @Nullable
+    private LowPowerStandbyPolicy mPolicy;
+
+    @VisibleForTesting
+    static final LowPowerStandbyPolicy DEFAULT_POLICY = new LowPowerStandbyPolicy(
+            "DEFAULT_POLICY",
+            Collections.emptySet(),
+            PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION,
+            Collections.emptySet());
+
     /** Functional interface for providing time. */
     @VisibleForTesting
     interface Clock {
@@ -166,11 +259,21 @@ public class LowPowerStandbyController {
         long elapsedRealtime();
     }
 
-    public LowPowerStandbyController(Context context, Looper looper, Clock clock) {
+    public LowPowerStandbyController(Context context, Looper looper) {
+        this(context, looper, SystemClock::elapsedRealtime,
+                new DeviceConfigWrapper(),
+                new File(Environment.getDataSystemDirectory(), "low_power_standby_policy.xml"));
+    }
+
+    @VisibleForTesting
+    LowPowerStandbyController(Context context, Looper looper, Clock clock,
+            DeviceConfigWrapper deviceConfig, File policyFile) {
         mContext = context;
         mHandler = new LowPowerStandbyHandler(looper);
         mClock = clock;
         mSettingsObserver = new SettingsObserver(mHandler);
+        mDeviceConfig = deviceConfig;
+        mPolicyFile = policyFile;
     }
 
     /** Call when system services are ready */
@@ -201,6 +304,16 @@ public class LowPowerStandbyController {
             mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.LOW_POWER_STANDBY_ACTIVE_DURING_MAINTENANCE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+
+            mDeviceConfig.registerPropertyUpdateListener(mContext.getMainExecutor(),
+                    properties -> onDeviceConfigFlagsChanged());
+            mEnableCustomPolicy = mDeviceConfig.enableCustomPolicy();
+
+            if (mEnableCustomPolicy) {
+                mPolicy = loadPolicy();
+            } else {
+                mPolicy = DEFAULT_POLICY;
+            }
             initSettingsLocked();
             updateSettingsLocked();
 
@@ -210,6 +323,17 @@ public class LowPowerStandbyController {
         }
 
         LocalServices.addService(LowPowerStandbyControllerInternal.class, mLocalService);
+    }
+
+    private void onDeviceConfigFlagsChanged() {
+        synchronized (mLock) {
+            boolean enableCustomPolicy = mDeviceConfig.enableCustomPolicy();
+            if (mEnableCustomPolicy != enableCustomPolicy) {
+                enqueueNotifyPolicyChangedLocked();
+                enqueueNotifyAllowlistChangedLocked();
+                mEnableCustomPolicy = enableCustomPolicy;
+            }
+        }
     }
 
     @GuardedBy("mLock")
@@ -240,6 +364,139 @@ public class LowPowerStandbyController {
                 DEFAULT_ACTIVE_DURING_MAINTENANCE ? 1 : 0) != 0;
 
         updateActiveLocked();
+    }
+
+    @Nullable
+    private LowPowerStandbyPolicy loadPolicy() {
+        final AtomicFile file = getPolicyFile();
+        if (!file.exists()) {
+            return null;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "Loading policy from " + file.getBaseFile());
+        }
+
+        try (FileInputStream in = file.openRead()) {
+            String identifier = null;
+            Set<String> exemptPackages = new ArraySet<>();
+            int allowedReasons = 0;
+            Set<String> allowedFeatures = new ArraySet<>();
+
+            TypedXmlPullParser parser = Xml.resolvePullParser(in);
+
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                if (type != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                final int depth = parser.getDepth();
+                // Check the root tag
+                final String tag = parser.getName();
+                if (depth == 1) {
+                    if (!TAG_ROOT.equals(tag)) {
+                        Slog.e(TAG, "Invalid root tag: " + tag);
+                        return null;
+                    }
+                    continue;
+                }
+                // Assume depth == 2
+                switch (tag) {
+                    case TAG_IDENTIFIER:
+                        identifier = parser.getAttributeValue(null, ATTR_VALUE);
+                        break;
+                    case TAG_EXEMPT_PACKAGE:
+                        exemptPackages.add(parser.getAttributeValue(null, ATTR_VALUE));
+                        break;
+                    case TAG_ALLOWED_REASONS:
+                        allowedReasons = parser.getAttributeInt(null, ATTR_VALUE);
+                        break;
+                    case TAG_ALLOWED_FEATURES:
+                        allowedFeatures.add(parser.getAttributeValue(null, ATTR_VALUE));
+                        break;
+                    default:
+                        Slog.e(TAG, "Invalid tag: " + tag);
+                        break;
+                }
+            }
+
+            final LowPowerStandbyPolicy policy = new LowPowerStandbyPolicy(identifier,
+                    exemptPackages, allowedReasons, allowedFeatures);
+            if (DEBUG) {
+                Slog.d(TAG, "Loaded policy: " + policy);
+            }
+            return policy;
+        } catch (FileNotFoundException e) {
+            // Use the default
+            return null;
+        } catch (IOException | NullPointerException | IllegalArgumentException
+                | XmlPullParserException e) {
+            Slog.e(TAG, "Failed to read policy file " + file.getBaseFile(), e);
+            return null;
+        }
+    }
+
+    static void writeTagValue(TypedXmlSerializer out, String tag, String value) throws IOException {
+        if (TextUtils.isEmpty(value)) return;
+
+        out.startTag(null, tag);
+        out.attribute(null, ATTR_VALUE, value);
+        out.endTag(null, tag);
+    }
+
+    static void writeTagValue(TypedXmlSerializer out, String tag, int value) throws IOException {
+        out.startTag(null, tag);
+        out.attributeInt(null, ATTR_VALUE, value);
+        out.endTag(null, tag);
+    }
+
+    private void savePolicy(@Nullable LowPowerStandbyPolicy policy) {
+        final AtomicFile file = getPolicyFile();
+        if (DEBUG) {
+            Slog.d(TAG, "Saving policy to " + file.getBaseFile());
+        }
+        if (policy == null) {
+            file.delete();
+            return;
+        }
+
+        FileOutputStream outs = null;
+        try {
+            file.getBaseFile().mkdirs();
+            outs = file.startWrite();
+
+            // Write to XML
+            TypedXmlSerializer out = Xml.resolveSerializer(outs);
+            out.startDocument(null, true);
+            out.startTag(null, TAG_ROOT);
+
+            // Body.
+            writeTagValue(out, TAG_IDENTIFIER, policy.getIdentifier());
+            for (String exemptPackage : policy.getExemptPackages()) {
+                writeTagValue(out, TAG_EXEMPT_PACKAGE, exemptPackage);
+            }
+            writeTagValue(out, TAG_ALLOWED_REASONS, policy.getAllowedReasons());
+            for (String allowedFeature : policy.getAllowedFeatures()) {
+                writeTagValue(out, TAG_ALLOWED_FEATURES, allowedFeature);
+            }
+
+            // Epilogue.
+            out.endTag(null, TAG_ROOT);
+            out.endDocument();
+
+            // Close.
+            file.finishWrite(outs);
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to write policy to file " + file.getBaseFile(), e);
+            file.failWrite(outs);
+        }
+    }
+
+    private void enqueueSavePolicy(@Nullable LowPowerStandbyPolicy policy) {
+        mHandler.post(() -> savePolicy(policy));
+    }
+
+    private AtomicFile getPolicyFile() {
+        return new AtomicFile(mPolicyFile);
     }
 
     @GuardedBy("mLock")
@@ -378,11 +635,25 @@ public class LowPowerStandbyController {
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
 
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter);
+        mContext.registerReceiver(mIdleBroadcastReceiver, intentFilter);
+
+        IntentFilter packageFilter = new IntentFilter();
+        packageFilter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        packageFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        mContext.registerReceiver(mPackageBroadcastReceiver, packageFilter);
+
+        final IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_ADDED);
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiver(mUserReceiver, userFilter, null, mHandler);
     }
 
     private void unregisterBroadcastReceiver() {
-        mContext.unregisterReceiver(mBroadcastReceiver);
+        mContext.unregisterReceiver(mIdleBroadcastReceiver);
+        mContext.unregisterReceiver(mPackageBroadcastReceiver);
+        mContext.unregisterReceiver(mUserReceiver);
     }
 
     @GuardedBy("mLock")
@@ -394,6 +665,25 @@ public class LowPowerStandbyController {
         final Intent intent = new Intent(PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+    }
+
+    @GuardedBy("mLock")
+    private void enqueueNotifyPolicyChangedLocked() {
+        final long now = mClock.elapsedRealtime();
+        final Message msg = mHandler.obtainMessage(MSG_NOTIFY_POLICY_CHANGED, getPolicy());
+        mHandler.sendMessageAtTime(msg, now);
+    }
+
+    private void notifyPolicyChanged(LowPowerStandbyPolicy policy) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyPolicyChanged, policy=" + policy);
+        }
+
+        final Intent intent = new Intent(
+                PowerManager.ACTION_LOW_POWER_STANDBY_POLICY_CHANGED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                Manifest.permission.MANAGE_LOW_POWER_STANDBY);
     }
 
     private void onStandbyTimeoutExpired() {
@@ -414,6 +704,9 @@ public class LowPowerStandbyController {
 
     /** Notify other system components about the updated Low Power Standby active state */
     private void notifyActiveChanged(boolean active) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyActiveChanged, active=" + active);
+        }
         final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
         final NetworkPolicyManagerInternal npmi = LocalServices.getService(
                 NetworkPolicyManagerInternal.class);
@@ -479,6 +772,104 @@ public class LowPowerStandbyController {
         }
     }
 
+    void setPolicy(@Nullable LowPowerStandbyPolicy policy) {
+        synchronized (mLock) {
+            if (!mSupportedConfig) {
+                Slog.w(TAG, "Low Power Standby policy cannot be changed "
+                        + "because it is not supported on this device");
+                return;
+            }
+
+            if (!mEnableCustomPolicy) {
+                Slog.d(TAG, "Custom policies are not enabled.");
+                return;
+            }
+
+            if (DEBUG) {
+                Slog.d(TAG, "setPolicy: policy=" + policy);
+            }
+            if (Objects.equals(mPolicy, policy)) {
+                return;
+            }
+
+            boolean allowlistChanged = policyChangeAffectsAllowlistLocked(mPolicy, policy);
+            mPolicy = policy;
+            enqueueSavePolicy(mPolicy);
+            if (allowlistChanged) {
+                enqueueNotifyAllowlistChangedLocked();
+            }
+            enqueueNotifyPolicyChangedLocked();
+        }
+    }
+
+    @NonNull
+    LowPowerStandbyPolicy getPolicy() {
+        synchronized (mLock) {
+            if (!mSupportedConfig) {
+                return null;
+            } else if (mEnableCustomPolicy) {
+                return policyOrDefault(mPolicy);
+            } else {
+                return DEFAULT_POLICY;
+            }
+        }
+    }
+
+    @NonNull
+    private LowPowerStandbyPolicy policyOrDefault(@Nullable LowPowerStandbyPolicy policy) {
+        if (policy == null) {
+            return DEFAULT_POLICY;
+        }
+        return policy;
+    }
+
+    boolean isPackageExempt(int uid) {
+        synchronized (mLock) {
+            if (!isEnabled()) {
+                return true;
+            }
+
+            return getExemptPackageAppIdsLocked().contains(UserHandle.getAppId(uid));
+        }
+    }
+
+    boolean isAllowed(@LowPowerStandbyAllowedReason int reason) {
+        synchronized (mLock) {
+            if (!isEnabled()) {
+                return true;
+            }
+
+            return (getPolicy().getAllowedReasons() & reason) != 0;
+        }
+    }
+
+    boolean isAllowed(String feature) {
+        synchronized (mLock) {
+            if (!mSupportedConfig) {
+                return true;
+            }
+
+            return !isEnabled() || getPolicy().getAllowedFeatures().contains(feature);
+        }
+    }
+
+    private boolean policyChangeAffectsAllowlistLocked(
+            @Nullable LowPowerStandbyPolicy oldPolicy, @Nullable LowPowerStandbyPolicy newPolicy) {
+        final LowPowerStandbyPolicy policyA = policyOrDefault(oldPolicy);
+        final LowPowerStandbyPolicy policyB = policyOrDefault(newPolicy);
+        int allowedReasonsInUse = 0;
+        for (int i = 0; i < mUidAllowedReasons.size(); i++) {
+            allowedReasonsInUse |= mUidAllowedReasons.valueAt(i);
+        }
+
+        int policyAllowedReasonsChanged = policyA.getAllowedReasons() ^ policyB.getAllowedReasons();
+
+        boolean exemptPackagesChanged = !policyA.getExemptPackages().equals(
+                policyB.getExemptPackages());
+
+        return (policyAllowedReasonsChanged & allowedReasonsInUse) != 0 || exemptPackagesChanged;
+    }
+
     void dump(PrintWriter pw) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
 
@@ -496,6 +887,8 @@ public class LowPowerStandbyController {
             ipw.println(mEnabledByDefaultConfig);
             ipw.print("mStandbyTimeoutConfig=");
             ipw.println(mStandbyTimeoutConfig);
+            ipw.print("mEnableCustomPolicy=");
+            ipw.println(mEnableCustomPolicy);
 
             if (mIsActive || mIsEnabled) {
                 ipw.print("mIsInteractive=");
@@ -509,8 +902,35 @@ public class LowPowerStandbyController {
             }
 
             final int[] allowlistUids = getAllowlistUidsLocked();
-            ipw.print("mAllowlistUids=");
+            ipw.print("Allowed UIDs=");
             ipw.println(Arrays.toString(allowlistUids));
+            ipw.println();
+
+            final LowPowerStandbyPolicy policy = getPolicy();
+            ipw.println("mPolicy:");
+            ipw.increaseIndent();
+            ipw.print("mIdentifier=");
+            ipw.println(policy.getIdentifier());
+            ipw.print("mExemptPackages=");
+            ipw.println(String.join(",", policy.getExemptPackages()));
+            ipw.print("mAllowedReasons=");
+            ipw.println(lowPowerStandbyAllowedReasonsToString(policy.getAllowedReasons()));
+            ipw.print("mAllowedFeatures=");
+            ipw.println(String.join(",", policy.getAllowedFeatures()));
+            ipw.decreaseIndent();
+
+            ipw.println();
+            ipw.println("UID allowed reasons:");
+            ipw.increaseIndent();
+            for (int i = 0; i < mUidAllowedReasons.size(); i++) {
+                if (mUidAllowedReasons.valueAt(i) > 0) {
+                    ipw.print(mUidAllowedReasons.keyAt(i));
+                    ipw.print(": ");
+                    ipw.println(
+                            lowPowerStandbyAllowedReasonsToString(mUidAllowedReasons.valueAt(i)));
+                }
+            }
+            ipw.decreaseIndent();
         }
         ipw.decreaseIndent();
     }
@@ -537,6 +957,17 @@ public class LowPowerStandbyController {
                 proto.write(LowPowerStandbyControllerDumpProto.ALLOWLIST, appId);
             }
 
+            long policyToken = proto.start(LowPowerStandbyControllerDumpProto.POLICY);
+            final LowPowerStandbyPolicy policy = getPolicy();
+            proto.write(LowPowerStandbyPolicyProto.IDENTIFIER, policy.getIdentifier());
+            for (String exemptPackage : policy.getExemptPackages()) {
+                proto.write(LowPowerStandbyPolicyProto.EXEMPT_PACKAGES, exemptPackage);
+            }
+            proto.write(LowPowerStandbyPolicyProto.ALLOWED_REASONS, policy.getAllowedReasons());
+            for (String feature : policy.getAllowedFeatures()) {
+                proto.write(LowPowerStandbyPolicyProto.ALLOWED_FEATURES, feature);
+            }
+            proto.end(policyToken);
             proto.end(token);
         }
     }
@@ -560,39 +991,133 @@ public class LowPowerStandbyController {
                     final int[] allowlistUids = (int[]) msg.obj;
                     notifyAllowlistChanged(allowlistUids);
                     break;
-            }
-        }
-    }
-
-    private void addToAllowlistInternal(int uid) {
-        if (DEBUG) {
-            Slog.i(TAG, "Adding to allowlist: " + uid);
-        }
-        synchronized (mLock) {
-            if (mSupportedConfig && !mAllowlistUids.get(uid)) {
-                mAllowlistUids.append(uid, true);
-                enqueueNotifyAllowlistChangedLocked();
-            }
-        }
-    }
-
-    private void removeFromAllowlistInternal(int uid) {
-        if (DEBUG) {
-            Slog.i(TAG, "Removing from allowlist: " + uid);
-        }
-        synchronized (mLock) {
-            if (mSupportedConfig && mAllowlistUids.get(uid)) {
-                mAllowlistUids.delete(uid);
-                enqueueNotifyAllowlistChangedLocked();
+                case MSG_NOTIFY_POLICY_CHANGED:
+                    notifyPolicyChanged((LowPowerStandbyPolicy) msg.obj);
+                    break;
             }
         }
     }
 
     @GuardedBy("mLock")
+    private boolean hasAllowedReasonLocked(int uid,
+            @LowPowerStandbyAllowedReason int allowedReason) {
+        int allowedReasons = mUidAllowedReasons.get(uid);
+        return (allowedReasons & allowedReason) != 0;
+    }
+
+    @GuardedBy("mLock")
+    private boolean addAllowedReasonLocked(int uid,
+            @LowPowerStandbyAllowedReason int allowedReason) {
+        int allowedReasons = mUidAllowedReasons.get(uid);
+        final int newAllowReasons = allowedReasons | allowedReason;
+        mUidAllowedReasons.put(uid, newAllowReasons);
+        return allowedReasons != newAllowReasons;
+    }
+
+    @GuardedBy("mLock")
+    private boolean removeAllowedReasonLocked(int uid,
+            @LowPowerStandbyAllowedReason int allowedReason) {
+        int allowedReasons = mUidAllowedReasons.get(uid);
+        if (allowedReasons == 0) {
+            return false;
+        }
+
+        final int newAllowedReasons = allowedReasons & ~allowedReason;
+        if (newAllowedReasons == 0) {
+            mUidAllowedReasons.removeAt(mUidAllowedReasons.indexOfKey(uid));
+        } else {
+            mUidAllowedReasons.put(uid, newAllowedReasons);
+        }
+        return allowedReasons != newAllowedReasons;
+    }
+
+    private void addToAllowlistInternal(int uid, @LowPowerStandbyAllowedReason int allowedReason) {
+        if (DEBUG) {
+            Slog.i(TAG,
+                    "Adding to allowlist: uid=" + uid + ", allowedReason=" + allowedReason);
+        }
+        synchronized (mLock) {
+            if (allowedReason != 0 && !hasAllowedReasonLocked(uid, allowedReason)) {
+                addAllowedReasonLocked(uid, allowedReason);
+                if ((getPolicy().getAllowedReasons() & allowedReason) != 0) {
+                    enqueueNotifyAllowlistChangedLocked();
+                }
+            }
+        }
+    }
+
+    private void removeFromAllowlistInternal(int uid,
+            @LowPowerStandbyAllowedReason int allowedReason) {
+        if (DEBUG) {
+            Slog.i(TAG, "Removing from allowlist: uid=" + uid + ", allowedReason=" + allowedReason);
+        }
+        synchronized (mLock) {
+            if (allowedReason != 0 && hasAllowedReasonLocked(uid, allowedReason)) {
+                removeAllowedReasonLocked(uid, allowedReason);
+                if ((getPolicy().getAllowedReasons() & allowedReason) != 0) {
+                    enqueueNotifyAllowlistChangedLocked();
+                }
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    @NonNull
+    private List<Integer> getExemptPackageAppIdsLocked() {
+        final PackageManager packageManager = mContext.getPackageManager();
+        final LowPowerStandbyPolicy policy = getPolicy();
+        final List<Integer> appIds = new ArrayList<>();
+
+        for (String packageName : policy.getExemptPackages()) {
+            try {
+                int packageUid = packageManager.getPackageUid(packageName,
+                        PackageManager.PackageInfoFlags.of(0));
+                int appId = UserHandle.getAppId(packageUid);
+                appIds.add(appId);
+            } catch (PackageManager.NameNotFoundException e) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Package UID cannot be resolved: packageName=" + packageName);
+                }
+            }
+        }
+
+        return appIds;
+    }
+
+    @GuardedBy("mLock")
     private int[] getAllowlistUidsLocked() {
-        final int[] uids = new int[mAllowlistUids.size()];
-        for (int i = 0; i < mAllowlistUids.size(); i++) {
-            uids[i] = mAllowlistUids.keyAt(i);
+        final UserManager userManager = mContext.getSystemService(UserManager.class);
+        final List<UserHandle> userHandles = userManager.getUserHandles(true);
+        final ArraySet<Integer> uids = new ArraySet<>(mUidAllowedReasons.size());
+        final LowPowerStandbyPolicy policy = getPolicy();
+
+        final int policyAllowedReasons = policy.getAllowedReasons();
+        for (int i = 0; i < mUidAllowedReasons.size(); i++) {
+            Integer uid = mUidAllowedReasons.keyAt(i);
+            if ((mUidAllowedReasons.valueAt(i) & policyAllowedReasons) != 0) {
+                uids.add(uid);
+            }
+        }
+
+        for (int appId : getExemptPackageAppIdsLocked()) {
+            for (int uid : uidsForAppId(appId, userHandles)) {
+                uids.add(uid);
+            }
+        }
+
+        int[] allowlistUids = new int[uids.size()];
+        for (int i = 0; i < uids.size(); i++) {
+            allowlistUids[i] = uids.valueAt(i);
+        }
+        Arrays.sort(allowlistUids);
+        return allowlistUids;
+    }
+
+    private int[] uidsForAppId(int appUid, List<UserHandle> userHandles) {
+        final int appId = UserHandle.getAppId(appUid);
+        final int[] uids = new int[userHandles.size()];
+        for (int i = 0; i < userHandles.size(); i++) {
+            uids[i] = userHandles.get(i).getUid(appId);
         }
         return uids;
     }
@@ -601,11 +1126,21 @@ public class LowPowerStandbyController {
     private void enqueueNotifyAllowlistChangedLocked() {
         final long now = mClock.elapsedRealtime();
         final int[] allowlistUids = getAllowlistUidsLocked();
+
+        if (DEBUG) {
+            Slog.d(TAG, "enqueueNotifyAllowlistChangedLocked: allowlistUids=" + Arrays.toString(
+                    allowlistUids));
+        }
+
         final Message msg = mHandler.obtainMessage(MSG_NOTIFY_ALLOWLIST_CHANGED, allowlistUids);
         mHandler.sendMessageAtTime(msg, now);
     }
 
     private void notifyAllowlistChanged(int[] allowlistUids) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyAllowlistChanged: " + Arrays.toString(allowlistUids));
+        }
+
         final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
         final NetworkPolicyManagerInternal npmi = LocalServices.getService(
                 NetworkPolicyManagerInternal.class);
@@ -613,15 +1148,42 @@ public class LowPowerStandbyController {
         npmi.setLowPowerStandbyAllowlist(allowlistUids);
     }
 
+    /**
+     * Class that is used to read device config for low power standby configuration.
+     */
+    @VisibleForTesting
+    public static class DeviceConfigWrapper {
+        public static final String NAMESPACE = "low_power_standby";
+        public static final String FEATURE_FLAG_ENABLE_POLICY = "enable_policy";
+
+        /**
+         * Returns true if custom policies are enabled.
+         * Otherwise, returns false, and the default policy will be used.
+         */
+        public boolean enableCustomPolicy() {
+            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_POLICY, false);
+        }
+
+        /**
+         * Registers a DeviceConfig update listener.
+         */
+        public void registerPropertyUpdateListener(
+                @NonNull Executor executor,
+                @NonNull DeviceConfig.OnPropertiesChangedListener onPropertiesChangedListener) {
+            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE, executor,
+                    onPropertiesChangedListener);
+        }
+    }
+
     private final class LocalService extends LowPowerStandbyControllerInternal {
         @Override
-        public void addToAllowlist(int uid) {
-            addToAllowlistInternal(uid);
+        public void addToAllowlist(int uid, @LowPowerStandbyAllowedReason int allowedReason) {
+            addToAllowlistInternal(uid, allowedReason);
         }
 
         @Override
-        public void removeFromAllowlist(int uid) {
-            removeFromAllowlistInternal(uid);
+        public void removeFromAllowlist(int uid, @LowPowerStandbyAllowedReason int allowedReason) {
+            removeFromAllowlistInternal(uid, allowedReason);
         }
     }
 

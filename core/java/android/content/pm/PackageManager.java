@@ -49,6 +49,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.pm.verify.domain.DomainVerificationManager;
@@ -1385,7 +1386,7 @@ public abstract class PackageManager {
             INSTALL_FROM_ADB,
             INSTALL_ALL_USERS,
             INSTALL_REQUEST_DOWNGRADE,
-            INSTALL_GRANT_RUNTIME_PERMISSIONS,
+            INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS,
             INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
             INSTALL_FORCE_VOLUME_UUID,
             INSTALL_FORCE_PERMISSION_PROMPT,
@@ -1462,14 +1463,16 @@ public abstract class PackageManager {
     public static final int INSTALL_REQUEST_DOWNGRADE = 0x00000080;
 
     /**
-     * Flag parameter for {@link #installPackage} to indicate that all runtime
-     * permissions should be granted to the package. If {@link #INSTALL_ALL_USERS}
-     * is set the runtime permissions will be granted to all users, otherwise
-     * only to the owner.
+     * Flag parameter for package install to indicate that all requested permissions should be
+     * granted to the package. If {@link #INSTALL_ALL_USERS} is set the runtime permissions will
+     * be granted to all users, otherwise only to the owner.
+     * <p/>
+     * If this flag is set, {@link SessionParams#setPermissionState(String, int)} should not be
+     * called.
      *
      * @hide
      */
-    public static final int INSTALL_GRANT_RUNTIME_PERMISSIONS = 0x00000100;
+    public static final int INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS = 0x00000100;
 
     /** {@hide} */
     public static final int INSTALL_FORCE_VOLUME_UUID = 0x00000200;
@@ -1598,7 +1601,7 @@ public abstract class PackageManager {
     public static final int INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK = 0x01000000;
 
     /**
-     * Flag parameter for {@link PackageInstaller.SessionParams} to indicate that the
+     * Flag parameter for {@link SessionParams} to indicate that the
      * update ownership enforcement is requested.
      * @hide
      */

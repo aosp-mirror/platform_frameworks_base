@@ -1358,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"ইউএছবিৰ জৰিয়তে পিটিপি অন কৰা হ’ল"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"ইউএছবি টেডাৰিং অন কৰা হ’ল"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"ইউএছবিৰ জৰিয়তে এমআইডিআই অন কৰা হ’ল"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"ইউএছবি সহায়ক সামগ্ৰী সংযোগ কৰা হ’ল"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"অধিক বিকল্পৰ বাবে টিপক।"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"সংযুক্ত ডিভাইচ চ্চাৰ্জ কৰি থকা হৈছে। অধিক বিকল্পৰ বাবে টিপক।"</string>
@@ -1706,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"কৰা হ’ল"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"শ্বৰ্টকাট অফ কৰক"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"শ্বৰ্টকাট ব্যৱহাৰ কৰক"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"ৰং বিপৰীতকৰণ"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"ৰং শুধৰণী"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"এখন হাতেৰে ব্যৱহাৰ কৰাৰ ম’ড"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"এক্সট্ৰা ডিম"</string>
@@ -2312,16 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"এটা সহযোগী এপক নেপথ্যৰ পৰা অগ্ৰভূমি সেৱাসমূহ আৰম্ভ কৰিবলৈ দিয়ে।"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"মাইক্ৰ’ফ’নটো উপলব্ধ"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"মাইক্ৰ’ফ’নটো অৱৰোধ কৰি থোৱা আছে"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"দ্বৈত স্ক্ৰীন"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ডুৱেল স্ক্ৰীন অন আছে"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ সমল দেখুৱাবলৈ দুয়োখন ডিছপ্লে’ ব্যৱহাৰ কৰি আছে"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ডিভাইচটো অতি বেছি গৰম হৈছে"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"আপোনাৰ ফ’নটো অতি বেছি গৰম হোৱাৰ বাবে ডুৱেল স্ক্ৰীন উপলব্ধ নহয়"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"অফ কৰক"</string>
 </resources>

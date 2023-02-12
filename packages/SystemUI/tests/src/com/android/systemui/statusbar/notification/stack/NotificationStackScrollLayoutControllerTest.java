@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
@@ -195,7 +196,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mNotificationStackSizeCalculator,
                 mFeatureFlags,
                 mNotificationTargetsHelper,
-                mSecureSettings
+                mSecureSettings,
+                mock(NotificationDismissibilityProvider.class)
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);

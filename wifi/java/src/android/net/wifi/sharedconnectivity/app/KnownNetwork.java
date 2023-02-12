@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * A data class representing a known Wifi network.
+ * A data class representing a known Wi-Fi network.
  *
  * @hide
  */
@@ -112,7 +112,7 @@ public final class KnownNetwork implements Parcelable {
         /**
          * Sets the device information of the device providing connectivity.
          *
-         * @param deviceInfo The array of security types supported by the known network.
+         * @param deviceInfo The device information object.
          * @return Returns the Builder object.
          */
         @NonNull
@@ -153,7 +153,7 @@ public final class KnownNetwork implements Parcelable {
             @NetworkSource int networkSource,
             @NonNull String ssid,
             @NonNull @SecurityType int[] securityTypes,
-            @NonNull android.net.wifi.sharedconnectivity.app.DeviceInfo deviceInfo) {
+            @NonNull DeviceInfo deviceInfo) {
         validate(networkSource, ssid, securityTypes);
         mNetworkSource = networkSource;
         mSsid = ssid;
@@ -166,7 +166,6 @@ public final class KnownNetwork implements Parcelable {
      *
      * @return Returns the network source as defined by IntDef {@link NetworkSource}.
      */
-    @NonNull
     @NetworkSource
     public int getNetworkSource() {
         return mNetworkSource;
@@ -196,7 +195,7 @@ public final class KnownNetwork implements Parcelable {
     /**
      * Gets the device information of the device providing connectivity.
      *
-     * @return Returns the array of security types supported by the known network.
+     * @return Returns the information of the device providing the known network.
      */
     @NonNull
     public DeviceInfo getDeviceInfo() {

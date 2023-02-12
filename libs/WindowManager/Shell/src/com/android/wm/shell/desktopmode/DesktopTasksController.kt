@@ -27,6 +27,7 @@ import android.content.Context
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
 import android.window.TransitionInfo
@@ -89,7 +90,8 @@ class DesktopTasksController(
         // Execute transaction if there are pending operations
         if (!wct.isEmpty) {
             if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-                transitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */)
+                // TODO(b/268662477): add animation for the transition
+                transitions.startTransition(TRANSIT_NONE, wct, null /* handler */)
             } else {
                 shellTaskOrganizer.applyTransaction(wct)
             }

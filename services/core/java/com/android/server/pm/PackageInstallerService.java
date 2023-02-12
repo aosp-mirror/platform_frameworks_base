@@ -88,6 +88,7 @@ import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -122,6 +123,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
@@ -169,6 +171,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
      */
     private static final int ADB_DEV_MODE = PackageManager.INSTALL_FROM_ADB
             | PackageManager.INSTALL_ALLOW_TEST;
+
+    private static final Set<String> ALLOWED_PERMISSION_STATE_NAMES = Set.of(
+            Manifest.permission.USE_FULL_SCREEN_INTENT
+    );
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -785,13 +791,31 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mBypassNextAllowedApexUpdateCheck = false;
 
         if (!params.isMultiPackage) {
+            var hasInstallGrantRuntimePermissions = mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS)
+                    == PackageManager.PERMISSION_GRANTED;
+
             // Only system components can circumvent runtime permissions when installing.
-            if ((params.installFlags & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
-                    && mContext.checkCallingOrSelfPermission(Manifest.permission
-                    .INSTALL_GRANT_RUNTIME_PERMISSIONS) == PackageManager.PERMISSION_DENIED) {
+            if ((params.installFlags & PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS) != 0
+                    && !hasInstallGrantRuntimePermissions) {
                 throw new SecurityException("You need the "
-                        + "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS permission "
-                        + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
+                        + Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS
+                        + " permission to use the"
+                        + " PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS flag");
+            }
+
+            var permissionStates = params.getFinalPermissionStates();
+            if (!permissionStates.isEmpty()) {
+                if (!hasInstallGrantRuntimePermissions) {
+                    for (int index = 0; index < permissionStates.size(); index++) {
+                        var permissionName = permissionStates.keyAt(index);
+                        if (!ALLOWED_PERMISSION_STATE_NAMES.contains(permissionName)) {
+                            throw new SecurityException("You need the "
+                                    + Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS
+                                    + " permission to grant runtime permissions for a session");
+                        }
+                    }
+                }
             }
 
             // Defensively resize giant app icons
@@ -1779,7 +1803,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mSilentUpdatePolicy.dump(pw);
     }
 
-    class InternalCallback {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public class InternalCallback {
         public void onSessionBadgingChanged(PackageInstallerSession session) {
             mCallbacks.notifySessionBadgingChanged(session.sessionId, session.userId);
             mSettingsWriteRequest.schedule();

@@ -1358,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB மூலமாக PTP பயன்முறை ஆன் செய்யப்பட்டது"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB இணைப்பு முறை ஆன் செய்யப்பட்டது"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB மூலமாக MIDI பயன்முறை ஆன் செய்யப்பட்டது"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB துணைக்கருவி இணைக்கப்பட்டது"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"மேலும் விருப்பங்களுக்கு, தட்டவும்."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"இணைக்கப்பட்ட சாதனத்தைச் சார்ஜ் செய்கிறது. கூடுதல் விருப்பங்களுக்கு, தட்டவும்."</string>
@@ -1706,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"முடிந்தது"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ஷார்ட்கட்டை முடக்கு"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ஷார்ட்கட்டைப் பயன்படுத்து"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"நிற நேரெதிர் மாற்றம்"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"கலர் கரெக்‌ஷன்"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ஒற்றைக் கைப் பயன்முறை"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"மிகக் குறைவான வெளிச்சம்"</string>
@@ -1857,8 +1860,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"பணியிடம் <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2வது பணி <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3வது பணி <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
-    <skip />
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"குளோன் <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"அகற்றும் முன் PINஐக் கேள்"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"அகற்றும் முன் அன்லாக் பேட்டர்னைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
@@ -2313,16 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"பின்னணியிலிருந்து முன்புலச் சேவைகளைத் தொடங்க துணைத் தயாரிப்பு ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"மைக்ரோஃபோன் இயக்கப்பட்டது"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"மைக்ரோஃபோன் முடக்கப்பட்டுள்ளது"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"இரட்டைத் திரை"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"இரட்டைத் திரை அம்சம் இயக்கத்தில் உள்ளது"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"உள்ளடக்கத்தைக் காட்டுவதற்கு இரண்டு டிஸ்ப்ளேக்களையும் <xliff:g id="APP_NAME">%1$s</xliff:g> பயன்படுத்துகிறது"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"சாதனம் மிகவும் சூடாக உள்ளது"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"உங்கள் மொபைல் மிகவும் சூடாக இருப்பதால் இரட்டைத் திரை அம்சத்தைப் பயன்படுத்த முடியாது"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"முடக்கு"</string>
 </resources>

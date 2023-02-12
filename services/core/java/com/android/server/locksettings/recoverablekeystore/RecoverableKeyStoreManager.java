@@ -102,8 +102,6 @@ public class RecoverableKeyStoreManager {
     private static final String TAG = "RecoverableKeyStoreMgr";
     private static final long SYNC_DELAY_MILLIS = 2000;
     private static final int INVALID_REMOTE_GUESS_LIMIT = 5;
-    public static final byte[] ENCRYPTED_REMOTE_CREDENTIALS_HEADER =
-            "encrypted_remote_credentials".getBytes(StandardCharsets.UTF_8);
 
     private static RecoverableKeyStoreManager mInstance;
 
@@ -1055,7 +1053,7 @@ public class RecoverableKeyStoreManager {
             decryptedCredentials = SecureBox.decrypt(
                 session.getKeyPair().getPrivate(),
                 /* sharedSecret= */ null,
-                ENCRYPTED_REMOTE_CREDENTIALS_HEADER,
+                LockPatternUtils.ENCRYPTED_REMOTE_CREDENTIALS_HEADER,
                 encryptedCredential);
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "Missing SecureBox algorithm. AOSP required to support this.", e);

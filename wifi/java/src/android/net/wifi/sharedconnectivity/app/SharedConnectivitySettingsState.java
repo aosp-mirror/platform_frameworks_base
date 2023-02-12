@@ -91,7 +91,6 @@ public final class SharedConnectivitySettingsState implements Parcelable {
      *
      * @return Returns true for enabled, false otherwise.
      */
-    @NonNull
     public boolean isInstantTetherEnabled() {
         return mInstantTetherEnabled;
     }
@@ -130,8 +129,7 @@ public final class SharedConnectivitySettingsState implements Parcelable {
     }
 
     @NonNull
-    public static final Creator<SharedConnectivitySettingsState> CREATOR =
-            new Creator<SharedConnectivitySettingsState>() {
+    public static final Creator<SharedConnectivitySettingsState> CREATOR = new Creator<>() {
                 @Override
                 public SharedConnectivitySettingsState createFromParcel(Parcel in) {
                     return new SharedConnectivitySettingsState(in.readBoolean(),

@@ -2102,7 +2102,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         @VisibleForTesting
         ChangeInfo(@NonNull WindowContainer container, boolean visible, boolean existChange) {
-            mContainer = container;
+            this(container);
             mVisible = visible;
             mExistenceChanged = existChange;
             mShowWallpaper = false;

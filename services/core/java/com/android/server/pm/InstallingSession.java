@@ -44,6 +44,7 @@ import android.content.pm.parsing.PackageLite;
 import android.os.Environment;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
@@ -73,7 +74,8 @@ class InstallingSession {
     final String mVolumeUuid;
     int mRet;
     final String mPackageAbiOverride;
-    final String[] mGrantedRuntimePermissions;
+    @NonNull
+    final ArrayMap<String, Integer> mPermissionStates;
     final List<String> mAllowlistedRestrictedPermissions;
     final int mAutoRevokePermissionsMode;
     final SigningDetails mSigningDetails;
@@ -116,7 +118,7 @@ class InstallingSession {
         mVolumeUuid = volumeUuid;
         mPackageAbiOverride = packageAbiOverride;
 
-        mGrantedRuntimePermissions = null;
+        mPermissionStates = new ArrayMap<>();
         mAllowlistedRestrictedPermissions = null;
         mAutoRevokePermissionsMode = MODE_DEFAULT;
         mSigningDetails = SigningDetails.UNKNOWN;
@@ -151,7 +153,7 @@ class InstallingSession {
         mInstallSource = installSource;
         mVolumeUuid = sessionParams.volumeUuid;
         mPackageAbiOverride = sessionParams.abiOverride;
-        mGrantedRuntimePermissions = sessionParams.grantedRuntimePermissions;
+        mPermissionStates = sessionParams.getFinalPermissionStates();
         mAllowlistedRestrictedPermissions = sessionParams.whitelistedRestrictedPermissions;
         mAutoRevokePermissionsMode = sessionParams.autoRevokePermissionsMode;
         mSigningDetails = signingDetails;

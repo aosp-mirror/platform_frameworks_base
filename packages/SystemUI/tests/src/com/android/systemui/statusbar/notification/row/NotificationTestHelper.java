@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
@@ -121,7 +122,8 @@ public class NotificationTestHelper {
     private final IconManager mIconManager;
     private final StatusBarStateController mStatusBarStateController;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
-    public final OnUserInteractionCallback mOnUserInteractionCallback;
+    private final OnUserInteractionCallback mOnUserInteractionCallback;
+    private final NotificationDismissibilityProvider mDismissibilityProvider;
     public final Runnable mFutureDismissalRunnable;
     private @InflationFlag int mDefaultInflationFlags;
     private FeatureFlags mFeatureFlags;
@@ -171,6 +173,7 @@ public class NotificationTestHelper {
         mBindPipelineEntryListener = collectionListenerCaptor.getValue();
         mPeopleNotificationIdentifier = mock(PeopleNotificationIdentifier.class);
         mOnUserInteractionCallback = mock(OnUserInteractionCallback.class);
+        mDismissibilityProvider = mock(NotificationDismissibilityProvider.class);
         mFutureDismissalRunnable = mock(Runnable.class);
         when(mOnUserInteractionCallback.registerFutureDismissal(any(), anyInt()))
                 .thenReturn(mFutureDismissalRunnable);
@@ -187,6 +190,14 @@ public class NotificationTestHelper {
 
     public ExpandableNotificationRowLogger getMockLogger() {
         return mMockLogger;
+    }
+
+    public OnUserInteractionCallback getOnUserInteractionCallback() {
+        return mOnUserInteractionCallback;
+    }
+
+    public NotificationDismissibilityProvider getDismissibilityProvider() {
+        return mDismissibilityProvider;
     }
 
     /**
@@ -545,6 +556,7 @@ public class NotificationTestHelper {
                 mOnUserInteractionCallback,
                 Optional.of(mock(BubblesManager.class)),
                 mock(NotificationGutsManager.class),
+                mDismissibilityProvider,
                 mock(MetricsLogger.class),
                 mock(SmartReplyConstants.class),
                 mock(SmartReplyController.class),

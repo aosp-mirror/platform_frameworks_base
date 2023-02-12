@@ -139,6 +139,7 @@ import dagger.Provides;
             DemoModeModule.class,
             FalsingModule.class,
             FlagsModule.class,
+            SystemPropertiesFlagsModule.class,
             FooterActionsModule.class,
             LogModule.class,
             MediaProjectionModule.class,
