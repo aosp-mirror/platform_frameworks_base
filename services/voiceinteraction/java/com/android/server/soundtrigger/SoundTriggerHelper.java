@@ -77,6 +77,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     static final String TAG = "SoundTriggerHelper";
     static final boolean DBG = false;
 
+    // Module ID if there is no available module to connect to.
+    public static final int INVALID_MODULE_ID = -1;
+
     /**
      * Return codes for {@link #startRecognition(int, KeyphraseSoundModel,
      *      IRecognitionStatusCallback, RecognitionConfig)},
@@ -138,7 +141,11 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         mKeyphraseUuidMap = new HashMap<Integer, UUID>();
         mModuleProvider = moduleProvider;
         mModulePropertiesProvider = modulePropertiesProvider;
-        mModule = mModuleProvider.apply(this);
+        if (moduleId == INVALID_MODULE_ID) {
+            mModule = null;
+        } else {
+            mModule = mModuleProvider.apply(this);
+        }
         Looper looper = Looper.myLooper();
         if (looper == null) {
             looper = Looper.getMainLooper();

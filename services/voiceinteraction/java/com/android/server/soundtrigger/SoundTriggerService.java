@@ -215,7 +215,7 @@ public class SoundTriggerService extends SystemService {
         }
     }
 
-    private SoundTriggerHelper newSoundTriggerHelper(@NonNull ModuleProperties moduleProperties) {
+    private SoundTriggerHelper newSoundTriggerHelper(ModuleProperties moduleProperties) {
         Identity middlemanIdentity = new Identity();
         middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
         Identity originatorIdentity = IdentityContext.getNonNull();
@@ -224,11 +224,15 @@ public class SoundTriggerService extends SystemService {
         SoundTrigger.listModulesAsMiddleman(moduleList, middlemanIdentity,
                                         originatorIdentity);
 
-        if (!moduleList.contains(moduleProperties)) {
-            throw new IllegalArgumentException("Invalid module properties");
-        }
+        // Don't fail existing CTS tests which run without a ST module
+        final int moduleId = (moduleProperties != null) ?
+                moduleProperties.getId() : SoundTriggerHelper.INVALID_MODULE_ID;
 
-        int moduleId = moduleProperties.getId();
+        if (moduleId != SoundTriggerHelper.INVALID_MODULE_ID) {
+            if (!moduleList.contains(moduleProperties)) {
+                throw new IllegalArgumentException("Invalid module properties");
+            }
+        }
 
         return new SoundTriggerHelper(
                 mContext,
