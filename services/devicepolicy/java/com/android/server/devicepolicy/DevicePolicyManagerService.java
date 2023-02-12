@@ -21,6 +21,7 @@ import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
@@ -4160,6 +4161,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         return getActiveAdminsForUserAndItsManagedProfilesLocked(userHandle,
                 /* shouldIncludeProfileAdmins */ (user) -> false);
+    }
+
+    /**
+     * Get the list of active admins for an affected user:
+     * <ul>
+     * <li>The active admins associated with the userHandle itself</li>
+     * <li>The parent active admins for each managed profile associated with the userHandle</li>
+     * <li>The permission based admin associated with the userHandle itself</li>
+     * </ul>
+     *
+     * @param userHandle the affected user for whom to get the active admins
+     * @return the list of active admins for the affected user
+     */
+    @GuardedBy("getLockObject()")
+    private List<ActiveAdmin> getActiveAdminsForAffectedUserInclPermissionBasedAdminLocked(
+            int userHandle) {
+        List<ActiveAdmin> list = getActiveAdminsForAffectedUserLocked(userHandle);
+        if (getUserData(userHandle).mPermissionBasedAdmin != null) {
+            list.add(getUserData(userHandle).mPermissionBasedAdmin);
+        }
+        return list;
     }
 
     /**
@@ -8467,24 +8489,39 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Disables all device cameras according to the specified admin.
      */
     @Override
-    public void setCameraDisabled(ComponentName who, boolean disabled, boolean parent) {
+    public void setCameraDisabled(ComponentName who, String callerPackageName, boolean disabled,
+            boolean parent) {
         if (!mHasFeature) {
             return;
         }
-        Objects.requireNonNull(who, "ComponentName is null");
 
-        final CallerIdentity caller = getCallerIdentity(who);
-        if (parent) {
-            Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
-        }
+        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        final int userHandle = caller.getUserId();
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_CAMERA_DISABLED);
 
-        final int userHandle = caller.getUserId();
+        ActiveAdmin admin = null;
+        if (isPermissionCheckFlagEnabled()) {
+            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+                    who,
+                    MANAGE_DEVICE_POLICY_CAMERA,
+                    callerPackageName,
+                    getProfileParentUserIfRequested(userHandle, parent));
+            admin = enforcingAdmin.getActiveAdmin();
+        } else {
+            Objects.requireNonNull(who, "ComponentName is null");
+            if (parent) {
+                Preconditions.checkCallAuthorization(
+                        isProfileOwnerOfOrganizationOwnedDevice(caller));
+            }
+            synchronized (getLockObject()) {
+                admin = getActiveAdminForCallerLocked(who,
+                        DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA, parent);
+            }
+        }
+
         synchronized (getLockObject()) {
-            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                    DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA, parent);
-            if (ap.disableCamera != disabled) {
-                ap.disableCamera = disabled;
+            if (admin.disableCamera != disabled) {
+                admin.disableCamera = disabled;
                 saveSettingsLocked(userHandle);
             }
         }
@@ -8513,14 +8550,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle)
-                || isCameraServerUid(caller));
-
-        if (parent) {
+        if (isPermissionCheckFlagEnabled()) {
             Preconditions.checkCallAuthorization(
-                    isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId()));
+                    hasFullCrossUsersPermission(caller, userHandle) || isCameraServerUid(caller)
+                            || hasPermission(MANAGE_DEVICE_POLICY_CAMERA, userHandle)
+                            || hasPermission(QUERY_ADMIN_POLICY));
+        } else {
+            Preconditions.checkCallAuthorization(
+                    hasFullCrossUsersPermission(caller, userHandle) || isCameraServerUid(caller));
+            if (parent) {
+                Preconditions.checkCallAuthorization(
+                        isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId()));
+            }
         }
 
         synchronized (getLockObject()) {
@@ -8533,12 +8575,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (deviceOwner != null && deviceOwner.disableCamera) {
                 return true;
             }
-            final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
+
             // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins = getActiveAdminsForAffectedUserLocked(affectedUserId);
+            List<ActiveAdmin> admins;
+            final int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
+            if (isPermissionCheckFlagEnabled()) {
+                admins = getActiveAdminsForAffectedUserInclPermissionBasedAdminLocked(
+                        affectedUserId);
+            } else {
+                admins = getActiveAdminsForAffectedUserLocked(affectedUserId);
+            }
             // Determine whether or not the device camera is disabled for any active admins.
-            for (ActiveAdmin admin : admins) {
-                if (admin.disableCamera) {
+            for (ActiveAdmin activeAdmin : admins) {
+                if (activeAdmin.disableCamera) {
                     return true;
                 }
             }
@@ -15595,6 +15644,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     who,
                     MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
+                    caller.getPackageName(),
                     caller.getUserId());
             admin = enforcingAdmin.getActiveAdmin();
         } else {
@@ -15625,6 +15675,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             EnforcingAdmin enforcingAdmin = enforceCanQueryAndGetEnforcingAdmin(
                     who,
                     MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
+                    caller.getPackageName(),
                     caller.getUserId());
             admin = enforcingAdmin.getActiveAdmin();
         } else {
@@ -20324,9 +20375,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * the associated cross-user permission if the caller's user is different to the target user.
      */
     private EnforcingAdmin enforcePermissionAndGetEnforcingAdmin(@Nullable ComponentName admin,
-            String permission, int targetUserId) {
+            String permission, String callerPackageName, int targetUserId) {
         enforcePermission(permission, targetUserId);
-        return getEnforcingAdminForCaller(admin, getCallerIdentity());
+        return getEnforcingAdminForCaller(admin, callerPackageName);
     }
 
     /**
@@ -20341,9 +20392,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * the associated cross-user permission if the caller's user is different to the target user.
      */
     private EnforcingAdmin enforceCanQueryAndGetEnforcingAdmin(@Nullable ComponentName admin,
-            String permission, int targetUserId) {
+            String permission, String callerPackageName, int targetUserId) {
         enforceCanQuery(permission, targetUserId);
-        return getEnforcingAdminForCaller(admin, getCallerIdentity());
+        return getEnforcingAdminForCaller(admin, callerPackageName);
     }
 
     private static final HashMap<String, String> POLICY_IDENTIFIER_TO_PERMISSION = new HashMap<>();
@@ -20487,7 +20538,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private EnforcingAdmin getEnforcingAdminForCaller(@Nullable ComponentName who,
-            CallerIdentity caller) {
+            String callerPackageName) {
+        CallerIdentity caller = getCallerIdentity(callerPackageName);
         int userId = caller.getUserId();
         ActiveAdmin admin = null;
         synchronized (getLockObject()) {
@@ -20499,7 +20551,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (getActiveAdminUncheckedLocked(who, userId) != null) {
             return EnforcingAdmin.createDeviceAdminEnforcingAdmin(who, userId, admin);
         }
-        return  EnforcingAdmin.createEnforcingAdmin(caller.getPackageName(), userId);
+        if (admin == null) {
+            admin = getUserData(userId).createOrGetPermissionBasedAdmin();
+        }
+        return  EnforcingAdmin.createEnforcingAdmin(caller.getPackageName(), userId, admin);
     }
 
     private boolean isPermissionCheckFlagEnabled() {

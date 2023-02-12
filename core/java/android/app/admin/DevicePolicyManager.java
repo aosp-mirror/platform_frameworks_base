@@ -18,6 +18,7 @@ package android.app.admin;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.SET_TIME;
@@ -8265,15 +8266,18 @@ public class DevicePolicyManager {
      * legacy device admins targeting SDK version {@link android.os.Build.VERSION_CODES#P} or
      * below will be silently ignored.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with or null if
+                     the caller is not a device admin
      * @param disabled Whether or not the camera should be disabled.
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
      *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
      */
-    public void setCameraDisabled(@NonNull ComponentName admin, boolean disabled) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CAMERA, conditional = true)
+    public void setCameraDisabled(@Nullable ComponentName admin, boolean disabled) {
         if (mService != null) {
             try {
-                mService.setCameraDisabled(admin, disabled, mParentInstance);
+                mService.setCameraDisabled(admin, mContext.getPackageName(), disabled,
+                        mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

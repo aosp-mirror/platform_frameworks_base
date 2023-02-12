@@ -19,10 +19,10 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.Authority;
-import android.app.admin.UnknownAuthority;
 import android.app.admin.DeviceAdminAuthority;
 import android.app.admin.DpcAuthority;
 import android.app.admin.RoleAuthority;
+import android.app.admin.UnknownAuthority;
 import android.content.ComponentName;
 import android.os.UserHandle;
 
@@ -71,9 +71,10 @@ final class EnforcingAdmin {
     private final boolean mIsRoleAuthority;
     private final ActiveAdmin mActiveAdmin;
 
-    static EnforcingAdmin createEnforcingAdmin(@NonNull String packageName, int userId) {
+    static EnforcingAdmin createEnforcingAdmin(@NonNull String packageName, int userId,
+            ActiveAdmin admin) {
         Objects.requireNonNull(packageName);
-        return new EnforcingAdmin(packageName, userId);
+        return new EnforcingAdmin(packageName, userId, admin);
     }
 
     static EnforcingAdmin createEnterpriseEnforcingAdmin(
@@ -127,7 +128,7 @@ final class EnforcingAdmin {
         mActiveAdmin = activeAdmin;
     }
 
-    private EnforcingAdmin(String packageName, int userId) {
+    private EnforcingAdmin(String packageName, int userId, ActiveAdmin activeAdmin) {
         Objects.requireNonNull(packageName);
 
         // Only role authorities use this constructor.
@@ -137,7 +138,7 @@ final class EnforcingAdmin {
         mComponentName = null;
         // authorities will be loaded when needed
         mAuthorities = null;
-        mActiveAdmin = null;
+        mActiveAdmin = activeAdmin;
     }
 
     private static Set<String> getRoleAuthoritiesOrDefault(String packageName, int userId) {
@@ -274,7 +275,7 @@ final class EnforcingAdmin {
         int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
 
         if (isRoleAuthority) {
-            return new EnforcingAdmin(packageName, userId);
+            return new EnforcingAdmin(packageName, userId, null);
         } else {
             String className = parser.getAttributeValue(/* namespace= */ null, ATTR_CLASS_NAME);
             ComponentName componentName = new ComponentName(packageName, className);
