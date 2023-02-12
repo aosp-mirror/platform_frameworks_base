@@ -599,7 +599,7 @@ public final class Settings {
 
     /**
      * Activity Action: Show settings to allow configuration of
-     * {@link Manifest.permission#RUN_LONG_JOBS} permission
+     * {@link Manifest.permission#RUN_USER_INITIATED_JOBS} permission
      *
      * Input: Optionally, the Intent's data URI can specify the application package name to
      * directly invoke the management GUI specific to the package name. For example
@@ -6998,6 +6998,58 @@ public final class Settings {
          */
         public static final String BLUETOOTH_LE_BROADCAST_APP_SOURCE_NAME =
                 "bluetooth_le_broadcast_app_source_name";
+
+        /**
+         * Ringtone routing value for hearing aid. It routes ringtone to hearing aid or device
+         * speaker.
+         * <ul>
+         *     <li> 0 = Default
+         *     <li> 1 = Route to hearing aid
+         *     <li> 2 = Route to device speaker
+         * </ul>
+         * @hide
+         */
+        public static final String HEARING_AID_RINGTONE_ROUTING =
+                "hearing_aid_ringtone_routing";
+
+        /**
+         * Phone call routing value for hearing aid. It routes phone call to hearing aid or
+         * device speaker.
+         * <ul>
+         *     <li> 0 = Default
+         *     <li> 1 = Route to hearing aid
+         *     <li> 2 = Route to device speaker
+         * </ul>
+         * @hide
+         */
+        public static final String HEARING_AID_CALL_ROUTING =
+                "hearing_aid_call_routing";
+
+        /**
+         * Media routing value for hearing aid. It routes media to hearing aid or device
+         * speaker.
+         * <ul>
+         *     <li> 0 = Default
+         *     <li> 1 = Route to hearing aid
+         *     <li> 2 = Route to device speaker
+         * </ul>
+         * @hide
+         */
+        public static final String HEARING_AID_MEDIA_ROUTING =
+                "hearing_aid_media_routing";
+
+        /**
+         * System sounds routing value for hearing aid. It routes system sounds to hearing aid
+         * or device speaker.
+         * <ul>
+         *     <li> 0 = Default
+         *     <li> 1 = Route to hearing aid
+         *     <li> 2 = Route to device speaker
+         * </ul>
+         * @hide
+         */
+        public static final String HEARING_AID_SYSTEM_SOUNDS_ROUTING =
+                "hearing_aid_system_sounds_routing";
 
         /**
          * Setting to indicate that on device captions are enabled.

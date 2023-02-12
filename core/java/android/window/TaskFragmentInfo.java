@@ -23,7 +23,6 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -89,9 +88,9 @@ public final class TaskFragmentInfo implements Parcelable {
     private final boolean mIsClearedForReorderActivityToFront;
 
     /**
-     * The maximum {@link ActivityInfo.WindowLayout#minWidth} and
-     * {@link ActivityInfo.WindowLayout#minHeight} aggregated from the TaskFragment's child
-     * activities.
+     * The maximum {@link android.content.pm.ActivityInfo.WindowLayout#minWidth} and
+     * {@link android.content.pm.ActivityInfo.WindowLayout#minHeight} aggregated from the
+     * TaskFragment's child activities.
      */
     @NonNull
     private final Point mMinimumDimensions = new Point();
@@ -179,7 +178,7 @@ public final class TaskFragmentInfo implements Parcelable {
 
     /**
      * Returns the minimum width this TaskFragment can be resized to.
-     * Client side must not {@link WindowContainerTransaction#setBounds(WindowContainerToken, Rect)}
+     * Client side must not {@link WindowContainerTransaction#setRelativeBounds}
      * that {@link Rect#width()} is shorter than the reported value.
      * @hide pending unhide
      */
@@ -189,7 +188,7 @@ public final class TaskFragmentInfo implements Parcelable {
 
     /**
      * Returns the minimum width this TaskFragment can be resized to.
-     * Client side must not {@link WindowContainerTransaction#setBounds(WindowContainerToken, Rect)}
+     * Client side must not {@link WindowContainerTransaction#setRelativeBounds}
      * that {@link Rect#height()} is shorter than the reported value.
      * @hide pending unhide
      */

@@ -71,11 +71,9 @@ static jlong Shader_getNativeFinalizer(JNIEnv*, jobject) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&Shader_safeUnref));
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
-                                      jint tileModeX, jint tileModeY, bool filter,
-                                      bool isDirectSampled) {
+static jlong createBitmapShaderHelper(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
+                                      jint tileModeX, jint tileModeY, bool isDirectSampled,
+                                      const SkSamplingOptions& sampling) {
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
     sk_sp<SkImage> image;
     if (bitmapHandle) {
@@ -88,8 +86,7 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, j
         SkBitmap bitmap;
         image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
     }
-    SkSamplingOptions sampling(filter ? SkFilterMode::kLinear : SkFilterMode::kNearest,
-                               SkMipmapMode::kNone);
+
     sk_sp<SkShader> shader;
     if (isDirectSampled) {
         shader = image->makeRawShader((SkTileMode)tileModeX, (SkTileMode)tileModeY, sampling);
@@ -103,6 +100,26 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, j
     }
 
     return reinterpret_cast<jlong>(shader.release());
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
+                                      jint tileModeX, jint tileModeY, bool filter,
+                                      bool isDirectSampled) {
+    SkSamplingOptions sampling(filter ? SkFilterMode::kLinear : SkFilterMode::kNearest,
+                               SkMipmapMode::kNone);
+    return createBitmapShaderHelper(env, o, matrixPtr, bitmapHandle, tileModeX, tileModeY,
+                                    isDirectSampled, sampling);
+}
+
+static jlong BitmapShader_constructorWithMaxAniso(JNIEnv* env, jobject o, jlong matrixPtr,
+                                                  jlong bitmapHandle, jint tileModeX,
+                                                  jint tileModeY, jint maxAniso,
+                                                  bool isDirectSampled) {
+    auto sampling = SkSamplingOptions::Aniso(static_cast<int>(maxAniso));
+    return createBitmapShaderHelper(env, o, matrixPtr, bitmapHandle, tileModeX, tileModeY,
+                                    isDirectSampled, sampling);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -408,6 +425,8 @@ static const JNINativeMethod gShaderMethods[] = {
 
 static const JNINativeMethod gBitmapShaderMethods[] = {
         {"nativeCreate", "(JJIIZZ)J", (void*)BitmapShader_constructor},
+        {"nativeCreateWithMaxAniso", "(JJIIIZ)J", (void*)BitmapShader_constructorWithMaxAniso},
+
 };
 
 static const JNINativeMethod gLinearGradientMethods[] = {

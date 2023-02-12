@@ -125,6 +125,7 @@ class DeviceStateToLayoutMap {
                             DisplayAddress.fromPhysicalDisplayId(d.getAddress().longValue()),
                             d.isDefaultDisplay(),
                             d.isEnabled(),
+                            d.getDisplayGroup(),
                             mIdProducer,
                             d.getBrightnessThrottlingMapId(),
                             leadDisplayId);

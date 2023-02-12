@@ -391,10 +391,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * @param yPos y position of new window
      * @param width width of new window
      * @param height height of new window
+     * @param cropPadding padding to add to window crop to ensure shadows display properly
      * @return
      */
-    AdditionalWindow addWindow(int layoutId, String namePrefix,
-            SurfaceControl.Transaction t, int xPos, int yPos, int width, int height) {
+    AdditionalWindow addWindow(int layoutId, String namePrefix, SurfaceControl.Transaction t,
+            int xPos, int yPos, int width, int height, int cropPadding) {
         final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
         SurfaceControl windowSurfaceControl = builder
                 .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
@@ -405,7 +406,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         t.setPosition(
                 windowSurfaceControl, xPos, yPos)
-                .setWindowCrop(windowSurfaceControl, width, height)
+                .setWindowCrop(windowSurfaceControl, width + cropPadding, height + cropPadding)
                 .show(windowSurfaceControl);
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
@@ -426,6 +427,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         RunningTaskInfo mRunningTaskInfo;
         int mLayoutResId;
         int mCaptionHeightId;
+        int mCaptionWidthId;
         int mShadowRadiusId;
 
         int mOutsetTopId;
@@ -451,6 +453,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         void reset() {
             mLayoutResId = Resources.ID_NULL;
             mCaptionHeightId = Resources.ID_NULL;
+            mCaptionWidthId = Resources.ID_NULL;
             mShadowRadiusId = Resources.ID_NULL;
 
             mOutsetTopId = Resources.ID_NULL;

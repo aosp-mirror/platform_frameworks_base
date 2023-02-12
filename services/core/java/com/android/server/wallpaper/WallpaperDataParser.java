@@ -74,13 +74,17 @@ class WallpaperDataParser {
     private final WallpaperCropper mWallpaperCropper;
     private final Context mContext;
 
+    // Temporary feature flag. TODO(b/197814683) remove
+    private final boolean mEnableSeparateLockScreenEngine;
+
     WallpaperDataParser(Context context, WallpaperDisplayHelper wallpaperDisplayHelper,
-            WallpaperCropper wallpaperCropper) {
+            WallpaperCropper wallpaperCropper, boolean enableSeparateLockScreenEngine) {
         mContext = context;
         mWallpaperDisplayHelper = wallpaperDisplayHelper;
         mWallpaperCropper = wallpaperCropper;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
+        mEnableSeparateLockScreenEngine = enableSeparateLockScreenEngine;
     }
 
     private JournaledFile makeJournaledFile(int userId) {
@@ -138,9 +142,17 @@ class WallpaperDataParser {
         FileInputStream stream = null;
         File file = journal.chooseForRead();
 
+        boolean migrateFromOld = wallpaper == null;
+
+        // don't reuse the wallpaper objects in the new version
+        if (mEnableSeparateLockScreenEngine) {
+            wallpaper = null;
+            lockWallpaper = null;
+        }
+
         if (wallpaper == null) {
             // Do this once per boot
-            migrateFromOld();
+            if (migrateFromOld) migrateFromOld();
             wallpaper = new WallpaperData(userId, FLAG_SYSTEM);
             wallpaper.allowBackup = true;
             if (!wallpaper.cropExists()) {
@@ -164,19 +176,25 @@ class WallpaperDataParser {
                 type = parser.next();
                 if (type == XmlPullParser.START_TAG) {
                     String tag = parser.getName();
-                    if ("wp".equals(tag)) {
-                        // Common to system + lock wallpapers
-                        parseWallpaperAttributes(parser, wallpaper, keepDimensionHints);
+                    if ("wp".equals(tag)
+                            || ("kwp".equals(tag) && mEnableSeparateLockScreenEngine)) {
 
-                        // A system wallpaper might also be a live wallpaper
+                        if ("kwp".equals(tag) && lockWallpaper == null) {
+                            lockWallpaper = new WallpaperData(userId, FLAG_LOCK);
+                        }
+                        WallpaperData wallpaperToParse =
+                                "wp".equals(tag) ? wallpaper : lockWallpaper;
+
+                        parseWallpaperAttributes(parser, wallpaperToParse, keepDimensionHints);
+
                         String comp = parser.getAttributeValue(null, "component");
-                        wallpaper.nextWallpaperComponent = comp != null
+                        wallpaperToParse.nextWallpaperComponent = comp != null
                                 ? ComponentName.unflattenFromString(comp)
                                 : null;
-                        if (wallpaper.nextWallpaperComponent == null
-                                || "android".equals(wallpaper.nextWallpaperComponent
+                        if (wallpaperToParse.nextWallpaperComponent == null
+                                || "android".equals(wallpaperToParse.nextWallpaperComponent
                                 .getPackageName())) {
-                            wallpaper.nextWallpaperComponent = mImageWallpaper;
+                            wallpaperToParse.nextWallpaperComponent = mImageWallpaper;
                         }
 
                         if (DEBUG) {

@@ -211,12 +211,12 @@ public class JobSchedulerServiceTest {
                 jobInfoBuilder.build(), callingUid, sourcePkg, 0, "JSSTest", testTag);
     }
 
-    private void grantRunLongJobsPermission(boolean grant) {
+    private void grantRunUserInitiatedJobsPermission(boolean grant) {
         final int permissionStatus = grant
                 ? PermissionChecker.PERMISSION_GRANTED : PermissionChecker.PERMISSION_HARD_DENIED;
         doReturn(permissionStatus)
                 .when(() -> PermissionChecker.checkPermissionForPreflight(
-                        any(), eq(android.Manifest.permission.RUN_LONG_JOBS),
+                        any(), eq(android.Manifest.permission.RUN_USER_INITIATED_JOBS),
                         anyInt(), anyInt(), anyString()));
     }
 
@@ -284,10 +284,10 @@ public class JobSchedulerServiceTest {
                 mService.getMinJobExecutionGuaranteeMs(jobHigh));
         assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobDef));
-        grantRunLongJobsPermission(false); // Without permission
+        grantRunUserInitiatedJobsPermission(false); // Without permission
         assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobDT));
-        grantRunLongJobsPermission(true); // With permission
+        grantRunUserInitiatedJobsPermission(true); // With permission
         doReturn(ConnectivityController.UNKNOWN_TIME)
                 .when(connectivityController).getEstimatedTransferTimeMs(any());
         assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
@@ -305,14 +305,14 @@ public class JobSchedulerServiceTest {
         assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobDT));
         // UserInitiated
-        grantRunLongJobsPermission(false);
+        grantRunUserInitiatedJobsPermission(false);
         // Permission isn't granted, so it should just be treated as a regular data transfer job.
         assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobUIDT));
         // Permission isn't granted, so it should just be treated as a regular job.
         assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobUI));
-        grantRunLongJobsPermission(true); // With permission
+        grantRunUserInitiatedJobsPermission(true); // With permission
         assertEquals(mService.mConstants.RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobUI));
         doReturn(ConnectivityController.UNKNOWN_TIME)
@@ -364,14 +364,14 @@ public class JobSchedulerServiceTest {
         doReturn(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                 .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
 
-        grantRunLongJobsPermission(true);
+        grantRunUserInitiatedJobsPermission(true);
         assertEquals(mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobDT));
         assertEquals(mService.mConstants.RUNTIME_USER_INITIATED_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUI));
         assertEquals(mService.mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUIDT));
-        grantRunLongJobsPermission(false);
+        grantRunUserInitiatedJobsPermission(false);
         assertEquals(mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobDT));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,

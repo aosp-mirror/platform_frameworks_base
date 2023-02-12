@@ -79,11 +79,13 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
+import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
@@ -126,6 +128,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final Context mContext;
     private final SyncTransactionQueue mSyncTransactionQueue;
     private final PipBoundsState mPipBoundsState;
+    private final PipSizeSpecHandler mPipSizeSpecHandler;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final @NonNull PipMenuController mPipMenuController;
     private final PipAnimationController mPipAnimationController;
@@ -313,6 +316,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @NonNull SyncTransactionQueue syncTransactionQueue,
             @NonNull PipTransitionState pipTransitionState,
             @NonNull PipBoundsState pipBoundsState,
+            @NonNull PipSizeSpecHandler pipSizeSpecHandler,
             @NonNull PipBoundsAlgorithm boundsHandler,
             @NonNull PipMenuController pipMenuController,
             @NonNull PipAnimationController pipAnimationController,
@@ -328,6 +332,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSyncTransactionQueue = syncTransactionQueue;
         mPipTransitionState = pipTransitionState;
         mPipBoundsState = pipBoundsState;
+        mPipSizeSpecHandler = pipSizeSpecHandler;
         mPipBoundsAlgorithm = boundsHandler;
         mPipMenuController = pipMenuController;
         mPipTransitionController = pipTransitionController;
@@ -1601,7 +1606,12 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private @Nullable Rect computeRotatedBounds(int rotationDelta, int direction,
             Rect outDestinationBounds, Rect sourceHintRect) {
         if (direction == TRANSITION_DIRECTION_TO_PIP) {
-            mPipBoundsState.getDisplayLayout().rotateTo(mContext.getResources(), mNextRotation);
+            DisplayLayout layoutCopy = mPipBoundsState.getDisplayLayout();
+
+            layoutCopy.rotateTo(mContext.getResources(), mNextRotation);
+            mPipBoundsState.setDisplayLayout(layoutCopy);
+            mPipSizeSpecHandler.setDisplayLayout(layoutCopy);
+
             final Rect displayBounds = mPipBoundsState.getDisplayBounds();
             outDestinationBounds.set(mPipBoundsAlgorithm.getEntryDestinationBounds());
             // Transform the destination bounds to current display coordinates.

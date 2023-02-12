@@ -128,6 +128,7 @@ public final class DisplayManager {
      * @see #getDisplays(String)
      * @hide
      */
+    @TestApi
     public static final String DISPLAY_CATEGORY_REAR =
             "android.hardware.display.category.REAR";
 

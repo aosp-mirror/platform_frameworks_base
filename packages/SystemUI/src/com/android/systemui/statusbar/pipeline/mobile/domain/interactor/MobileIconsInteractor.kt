@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionManager
-import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
@@ -118,22 +117,8 @@ constructor(
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
 ) : MobileIconsInteractor {
-    private val activeMobileDataSubscriptionId =
-        mobileConnectionsRepo.activeMobileDataSubscriptionId
-
-    private val activeMobileDataConnectionRepo: StateFlow<MobileConnectionRepository?> =
-        activeMobileDataSubscriptionId
-            .mapLatest { activeId ->
-                if (activeId == INVALID_SUBSCRIPTION_ID) {
-                    null
-                } else {
-                    mobileConnectionsRepo.getRepoForSubId(activeId)
-                }
-            }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
-
     override val activeDataConnectionHasDataEnabled: StateFlow<Boolean> =
-        activeMobileDataConnectionRepo
+        mobileConnectionsRepo.activeMobileDataRepository
             .flatMapLatest { it?.dataEnabled ?: flowOf(false) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
@@ -154,35 +139,37 @@ constructor(
      * and by checking which subscription is opportunistic, or which one is active.
      */
     override val filteredSubscriptions: Flow<List<SubscriptionModel>> =
-        combine(unfilteredSubscriptions, activeMobileDataSubscriptionId) { unfilteredSubs, activeId
-            ->
-            // Based on the old logic,
-            if (unfilteredSubs.size != 2) {
-                return@combine unfilteredSubs
-            }
+        combine(
+                unfilteredSubscriptions,
+                mobileConnectionsRepo.activeMobileDataSubscriptionId,
+            ) { unfilteredSubs, activeId ->
+                // Based on the old logic,
+                if (unfilteredSubs.size != 2) {
+                    return@combine unfilteredSubs
+                }
 
-            val info1 = unfilteredSubs[0]
-            val info2 = unfilteredSubs[1]
-            // If both subscriptions are primary, show both
-            if (!info1.isOpportunistic && !info2.isOpportunistic) {
-                return@combine unfilteredSubs
-            }
+                val info1 = unfilteredSubs[0]
+                val info2 = unfilteredSubs[1]
+                // If both subscriptions are primary, show both
+                if (!info1.isOpportunistic && !info2.isOpportunistic) {
+                    return@combine unfilteredSubs
+                }
 
-            // NOTE: at this point, we are now returning a single SubscriptionInfo
+                // NOTE: at this point, we are now returning a single SubscriptionInfo
 
-            // If carrier required, always show the icon of the primary subscription.
-            // Otherwise, show whichever subscription is currently active for internet.
-            if (carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault) {
-                // return the non-opportunistic info
-                return@combine if (info1.isOpportunistic) listOf(info2) else listOf(info1)
-            } else {
-                return@combine if (info1.subscriptionId == activeId) {
-                    listOf(info1)
+                // If carrier required, always show the icon of the primary subscription.
+                // Otherwise, show whichever subscription is currently active for internet.
+                if (carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault) {
+                    // return the non-opportunistic info
+                    return@combine if (info1.isOpportunistic) listOf(info2) else listOf(info1)
                 } else {
-                    listOf(info2)
+                    return@combine if (info1.subscriptionId == activeId) {
+                        listOf(info1)
+                    } else {
+                        listOf(info2)
+                    }
                 }
             }
-        }
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,

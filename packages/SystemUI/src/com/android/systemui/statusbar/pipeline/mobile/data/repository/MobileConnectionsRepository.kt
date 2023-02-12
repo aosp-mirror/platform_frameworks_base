@@ -34,8 +34,14 @@ interface MobileConnectionsRepository {
     /** Observable list of current mobile subscriptions */
     val subscriptions: StateFlow<List<SubscriptionModel>>
 
-    /** Observable for the subscriptionId of the current mobile data connection */
-    val activeMobileDataSubscriptionId: StateFlow<Int>
+    /**
+     * Observable for the subscriptionId of the current mobile data connection. Null if we don't
+     * have a valid subscription id
+     */
+    val activeMobileDataSubscriptionId: StateFlow<Int?>
+
+    /** Repo that tracks the current [activeMobileDataSubscriptionId] */
+    val activeMobileDataRepository: StateFlow<MobileConnectionRepository?>
 
     /**
      * Observable event for when the active data sim switches but the group stays the same. E.g.,

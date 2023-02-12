@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.controls.util;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -61,8 +62,9 @@ public class MediaDataUtils {
      * @param extras
      * @return the progress value between 0-1 inclusive if prsent, otherwise null
      */
-    public static Double getDescriptionProgress(Bundle extras) {
-        if (!extras.containsKey(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS)) {
+    public static Double getDescriptionProgress(@Nullable Bundle extras) {
+        if (extras == null
+                || !extras.containsKey(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS)) {
             return null;
         }
 

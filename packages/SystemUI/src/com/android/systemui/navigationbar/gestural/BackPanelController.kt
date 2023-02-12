@@ -36,7 +36,6 @@ import androidx.core.view.isVisible
 import androidx.dynamicanimation.animation.DynamicAnimation
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.plugins.MotionEventsHandlerBase
 import com.android.systemui.plugins.NavigationEdgeBackPlugin
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -590,10 +589,6 @@ class BackPanelController internal constructor(
     override fun setLayoutParams(layoutParams: WindowManager.LayoutParams) {
         this.layoutParams = layoutParams
         windowManager.addView(mView, layoutParams)
-    }
-
-    override fun setMotionEventsHandler(motionEventsHandler: MotionEventsHandlerBase?) {
-        // TODO(255697805): Integrate MotionEventHandler for trackpad.
     }
 
     private fun isDragAwayFromEdge(velocityPxPerSecThreshold: Int = 0) = velocityTracker!!.run {

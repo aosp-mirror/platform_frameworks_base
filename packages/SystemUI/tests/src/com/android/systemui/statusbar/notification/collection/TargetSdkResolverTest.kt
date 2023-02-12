@@ -120,13 +120,31 @@ class TargetSdkResolverTest : SysuiTestCase() {
     private fun createRanking(key: String) = Ranking().apply {
         populate(
                 key,
-                0,
-                false,
-                0,
-                0,
-                NotificationManager.IMPORTANCE_DEFAULT,
-                null, null,
-                null, null, null, true, 0, false, -1, false, null, null, false, false,
-                false, null, 0, false, 0)
+                /* rank = */ 0,
+                /* matchesInterruptionFilter = */ false,
+                /* visibilityOverride = */ 0,
+                /* suppressedVisualEffects = */ 0,
+                /* importance = */ NotificationManager.IMPORTANCE_DEFAULT,
+                /* explanation = */ null,
+                /* overrideGroupKey = */ null,
+                /* channel = */ null,
+                /* overridePeople = */ null,
+                /* snoozeCriteria = */ null,
+                /* showBadge = */ true,
+                /* userSentiment = */ 0,
+                /* hidden = */ false,
+                /* lastAudiblyAlertedMs = */ -1,
+                /* noisy = */ false,
+                /* smartActions = */ null,
+                /* smartReplies = */ null,
+                /* canBubble = */ false,
+                /* isTextChanged = */ false,
+                /* isConversation = */ false,
+                /* shortcutInfo = */ null,
+                /* rankingAdjustment = */ 0,
+                /* isBubble = */ false,
+                /* proposedImportance = */ 0,
+                /* sensitiveContent = */ false
+        )
     }
 }

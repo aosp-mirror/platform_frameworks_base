@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <jni.h>
 
-package com.android.systemui.plugins;
+#define LOG_TAG "ChoreographerTestsJniOnLoad"
 
-import android.view.MotionEvent;
+extern int register_android_android_view_tests_ChoreographerNativeTest(JNIEnv* env);
 
-/** Handles both trackpad and touch events and report displacements in both axis's. */
-public interface MotionEventsHandlerBase {
+JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
+    JNIEnv* env = NULL;
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        return JNI_ERR;
+    }
 
-    void onMotionEvent(MotionEvent ev);
+    if (register_android_android_view_tests_ChoreographerNativeTest(env)) {
+        return JNI_ERR;
+    }
 
-    float getDisplacementX(MotionEvent ev);
-
-    float getDisplacementY(MotionEvent ev);
-
-    String dump();
+    return JNI_VERSION_1_6;
 }

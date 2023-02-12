@@ -409,12 +409,6 @@ public class PipSizeSpecHandler {
         return new Rect(0, 0, mDisplayLayout.width(), mDisplayLayout.height());
     }
 
-    /** Get the display layout. */
-    @NonNull
-    public DisplayLayout getDisplayLayout() {
-        return mDisplayLayout;
-    }
-
     /** Update the display layout. */
     public void setDisplayLayout(@NonNull DisplayLayout displayLayout) {
         mDisplayLayout.set(displayLayout);
@@ -429,12 +423,11 @@ public class PipSizeSpecHandler {
      */
     public Rect getInsetBounds() {
         Rect insetBounds = new Rect();
-        final DisplayLayout displayLayout = getDisplayLayout();
-        Rect insets = getDisplayLayout().stableInsets();
+        Rect insets = mDisplayLayout.stableInsets();
         insetBounds.set(insets.left + mScreenEdgeInsets.x,
                 insets.top + mScreenEdgeInsets.y,
-                displayLayout.width() - insets.right - mScreenEdgeInsets.x,
-                displayLayout.height() - insets.bottom - mScreenEdgeInsets.y);
+                mDisplayLayout.width() - insets.right - mScreenEdgeInsets.x,
+                mDisplayLayout.height() - insets.bottom - mScreenEdgeInsets.y);
         return insetBounds;
     }
 

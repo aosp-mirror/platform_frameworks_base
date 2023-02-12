@@ -766,11 +766,13 @@ public class VoiceInteractionService extends Service {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("VOICE INTERACTION");
         synchronized (mLock) {
-            pw.println("  Sandboxed Detector(s)");
+            pw.println("  Sandboxed Detector(s):");
             if (mActiveDetectors.size() == 0) {
-                pw.println("    NULL");
+                pw.println("    No detector.");
             } else {
                 mActiveDetectors.forEach(detector -> {
+                    pw.print("  Using sandboxed detection service=");
+                    pw.println(detector.isUsingSandboxedDetectionService());
                     detector.dump("    ", pw);
                     pw.println();
                 });
