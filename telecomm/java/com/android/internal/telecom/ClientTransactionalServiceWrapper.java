@@ -23,6 +23,7 @@ import android.os.OutcomeReceiver;
 import android.os.ResultReceiver;
 import android.telecom.CallAttributes;
 import android.telecom.CallControl;
+import android.telecom.CallControlCallback;
 import android.telecom.CallEndpoint;
 import android.telecom.CallEventCallback;
 import android.telecom.CallException;
@@ -37,7 +38,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * wraps {@link CallEventCallback} and {@link CallControl} on a
+ * wraps {@link CallControlCallback}, {@link CallEventCallback}, and {@link CallControl} on a
  * per-{@link  android.telecom.PhoneAccountHandle} basis to track ongoing calls.
  *
  * @hide
@@ -86,18 +87,20 @@ public class ClientTransactionalServiceWrapper {
      * @param callAttributes of the new call
      * @param executor       to run callbacks on
      * @param pendingControl that allows telecom to call into the client
-     * @param callback       that overrides the CallEventCallback
+     * @param handshakes     that overrides the CallControlCallback
+     * @param events         that overrides the CallStateCallback
      * @return the callId of the newly created call
      */
     public String trackCall(CallAttributes callAttributes, Executor executor,
             OutcomeReceiver<CallControl, CallException> pendingControl,
-            CallEventCallback callback) {
+            CallControlCallback handshakes,
+            CallEventCallback events) {
         // generate a new id for this new call
         String newCallId = UUID.randomUUID().toString();
 
         // couple the objects passed from the client side
         mCallIdToTransactionalCall.put(newCallId, new TransactionalCall(newCallId, callAttributes,
-                executor, pendingControl, callback));
+                executor, pendingControl, handshakes, events));
 
         return newCallId;
     }
@@ -144,16 +147,17 @@ public class ClientTransactionalServiceWrapper {
         private static final String ON_REQ_ENDPOINT_CHANGE = "onRequestEndpointChange";
         private static final String ON_AVAILABLE_CALL_ENDPOINTS = "onAvailableCallEndpointsChanged";
         private static final String ON_MUTE_STATE_CHANGED = "onMuteStateChanged";
+        private static final String ON_CALL_STREAMING_FAILED = "onCallStreamingFailed";
 
-        private void handleCallEventCallback(String action, String callId, int code,
+        private void handleHandshakeCallback(String action, String callId, int code,
                 ResultReceiver ackResultReceiver) {
-            Log.i(TAG, TextUtils.formatSimple("hCEC: id=[%s], action=[%s]", callId, action));
+            Log.i(TAG, TextUtils.formatSimple("hHC: id=[%s], action=[%s]", callId, action));
             // lookup the callEventCallback associated with the particular call
             TransactionalCall call = mCallIdToTransactionalCall.get(callId);
 
             if (call != null) {
                 // Get the CallEventCallback interface
-                CallEventCallback callback = call.getCallEventCallback();
+                CallControlCallback callback = call.getCallControlCallback();
                 // Get Receiver to wait on client ack
                 ReceiverWrapper outcomeReceiverWrapper = new ReceiverWrapper(ackResultReceiver);
 
@@ -225,51 +229,51 @@ public class ClientTransactionalServiceWrapper {
 
         @Override
         public void onSetActive(String callId, ResultReceiver resultReceiver) {
-            handleCallEventCallback(ON_SET_ACTIVE, callId, 0, resultReceiver);
+            handleHandshakeCallback(ON_SET_ACTIVE, callId, 0, resultReceiver);
         }
 
 
         @Override
         public void onSetInactive(String callId, ResultReceiver resultReceiver) {
-            handleCallEventCallback(ON_SET_INACTIVE, callId, 0, resultReceiver);
+            handleHandshakeCallback(ON_SET_INACTIVE, callId, 0, resultReceiver);
         }
 
         @Override
         public void onAnswer(String callId, int videoState, ResultReceiver resultReceiver) {
-            handleCallEventCallback(ON_ANSWER, callId, videoState, resultReceiver);
+            handleHandshakeCallback(ON_ANSWER, callId, videoState, resultReceiver);
         }
 
         @Override
         public void onReject(String callId, ResultReceiver resultReceiver) {
-            handleCallEventCallback(ON_REJECT, callId, 0, resultReceiver);
+            handleHandshakeCallback(ON_REJECT, callId, 0, resultReceiver);
         }
 
         @Override
         public void onDisconnect(String callId, ResultReceiver resultReceiver) {
-            handleCallEventCallback(ON_DISCONNECT, callId, 0, resultReceiver);
+            handleHandshakeCallback(ON_DISCONNECT, callId, 0, resultReceiver);
         }
 
         @Override
         public void onCallEndpointChanged(String callId, CallEndpoint endpoint) {
-            handleEndpointUpdate(callId, ON_REQ_ENDPOINT_CHANGE, endpoint);
+            handleEventCallback(callId, ON_REQ_ENDPOINT_CHANGE, endpoint);
         }
 
         @Override
         public void onAvailableCallEndpointsChanged(String callId, List<CallEndpoint> endpoints) {
-            handleEndpointUpdate(callId, ON_AVAILABLE_CALL_ENDPOINTS, endpoints);
+            handleEventCallback(callId, ON_AVAILABLE_CALL_ENDPOINTS, endpoints);
         }
 
         @Override
         public void onMuteStateChanged(String callId, boolean isMuted) {
-            handleEndpointUpdate(callId, ON_MUTE_STATE_CHANGED, isMuted);
+            handleEventCallback(callId, ON_MUTE_STATE_CHANGED, isMuted);
         }
 
-        public void handleEndpointUpdate(String callId, String action, Object arg) {
-            Log.d(TAG, TextUtils.formatSimple("[%s], callId=[%s]", action, callId));
+        public void handleEventCallback(String callId, String action, Object arg) {
+            Log.d(TAG, TextUtils.formatSimple("hEC: [%s], callId=[%s]", action, callId));
             // lookup the callEventCallback associated with the particular call
             TransactionalCall call = mCallIdToTransactionalCall.get(callId);
             if (call != null) {
-                CallEventCallback callback = call.getCallEventCallback();
+                CallEventCallback callback = call.getCallStateCallback();
                 Executor executor = call.getExecutor();
                 final long identity = Binder.clearCallingIdentity();
                 try {
@@ -283,6 +287,9 @@ public class ClientTransactionalServiceWrapper {
                                 break;
                             case ON_MUTE_STATE_CHANGED:
                                 callback.onMuteStateChanged((boolean) arg);
+                                break;
+                            case ON_CALL_STREAMING_FAILED:
+                                callback.onCallStreamingFailed((int) arg /* reason */);
                                 break;
                         }
                     });
@@ -299,20 +306,13 @@ public class ClientTransactionalServiceWrapper {
 
         @Override
         public void onCallStreamingStarted(String callId, ResultReceiver resultReceiver) {
-            handleCallEventCallback(ON_STREAMING_STARTED, callId, 0, resultReceiver);
+            handleHandshakeCallback(ON_STREAMING_STARTED, callId, 0, resultReceiver);
         }
 
         @Override
         public void onCallStreamingFailed(String callId, int reason) {
-            Log.i(TAG, TextUtils.formatSimple("onCallAudioStateChanged: callId=[%s], reason=[%s]",
-                    callId, reason));
-            // lookup the callEventCallback associated with the particular call
-            TransactionalCall call = mCallIdToTransactionalCall.get(callId);
-            if (call != null) {
-                CallEventCallback callback = call.getCallEventCallback();
-                Executor executor = call.getExecutor();
-                executor.execute(() -> callback.onCallStreamingFailed(reason));
-            }
+            Log.i(TAG, TextUtils.formatSimple("oCSF: id=[%s], reason=[%s]", callId, reason));
+            handleEventCallback(callId, ON_CALL_STREAMING_FAILED, reason);
         }
     };
 }

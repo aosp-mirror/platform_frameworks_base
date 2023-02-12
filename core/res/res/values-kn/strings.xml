@@ -1358,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB ಮೂಲಕ PTP ಆನ್‌ ಆಗಿದೆ"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB ಟೆಥರಿಂಗ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB ಮೂಲಕ MIDI ಆನ್‌ ಆಗಿದೆ"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ಪರಿಕರವನ್ನು ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗೆ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ಸಂಪರ್ಕಗೊಂಡಿರುವ ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
@@ -1706,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ಶಾರ್ಟ್‌ಕಟ್‌ ಆಫ್ ಮಾಡಿ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ಶಾರ್ಟ್‌ಕಟ್ ಬಳಸಿ"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"ಬಣ್ಣ ವಿಲೋಮ"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"ಬಣ್ಣದ ತಿದ್ದುಪಡಿ"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ಒಂದು ಕೈ ಮೋಡ್‌"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ಇನ್ನಷ್ಟು ಮಬ್ಬು"</string>
@@ -2312,16 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"ಮುನ್ನೆಲೆ ಸೇವೆಗಳನ್ನು ಹಿನ್ನೆಲೆಯಿಂದ ಪ್ರಾರಂಭಿಸಲು ಕಂಪ್ಯಾನಿಯನ್ ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"ಮೈಕ್ರೊಫೋನ್ ಲಭ್ಯವಿದೆ"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ಡ್ಯೂಯಲ್ ಸ್ಕ್ರೀನ್"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ಡ್ಯೂಯಲ್ ಸ್ಕ್ರೀನ್ ಆನ್ ಆಗಿದೆ"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"ವಿಷಯವನ್ನು ತೋರಿಸಲು <xliff:g id="APP_NAME">%1$s</xliff:g> ಎರಡೂ ಡಿಸ್‌ಪ್ಲೇಗಳನ್ನು ಬಳಸುತ್ತದೆ"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ಸಾಧನವು ತುಂಬಾ ಬಿಸಿಯಾಗಿದೆ"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ನಿಮ್ಮ ಫೋನ್ ತುಂಬಾ ಬಿಸಿಯಾಗುವುದರಿಂದ ಡ್ಯೂಯಲ್ ಸ್ಕ್ರೀನ್ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ಆಫ್ ಮಾಡಿ"</string>
 </resources>

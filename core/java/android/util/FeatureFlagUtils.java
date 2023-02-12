@@ -183,6 +183,14 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API =
             "settings_enable_lockscreen_transfer_api";
 
+    /**
+     * Flag to enable remote device credential validation
+     * @hide
+     */
+    public static final String SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION =
+            "settings_remote_device_credential_validation";
+
+
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -226,6 +234,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_FLASH_ALERTS, "false");
         DEFAULT_FLAGS.put(SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API, "false");
+        DEFAULT_FLAGS.put(SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;

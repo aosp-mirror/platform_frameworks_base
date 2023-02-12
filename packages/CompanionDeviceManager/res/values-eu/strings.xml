@@ -35,10 +35,10 @@
     <string name="helper_summary_app_streaming" msgid="5977509499890099">"Gailu batetik bestera aplikazioak igortzeko baimena eskatzen ari da <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> gailuaren izenean"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
-    <string name="title_computer" msgid="4693714143506569253">"Eman telefonoko informazio hau atzitzeko baimena &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioari"</string>
+    <string name="title_computer" msgid="4693714143506569253">"Eman telefonoko informazio hau erabiltzeko baimena &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioari"</string>
     <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="helper_title_computer" msgid="4671071173916176037">"Google Play Services"</string>
-    <string name="helper_summary_computer" msgid="9050724687678157852">"Telefonoko argazkiak, multimedia-edukia eta jakinarazpenak atzitzeko baimena eskatzen ari da <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> gailuaren izenean"</string>
+    <string name="helper_summary_computer" msgid="9050724687678157852">"Telefonoko argazkiak, multimedia-edukia eta jakinarazpenak erabiltzeko baimena eskatzen ari da <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> gailuaren izenean"</string>
     <string name="title_nearby_device_streaming" msgid="179278282547719200">"Eman telefonotik ekintza hau gauzatzeko baimena &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; aplikazioari"</string>
     <string name="helper_title_nearby_device_streaming" msgid="6124438217620593669">"Gailu baterako baino gehiagotarako zerbitzuak"</string>
     <string name="helper_summary_nearby_device_streaming" msgid="5538329403511524333">"Inguruko gailuetara edukia igortzeko baimena eskatzen ari da <xliff:g id="APP_NAME">%1$s</xliff:g>, <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> gailuaren izenean"</string>

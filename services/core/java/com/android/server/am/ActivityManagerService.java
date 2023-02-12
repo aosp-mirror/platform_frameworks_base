@@ -5635,8 +5635,35 @@ public class ActivityManagerService extends IActivityManager.Stub
             IBinder allowlistToken, int code, Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
         if (target instanceof PendingIntentRecord) {
-            return ((PendingIntentRecord) target).sendWithResult(caller, code, intent,
-                    resolvedType, allowlistToken, finishedReceiver, requiredPermission, options);
+            final PendingIntentRecord originalRecord = (PendingIntentRecord) target;
+
+            // In multi-display scenarios, there can be background users who execute the
+            // PendingIntent. In these scenarios, we don't want to use the foreground user as the
+            // current user.
+            final PendingIntentRecord.Key originalKey = originalRecord.key;
+            final UserManagerInternal umInternal =
+                    LocalServices.getService(UserManagerInternal.class);
+            final int callingUserId = UserHandle.getCallingUserId();
+            if (UserManager.isVisibleBackgroundUsersEnabled()
+                    && originalKey.userId == UserHandle.USER_CURRENT
+                    && callingUserId != UserHandle.USER_SYSTEM
+                    && umInternal.isUserVisible(callingUserId)) {
+                EventLogTags.writeAmIntentSenderRedirectUser(callingUserId);
+                final PendingIntentRecord.Key key = new PendingIntentRecord.Key(originalKey.type,
+                        originalKey.packageName, originalKey.featureId, originalKey.activity,
+                        originalKey.who, originalKey.requestCode, originalKey.allIntents,
+                        originalKey.allResolvedTypes, originalKey.flags, originalKey.options,
+                        callingUserId);
+
+                final PendingIntentRecord newRecord = new PendingIntentRecord(
+                        originalRecord.controller, key, originalRecord.uid);
+
+                return newRecord.sendWithResult(caller, code, intent, resolvedType, allowlistToken,
+                        finishedReceiver, requiredPermission, options);
+            }
+
+            return originalRecord.sendWithResult(caller, code, intent, resolvedType, allowlistToken,
+                    finishedReceiver, requiredPermission, options);
         } else {
             if (intent == null) {
                 // Weird case: someone has given us their own custom IIntentSender, and now

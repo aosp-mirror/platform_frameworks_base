@@ -10305,7 +10305,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
         // feature flag: ALLOW_DISMISS_ONGOING is on
         mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
-        mService.setSystemExemptFromDismissal(false);
+        setSystemExemptFromDismissal(false);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -10326,7 +10326,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
         // feature flag: ALLOW_DISMISS_ONGOING is on
         mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
-        mService.setSystemExemptFromDismissal(true);
+        setSystemExemptFromDismissal(true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -10337,7 +10337,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Then: the notification's flag FLAG_NO_DISMISS should be set
         assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
 
-        mService.setSystemExemptFromDismissal(false);
+        setSystemExemptFromDismissal(false);
     }
 
     @Test
@@ -10349,7 +10349,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
         // feature flag: ALLOW_DISMISS_ONGOING is on
         mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
-        mService.setSystemExemptFromDismissal(false);
+        setSystemExemptFromDismissal(false);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -10359,5 +10359,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
         assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
+    }
+
+    private void setSystemExemptFromDismissal(boolean isOn) {
+        DeviceConfig.setProperty(
+                DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
+                /* name= */ "application_exemptions",
+                String.valueOf(isOn),
+                /* makeDefault= */ false);
     }
 }

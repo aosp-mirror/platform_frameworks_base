@@ -95,8 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"ଫାଇଲଗୁଡ଼ିକ"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ଏହି ସ୍କ୍ରିନସଟକୁ ଚିହ୍ନଟ କରିଛି।"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ଏବଂ ଅନ୍ୟ ଓପନ ଆପ୍ସ ଏହି ସ୍କ୍ରିନସଟକୁ ଚିହ୍ନଟ କରିଛି।"</string>
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ନୋଟରେ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ସ୍କ୍ରିନ୍ ରେକର୍ଡର୍"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ସ୍କ୍ରିନ ରେକର୍ଡିଂର ପ୍ରକ୍ରିୟାକରଣ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ଏକ ସ୍କ୍ରି‍ନ୍‍ ରେକର୍ଡ୍‍ ସେସନ୍‍ ପାଇଁ ଚାଲୁଥିବା ବିଜ୍ଞପ୍ତି"</string>
@@ -890,6 +889,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"କିଛି ତ୍ରୁଟି ହୋଇଛି। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"ଲୋଡ ହେଉଛି"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ଟାବଲେଟ"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳିଲା ନାହିଁ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ନିୟନ୍ତ୍ରଣ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -926,6 +929,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ବ୍ରଡକାଷ୍ଟ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ସେଭ କରାଯାଇପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ସେଭ କରାଯାଇପାରିଲା ନାହିଁ।"</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ବିଲ୍ଡ ନମ୍ୱର"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"କ୍ଲିପବୋର୍ଡକୁ କପି କରାଯାଇଥିବା ବିଲ୍ଡ ନମ୍ୱର।"</string>
     <string name="basic_status" msgid="2315371112182658176">"ବାର୍ତ୍ତାଳାପ ଖୋଲନ୍ତୁ"</string>
@@ -1026,8 +1033,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"କ୍ୟାମେରା ବନ୍ଦ ଅଛି"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"ମାଇକ ବନ୍ଦ ଅଛି"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"କ୍ୟାମେରା ଏବଂ ମାଇକ ବନ୍ଦ ଅଛି"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistant ଶୁଣୁଛି"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{#ଟି ବିଜ୍ଞପ୍ତି}other{#ଟି ବିଜ୍ଞପ୍ତି}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"ନୋଟଟେକିଂ"</string>
@@ -1043,10 +1049,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"ଗୋଟିଏ-ଥର ଆକ୍ସେସ ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"ଅନୁମତି ଦିଅନ୍ତୁ ନାହିଁ"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"ଆପଣଙ୍କ ଡିଭାଇସରେ ଯାହା ହୁଏ ତାହା ଡିଭାଇସ ଲଗଗୁଡ଼ିକ ରେକର୍ଡ କରେ। ସମସ୍ୟାଗୁଡ଼ିକୁ ଖୋଜି ସମାଧାନ କରିବାକୁ ଆପ୍ସ ଏହି ଲଗଗୁଡ଼ିକୁ ବ୍ୟବହାର କରିପାରିବ।\n\nକିଛି ଲଗରେ ସମ୍ବେଦନଶୀଳ ସୂଚନା ଥାଇପାରେ, ତେଣୁ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପଣ ବିଶ୍ୱାସ କରୁଥିବା ଆପ୍ସକୁ ହିଁ କେବଳ ଅନୁମତି ଦିଅନ୍ତୁ। \n\nଯଦି ଆପଣ ସମସ୍ତ ଡିଭାଇସ ଲଗକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ଏହି ଆପକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ, ତେବେ ଏହା ନିଜର ଡିଭାଇସ ଲଗଗୁଡ଼ିକୁ ଏବେ ବି ଆକ୍ସେସ କରିପାରିବ। ଆପଣଙ୍କ ଡିଭାଇସର ନିର୍ମାତା ଏବେ ବି ଆପଣଙ୍କର ଡିଭାଇସରେ କିଛି ଲଗ କିମ୍ବା ସୂଚନାକୁ ଆକ୍ସେସ କରିବା ପାଇଁ ସକ୍ଷମ ହୋଇପାରନ୍ତି।"</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g>ରେ ଅଧିକ ଜାଣନ୍ତୁ"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ଖୋଲନ୍ତୁ"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ଆପ ସେଟ ଅପ କରାଯାଇଥିବା"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Walletରେ ଅତିକମରେ ଗୋଟିଏ କାର୍ଡ ଯୋଗ କରାଯାଇଥିବା"</string>

@@ -540,11 +540,16 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Този телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Този таблет"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Този телефон"</string>
-    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
     <skip />
-    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Надстройте профила, за да превключите"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Изтеглянията не могат да се възпроизвеждат тук"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Опитайте отново след рекламата"</string>
+    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
     <skip />
-    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
+    <skip />
+    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
     <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"При свързването възникна проблем. Изключете устройството и го включете отново"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Аудиоустройство с кабел"</string>
@@ -672,8 +677,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Анимации за предвиждащия жест за връщане назад"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Активиране на системните анимации за предвиждащия жест за връщане назад."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Тази настройка активира системните анимации за предвиждащите жестове. За целта във файла на манифеста трябва да зададете enableOnBackInvokedCallback на true за отделните приложения."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Преместване наляво"</item>
+    <item msgid="5425394847942513942">"Преместване надолу"</item>
+    <item msgid="7728484337962740316">"Преместване надясно"</item>
+    <item msgid="324200556467459329">"Преместване нагоре"</item>
+  </string-array>
 </resources>

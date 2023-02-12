@@ -95,8 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Fayllar"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> bu skrinşotu aşkarladı."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> və digər açıq tətbiqlər bu skrinşotu aşkarladı."</string>
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Qeydə əlavə edin"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekran Yazıcısı"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran çəkilişi emal edilir"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekranın video çəkimi ərzində silinməyən bildiriş"</string>
@@ -182,7 +181,7 @@
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> üzərindən qoşuldu."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> cihazına qoşulub."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Qoşulu deyil."</string>
-    <string name="data_connection_roaming" msgid="375650836665414797">"Rominq"</string>
+    <string name="data_connection_roaming" msgid="375650836665414797">"Rouminq"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Deaktiv"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Uçuş rejimi"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN aktivdir."</string>
@@ -890,6 +889,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Xəta oldu. Yenə cəhd edin."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Yüklənir"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"planşet"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Aktiv deyil, tətbiqi yoxlayın"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Tapılmadı"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Nəzarət əlçatan deyil"</string>
@@ -926,6 +929,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Yayımlamaq mümkün deyil"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Yadda saxlamaq mümkün deyil. Yenə cəhd edin."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Yadda saxlamaq mümkün deyil."</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Montaj nömrəsi"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versiya nömrəsi mübadilə buferinə kopyalandı."</string>
     <string name="basic_status" msgid="2315371112182658176">"Açıq söhbət"</string>
@@ -1026,8 +1033,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kamera deaktivdir"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofon deaktivdir"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera və mikrofon deaktivdir"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistent dinləyir"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# bildiriş}other{# bildiriş}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Qeyd tutma"</string>
@@ -1043,10 +1049,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Birdəfəlik girişə icazə verin"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"İcazə verməyin"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"Cihaz qeydləri cihazınızda baş verənləri qeyd edir. Tətbiqlər problemləri tapmaq və həll etmək üçün bu qeydlərdən istifadə edə bilər.\n\nBəzi qeydlərdə həssas məlumatlar ola bilər, ona görə də yalnız etibar etdiyiniz tətbiqlərin bütün cihaz qeydlərinə giriş etməsinə icazə verin. \n\nBu tətbiqin bütün cihaz qeydlərinə girişinə icazə verməsəniz, o, hələ də öz qeydlərinə giriş edə bilər. Cihaz istehsalçınız hələ də cihazınızda bəzi qeydlərə və ya məlumatlara giriş edə bilər."</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Ətraflı məlumat"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Ətraflı məlumat: <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> tətbiqini açın"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• Tətbiq ayarlanmalıdır"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Pulqabına ən azı bir kart əlavə edilməlidir"</string>

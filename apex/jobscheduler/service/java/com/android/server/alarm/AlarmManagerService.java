@@ -19,6 +19,7 @@ package com.android.server.alarm;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
+import static android.app.AlarmManager.EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_COMPAT;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
@@ -57,6 +58,8 @@ import static com.android.server.alarm.Alarm.TARE_POLICY_INDEX;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_ALARM_CANCELLED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_DATA_CLEARED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_EXACT_PERMISSION_REVOKED;
+import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_LISTENER_BINDER_DIED;
+import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_LISTENER_CACHED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_PI_CANCELLED;
 import static com.android.server.alarm.AlarmManagerService.RemovedAlarm.REMOVE_REASON_UNDEFINED;
 
@@ -610,6 +613,8 @@ public class AlarmManagerService extends SystemService {
         static final int REMOVE_REASON_EXACT_PERMISSION_REVOKED = 2;
         static final int REMOVE_REASON_DATA_CLEARED = 3;
         static final int REMOVE_REASON_PI_CANCELLED = 4;
+        static final int REMOVE_REASON_LISTENER_BINDER_DIED = 5;
+        static final int REMOVE_REASON_LISTENER_CACHED = 6;
 
         final String mTag;
         final long mWhenRemovedElapsed;
@@ -639,6 +644,10 @@ public class AlarmManagerService extends SystemService {
                     return "data_cleared";
                 case REMOVE_REASON_PI_CANCELLED:
                     return "pi_cancelled";
+                case REMOVE_REASON_LISTENER_BINDER_DIED:
+                    return "listener_binder_died";
+                case REMOVE_REASON_LISTENER_CACHED:
+                    return "listener_cached";
                 default:
                     return "unknown:" + reason;
             }
@@ -1892,7 +1901,9 @@ public class AlarmManagerService extends SystemService {
             @Override
             public void binderDied(IBinder who) {
                 final IAlarmListener listener = IAlarmListener.Stub.asInterface(who);
-                removeImpl(null, listener);
+                synchronized (mLock) {
+                    removeLocked(null, listener, REMOVE_REASON_LISTENER_BINDER_DIED);
+                }
             }
         };
 
@@ -5442,6 +5453,24 @@ public class AlarmManagerService extends SystemService {
         public void removeAlarmsForUid(int uid) {
             synchronized (mLock) {
                 removeForStoppedLocked(uid);
+            }
+        }
+
+        @Override
+        public void removeListenerAlarmsForCachedUid(int uid) {
+            if (!CompatChanges.isChangeEnabled(EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED, uid)) {
+                return;
+            }
+            synchronized (mLock) {
+                removeAlarmsInternalLocked(a -> {
+                    if (a.uid != uid || a.listener == null || a.windowLength != 0) {
+                        return false;
+                    }
+                    // TODO (b/265195908): Change to a .w once we have some data on breakages.
+                    Slog.wtf(TAG, "Alarm " + a.listenerTag + " being removed for " + a.packageName
+                            + " because the app went into cached state");
+                    return true;
+                }, REMOVE_REASON_LISTENER_CACHED);
             }
         }
     };

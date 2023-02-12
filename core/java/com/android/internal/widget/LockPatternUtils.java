@@ -65,6 +65,7 @@ import com.google.android.collect.Lists;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -114,6 +115,13 @@ public class LockPatternUtils {
     public static final int CREDENTIAL_TYPE_PASSWORD_OR_PIN = 2;
     public static final int CREDENTIAL_TYPE_PIN = 3;
     public static final int CREDENTIAL_TYPE_PASSWORD = 4;
+
+    /**
+     * Header used for the encryption and decryption of the device credential for
+     * remote device lockscreen validation.
+     */
+    public static final byte[] ENCRYPTED_REMOTE_CREDENTIALS_HEADER =
+            "encrypted_remote_credentials".getBytes(StandardCharsets.UTF_8);
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"CREDENTIAL_TYPE_"}, value = {

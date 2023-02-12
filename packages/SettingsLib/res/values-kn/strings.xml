@@ -540,11 +540,16 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ಈ ಫೋನ್"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ಈ ಟ್ಯಾಬ್ಲೆಟ್"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ಈ ಫೋನ್"</string>
-    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
     <skip />
-    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"ಬದಲಾಯಿಸಲು ಖಾತೆಯನ್ನು ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ಇಲ್ಲಿ ಡೌನ್‌ಲೋಡ್‌ಗಳನ್ನು ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ಜಾಹೀರಾತಿನ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
+    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
     <skip />
-    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
+    <skip />
+    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
     <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ಕನೆಕ್ಟ್ ಮಾಡುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ ಸಾಧನವನ್ನು ಆಫ್ ಮಾಡಿ ಹಾಗೂ ನಂತರ ಪುನಃ ಆನ್ ಮಾಡಿ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ವೈರ್ ಹೊಂದಿರುವ ಆಡಿಯೋ ಸಾಧನ"</string>
@@ -672,8 +677,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"ಮುನ್ಸೂಚಕ ಬ್ಯಾಕ್ ಆ್ಯನಿಮೇಶನ್‌ಗಳು"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"ಮುನ್ಸೂಚಕ ಬ್ಯಾಕ್ ಗೆಸ್ಚರ್‌ಗಾಗಿ ಸಿಸ್ಟಂ ಆ್ಯನಿಮೇಶನ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"ಮುನ್ನೋಟದ ಗೆಸ್ಚರ್ ಆ್ಯನಿಮೇಶನ್‌ಗಾಗಿ ಸಿಸ್ಟಂ ಆ್ಯನಿಮೇಶನ್‌ಗಳನ್ನು ಈ ಸೆಟ್ಟಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸುತ್ತವೆ. ಇದನ್ನು ಮಾಡಲು, ಪ್ರತಿ ಆ್ಯಪ್‌ನ ಮ್ಯಾನಿಫೆಸ್ಟ್ ಫೈಲ್‌ನಲ್ಲಿರುವ enableOnBackInvokedCallback ಪ್ಯಾರಾಮೀಟರ್ ಅನ್ನು ಸರಿ ಎಂದು ಹೊಂದಿಸಬೇಕು."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"ಎಡಕ್ಕೆ ಸರಿಸಿ"</item>
+    <item msgid="5425394847942513942">"ಕೆಳಕ್ಕೆ ಸರಿಸಿ"</item>
+    <item msgid="7728484337962740316">"ಬಲಕ್ಕೆ ಸರಿಸಿ"</item>
+    <item msgid="324200556467459329">"ಮೇಲಕ್ಕೆ ಸರಿಸಿ"</item>
+  </string-array>
 </resources>

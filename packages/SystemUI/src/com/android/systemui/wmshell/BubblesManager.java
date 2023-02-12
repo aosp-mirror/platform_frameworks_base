@@ -25,6 +25,7 @@ import static android.service.notification.NotificationListenerService.REASON_GR
 import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
+import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ALLOW_DISMISS_ONGOING;
 import static com.android.systemui.flags.Flags.WM_BUBBLE_BAR;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -50,6 +51,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
@@ -617,9 +619,20 @@ public class BubblesManager {
     }
 
     static BubbleEntry notifToBubbleEntry(NotificationEntry e) {
-        return new BubbleEntry(e.getSbn(), e.getRanking(), e.isDismissable(),
+        return new BubbleEntry(e.getSbn(), e.getRanking(), isDismissableFromBubbles(e),
                 e.shouldSuppressNotificationDot(), e.shouldSuppressNotificationList(),
                 e.shouldSuppressPeek());
+    }
+
+    private static boolean isDismissableFromBubbles(NotificationEntry e) {
+        // TODO(b/268380968): inject FlagResolver
+        if (SystemUiSystemPropertiesFlags.getResolver().isEnabled(ALLOW_DISMISS_ONGOING)) {
+            // Bubbles are only accessible from the unlocked state,
+            // so we can calculate this from the Notification flags only.
+            return e.isDismissableForState(/*isLocked=*/ false);
+        } else {
+            return e.legacyIsDismissableRecursive();
+        }
     }
 
     /**

@@ -30,6 +30,8 @@ import static android.content.pm.PackageInfo.INSTALL_LOCATION_AUTO;
 import static android.content.pm.PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
 import static android.content.pm.PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL;
 
+import static com.android.internal.util.XmlUtils.writeStringAttribute;
+
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
@@ -79,14 +81,18 @@ import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
+import android.util.Log;
 
 import com.android.internal.content.InstallLocationUtils;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import java.io.Closeable;
 import java.io.File;
@@ -101,6 +107,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -2203,6 +2210,38 @@ public class PackageInstaller {
          */
         public static final int USER_ACTION_NOT_REQUIRED = 2;
 
+        /** @hide */
+        @IntDef(prefix = {"PERMISSION_STATE_"}, value = {
+                PERMISSION_STATE_DEFAULT,
+                PERMISSION_STATE_GRANTED,
+                PERMISSION_STATE_DENIED,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface PermissionState {}
+
+        /**
+         * Value is passed by the installer to {@link #setPermissionState(String, int)} to set
+         * the state of a permission. This indicates no preference by the installer, relying on
+         * the device's default policy to set the grant state of the permission.
+         */
+        public static final int PERMISSION_STATE_DEFAULT = 0;
+
+        /**
+         * Value is passed by the installer to {@link #setPermissionState(String, int)} to set
+         * the state of a permission. This indicates the installers wants to automatically grant
+         * the permission to the package being installed. The user and other actors in the system
+         * may still be able to deny the permission after installation.
+         */
+        public static final int PERMISSION_STATE_GRANTED = 1;
+
+        /**
+         * Value is passed by the installer to {@link #setPermissionState(String, int)} to set
+         * the state of a permission. This indicates the installers wants to deny the permission
+         * by default to the package being installed. The user and other actors in the system may
+         * still be able to grant the permission after installation.
+         */
+        public static final int PERMISSION_STATE_DENIED = 2;
+
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int mode = MODE_INVALID;
@@ -2247,8 +2286,6 @@ public class PackageInstaller {
         /** {@hide} */
         public String volumeUuid;
         /** {@hide} */
-        public String[] grantedRuntimePermissions;
-        /** {@hide} */
         public List<String> whitelistedRestrictedPermissions;
         /** {@hide} */
         public int autoRevokePermissionsMode = MODE_DEFAULT;
@@ -2273,6 +2310,13 @@ public class PackageInstaller {
         /** {@hide} */
         public boolean applicationEnabledSettingPersistent = false;
 
+        private final ArrayMap<String, Integer> mPermissionStates;
+
+        /**
+         * @see #getFinalPermissionStates()
+         */
+        private ArrayMap<String, Integer> mFinalPermissionStates;
+
         /**
          * Construct parameters for a new package install session.
          *
@@ -2282,6 +2326,7 @@ public class PackageInstaller {
          */
         public SessionParams(int mode) {
             this.mode = mode;
+            mPermissionStates = new ArrayMap<>();
         }
 
         /** {@hide} */
@@ -2300,7 +2345,8 @@ public class PackageInstaller {
             referrerUri = source.readParcelable(null, android.net.Uri.class);
             abiOverride = source.readString();
             volumeUuid = source.readString();
-            grantedRuntimePermissions = source.readStringArray();
+            mPermissionStates = new ArrayMap<>();
+            source.readMap(mPermissionStates, null, String.class, Integer.class);
             whitelistedRestrictedPermissions = source.createStringArrayList();
             autoRevokePermissionsMode = source.readInt();
             installerPackageName = source.readString();
@@ -2335,7 +2381,7 @@ public class PackageInstaller {
             ret.referrerUri = referrerUri;  // not a copy, but immutable.
             ret.abiOverride = abiOverride;
             ret.volumeUuid = volumeUuid;
-            ret.grantedRuntimePermissions = grantedRuntimePermissions;
+            ret.mPermissionStates.putAll(mPermissionStates);
             ret.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
             ret.autoRevokePermissionsMode = autoRevokePermissionsMode;
             ret.installerPackageName = installerPackageName;
@@ -2459,13 +2505,93 @@ public class PackageInstaller {
          * @param permissions The permissions to grant or null to grant all runtime
          *     permissions.
          *
+         * @deprecated Prefer {@link #setPermissionState(String, int)} instead starting in
+         * {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}.
          * @hide
          */
+        @Deprecated
         @SystemApi
         @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS)
         public void setGrantedRuntimePermissions(String[] permissions) {
-            installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
-            this.grantedRuntimePermissions = permissions;
+            if (permissions == null) {
+                // The new API has no mechanism to grant all requested permissions
+                installFlags |= PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS;
+                mPermissionStates.clear();
+            } else {
+                installFlags &= ~PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS;
+                // Otherwise call the new API to grant the permissions specified
+                for (String permission : permissions) {
+                    setPermissionState(permission, PERMISSION_STATE_GRANTED);
+                }
+            }
+        }
+
+        /**
+         * Sets the state of permissions for the package at installation.
+         * <p/>
+         * Granting any runtime permissions require the
+         * {@link android.Manifest.permission#INSTALL_GRANT_RUNTIME_PERMISSIONS} permission to be
+         * held by the caller. Revoking runtime permissions is not allowed, even during app update
+         * sessions.
+         * <p/>
+         * Holders without the permission are allowed to change the following special permissions:
+         * <p/>
+         * On platform {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE UPSIDE_DOWN_CAKE}:
+         * <ul>
+         *     <li>{@link Manifest.permission#USE_FULL_SCREEN_INTENT}</li>
+         * </ul>
+         * Install time permissions, which cannot be revoked by the user, cannot be changed by the
+         * installer.
+         * <p/>
+         * See <a href="https://developer.android.com/guide/topics/permissions/overview">
+         * Permissions on Android</a> for more information.
+         *
+         * @param permissionName The permission to change state for.
+         * @param state          Either {@link #PERMISSION_STATE_DEFAULT},
+         *                       {@link #PERMISSION_STATE_GRANTED},
+         *                       or {@link #PERMISSION_STATE_DENIED} to set the permission to.
+         *
+         * @return This object for easier chaining.
+         */
+        @RequiresPermission(value = android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS,
+                conditional = true)
+        @NonNull
+        public SessionParams setPermissionState(@NonNull String permissionName,
+                @PermissionState int state) {
+            if (TextUtils.isEmpty(permissionName)) {
+                throw new IllegalArgumentException("Provided permissionName cannot be "
+                        + (permissionName == null ? "null" : "empty"));
+            }
+
+            if (mFinalPermissionStates != null) {
+                Log.wtf(TAG, "Requested permission " + permissionName + " but final permissions"
+                        + " were already decided for this session: " + mFinalPermissionStates);
+            }
+
+            switch (state) {
+                case PERMISSION_STATE_DEFAULT:
+                    mPermissionStates.remove(permissionName);
+                    break;
+                case PERMISSION_STATE_GRANTED:
+                case PERMISSION_STATE_DENIED:
+                    mPermissionStates.put(permissionName, state);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unexpected permission state int: " + state);
+            }
+
+            return this;
+        }
+
+        /** @hide */
+        public void setPermissionStates(Collection<String> grantPermissions,
+                Collection<String> denyPermissions) {
+            for (String grantPermission : grantPermissions) {
+                mPermissionStates.put(grantPermission, PERMISSION_STATE_GRANTED);
+            }
+            for (String denyPermission : denyPermissions) {
+                mPermissionStates.put(denyPermission, PERMISSION_STATE_DENIED);
+            }
         }
 
         /**
@@ -2882,6 +3008,69 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * This is only for use by system server. If you need the actual grant state, use
+         * {@link #getFinalPermissionStates()}.
+         * <p/>
+         * This is implemented here to avoid exposing the raw permission sets to external callers,
+         * so that enforcement done in the either of the final methods is the single source of truth
+         * for default grant/deny policy.
+         *
+         * @hide
+         */
+        public void writePermissionStateXml(@NonNull TypedXmlSerializer out,
+                @NonNull String grantTag, @NonNull String denyTag, @NonNull String attrName)
+                throws IOException {
+            for (int index = 0; index < mPermissionStates.size(); index++) {
+                var permissionName = mPermissionStates.keyAt(index);
+                var state = mPermissionStates.valueAt(index);
+                String tag = state == PERMISSION_STATE_GRANTED ? grantTag : denyTag;
+                out.startTag(null, tag);
+                writeStringAttribute(out, attrName, permissionName);
+                out.endTag(null, tag);
+            }
+        }
+
+        /**
+         * Snapshot of final permission states taken when this method is first called, to separate
+         * what the caller wanted and the effective state that should be applied to the session.
+         *
+         * This prevents someone from adding more permissions after the fact.
+         *
+         * @hide
+         */
+        @NonNull
+        public ArrayMap<String, Integer> getFinalPermissionStates() {
+            if (mFinalPermissionStates == null) {
+                mFinalPermissionStates = new ArrayMap<>(mPermissionStates);
+                if (!mFinalPermissionStates.containsKey(
+                        Manifest.permission.USE_FULL_SCREEN_INTENT)) {
+                    mFinalPermissionStates.put(Manifest.permission.USE_FULL_SCREEN_INTENT,
+                            PERMISSION_STATE_GRANTED);
+                }
+            }
+            return mFinalPermissionStates;
+        }
+
+        /** @hide */
+        @Nullable
+        public String[] getLegacyGrantedRuntimePermissions() {
+            if ((installFlags & PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS) != 0) {
+                return null;
+            }
+
+            var grantedPermissions = new ArrayList<String>();
+            for (int index = 0; index < mPermissionStates.size(); index++) {
+                var permissionName = mPermissionStates.keyAt(index);
+                var state = mPermissionStates.valueAt(index);
+                if (state == PERMISSION_STATE_GRANTED) {
+                    grantedPermissions.add(permissionName);
+                }
+            }
+
+            return grantedPermissions.toArray(ArrayUtils.emptyArray(String.class));
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -2898,7 +3087,7 @@ public class PackageInstaller {
             pw.printPair("referrerUri", referrerUri);
             pw.printPair("abiOverride", abiOverride);
             pw.printPair("volumeUuid", volumeUuid);
-            pw.printPair("grantedRuntimePermissions", grantedRuntimePermissions);
+            pw.printPair("mPermissionStates", mPermissionStates);
             pw.printPair("packageSource", packageSource);
             pw.printPair("whitelistedRestrictedPermissions", whitelistedRestrictedPermissions);
             pw.printPair("autoRevokePermissions", autoRevokePermissionsMode);
@@ -2936,7 +3125,7 @@ public class PackageInstaller {
             dest.writeParcelable(referrerUri, flags);
             dest.writeString(abiOverride);
             dest.writeString(volumeUuid);
-            dest.writeStringArray(grantedRuntimePermissions);
+            dest.writeMap(mPermissionStates);
             dest.writeStringList(whitelistedRestrictedPermissions);
             dest.writeInt(autoRevokePermissionsMode);
             dest.writeString(installerPackageName);

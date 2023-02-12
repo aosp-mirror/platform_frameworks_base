@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
@@ -256,10 +257,13 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         WindowContainerTransaction wct = new WindowContainerTransaction();
         bringDesktopAppsToFront(wct);
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mTransitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */);
-        } else {
-            mShellTaskOrganizer.applyTransaction(wct);
+        if (!wct.isEmpty()) {
+            if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+                // TODO(b/268662477): add animation for the transition
+                mTransitions.startTransition(TRANSIT_NONE, wct, null /* handler */);
+            } else {
+                mShellTaskOrganizer.applyTransaction(wct);
+            }
         }
     }
 

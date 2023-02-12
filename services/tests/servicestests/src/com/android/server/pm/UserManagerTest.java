@@ -71,8 +71,8 @@ public final class UserManagerTest {
     // Taken from UserManagerService
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // 30 years
 
-    private static final int SWITCH_USER_TIMEOUT_SECONDS = 40; // 40 seconds
-    private static final int REMOVE_USER_TIMEOUT_SECONDS = 40; // 40 seconds
+    private static final int SWITCH_USER_TIMEOUT_SECONDS = 180; // 180 seconds
+    private static final int REMOVE_USER_TIMEOUT_SECONDS = 180; // 180 seconds
 
     // Packages which are used during tests.
     private static final String[] PACKAGES = new String[] {
@@ -1295,7 +1295,11 @@ public final class UserManagerTest {
             });
         }
         es.shutdown();
-        es.awaitTermination(20, TimeUnit.SECONDS);
+        int timeout = createUsersCount * 20;
+        assertWithMessage(
+                "Could not create " + createUsersCount + " users in " + timeout + " seconds")
+                .that(es.awaitTermination(timeout, TimeUnit.SECONDS))
+                .isTrue();
         assertThat(mUserManager.getAliveUsers().size()).isEqualTo(maxSupportedUsers);
         assertThat(created.get()).isEqualTo(canBeCreatedCount);
     }

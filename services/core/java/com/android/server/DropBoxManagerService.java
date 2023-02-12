@@ -19,6 +19,7 @@ package com.android.server;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -29,6 +30,8 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
+import android.os.BundleMerger;
 import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
@@ -264,7 +267,7 @@ public final class DropBoxManagerService extends SystemService {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SEND_BROADCAST:
-                    prepareAndSendBroadcast((Intent) msg.obj);
+                    prepareAndSendBroadcast((Intent) msg.obj, null);
                     break;
                 case MSG_SEND_DEFERRED_BROADCAST:
                     Intent deferredIntent;
@@ -272,25 +275,48 @@ public final class DropBoxManagerService extends SystemService {
                         deferredIntent = mDeferredMap.remove((String) msg.obj);
                     }
                     if (deferredIntent != null) {
-                        prepareAndSendBroadcast(deferredIntent);
+                        prepareAndSendBroadcast(deferredIntent,
+                                createBroadcastOptions(deferredIntent));
                     }
                     break;
             }
         }
 
-        private void prepareAndSendBroadcast(Intent intent) {
+        private void prepareAndSendBroadcast(Intent intent, Bundle options) {
             if (!DropBoxManagerService.this.mBooted) {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             }
             getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
-                    android.Manifest.permission.READ_LOGS);
+                    android.Manifest.permission.READ_LOGS, options);
         }
 
         private Intent createIntent(String tag, long time) {
             final Intent dropboxIntent = new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
             dropboxIntent.putExtra(DropBoxManager.EXTRA_TAG, tag);
             dropboxIntent.putExtra(DropBoxManager.EXTRA_TIME, time);
+            dropboxIntent.putExtra(DropBoxManager.EXTRA_DROPPED_COUNT, 0);
             return dropboxIntent;
+        }
+
+        private Bundle createBroadcastOptions(Intent intent) {
+            final BundleMerger extrasMerger = new BundleMerger();
+            extrasMerger.setDefaultMergeStrategy(BundleMerger.STRATEGY_FIRST);
+            extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_TIME,
+                    BundleMerger.STRATEGY_COMPARABLE_MAX);
+            extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_DROPPED_COUNT,
+                    BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD);
+
+            final String tag = intent.getStringExtra(DropBoxManager.EXTRA_TAG);
+            final IntentFilter matchingFilter = new IntentFilter(
+                    DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
+            matchingFilter.addExtra(DropBoxManager.EXTRA_TAG, tag);
+
+            return BroadcastOptions.makeBasic()
+                    .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED)
+                    .setDeliveryGroupMatchingFilter(matchingFilter)
+                    .setDeliveryGroupExtrasMerger(extrasMerger)
+                    .setDeferUntilActive(true)
+                    .toBundle();
         }
 
         /**
@@ -697,7 +723,7 @@ public final class DropBoxManagerService extends SystemService {
                 out.append(file.getPath()).append("\n");
             }
 
-            if ((entry.flags & DropBoxManager.IS_TEXT) != 0 && (doPrint || !doFile)) {
+            if ((entry.flags & DropBoxManager.IS_TEXT) != 0 && doPrint) {
                 DropBoxManager.Entry dbe = null;
                 InputStreamReader isr = null;
                 try {
@@ -721,17 +747,6 @@ public final class DropBoxManagerService extends SystemService {
                             }
                         }
                         if (!newline) out.append("\n");
-                    } else {
-                        String text = dbe.getText(70);
-                        out.append("    ");
-                        if (text == null) {
-                            out.append("[null]");
-                        } else {
-                            boolean truncated = (text.length() == 70);
-                            out.append(text.trim().replace('\n', '/'));
-                            if (truncated) out.append(" ...");
-                        }
-                        out.append("\n");
                     }
                 } catch (IOException e) {
                     out.append("*** ").append(e.toString()).append("\n");

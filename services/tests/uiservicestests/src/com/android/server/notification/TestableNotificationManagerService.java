@@ -159,8 +159,4 @@ public class TestableNotificationManagerService extends NotificationManagerServi
             return mGetStrongAuthForUserReturnValue;
         }
     }
-
-    protected void setSystemExemptFromDismissal(boolean isOn) {
-        mSystemExemptFromDismissal = isOn;
-    }
 }

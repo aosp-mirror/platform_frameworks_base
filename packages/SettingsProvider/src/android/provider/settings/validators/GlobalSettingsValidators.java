@@ -296,6 +296,19 @@ public class GlobalSettingsValidators {
                                 String.valueOf(Global.Wearable.LOCK_SCREEN_STATE_PIN),
                                 String.valueOf(Global.Wearable.LOCK_SCREEN_STATE_PATTERN)
                         }));
+        VALIDATORS.put(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
+                new DiscreteValueValidator(new String[]{
+                        String.valueOf(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE_DIGIT),
+                        String.valueOf(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE_TERSE)}));
+        VALIDATORS.put(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
+                new DiscreteValueValidator(new String[]{String.valueOf(
+                        Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED_VERY_SLOW),
+                        String.valueOf(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED_SLOW),
+                        String.valueOf(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED_MEDIUM),
+                        String.valueOf(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED_FAST),
+                        String.valueOf(
+                                Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED_VERY_FAST)}));
         VALIDATORS.put(
                 Global.Wearable.PAIRED_DEVICE_OS_TYPE,
                 new DiscreteValueValidator(

@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"ต่อไป"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ตัวเลือกเพิ่มเติม"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ดูข้อมูลเพิ่มเติม"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"แสดงรหัสผ่าน"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"ซ่อนรหัสผ่าน"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ปลอดภัยขึ้นด้วยพาสคีย์"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"พาสคีย์ช่วยให้คุณไม่ต้องสร้างหรือจำรหัสผ่านที่ซับซ้อน"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"พาสคีย์คือกุญแจดิจิทัลที่เข้ารหัสซึ่งคุณสร้างโดยใช้ลายนิ้วมือ ใบหน้า หรือการล็อกหน้าจอ"</string>
@@ -59,7 +57,10 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ตัวเลือกการลงชื่อเข้าใช้"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"สำหรับ <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"เครื่องมือจัดการรหัสผ่านที่ล็อกไว้"</string>
-    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"แตะเพื่อปลดล็อก"</string>
+    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
+    <skip />
+    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
+    <skip />
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"จัดการการลงชื่อเข้าใช้"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"จากอุปกรณ์อื่น"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ใช้อุปกรณ์อื่น"</string>

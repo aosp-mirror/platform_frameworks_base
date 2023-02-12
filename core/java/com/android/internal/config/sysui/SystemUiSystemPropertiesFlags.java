@@ -68,7 +68,7 @@ public class SystemUiSystemPropertiesFlags {
 
         /** Gating the ability for users to dismiss ongoing event notifications */
         public static final Flag ALLOW_DISMISS_ONGOING =
-                devFlag("persist.sysui.notification.ongoing_dismissal");
+                releasedFlag("persist.sysui.notification.ongoing_dismissal");
 
         /** Gating the redaction of OTP notifications on the lockscreen */
         public static final Flag OTP_REDACTION =

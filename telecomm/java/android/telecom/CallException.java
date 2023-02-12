@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * This class defines exceptions that can be thrown when using Telecom APIs with
  * {@link android.os.OutcomeReceiver}s.  Most of these exceptions are thrown when changing a call
- * state with {@link CallControl}s or {@link CallEventCallback}s.
+ * state with {@link CallControl}s or {@link CallControlCallback}s.
  */
 public final class CallException extends RuntimeException implements Parcelable {
     /** @hide **/

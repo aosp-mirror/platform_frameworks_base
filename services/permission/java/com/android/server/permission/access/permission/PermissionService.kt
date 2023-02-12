@@ -21,6 +21,7 @@ import android.app.ActivityManager
 import android.compat.annotation.ChangeId
 import android.compat.annotation.EnabledAfter
 import android.content.Context
+import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.content.pm.PackageManagerInternal
 import android.content.pm.PermissionGroupInfo
@@ -735,7 +736,7 @@ class PermissionService(
     private fun grantRequestedRuntimePermissions(
         packageState: PackageState,
         userId: Int,
-        permissionNames: List<String>
+        permissionNames: IndexedList<String>
     ) {
         service.mutateState {
             permissionNames.forEachIndexed { _, permissionName ->
@@ -1813,7 +1814,15 @@ class PermissionService(
             val packageState =
                 packageManagerInternal.getPackageStateInternal(androidPackage.packageName)!!
             // TODO: Add allowlisting
-            grantRequestedRuntimePermissions(packageState, userId, params.grantedPermissions)
+            grantRequestedRuntimePermissions(
+                packageState,
+                userId,
+                params.permissionStates.mapNotNullIndexed { _, permissionName, permissionState ->
+                    permissionName.takeIf {
+                        permissionState == PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED
+                    }
+                }
+            )
         }
     }
 

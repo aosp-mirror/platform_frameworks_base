@@ -34,6 +34,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -89,7 +90,6 @@ class MotionPredictorBenchmark {
     private val initialPropertyValue =
             SystemProperties.get("persist.input.enable_motion_prediction")
 
-    private var eventTime = Duration.ofMillis(1)
 
     @Before
     fun setUp() {
@@ -109,22 +109,31 @@ class MotionPredictorBenchmark {
      */
     @Test
     fun timeRecordAndPredict() {
-        val offset = Duration.ofMillis(1)
+        val offset = Duration.ofMillis(20)
+        var eventTime = Duration.ofMillis(0)
+        val eventInterval = Duration.ofMillis(4) // 240 Hz
+
+        var eventPosition = 0f
+        val positionInterval = 10f
+
         val predictor = MotionPredictor(getPredictionContext(offset, /*enablePrediction=*/true))
         // ACTION_DOWN t=0 x=0 y=0
-        predictor.record(getStylusMotionEvent(eventTime, ACTION_DOWN, /*x=*/0f, /*y=*/0f))
+        predictor.record(getStylusMotionEvent(
+            eventTime, ACTION_DOWN, /*x=*/eventPosition, /*y=*/eventPosition))
 
         val state = perfStatusReporter.getBenchmarkState()
         while (state.keepRunning()) {
-            eventTime += Duration.ofMillis(1)
+            eventTime += eventInterval
+            eventPosition += positionInterval
 
             // Send MOVE event and then call .predict
-            val moveEvent = getStylusMotionEvent(eventTime, ACTION_MOVE, /*x=*/1f, /*y=*/2f)
+            val moveEvent = getStylusMotionEvent(
+                eventTime, ACTION_MOVE, /*x=*/eventPosition, /*y=*/eventPosition)
             predictor.record(moveEvent)
-            val predictionTime = eventTime + Duration.ofMillis(2)
+            val predictionTime = eventTime + eventInterval
             val predicted = predictor.predict(predictionTime.toNanos())
             assertEquals(1, predicted.size)
-            assertEquals((predictionTime + offset).toMillis(), predicted[0].eventTime)
+            assertTrue(predicted[0].eventTime <= (predictionTime + offset).toMillis())
         }
     }
 
@@ -135,7 +144,7 @@ class MotionPredictorBenchmark {
     @Test
     fun timeCreatePredictor() {
         val context = getPredictionContext(
-                /*offset=*/Duration.ofMillis(1), /*enablePrediction=*/true)
+                /*offset=*/Duration.ofMillis(20), /*enablePrediction=*/true)
 
         val state = perfStatusReporter.getBenchmarkState()
         while (state.keepRunning()) {

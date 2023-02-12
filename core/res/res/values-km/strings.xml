@@ -1358,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"មុខងារ PTP តាម​ USB ត្រូវបានបើក"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"ការភ្ជាប់តាម USB ត្រូវបានបើក"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"មុខងារ​ MIDI តាម USB ត្រូវបានបើក"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"បាន​ភ្ជាប់​ជាមួយ​គ្រឿង​បរិក្ខារ USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"ប៉ះសម្រាប់ជម្រើសជាច្រើនទៀត"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"កំពុងសាកថ្ម​ឧបករណ៍​ដែលបានភ្ជាប់។ សូមចុចសម្រាប់​ជម្រើសបន្ថែម។"</string>
@@ -1706,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"រួចរាល់"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"បិទ​ផ្លូវកាត់"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"បញ្ច្រាស​ពណ៌"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"ការកែតម្រូវ​ពណ៌"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"មុខងារប្រើដៃម្ខាង"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ពន្លឺតិចខ្លាំង"</string>
@@ -1857,8 +1860,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g>​ការងារ"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 2"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 3"</string>
-    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
-    <skip />
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"ក្លូន <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"សួរ​រក​កូដ PIN មុន​ពេលដកខ្ទាស់"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"សួរ​រក​លំនាំ​ដោះ​សោ​មុន​ពេលដោះខ្ទាស់"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
@@ -2313,16 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"អនុញ្ញាតឱ្យកម្មវិធីដៃគូចាប់ផ្តើមសេវាកម្មផ្ទៃខាងមុខពីផ្ទៃខាងក្រោយ។"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"អាចប្រើ​មីក្រូហ្វូនបាន"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"មីក្រូហ្វូនត្រូវ​បានទប់ស្កាត់"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"អេក្រង់ពីរ"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"អេក្រង់ពីរត្រូវបានបើក"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងប្រើផ្ទាំងអេក្រង់ទាំងពីរដើម្បីបង្ហាញខ្លឹមសារ"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ឧបករណ៍ក្តៅពេក"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"អេក្រង់ពីរមិនអាចប្រើបានទេ ដោយសារទូរសព្ទរបស់អ្នកឡើងក្តៅពេក"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"បិទ"</string>
 </resources>
