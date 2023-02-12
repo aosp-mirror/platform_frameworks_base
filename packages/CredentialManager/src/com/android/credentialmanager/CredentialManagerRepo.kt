@@ -402,7 +402,8 @@ class CredentialManagerRepo(
                 "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL",
                 credentialData,
                 /*candidateQueryData=*/ Bundle(),
-                /*isSystemProviderRequired=*/ false
+                /*isSystemProviderRequired=*/ false,
+                /*alwaysSendAppInfoToProvider=*/ true
             ),
             "com.google.android.youtube"
         )
@@ -416,7 +417,8 @@ class CredentialManagerRepo(
                 TYPE_PASSWORD_CREDENTIAL,
                 request.credentialData,
                 request.candidateQueryData,
-                /*isSystemProviderRequired=*/ false
+                /*isSystemProviderRequired=*/ false,
+                /*alwaysSendAppInfoToProvider=*/ true
             ),
             "com.google.android.youtube"
         )
@@ -434,7 +436,8 @@ class CredentialManagerRepo(
                 "other-sign-ins",
                 data,
                 /*candidateQueryData=*/ Bundle(),
-                /*isSystemProviderRequired=*/ false
+                /*isSystemProviderRequired=*/ false,
+                /*alwaysSendAppInfoToProvider=*/ true
             ),
             "com.google.android.youtube"
         )
