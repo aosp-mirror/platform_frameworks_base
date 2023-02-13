@@ -570,8 +570,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
                             return;
                         }
-                        mTouchHandler.getMotionHelper().expandLeavePip(
-                                clearedTask /* skipAnimation */);
+                        if (mPipTaskOrganizer.isLaunchToSplit(task)) {
+                            mTouchHandler.getMotionHelper().expandIntoSplit();
+                        } else {
+                            mTouchHandler.getMotionHelper().expandLeavePip(
+                                    clearedTask /* skipAnimation */);
+                        }
                     }
                 });
 
