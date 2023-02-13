@@ -9038,12 +9038,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private @UserIdInt int getMainUserId() {
-        UserHandle mainUser = mUserManager.getMainUser();
-        if (mainUser == null) {
+        int mainUserId = mUserManagerInternal.getMainUserId();
+        if (mainUserId == UserHandle.USER_NULL) {
             Slogf.d(LOG_TAG, "getMainUserId(): no main user, returning USER_SYSTEM");
             return UserHandle.USER_SYSTEM;
         }
-        return mainUser.getIdentifier();
+        return mainUserId;
     }
 
     // TODO(b/240562946): Remove api as owner name is not used.
@@ -12019,10 +12019,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
         }
 
-        int userHandle = caller.getUserId();
+        int userId = caller.getUserId();
         synchronized (getLockObject()) {
             final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
-                    getProfileOwnerOrDeviceOwnerLocked(userHandle), parent);
+                    getProfileOwnerOrDeviceOwnerLocked(userId), parent);
 
             if (isDefaultDeviceOwner(caller)) {
                 if (!UserRestrictionsUtils.canDeviceOwnerChange(key)) {
@@ -12039,7 +12039,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         "Cannot use the parent instance in Financed Device Owner mode");
             } else {
                 boolean profileOwnerCanChangeOnItself = !parent
-                        && UserRestrictionsUtils.canProfileOwnerChange(key, userHandle);
+                        && UserRestrictionsUtils.canProfileOwnerChange(
+                                key, userId == getMainUserId());
                 boolean orgOwnedProfileOwnerCanChangesGlobally = parent
                         && isProfileOwnerOfOrganizationOwnedDevice(caller)
                         && UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(
@@ -12058,7 +12059,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } else {
                 restrictions.remove(key);
             }
-            saveUserRestrictionsLocked(userHandle);
+            saveUserRestrictionsLocked(userId);
         }
         final int eventId = enabledFromThisOwner
                 ? DevicePolicyEnums.ADD_USER_RESTRICTION
@@ -12072,7 +12073,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final int eventTag = enabledFromThisOwner
                     ? SecurityLog.TAG_USER_RESTRICTION_ADDED
                     : SecurityLog.TAG_USER_RESTRICTION_REMOVED;
-            SecurityLog.writeEvent(eventTag, who.getPackageName(), userHandle, key);
+            SecurityLog.writeEvent(eventTag, who.getPackageName(), userId, key);
         }
     }
 
