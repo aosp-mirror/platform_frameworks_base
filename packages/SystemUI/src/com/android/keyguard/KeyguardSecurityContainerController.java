@@ -744,20 +744,17 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private void reloadColors() {
-        reinflateViewFlipper();
+        resetViewFlipper();
         mView.reloadColors();
     }
 
     /** Handles density or font scale changes. */
     private void onDensityOrFontScaleChanged() {
-        reinflateViewFlipper();
+        resetViewFlipper();
         mView.onDensityOrFontScaleChanged();
     }
 
-    /**
-     * Reinflate the view flipper child view.
-     */
-    public void reinflateViewFlipper() {
+    private void resetViewFlipper() {
         mSecurityViewFlipperController.clearViews();
         mSecurityViewFlipperController.getSecurityView(mCurrentSecurityMode,
                 mKeyguardSecurityCallback);
