@@ -18137,6 +18137,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             });
         }
+        String[] appOpExemptions = new String[exemptions.length];
+        for (int i = 0; i < exemptions.length; i++) {
+            appOpExemptions[i] = APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.get(exemptions[i]);
+        }
+        DevicePolicyEventLogger
+            .createEvent(DevicePolicyEnums.SET_APPLICATION_EXEMPTIONS)
+            .setAdmin(caller.getPackageName())
+            .setStrings(packageName, appOpExemptions)
+            .write();
     }
 
     @Override
