@@ -34,7 +34,7 @@ import android.os.PowerExemptionManager.TempAllowListType;
  * {@hide}
  */
 @SystemApi
-public class BroadcastOptions {
+public class BroadcastOptions extends ComponentOptions {
     private long mTemporaryAppAllowlistDuration;
     private @TempAllowListType int mTemporaryAppAllowlistType;
     private @ReasonCode int mTemporaryAppAllowlistReasonCode;
@@ -108,12 +108,14 @@ public class BroadcastOptions {
     }
 
     private BroadcastOptions() {
+        super();
         resetTemporaryAppAllowlist();
     }
 
     /** @hide */
     @TestApi
     public BroadcastOptions(@NonNull Bundle opts) {
+        super(opts);
         // Match the logic in toBundle().
         if (opts.containsKey(KEY_TEMPORARY_APP_ALLOWLIST_DURATION)) {
             mTemporaryAppAllowlistDuration = opts.getLong(KEY_TEMPORARY_APP_ALLOWLIST_DURATION);
@@ -188,6 +190,24 @@ public class BroadcastOptions {
         mTemporaryAppAllowlistType = PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
         mTemporaryAppAllowlistReasonCode = PowerExemptionManager.REASON_UNKNOWN;
         mTemporaryAppAllowlistReason = null;
+    }
+
+    /**
+     * Set PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * @hide
+     */
+    public void setPendingIntentBackgroundActivityLaunchAllowed(boolean allowed) {
+        super.setPendingIntentBackgroundActivityLaunchAllowed(allowed);
+    }
+
+    /**
+     * Get PendingIntent activity is allowed to be started in the background if the caller
+     * can start background activities.
+     * @hide
+     */
+    public boolean isPendingIntentBackgroundActivityLaunchAllowed() {
+        return super.isPendingIntentBackgroundActivityLaunchAllowed();
     }
 
     /**
@@ -308,8 +328,9 @@ public class BroadcastOptions {
      * object; you must not modify it, but can supply it to the sendBroadcast
      * methods that take an options Bundle.
      */
+    @Override
     public Bundle toBundle() {
-        Bundle b = new Bundle();
+        Bundle b = super.toBundle();
         if (isTemporaryAppAllowlistSet()) {
             b.putLong(KEY_TEMPORARY_APP_ALLOWLIST_DURATION, mTemporaryAppAllowlistDuration);
             b.putInt(KEY_TEMPORARY_APP_ALLOWLIST_TYPE, mTemporaryAppAllowlistType);
