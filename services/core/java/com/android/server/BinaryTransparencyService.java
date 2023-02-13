@@ -81,6 +81,7 @@ import android.util.apk.ApkSignatureVerifier;
 import android.util.apk.ApkSigningBlockUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.expresslog.Histogram;
 import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.pm.ApexManager;
@@ -140,6 +141,10 @@ public class BinaryTransparencyService extends SystemService {
             "enable_biometric_property_verification";
 
     private static final boolean DEBUG = false;     // toggle this for local debug
+
+    private static final Histogram digestAllPackagesLatency = new Histogram(
+            "binary_transparency.value_digest_all_packages_latency_uniform",
+            new Histogram.UniformOptions(50, 0, 500));
 
     private final Context mContext;
     private String mVbmetaDigest;
@@ -350,8 +355,9 @@ public class BinaryTransparencyService extends SystemService {
                     writeAppInfoToLog(appInfo);
                 }
             }
+            long timeSpentMeasuring = System.currentTimeMillis() - currentTimeMs;
+            digestAllPackagesLatency.logSample(timeSpentMeasuring);
             if (DEBUG) {
-                long timeSpentMeasuring = System.currentTimeMillis() - currentTimeMs;
                 Slog.d(TAG, "Measured " + packagesMeasured.size()
                         + " packages altogether in " + timeSpentMeasuring + "ms");
             }
