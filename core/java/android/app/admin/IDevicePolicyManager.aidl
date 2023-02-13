@@ -113,7 +113,7 @@ interface IDevicePolicyManager {
 
     boolean resetPassword(String password, int flags);
 
-    void setMaximumTimeToLock(in ComponentName who, long timeMs, boolean parent);
+    void setMaximumTimeToLock(in ComponentName who, String callerPackageName, long timeMs, boolean parent);
     long getMaximumTimeToLock(in ComponentName who, int userHandle, boolean parent);
 
     void setRequiredStrongAuthTimeout(in ComponentName who, String callerPackageName, long timeMs, boolean parent);
@@ -126,7 +126,7 @@ interface IDevicePolicyManager {
     **/
     void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent, boolean factoryReset);
 
-    void setFactoryResetProtectionPolicy(in ComponentName who, in FactoryResetProtectionPolicy policy);
+    void setFactoryResetProtectionPolicy(in ComponentName who, String callerPackageName, in FactoryResetProtectionPolicy policy);
     FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(in ComponentName who);
     boolean isFactoryResetProtectionPolicySupported();
 
@@ -155,7 +155,7 @@ interface IDevicePolicyManager {
     void setNearbyAppStreamingPolicy(int policy);
     int getNearbyAppStreamingPolicy(int userId);
 
-    void setKeyguardDisabledFeatures(in ComponentName who, int which, boolean parent);
+    void setKeyguardDisabledFeatures(in ComponentName who, String callerPackageName, int which, boolean parent);
     int getKeyguardDisabledFeatures(in ComponentName who, int userHandle, boolean parent);
 
     void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing, int userHandle);
@@ -262,8 +262,8 @@ interface IDevicePolicyManager {
     List<String> getPermittedAccessibilityServicesForUser(int userId);
     boolean isAccessibilityServicePermittedByAdmin(in ComponentName admin, String packageName, int userId);
 
-    boolean setPermittedInputMethods(in ComponentName admin,in List<String> packageList, boolean parent);
-    List<String> getPermittedInputMethods(in ComponentName admin, boolean parent);
+    boolean setPermittedInputMethods(in ComponentName admin, String callerPackageName, in List<String> packageList, boolean parent);
+    List<String> getPermittedInputMethods(in ComponentName admin, String callerPackageName, boolean parent);
     List<String> getPermittedInputMethodsAsUser(int userId);
     boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId, boolean parent);
 
@@ -353,8 +353,8 @@ interface IDevicePolicyManager {
     boolean getBluetoothContactSharingDisabled(in ComponentName who);
     boolean getBluetoothContactSharingDisabledForUser(int userId);
 
-    void setTrustAgentConfiguration(in ComponentName admin, in ComponentName agent,
-            in PersistableBundle args, boolean parent);
+    void setTrustAgentConfiguration(in ComponentName admin, String callerPackageName,
+            in ComponentName agent, in PersistableBundle args, boolean parent);
     List<PersistableBundle> getTrustAgentConfiguration(in ComponentName admin,
             in ComponentName agent, int userId, boolean parent);
 
