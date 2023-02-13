@@ -38,6 +38,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.view.LaunchableImageView;
+import com.android.systemui.condition.SelfExecutingMonitor;
 import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.controller.ControlsController;
 import com.android.systemui.controls.controller.StructureInfo;
@@ -102,7 +103,6 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<DreamOverlayStateController.Callback> mStateCallbackCaptor;
 
-    @Mock
     private Monitor mMonitor;
 
     @Before
@@ -116,6 +116,8 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
                 Optional.of(mControlsListingController));
         when(mControlsComponent.getVisibility()).thenReturn(AVAILABLE);
         when(mView.findViewById(R.id.home_controls_chip)).thenReturn(mHomeControlsView);
+
+        mMonitor = SelfExecutingMonitor.createInstance();
     }
 
     @Test
