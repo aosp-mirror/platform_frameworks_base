@@ -2,7 +2,6 @@ package com.android.settingslib.spaprivileged.template.app
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spa.widget.preference.TwoTargetSwitchPreference
@@ -16,14 +15,12 @@ fun <T : AppRecord> AppListItemModel<T>.AppListSwitchItem(
     onCheckedChange: ((newChecked: Boolean) -> Unit)?,
 ) {
     TwoTargetSwitchPreference(
-        model = remember {
-            object : SwitchPreferenceModel {
-                override val title = label
-                override val summary = this@AppListSwitchItem.summary
-                override val checked = checked
-                override val changeable = changeable
-                override val onCheckedChange = onCheckedChange
-            }
+        model = object : SwitchPreferenceModel {
+            override val title = label
+            override val summary = this@AppListSwitchItem.summary
+            override val checked = checked
+            override val changeable = changeable
+            override val onCheckedChange = onCheckedChange
         },
         icon = { AppIcon(record.app, SettingsDimension.appIconItemSize) },
         onClick = onClick,

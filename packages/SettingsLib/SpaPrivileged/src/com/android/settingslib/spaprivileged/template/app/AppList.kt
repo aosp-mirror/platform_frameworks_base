@@ -159,7 +159,7 @@ private fun <T : AppRecord> AppListModel<T>.AppListWidget(
 }
 
 private fun <T : AppRecord> T.itemKey(option: Int) =
-    listOf(option, app.packageName, app.userId, System.identityHashCode(this))
+    listOf(option, app.packageName, app.userId)
 
 /** Returns group title if this is the first item of the group. */
 private fun <T : AppRecord> AppListModel<T>.getGroupTitleIfFirst(
