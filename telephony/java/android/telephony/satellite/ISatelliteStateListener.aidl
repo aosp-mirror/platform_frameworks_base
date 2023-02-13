@@ -26,7 +26,8 @@ import android.telephony.satellite.SatelliteDatagram;
 oneway interface ISatelliteStateListener {
     void onSatelliteProvisionStateChanged(in boolean provisioned);
     void onSatellitePositionUpdate(in PointingInfo pointingInfo);
-    void onMessageTransferStateUpdate(in int state);
+    void onMessageTransferStateUpdate(in int state, in int sendPendingCount,
+            in int receivePendingCount, in int errorCode);
     void onSatelliteModemStateChange(in int state);
     void onPendingMessageCount(in int count);
     void onSatelliteDatagrams(in SatelliteDatagram[] datagrams);

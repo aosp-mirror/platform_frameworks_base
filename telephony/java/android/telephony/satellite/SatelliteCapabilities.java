@@ -33,8 +33,8 @@ public final class SatelliteCapabilities implements Parcelable {
     private Set<Integer> mSupportedRadioTechnologies;
 
     /**
-     * Whether satellite mode is always on (this to indicate power impact of keeping it on is
-     * very minimal).
+     * Whether satellite modem is always on.
+     * This indicates the power impact of keeping it on is very minimal.
      */
     private boolean mIsAlwaysOn;
 
@@ -44,12 +44,7 @@ public final class SatelliteCapabilities implements Parcelable {
     private boolean mNeedsPointingToSatellite;
 
     /**
-     * List of features supported by the Satellite modem.
-     */
-    private Set<Integer> mSupportedFeatures;
-
-    /**
-     * Whether UE needs a separate SIM profile to communicate with the Satellite network.
+     * Whether UE needs a separate SIM profile to communicate with the satellite network.
      */
     private boolean mNeedsSeparateSimProfile;
 
@@ -57,12 +52,10 @@ public final class SatelliteCapabilities implements Parcelable {
      * @hide
      */
     public SatelliteCapabilities(Set<Integer> supportedRadioTechnologies, boolean isAlwaysOn,
-            boolean needsPointingToSatellite, Set<Integer> supportedFeatures,
-            boolean needsSeparateSimProfile) {
+            boolean needsPointingToSatellite, boolean needsSeparateSimProfile) {
         mSupportedRadioTechnologies = supportedRadioTechnologies;
         mIsAlwaysOn = isAlwaysOn;
         mNeedsPointingToSatellite = needsPointingToSatellite;
-        mSupportedFeatures = supportedFeatures;
         mNeedsSeparateSimProfile = needsSeparateSimProfile;
     }
 
@@ -88,51 +81,29 @@ public final class SatelliteCapabilities implements Parcelable {
 
         out.writeBoolean(mIsAlwaysOn);
         out.writeBoolean(mNeedsPointingToSatellite);
-
-        if (mSupportedFeatures != null && !mSupportedFeatures.isEmpty()) {
-            out.writeInt(mSupportedFeatures.size());
-            for (int feature : mSupportedFeatures) {
-                out.writeInt(feature);
-            }
-        } else {
-            out.writeInt(0);
-        }
-
         out.writeBoolean(mNeedsSeparateSimProfile);
     }
 
-    public static final @android.annotation.NonNull Creator<SatelliteCapabilities> CREATOR =
-            new Creator<SatelliteCapabilities>() {
-                @Override
-                public SatelliteCapabilities createFromParcel(Parcel in) {
-                    return new SatelliteCapabilities(in);
-                }
+    @NonNull public static final Creator<SatelliteCapabilities> CREATOR = new Creator<>() {
+        @Override
+        public SatelliteCapabilities createFromParcel(Parcel in) {
+            return new SatelliteCapabilities(in);
+        }
 
-                @Override
-                public SatelliteCapabilities[] newArray(int size) {
-                    return new SatelliteCapabilities[size];
-                }
-            };
+        @Override
+        public SatelliteCapabilities[] newArray(int size) {
+            return new SatelliteCapabilities[size];
+        }
+    };
 
-    @NonNull
     @Override
-    public String toString() {
+    @NonNull public String toString() {
         StringBuilder sb = new StringBuilder();
 
         sb.append("SupportedRadioTechnology:");
         if (mSupportedRadioTechnologies != null && !mSupportedRadioTechnologies.isEmpty()) {
             for (int technology : mSupportedRadioTechnologies) {
                 sb.append(technology);
-                sb.append(",");
-            }
-        } else {
-            sb.append("none,");
-        }
-
-        sb.append("SupportedFeatures:");
-        if (mSupportedFeatures != null && !mSupportedFeatures.isEmpty()) {
-            for (int feature : mSupportedFeatures) {
-                sb.append(feature);
                 sb.append(",");
             }
         } else {
@@ -152,26 +123,39 @@ public final class SatelliteCapabilities implements Parcelable {
         return sb.toString();
     }
 
-    @NonNull
-    public Set<Integer> getSupportedRadioTechnologies() {
+    /**
+     * @return The list of technologies supported by the satellite modem.
+     */
+    @NonNull public Set<Integer> getSupportedRadioTechnologies() {
         return mSupportedRadioTechnologies;
     }
 
+    /**
+     * Get whether the satellite modem is always on.
+     * This indicates the power impact of keeping it on is very minimal.
+     *
+     * @return {@code true} if the satellite modem is always on and {@code false} otherwise.
+     */
     public boolean isAlwaysOn() {
         return mIsAlwaysOn;
     }
 
-    /** Get function for mNeedsPointingToSatellite */
+    /**
+     * Get whether UE needs to point to a satellite to send and receive data.
+     *
+     * @return {@code true} if UE needs to pointing to a satellite to send and receive data and
+     *         {@code false} otherwise.
+     */
     public boolean needsPointingToSatellite() {
         return mNeedsPointingToSatellite;
     }
 
-    @NonNull
-    public Set<Integer> getSupportedFeatures() {
-        return mSupportedFeatures;
-    }
-
-    /** Get function for mNeedsSeparateSimProfile */
+    /**
+     * Get whether UE needs a separate SIM profile to communicate with the satellite network.
+     *
+     * @return {@code true} if UE needs a separate SIM profile to comunicate with the satellite
+     *         network and {@code false} otherwise.
+     */
     public boolean needsSeparateSimProfile() {
         return mNeedsSeparateSimProfile;
     }
@@ -187,15 +171,6 @@ public final class SatelliteCapabilities implements Parcelable {
 
         mIsAlwaysOn = in.readBoolean();
         mNeedsPointingToSatellite = in.readBoolean();
-
-        mSupportedFeatures = new HashSet<>();
-        int numSupportedFeatures = in.readInt();
-        if (numSupportedFeatures > 0) {
-            for (int i = 0; i < numSupportedFeatures; i++) {
-                mSupportedFeatures.add(in.readInt());
-            }
-        }
-
         mNeedsSeparateSimProfile = in.readBoolean();
     }
 }

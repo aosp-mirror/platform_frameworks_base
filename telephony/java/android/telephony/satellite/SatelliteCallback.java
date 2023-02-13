@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.os.Binder;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -70,7 +69,7 @@ public class SatelliteCallback {
     }
 
     /**
-     * Interface for position update change listener.
+     * Interface for position update and message transfer state change listener.
      */
     public interface SatellitePositionUpdateListener {
         /**
@@ -84,9 +83,13 @@ public class SatelliteCallback {
          * Called when satellite message transfer state changes.
          *
          * @param state The new message transfer state.
+         * @param sendPendingCount The number of messages that are currently being sent.
+         * @param receivePendingCount The number of messages that are currently being received.
+         * @param errorCode If message transfer failed, the reason for failure.
          */
         void onMessageTransferStateUpdate(
-                @SatelliteManager.SatelliteMessageTransferState int state);
+                @SatelliteManager.SatelliteMessageTransferState int state, int sendPendingCount,
+                int receivePendingCount, @SatelliteManager.SatelliteError int errorCode);
     }
 
     /**
@@ -95,13 +98,13 @@ public class SatelliteCallback {
     public interface SatelliteStateListener {
         /**
          * Called when satellite state changes.
-         * @param state - The new satellite state.
+         * @param state The new satellite state.
          */
         void onSatelliteModemStateChange(@SatelliteManager.SatelliteModemState int state);
 
         /**
          * Called when there are pending messages to be received from satellite.
-         * @param count - pending message count.
+         * @param count Pending message count.
          */
         void onPendingMessageCount(int count);
     }
@@ -112,7 +115,7 @@ public class SatelliteCallback {
     public interface SatelliteDatagramListener {
         /**
          * Called when there are incoming datagrams to be received.
-         * @param datagrams - datagrams to be received over satellite.
+         * @param datagrams Datagrams to be received over satellite.
          */
         void onSatelliteDatagrams(SatelliteDatagram[] datagrams);
     }
@@ -145,13 +148,15 @@ public class SatelliteCallback {
         }
 
         public void onMessageTransferStateUpdate(
-                @SatelliteManager.SatelliteMessageTransferState int state) {
+                @SatelliteManager.SatelliteMessageTransferState int state, int sendPendingCount,
+                int receivePendingCount, @SatelliteManager.SatelliteError int errorCode) {
             SatellitePositionUpdateListener listener =
                     (SatellitePositionUpdateListener) mSatelliteCallbackWeakRef.get();
             if (listener == null) return;
 
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> listener.onMessageTransferStateUpdate(state)));
+                    () -> listener.onMessageTransferStateUpdate(
+                            state, sendPendingCount, receivePendingCount, errorCode)));
         }
 
 
