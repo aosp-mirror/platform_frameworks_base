@@ -537,6 +537,12 @@ object Flags {
     val CONTROLS_MANAGEMENT_NEW_FLOWS =
         unreleasedFlag(2002, "controls_management_new_flows", teamfood = true)
 
+    // Enables removing app from Home control panel as a part of a new flow
+    // TODO(b/269132640): Tracking Bug
+    @JvmField
+    val APP_PANELS_REMOVE_APPS_ALLOWED =
+        unreleasedFlag(2003, "app_panels_remove_apps_allowed", teamfood = false)
+
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
 
