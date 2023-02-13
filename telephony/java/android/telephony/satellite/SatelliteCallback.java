@@ -98,15 +98,15 @@ public class SatelliteCallback {
     public interface SatelliteStateListener {
         /**
          * Called when satellite state changes.
-         * @param state The new satellite state.
+         * @param state The new satellite modem state.
          */
         void onSatelliteModemStateChange(@SatelliteManager.SatelliteModemState int state);
 
         /**
-         * Called when there are pending messages to be received from satellite.
-         * @param count Pending message count.
+         * Called when there are pending datagrams to be received from satellite.
+         * @param count pending datagram count.
          */
-        void onPendingMessageCount(int count);
+        void onPendingDatagramCount(int count);
     }
 
     /**
@@ -115,7 +115,7 @@ public class SatelliteCallback {
     public interface SatelliteDatagramListener {
         /**
          * Called when there are incoming datagrams to be received.
-         * @param datagrams Datagrams to be received over satellite.
+         * @param datagrams array of datagrams to be received over satellite.
          */
         void onSatelliteDatagrams(SatelliteDatagram[] datagrams);
     }
@@ -171,13 +171,13 @@ public class SatelliteCallback {
         }
 
         @Override
-        public void onPendingMessageCount(int count) {
+        public void onPendingDatagramCount(int count) {
             SatelliteStateListener listener =
                     (SatelliteStateListener) mSatelliteCallbackWeakRef.get();
             if (listener == null) return;
 
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> listener.onPendingMessageCount(count)));
+                    () -> listener.onPendingDatagramCount(count)));
         }
 
         @Override
