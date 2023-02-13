@@ -51,6 +51,7 @@ class NumPadAnimator {
     private float mStartRadius;
     private float mEndRadius;
     private int mHeight;
+    private boolean mInitialized;
 
     private static final int EXPAND_ANIMATION_MS = 100;
     private static final int EXPAND_COLOR_ANIMATION_MS = 50;
@@ -97,6 +98,11 @@ class NumPadAnimator {
         mEndRadius = height / 4f;
         mExpandAnimator.setFloatValues(mStartRadius, mEndRadius);
         mContractAnimator.setFloatValues(mEndRadius, mStartRadius);
+        // Set initial corner radius.
+        if (!mInitialized) {
+            mBackground.setCornerRadius(mStartRadius);
+            mInitialized = true;
+        }
     }
 
     /**
