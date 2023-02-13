@@ -694,7 +694,8 @@ internal object SubtitleArrayMapping {
         "alarm" to R.array.tile_states_alarm,
         "onehanded" to R.array.tile_states_onehanded,
         "color_correction" to R.array.tile_states_color_correction,
-        "dream" to R.array.tile_states_dream
+        "dream" to R.array.tile_states_dream,
+        "font_scaling" to R.array.tile_states_font_scaling
     )
 
     fun getSubtitleId(spec: String?): Int {

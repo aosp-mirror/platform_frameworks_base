@@ -1,0 +1,83 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.systemui.qs.tiles
+
+import android.content.Intent
+import android.os.Handler
+import android.os.Looper
+import android.view.View
+import com.android.internal.logging.MetricsLogger
+import com.android.systemui.R
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.tileimpl.QSTileImpl
+import javax.inject.Inject
+
+class FontScalingTile
+@Inject
+constructor(
+    host: QSHost,
+    @Background backgroundLooper: Looper,
+    @Main mainHandler: Handler,
+    falsingManager: FalsingManager,
+    metricsLogger: MetricsLogger,
+    statusBarStateController: StatusBarStateController,
+    activityStarter: ActivityStarter,
+    qsLogger: QSLogger
+) :
+    QSTileImpl<QSTile.State?>(
+        host,
+        backgroundLooper,
+        mainHandler,
+        falsingManager,
+        metricsLogger,
+        statusBarStateController,
+        activityStarter,
+        qsLogger
+    ) {
+    private val mIcon = ResourceIcon.get(R.drawable.ic_qs_font_scaling)
+
+    override fun isAvailable(): Boolean {
+        return false
+    }
+
+    override fun newTileState(): QSTile.State {
+        val state = QSTile.State()
+        state.handlesLongClick = false
+        return state
+    }
+
+    override fun handleClick(view: View?) {}
+
+    override fun handleUpdateState(state: QSTile.State?, arg: Any?) {
+        state?.label = mContext.getString(R.string.quick_settings_font_scaling_label)
+        state?.icon = mIcon
+    }
+
+    override fun getLongClickIntent(): Intent? {
+        return null
+    }
+
+    override fun getTileLabel(): CharSequence {
+        return mContext.getString(R.string.quick_settings_font_scaling_label)
+    }
+}
