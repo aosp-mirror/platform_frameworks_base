@@ -2824,6 +2824,13 @@
     <permission android:name="android.permission.BIND_INCALL_SERVICE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Must be required by a {@link android.telecom.CallStreamingService},
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @SystemApi @hide-->
+    <permission android:name="android.permission.BIND_CALL_STREAMING_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- Allows to query ongoing call details and manage ongoing calls
      <p>Protection level: signature|appop -->
     <permission android:name="android.permission.MANAGE_ONGOING_CALLS"
