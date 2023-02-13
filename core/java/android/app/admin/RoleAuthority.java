@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -38,15 +37,18 @@ public final class RoleAuthority extends Authority {
     private final Set<String> mRoles;
 
     /**
-     * @hide
+     * Constructor for a role authority that accepts the list of roles held by the admin.
      */
     public RoleAuthority(@NonNull Set<String> roles) {
         mRoles = new HashSet<>(Objects.requireNonNull(roles));
     }
 
     private RoleAuthority(Parcel source) {
-        String[] roles = source.readStringArray();
-        mRoles = roles == null ? new HashSet<>() : new HashSet<>(Arrays.stream(roles).toList());
+        mRoles = new HashSet<>();
+        int size = source.readInt();
+        for (int i = 0; i < size; i++) {
+            mRoles.add(source.readString());
+        }
     }
 
     /**
@@ -64,7 +66,10 @@ public final class RoleAuthority extends Authority {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeArray(mRoles.toArray());
+        dest.writeInt(mRoles.size());
+        for (String role : mRoles) {
+            dest.writeString(role);
+        }
     }
 
     @Override

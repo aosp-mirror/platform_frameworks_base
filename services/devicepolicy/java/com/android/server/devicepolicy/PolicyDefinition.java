@@ -123,7 +123,8 @@ final class PolicyDefinition<V> {
             new NoArgsPolicyKey(DevicePolicyIdentifiers.LOCK_TASK_POLICY),
             new TopPriority<>(List.of(
                     // TODO(b/258166155): add correct device lock role name
-                    EnforcingAdmin.getRoleAuthorityOf("DeviceLock"),
+                    EnforcingAdmin.getRoleAuthorityOf(
+                            "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER"),
                     EnforcingAdmin.DPC_AUTHORITY)),
             POLICY_FLAG_LOCAL_ONLY_POLICY,
             (LockTaskPolicy value, Context context, Integer userId, PolicyKey policyKey) ->
@@ -148,7 +149,8 @@ final class PolicyDefinition<V> {
                             DevicePolicyIdentifiers.PERSISTENT_PREFERRED_ACTIVITY_POLICY),
             new TopPriority<>(List.of(
                     // TODO(b/258166155): add correct device lock role name
-                    EnforcingAdmin.getRoleAuthorityOf("DeviceLock"),
+                    EnforcingAdmin.getRoleAuthorityOf(
+                            "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER"),
                     EnforcingAdmin.DPC_AUTHORITY)),
             POLICY_FLAG_LOCAL_ONLY_POLICY,
             PolicyEnforcerCallbacks::addPersistentPreferredActivity,

@@ -1217,6 +1217,7 @@ package android.app.admin {
   }
 
   public final class DeviceAdminAuthority extends android.app.admin.Authority {
+    ctor public DeviceAdminAuthority();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DeviceAdminAuthority> CREATOR;
   }
@@ -1400,11 +1401,13 @@ package android.app.admin {
   }
 
   public final class DpcAuthority extends android.app.admin.Authority {
+    ctor public DpcAuthority();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.DpcAuthority> CREATOR;
   }
 
   public final class EnforcingAdmin implements android.os.Parcelable {
+    ctor public EnforcingAdmin(@NonNull String, @NonNull android.app.admin.Authority, @NonNull android.os.UserHandle);
     method public int describeContents();
     method @NonNull public android.app.admin.Authority getAuthority();
     method @NonNull public String getPackageName();
@@ -1528,6 +1531,7 @@ package android.app.admin {
   }
 
   public final class RoleAuthority extends android.app.admin.Authority {
+    ctor public RoleAuthority(@NonNull java.util.Set<java.lang.String>);
     method @NonNull public java.util.Set<java.lang.String> getRoles();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.RoleAuthority> CREATOR;
@@ -1548,6 +1552,7 @@ package android.app.admin {
   }
 
   public final class UnknownAuthority extends android.app.admin.Authority {
+    ctor public UnknownAuthority();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.UnknownAuthority> CREATOR;
   }

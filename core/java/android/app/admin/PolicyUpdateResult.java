@@ -61,12 +61,16 @@ public final class PolicyUpdateResult {
     /**
      * Result code to indicate that the policy set by the admin has not been enforced because the
      * local storage has reached its max limit.
+     *
+     * <p>The system will NOT try to automatically store and enforce this policy again.
      */
     public static final int RESULT_FAILURE_STORAGE_LIMIT_REACHED = 3;
 
     /**
      * Result code to indicate that the policy set by the admin has not been enforced because of a
      * permanent hardware limitation/issue.
+     *
+     * <p>The system will NOT try to automatically store and enforce this policy again.
      */
     public static final int RESULT_FAILURE_HARDWARE_LIMITATION = 4;
 
