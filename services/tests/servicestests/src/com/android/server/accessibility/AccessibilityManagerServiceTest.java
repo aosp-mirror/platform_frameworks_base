@@ -284,7 +284,7 @@ public class AccessibilityManagerServiceTest {
         verify(mProxyManager).registerProxy(eq(mMockServiceClient), eq(TEST_DISPLAY),
                 eq(mTestableContext), anyInt(), any(), eq(mMockSecurityPolicy),
                 eq(mA11yms), eq(mA11yms.getTraceManager()),
-                eq(mMockWindowManagerService), eq(mMockA11yWindowManager));
+                eq(mMockWindowManagerService));
     }
 
     @SmallTest
@@ -296,7 +296,7 @@ public class AccessibilityManagerServiceTest {
         assertThrows(SecurityException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY));
         verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any());
     }
 
     @SmallTest
@@ -305,7 +305,7 @@ public class AccessibilityManagerServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, Display.DEFAULT_DISPLAY));
         verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any());
     }
 
     @SmallTest
@@ -314,7 +314,7 @@ public class AccessibilityManagerServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, Display.INVALID_DISPLAY));
         verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
-                any(), any(), any(), any());
+                any(), any(), any());
     }
 
     @SmallTest
