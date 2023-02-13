@@ -74,6 +74,7 @@ constructor(
 
         stylusUsiPowerUi.init()
         stylusManager.registerCallback(this)
+        stylusManager.registerBatteryCallback(this)
         stylusManager.startListener()
     }
 
