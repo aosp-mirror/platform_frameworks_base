@@ -37,7 +37,6 @@ import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.os.Binder;
@@ -108,26 +107,26 @@ public class VirtualDeviceManagerService extends SystemService {
     private final ActivityInterceptorCallback mActivityInterceptorCallback =
             new ActivityInterceptorCallback() {
 
-        @Nullable
-        @Override
-        public ActivityInterceptResult onInterceptActivityLaunch(@NonNull
-                ActivityInterceptorInfo info) {
-            if (info.getCallingPackage() == null) {
-                return null;
-            }
-            PendingTrampoline pt = mPendingTrampolines.remove(info.getCallingPackage());
-            if (pt == null) {
-                return null;
-            }
-            pt.mResultReceiver.send(VirtualDeviceManager.LAUNCH_SUCCESS, null);
-            ActivityOptions options = info.getCheckedOptions();
-            if (options == null) {
-                options = ActivityOptions.makeBasic();
-            }
-            return new ActivityInterceptResult(
-                    info.getIntent(), options.setLaunchDisplayId(pt.mDisplayId));
-        }
-    };
+                @Nullable
+                @Override
+                public ActivityInterceptResult onInterceptActivityLaunch(@NonNull
+                        ActivityInterceptorInfo info) {
+                    if (info.getCallingPackage() == null) {
+                        return null;
+                    }
+                    PendingTrampoline pt = mPendingTrampolines.remove(info.getCallingPackage());
+                    if (pt == null) {
+                        return null;
+                    }
+                    pt.mResultReceiver.send(VirtualDeviceManager.LAUNCH_SUCCESS, null);
+                    ActivityOptions options = info.getCheckedOptions();
+                    if (options == null) {
+                        options = ActivityOptions.makeBasic();
+                    }
+                    return new ActivityInterceptResult(
+                            info.getIntent(), options.setLaunchDisplayId(pt.mDisplayId));
+                }
+            };
 
     @Override
     public void onStart() {
@@ -146,8 +145,8 @@ public class VirtualDeviceManagerService extends SystemService {
                 CharSequence deviceName = mVirtualDevices.valueAt(i).getDisplayName();
                 mVirtualDevices.valueAt(i).showToastWhereUidIsRunning(appUid,
                         getContext().getString(
-                            com.android.internal.R.string.vdm_camera_access_denied,
-                            deviceName),
+                                com.android.internal.R.string.vdm_camera_access_denied,
+                                deviceName),
                         Toast.LENGTH_LONG, Looper.myLooper());
             }
         }
@@ -193,11 +192,20 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
-    @VisibleForTesting
     void removeVirtualDevice(int deviceId) {
         synchronized (mVirtualDeviceManagerLock) {
             mAppsOnVirtualDevices.remove(deviceId);
             mVirtualDevices.remove(deviceId);
+        }
+
+        Intent i = new Intent(VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED);
+        i.putExtra(VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID, deviceId);
+        i.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            getContext().sendBroadcastAsUser(i, UserHandle.ALL);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -205,22 +213,25 @@ public class VirtualDeviceManagerService extends SystemService {
 
         private final VirtualDeviceImpl.PendingTrampolineCallback mPendingTrampolineCallback =
                 new VirtualDeviceImpl.PendingTrampolineCallback() {
-            @Override
-            public void startWaitingForPendingTrampoline(PendingTrampoline pendingTrampoline) {
-                PendingTrampoline existing = mPendingTrampolines.put(
-                        pendingTrampoline.mPendingIntent.getCreatorPackage(),
-                        pendingTrampoline);
-                if (existing != null) {
-                    existing.mResultReceiver.send(
-                            VirtualDeviceManager.LAUNCH_FAILURE_NO_ACTIVITY, null);
-                }
-            }
+                    @Override
+                    public void startWaitingForPendingTrampoline(
+                            PendingTrampoline pendingTrampoline) {
+                        PendingTrampoline existing = mPendingTrampolines.put(
+                                pendingTrampoline.mPendingIntent.getCreatorPackage(),
+                                pendingTrampoline);
+                        if (existing != null) {
+                            existing.mResultReceiver.send(
+                                    VirtualDeviceManager.LAUNCH_FAILURE_NO_ACTIVITY, null);
+                        }
+                    }
 
-            @Override
-            public void stopWaitingForPendingTrampoline(PendingTrampoline pendingTrampoline) {
-                mPendingTrampolines.remove(pendingTrampoline.mPendingIntent.getCreatorPackage());
-            }
-        };
+                    @Override
+                    public void stopWaitingForPendingTrampoline(
+                            PendingTrampoline pendingTrampoline) {
+                        mPendingTrampolines.remove(
+                                pendingTrampoline.mPendingIntent.getCreatorPackage());
+                    }
+                };
 
         @Override // Binder call
         public IVirtualDevice createVirtualDevice(
@@ -251,8 +262,9 @@ public class VirtualDeviceManagerService extends SystemService {
                 final Consumer<ArraySet<Integer>> runningAppsChangedCallback =
                         runningUids -> notifyRunningAppsChanged(deviceId, runningUids);
                 VirtualDeviceImpl virtualDevice = new VirtualDeviceImpl(getContext(),
-                        associationInfo, token, callingUid, deviceId, cameraAccessController,
-                        this::onDeviceClosed, mPendingTrampolineCallback, activityListener,
+                        associationInfo, VirtualDeviceManagerService.this, token, callingUid,
+                        deviceId, cameraAccessController,
+                        mPendingTrampolineCallback, activityListener,
                         soundEffectListener, runningAppsChangedCallback, params);
                 mVirtualDevices.put(deviceId, virtualDevice);
                 return virtualDevice;
@@ -281,26 +293,9 @@ public class VirtualDeviceManagerService extends SystemService {
                         "uid " + callingUid
                                 + " is not the owner of the supplied VirtualDevice");
             }
-            GenericWindowPolicyController gwpc;
-            final long token = Binder.clearCallingIdentity();
-            try {
-                gwpc = virtualDeviceImpl.createWindowPolicyController(
-                    virtualDisplayConfig.getDisplayCategories());
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
 
-            DisplayManagerInternal displayManager = getLocalService(
-                    DisplayManagerInternal.class);
-            int displayId = displayManager.createVirtualDisplay(virtualDisplayConfig, callback,
-                    virtualDevice, gwpc, packageName);
-
-            final long tokenTwo = Binder.clearCallingIdentity();
-            try {
-                virtualDeviceImpl.onVirtualDisplayCreatedLocked(gwpc, displayId);
-            } finally {
-                Binder.restoreCallingIdentity(tokenTwo);
-            }
+            int displayId = virtualDeviceImpl.createVirtualDisplay(virtualDisplayConfig, callback,
+                    packageName);
             mLocalService.onVirtualDisplayCreated(displayId);
             return displayId;
         }
@@ -412,19 +407,6 @@ public class VirtualDeviceManagerService extends SystemService {
             return null;
         }
 
-        private void onDeviceClosed(int deviceId) {
-            removeVirtualDevice(deviceId);
-            Intent i = new Intent(VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED);
-            i.putExtra(VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID, deviceId);
-            i.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                getContext().sendBroadcastAsUser(i, UserHandle.ALL);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
         @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
                 throws RemoteException {
@@ -512,9 +494,14 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override
         public void onVirtualDisplayRemoved(IVirtualDevice virtualDevice, int displayId) {
             final VirtualDisplayListener[] listeners;
+            VirtualDeviceImpl virtualDeviceImpl;
             synchronized (mVirtualDeviceManagerLock) {
-                ((VirtualDeviceImpl) virtualDevice).onVirtualDisplayRemovedLocked(displayId);
                 listeners = mVirtualDisplayListeners.toArray(new VirtualDisplayListener[0]);
+                virtualDeviceImpl = mVirtualDevices.get(
+                        ((VirtualDeviceImpl) virtualDevice).getDeviceId());
+            }
+            if (virtualDeviceImpl != null) {
+                virtualDeviceImpl.onVirtualDisplayRemoved(displayId);
             }
             mHandler.post(() -> {
                 for (VirtualDisplayListener listener : listeners) {
@@ -599,16 +586,11 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public @NonNull ArraySet<Integer> getDisplayIdsForDevice(int deviceId) {
+            VirtualDeviceImpl virtualDevice;
             synchronized (mVirtualDeviceManagerLock) {
-                int size = mVirtualDevices.size();
-                for (int i = 0; i < size; i++) {
-                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
-                    if (device.getDeviceId() == deviceId) {
-                        return new ArraySet<>(device.mVirtualDisplayIds);
-                    }
-                }
+                virtualDevice = mVirtualDevices.get(deviceId);
             }
-            return new ArraySet<>();
+            return virtualDevice == null ? new ArraySet<>() : virtualDevice.getDisplayIds();
         }
 
         @Override
