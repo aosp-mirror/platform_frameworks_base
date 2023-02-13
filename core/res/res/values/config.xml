@@ -2997,6 +2997,12 @@
     <string name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.wifi.WifiDebuggingSecondaryUserActivity</string>
 
+    <!-- Package name of the system service that implements the shared connectivity service -->
+    <string translatable="false" name="shared_connectivity_service_package"></string>
+
+    <!-- Intent action used when binding to the shared connectivity service -->
+    <string translatable="false" name="shared_connectivity_service_intent_action"></string>
+
     <!-- Component name of the activity that shows the usb containment status. -->
     <string name="config_usbContaminantActivity" translatable="false"
             >com.android.systemui/com.android.systemui.usb.UsbContaminantActivity</string>
