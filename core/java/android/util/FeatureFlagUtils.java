@@ -127,6 +127,13 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_ENABLE_SPA = "settings_enable_spa";
 
+    /**
+     * Enable new pages implemented with SPA besides the SPA pages controlled by the {@code
+     * settings_enable_spa} flag.
+     * @hide
+     */
+    public static final String SETTINGS_ENABLE_SPA_PHASE2 = "settings_enable_spa_phase2";
+
     /** Flag to enable/disable adb log metrics
      *  @hide
      */
@@ -225,6 +232,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "true");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_PHASE2, "false");
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
         DEFAULT_FLAGS.put(SETTINGS_SHOW_STYLUS_PREFERENCES, "true");
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
@@ -252,6 +260,7 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA);
+        PERSISTENT_FLAGS.add(SETTINGS_ENABLE_SPA_PHASE2);
         PERSISTENT_FLAGS.add(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM);
     }
 
