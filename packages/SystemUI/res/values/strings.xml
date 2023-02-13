@@ -662,6 +662,8 @@
     <string name="quick_settings_inversion_label">Color inversion</string>
     <!-- QuickSettings: Label for the toggle that controls whether display color correction is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_color_correction_label">Color correction</string>
+    <!-- QuickSettings: Label for font size scaling. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_font_scaling_label">Font size</string>
     <!-- QuickSettings: Control panel: Label for button that navigates to user settings. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_more_user_settings">Manage users</string>
     <!-- QuickSettings: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
