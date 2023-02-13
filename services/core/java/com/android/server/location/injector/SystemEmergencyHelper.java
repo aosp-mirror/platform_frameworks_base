@@ -27,6 +27,7 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.android.internal.telephony.TelephonyIntents;
 import com.android.server.FgThread;
 
 import java.util.Objects;
@@ -73,12 +74,25 @@ public class SystemEmergencyHelper extends EmergencyHelper {
                     try {
                         mIsInEmergencyCall = mTelephonyManager.isEmergencyNumber(
                                 intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER));
+                        dispatchEmergencyStateChanged();
                     } catch (IllegalStateException e) {
                         Log.w(TAG, "Failed to call TelephonyManager.isEmergencyNumber().", e);
                     }
                 }
             }
         }, new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL));
+
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (!TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED.equals(
+                        intent.getAction())) {
+                    return;
+                }
+
+                dispatchEmergencyStateChanged();
+            }
+        }, new IntentFilter(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED));
     }
 
     @Override
@@ -108,6 +122,7 @@ public class SystemEmergencyHelper extends EmergencyHelper {
                     if (mIsInEmergencyCall) {
                         mEmergencyCallEndRealtimeMs = SystemClock.elapsedRealtime();
                         mIsInEmergencyCall = false;
+                        dispatchEmergencyStateChanged();
                     }
                 }
             }
