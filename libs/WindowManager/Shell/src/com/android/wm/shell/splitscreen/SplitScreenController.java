@@ -42,6 +42,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
+import android.app.TaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
@@ -419,6 +420,14 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public void goToFullscreenFromSplit() {
         mStageCoordinator.goToFullscreenFromSplit();
+    }
+
+    public boolean isLaunchToSplit(TaskInfo taskInfo) {
+        return mStageCoordinator.isLaunchToSplit(taskInfo);
+    }
+
+    public int getActivateSplitPosition(TaskInfo taskInfo) {
+        return mStageCoordinator.getActivateSplitPosition(taskInfo);
     }
 
     public void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {

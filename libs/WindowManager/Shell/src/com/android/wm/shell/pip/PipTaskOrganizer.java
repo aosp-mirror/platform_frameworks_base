@@ -1409,7 +1409,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @PipAnimationController.TransitionDirection int direction,
             @PipAnimationController.AnimationType int type) {
         final Rect preResizeBounds = new Rect(mPipBoundsState.getBounds());
-        final boolean isPipTopLeft = isPipTopLeft();
         mPipBoundsState.setBounds(destinationBounds);
         if (direction == TRANSITION_DIRECTION_REMOVE_STACK) {
             removePipImmediately();
@@ -1455,9 +1454,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                             null /* callback */, false /* withStartDelay */);
                 });
             } else {
-                applyFinishBoundsResize(wct, direction, isPipTopLeft);
+                applyFinishBoundsResize(wct, direction, false);
             }
         } else {
+            final boolean isPipTopLeft =
+                    direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN && isPipToTopLeft();
             applyFinishBoundsResize(wct, direction, isPipTopLeft);
         }
 
@@ -1524,6 +1525,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSplitScreenOptional.get().getStageBounds(topLeft, bottomRight);
 
         return topLeft.contains(mPipBoundsState.getBounds());
+    }
+
+    private boolean isPipToTopLeft() {
+        if (!mSplitScreenOptional.isPresent()) {
+            return false;
+        }
+        return mSplitScreenOptional.get().getActivateSplitPosition(mTaskInfo)
+                == SPLIT_POSITION_TOP_OR_LEFT;
     }
 
     /**
@@ -1662,8 +1671,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final Rect topLeft = new Rect();
         final Rect bottomRight = new Rect();
         mSplitScreenOptional.get().getStageBounds(topLeft, bottomRight);
-        final boolean isPipTopLeft = isPipTopLeft();
-        destinationBoundsOut.set(isPipTopLeft ? topLeft : bottomRight);
+        destinationBoundsOut.set(isPipToTopLeft()  ? topLeft : bottomRight);
         return true;
     }
 
@@ -1745,6 +1753,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     public void setSurfaceControlTransactionFactory(
             PipSurfaceTransactionHelper.SurfaceControlTransactionFactory factory) {
         mSurfaceControlTransactionFactory = factory;
+    }
+
+    public boolean isLaunchToSplit(TaskInfo taskInfo) {
+        return mSplitScreenOptional.isPresent()
+                && mSplitScreenOptional.get().isLaunchToSplit(taskInfo);
     }
 
     /**
