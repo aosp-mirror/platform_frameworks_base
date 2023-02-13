@@ -63,6 +63,7 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
     public @interface ConnectionStatus {}
 
     @ConnectionStatus private final int mStatus;
+    private final KnownNetwork mKnownNetwork;
     private final Bundle mExtras;
 
     /**
@@ -70,6 +71,7 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
      */
     public static final class Builder {
         @ConnectionStatus private int mStatus;
+        private KnownNetwork mKnownNetwork;
         private Bundle mExtras;
 
         public Builder() {}
@@ -82,6 +84,17 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
         @NonNull
         public Builder setStatus(@ConnectionStatus int status) {
             mStatus = status;
+            return this;
+        }
+
+        /**
+         * Sets the {@link KnownNetwork} object of the connection.
+         *
+         * @return Returns the Builder object.
+         */
+        @NonNull
+        public Builder setKnownNetwork(@NonNull KnownNetwork knownNetwork) {
+            mKnownNetwork = knownNetwork;
             return this;
         }
 
@@ -103,12 +116,14 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
          */
         @NonNull
         public KnownNetworkConnectionStatus build() {
-            return new KnownNetworkConnectionStatus(mStatus, mExtras);
+            return new KnownNetworkConnectionStatus(mStatus, mKnownNetwork, mExtras);
         }
     }
 
-    private KnownNetworkConnectionStatus(@ConnectionStatus int status, Bundle extras) {
+    private KnownNetworkConnectionStatus(@ConnectionStatus int status, KnownNetwork knownNetwork,
+            Bundle extras) {
         mStatus = status;
+        mKnownNetwork = knownNetwork;
         mExtras = extras;
     }
 
@@ -120,6 +135,16 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
     @ConnectionStatus
     public int getStatus() {
         return mStatus;
+    }
+
+    /**
+     * Gets the {@link KnownNetwork} object of the connection.
+     *
+     * @return Returns a KnownNetwork object.
+     */
+    @NonNull
+    public KnownNetwork getKnownNetwork() {
+        return mKnownNetwork;
     }
 
     /**
@@ -136,12 +161,13 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
     public boolean equals(Object obj) {
         if (!(obj instanceof KnownNetworkConnectionStatus)) return false;
         KnownNetworkConnectionStatus other = (KnownNetworkConnectionStatus) obj;
-        return mStatus == other.getStatus();
+        return mStatus == other.getStatus()
+                && Objects.equals(mKnownNetwork, other.getKnownNetwork());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mStatus);
+        return Objects.hash(mStatus, mKnownNetwork);
     }
 
     @Override
@@ -152,15 +178,27 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mStatus);
+        mKnownNetwork.writeToParcel(dest, flags);
         dest.writeBundle(mExtras);
+    }
+
+    /**
+     * Creates a {@link KnownNetworkConnectionStatus} object from a parcel.
+     *
+     * @hide
+     */
+    @NonNull
+    public static KnownNetworkConnectionStatus readFromParcel(@NonNull Parcel in) {
+        return new KnownNetworkConnectionStatus(in.readInt(),
+                KnownNetwork.readFromParcel(in),
+                in.readBundle());
     }
 
     @NonNull
     public static final Creator<KnownNetworkConnectionStatus> CREATOR = new Creator<>() {
                 @Override
                 public KnownNetworkConnectionStatus createFromParcel(Parcel in) {
-                    return new KnownNetworkConnectionStatus(in.readInt(),
-                            in.readBundle(getClass().getClassLoader()));
+                    return readFromParcel(in);
                 }
 
                 @Override
@@ -173,6 +211,7 @@ public final class KnownNetworkConnectionStatus implements Parcelable {
     public String toString() {
         return new StringBuilder("KnownNetworkConnectionStatus[")
                 .append("status=").append(mStatus)
+                .append("known network=").append(mKnownNetwork.toString())
                 .append("extras=").append(mExtras.toString())
                 .append("]").toString();
     }

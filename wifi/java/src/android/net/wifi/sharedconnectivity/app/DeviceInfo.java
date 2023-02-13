@@ -270,12 +270,22 @@ public final class DeviceInfo implements Parcelable {
         return 0;
     }
 
+    /**
+     * Creates a {@link DeviceInfo} object from a parcel.
+     *
+     * @hide
+     */
+    @NonNull
+    public static DeviceInfo readFromParcel(@NonNull Parcel in) {
+        return new DeviceInfo(in.readInt(), in.readString(), in.readString(), in.readInt(),
+                in.readInt());
+    }
+
     @NonNull
     public static final Creator<DeviceInfo> CREATOR = new Creator<DeviceInfo>() {
         @Override
         public DeviceInfo createFromParcel(Parcel in) {
-            return new DeviceInfo(in.readInt(), in.readString(), in.readString(), in.readInt(),
-                    in.readInt());
+            return readFromParcel(in);
         }
 
         @Override
