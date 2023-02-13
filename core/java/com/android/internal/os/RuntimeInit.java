@@ -16,14 +16,10 @@
 
 package com.android.internal.os;
 
-import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
-
-import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
 import android.app.IActivityManager;
-import android.app.compat.CompatChanges;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.type.DefaultMimeMapFactory;
 import android.net.TrafficStats;
@@ -40,7 +36,6 @@ import com.android.internal.logging.AndroidConfig;
 
 import dalvik.system.RuntimeHooks;
 import dalvik.system.VMRuntime;
-import dalvik.system.ZipPathValidator;
 
 import libcore.content.type.MimeMap;
 
@@ -265,28 +260,7 @@ public class RuntimeInit {
          */
         TrafficStats.attachSocketTagger();
 
-        /*
-         * Initialize the zip path validator callback depending on the targetSdk.
-         */
-        initZipPathValidatorCallback();
-
         initialized = true;
-    }
-
-    /**
-     * If targetSDK >= U: set the safe zip path validator callback which disallows dangerous zip
-     * entry names.
-     * Otherwise: clear the callback to the default validation.
-     *
-     * @hide
-     */
-    @TestApi
-    public static void initZipPathValidatorCallback() {
-        if (CompatChanges.isChangeEnabled(VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL)) {
-            ZipPathValidator.setCallback(new SafeZipPathValidatorCallback());
-        } else {
-            ZipPathValidator.clearCallback();
-        }
     }
 
     /**
