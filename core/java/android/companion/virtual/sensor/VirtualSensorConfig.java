@@ -16,20 +16,15 @@
 
 package android.companion.virtual.sensor;
 
-import static java.util.concurrent.TimeUnit.MICROSECONDS;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.hardware.Sensor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.time.Duration;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 
 /**
  * Configuration for creation of a virtual sensor.
@@ -44,23 +39,17 @@ public final class VirtualSensorConfig implements Parcelable {
     private final String mName;
     @Nullable
     private final String mVendor;
-    @Nullable
-    private final IVirtualSensorStateChangeCallback mStateChangeCallback;
 
-    private VirtualSensorConfig(int type, @NonNull String name, @Nullable String vendor,
-            @Nullable IVirtualSensorStateChangeCallback stateChangeCallback) {
+    private VirtualSensorConfig(int type, @NonNull String name, @Nullable String vendor) {
         mType = type;
         mName = name;
         mVendor = vendor;
-        mStateChangeCallback = stateChangeCallback;
     }
 
     private VirtualSensorConfig(@NonNull Parcel parcel) {
         mType = parcel.readInt();
         mName = parcel.readString8();
         mVendor = parcel.readString8();
-        mStateChangeCallback =
-                IVirtualSensorStateChangeCallback.Stub.asInterface(parcel.readStrongBinder());
     }
 
     @Override
@@ -73,8 +62,6 @@ public final class VirtualSensorConfig implements Parcelable {
         parcel.writeInt(mType);
         parcel.writeString8(mName);
         parcel.writeString8(mVendor);
-        parcel.writeStrongBinder(
-                mStateChangeCallback != null ? mStateChangeCallback.asBinder() : null);
     }
 
     /**
@@ -105,15 +92,6 @@ public final class VirtualSensorConfig implements Parcelable {
     }
 
     /**
-     * Returns the callback to get notified about changes in the sensor listeners.
-     * @hide
-     */
-    @Nullable
-    public IVirtualSensorStateChangeCallback getStateChangeCallback() {
-        return mStateChangeCallback;
-    }
-
-    /**
      * Builder for {@link VirtualSensorConfig}.
      */
     public static final class Builder {
@@ -123,32 +101,6 @@ public final class VirtualSensorConfig implements Parcelable {
         private final String mName;
         @Nullable
         private String mVendor;
-        @Nullable
-        private IVirtualSensorStateChangeCallback mStateChangeCallback;
-
-        private static class SensorStateChangeCallbackDelegate
-                extends IVirtualSensorStateChangeCallback.Stub {
-            @NonNull
-            private final Executor mExecutor;
-            @NonNull
-            private final VirtualSensor.SensorStateChangeCallback mCallback;
-
-            SensorStateChangeCallbackDelegate(@NonNull @CallbackExecutor Executor executor,
-                    @NonNull VirtualSensor.SensorStateChangeCallback callback) {
-                mCallback = callback;
-                mExecutor = executor;
-            }
-            @Override
-            public void onStateChanged(boolean enabled, int samplingPeriodMicros,
-                    int batchReportLatencyMicros) {
-                final Duration samplingPeriod =
-                        Duration.ofNanos(MICROSECONDS.toNanos(samplingPeriodMicros));
-                final Duration batchReportingLatency =
-                        Duration.ofNanos(MICROSECONDS.toNanos(batchReportLatencyMicros));
-                mExecutor.execute(() -> mCallback.onStateChanged(
-                        enabled, samplingPeriod, batchReportingLatency));
-            }
-        }
 
         /**
          * Creates a new builder.
@@ -167,7 +119,7 @@ public final class VirtualSensorConfig implements Parcelable {
          */
         @NonNull
         public VirtualSensorConfig build() {
-            return new VirtualSensorConfig(mType, mName, mVendor, mStateChangeCallback);
+            return new VirtualSensorConfig(mType, mName, mVendor);
         }
 
         /**
@@ -176,24 +128,6 @@ public final class VirtualSensorConfig implements Parcelable {
         @NonNull
         public VirtualSensorConfig.Builder setVendor(@Nullable String vendor) {
             mVendor = vendor;
-            return this;
-        }
-
-        /**
-         * Sets the callback to get notified about changes in the sensor listeners.
-         *
-         * @param executor The executor where the callback is executed on.
-         * @param callback The callback to get notified when the state of the sensor
-         * listeners has changed, see {@link VirtualSensor.SensorStateChangeCallback}
-         */
-        @SuppressLint("MissingGetterMatchingBuilder")
-        @NonNull
-        public VirtualSensorConfig.Builder setStateChangeCallback(
-                @NonNull @CallbackExecutor Executor executor,
-                @NonNull VirtualSensor.SensorStateChangeCallback callback) {
-            mStateChangeCallback = new SensorStateChangeCallbackDelegate(
-                    Objects.requireNonNull(executor),
-                    Objects.requireNonNull(callback));
             return this;
         }
     }
