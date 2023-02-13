@@ -70,6 +70,7 @@ import com.android.systemui.smartspace.dagger.SmartspaceModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
@@ -266,6 +267,7 @@ public abstract class SystemUIModule {
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
             FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             @Main Executor sysuiMainExecutor) {
         return Optional.ofNullable(BubblesManager.create(context,
                 bubblesOptional,
@@ -283,6 +285,7 @@ public abstract class SystemUIModule {
                 notifPipeline,
                 sysUiState,
                 featureFlags,
+                notifPipelineFlags,
                 sysuiMainExecutor));
     }
 
