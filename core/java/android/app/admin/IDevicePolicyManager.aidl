@@ -107,7 +107,8 @@ interface IDevicePolicyManager {
     int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);
 
-    void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num, boolean parent);
+    void setMaximumFailedPasswordsForWipe(
+        in ComponentName admin, String callerPackageName, int num, boolean parent);
     int getMaximumFailedPasswordsForWipe(in ComponentName admin, int userHandle, boolean parent);
 
     boolean resetPassword(String password, int flags);
@@ -144,7 +145,8 @@ interface IDevicePolicyManager {
     void setCameraDisabled(in ComponentName who, String callerPackageName, boolean disabled, boolean parent);
     boolean getCameraDisabled(in ComponentName who, int userHandle, boolean parent);
 
-    void setScreenCaptureDisabled(in ComponentName who, boolean disabled, boolean parent);
+    void setScreenCaptureDisabled(
+        in ComponentName who, String callerPackageName, boolean disabled, boolean parent);
     boolean getScreenCaptureDisabled(in ComponentName who, int userHandle, boolean parent);
 
     void setNearbyNotificationStreamingPolicy(int policy);
@@ -376,7 +378,7 @@ interface IDevicePolicyManager {
 
     void setUserIcon(in ComponentName admin, in Bitmap icon);
 
-    void setSystemUpdatePolicy(in ComponentName who, in SystemUpdatePolicy policy);
+    void setSystemUpdatePolicy(in ComponentName who, String callerPackageName, in SystemUpdatePolicy policy);
     SystemUpdatePolicy getSystemUpdatePolicy();
     void clearSystemUpdatePolicyFreezePeriodRecord();
 
@@ -398,7 +400,7 @@ interface IDevicePolicyManager {
     void setKeepUninstalledPackages(in ComponentName admin, in String callerPackage, in List<String> packageList);
     List<String> getKeepUninstalledPackages(in ComponentName admin, in String callerPackage);
     boolean isManagedProfile(in ComponentName admin);
-    String getWifiMacAddress(in ComponentName admin);
+    String getWifiMacAddress(in ComponentName admin, String callerPackageName);
     void reboot(in ComponentName admin);
 
     void setShortSupportMessage(in ComponentName admin, in CharSequence message);
@@ -502,7 +504,7 @@ interface IDevicePolicyManager {
 
     void setProfileOwnerOnOrganizationOwnedDevice(in ComponentName who, int userId, boolean isProfileOwnerOnOrganizationOwnedDevice);
 
-    void installUpdateFromFile(in ComponentName admin, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
+    void installUpdateFromFile(in ComponentName admin, String callerPackageName, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
 
     void setCrossProfileCalendarPackages(in ComponentName admin, in List<String> packageNames);
     List<String> getCrossProfileCalendarPackages(in ComponentName admin);
@@ -565,10 +567,10 @@ interface IDevicePolicyManager {
     boolean isUsbDataSignalingEnabledForUser(int userId);
     boolean canUsbDataSignalingBeDisabled();
 
-    void setMinimumRequiredWifiSecurityLevel(int level);
+    void setMinimumRequiredWifiSecurityLevel(String callerPackageName, int level);
     int getMinimumRequiredWifiSecurityLevel();
 
-    void setWifiSsidPolicy(in WifiSsidPolicy policy);
+    void setWifiSsidPolicy(String callerPackageName, in WifiSsidPolicy policy);
     WifiSsidPolicy getWifiSsidPolicy();
 
     List<UserHandle> listForegroundAffiliatedUsers();
