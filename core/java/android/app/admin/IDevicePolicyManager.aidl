@@ -91,7 +91,7 @@ interface IDevicePolicyManager {
     void setPasswordHistoryLength(in ComponentName who, int length, boolean parent);
     int getPasswordHistoryLength(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordExpirationTimeout(in ComponentName who, long expiration, boolean parent);
+    void setPasswordExpirationTimeout(in ComponentName who, String callerPackageName, long expiration, boolean parent);
     long getPasswordExpirationTimeout(in ComponentName who, int userHandle, boolean parent);
 
     long getPasswordExpiration(in ComponentName who, int userHandle, boolean parent);
@@ -100,7 +100,7 @@ interface IDevicePolicyManager {
     boolean isActivePasswordSufficientForDeviceRequirement();
     boolean isPasswordSufficientAfterProfileUnification(int userHandle, int profileUser);
     int getPasswordComplexity(boolean parent);
-    void setRequiredPasswordComplexity(int passwordComplexity, boolean parent);
+    void setRequiredPasswordComplexity(String callerPackageName, int passwordComplexity, boolean parent);
     int getRequiredPasswordComplexity(boolean parent);
     int getAggregatedPasswordComplexityForUser(int userId, boolean deviceWideOnly);
     boolean isUsingUnifiedPassword(in ComponentName admin);
@@ -116,7 +116,7 @@ interface IDevicePolicyManager {
     void setMaximumTimeToLock(in ComponentName who, long timeMs, boolean parent);
     long getMaximumTimeToLock(in ComponentName who, int userHandle, boolean parent);
 
-    void setRequiredStrongAuthTimeout(in ComponentName who, long timeMs, boolean parent);
+    void setRequiredStrongAuthTimeout(in ComponentName who, String callerPackageName, long timeMs, boolean parent);
     long getRequiredStrongAuthTimeout(in ComponentName who, int userId, boolean parent);
 
     void lockNow(int flags, boolean parent);
@@ -314,7 +314,7 @@ interface IDevicePolicyManager {
     void setSystemSetting(in ComponentName who, in String setting, in String value);
     void setSecureSetting(in ComponentName who, in String setting, in String value);
 
-    void setConfiguredNetworksLockdownState(in ComponentName who, boolean lockdown);
+    void setConfiguredNetworksLockdownState(in ComponentName who, String callerPackageName, boolean lockdown);
     boolean hasLockdownAdminConfiguredNetworks(in ComponentName who);
 
     void setLocationEnabled(in ComponentName who, boolean locationEnabled);
@@ -593,8 +593,8 @@ interface IDevicePolicyManager {
     void setApplicationExemptions(String packageName, in int[]exemptions);
     int[] getApplicationExemptions(String packageName);
 
-    void setMtePolicy(int flag);
-    int getMtePolicy();
+    void setMtePolicy(int flag, String callerPackageName);
+    int getMtePolicy(String callerPackageName);
 
     void setManagedSubscriptionsPolicy(in ManagedSubscriptionsPolicy policy);
     ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy();

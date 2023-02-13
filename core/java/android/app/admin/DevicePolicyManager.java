@@ -20,7 +20,10 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MTE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_PACKAGE_STATE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SCREEN_CAPTURE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SECURITY_LOGGING;
@@ -29,6 +32,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLI
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
+import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
 import static android.Manifest.permission.SET_TIME_ZONE;
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
@@ -2226,7 +2230,7 @@ public class DevicePolicyManager {
      *
      * <p>If an invalid value is used, it will be treated as {@link #PASSWORD_COMPLEXITY_NONE}.
      */
-    @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY)
+    @RequiresPermission(REQUEST_PASSWORD_COMPLEXITY)
     public static final String EXTRA_PASSWORD_COMPLEXITY =
             "android.app.extra.PASSWORD_COMPLEXITY";
 
@@ -4000,7 +4004,8 @@ public class DevicePolicyManager {
     public static @interface MtePolicy {}
 
     /**
-     * Called by a device owner or profile owner of an organization-owned device to set the Memory
+     * Called by a device owner, profile owner of an organization-owned device, or holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MTE} permission to set the Memory
      * Tagging Extension (MTE) policy. MTE is a CPU extension that allows to protect against certain
      * classes of security problems at a small runtime performance cost overhead.
      *
@@ -4009,16 +4014,16 @@ public class DevicePolicyManager {
      *
      * <p>The device needs to be rebooted to apply changes to the MTE policy.
      *
-     * @throws SecurityException if caller is not device owner or profile owner of org-owned device
-     *     or if called on a parent instance
+     * @throws SecurityException if caller is not permitted to set Mte policy
      * @throws UnsupportedOperationException if the device does not support MTE
      * @param policy the MTE policy to be set
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_MTE, conditional = true)
     public void setMtePolicy(@MtePolicy int policy) {
         throwIfParentInstance("setMtePolicy");
         if (mService != null) {
             try {
-                mService.setMtePolicy(policy);
+                mService.setMtePolicy(policy, mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -4026,21 +4031,22 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner, a profile owner of an organization-owned device or the system to
+     * Called by a device owner, profile owner of an organization-owned device, or a holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MTE} permission to
      * get the Memory Tagging Extension (MTE) policy
      *
      * <a href="https://source.android.com/docs/security/test/memory-safety/arm-mte">
      * Learn more about MTE</a>
      *
-     * @throws SecurityException if caller is not device owner or profile owner of org-owned device
-     *                           or system uid, or if called on a parent instance
+     * @throws SecurityException if caller is not permitted to set Mte policy
      * @return the currently set MTE policy
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_MTE, conditional = true)
     public @MtePolicy int getMtePolicy() {
         throwIfParentInstance("setMtePolicy");
         if (mService != null) {
             try {
-                return mService.getMtePolicy();
+                return mService.getMtePolicy(mContext.getPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5236,7 +5242,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device admin to set the password expiration timeout. Calling this method will
+     * Called by a device admin or holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission to set
+     * the password expiration timeout. Calling this method will
      * restart the countdown for password expiration for the given admin, as will changing the
      * device password (for all admins).
      * <p>
@@ -5249,7 +5257,7 @@ public class DevicePolicyManager {
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password expiration is always disabled.
      * <p>
-     * The calling device admin must have requested
+     * A calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to be able to call this method; if it has
      * not, a security exception will be thrown.
      * <p>
@@ -5260,17 +5268,23 @@ public class DevicePolicyManager {
      * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the parent
      * profile.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin
      * @param timeout The limit (in ms) that a password can remain in effect. A value of 0 means
      *            there is no restriction (unlimited).
      * @throws SecurityException if {@code admin} is not an active administrator or {@code admin}
-     *             does not use {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD}
+     *             does not use {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} and the caller
+     *             does not hold the
+     *             {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS}
+     *             permission
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public void setPasswordExpirationTimeout(@NonNull ComponentName admin, long timeout) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
+    public void setPasswordExpirationTimeout(@Nullable ComponentName admin, long timeout) {
         if (mService != null) {
             try {
-                mService.setPasswordExpirationTimeout(admin, timeout, mParentInstance);
+                mService.setPasswordExpirationTimeout(
+                        admin, mContext.getPackageName(), timeout, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5426,9 +5440,11 @@ public class DevicePolicyManager {
      *
      * @return {@code true} if the password meets the policy requirements, {@code false} otherwise
      * @throws SecurityException if the calling application isn't an active admin that uses
-     *     {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     *     {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} and does not hold the
+     *     {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission
      * @throws IllegalStateException if the user isn't unlocked
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
     public boolean isActivePasswordSufficient() {
         if (mService != null) {
             try {
@@ -5492,7 +5508,8 @@ public class DevicePolicyManager {
      * <p>Note that when called from a profile which uses an unified challenge with its parent, the
      * screen lock complexity of the parent will be returned.
      *
-     * <p>Apps need the {@link permission#REQUEST_PASSWORD_COMPLEXITY} permission to call this
+     * <p>Apps need the {@link permission#REQUEST_PASSWORD_COMPLEXITY} or
+     * {@link permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permissions to call this
      * method. On Android {@link android.os.Build.VERSION_CODES#S} and above, the calling
      * application does not need this permission if it is a device owner or a profile owner.
      *
@@ -5502,11 +5519,12 @@ public class DevicePolicyManager {
      *
      * @throws IllegalStateException if the user is not unlocked.
      * @throws SecurityException     if the calling application does not have the permission
-     *                               {@link permission#REQUEST_PASSWORD_COMPLEXITY}, and is not a
-     *                               device owner or a profile owner.
+     *                               {@link permission#REQUEST_PASSWORD_COMPLEXITY} or
+     *                               {@link permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS}, and
+     *                               is not a device owner or a profile owner.
      */
     @PasswordComplexity
-    @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY)
+    @RequiresPermission(anyOf={MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, REQUEST_PASSWORD_COMPLEXITY}, conditional = true)
     public int getPasswordComplexity() {
         if (mService == null) {
             return PASSWORD_COMPLEXITY_NONE;
@@ -5540,20 +5558,23 @@ public class DevicePolicyManager {
      * with {@link #PASSWORD_QUALITY_UNSPECIFIED} on that instance prior to setting complexity
      * requirement for the managed profile.
      *
-     * @throws SecurityException if the calling application is not a device owner or a profile
-     * owner.
+     * @throws SecurityException if the calling application is not a device owner, a profile
+     * owner, or a holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission.
      * @throws IllegalArgumentException if the complexity level is not one of the four above.
      * @throws IllegalStateException if the caller is trying to set password complexity while there
      * are password requirements specified using {@link #setPasswordQuality(ComponentName, int)}
      * on the parent {@code DevicePolicyManager} instance.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
     public void setRequiredPasswordComplexity(@PasswordComplexity int passwordComplexity) {
         if (mService == null) {
             return;
         }
 
         try {
-            mService.setRequiredPasswordComplexity(passwordComplexity, mParentInstance);
+            mService.setRequiredPasswordComplexity(
+                    mContext.getPackageName(), passwordComplexity, mParentInstance);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -5573,9 +5594,11 @@ public class DevicePolicyManager {
      * restrictions on the parent profile.
      *
      * @throws SecurityException if the calling application is not a device owner or a profile
-     * owner.
+     * owner and does not hold the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission.
      */
     @PasswordComplexity
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
     public int getRequiredPasswordComplexity() {
         if (mService == null) {
             return PASSWORD_COMPLEXITY_NONE;
@@ -5683,9 +5706,11 @@ public class DevicePolicyManager {
      * @return The number of times user has entered an incorrect password since the last correct
      *         password entry.
      * @throws SecurityException if the calling application does not own an active administrator
-     *             that uses {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN}
+     *             that uses {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and does not hold the
+     * @link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission.
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
     public int getCurrentFailedPasswordAttempts() {
         return getCurrentFailedPasswordAttempts(myUserId());
     }
@@ -6125,7 +6150,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device/profile owner to set the timeout after which unlocking with secondary, non
+     * Called by a device owner, profile owner, or holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS} permission to set
+     * the timeout after which unlocking with secondary, non
      * strong auth (e.g. fingerprint, face, trust agents) times out, i.e. the user has to use a
      * strong authentication method like password, pin or pattern.
      *
@@ -6136,10 +6163,7 @@ public class DevicePolicyManager {
      *
      * <p>Trust agents can also be disabled altogether using {@link #KEYGUARD_DISABLE_TRUST_AGENTS}.
      *
-     * <p>The calling device admin must be a device or profile owner. If it is not,
-     * a {@link SecurityException} will be thrown.
-     *
-     * <p>The calling device admin can verify the value it has set by calling
+     * <p>A calling device admin can verify the value it has set by calling
      * {@link #getRequiredStrongAuthTimeout(ComponentName)} and passing in its instance.
      *
      * <p>This method can be called on the {@link DevicePolicyManager} instance returned by
@@ -6149,7 +6173,8 @@ public class DevicePolicyManager {
      * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature,
      * calling this methods has no effect - i.e. the timeout is not set.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
+     *              caller is not a device admin
      * @param timeoutMs The new timeout in milliseconds, after which the user will have to unlock
      *         with strong authentication method. A value of 0 means the admin is not participating
      *         in controlling the timeout.
@@ -6158,14 +6183,17 @@ public class DevicePolicyManager {
      *         auth at all times using {@link #KEYGUARD_DISABLE_FINGERPRINT} and/or
      *         {@link #KEYGUARD_DISABLE_TRUST_AGENTS}.
      *
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not permitted to set this policy.
+     *
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public void setRequiredStrongAuthTimeout(@NonNull ComponentName admin,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS, conditional = true)
+    public void setRequiredStrongAuthTimeout(@Nullable ComponentName admin,
             long timeoutMs) {
         if (mService != null) {
             try {
-                mService.setRequiredStrongAuthTimeout(admin, timeoutMs, mParentInstance);
+                mService.setRequiredStrongAuthTimeout(
+                        admin, mContext.getPackageName(), timeoutMs, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -11496,9 +11524,10 @@ public class DevicePolicyManager {
 
     /**
      * Hide or unhide packages. When a package is hidden it is unavailable for use, but the data and
-     * actual package file remain. This function can be called by a device owner, profile owner, or
-     * by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
-     * {@link #setDelegatedScopes}.
+     * actual package file remain. This function can be called by a device owner, profile owner,
+     * delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
+     * {@link #setDelegatedScopes}, or a holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PACKAGE_STATE} permission.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance, returned by
      * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
@@ -11506,7 +11535,7 @@ public class DevicePolicyManager {
      * on the parent instance, then the package is hidden or unhidden in the personal profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if the caller is a package access delegate.
+     *            {@code null} if the caller is not a device admin.
      * @param packageName The name of the package to hide or unhide.
      * @param hidden {@code true} if the package should be hidden, {@code false} if it should be
      *            unhidden.
@@ -11519,7 +11548,8 @@ public class DevicePolicyManager {
      * @see #setDelegatedScopes
      * @see #DELEGATION_PACKAGE_ACCESS
      */
-    public boolean setApplicationHidden(@NonNull ComponentName admin, String packageName,
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PACKAGE_STATE, conditional = true)
+    public boolean setApplicationHidden(@Nullable ComponentName admin, String packageName,
             boolean hidden) {
         if (mService != null) {
             try {
@@ -11534,8 +11564,9 @@ public class DevicePolicyManager {
 
     /**
      * Determine if a package is hidden. This function can be called by a device owner, profile
-     * owner, or by a delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
-     * {@link #setDelegatedScopes}.
+     * owner, delegate given the {@link #DELEGATION_PACKAGE_ACCESS} scope via
+     * {@link #setDelegatedScopes}, or a holder of the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_PACKAGE_STATE} permission.
      * <p>
      * This method can be called on the {@link DevicePolicyManager} instance, returned by
      * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
@@ -11544,7 +11575,7 @@ public class DevicePolicyManager {
      * personal profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if the caller is a package access delegate.
+     *            {@code null} if the caller is not a device admin.
      * @param packageName The name of the package to retrieve the hidden status of.
      * @return boolean {@code true} if the package is hidden, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device or profile owner or if called on
@@ -11555,7 +11586,8 @@ public class DevicePolicyManager {
      * @see #setDelegatedScopes
      * @see #DELEGATION_PACKAGE_ACCESS
      */
-    public boolean isApplicationHidden(@NonNull ComponentName admin, String packageName) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_PACKAGE_STATE, conditional = true)
+    public boolean isApplicationHidden(@Nullable ComponentName admin, String packageName) {
         if (mService != null) {
             try {
                 return mService.isApplicationHidden(admin, mContext.getPackageName(), packageName,
@@ -12114,7 +12146,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner or a profile owner of an organization-owned managed profile to
+     * Called by a device owner, profile owner of an organization-owned managed profile, or holder
+     * of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI} permission to
      * control whether the user can change networks configured by the admin. When this lockdown is
      * enabled, the user can still configure and connect to other Wi-Fi networks, or use other Wi-Fi
      * capabilities such as tethering.
@@ -12126,17 +12159,19 @@ public class DevicePolicyManager {
      * to this API.
      *
      * @param admin             admin Which {@link DeviceAdminReceiver} this request is associated
-     *                          with.
+     *                          with. Null if the caller is not a device admin.
      * @param lockdown Whether the admin configured networks should be unmodifiable by the
      *                          user.
-     * @throws SecurityException if caller is not a device owner or a profile owner of an
-     *                           organization-owned managed profile.
+     * @throws SecurityException if caller is not permitted to modify this policy
      */
-    public void setConfiguredNetworksLockdownState(@NonNull ComponentName admin, boolean lockdown) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIFI, conditional = true)
+    public void setConfiguredNetworksLockdownState(
+            @Nullable ComponentName admin, boolean lockdown) {
         throwIfParentInstance("setConfiguredNetworksLockdownState");
         if (mService != null) {
             try {
-                mService.setConfiguredNetworksLockdownState(admin, lockdown);
+                mService.setConfiguredNetworksLockdownState(
+                        admin, mContext.getPackageName(), lockdown);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -12144,15 +12179,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner or a profile owner of an organization-owned managed profile to
+     * Called by a device owner, profile owner of an organization-owned managed profile, or holder
+     * of the {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI} permission to
      * determine whether the user is prevented from modifying networks configured by the admin.
      *
      * @param admin             admin Which {@link DeviceAdminReceiver} this request is associated
-     *                          with.
-     * @throws SecurityException if caller is not a device owner or a profile owner of an
-     *                           organization-owned managed profile.
+     *                          with. Null if the caller is not a device admin.
+     * @throws SecurityException if caller is not a device owner, a profile owner of an
+     *                           organization-owned managed profile, or holder of the
+     *                           {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_WIFI}
+     *                           permission.
      */
-    public boolean hasLockdownAdminConfiguredNetworks(@NonNull ComponentName admin) {
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_WIFI, conditional = true)
+    public boolean hasLockdownAdminConfiguredNetworks(@Nullable ComponentName admin) {
         throwIfParentInstance("hasLockdownAdminConfiguredNetworks");
         if (mService != null) {
             try {
