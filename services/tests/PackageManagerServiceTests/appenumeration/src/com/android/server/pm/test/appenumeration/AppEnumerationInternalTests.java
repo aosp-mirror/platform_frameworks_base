@@ -16,6 +16,8 @@
 
 package com.android.server.pm.test.appenumeration;
 
+import static android.content.Context.MEDIA_PROJECTION_SERVICE;
+
 import static com.android.compatibility.common.util.ShellUtils.runShellCommand;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -26,7 +28,10 @@ import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.IPackageManager;
 import android.content.pm.ProviderInfo;
+import android.media.projection.IMediaProjectionManager;
+import android.media.projection.MediaProjectionManager;
 import android.os.Process;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -158,6 +163,31 @@ public class AppEnumerationInternalTests {
         Assert.assertThrows(IntentSender.SendIntentException.class,
                 () -> failedSender.sendIntent(context, 0 /* code */, null /* intent */,
                         null /* onFinished */, null /* handler */));
+    }
+
+    @Test
+    public void mediaProjectionManager_createProjection_canSeeForceQueryable()
+            throws Exception {
+        installPackage(SHARED_USER_APK_PATH, true /* forceQueryable */);
+        final IMediaProjectionManager mediaProjectionManager =
+                IMediaProjectionManager.Stub.asInterface(
+                        ServiceManager.getService(MEDIA_PROJECTION_SERVICE));
+
+        assertThat(mediaProjectionManager.createProjection(0 /* uid */, TARGET_SHARED_USER,
+                MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */))
+                .isNotNull();
+    }
+
+    @Test
+    public void mediaProjectionManager_createProjection_cannotSeeTarget() {
+        installPackage(SHARED_USER_APK_PATH, false /* forceQueryable */);
+        final IMediaProjectionManager mediaProjectionManager =
+                IMediaProjectionManager.Stub.asInterface(
+                        ServiceManager.getService(MEDIA_PROJECTION_SERVICE));
+
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> mediaProjectionManager.createProjection(0 /* uid */, TARGET_SHARED_USER,
+                        MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */));
     }
 
     private static void installPackage(String apkPath, boolean forceQueryable) {
