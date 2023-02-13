@@ -1199,7 +1199,7 @@ public class BinaryTransparencyService extends SystemService {
     }
 
     /**
-     * JobService to measure all covered binaries and record result to Westworld.
+     * JobService to measure all covered binaries and record results to statsd.
      */
     public static class UpdateMeasurementsJobService extends JobService {
         private static long sTimeLastRanMs = 0;
