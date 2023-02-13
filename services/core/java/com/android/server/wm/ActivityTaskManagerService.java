@@ -2048,7 +2048,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final ActivityStarter starter = getActivityStartController().obtainStarter(
                 null /* intent */, "moveTaskToFront");
         if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage, -1,
-                -1, callerApp, null, false, null)) {
+                -1, callerApp, null, false, null, null)) {
             if (!isBackgroundActivityStartsEnabled()) {
                 return;
             }

@@ -68,7 +68,7 @@ import java.util.ArrayList;
  * {@link android.content.Context#startActivity(android.content.Intent, android.os.Bundle)
  * Context.startActivity(Intent, Bundle)} and related methods.
  */
-public class ActivityOptions {
+public class ActivityOptions extends ComponentOptions {
     private static final String TAG = "ActivityOptions";
 
     /**
@@ -1071,13 +1071,12 @@ public class ActivityOptions {
     }
 
     private ActivityOptions() {
+        super();
     }
 
     /** @hide */
     public ActivityOptions(Bundle opts) {
-        // If the remote side sent us bad parcelables, they won't get the
-        // results they want, which is their loss.
-        opts.setDefusable(true);
+        super(opts);
 
         mPackageName = opts.getString(KEY_PACKAGE_NAME);
         try {
@@ -1804,8 +1803,9 @@ public class ActivityOptions {
      * object; you must not modify it, but can supply it to the startActivity
      * methods that take an options Bundle.
      */
+    @Override
     public Bundle toBundle() {
-        Bundle b = new Bundle();
+        Bundle b = super.toBundle();
         if (mPackageName != null) {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
         }
