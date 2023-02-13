@@ -1328,17 +1328,16 @@ public class TaskTests extends WindowTestsBase {
         spyOn(persister);
 
         final Task task = getTestTask();
-        task.setHasBeenVisible(false);
+        task.setHasBeenVisible(true);
         task.getDisplayContent()
                 .getDefaultTaskDisplayArea()
-                .setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
-        task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                .setWindowingMode(WINDOWING_MODE_FREEFORM);
+        task.getRootTask().setWindowingMode(WINDOWING_MODE_FREEFORM);
         final DisplayContent oldDisplay = task.getDisplayContent();
 
         LaunchParamsController.LaunchParams params = new LaunchParamsController.LaunchParams();
-        params.mWindowingMode = WINDOWING_MODE_UNDEFINED;
         persister.getLaunchParams(task, null, params);
-        assertEquals(WINDOWING_MODE_UNDEFINED, params.mWindowingMode);
+        assertEquals(WINDOWING_MODE_FREEFORM, params.mWindowingMode);
 
         task.setHasBeenVisible(true);
         task.removeImmediately();
@@ -1346,7 +1345,7 @@ public class TaskTests extends WindowTestsBase {
         verify(persister).saveTask(task, oldDisplay);
 
         persister.getLaunchParams(task, null, params);
-        assertEquals(WINDOWING_MODE_FULLSCREEN, params.mWindowingMode);
+        assertEquals(WINDOWING_MODE_FREEFORM, params.mWindowingMode);
     }
 
     @Test
