@@ -1442,7 +1442,7 @@ public class AudioManager {
      */
     @SystemApi
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS,
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED,
             android.Manifest.permission.MODIFY_AUDIO_ROUTING
     })
     public void setVolumeGroupVolumeIndex(int groupId, int index, int flags) {
@@ -1467,7 +1467,7 @@ public class AudioManager {
     @SystemApi
     @IntRange(from = 0)
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS,
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED,
             android.Manifest.permission.MODIFY_AUDIO_ROUTING
     })
     public int getVolumeGroupVolumeIndex(int groupId) {
@@ -1491,7 +1491,7 @@ public class AudioManager {
     @SystemApi
     @IntRange(from = 0)
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS,
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED,
             android.Manifest.permission.MODIFY_AUDIO_ROUTING
     })
     public int getVolumeGroupMaxVolumeIndex(int groupId) {
@@ -1515,7 +1515,7 @@ public class AudioManager {
     @SystemApi
     @IntRange(from = 0)
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS,
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED,
             android.Manifest.permission.MODIFY_AUDIO_ROUTING
     })
     public int getVolumeGroupMinVolumeIndex(int groupId) {
@@ -6331,7 +6331,7 @@ public class AudioManager {
     @SystemApi
     @RequiresPermission(anyOf = {
             Manifest.permission.MODIFY_AUDIO_ROUTING,
-            Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS
+            Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED
     })
     public void setDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device,
             @DeviceVolumeBehavior int deviceVolumeBehavior) {
@@ -6369,7 +6369,7 @@ public class AudioManager {
     @RequiresPermission(anyOf = {
             Manifest.permission.MODIFY_AUDIO_ROUTING,
             Manifest.permission.QUERY_AUDIO_STATE,
-            Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS
+            Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED
     })
     public @DeviceVolumeBehavior
     int getDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device) {
@@ -6397,7 +6397,7 @@ public class AudioManager {
     @RequiresPermission(anyOf = {
             Manifest.permission.MODIFY_AUDIO_ROUTING,
             Manifest.permission.QUERY_AUDIO_STATE,
-            Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS
+            Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED
     })
     public boolean isFullVolumeDevice() {
         final AudioAttributes attributes = new AudioAttributes.Builder()
@@ -6753,7 +6753,7 @@ public class AudioManager {
      * @return the RS2 value used for momentary exposure warnings
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public float getRs2Value() {
         try {
             return getService().getRs2Value();
@@ -6767,7 +6767,7 @@ public class AudioManager {
      * Sets the RS2 value used for momentary exposure warnings
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void setRs2Value(float rs2Value) {
         try {
             getService().setRs2Value(rs2Value);
@@ -6781,7 +6781,7 @@ public class AudioManager {
      * @return the current computed sound dose value
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public float getCsd() {
         try {
             return getService().getCsd();
@@ -6795,7 +6795,7 @@ public class AudioManager {
      * Sets the computed sound dose value to {@code csd}
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void setCsd(float csd) {
         try {
             getService().setCsd(csd);
@@ -6811,7 +6811,7 @@ public class AudioManager {
      * since this can affect the certification of a device with EN50332-3 regulation.
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void forceUseFrameworkMel(boolean useFrameworkMel) {
         try {
             getService().forceUseFrameworkMel(useFrameworkMel);
@@ -6825,7 +6825,7 @@ public class AudioManager {
      * Forces the computation of CSD on all output devices.
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void forceComputeCsdOnAllDevices(boolean computeCsdOnAllDevices) {
         try {
             getService().forceComputeCsdOnAllDevices(computeCsdOnAllDevices);
@@ -6839,7 +6839,7 @@ public class AudioManager {
      * Returns whether CSD is enabled on this device.
      */
     @TestApi
-    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public boolean isCsdEnabled() {
         try {
             return getService().isCsdEnabled();
@@ -9503,7 +9503,7 @@ public class AudioManager {
      * @param onStreamAliasingChangedListener the listener to add for the aliasing changes
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void addOnStreamAliasingChangedListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Runnable onStreamAliasingChangedListener) {
@@ -9520,7 +9520,7 @@ public class AudioManager {
      * @param onStreamAliasingChangedListener the previously added listener of aliasing changes
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void removeOnStreamAliasingChangedListener(
             @NonNull Runnable onStreamAliasingChangedListener) {
         mStreamAliasingListenerMgr.removeListener(onStreamAliasingChangedListener,
@@ -9534,7 +9534,7 @@ public class AudioManager {
      * @param isAliased if true, STREAM_NOTIFICATION is aliased to STREAM_RING
      */
     @TestApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void setNotifAliasRingForTest(boolean isAliased) {
         final IAudioService service = getService();
         try {
@@ -9553,7 +9553,7 @@ public class AudioManager {
      * @return list of independent stream types.
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public @NonNull List<Integer> getIndependentStreamTypes() {
         final IAudioService service = getService();
         try {
@@ -9574,7 +9574,7 @@ public class AudioManager {
      * @return the stream type the source type is aliased to.
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public @PublicStreamTypes int getStreamTypeAlias(@PublicStreamTypes int sourceStreamType) {
         final IAudioService service = getService();
         try {
@@ -9591,7 +9591,7 @@ public class AudioManager {
      *     stream types.
      */
     @TestApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS)
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public boolean isVolumeControlUsingVolumeGroups() {
         final IAudioService service = getService();
         try {

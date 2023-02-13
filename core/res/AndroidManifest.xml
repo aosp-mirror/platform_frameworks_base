@@ -5830,7 +5830,7 @@
         devices, regardless of their connection status.
         <p>Not for use by third-party applications.
         @hide -->
-    <permission android:name="android.permission.MODIFY_AUDIO_SYSTEM_SETTINGS"
+    <permission android:name="android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED"
                 android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to access the uplink and downlink audio of an ongoing

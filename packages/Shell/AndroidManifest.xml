@@ -656,7 +656,7 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
 
     <!-- Permission required for CTS test - SoundDoseHelperTest -->
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SYSTEM_SETTINGS" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED" />
 
     <!-- Permission required for CTS test - CtsAmbientContextDetectionServiceDeviceTest -->
     <uses-permission android:name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT" />
