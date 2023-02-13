@@ -25,7 +25,6 @@ import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.Airpla
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -42,7 +41,6 @@ constructor(
     val subscriptionIdsFlow: StateFlow<List<Int>>,
     private val interactor: MobileIconsInteractor,
     private val airplaneModeInteractor: AirplaneModeInteractor,
-    private val logger: MobileInputLogger,
     private val constants: ConnectivityConstants,
     @Application private val scope: CoroutineScope,
     private val statusBarPipelineFlags: StatusBarPipelineFlags,
@@ -83,7 +81,6 @@ constructor(
     constructor(
         private val interactor: MobileIconsInteractor,
         private val airplaneModeInteractor: AirplaneModeInteractor,
-        private val logger: MobileInputLogger,
         private val constants: ConnectivityConstants,
         @Application private val scope: CoroutineScope,
         private val statusBarPipelineFlags: StatusBarPipelineFlags,
@@ -93,7 +90,6 @@ constructor(
                 subscriptionIdsFlow,
                 interactor,
                 airplaneModeInteractor,
-                logger,
                 constants,
                 scope,
                 statusBarPipelineFlags,

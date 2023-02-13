@@ -21,57 +21,22 @@ import android.net.NetworkCapabilities
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.TelephonyDisplayInfo
+import com.android.settingslib.SignalIcon
+import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.log.dagger.StatusBarConnectivityLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger.Companion.toString
+import com.android.systemui.statusbar.pipeline.dagger.MobileInputLog
 import com.android.systemui.statusbar.pipeline.shared.LoggerHelper
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.onEach
 
+/** Logs for inputs into the mobile pipeline. */
 @SysUISingleton
 class MobileInputLogger
 @Inject
 constructor(
-    @StatusBarConnectivityLog private val buffer: LogBuffer,
+    @MobileInputLog private val buffer: LogBuffer,
 ) {
-    /**
-     * Logs a change in one of the **raw inputs** to the connectivity pipeline.
-     *
-     * Use this method for inputs that don't have any extra information besides their callback name.
-     */
-    fun logInputChange(callbackName: String) {
-        buffer.log(SB_LOGGING_TAG, LogLevel.INFO, { str1 = callbackName }, { "Input: $str1" })
-    }
-
-    /** Logs a change in one of the **raw inputs** to the connectivity pipeline. */
-    fun logInputChange(callbackName: String, changeInfo: String?) {
-        buffer.log(
-            SB_LOGGING_TAG,
-            LogLevel.INFO,
-            {
-                str1 = callbackName
-                str2 = changeInfo
-            },
-            { "Input: $str1: $str2" }
-        )
-    }
-
-    /** Logs a change in one of the **outputs** to the connectivity pipeline. */
-    fun logOutputChange(outputParamName: String, changeInfo: String) {
-        buffer.log(
-            SB_LOGGING_TAG,
-            LogLevel.INFO,
-            {
-                str1 = outputParamName
-                str2 = changeInfo
-            },
-            { "Output: $str1: $str2" }
-        )
-    }
-
     fun logOnCapabilitiesChanged(
         network: Network,
         networkCapabilities: NetworkCapabilities,
@@ -79,7 +44,7 @@ constructor(
     ) {
         LoggerHelper.logOnCapabilitiesChanged(
             buffer,
-            SB_LOGGING_TAG,
+            TAG,
             network,
             networkCapabilities,
             isDefaultNetworkCallback,
@@ -87,12 +52,12 @@ constructor(
     }
 
     fun logOnLost(network: Network) {
-        LoggerHelper.logOnLost(buffer, SB_LOGGING_TAG, network)
+        LoggerHelper.logOnLost(buffer, TAG, network)
     }
 
     fun logOnServiceStateChanged(serviceState: ServiceState, subId: Int) {
         buffer.log(
-            SB_LOGGING_TAG,
+            TAG,
             LogLevel.INFO,
             {
                 int1 = subId
@@ -109,7 +74,7 @@ constructor(
 
     fun logOnSignalStrengthsChanged(signalStrength: SignalStrength, subId: Int) {
         buffer.log(
-            SB_LOGGING_TAG,
+            TAG,
             LogLevel.INFO,
             {
                 int1 = subId
@@ -121,7 +86,7 @@ constructor(
 
     fun logOnDataConnectionStateChanged(dataState: Int, networkType: Int, subId: Int) {
         buffer.log(
-            SB_LOGGING_TAG,
+            TAG,
             LogLevel.INFO,
             {
                 int1 = subId
@@ -134,7 +99,7 @@ constructor(
 
     fun logOnDataActivity(direction: Int, subId: Int) {
         buffer.log(
-            SB_LOGGING_TAG,
+            TAG,
             LogLevel.INFO,
             {
                 int1 = subId
@@ -146,7 +111,7 @@ constructor(
 
     fun logOnCarrierNetworkChange(active: Boolean, subId: Int) {
         buffer.log(
-            SB_LOGGING_TAG,
+            TAG,
             LogLevel.INFO,
             {
                 int1 = subId
@@ -158,7 +123,7 @@ constructor(
 
     fun logOnDisplayInfoChanged(displayInfo: TelephonyDisplayInfo, subId: Int) {
         buffer.log(
-            SB_LOGGING_TAG,
+            TAG,
             LogLevel.INFO,
             {
                 int1 = subId
@@ -168,11 +133,9 @@ constructor(
         )
     }
 
-    // TODO(b/238425913): We should split this class into mobile-specific and wifi-specific loggers.
-
     fun logUiAdapterSubIdsUpdated(subs: List<Int>) {
         buffer.log(
-            SB_LOGGING_TAG,
+            TAG,
             LogLevel.INFO,
             { str1 = subs.toString() },
             { "Sub IDs in MobileUiAdapter updated internally: $str1" },
@@ -181,7 +144,7 @@ constructor(
 
     fun logUiAdapterSubIdsSentToIconController(subs: List<Int>) {
         buffer.log(
-            SB_LOGGING_TAG,
+            TAG,
             LogLevel.INFO,
             { str1 = subs.toString() },
             { "Sub IDs in MobileUiAdapter being sent to icon controller: $str1" },
@@ -190,7 +153,7 @@ constructor(
 
     fun logCarrierConfigChanged(subId: Int) {
         buffer.log(
-            SB_LOGGING_TAG,
+            TAG,
             LogLevel.INFO,
             { int1 = subId },
             { "onCarrierConfigChanged: subId=$int1" },
@@ -199,7 +162,7 @@ constructor(
 
     fun logOnDataEnabledChanged(enabled: Boolean, subId: Int) {
         buffer.log(
-            SB_LOGGING_TAG,
+            TAG,
             LogLevel.INFO,
             {
                 int1 = subId
@@ -209,43 +172,31 @@ constructor(
         )
     }
 
-    companion object {
-        const val SB_LOGGING_TAG = "SbConnectivity"
+    fun logActionCarrierConfigChanged() {
+        buffer.log(TAG, LogLevel.INFO, {}, { "Intent received: ACTION_CARRIER_CONFIG_CHANGED" })
+    }
 
-        /** Log a change in one of the **inputs** to the connectivity pipeline. */
-        fun Flow<Unit>.logInputChange(
-            logger: MobileInputLogger,
-            inputParamName: String,
-        ): Flow<Unit> {
-            return this.onEach { logger.logInputChange(inputParamName) }
-        }
+    fun logDefaultDataSubRatConfig(config: MobileMappings.Config) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { str1 = config.toString() },
+            { "defaultDataSubRatConfig: $str1" }
+        )
+    }
 
-        /**
-         * Log a change in one of the **inputs** to the connectivity pipeline.
-         *
-         * @param prettyPrint an optional function to transform the value into a readable string.
-         * [toString] is used if no custom function is provided.
-         */
-        fun <T> Flow<T>.logInputChange(
-            logger: MobileInputLogger,
-            inputParamName: String,
-            prettyPrint: (T) -> String = { it.toString() }
-        ): Flow<T> {
-            return this.onEach { logger.logInputChange(inputParamName, prettyPrint(it)) }
-        }
+    fun logDefaultMobileIconMapping(mapping: Map<String, SignalIcon.MobileIconGroup>) {
+        buffer.log(
+            TAG,
+            LogLevel.INFO,
+            { str1 = mapping.toString() },
+            { "defaultMobileIconMapping: $str1" }
+        )
+    }
 
-        /**
-         * Log a change in one of the **outputs** to the connectivity pipeline.
-         *
-         * @param prettyPrint an optional function to transform the value into a readable string.
-         * [toString] is used if no custom function is provided.
-         */
-        fun <T> Flow<T>.logOutputChange(
-            logger: MobileInputLogger,
-            outputParamName: String,
-            prettyPrint: (T) -> String = { it.toString() }
-        ): Flow<T> {
-            return this.onEach { logger.logOutputChange(outputParamName, prettyPrint(it)) }
-        }
+    fun logDefaultMobileIconGroup(group: SignalIcon.MobileIconGroup) {
+        buffer.log(TAG, LogLevel.INFO, { str1 = group.name }, { "defaultMobileIconGroup: $str1" })
     }
 }
+
+private const val TAG = "MobileInputLog"

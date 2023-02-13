@@ -21,7 +21,6 @@ import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger.Companion.SB_LOGGING_TAG
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -37,7 +36,7 @@ constructor(
     dumpManager: DumpManager,
 ) : Dumpable {
     init {
-        dumpManager.registerDumpable("${SB_LOGGING_TAG}WifiConstants", this)
+        dumpManager.registerNormalDumpable("WifiConstants", this)
     }
 
     /** True if we should always show the wifi icon when wifi is enabled and false otherwise. */
