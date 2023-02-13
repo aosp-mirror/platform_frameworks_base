@@ -97,6 +97,7 @@ import android.view.InsetsState;
 import android.view.RoundedCorner;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import com.android.internal.R;
@@ -130,12 +131,6 @@ final class LetterboxUiController {
     private final LetterboxConfiguration mLetterboxConfiguration;
 
     private final ActivityRecord mActivityRecord;
-
-    /**
-     * Taskbar expanded height. Used to determine when to crop an app window to display the
-     * rounded corners above the expanded taskbar.
-     */
-    private final float mExpandedTaskBarHeight;
 
     // TODO(b/265576778): Cache other overrides as well.
 
@@ -258,9 +253,6 @@ final class LetterboxUiController {
                         () -> mLetterboxConfiguration.isCameraCompatTreatmentEnabled(
                                 /* checkDeviceConfig */ true),
                         PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE);
-
-        mExpandedTaskBarHeight =
-                getResources().getDimensionPixelSize(R.dimen.taskbar_frame_height);
 
         mBooleanPropertyAllowOrientationOverride =
                 readComponentProperty(packageManager, mActivityRecord.packageName,
@@ -1131,11 +1123,13 @@ final class LetterboxUiController {
     @VisibleForTesting
     @Nullable
     InsetsSource getExpandedTaskbarOrNull(final WindowState mainWindow) {
-        final InsetsSource taskbar = mainWindow.getInsetsState().peekSource(
-                InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
-        if (taskbar != null && taskbar.isVisible()
-                && taskbar.getFrame().height() >= mExpandedTaskBarHeight) {
-            return taskbar;
+        final InsetsState state = mainWindow.getInsetsState();
+        for (int i = state.sourceSize() - 1; i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            if (source.getType() == WindowInsets.Type.navigationBars()
+                    && source.insetsRoundedCornerFrame() && source.isVisible()) {
+                return source;
+            }
         }
         return null;
     }

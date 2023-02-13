@@ -28,7 +28,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.provider.DeviceConfig.NAMESPACE_CONSTRAIN_DISPLAY_APIS;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.ITYPE_TOP_MANDATORY_GESTURES;
 import static android.view.InsetsState.ITYPE_TOP_TAPPABLE_ELEMENT;
@@ -2987,8 +2986,9 @@ public class SizeCompatTests extends WindowTestsBase {
         organizer.mPrimary.setBounds(0, screenHeight / 2, screenWidth, screenHeight);
         organizer.putTaskToPrimary(mTask, true);
 
-        final InsetsSource navSource =
-                new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR, navigationBars());
+        final InsetsSource navSource = new InsetsSource(
+                InsetsSource.createId(null, 0, navigationBars()), navigationBars());
+        navSource.setInsetsRoundedCornerFrame(true);
         navSource.setFrame(new Rect(0, screenHeight - taskbarHeight, screenWidth, screenHeight));
 
         mActivity.mWmService.mLetterboxConfiguration.setLetterboxActivityCornersRadius(15);

@@ -931,7 +931,7 @@ public class DisplayPolicy {
         }
 
         final InsetsSourceProvider provider = win.getControllableInsetProvider();
-        if (provider != null && provider.getSource().getInsetsRoundedCornerFrame()
+        if (provider != null && provider.getSource().insetsRoundedCornerFrame()
                 != attrs.insetsRoundedCornerFrame) {
             provider.getSource().setInsetsRoundedCornerFrame(attrs.insetsRoundedCornerFrame);
         }
