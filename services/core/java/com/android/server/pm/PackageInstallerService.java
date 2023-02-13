@@ -804,7 +804,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         + " PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS flag");
             }
 
-            var permissionStates = params.getFinalPermissionStates();
+            var permissionStates = params.getPermissionStates();
             if (!permissionStates.isEmpty()) {
                 if (!hasInstallGrantRuntimePermissions) {
                     for (int index = 0; index < permissionStates.size(); index++) {
