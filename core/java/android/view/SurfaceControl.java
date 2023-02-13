@@ -1291,6 +1291,20 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Provides more information to show about the source of this SurfaceControl if it is finalized
+     * without being released. This is primarily intended for callers to update the call site after
+     * receiving a SurfaceControl from another process, which would otherwise get a generic default
+     * call site.
+     * @hide
+     */
+    public void setUnreleasedWarningCallSite(@NonNull String callsite) {
+        if (!isValid()) {
+            return;
+        }
+        mCloseGuard.openWithCallSite("release", callsite);
+    }
+
+    /**
      * Checks whether two {@link SurfaceControl} objects represent the same surface.
      *
      * @param other The other object to check

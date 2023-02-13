@@ -170,6 +170,7 @@ public class SurfaceControlViewHost {
         private SurfacePackage(Parcel in) {
             mSurfaceControl = new SurfaceControl();
             mSurfaceControl.readFromParcel(in);
+            mSurfaceControl.setUnreleasedWarningCallSite("SurfacePackage(Parcel)");
             mAccessibilityEmbeddedConnection = IAccessibilityEmbeddedConnection.Stub.asInterface(
                     in.readStrongBinder());
             mInputToken = in.readStrongBinder();
