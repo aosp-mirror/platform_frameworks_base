@@ -1900,16 +1900,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         ownerTask.addChild(taskFragment, position);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
-        if (creationParams.areInitialRelativeBoundsSet()) {
+        if (!creationParams.getInitialRelativeBounds().isEmpty()) {
             // Set relative bounds instead of using setBounds. This will avoid unnecessary update in
             // case the parent has resized since the last time parent info is sent to the organizer.
             taskFragment.setRelativeEmbeddedBounds(creationParams.getInitialRelativeBounds());
             // Recompute configuration as the bounds will be calculated based on relative bounds in
             // TaskFragment#resolveOverrideConfiguration.
             taskFragment.recomputeConfiguration();
-        } else {
-            // TODO(b/232476698): remove after remove creationParams.getInitialBounds().
-            taskFragment.setBounds(creationParams.getInitialBounds());
         }
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
 
