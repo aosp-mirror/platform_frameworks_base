@@ -3896,6 +3896,14 @@ public class DevicePolicyManager {
     public static final int EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION = 2;
 
     /**
+     * Prevent an app from entering hibernation.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EXEMPT_FROM_HIBERNATION =  3;
+
+    /**
      * Exemptions to platform restrictions, given to an application through
      * {@link #setApplicationExemptions(String, Set)}.
      *
@@ -3904,7 +3912,8 @@ public class DevicePolicyManager {
     @IntDef(prefix = { "EXEMPT_FROM_"}, value = {
             EXEMPT_FROM_APP_STANDBY,
             EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
-            EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION
+            EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
+            EXEMPT_FROM_HIBERNATION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationExemptionConstants {}
