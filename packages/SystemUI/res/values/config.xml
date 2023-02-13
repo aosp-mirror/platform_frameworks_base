@@ -450,7 +450,7 @@
     <integer name="watch_heap_limit">256000</integer>
 
     <!-- SystemUI Plugins that can be loaded on user builds. -->
-    <string-array name="config_pluginWhitelist" translatable="false">
+    <string-array name="config_pluginAllowlist" translatable="false">
         <item>com.android.systemui</item>
     </string-array>
 
@@ -828,7 +828,7 @@
     <string name="config_wallpaperPickerPackage" translatable="false">
         com.android.wallpaper
     </string>
-    
+
     <!-- Whether the floating rotation button should be on the left/right in the device's natural
          orientation -->
     <bool name="floating_rotation_button_position_left">true</bool>
