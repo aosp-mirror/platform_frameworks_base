@@ -867,9 +867,6 @@ public class TransitionTests extends WindowTestsBase {
         final AsyncRotationController asyncRotationController =
                 mDisplayContent.getAsyncRotationController();
         assertNotNull(asyncRotationController);
-        for (WindowState w : windows) {
-            w.setOrientationChanging(true);
-        }
         player.startTransition();
 
         assertFalse(mDisplayContent.mTransitionController.isCollecting(statusBar.mToken));
@@ -879,15 +876,11 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(asyncRotationController.isTargetToken(decorToken));
         assertShouldFreezeInsetsPosition(asyncRotationController, statusBar, true);
 
-        if (TransitionController.SYNC_METHOD != BLASTSyncEngine.METHOD_BLAST) {
-            // Only seamless window syncs its draw transaction with transition.
-            assertFalse(asyncRotationController.handleFinishDrawing(statusBar, mMockT));
-            assertTrue(asyncRotationController.handleFinishDrawing(screenDecor, mMockT));
-        }
-        screenDecor.setOrientationChanging(false);
+        // Only seamless window syncs its draw transaction with transition.
+        assertTrue(asyncRotationController.handleFinishDrawing(screenDecor, mMockT));
         // Status bar finishes drawing before the start transaction. Its fade-in animation will be
         // executed until the transaction is committed, so it is still in target tokens.
-        statusBar.setOrientationChanging(false);
+        assertFalse(asyncRotationController.handleFinishDrawing(statusBar, mMockT));
         assertTrue(asyncRotationController.isTargetToken(statusBar.mToken));
 
         final SurfaceControl.Transaction startTransaction = mock(SurfaceControl.Transaction.class);
@@ -901,7 +894,7 @@ public class TransitionTests extends WindowTestsBase {
 
         // Navigation bar finishes drawing after the start transaction, so its fade-in animation
         // can execute directly.
-        navBar.setOrientationChanging(false);
+        asyncRotationController.handleFinishDrawing(navBar, mMockT);
         assertFalse(asyncRotationController.isTargetToken(navBar.mToken));
         assertNull(mDisplayContent.getAsyncRotationController());
     }
@@ -935,7 +928,6 @@ public class TransitionTests extends WindowTestsBase {
         assertNotNull(asyncRotationController);
         assertShouldFreezeInsetsPosition(asyncRotationController, statusBar, true);
 
-        statusBar.setOrientationChanging(true);
         player.startTransition();
         // Non-app windows should not be collected.
         assertFalse(statusBar.mToken.inTransition());
@@ -998,7 +990,6 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.mTransitionController.dispatchLegacyAppTransitionFinished(app);
         assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
 
-        statusBar.setOrientationChanging(true);
         player.startTransition();
         // Non-app windows should not be collected.
         assertFalse(mDisplayContent.mTransitionController.isCollecting(statusBar.mToken));
@@ -1010,7 +1001,6 @@ public class TransitionTests extends WindowTestsBase {
 
         // The controller should be cleared if the target windows are drawn.
         statusBar.finishDrawing(mWm.mTransactionFactory.get(), Integer.MAX_VALUE);
-        statusBar.setOrientationChanging(false);
         assertNull(mDisplayContent.getAsyncRotationController());
     }
 
