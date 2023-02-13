@@ -114,7 +114,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
         context = context.createWindowContext(context.getDisplay(), TYPE_APPLICATION_OVERLAY,
                 null /* options */);
         mHostLeash = rootLeash;
-        mViewHost = new SurfaceControlViewHost(context, context.getDisplay(), this);
+        mViewHost = new SurfaceControlViewHost(context, context.getDisplay(), this,
+                "SplitDecorManager");
 
         mIconSize = context.getResources().getDimensionPixelSize(R.dimen.split_icon_size);
         final FrameLayout rootLayout = (FrameLayout) LayoutInflater.from(context)

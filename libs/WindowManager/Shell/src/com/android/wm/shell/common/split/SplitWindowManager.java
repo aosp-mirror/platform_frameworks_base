@@ -113,7 +113,8 @@ public final class SplitWindowManager extends WindowlessWindowManager {
                     "Try to inflate divider view again without release first");
         }
 
-        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
+        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this,
+                "SplitWindowManager");
         mDividerView = (DividerView) LayoutInflater.from(mContext)
                 .inflate(R.layout.split_divider, null /* root */);
 
