@@ -602,6 +602,14 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 any(KeyguardSecurityCallback.class));
     }
 
+    @Test
+    public void testReinflateViewFlipper() {
+        mKeyguardSecurityContainerController.reinflateViewFlipper();
+        verify(mKeyguardSecurityViewFlipperController).clearViews();
+        verify(mKeyguardSecurityViewFlipperController).getSecurityView(any(SecurityMode.class),
+                any(KeyguardSecurityCallback.class));
+    }
+
     private KeyguardSecurityContainer.SwipeListener getRegisteredSwipeListener() {
         mKeyguardSecurityContainerController.onViewAttached();
         verify(mView).setSwipeListener(mSwipeListenerArgumentCaptor.capture());
