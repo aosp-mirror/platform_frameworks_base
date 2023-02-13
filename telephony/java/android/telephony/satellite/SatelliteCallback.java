@@ -18,7 +18,6 @@ package android.telephony.satellite;
 
 import android.annotation.NonNull;
 import android.os.Binder;
-import android.telephony.satellite.stub.SatelliteImplBase;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
@@ -63,12 +62,10 @@ public class SatelliteCallback {
         /**
          * Called when satellite provision state changes.
          *
-         * @param features The list of provisioned features.
          * @param provisioned The new provision state. {@code true} means satellite is provisioned
          *                    {@code false} means satellite is not provisioned.
          */
-        void onSatelliteProvisionStateChanged(
-                @SatelliteImplBase.Feature int[] features, boolean provisioned);
+        void onSatelliteProvisionStateChanged(boolean provisioned);
     }
 
     /**
@@ -100,14 +97,13 @@ public class SatelliteCallback {
             mExecutor = executor;
         }
 
-        public void onSatelliteProvisionStateChanged(
-                @SatelliteImplBase.Feature int[] features, boolean provisioned) {
+        public void onSatelliteProvisionStateChanged(boolean provisioned) {
             SatelliteProvisionStateListener listener =
                     (SatelliteProvisionStateListener) mSatelliteCallbackWeakRef.get();
             if (listener == null) return;
 
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> listener.onSatelliteProvisionStateChanged(features, provisioned)));
+                    () -> listener.onSatelliteProvisionStateChanged(provisioned)));
         }
 
         public void onSatellitePositionUpdate(@NonNull PointingInfo pointingInfo) {

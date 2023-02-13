@@ -638,7 +638,8 @@ public class SatelliteManager {
      * Provision the device with a satellite provider.
      * This is needed if the provider allows dynamic registration.
      *
-     * @param token The security token of the device/subscription to be provisioned.
+     * @param token The token to be used as a unique identifier for provisioning with satellite
+     *              gateway.
      * @param cancellationSignal The optional signal used by the caller to cancel the provision
      *                           request. Even when the cancellation is signaled, Telephony will
      *                           still trigger the callback to return the result of this request.
@@ -678,6 +679,48 @@ public class SatelliteManager {
         }
         if (cancellationSignal != null) {
             cancellationSignal.setRemote(cancelRemote);
+        }
+    }
+
+    /**
+     * Deprovision the device with the satellite provider.
+     * This is needed if the provider allows dynamic registration. Once deprovisioned,
+     * {@link SatelliteCallback.SatelliteProvisionStateListener#onSatelliteProvisionStateChanged}
+     * should report as deprovisioned.
+     * For provisioning satellite service, refer to
+     * {@link #provisionSatelliteService(String, CancellationSignal, Executor, Consumer)}.
+     *
+     * @param token The token of the device/subscription to be deprovisioned.
+     * @param errorCodeListener Listener for the {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void deprovisionSatelliteService(@NonNull String token,
+            @NonNull @CallbackExecutor Executor executor,
+            @SatelliteError @NonNull Consumer<Integer> errorCodeListener) {
+        Objects.requireNonNull(token);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(errorCodeListener);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IIntegerConsumer errorCallback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> errorCodeListener.accept(result)));
+                    }
+                };
+                telephony.deprovisionSatelliteService(mSubId, token, errorCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("deprovisionSatelliteService RemoteException=" + ex);
+            ex.rethrowFromSystemServer();
         }
     }
 

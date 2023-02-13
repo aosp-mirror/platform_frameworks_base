@@ -23,7 +23,7 @@ import android.telephony.satellite.PointingInfo;
  * @hide
  */
 oneway interface ISatelliteStateListener {
-    void onSatelliteProvisionStateChanged(in int[] features, in boolean provisioned);
+    void onSatelliteProvisionStateChanged(in boolean provisioned);
     void onSatellitePositionUpdate(in PointingInfo pointingInfo);
     void onMessageTransferStateUpdate(in int state);
 }

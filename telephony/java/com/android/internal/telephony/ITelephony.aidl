@@ -2783,7 +2783,8 @@ interface ITelephony {
      * This is needed to register the subscription if the provider allows dynamic registration.
      *
      * @param subId The subId of the subscription to be provisioned.
-     * @param token The security token of the device/subscription to be provisioned.
+     * @param token The token to be used as a unique identifier for provisioning with satellite
+     *              gateway.
      * @param callback The callback to get the error code of the request.
      *
      * @return The signal transport used by callers to cancel the provision request.
@@ -2792,6 +2793,22 @@ interface ITelephony {
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     ICancellationSignal provisionSatelliteService(int subId, in String token,
             in IIntegerConsumer callback);
+
+    /**
+     * Unregister the subscription with the satellite provider.
+     * This is needed to unregister the subscription if the provider allows dynamic registration.
+     * Once deprovisioned,
+     * {@link SatelliteCallback.SatelliteProvisionStateListener#onSatelliteProvisionStateChanged}
+     * should report as deprovisioned.
+     *
+     * @param subId The subId of the subscription to be deprovisioned.
+     * @param token The token of the device/subscription to be deprovisioned.
+     * @param callback The callback to get the error code of the request.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void deprovisionSatelliteService(int subId, in String token, in IIntegerConsumer callback);
+
 
     /**
      * Register for the satellite provision state change.
