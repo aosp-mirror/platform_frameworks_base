@@ -27,6 +27,7 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.animation.doOnCancel
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
@@ -358,6 +359,105 @@ class ChipbarCoordinatorTest : SysuiTestCase() {
         getChipbarView().getEndButton().performClick()
 
         assertThat(isClicked).isTrue()
+    }
+
+    @Test
+    fun displayView_loading_animationStarted() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.id.check_box, null),
+                Text.Loaded("text"),
+                endItem = ChipbarEndItem.Loading,
+            )
+        )
+
+        assertThat(underTest.loadingDetails!!.animator.isStarted).isTrue()
+    }
+
+    @Test
+    fun displayView_notLoading_noAnimation() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.id.check_box, null),
+                Text.Loaded("text"),
+                endItem = ChipbarEndItem.Error,
+            )
+        )
+
+        assertThat(underTest.loadingDetails).isNull()
+    }
+
+    @Test
+    fun displayView_loadingThenNotLoading_animationStopped() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.id.check_box, null),
+                Text.Loaded("text"),
+                endItem = ChipbarEndItem.Loading,
+            )
+        )
+
+        val animator = underTest.loadingDetails!!.animator
+        var cancelled = false
+        animator.doOnCancel { cancelled = true }
+
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.id.check_box, null),
+                Text.Loaded("text"),
+                endItem = ChipbarEndItem.Button(Text.Loaded("button")) {},
+            )
+        )
+
+        assertThat(cancelled).isTrue()
+        assertThat(underTest.loadingDetails).isNull()
+    }
+
+    @Test
+    fun displayView_loadingThenHideView_animationStopped() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.id.check_box, null),
+                Text.Loaded("text"),
+                endItem = ChipbarEndItem.Loading,
+            )
+        )
+
+        val animator = underTest.loadingDetails!!.animator
+        var cancelled = false
+        animator.doOnCancel { cancelled = true }
+
+        underTest.removeView(DEVICE_ID, "TestReason")
+
+        assertThat(cancelled).isTrue()
+        assertThat(underTest.loadingDetails).isNull()
+    }
+
+    @Test
+    fun displayView_loadingThenNewLoading_animationStaysTheSame() {
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.id.check_box, null),
+                Text.Loaded("text"),
+                endItem = ChipbarEndItem.Loading,
+            )
+        )
+
+        val animator = underTest.loadingDetails!!.animator
+        var cancelled = false
+        animator.doOnCancel { cancelled = true }
+
+        underTest.displayView(
+            createChipbarInfo(
+                Icon.Resource(R.id.check_box, null),
+                Text.Loaded("new text"),
+                endItem = ChipbarEndItem.Loading,
+            )
+        )
+
+        assertThat(underTest.loadingDetails!!.animator).isEqualTo(animator)
+        assertThat(underTest.loadingDetails!!.animator.isStarted).isTrue()
+        assertThat(cancelled).isFalse()
     }
 
     @Test
