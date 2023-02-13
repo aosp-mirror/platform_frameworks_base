@@ -170,8 +170,7 @@ public final class KeyEventTest {
                 DEVICE_ID, SCAN_CODE, FLAGS);
 
         assertKeyEventFields(key, DOWN_TIME, EVENT_TIME, ACTION, KEYCODE, REPEAT, METASTATE,
-                DEVICE_ID, SCAN_CODE, FLAGS, /* source= */ 0, /* displayId= */ 0,
-                CHARACTERS);
+                DEVICE_ID, SCAN_CODE, FLAGS, /* source= */ 0, INVALID_DISPLAY, CHARACTERS);
     }
 
     @Test
@@ -180,7 +179,7 @@ public final class KeyEventTest {
                 DEVICE_ID, SCAN_CODE);
 
         assertKeyEventFields(key, DOWN_TIME, EVENT_TIME, ACTION, KEYCODE, REPEAT, METASTATE,
-                DEVICE_ID, SCAN_CODE, /* flags= */ 0, /* source= */ 0, /* displayId= */ 0,
+                DEVICE_ID, SCAN_CODE, /* flags= */ 0, /* source= */ 0, INVALID_DISPLAY,
                 CHARACTERS);
     }
 
@@ -190,7 +189,7 @@ public final class KeyEventTest {
 
         assertKeyEventFields(key, DOWN_TIME, EVENT_TIME, ACTION, KEYCODE, REPEAT, METASTATE,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, /* scanCode= */ 0, /* flags= */ 0,
-                /* source= */ 0, /* displayId= */ 0, CHARACTERS);
+                /* source= */ 0, INVALID_DISPLAY, CHARACTERS);
     }
 
     @Test
@@ -199,7 +198,7 @@ public final class KeyEventTest {
 
         assertKeyEventFields(key, DOWN_TIME, EVENT_TIME, ACTION, KEYCODE, REPEAT,
                 /* metaState= */ 0, KeyCharacterMap.VIRTUAL_KEYBOARD, /* scanCode= */ 0,
-                /* flags= */ 0, /* source= */ 0, /* displayId= */ 0, CHARACTERS);
+                /* flags= */ 0, /* source= */ 0, INVALID_DISPLAY, CHARACTERS);
     }
 
     @Test
@@ -217,7 +216,7 @@ public final class KeyEventTest {
 
         assertKeyEventFields(key, /* downTime= */ 0, /* eventTime= */ 0, ACTION, KEYCODE,
                 /* repeat= */ 0, /* metaState= */ 0, KeyCharacterMap.VIRTUAL_KEYBOARD,
-                /* scanCode= */ 0, FLAGS, /* source= */ 0, /* displayId= */ 0, CHARACTERS);
+                /* scanCode= */ 0, FLAGS, /* source= */ 0, INVALID_DISPLAY, CHARACTERS);
     }
 
     private static KeyEvent createKey() {
