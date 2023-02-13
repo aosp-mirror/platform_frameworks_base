@@ -243,7 +243,14 @@ interface IVoiceInteractionManagerService {
      */
     IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
             in Identity originatorIdentity,
-            IBinder client);
+            IBinder client,
+            in SoundTrigger.ModuleProperties moduleProperties);
+
+    /**
+     * Lists properties of SoundTrigger modules that can be attached to by
+     * @{link createSoundTriggerSessionAsOriginator}.
+     */
+    List<SoundTrigger.ModuleProperties> listModuleProperties(in Identity originatorIdentity);
 
     /**
      * Set configuration and pass read-only data to hotword detection service.
