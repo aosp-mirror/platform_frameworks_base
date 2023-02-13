@@ -23,6 +23,7 @@ import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.advanceTimeBy
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
@@ -311,17 +312,20 @@ class KeyguardCoordinatorTest : SysuiTestCase() {
     fun unseenNotificationIsMarkedAsSeenWhenKeyguardGoesAway() {
         whenever(notifPipelineFlags.shouldFilterUnseenNotifsOnKeyguard).thenReturn(true)
 
-        // GIVEN: Keyguard is showing, unseen notification is present
+        // GIVEN: Keyguard is showing, not dozing, unseen notification is present
         keyguardRepository.setKeyguardShowing(true)
+        keyguardRepository.setDozing(false)
         runKeyguardCoordinatorTest {
             val fakeEntry = NotificationEntryBuilder().build()
             collectionListener.onEntryAdded(fakeEntry)
 
+            // WHEN: five seconds have passed
+            testScheduler.advanceTimeBy(5.seconds)
+            testScheduler.runCurrent()
+
             // WHEN: Keyguard is no longer showing
             keyguardRepository.setKeyguardShowing(false)
-
-            // When: Shade is expanded
-            statusBarStateListener.onExpandedChanged(true)
+            testScheduler.runCurrent()
 
             // WHEN: Keyguard is shown again
             keyguardRepository.setKeyguardShowing(true)
