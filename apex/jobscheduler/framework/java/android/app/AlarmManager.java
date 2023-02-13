@@ -311,6 +311,15 @@ public class AlarmManager {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public static final long SCHEDULE_EXACT_ALARM_DOES_NOT_ELEVATE_BUCKET = 262645982L;
 
+    /**
+     * Exact alarms expecting a {@link OnAlarmListener} callback will be dropped when the calling
+     * app goes into cached state.
+     *
+     * @hide
+     */
+    @ChangeId
+    public static final long EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED = 265195908L;
+
     @UnsupportedAppUsage
     private final IAlarmManager mService;
     private final Context mContext;
@@ -808,12 +817,23 @@ public class AlarmManager {
      * The OnAlarmListener's {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
+     * <p>
+     * This API should only be used to set alarms that are relevant in the context of the app's
+     * current lifecycle, as the {@link OnAlarmListener} instance supplied is only valid as long as
+     * the process is alive, and the system can clean up the app process as soon as it is out of
+     * lifecycle. To schedule alarms that fire reliably even after the current lifecycle completes,
+     * and wakes up the app if required, use any of the other scheduling APIs that accept a
+     * {@link PendingIntent} instance.
      *
-     * <p class="note"><strong>Note:</strong>
+     * <p>
      * On previous android versions {@link Build.VERSION_CODES#S} and
      * {@link Build.VERSION_CODES#TIRAMISU}, apps targeting SDK level 31 or higher needed to hold
      * the {@link Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM} permission to use
      * this API, unless the app was exempt from battery restrictions.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * Starting with android version {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system will
+     * explicitly drop any alarms set via this API when the calling app goes out of lifecycle.
      *
      */
     public void setExact(@AlarmType int type, long triggerAtMillis, @Nullable String tag,
@@ -983,6 +1003,10 @@ public class AlarmManager {
      * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}, unless you are on the system's power
      * allowlist. This can be set, for example, by marking the app as {@code <allow-in-power-save>}
      * within the system config.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * Starting with android version {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system will
+     * explicitly drop any alarms set via this API when the calling app goes out of lifecycle.
      *
      * @param type            type of alarm
      * @param triggerAtMillis The exact time in milliseconds, that the alarm should be delivered,
@@ -1294,6 +1318,10 @@ public class AlarmManager {
      * alarm will be allowed to execute even when the system is in low-power idle modes.
      *
      * <p> See {@link #setExactAndAllowWhileIdle(int, long, PendingIntent)} for more details.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * Starting with android version {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system will
+     * explicitly drop any alarms set via this API when the calling app goes out of lifecycle.
      *
      * @param type            type of alarm
      * @param triggerAtMillis The exact time in milliseconds, that the alarm should be delivered,

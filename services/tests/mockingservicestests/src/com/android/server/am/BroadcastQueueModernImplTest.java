@@ -60,11 +60,13 @@ import android.content.pm.ResolveInfo;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.BundleMerger;
+import android.os.DropBoxManager;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
+import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
@@ -975,6 +977,59 @@ public class BroadcastQueueModernImplTest {
         // Verify that the older timeTick has been removed.
         verifyPendingRecords(queue,
                 List.of(musicVolumeChanged, alarmVolumeChanged, timeTick));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_merged_matchingFilter() {
+        final long now = SystemClock.elapsedRealtime();
+        final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast1 = createDropboxBroadcast(
+                "TAG_A", now, 2);
+        final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast2 = createDropboxBroadcast(
+                "TAG_B", now + 1000, 4);
+        final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast3 = createDropboxBroadcast(
+                "TAG_A", now + 2000, 7);
+
+        // Halt all processing so that we get a consistent view
+        mHandlerThread.getLooper().getQueue().postSyncBarrier();
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast1.first,
+                dropboxEntryBroadcast1.second));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast2.first,
+                dropboxEntryBroadcast2.second));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast3.first,
+                dropboxEntryBroadcast3.second));
+
+        final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        // dropboxEntryBroadcast1 and dropboxEntryBroadcast3 should be merged as they use the same
+        // tag and there shouldn't be a change to dropboxEntryBroadcast2.
+        final Pair<Intent, BroadcastOptions> expectedMergedBroadcast = createDropboxBroadcast(
+                "TAG_A", now + 2000, 10);
+        verifyPendingRecords(queue, List.of(
+                dropboxEntryBroadcast2.first, expectedMergedBroadcast.first));
+    }
+
+    private Pair<Intent, BroadcastOptions> createDropboxBroadcast(String tag, long timestampMs,
+            int droppedCount) {
+        final Intent dropboxEntryAdded = new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
+        dropboxEntryAdded.putExtra(DropBoxManager.EXTRA_TAG, tag);
+        dropboxEntryAdded.putExtra(DropBoxManager.EXTRA_TIME, timestampMs);
+        dropboxEntryAdded.putExtra(DropBoxManager.EXTRA_DROPPED_COUNT, droppedCount);
+
+        final BundleMerger extrasMerger = new BundleMerger();
+        extrasMerger.setDefaultMergeStrategy(BundleMerger.STRATEGY_FIRST);
+        extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_TIME,
+                BundleMerger.STRATEGY_COMPARABLE_MAX);
+        extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_DROPPED_COUNT,
+                BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD);
+        final IntentFilter matchingFilter = new IntentFilter(
+                DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
+        matchingFilter.addExtra(DropBoxManager.EXTRA_TAG, tag);
+        final BroadcastOptions optionsDropboxEntryAdded = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED)
+                .setDeliveryGroupMatchingFilter(matchingFilter)
+                .setDeliveryGroupExtrasMerger(extrasMerger);
+        return Pair.create(dropboxEntryAdded, optionsDropboxEntryAdded);
     }
 
     @Test

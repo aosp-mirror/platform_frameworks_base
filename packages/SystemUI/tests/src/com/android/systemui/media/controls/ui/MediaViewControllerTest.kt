@@ -33,6 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.floatThat
 import org.mockito.Mock
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -139,14 +140,12 @@ class MediaViewControllerTest : SysuiTestCase() {
         whenever(controlWidgetState.y).thenReturn(150F)
         whenever(controlWidgetState.height).thenReturn(20)
         // in current beizer, when the progress reach 0.38, the result will be 0.5
-        mediaViewController.squishViewState(mockViewState, 119F / 200F)
-        verify(detailWidgetState).alpha = floatThat { kotlin.math.abs(it - 0.5F) < delta }
-        mediaViewController.squishViewState(mockViewState, 150F / 200F)
-        verify(detailWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
         mediaViewController.squishViewState(mockViewState, 181.4F / 200F)
         verify(controlWidgetState).alpha = floatThat { kotlin.math.abs(it - 0.5F) < delta }
+        verify(detailWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
         mediaViewController.squishViewState(mockViewState, 200F / 200F)
         verify(controlWidgetState).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
+        verify(detailWidgetState, times(2)).alpha = floatThat { kotlin.math.abs(it - 1.0F) < delta }
     }
 
     @Test

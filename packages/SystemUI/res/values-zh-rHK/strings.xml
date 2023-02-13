@@ -91,12 +91,11 @@
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"下方邊界 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"左方邊界 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"右方邊界 <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
-    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"已儲存在工作資料夾的「<xliff:g id="APP">%1$s</xliff:g>」中"</string>
+    <string name="screenshot_work_profile_notification" msgid="203041724052970693">"已儲存在工作設定檔的「<xliff:g id="APP">%1$s</xliff:g>」中"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"檔案"</string>
-    <string name="screenshot_detected_template" msgid="7940376642921719915">"「<xliff:g id="APPNAME">%1$s</xliff:g>」偵測到這張螢幕截圖。"</string>
-    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"「<xliff:g id="APPNAME">%1$s</xliff:g>」和其他開啟的應用程式偵測到這張螢幕截圖。"</string>
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> 偵測到此螢幕截圖。"</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> 和其他開啟的應用程式偵測到此螢幕截圖。"</string>
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"新增至筆記"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"螢幕畫面錄影工具"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"正在處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示錄影畫面工作階段通知"</string>
@@ -890,6 +889,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"發生錯誤，請再試一次。"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"正在載入"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"平板電腦"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"已停用，請檢查應用程式"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"找不到"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"無法使用控制功能"</string>
@@ -926,6 +929,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"無法廣播"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"無法儲存，請再試一次。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"無法儲存。"</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本號碼"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"版本號碼已複製到剪貼簿。"</string>
     <string name="basic_status" msgid="2315371112182658176">"開啟對話"</string>
@@ -1026,7 +1033,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"相機已關閉"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"麥克風已關閉"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"相機和麥克風已關閉"</string>
-    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Google 助理正在聆聽"</string>
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"「Google 助理」正在聆聽"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# 則通知}other{# 則通知}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>，<xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"做筆記"</string>
@@ -1043,7 +1050,7 @@
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"不允許"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"裝置記錄會記下裝置的活動。應用程式可透過這些記錄找出並修正問題。\n\n部分記錄可能包含敏感資料，因此請只允許信任的應用程式存取所有裝置記錄。\n\n如果不允許此應用程式存取所有裝置記錄，此應用程式仍能存取自己的記錄，且裝置製造商可能仍可存取裝置上的部分記錄或資料。"</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"瞭解詳情"</string>
-    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"如要瞭解詳情，請前往 <xliff:g id="URL">%s</xliff:g>"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"詳情請瀏覽 <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"開啟「<xliff:g id="APPNAME">%1$s</xliff:g>」"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• 應用程式已完成設定"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• 已新增至少一張卡至「錢包」"</string>

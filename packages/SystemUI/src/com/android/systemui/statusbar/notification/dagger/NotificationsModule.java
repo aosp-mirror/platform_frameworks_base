@@ -38,6 +38,8 @@ import com.android.systemui.statusbar.notification.collection.inflation.BindEven
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.inflation.OnUserInteractionCallbackImpl;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProviderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationVisibilityProviderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderModule;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
@@ -65,13 +67,13 @@ import com.android.systemui.statusbar.notification.stack.NotificationSectionsMan
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
-import java.util.concurrent.Executor;
-
-import javax.inject.Provider;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.concurrent.Executor;
+
+import javax.inject.Provider;
 
 /**
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
@@ -162,6 +164,13 @@ public interface NotificationsModule {
      */
     @Binds
     CommonNotifCollection provideCommonNotifCollection(NotifPipeline pipeline);
+
+    /**
+     * Provide the object which can be used to obtain dismissibility of a Notification.
+     */
+    @Binds
+    NotificationDismissibilityProvider provideNotificationDismissibilityProvider(
+            NotificationDismissibilityProviderImpl impl);
 
     /**
      * Provide the object which can be used to obtain NotificationVisibility objects.

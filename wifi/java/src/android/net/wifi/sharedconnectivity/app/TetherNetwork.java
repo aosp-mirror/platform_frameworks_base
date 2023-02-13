@@ -110,7 +110,7 @@ public final class TetherNetwork implements Parcelable {
         /**
          * Sets information about the device providing connectivity.
          *
-         * @param deviceInfo The user configurable device name.
+         * @param deviceInfo The device information object.
          * @return Returns the Builder object.
          */
         @NonNull
@@ -236,7 +236,6 @@ public final class TetherNetwork implements Parcelable {
      *
      * @return Returns the locally unique ID for this Instant Tether network.
      */
-    @NonNull
     public long getDeviceId() {
         return mDeviceId;
     }
@@ -244,7 +243,7 @@ public final class TetherNetwork implements Parcelable {
     /**
      * Gets information about the device providing connectivity.
      *
-     * @return Returns the locally unique ID for this Instant Tether network.
+     * @return Returns the information of the device providing the Instant Tether network.
      */
     @NonNull
     public DeviceInfo getDeviceInfo() {
@@ -256,7 +255,6 @@ public final class TetherNetwork implements Parcelable {
      *
      * @return Returns the network type as represented by IntDef {@link NetworkType}.
      */
-    @NonNull
     @NetworkType
     public int getNetworkType() {
         return mNetworkType;

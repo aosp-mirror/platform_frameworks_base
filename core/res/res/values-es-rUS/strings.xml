@@ -47,7 +47,7 @@
     <string name="needPuk2" msgid="3910763547447344963">"Escribe el código PUK2 para desbloquear la tarjeta SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Error; habilita el bloqueo de SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más antes de que se bloquee la tarjeta SIM.</item>
       <item quantity="other">Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más antes de que se bloquee la tarjeta SIM.</item>
       <item quantity="one">Tienes <xliff:g id="NUMBER_0">%d</xliff:g> un intento más antes de que se bloquee la tarjeta SIM.</item>
     </plurals>
@@ -1359,6 +1359,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Se activó el modo PTP mediante USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Se activó la conexión mediante dispositivo móvil por USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Se activó el modo MIDI mediante USB"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Accesorio USB conectado"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Presiona para ver más opciones."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Cargando el dispositivo conectado. Presiona para ver más opciones."</string>
@@ -1707,7 +1709,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Listo"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactivar acceso directo"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usar acceso directo"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de color"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Corrección de colores"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo de una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Atenuación extra"</string>
@@ -2313,16 +2316,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permite que una aplicación complementaria inicie servicios en primer plano desde el segundo plano."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"El micrófono está disponible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"El micrófono está bloqueado"</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Pantalla dual"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La Pantalla dual está activada"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando ambas pantallas para mostrar contenido"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"El dispositivo está muy caliente"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"La Pantalla dual no está disponible porque el teléfono se está calentando demasiado"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactivar"</string>
 </resources>

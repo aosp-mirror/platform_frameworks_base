@@ -20,6 +20,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP
 import com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE
+import com.android.systemui.util.mockito.any
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
@@ -48,22 +49,22 @@ class FeatureFlagsDebugRestarterTest : SysuiTestCase() {
     @Test
     fun testRestart_ImmediateWhenAsleep() {
         whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_ASLEEP)
-        restarter.restartSystemUI()
-        verify(systemExitRestarter).restartSystemUI()
+        restarter.restartSystemUI("Restart for test")
+        verify(systemExitRestarter).restartSystemUI(any())
     }
 
     @Test
     fun testRestart_WaitsForSceenOff() {
         whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_AWAKE)
 
-        restarter.restartSystemUI()
-        verify(systemExitRestarter, never()).restartSystemUI()
+        restarter.restartSystemUI("Restart for test")
+        verify(systemExitRestarter, never()).restartSystemUI(any())
 
         val captor = ArgumentCaptor.forClass(WakefulnessLifecycle.Observer::class.java)
         verify(wakefulnessLifecycle).addObserver(captor.capture())
 
         captor.value.onFinishedGoingToSleep()
 
-        verify(systemExitRestarter).restartSystemUI()
+        verify(systemExitRestarter).restartSystemUI(any())
     }
 }

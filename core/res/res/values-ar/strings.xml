@@ -1249,6 +1249,7 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"‏جارٍ تشغيل Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"جارٍ بدء تشغيل الجهاز اللوحي…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"جارٍ بدء تشغيل الجهاز…"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"جارٍ إنهاء تحديث النظام…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"جارٍ ترقية <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"جارٍ تحضير <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"بدء التطبيقات."</string>
@@ -1361,6 +1362,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"‏تمّ تفعيل PTP عبر USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"‏تمّ تفعيل التوصيل عبر USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"‏تمّ تفعيل MIDI عبر USB"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"‏تم توصيل ملحق USB."</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"انقر للحصول على المزيد من الخيارات."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"جارٍ شحن الجهاز المتصل. انقر لعرض خيارات أكثر."</string>
@@ -1709,7 +1712,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"تم"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"إيقاف الاختصار"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استخدام الاختصار"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"قلب الألوان"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"تصحيح الألوان"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"وضع \"التصفح بيد واحدة\""</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"زيادة تعتيم الشاشة"</string>
@@ -1860,8 +1864,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> المخصص للعمل"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"العمل الثاني <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"العمل الثالث <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
-    <skip />
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"نسخة طبق الأصل عن \"<xliff:g id="LABEL">%1$s</xliff:g>\""</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"طلب إدخال رقم التعريف الشخصي قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"طلب إدخال النقش الخاص بإلغاء القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"طلب إدخال كلمة المرور قبل إزالة التثبيت"</string>
@@ -2316,16 +2319,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"يسمح هذا الإذن للتطبيق المصاحب ببدء الخدمات التي تعمل في المقدّمة من الخلفية."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"الميكروفون متاح."</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"تم حظر الميكروفون."</string>
-    <!-- no translation found for concurrent_display_notification_name (1526911253558311131) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_title (4892473462327943673) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_active_content (5889355473710601270) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_title (5921609404644739229) -->
-    <skip />
-    <!-- no translation found for concurrent_display_notification_thermal_content (2075484836527609319) -->
-    <skip />
-    <!-- no translation found for device_state_notification_turn_off_button (6327161707661689232) -->
-    <skip />
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"استخدام الشاشتين"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ميزة \"استخدام الشاشتين\" مفعّلة"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"يستخدم \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" كلتا الشاشتين لعرض المحتوى."</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"الجهاز ساخن للغاية"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ميزة \"استخدام الشاشتين\" غير متاحة لأن هاتفك ساخن للغاية."</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"إيقاف"</string>
 </resources>

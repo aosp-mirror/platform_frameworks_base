@@ -1129,6 +1129,22 @@ public final class ConnectivityController extends RestrictingController implemen
 
         final boolean satisfied = isSatisfied(jobStatus, network, capabilities, mConstants);
 
+        if (!satisfied && jobStatus.network != null
+                && mService.isCurrentlyRunningLocked(jobStatus)
+                && isSatisfied(jobStatus, jobStatus.network,
+                        getNetworkCapabilities(jobStatus.network), mConstants)) {
+            // A new network became available for a currently running job
+            // (and most likely became the default network for the app),
+            // but it doesn't yet satisfy the requested constraints and the old network
+            // is still available and satisfies the constraints. Don't change the network
+            // given to the job for now and let it keep running. We will re-evaluate when
+            // the capabilities or connection state of the either network change.
+            if (DEBUG) {
+                Slog.i(TAG, "Not reassigning network for running job " + jobStatus);
+            }
+            return false;
+        }
+
         final boolean changed = jobStatus.setConnectivityConstraintSatisfied(nowElapsed, satisfied);
 
         if (jobStatus.getPreferUnmetered()) {

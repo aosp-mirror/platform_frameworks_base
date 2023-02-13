@@ -17,14 +17,18 @@
 package android.net.wifi.sharedconnectivity.service;
 
 import android.net.wifi.sharedconnectivity.app.KnownNetwork;
+import android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState;
 import android.net.wifi.sharedconnectivity.app.TetherNetwork;
+import android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus;
 
 /*
  * @hide
  */
 interface ISharedConnectivityCallback {
     oneway void onTetherNetworksUpdated(in List<TetherNetwork> networks);
+    oneway void onTetherNetworkConnectionStatusChanged(in TetherNetworkConnectionStatus status);
     oneway void onKnownNetworksUpdated(in List<KnownNetwork> networks);
+    oneway void onKnownNetworkConnectionStatusChanged(in KnownNetworkConnectionStatus status);
     oneway void onSharedConnectivitySettingsChanged(in SharedConnectivitySettingsState state);
 }

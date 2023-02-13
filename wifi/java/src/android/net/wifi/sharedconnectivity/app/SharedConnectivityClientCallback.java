@@ -50,5 +50,19 @@ public interface SharedConnectivityClientCallback {
      * @param state The new state.
      */
     void onSharedConnectivitySettingsChanged(@NonNull SharedConnectivitySettingsState state);
+
+    /**
+     * This method is being called by {@link SharedConnectivityService} to notify of a change in the
+     * status of the current tether network connection.
+     * @param status The new status.
+     */
+    void onTetherNetworkConnectionStatusChanged(@NonNull TetherNetworkConnectionStatus status);
+
+    /**
+     * This method is being called by {@link SharedConnectivityService} to notify of a change in the
+     * status of the current known network connection.
+     * @param status The new status.
+     */
+    void onKnownNetworkConnectionStatusChanged(@NonNull KnownNetworkConnectionStatus status);
 }
 

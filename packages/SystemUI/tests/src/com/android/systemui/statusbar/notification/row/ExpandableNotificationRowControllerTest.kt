@@ -30,6 +30,7 @@ import com.android.systemui.plugins.PluginManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.SmartReplyController
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
@@ -88,6 +89,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val peopleNotificationIdentifier: PeopleNotificationIdentifier = mock()
     private val bubblesManager: BubblesManager = mock()
     private val dragController: ExpandableNotificationRowDragController = mock()
+    private val dismissibilityProvider: NotificationDismissibilityProvider = mock()
     private lateinit var controller: ExpandableNotificationRowController
 
     @Before
@@ -124,7 +126,8 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 featureFlags,
                 peopleNotificationIdentifier,
                 Optional.of(bubblesManager),
-                dragController
+                dragController,
+                dismissibilityProvider
             )
     }
 

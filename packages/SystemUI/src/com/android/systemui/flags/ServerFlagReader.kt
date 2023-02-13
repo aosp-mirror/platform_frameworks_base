@@ -17,8 +17,10 @@
 package com.android.systemui.flags
 
 import android.provider.DeviceConfig
+import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.TestHarness
 import com.android.systemui.util.DeviceConfigProxy
 import dagger.Module
 import dagger.Provides
@@ -35,21 +37,27 @@ interface ServerFlagReader {
     fun listenForChanges(values: Collection<Flag<*>>, listener: ChangeListener)
 
     interface ChangeListener {
-        fun onChange()
+        fun onChange(flag: Flag<*>)
     }
 }
 
 class ServerFlagReaderImpl @Inject constructor(
     private val namespace: String,
     private val deviceConfig: DeviceConfigProxy,
-    @Background private val executor: Executor
+    @Background private val executor: Executor,
+    @TestHarness private val isTestHarness: Boolean
 ) : ServerFlagReader {
+
+    private val TAG = "ServerFlagReader"
 
     private val listeners =
         mutableListOf<Pair<ServerFlagReader.ChangeListener, Collection<Flag<*>>>>()
 
     private val onPropertiesChangedListener = object : DeviceConfig.OnPropertiesChangedListener {
         override fun onPropertiesChanged(properties: DeviceConfig.Properties) {
+            if (isTestHarness) {
+                Log.w(TAG, "Ignore server flag changes in Test Harness mode.")
+            }
             if (properties.namespace != namespace) {
                 return
             }
@@ -59,7 +67,7 @@ class ServerFlagReaderImpl @Inject constructor(
                 propLoop@ for (propName in properties.keyset) {
                     for (flag in flags) {
                         if (propName == getServerOverrideName(flag.id) || propName == flag.name) {
-                            listener.onChange()
+                            listener.onChange(flag)
                             break@propLoop
                         }
                     }
@@ -111,10 +119,11 @@ interface ServerFlagReaderModule {
         @SysUISingleton
         fun bindsReader(
             deviceConfig: DeviceConfigProxy,
-            @Background executor: Executor
+            @Background executor: Executor,
+            @TestHarness isTestHarness: Boolean
         ): ServerFlagReader {
             return ServerFlagReaderImpl(
-                SYSUI_NAMESPACE, deviceConfig, executor
+                SYSUI_NAMESPACE, deviceConfig, executor, isTestHarness
             )
         }
     }
@@ -139,7 +148,7 @@ class ServerFlagReaderFake : ServerFlagReader {
         for ((listener, flags) in listeners) {
             flagLoop@ for (flag in flags) {
                 if (name == flag.name) {
-                    listener.onChange()
+                    listener.onChange(flag)
                     break@flagLoop
                 }
             }

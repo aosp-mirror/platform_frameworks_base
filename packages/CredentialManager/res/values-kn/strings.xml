@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"ಮುಂದುವರಿಸಿ"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ಇನ್ನಷ್ಟು ಆಯ್ಕೆಗಳು"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"ಪಾಸ್‌ವರ್ಡ್ ತೋರಿಸಿ"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಮರೆಮಾಡಿ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ಪಾಸ್‌ಕೀಗಳೊಂದಿಗೆ ಸುರಕ್ಷಿತವಾಗಿರುತ್ತವೆ"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ಪಾಸ್‌ಕೀಗಳ ಮೂಲಕ, ನೀವು ಕ್ಲಿಷ್ಟ ಪಾಸ್‌ವರ್ಡ್‌ಗಳನ್ನು ರಚಿಸುವ ಅಥವಾ ನೆನಪಿಟ್ಟುಕೊಳ್ಳುವ ಅಗತ್ಯವಿಲ್ಲ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ಪಾಸ್‌ಕೀಗಳು ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್, ಫೇಸ್ ಅಥವಾ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ಬಳಸಿಕೊಂಡು ನೀವು ರಚಿಸುವ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿದ ಡಿಜಿಟಲ್ ಕೀಗಳಾಗಿವೆ"</string>
@@ -59,7 +57,10 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"ಸೈನ್ ಇನ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"ಪಾಸ್‌ವರ್ಡ್ ನಿರ್ವಾಹಕರನ್ನು ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
-    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
+    <skip />
+    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
+    <skip />
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ಸೈನ್-ಇನ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"ಮತ್ತೊಂದು ಸಾಧನದಿಂದ"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"ಬೇರೆ ಸಾಧನವನ್ನು ಬಳಸಿ"</string>

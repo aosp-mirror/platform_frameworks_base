@@ -65,6 +65,7 @@ package android {
     field public static final String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE = "android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE";
     field public static final String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
+    field public static final String BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE = "android.permission.BIND_REMOTE_LOCKSCREEN_VALIDATION_SERVICE";
     field public static final String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final String BIND_RESUME_ON_REBOOT_SERVICE = "android.permission.BIND_RESUME_ON_REBOOT_SERVICE";
     field public static final String BIND_ROTATION_RESOLVER_SERVICE = "android.permission.BIND_ROTATION_RESOLVER_SERVICE";
@@ -911,6 +912,7 @@ package android.app {
 
   public class KeyguardManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN) public long addWeakEscrowToken(@NonNull byte[], @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.KeyguardManager.WeakEscrowTokenActivatedListener);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CHECK_REMOTE_LOCKSCREEN) public android.content.Intent createConfirmDeviceCredentialForRemoteValidationIntent(@NonNull android.app.StartLockscreenValidationRequest, @NonNull android.content.ComponentName, @Nullable CharSequence, @Nullable CharSequence, @Nullable CharSequence, @Nullable CharSequence);
     method public android.content.Intent createConfirmFactoryResetCredentialIntent(CharSequence, CharSequence, CharSequence);
     method @RequiresPermission("android.permission.SET_INITIAL_LOCK") public int getMinLockLength(boolean, int);
     method @RequiresPermission(android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS) public boolean getPrivateNotificationsAllowed();
@@ -3127,11 +3129,18 @@ package android.companion {
   }
 
   public final class CompanionDeviceManager {
+    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void addOnAssociationsChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.OnAssociationsChangedListener);
     method @RequiresPermission(android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES) public void associate(@NonNull String, @NonNull android.net.MacAddress, @NonNull byte[]);
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean canPairWithoutPrompt(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
+    method @NonNull @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public java.util.List<android.companion.AssociationInfo> getAllAssociations();
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public boolean isDeviceAssociatedForWifiConnection(@NonNull String, @NonNull android.net.MacAddress, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED) public void notifyDeviceAppeared(int);
     method @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED) public void notifyDeviceDisappeared(int);
+    method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void removeOnAssociationsChangedListener(@NonNull android.companion.CompanionDeviceManager.OnAssociationsChangedListener);
+  }
+
+  public static interface CompanionDeviceManager.OnAssociationsChangedListener {
+    method public void onAssociationsChanged(@NonNull java.util.List<android.companion.AssociationInfo>);
   }
 
 }
@@ -3787,7 +3796,7 @@ package android.content.pm {
     method @RequiresPermission(allOf={android.Manifest.permission.INSTALL_PACKAGES, "com.android.permission.USE_INSTALLER_V2"}) public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
     method public void setEnableRollback(boolean);
     method public void setEnableRollback(boolean, int);
-    method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
@@ -9930,8 +9939,8 @@ package android.net.wifi.sharedconnectivity.app {
 
   public final class DeviceInfo implements android.os.Parcelable {
     method public int describeContents();
-    method @IntRange(from=0, to=100) @NonNull public int getBatteryPercentage();
-    method @IntRange(from=0, to=3) @NonNull public int getConnectionStrength();
+    method @IntRange(from=0, to=100) public int getBatteryPercentage();
+    method @IntRange(from=0, to=3) public int getConnectionStrength();
     method @NonNull public String getDeviceName();
     method public int getDeviceType();
     method @NonNull public String getModelName();
@@ -9956,7 +9965,7 @@ package android.net.wifi.sharedconnectivity.app {
   public final class KnownNetwork implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo getDeviceInfo();
-    method @NonNull public int getNetworkSource();
+    method public int getNetworkSource();
     method @NonNull public int[] getSecurityTypes();
     method @NonNull public String getSsid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -9974,9 +9983,29 @@ package android.net.wifi.sharedconnectivity.app {
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setSsid(@NonNull String);
   }
 
+  public final class KnownNetworkConnectionStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getExtras();
+    method public int getStatus();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONNECTION_STATUS_SAVED = 1; // 0x1
+    field public static final int CONNECTION_STATUS_SAVE_FAILED = 2; // 0x2
+    field public static final int CONNECTION_STATUS_UNKNOWN = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus> CREATOR;
+  }
+
+  public static final class KnownNetworkConnectionStatus.Builder {
+    ctor public KnownNetworkConnectionStatus.Builder();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus build();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.Builder setStatus(int);
+  }
+
   public interface SharedConnectivityClientCallback {
+    method public void onKnownNetworkConnectionStatusChanged(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus);
     method public void onKnownNetworksUpdated(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.KnownNetwork>);
     method public void onSharedConnectivitySettingsChanged(@NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState);
+    method public void onTetherNetworkConnectionStatusChanged(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus);
     method public void onTetherNetworksUpdated(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.TetherNetwork>);
   }
 
@@ -9992,7 +10021,7 @@ package android.net.wifi.sharedconnectivity.app {
   public final class SharedConnectivitySettingsState implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.os.Bundle getExtras();
-    method @NonNull public boolean isInstantTetherEnabled();
+    method public boolean isInstantTetherEnabled();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState> CREATOR;
   }
@@ -10006,13 +10035,13 @@ package android.net.wifi.sharedconnectivity.app {
 
   public final class TetherNetwork implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public long getDeviceId();
+    method public long getDeviceId();
     method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo getDeviceInfo();
     method @Nullable public String getHotspotBssid();
     method @Nullable public int[] getHotspotSecurityTypes();
     method @Nullable public String getHotspotSsid();
     method @NonNull public String getNetworkName();
-    method @NonNull public int getNetworkType();
+    method public int getNetworkType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.TetherNetwork> CREATOR;
     field public static final int NETWORK_TYPE_CELLULAR = 1; // 0x1
@@ -10033,6 +10062,31 @@ package android.net.wifi.sharedconnectivity.app {
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setNetworkType(int);
   }
 
+  public final class TetherNetworkConnectionStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getExtras();
+    method public int getStatus();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONNECTION_STATUS_CONNECT_TO_HOTSPOT_FAILED = 9; // 0x9
+    field public static final int CONNECTION_STATUS_ENABLING_HOTSPOT = 1; // 0x1
+    field public static final int CONNECTION_STATUS_ENABLING_HOTSPOT_FAILED = 7; // 0x7
+    field public static final int CONNECTION_STATUS_ENABLING_HOTSPOT_TIMEOUT = 8; // 0x8
+    field public static final int CONNECTION_STATUS_NO_CELL_DATA = 6; // 0x6
+    field public static final int CONNECTION_STATUS_PROVISIONING_FAILED = 3; // 0x3
+    field public static final int CONNECTION_STATUS_TETHERING_TIMEOUT = 4; // 0x4
+    field public static final int CONNECTION_STATUS_TETHERING_UNSUPPORTED = 5; // 0x5
+    field public static final int CONNECTION_STATUS_UNKNOWN = 0; // 0x0
+    field public static final int CONNECTION_STATUS_UNKNOWN_ERROR = 2; // 0x2
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus> CREATOR;
+  }
+
+  public static final class TetherNetworkConnectionStatus.Builder {
+    ctor public TetherNetworkConnectionStatus.Builder();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus build();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.Builder setStatus(int);
+  }
+
 }
 
 package android.net.wifi.sharedconnectivity.service {
@@ -10048,6 +10102,8 @@ package android.net.wifi.sharedconnectivity.service {
     method public final void setKnownNetworks(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.KnownNetwork>);
     method public final void setSettingsState(@NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState);
     method public final void setTetherNetworks(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.TetherNetwork>);
+    method public final void updateKnownNetworkConnectionStatus(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus);
+    method public final void updateTetherNetworkConnectionStatus(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus);
   }
 
 }
@@ -10565,6 +10621,7 @@ package android.os {
     method @RequiresPermission(allOf={android.Manifest.permission.READ_DREAM_STATE, android.Manifest.permission.WRITE_DREAM_STATE}) public void dream(long);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public boolean forceSuspend();
     method @NonNull public android.os.BatterySaverPolicyConfig getFullPowerSavePolicy();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public android.os.PowerManager.LowPowerStandbyPolicy getLowPowerStandbyPolicy();
     method public int getPowerSaveModeTrigger();
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isAmbientDisplayAvailable();
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isAmbientDisplaySuppressed();
@@ -10577,9 +10634,11 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setFullPowerSavePolicy(@NonNull android.os.BatterySaverPolicyConfig);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void setLowPowerStandbyActiveDuringMaintenance(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void setLowPowerStandbyEnabled(boolean);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void setLowPowerStandbyPolicy(@Nullable android.os.PowerManager.LowPowerStandbyPolicy);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setPowerSaveModeEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void suppressAmbientDisplay(@NonNull String, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.USER_ACTIVITY}) public void userActivity(long, int, int);
+    field @RequiresPermission(android.Manifest.permission.MANAGE_LOW_POWER_STANDBY) public static final String ACTION_LOW_POWER_STANDBY_POLICY_CHANGED = "android.os.action.LOW_POWER_STANDBY_POLICY_CHANGED";
     field public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0; // 0x0
     field public static final String REBOOT_USERSPACE = "userspace";
@@ -10592,6 +10651,14 @@ package android.os {
     field public static final int USER_ACTIVITY_EVENT_TOUCH = 2; // 0x2
     field public static final int USER_ACTIVITY_FLAG_INDIRECT = 2; // 0x2
     field public static final int USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS = 1; // 0x1
+  }
+
+  public static final class PowerManager.LowPowerStandbyPolicy {
+    ctor public PowerManager.LowPowerStandbyPolicy(@NonNull String, @NonNull java.util.Set<java.lang.String>, int, @NonNull java.util.Set<java.lang.String>);
+    method @NonNull public java.util.Set<java.lang.String> getAllowedFeatures();
+    method public int getAllowedReasons();
+    method @NonNull public java.util.Set<java.lang.String> getExemptPackages();
+    method @NonNull public String getIdentifier();
   }
 
   @Deprecated public class PowerWhitelistManager {
@@ -12496,6 +12563,17 @@ package android.service.quicksettings {
 
   public class TileService extends android.app.Service {
     method public final void setStatusIcon(android.graphics.drawable.Icon, String);
+  }
+
+}
+
+package android.service.remotelockscreenvalidation {
+
+  public abstract class RemoteLockscreenValidationService extends android.app.Service {
+    ctor public RemoteLockscreenValidationService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onValidateLockscreenGuess(@NonNull byte[], @NonNull android.os.OutcomeReceiver<android.app.RemoteLockscreenValidationResult,java.lang.Exception>);
+    field public static final String SERVICE_INTERFACE = "android.service.remotelockscreenvalidation.RemoteLockscreenValidationService";
   }
 
 }

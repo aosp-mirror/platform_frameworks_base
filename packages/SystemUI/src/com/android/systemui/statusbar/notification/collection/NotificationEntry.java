@@ -731,12 +731,28 @@ public final class NotificationEntry extends ListEntry {
     }
 
     /**
+     * Determines whether the NotificationEntry is dismissable based on the Notification flags and
+     * the given state. It doesn't recurse children or depend on the view attach state.
+     *
+     * @param isLocked if the device is locked or unlocked
+     * @return true if this NotificationEntry is dismissable.
+     */
+    public boolean isDismissableForState(boolean isLocked) {
+        if (mSbn.isNonDismissable()) {
+            // don't dismiss exempted Notifications
+            return false;
+        }
+        // don't dismiss ongoing Notifications when the device is locked
+        return !mSbn.isOngoing() || !isLocked;
+    }
+
+    /**
      * @return Can the underlying notification be individually dismissed?
      * @see #canViewBeDismissed()
      */
     // TODO: This logic doesn't belong on NotificationEntry. It should be moved to a controller
     // that can be added as a dependency to any class that needs to answer this question.
-    public boolean isDismissable() {
+    public boolean legacyIsDismissableRecursive() {
         if  (mSbn.isOngoing()) {
             return false;
         }

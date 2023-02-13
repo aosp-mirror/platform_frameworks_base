@@ -540,11 +540,16 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Este tablet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
-    <!-- no translation found for media_output_status_require_premium (8411255800047014822) -->
+    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
     <skip />
-    <!-- no translation found for media_output_status_not_support_downloads (4523828729240373315) -->
+    <string name="media_output_status_require_premium" msgid="8411255800047014822">"Actualiza la cuenta para cambiar"</string>
+    <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"No se pueden reproducir descargas aquí"</string>
+    <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Prueba de nuevo después del anuncio"</string>
+    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
     <skip />
-    <!-- no translation found for media_output_status_try_after_ad (8312579066856015441) -->
+    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
+    <skip />
+    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
     <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"No se ha podido conectar; reinicia el dispositivo"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de audio con cable"</string>
@@ -585,7 +590,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restringido, debes configurar una pantalla de bloqueo que proteja tus aplicaciones y datos personales."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Establecer bloqueo"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Cambiar a <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creando usuario…"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Creando usuario nuevo…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Creando nuevo invitado…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"No se ha podido crear el usuario"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"No se ha podido crear un nuevo invitado"</string>
@@ -672,8 +677,10 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animaciones para acciones de retorno predictivas"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"Habilitar animaciones del sistema para acciones de retorno predictivas."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Este ajuste habilita animaciones del sistema para acciones gestuales predictivas. Exige definir el valor de enableOnBackInvokedCallback en \"verdadero\" para cada aplicación en el archivo de manifiesto."</string>
-    <!-- no translation found for udfps_accessibility_touch_hints:0 (1737722959616802157) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:1 (5425394847942513942) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:2 (7728484337962740316) -->
-    <!-- no translation found for udfps_accessibility_touch_hints:3 (324200556467459329) -->
+  <string-array name="udfps_accessibility_touch_hints">
+    <item msgid="1737722959616802157">"Muévete hacia la izquierda"</item>
+    <item msgid="5425394847942513942">"Muévete hacia abajo"</item>
+    <item msgid="7728484337962740316">"Muévete hacia la derecha"</item>
+    <item msgid="324200556467459329">"Muévete hacia arriba"</item>
+  </string-array>
 </resources>

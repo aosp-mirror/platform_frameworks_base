@@ -51,6 +51,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -346,7 +347,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             mFgHandler.post(mSetPowerBoostRunnable);
 
             if (mLowPowerStandbyControllerInternal != null) {
-                mLowPowerStandbyControllerInternal.addToAllowlist(mCallingUid);
+                mLowPowerStandbyControllerInternal.addToAllowlist(mCallingUid,
+                        PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION);
                 mLowPowerStandbyAllowlisted = true;
                 mFgHandler.removeCallbacks(mRemoveFromLowPowerStandbyAllowlistRunnable);
                 mFgHandler.postDelayed(mRemoveFromLowPowerStandbyAllowlistRunnable,
@@ -861,7 +863,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         synchronized (mLock) {
             if (mLowPowerStandbyAllowlisted) {
                 mFgHandler.removeCallbacks(mRemoveFromLowPowerStandbyAllowlistRunnable);
-                mLowPowerStandbyControllerInternal.removeFromAllowlist(mCallingUid);
+                mLowPowerStandbyControllerInternal.removeFromAllowlist(mCallingUid,
+                        PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION);
                 mLowPowerStandbyAllowlisted = false;
             }
         }

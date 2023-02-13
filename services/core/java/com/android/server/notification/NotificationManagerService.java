@@ -579,9 +579,6 @@ public class NotificationManagerService extends SystemService {
     private float mInCallNotificationVolume;
     private Binder mCallNotificationToken = null;
 
-    @VisibleForTesting
-    protected boolean mSystemExemptFromDismissal = false;
-
     private SystemUiSystemPropertiesFlags.FlagResolver mFlagResolver;
 
     // used as a mutex for access to all active notifications & listeners
@@ -648,6 +645,7 @@ public class NotificationManagerService extends SystemService {
     private NotificationUsageStats mUsageStats;
     private boolean mLockScreenAllowSecureNotifications = true;
     boolean mAllowFgsDismissal = false;
+    boolean mSystemExemptFromDismissal = false;
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
@@ -2603,8 +2601,10 @@ public class NotificationManagerService extends SystemService {
         mAllowFgsDismissal = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED, true);
-        mSystemExemptFromDismissal =
-                mDpm.isApplicationExemptionsFlagEnabled();
+        mSystemExemptFromDismissal = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
+                /* name= */ "application_exemptions",
+                /* defaultValue= */ true);
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 new HandlerExecutor(mHandler),

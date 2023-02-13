@@ -84,6 +84,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.TransitionInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -945,43 +946,6 @@ public class ShellTransitionTests extends ShellTestCase {
         // Merged transition won't receive any lifecycle calls beyond ready
         verify(observer, times(0)).onTransitionStarting(transitToken3);
         verify(observer, times(0)).onTransitionFinished(eq(transitToken3), anyBoolean());
-    }
-
-    class TransitionInfoBuilder {
-        final TransitionInfo mInfo;
-
-        TransitionInfoBuilder(@WindowManager.TransitionType int type) {
-            this(type, 0 /* flags */);
-        }
-
-        TransitionInfoBuilder(@WindowManager.TransitionType int type,
-                @WindowManager.TransitionFlags int flags) {
-            mInfo = new TransitionInfo(type, flags);
-            mInfo.setRootLeash(createMockSurface(true /* valid */), 0, 0);
-        }
-
-        TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
-                RunningTaskInfo taskInfo) {
-            final TransitionInfo.Change change =
-                    new TransitionInfo.Change(null /* token */, createMockSurface(true));
-            change.setMode(mode);
-            change.setTaskInfo(taskInfo);
-            mInfo.addChange(change);
-            return this;
-        }
-
-        TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode) {
-            return addChange(mode, null /* taskInfo */);
-        }
-
-        TransitionInfoBuilder addChange(TransitionInfo.Change change) {
-            mInfo.addChange(change);
-            return this;
-        }
-
-        TransitionInfo build() {
-            return mInfo;
-        }
     }
 
     class ChangeBuilder {

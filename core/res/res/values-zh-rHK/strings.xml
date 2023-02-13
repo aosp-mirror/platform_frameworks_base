@@ -1358,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"已開啟 USB PTP 模式"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"已開啟 USB 的網絡共享模式"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"已開啟 USB MIDI 模式"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"已連接 USB 配件"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"輕按即可查看更多選項。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"正在為連接的裝置充電。輕按即可查看更多選項。"</string>
@@ -1706,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完成"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"關閉快速鍵"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快速鍵"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"色彩反轉"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"色彩校正"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"單手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"超暗"</string>
@@ -1857,7 +1860,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"第二個工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"第三個工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="clone_profile_label_badge" msgid="1871997694718793964">"複製<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"複製 <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消固定時必須提供解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"取消固定時必須輸入密碼"</string>
@@ -2313,9 +2316,9 @@
     <string name="mic_access_on_toast" msgid="2666925317663845156">"可以使用麥克風"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"已封鎖麥克風"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"雙螢幕"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"雙螢幕功能已啟用"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"已開啟雙螢幕功能"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在使用雙螢幕顯示內容"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"裝置過熱"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"手機過熱，因此無法使用雙螢幕功能"</string>
-    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"停用"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"由於手機過熱，雙螢幕功能無法使用"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"關閉"</string>
 </resources>

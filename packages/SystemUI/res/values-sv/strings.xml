@@ -95,8 +95,7 @@
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Filer"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> identifierade skärmbilden."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> och andra öppna appar identifierade skärmbilden."</string>
-    <!-- no translation found for app_clips_save_add_to_note (3460200751278069445) -->
-    <skip />
+    <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Lägg till i anteckning"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skärminspelare"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandlar skärminspelning"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Avisering om att skärminspelning pågår"</string>
@@ -890,6 +889,10 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Något gick fel. Försök igen."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Läser in"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"surfplatta"</string>
+    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
+    <skip />
+    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv, kolla appen"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Hittades inte"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Styrning är inte tillgänglig"</string>
@@ -926,6 +929,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Det gick inte att sända ut"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Det gick inte att spara. Försök igen."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Det gick inte att spara."</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Versionsnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versionsnumret har kopierats till urklipp."</string>
     <string name="basic_status" msgid="2315371112182658176">"Öppen konversation"</string>
@@ -1026,8 +1033,7 @@
     <string name="dream_overlay_status_bar_camera_off" msgid="5273073778969890823">"Kameran är av"</string>
     <string name="dream_overlay_status_bar_mic_off" msgid="8366534415013819396">"Mikrofonen är av"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kameran och mikrofonen är avstängda"</string>
-    <!-- no translation found for dream_overlay_status_bar_assistant_attention_indicator (4712565923771372690) -->
-    <skip />
+    <string name="dream_overlay_status_bar_assistant_attention_indicator" msgid="4712565923771372690">"Assistenten lyssnar"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# avisering}other{# aviseringar}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
     <string name="note_task_button_label" msgid="8718616095800343136">"Anteckningar"</string>
@@ -1043,10 +1049,8 @@
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Tillåt engångsåtkomst"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Tillåt inte"</string>
     <string name="log_access_confirmation_body" msgid="6883031912003112634">"I enhetsloggar registreras vad som händer på enheten. Appar kan använda dessa loggar för att hitta och åtgärda problem.\n\nVissa loggar kan innehålla känsliga uppgifter, så du ska bara bevilja appar du litar på åtkomst till alla enhetsloggar. \n\nEn app har åtkomst till sina egna loggar även om du inte ger den åtkomst till alla enhetsloggar. Enhetens tillverkare kan fortfarande ha åtkomst till vissa loggar eller viss information på enheten."</string>
-    <!-- no translation found for log_access_confirmation_learn_more (3134565480986328004) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_learn_more_at (5635666259505215905) -->
-    <skip />
+    <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Läs mer"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Läs mer på <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Öppna <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• appen har konfigurerats"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• minst ett kort har lagts till i Wallet"</string>

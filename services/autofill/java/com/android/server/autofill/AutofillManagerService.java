@@ -756,6 +756,29 @@ public final class AutofillManagerService
         return false;
     }
 
+    // Called by Shell command
+    boolean setTemporaryDetectionService(@UserIdInt int userId, @NonNull String serviceName,
+            int durationMs) {
+        Slog.i(mTag, "setTemporaryDetectionService(" + userId + ") to " + serviceName
+                + " for " + durationMs + "ms");
+        enforceCallingPermissionForManagement();
+
+        Objects.requireNonNull(serviceName);
+        if (durationMs > 100000) {
+            // limit duration
+        }
+
+        mFieldClassificationResolver.setTemporaryService(userId, serviceName, durationMs);
+
+        return false;
+    }
+
+    // Called by Shell command
+    void resetTemporaryDetectionService(@UserIdInt int userId) {
+        enforceCallingPermissionForManagement();
+        mFieldClassificationResolver.resetTemporaryService(userId);
+    }
+
     /**
      * Requests a count of saved passwords from the current service.
      *

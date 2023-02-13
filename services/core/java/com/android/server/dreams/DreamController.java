@@ -320,7 +320,7 @@ final class DreamController {
         try {
             service.asBinder().linkToDeath(mCurrentDream, 0);
             service.attach(mCurrentDream.mToken, mCurrentDream.mCanDoze,
-                    mCurrentDream.mDreamingStartedCallback);
+                    mCurrentDream.mIsPreviewMode, mCurrentDream.mDreamingStartedCallback);
         } catch (RemoteException ex) {
             Slog.e(TAG, "The dream service died unexpectedly.", ex);
             stopDream(true /*immediate*/, "attach failed");

@@ -1360,6 +1360,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP režimas naudojant USB įjungtas"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB įrenginio kaip modemo naudojimas įjungtas"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI režimas naudojant USB įjungtas"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Prijungtas USB priedas"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Palieskite, kad būtų rodoma daugiau parinkčių."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Įkraunamas prijungtas įrenginys. Palieskite, jei reikia daugiau parinkčių."</string>
@@ -1708,7 +1710,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Atlikta"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Išjungti spartųjį klavišą"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Naudoti spartųjį klavišą"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Spalvų inversija"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Spalvų taisymas"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Vienos rankos režimas"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Itin blanku"</string>
@@ -1859,8 +1862,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Darbo <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2-asis darbo <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3-iasis darbo <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <!-- no translation found for clone_profile_label_badge (1871997694718793964) -->
-    <skip />
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"„<xliff:g id="LABEL">%1$s</xliff:g>“ kopija"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Prašyti PIN kodo prieš atsegant"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Prašyti atrakinimo piešinio prieš atsegant"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Prašyti slaptažodžio prieš atsegant"</string>

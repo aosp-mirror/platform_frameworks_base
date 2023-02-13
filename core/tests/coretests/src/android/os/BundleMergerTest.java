@@ -26,6 +26,7 @@ import static android.os.BundleMerger.STRATEGY_FIRST;
 import static android.os.BundleMerger.STRATEGY_LAST;
 import static android.os.BundleMerger.STRATEGY_NUMBER_ADD;
 import static android.os.BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST;
+import static android.os.BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD;
 import static android.os.BundleMerger.STRATEGY_REJECT;
 import static android.os.BundleMerger.merge;
 
@@ -151,6 +152,14 @@ public class BundleMergerTest {
     }
 
     @Test
+    public void testStrategyNumberIncrementFirstAndAdd() throws Exception {
+        assertEquals(31, merge(STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD, 10, 20));
+        assertEquals(31, merge(STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD, 20, 10));
+        assertEquals(31L, merge(STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD, 10L, 20L));
+        assertEquals(31L, merge(STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD, 20L, 10L));
+    }
+
+    @Test
     public void testStrategyBooleanAnd() throws Exception {
         assertEquals(false, merge(STRATEGY_BOOLEAN_AND, false, false));
         assertEquals(false, merge(STRATEGY_BOOLEAN_AND, true, false));
@@ -212,6 +221,29 @@ public class BundleMergerTest {
         assertThrows(Exception.class, () -> {
             merge(STRATEGY_ARRAY_LIST_APPEND, 10, 20);
         });
+    }
+
+    @Test
+    public void testSetDefaultMergeStrategy() throws Exception {
+        final BundleMerger merger = new BundleMerger();
+        merger.setDefaultMergeStrategy(STRATEGY_FIRST);
+        merger.setMergeStrategy(Intent.EXTRA_INDEX, STRATEGY_COMPARABLE_MAX);
+
+        Bundle a = new Bundle();
+        a.putString(Intent.EXTRA_SUBJECT, "SubjectA");
+        a.putInt(Intent.EXTRA_INDEX, 10);
+
+        Bundle b = new Bundle();
+        b.putString(Intent.EXTRA_SUBJECT, "SubjectB");
+        b.putInt(Intent.EXTRA_INDEX, 20);
+
+        Bundle ab = merger.merge(a, b);
+        assertEquals("SubjectA", ab.getString(Intent.EXTRA_SUBJECT));
+        assertEquals(20, ab.getInt(Intent.EXTRA_INDEX));
+
+        Bundle ba = merger.merge(b, a);
+        assertEquals("SubjectB", ba.getString(Intent.EXTRA_SUBJECT));
+        assertEquals(20, ba.getInt(Intent.EXTRA_INDEX));
     }
 
     @Test
@@ -323,7 +355,7 @@ public class BundleMergerTest {
         merger.setMergeStrategy(DropBoxManager.EXTRA_TIME,
                 STRATEGY_COMPARABLE_MAX);
         merger.setMergeStrategy(DropBoxManager.EXTRA_DROPPED_COUNT,
-                STRATEGY_NUMBER_INCREMENT_FIRST);
+                STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD);
 
         final long now = System.currentTimeMillis();
         final Bundle a = new Bundle();
@@ -341,6 +373,11 @@ public class BundleMergerTest {
         c.putLong(DropBoxManager.EXTRA_TIME, now + 2000);
         c.putInt(DropBoxManager.EXTRA_DROPPED_COUNT, 0);
 
+        final Bundle d = new Bundle();
+        d.putString(DropBoxManager.EXTRA_TAG, "system_server_strictmode");
+        d.putLong(DropBoxManager.EXTRA_TIME, now + 3000);
+        d.putInt(DropBoxManager.EXTRA_DROPPED_COUNT, 5);
+
         final Bundle ab = merger.merge(a, b);
         assertEquals("system_server_strictmode", ab.getString(DropBoxManager.EXTRA_TAG));
         assertEquals(now + 1000, ab.getLong(DropBoxManager.EXTRA_TIME));
@@ -350,6 +387,11 @@ public class BundleMergerTest {
         assertEquals("system_server_strictmode", abc.getString(DropBoxManager.EXTRA_TAG));
         assertEquals(now + 2000, abc.getLong(DropBoxManager.EXTRA_TIME));
         assertEquals(2, abc.getInt(DropBoxManager.EXTRA_DROPPED_COUNT));
+
+        final Bundle abcd = merger.merge(abc, d);
+        assertEquals("system_server_strictmode", abcd.getString(DropBoxManager.EXTRA_TAG));
+        assertEquals(now + 3000, abcd.getLong(DropBoxManager.EXTRA_TIME));
+        assertEquals(8, abcd.getInt(DropBoxManager.EXTRA_DROPPED_COUNT));
     }
 
     private static ArrayList<Object> arrayListOf(Object... values) {

@@ -635,7 +635,7 @@ public final class PowerManagerService extends SystemService
     // Set of app ids that are temporarily allowed to acquire wakelocks due to high-pri message
     int[] mDeviceIdleTempWhitelist = new int[0];
 
-    // Set of app ids that are allowed to acquire wakelocks while low power standby is active
+    // Set of uids that are allowed to acquire wakelocks while low power standby is active
     int[] mLowPowerStandbyAllowlist = new int[0];
 
     private boolean mLowPowerStandbyActive;
@@ -1027,7 +1027,7 @@ public final class PowerManagerService extends SystemService
         }
 
         LowPowerStandbyController createLowPowerStandbyController(Context context, Looper looper) {
-            return new LowPowerStandbyController(context, looper, SystemClock::elapsedRealtime);
+            return new LowPowerStandbyController(context, looper);
         }
 
         AppOpsManager createAppOpsManager(Context context) {
@@ -3935,9 +3935,9 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    void setLowPowerStandbyAllowlistInternal(int[] appids) {
+    void setLowPowerStandbyAllowlistInternal(int[] uids) {
         synchronized (mLock) {
-            mLowPowerStandbyAllowlist = appids;
+            mLowPowerStandbyAllowlist = uids;
             if (mLowPowerStandbyActive) {
                 updateWakeLockDisabledStatesLocked();
             }
@@ -4095,7 +4095,7 @@ public final class PowerManagerService extends SystemService
                 }
                 if (mLowPowerStandbyActive) {
                     final UidState state = wakeLock.mUidState;
-                    if (Arrays.binarySearch(mLowPowerStandbyAllowlist, appid) < 0
+                    if (Arrays.binarySearch(mLowPowerStandbyAllowlist, wakeLock.mOwnerUid) < 0
                             && state.mProcState != ActivityManager.PROCESS_STATE_NONEXISTENT
                             && state.mProcState > ActivityManager.PROCESS_STATE_BOUND_TOP) {
                         disabled = true;
@@ -6145,6 +6145,82 @@ public final class PowerManagerService extends SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 mLowPowerStandbyController.forceActive(active);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        @RequiresPermission(anyOf = {
+                android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+                android.Manifest.permission.DEVICE_POWER
+        })
+        public void setLowPowerStandbyPolicy(@Nullable IPowerManager.LowPowerStandbyPolicy policy) {
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
+                    != PackageManager.PERMISSION_GRANTED) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+                        "setLowPowerStandbyPolicy");
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mLowPowerStandbyController.setPolicy(
+                        PowerManager.LowPowerStandbyPolicy.fromParcelable(policy));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        @RequiresPermission(anyOf = {
+                android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+                android.Manifest.permission.DEVICE_POWER
+        })
+        public IPowerManager.LowPowerStandbyPolicy getLowPowerStandbyPolicy() {
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
+                    != PackageManager.PERMISSION_GRANTED) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+                        "getLowPowerStandbyPolicy");
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return PowerManager.LowPowerStandbyPolicy.toParcelable(
+                        mLowPowerStandbyController.getPolicy());
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isExemptFromLowPowerStandby() {
+            final int callingUid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mLowPowerStandbyController.isPackageExempt(callingUid);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isReasonAllowedInLowPowerStandby(
+                @PowerManager.LowPowerStandbyAllowedReason int reason) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mLowPowerStandbyController.isAllowed(reason);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isFeatureAllowedInLowPowerStandby(String feature) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mLowPowerStandbyController.isAllowed(feature);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

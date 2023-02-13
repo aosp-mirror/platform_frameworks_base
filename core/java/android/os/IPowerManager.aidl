@@ -70,11 +70,29 @@ interface IPowerManager
     boolean isBatteryDischargePredictionPersonalized();
     boolean isDeviceIdleMode();
     boolean isLightDeviceIdleMode();
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = { android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER })")
     boolean isLowPowerStandbySupported();
     boolean isLowPowerStandbyEnabled();
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = { android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER })")
     void setLowPowerStandbyEnabled(boolean enabled);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = { android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER })")
     void setLowPowerStandbyActiveDuringMaintenance(boolean activeDuringMaintenance);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = { android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER })")
     void forceLowPowerStandbyActive(boolean active);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = { android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER })")
+    void setLowPowerStandbyPolicy(in @nullable LowPowerStandbyPolicy policy);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = { android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER })")
+    LowPowerStandbyPolicy getLowPowerStandbyPolicy();
+    boolean isExemptFromLowPowerStandby();
+    boolean isReasonAllowedInLowPowerStandby(int reason);
+    boolean isFeatureAllowedInLowPowerStandby(String feature);
+
+    parcelable LowPowerStandbyPolicy {
+        String identifier;
+        List<String> exemptPackages;
+        int allowedReasons;
+        List<String> allowedFeatures;
+    }
 
     @UnsupportedAppUsage
     void reboot(boolean confirm, String reason, boolean wait);

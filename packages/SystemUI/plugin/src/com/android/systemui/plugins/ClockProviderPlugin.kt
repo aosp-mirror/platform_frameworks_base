@@ -45,7 +45,7 @@ interface ClockProvider {
     /** Initializes and returns the target clock design */
     @Deprecated("Use overload with ClockSettings")
     fun createClock(id: ClockId): ClockController {
-        return createClock(ClockSettings(id, null, null))
+        return createClock(ClockSettings(id, null))
     }
 
     /** Initializes and returns the target clock design */
@@ -186,16 +186,21 @@ data class ClockMetadata(
 /** Structure for keeping clock-specific settings */
 @Keep
 data class ClockSettings(
-    var clockId: ClockId? = null,
-    var seedColor: Int? = null,
-    var _applied_timestamp: Long? = null,
+    val clockId: ClockId? = null,
+    val seedColor: Int? = null,
 ) {
+    var _applied_timestamp: Long? = null
+
     companion object {
         private val KEY_CLOCK_ID = "clockId"
         private val KEY_SEED_COLOR = "seedColor"
         private val KEY_TIMESTAMP = "_applied_timestamp"
 
-        fun serialize(setting: ClockSettings): String {
+        fun serialize(setting: ClockSettings?): String {
+            if (setting == null) {
+                return ""
+            }
+
             return JSONObject()
                 .put(KEY_CLOCK_ID, setting.clockId)
                 .put(KEY_SEED_COLOR, setting.seedColor)
@@ -203,13 +208,21 @@ data class ClockSettings(
                 .toString()
         }
 
-        fun deserialize(jsonStr: String): ClockSettings {
+        fun deserialize(jsonStr: String?): ClockSettings? {
+            if (jsonStr.isNullOrEmpty()) {
+                return null
+            }
+
             val json = JSONObject(jsonStr)
-            return ClockSettings(
-                json.getString(KEY_CLOCK_ID),
-                if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null,
-                if (!json.isNull(KEY_TIMESTAMP)) json.getLong(KEY_TIMESTAMP) else null
-            )
+            val result =
+                ClockSettings(
+                    json.getString(KEY_CLOCK_ID),
+                    if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null
+                )
+            if (!json.isNull(KEY_TIMESTAMP)) {
+                result._applied_timestamp = json.getLong(KEY_TIMESTAMP)
+            }
+            return result
         }
     }
 }

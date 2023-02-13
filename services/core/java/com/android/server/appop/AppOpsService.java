@@ -589,7 +589,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    /** Returned from {@link #verifyAndGetBypass(int, String, String, String)}. */
+    /** Returned from {@link #verifyAndGetBypass(int, String, String, String, boolean)}. */
     private static final class PackageVerificationResult {
 
         final RestrictionBypass bypass;
@@ -2433,7 +2433,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int checkPackage(int uid, String packageName) {
         Objects.requireNonNull(packageName);
         try {
-            verifyAndGetBypass(uid, packageName, null);
+            verifyAndGetBypass(uid, packageName, null, null, true);
             // When the caller is the system, it's possible that the packageName is the special
             // one (e.g., "root") which isn't actually existed.
             if (resolveUid(packageName) == uid
@@ -3645,11 +3645,19 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     /**
-     * @see #verifyAndGetBypass(int, String, String, String)
+     * @see #verifyAndGetBypass(int, String, String, String, boolean)
      */
     private @NonNull PackageVerificationResult verifyAndGetBypass(int uid, String packageName,
             @Nullable String attributionTag) {
         return verifyAndGetBypass(uid, packageName, attributionTag, null);
+    }
+
+    /**
+     * @see #verifyAndGetBypass(int, String, String, String, boolean)
+     */
+    private @NonNull PackageVerificationResult verifyAndGetBypass(int uid, String packageName,
+            @Nullable String attributionTag, @Nullable String proxyPackageName) {
+        return verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName, false);
     }
 
     /**
@@ -3661,12 +3669,14 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @param packageName The package the might belong to the uid
      * @param attributionTag attribution tag or {@code null} if no need to verify
      * @param proxyPackageName The proxy package, from which the attribution tag is to be pulled
+     * @param suppressErrorLogs Whether to print to logcat about nonmatching parameters
      *
      * @return PackageVerificationResult containing {@link RestrictionBypass} and whether the
      *         attribution tag is valid
      */
     private @NonNull PackageVerificationResult verifyAndGetBypass(int uid, String packageName,
-            @Nullable String attributionTag, @Nullable String proxyPackageName) {
+            @Nullable String attributionTag, @Nullable String proxyPackageName,
+            boolean suppressErrorLogs) {
         if (uid == Process.ROOT_UID) {
             // For backwards compatibility, don't check package name for root UID.
             return new PackageVerificationResult(null,
@@ -3720,8 +3730,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         if (pkgUid != Process.INVALID_UID) {
             if (pkgUid != UserHandle.getAppId(uid)) {
-                Slog.e(TAG, "Bad call made by uid " + callingUid + ". "
-                        + "Package \"" + packageName + "\" does not belong to uid " + uid + ".");
+                if (!suppressErrorLogs) {
+                    Slog.e(TAG, "Bad call made by uid " + callingUid + ". "
+                            + "Package \"" + packageName + "\" does not belong to uid " + uid
+                            + ".");
+                }
                 String otherUidMessage = DEBUG ? " but it is really " + pkgUid : " but it is not";
                 throw new SecurityException("Specified package \"" + packageName + "\" under uid "
                         +  UserHandle.getAppId(uid) + otherUidMessage);
@@ -3779,8 +3792,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         if (pkgUid != uid) {
-            Slog.e(TAG, "Bad call made by uid " + callingUid + ". "
-                    + "Package \"" + packageName + "\" does not belong to uid " + uid + ".");
+            if (!suppressErrorLogs) {
+                Slog.e(TAG, "Bad call made by uid " + callingUid + ". "
+                        + "Package \"" + packageName + "\" does not belong to uid " + uid + ".");
+            }
             String otherUidMessage = DEBUG ? " but it is really " + pkgUid : " but it is not";
             throw new SecurityException("Specified package \"" + packageName + "\" under uid " + uid
                     + otherUidMessage);
