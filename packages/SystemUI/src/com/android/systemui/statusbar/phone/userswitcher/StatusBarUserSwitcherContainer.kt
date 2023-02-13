@@ -21,7 +21,7 @@ import android.util.AttributeSet
 import android.widget.ImageView
 import android.widget.TextView
 import com.android.systemui.R
-import com.android.systemui.common.ui.view.LaunchableLinearLayout
+import com.android.systemui.animation.view.LaunchableLinearLayout
 
 class StatusBarUserSwitcherContainer(
     context: Context?,
