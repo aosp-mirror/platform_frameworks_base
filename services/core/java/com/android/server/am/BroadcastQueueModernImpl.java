@@ -595,18 +595,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final int cookie = traceBegin("enqueueBroadcast");
         r.applySingletonPolicy(mService);
 
-        final IntentFilter removeMatchingFilter = (r.options != null)
-                ? r.options.getRemoveMatchingFilter() : null;
-        if (removeMatchingFilter != null) {
-            final Predicate<Intent> removeMatching = removeMatchingFilter.asPredicate();
-            forEachMatchingBroadcast(QUEUE_PREDICATE_ANY, (testRecord, testIndex) -> {
-                // We only allow caller to remove broadcasts they enqueued
-                return (r.callingUid == testRecord.callingUid)
-                        && (r.userId == testRecord.userId)
-                        && removeMatching.test(testRecord.intent);
-            }, mBroadcastConsumerSkipAndCanceled, true);
-        }
-
         applyDeliveryGroupPolicy(r);
 
         r.enqueueTime = SystemClock.uptimeMillis();

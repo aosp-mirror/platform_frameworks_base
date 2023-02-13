@@ -765,40 +765,6 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
     }
 
     /**
-     * Verify that sending a broadcast that removes any matching pending
-     * broadcasts is applied as expected.
-     */
-    @Test
-    public void testRemoveMatchingFilter() {
-        final Intent screenOn = new Intent(Intent.ACTION_SCREEN_ON);
-        final BroadcastOptions optionsOn = BroadcastOptions.makeBasic();
-        optionsOn.setRemoveMatchingFilter(new IntentFilter(Intent.ACTION_SCREEN_OFF));
-
-        final Intent screenOff = new Intent(Intent.ACTION_SCREEN_OFF);
-        final BroadcastOptions optionsOff = BroadcastOptions.makeBasic();
-        optionsOff.setRemoveMatchingFilter(new IntentFilter(Intent.ACTION_SCREEN_ON));
-
-        // Halt all processing so that we get a consistent view
-        mHandlerThread.getLooper().getQueue().postSyncBarrier();
-
-        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, optionsOn));
-        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, optionsOff));
-        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOn, optionsOn));
-        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(screenOff, optionsOff));
-
-        // While we're here, give our health check some test coverage
-        mImpl.checkHealthLocked();
-
-        // Marching through the queue we should only have one SCREEN_OFF
-        // broadcast, since that's the last state we dispatched
-        final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
-                getUidForPackage(PACKAGE_GREEN));
-        queue.makeActiveNextPending();
-        assertEquals(Intent.ACTION_SCREEN_OFF, queue.getActive().intent.getAction());
-        assertTrue(queue.isEmpty());
-    }
-
-    /**
      * Verify that sending a broadcast with DELIVERY_GROUP_POLICY_MOST_RECENT works as expected.
      */
     @Test

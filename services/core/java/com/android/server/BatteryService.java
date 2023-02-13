@@ -190,20 +190,21 @@ public final class BatteryService extends SystemService {
     private ArrayDeque<Bundle> mBatteryLevelsEventQueue;
     private long mLastBatteryLevelChangedSentMs;
 
-    private Bundle mBatteryChangedOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_BATTERY_CHANGED)).setDeferUntilActive(true)
+    private Bundle mBatteryChangedOptions = BroadcastOptions.makeBasic()
+            .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+            .setDeferUntilActive(true)
             .toBundle();
-    private Bundle mPowerConnectedOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_POWER_DISCONNECTED)).setDeferUntilActive(true)
+    /** Used for both connected/disconnected, so match using key */
+    private Bundle mPowerOptions = BroadcastOptions.makeBasic()
+            .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+            .setDeliveryGroupMatchingKey("android", Intent.ACTION_POWER_CONNECTED)
+            .setDeferUntilActive(true)
             .toBundle();
-    private Bundle mPowerDisconnectedOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_POWER_CONNECTED)).setDeferUntilActive(true)
-            .toBundle();
-    private Bundle mBatteryLowOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_BATTERY_OKAY)).setDeferUntilActive(true)
-            .toBundle();
-    private Bundle mBatteryOkayOptions = BroadcastOptions.makeRemovingMatchingFilter(
-            new IntentFilter(Intent.ACTION_BATTERY_LOW)).setDeferUntilActive(true)
+    /** Used for both low/okay, so match using key */
+    private Bundle mBatteryOptions = BroadcastOptions.makeBasic()
+            .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+            .setDeliveryGroupMatchingKey("android", Intent.ACTION_BATTERY_OKAY)
+            .setDeferUntilActive(true)
             .toBundle();
 
     private MetricsLogger mMetricsLogger;
@@ -632,7 +633,7 @@ public final class BatteryService extends SystemService {
                     @Override
                     public void run() {
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mPowerConnectedOptions);
+                                mPowerOptions);
                     }
                 });
             }
@@ -644,7 +645,7 @@ public final class BatteryService extends SystemService {
                     @Override
                     public void run() {
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mPowerDisconnectedOptions);
+                                mPowerOptions);
                     }
                 });
             }
@@ -658,7 +659,7 @@ public final class BatteryService extends SystemService {
                     @Override
                     public void run() {
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mBatteryLowOptions);
+                                mBatteryOptions);
                     }
                 });
             } else if (mSentLowBatteryBroadcast &&
@@ -671,7 +672,7 @@ public final class BatteryService extends SystemService {
                     @Override
                     public void run() {
                         mContext.sendBroadcastAsUser(statusIntent, UserHandle.ALL, null,
-                                mBatteryOkayOptions);
+                                mBatteryOptions);
                     }
                 });
             }

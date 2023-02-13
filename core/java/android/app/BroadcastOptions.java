@@ -60,7 +60,6 @@ public class BroadcastOptions extends ComponentOptions {
     private String[] mRequireNoneOfPermissions;
     private long mRequireCompatChangeId = CHANGE_INVALID;
     private long mIdForResponseEvent;
-    private @Nullable IntentFilter mRemoveMatchingFilter;
     private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
     private @Nullable String mDeliveryGroupMatchingKey;
     private @Nullable BundleMerger mDeliveryGroupExtrasMerger;
@@ -190,12 +189,6 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.idForResponseEvent";
 
     /**
-     * Corresponds to {@link #setRemoveMatchingFilter}.
-     */
-    private static final String KEY_REMOVE_MATCHING_FILTER =
-            "android:broadcast.removeMatchingFilter";
-
-    /**
      * Corresponds to {@link #setDeliveryGroupPolicy(int)}.
      */
     private static final String KEY_DELIVERY_GROUP_POLICY =
@@ -274,18 +267,6 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
-     * {@hide}
-     * @deprecated use {@link #setDeliveryGroupMatchingFilter(IntentFilter)} instead.
-     */
-    @Deprecated
-    public static @NonNull BroadcastOptions makeRemovingMatchingFilter(
-            @NonNull IntentFilter removeMatchingFilter) {
-        BroadcastOptions opts = new BroadcastOptions();
-        opts.setRemoveMatchingFilter(removeMatchingFilter);
-        return opts;
-    }
-
-    /**
      * Creates a new {@code BroadcastOptions} with no options initially set.
      */
     public BroadcastOptions() {
@@ -315,8 +296,6 @@ public class BroadcastOptions extends ComponentOptions {
         mRequireNoneOfPermissions = opts.getStringArray(KEY_REQUIRE_NONE_OF_PERMISSIONS);
         mRequireCompatChangeId = opts.getLong(KEY_REQUIRE_COMPAT_CHANGE_ID, CHANGE_INVALID);
         mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
-        mRemoveMatchingFilter = opts.getParcelable(KEY_REMOVE_MATCHING_FILTER,
-                IntentFilter.class);
         mDeliveryGroupPolicy = opts.getInt(KEY_DELIVERY_GROUP_POLICY,
                 DELIVERY_GROUP_POLICY_ALL);
         mDeliveryGroupMatchingKey = opts.getString(KEY_DELIVERY_GROUP_KEY);
@@ -797,31 +776,6 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
-     * When enqueuing this broadcast, remove all pending broadcasts previously
-     * sent by this app which match the given filter.
-     * <p>
-     * For example, sending {@link Intent#ACTION_SCREEN_ON} would typically want
-     * to remove any pending {@link Intent#ACTION_SCREEN_OFF} broadcasts.
-     *
-     * @hide
-     * @deprecated use {@link #setDeliveryGroupMatchingFilter(IntentFilter)} instead.
-     */
-    @Deprecated
-    public void setRemoveMatchingFilter(@NonNull IntentFilter removeMatchingFilter) {
-        mRemoveMatchingFilter = Objects.requireNonNull(removeMatchingFilter);
-    }
-
-    /** @hide */
-    public void clearRemoveMatchingFilter() {
-        mRemoveMatchingFilter = null;
-    }
-
-    /** @hide */
-    public @Nullable IntentFilter getRemoveMatchingFilter() {
-        return mRemoveMatchingFilter;
-    }
-
-    /**
      * Set delivery group policy for this broadcast to specify how multiple broadcasts belonging to
      * the same delivery group has to be handled.
      *
@@ -1091,9 +1045,6 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mIdForResponseEvent != 0) {
             b.putLong(KEY_ID_FOR_RESPONSE_EVENT, mIdForResponseEvent);
-        }
-        if (mRemoveMatchingFilter != null) {
-            b.putParcelable(KEY_REMOVE_MATCHING_FILTER, mRemoveMatchingFilter);
         }
         if (mDeliveryGroupPolicy != DELIVERY_GROUP_POLICY_ALL) {
             b.putInt(KEY_DELIVERY_GROUP_POLICY, mDeliveryGroupPolicy);
