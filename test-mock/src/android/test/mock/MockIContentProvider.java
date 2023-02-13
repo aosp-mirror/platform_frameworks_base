@@ -61,16 +61,30 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     @Override
-    public String getType(Uri url) {
+    public String getType(@NonNull AttributionSource attributionSource, Uri url) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public void getTypeAsync(Uri uri, RemoteCallback remoteCallback) {
+    public void getTypeAsync(@NonNull AttributionSource attributionSource,
+            Uri uri, RemoteCallback remoteCallback) {
         AsyncTask.SERIAL_EXECUTOR.execute(() -> {
             final Bundle bundle = new Bundle();
-            bundle.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getType(uri));
+            bundle.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getType(attributionSource,
+                    uri));
+            remoteCallback.sendResult(bundle);
+        });
+    }
+    public String getTypeAnonymous(Uri url) {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+    @Override
+    @SuppressWarnings("deprecation")
+    public void getTypeAnonymousAsync(Uri uri, RemoteCallback remoteCallback) {
+        AsyncTask.SERIAL_EXECUTOR.execute(() -> {
+            final Bundle bundle = new Bundle();
+            bundle.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getTypeAnonymous(uri));
             remoteCallback.sendResult(bundle);
         });
     }
