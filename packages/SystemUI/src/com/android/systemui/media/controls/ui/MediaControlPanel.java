@@ -346,6 +346,11 @@ public class MediaControlPanel {
         mSeekBarViewModel.setListening(listening);
     }
 
+    @VisibleForTesting
+    public boolean getListening() {
+        return mSeekBarViewModel.getListening();
+    }
+
     /** Sets whether the user is touching the seek bar to change the track position. */
     private void setIsScrubbing(boolean isScrubbing) {
         if (mMediaData == null || mMediaData.getSemanticActions() == null) {

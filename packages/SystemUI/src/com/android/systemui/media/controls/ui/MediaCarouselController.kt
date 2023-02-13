@@ -164,13 +164,13 @@ constructor(
                 mediaCarouselScrollHandler.scrollToStart()
             }
         }
-    private var currentlyExpanded = true
+
+    @VisibleForTesting
+    var currentlyExpanded = true
         set(value) {
             if (field != value) {
                 field = value
-                for (player in MediaPlayerData.players()) {
-                    player.setListening(field)
-                }
+                updateSeekbarListening(mediaCarouselScrollHandler.visibleToUser)
             }
         }
 
@@ -259,6 +259,7 @@ constructor(
                 executor,
                 this::onSwipeToDismiss,
                 this::updatePageIndicatorLocation,
+                this::updateSeekbarListening,
                 this::closeGuts,
                 falsingCollector,
                 falsingManager,
@@ -618,7 +619,9 @@ constructor(
                     )
                 newPlayer.mediaViewHolder?.player?.setLayoutParams(lp)
                 newPlayer.bindPlayer(data, key)
-                newPlayer.setListening(currentlyExpanded)
+                newPlayer.setListening(
+                    mediaCarouselScrollHandler.visibleToUser && currentlyExpanded
+                )
                 MediaPlayerData.addMediaPlayer(
                     key,
                     data,
@@ -912,6 +915,13 @@ constructor(
         pageIndicator.translationY =
             (mediaCarousel.measuredHeight - pageIndicator.height - layoutParams.bottomMargin)
                 .toFloat()
+    }
+
+    /** Update listening to seekbar. */
+    private fun updateSeekbarListening(visibleToUser: Boolean) {
+        for (player in MediaPlayerData.players()) {
+            player.setListening(visibleToUser && currentlyExpanded)
+        }
     }
 
     /** Update the dimension of this carousel. */
