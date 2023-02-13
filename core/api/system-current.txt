@@ -2262,7 +2262,6 @@ package android.app.search {
     method public void notifyEvent(@NonNull android.app.search.Query, @NonNull android.app.search.SearchTargetEvent);
     method @Nullable public void query(@NonNull android.app.search.Query, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.search.SearchTarget>>);
     method public void registerEmptyQueryResultUpdateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.app.search.SearchSession.Callback);
-    method public void requestEmptyQueryResultUpdate();
     method public void unregisterEmptyQueryResultUpdateCallback(@NonNull android.app.search.SearchSession.Callback);
   }
 
@@ -12671,7 +12670,6 @@ package android.service.search {
     method @MainThread public abstract void onDestroy(@NonNull android.app.search.SearchSessionId);
     method @MainThread public abstract void onNotifyEvent(@NonNull android.app.search.SearchSessionId, @NonNull android.app.search.Query, @NonNull android.app.search.SearchTargetEvent);
     method @MainThread public abstract void onQuery(@NonNull android.app.search.SearchSessionId, @NonNull android.app.search.Query, @NonNull java.util.function.Consumer<java.util.List<android.app.search.SearchTarget>>);
-    method @MainThread public void onRequestEmptyQueryResultUpdate(@NonNull android.app.search.SearchSessionId);
     method public void onSearchSessionCreated(@NonNull android.app.search.SearchContext, @NonNull android.app.search.SearchSessionId);
     method @MainThread public void onStartUpdateEmptyQueryResult();
     method @MainThread public void onStopUpdateEmptyQueryResult();

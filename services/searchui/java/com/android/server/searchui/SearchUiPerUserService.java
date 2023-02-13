@@ -181,16 +181,6 @@ public class SearchUiPerUserService extends
     }
 
     /**
-     * Requests a new set of search targets for empty query result used for zero state.
-     */
-    @GuardedBy("mLock")
-    public void requestEmptyQueryResultUpdateLocked(@NonNull SearchSessionId sessionId) {
-        final SearchSessionInfo sessionInfo = mSessionInfos.get(sessionId);
-        if (sessionInfo == null) return;
-        resolveService(sessionId, s->s.onRequestEmptyQueryResultUpdate(sessionId));
-    }
-
-    /**
      * Notifies the service of the end of an existing search session.
      */
     @GuardedBy("mLock")
