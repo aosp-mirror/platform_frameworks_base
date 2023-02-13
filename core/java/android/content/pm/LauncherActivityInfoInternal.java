@@ -21,6 +21,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 /**
  * @hide
@@ -30,23 +31,27 @@ public class LauncherActivityInfoInternal implements Parcelable {
     @NonNull private ActivityInfo mActivityInfo;
     @NonNull private ComponentName mComponentName;
     @NonNull private IncrementalStatesInfo mIncrementalStatesInfo;
+    @NonNull private UserHandle mUser;
 
     /**
      * @param info ActivityInfo from which to create the LauncherActivityInfo.
      * @param incrementalStatesInfo The package's states.
+     * @param user The user the activity info belongs to.
      */
     public LauncherActivityInfoInternal(@NonNull ActivityInfo info,
-            @NonNull IncrementalStatesInfo incrementalStatesInfo) {
+            @NonNull IncrementalStatesInfo incrementalStatesInfo,
+            @NonNull UserHandle user) {
         mActivityInfo = info;
         mComponentName = new ComponentName(info.packageName, info.name);
         mIncrementalStatesInfo = incrementalStatesInfo;
+        mUser = user;
     }
 
     public LauncherActivityInfoInternal(Parcel source) {
-        mActivityInfo = source.readParcelable(ActivityInfo.class.getClassLoader(), android.content.pm.ActivityInfo.class);
+        mActivityInfo = source.readTypedObject(ActivityInfo.CREATOR);
         mComponentName = new ComponentName(mActivityInfo.packageName, mActivityInfo.name);
-        mIncrementalStatesInfo = source.readParcelable(
-                IncrementalStatesInfo.class.getClassLoader(), android.content.pm.IncrementalStatesInfo.class);
+        mIncrementalStatesInfo = source.readTypedObject(IncrementalStatesInfo.CREATOR);
+        mUser = source.readTypedObject(UserHandle.CREATOR);
     }
 
     public ComponentName getComponentName() {
@@ -55,6 +60,10 @@ public class LauncherActivityInfoInternal implements Parcelable {
 
     public ActivityInfo getActivityInfo() {
         return mActivityInfo;
+    }
+
+    public UserHandle getUser() {
+        return mUser;
     }
 
     public IncrementalStatesInfo getIncrementalStatesInfo() {
@@ -68,8 +77,9 @@ public class LauncherActivityInfoInternal implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mActivityInfo, 0);
-        dest.writeParcelable(mIncrementalStatesInfo, 0);
+        dest.writeTypedObject(mActivityInfo, flags);
+        dest.writeTypedObject(mIncrementalStatesInfo, flags);
+        dest.writeTypedObject(mUser, flags);
     }
 
     public static final @android.annotation.NonNull Creator<LauncherActivityInfoInternal> CREATOR =

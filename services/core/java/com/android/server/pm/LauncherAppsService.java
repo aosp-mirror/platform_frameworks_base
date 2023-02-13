@@ -39,6 +39,7 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -85,6 +86,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -107,6 +109,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
@@ -623,7 +626,7 @@ public class LauncherAppsService extends SystemService {
                     // package does not exist; should not happen
                     return null;
                 }
-                return new LauncherActivityInfoInternal(activityInfo, incrementalStatesInfo);
+                return new LauncherActivityInfoInternal(activityInfo, incrementalStatesInfo, user);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -676,7 +679,7 @@ public class LauncherAppsService extends SystemService {
                     continue;
                 }
                 results.add(new LauncherActivityInfoInternal(ri.activityInfo,
-                        incrementalStatesInfo));
+                        incrementalStatesInfo, user));
             }
             return results;
         }
@@ -1075,6 +1078,55 @@ public class LauncherAppsService extends SystemService {
             verifyCallingPackage(callingPackage);
             return mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
                     callingPackage, injectBinderCallingPid(), injectBinderCallingUid());
+        }
+
+        @Override
+        @NonNull
+        public Map<String, LauncherActivityInfoInternal> getActivityOverrides(String callingPackage,
+                int userId) {
+            ensureShortcutPermission(callingPackage);
+            int callingUid = Binder.getCallingUid();
+            final long callerIdentity = Binder.clearCallingIdentity();
+            try {
+                Map<String, LauncherActivityInfoInternal> shortcutOverridesInfo = new ArrayMap<>();
+                UserHandle managedUserHandle = getManagedProfile(userId);
+                if (managedUserHandle == null) {
+                    return shortcutOverridesInfo;
+                }
+
+                List<String> packagesToOverride =
+                        DevicePolicyCache.getInstance().getLauncherShortcutOverrides();
+                for (String packageName : packagesToOverride) {
+                    Intent intent = new Intent(Intent.ACTION_MAIN)
+                            .addCategory(Intent.CATEGORY_LAUNCHER)
+                            .setPackage(packageName);
+
+                    List<LauncherActivityInfoInternal> possibleShortcutOverrides =
+                            queryIntentLauncherActivities(
+                                    intent,
+                                    callingUid,
+                                    managedUserHandle
+                            );
+
+                    if (!possibleShortcutOverrides.isEmpty()) {
+                        shortcutOverridesInfo.put(packageName, possibleShortcutOverrides.get(0));
+                    }
+                }
+                return shortcutOverridesInfo;
+            } finally {
+                Binder.restoreCallingIdentity(callerIdentity);
+            }
+        }
+
+
+        @Nullable
+        private UserHandle getManagedProfile(int userId) {
+            for (UserInfo profile : mUm.getProfiles(userId)) {
+                if (profile.isManagedProfile()) {
+                    return profile.getUserHandle();
+                }
+            }
+            return null;
         }
 
         @Override

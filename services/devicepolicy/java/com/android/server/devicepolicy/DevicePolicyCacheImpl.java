@@ -24,6 +24,8 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -51,6 +53,11 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
 
     @GuardedBy("mLock")
     private final SparseIntArray mPermissionPolicy = new SparseIntArray();
+
+    @GuardedBy("mLock")
+    private List<String> mLauncherShortcutOverrides =
+            new ArrayList<>();
+
 
     /** Maps to {@code ActiveAdmin.mAdminCanGrantSensorsPermissions}. */
     private final AtomicBoolean mCanGrantSensorsPermissions = new AtomicBoolean(false);
@@ -122,6 +129,22 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
         mCanGrantSensorsPermissions.set(canGrant);
     }
 
+    @Override
+    public List<String> getLauncherShortcutOverrides() {
+        synchronized (mLock) {
+            return new ArrayList<>(mLauncherShortcutOverrides);
+        }
+    }
+
+    /**
+     * Sets a list of packages for which shortcuts should be replaced by their badged version.
+     */
+    public void setLauncherShortcutOverrides(List<String> launcherShortcutOverrides) {
+        synchronized (mLock) {
+            mLauncherShortcutOverrides = new ArrayList<>(launcherShortcutOverrides);
+        }
+    }
+
     /** Dump content */
     public void dump(IndentingPrintWriter pw) {
         synchronized (mLock) {
@@ -131,6 +154,8 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
             pw.println("Password quality: " + mPasswordQuality);
             pw.println("Permission policy: " + mPermissionPolicy);
             pw.println("Admin can grant sensors permission: " + mCanGrantSensorsPermissions.get());
+            pw.print("Shortcuts overrides: ");
+            pw.println(mLauncherShortcutOverrides);
             pw.decreaseIndent();
         }
     }

@@ -33,6 +33,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.LauncherActivityInfoInternal;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -114,4 +115,5 @@ interface ILauncherApps {
 
     String getShortcutIconUri(String callingPackage, String packageName, String shortcutId,
             int userId);
+    Map<String, LauncherActivityInfoInternal> getActivityOverrides(String callingPackage, int userId);
 }

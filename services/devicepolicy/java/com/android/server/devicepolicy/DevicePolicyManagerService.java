@@ -3518,15 +3518,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 userId == UserHandle.USER_SYSTEM ? UserHandle.USER_ALL : userId);
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
-
         final List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs;
+        boolean isManagedSubscription;
+
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
             preferentialNetworkServiceConfigs = owner != null
                     ? owner.mPreferentialNetworkServiceConfigs
                     : List.of(PreferentialNetworkServiceConfig.DEFAULT);
+
+            isManagedSubscription = owner != null && owner.mManagedSubscriptionsPolicy != null
+                    && owner.mManagedSubscriptionsPolicy.getPolicyType()
+                    == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS;
         }
         updateNetworkPreferenceForUser(userId, preferentialNetworkServiceConfigs);
+
+        if (isManagedSubscription) {
+            String defaultDialerPackageName = getDefaultRoleHolderPackageName(
+                    com.android.internal.R.string.config_defaultDialer);
+            String defaultSmsPackageName = getDefaultRoleHolderPackageName(
+                    com.android.internal.R.string.config_defaultSms);
+            updateDialerAndSmsManagedShortcutsOverrideCache(defaultDialerPackageName,
+                    defaultSmsPackageName);
+        }
 
         startOwnerService(userId, "start-user");
         if (isDevicePolicyEngineEnabled()) {
@@ -7610,6 +7624,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         if (isWorkProfileTelephonyFlagEnabled()) {
             clearManagedSubscriptionsPolicy();
+            clearLauncherShortcutOverrides();
             updateTelephonyCrossProfileIntentFilters(parentId, UserHandle.USER_NULL, false);
         }
         Slogf.i(LOG_TAG, "Cleaning up device-wide policies done.");
@@ -7625,6 +7640,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         for (int subId : subscriptionIds) {
             subscriptionManager.setSubscriptionUserHandle(subId, null);
         }
+    }
+
+    private void clearLauncherShortcutOverrides() {
+        mPolicyCache.setLauncherShortcutOverrides(new ArrayList<>());
     }
 
     private void updateTelephonyCrossProfileIntentFilters(int parentUserId, int profileUserId,
@@ -22745,10 +22764,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } else {
                 Slogf.w(LOG_TAG, "Couldn't install sms app, sms app package is null");
             }
+
+            updateDialerAndSmsManagedShortcutsOverrideCache(defaultDialerPackageName,
+                    defaultSmsPackageName);
         } catch (RemoteException re) {
             // shouldn't happen
             Slogf.wtf(LOG_TAG, "Failed to install dialer/sms app", re);
         }
+    }
+
+    private void updateDialerAndSmsManagedShortcutsOverrideCache(
+            String defaultDialerPackageName, String defaultSmsPackageName) {
+
+        List<String> shortcutOverrides = new ArrayList<>();
+
+        if (defaultDialerPackageName != null) {
+            shortcutOverrides.add(defaultDialerPackageName);
+        }
+
+        if (defaultSmsPackageName != null) {
+            shortcutOverrides.add(defaultSmsPackageName);
+        }
+        mPolicyCache.setLauncherShortcutOverrides(shortcutOverrides);
     }
 
     private void registerListenerToAssignSubscriptionsToUser(int userId) {
