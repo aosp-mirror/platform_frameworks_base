@@ -137,6 +137,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      <refreshRate>
  *        <lowerBlockingZoneConfigs>
  *          <defaultRefreshRate>75</defaultRefreshRate>
+ *          <defaultRefreshRateInHbmHdr>75</defaultRefreshRateInHbmHdr>
+ *          <defaultRefreshRateInHbmSunlight>75</defaultRefreshRateInHbmSunlight>
  *          <blockingZoneThreshold>
  *            <displayBrightnessPoint>
  *              <lux>50</lux>
@@ -404,6 +406,7 @@ public class DisplayDeviceConfig {
     private static final long STABLE_FLAG = 1L << 62;
     private static final int DEFAULT_PEAK_REFRESH_RATE = 0;
     private static final int DEFAULT_REFRESH_RATE = 60;
+    private static final int DEFAULT_REFRESH_RATE_IN_HBM = 0;
     private static final int DEFAULT_LOW_REFRESH_RATE = 60;
     private static final int DEFAULT_HIGH_REFRESH_RATE = 0;
     private static final int[] DEFAULT_BRIGHTNESS_THRESHOLDS = new int[]{};
@@ -584,6 +587,15 @@ public class DisplayDeviceConfig {
      */
     private int mDefaultRefreshRate = DEFAULT_REFRESH_RATE;
 
+    /**
+     * Default refresh rate while the device has high brightness mode enabled for HDR.
+     */
+    private int mDefaultRefreshRateInHbmHdr = DEFAULT_REFRESH_RATE_IN_HBM;
+
+    /**
+     * Default refresh rate while the device has high brightness mode enabled for Sunlight.
+     */
+    private int mDefaultRefreshRateInHbmSunlight = DEFAULT_REFRESH_RATE_IN_HBM;
     /**
      * Default refresh rate in the high zone defined by brightness and ambient thresholds.
      * If non-positive, then the refresh rate is unchanged even if thresholds are configured.
@@ -1324,8 +1336,7 @@ public class DisplayDeviceConfig {
      * @return Default refresh rate while the device has high brightness mode enabled for HDR.
      */
     public int getDefaultRefreshRateInHbmHdr() {
-        return mContext.getResources().getInteger(
-            R.integer.config_defaultRefreshRateInHbmHdr);
+        return mDefaultRefreshRateInHbmHdr;
     }
 
     /**
@@ -1333,8 +1344,7 @@ public class DisplayDeviceConfig {
      * high lux.
      */
     public int getDefaultRefreshRateInHbmSunlight() {
-        return mContext.getResources().getInteger(
-            R.integer.config_defaultRefreshRateInHbmSunlight);
+        return mDefaultRefreshRateInHbmSunlight;
     }
 
     /**
@@ -1490,6 +1500,8 @@ public class DisplayDeviceConfig {
                 + ", mDefaultHighBlockingZoneRefreshRate= " + mDefaultHighBlockingZoneRefreshRate
                 + ", mDefaultPeakRefreshRate= " + mDefaultPeakRefreshRate
                 + ", mDefaultRefreshRate= " + mDefaultRefreshRate
+                + ", mDefaultRefreshRateInHbmHdr= " + mDefaultRefreshRateInHbmHdr
+                + ", mDefaultRefreshRateInHbmSunlight= " + mDefaultRefreshRateInHbmSunlight
                 + ", mLowDisplayBrightnessThresholds= "
                 + Arrays.toString(mLowDisplayBrightnessThresholds)
                 + ", mLowAmbientBrightnessThresholds= "
@@ -1805,6 +1817,7 @@ public class DisplayDeviceConfig {
                         : refreshRateConfigs.getHigherBlockingZoneConfigs();
         loadPeakDefaultRefreshRate(refreshRateConfigs);
         loadDefaultRefreshRate(refreshRateConfigs);
+        loadDefaultRefreshRateInHbm(refreshRateConfigs);
         loadLowerRefreshRateBlockingZones(lowerBlockingZoneConfig);
         loadHigherRefreshRateBlockingZones(higherBlockingZoneConfig);
     }
@@ -1826,6 +1839,26 @@ public class DisplayDeviceConfig {
         } else {
             mDefaultRefreshRate =
                 refreshRateConfigs.getDefaultRefreshRate().intValue();
+        }
+    }
+
+    private void loadDefaultRefreshRateInHbm(RefreshRateConfigs refreshRateConfigs) {
+        if (refreshRateConfigs != null
+                && refreshRateConfigs.getDefaultRefreshRateInHbmHdr() != null) {
+            mDefaultRefreshRateInHbmHdr = refreshRateConfigs.getDefaultRefreshRateInHbmHdr()
+                    .intValue();
+        } else {
+            mDefaultRefreshRateInHbmHdr = mContext.getResources().getInteger(
+                    R.integer.config_defaultRefreshRateInHbmHdr);
+        }
+
+        if (refreshRateConfigs != null
+                && refreshRateConfigs.getDefaultRefreshRateInHbmSunlight() != null) {
+            mDefaultRefreshRateInHbmSunlight =
+                    refreshRateConfigs.getDefaultRefreshRateInHbmSunlight().intValue();
+        } else {
+            mDefaultRefreshRateInHbmSunlight = mContext.getResources().getInteger(
+                R.integer.config_defaultRefreshRateInHbmSunlight);
         }
     }
 
