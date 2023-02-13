@@ -26,7 +26,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.phone.StatusBarIconController
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityInputLogger
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlots
@@ -57,7 +57,7 @@ class ConnectivityRepositoryImpl @Inject constructor(
     private val connectivitySlots: ConnectivitySlots,
     context: Context,
     dumpManager: DumpManager,
-    logger: ConnectivityPipelineLogger,
+    logger: ConnectivityInputLogger,
     @Application scope: CoroutineScope,
     tunerService: TunerService,
 ) : ConnectivityRepository, Dumpable {
@@ -77,7 +77,7 @@ class ConnectivityRepositoryImpl @Inject constructor(
                 if (key != HIDDEN_ICONS_TUNABLE_KEY) {
                     return
                 }
-                logger.logInputChange("onTuningChanged", newHideList)
+                logger.logTuningChanged(newHideList)
 
                 val outputList = newHideList?.split(",")?.toSlotSet(connectivitySlots)
                     ?: defaultHiddenIcons

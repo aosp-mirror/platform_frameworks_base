@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.pipeline.shared.data.repository
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.ConnectivityInputLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlots
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl.Companion.DEFAULT_HIDDEN_ICONS_RESOURCE
@@ -52,7 +52,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var connectivitySlots: ConnectivitySlots
     @Mock private lateinit var dumpManager: DumpManager
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var logger: ConnectivityInputLogger
     private lateinit var scope: CoroutineScope
     @Mock private lateinit var tunerService: TunerService
 
