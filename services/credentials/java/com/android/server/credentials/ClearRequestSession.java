@@ -83,7 +83,10 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     }
 
     @Override
-    public void onFinalResponseReceived(ComponentName componentName, Void response) {
+    public void onFinalResponseReceived(
+            ComponentName componentName,
+            Void response) {
+        setChosenMetric(componentName);
         respondToClientWithResponseAndFinish();
     }
 
@@ -114,6 +117,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
         Log.i(TAG, "respondToClientWithResponseAndFinish");
         if (isSessionCancelled()) {
             // TODO: Differentiate btw cancelled and false
+            mChosenProviderMetric.setChosenProviderStatus(
+                    MetricUtilities.METRICS_PROVIDER_STATUS_FINAL_SUCCESS);
             logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ true);
             finishSession(/*propagateCancellation=*/true);
             return;
@@ -122,6 +127,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
             mClientCallback.onSuccess();
             logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ true);
         } catch (RemoteException e) {
+            mChosenProviderMetric.setChosenProviderStatus(
+                    MetricUtilities.METRICS_PROVIDER_STATUS_FINAL_FAILURE);
             Log.i(TAG, "Issue while propagating the response to the client");
             logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ false);
         }

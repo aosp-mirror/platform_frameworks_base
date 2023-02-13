@@ -357,7 +357,6 @@ public final class CredentialManagerService
             final int userId = UserHandle.getCallingUserId();
             final int callingUid = Binder.getCallingUid();
             enforceCallingPackage(callingPackage, callingUid);
-
             // New request session, scoped for this request only.
             final GetRequestSession session =
                     new GetRequestSession(
@@ -497,6 +496,7 @@ public final class CredentialManagerService
             Log.i(TAG, "starting executeCreateCredential with callingPackage: "
                     + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
+
             final int userId = UserHandle.getCallingUserId();
             final int callingUid = Binder.getCallingUid();
             enforceCallingPackage(callingPackage, callingUid);
