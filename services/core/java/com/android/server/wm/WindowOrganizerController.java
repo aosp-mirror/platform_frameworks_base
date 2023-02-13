@@ -177,7 +177,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         if (t == null) {
             throw new IllegalArgumentException("Null transaction passed to applySyncTransaction");
         }
-        enforceTaskPermission("applySyncTransaction()", t);
+        enforceTaskPermission("applySyncTransaction()");
         final CallerInfo caller = new CallerInfo();
         final long ident = Binder.clearCallingIdentity();
         try {
