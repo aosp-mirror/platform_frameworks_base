@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.notification;
-
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
+package com.android.internal.config.sysui;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestFlagResolver implements SystemUiSystemPropertiesFlags.FlagResolver {
-    private Map<SystemUiSystemPropertiesFlags.Flag, Boolean> mOverrides = new HashMap<>();
+public class TestableFlagResolver implements SystemUiSystemPropertiesFlags.FlagResolver {
+    private Map<String, Boolean> mOverrides = new HashMap<>();
 
     @Override
     public boolean isEnabled(SystemUiSystemPropertiesFlags.Flag flag) {
-        return mOverrides.getOrDefault(flag, flag.mDefaultValue);
+        return mOverrides.getOrDefault(flag.mSysPropKey, flag.mDefaultValue);
     }
 
     public void setFlagOverride(SystemUiSystemPropertiesFlags.Flag flag, boolean isEnabled) {
-        mOverrides.put(flag, isEnabled);
+        mOverrides.put(flag.mSysPropKey, isEnabled);
     }
 }
