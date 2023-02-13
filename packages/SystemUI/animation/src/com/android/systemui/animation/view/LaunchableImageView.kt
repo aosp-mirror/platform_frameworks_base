@@ -15,7 +15,7 @@
  *
  */
 
-package com.android.systemui.common.ui.view
+package com.android.systemui.animation.view
 
 import android.content.Context
 import android.util.AttributeSet
@@ -23,6 +23,7 @@ import android.widget.ImageView
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
 
+/** An [ImageView] that also implements [LaunchableView]. */
 class LaunchableImageView : ImageView, LaunchableView {
     private val delegate =
         LaunchableViewDelegate(
