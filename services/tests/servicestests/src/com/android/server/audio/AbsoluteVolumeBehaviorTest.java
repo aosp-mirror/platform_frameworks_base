@@ -39,6 +39,7 @@ import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.VolumeInfo;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -52,6 +53,7 @@ import org.junit.rules.TestRule;
 import java.util.Collections;
 import java.util.List;
 
+@Presubmit
 public class AbsoluteVolumeBehaviorTest {
     @Rule
     public TestRule compatChangeRule = new CoreCompatChangeRule();
