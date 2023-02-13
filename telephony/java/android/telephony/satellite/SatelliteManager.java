@@ -47,11 +47,7 @@ import java.util.function.Consumer;
 
 /**
  * Manages satellite operations such as provisioning, pointing, messaging, location sharing, etc.
- * To get the object, call {@link Context#getSystemService(String)}. This object is associated
- * with the {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} and the satellite service is
- * associated with the device rather than a subscription.
- * To create an instance of {@link SatelliteManager} associated with a specific subscription ID,
- * call {@link #createForSubscriptionId(int)}.
+ * To get the object, call {@link Context#getSystemService(String)}.
  *
  * @hide
  */
@@ -59,13 +55,6 @@ import java.util.function.Consumer;
 public class SatelliteManager {
     private static final String TAG = "SatelliteManager";
 
-    /**
-     * The subscription ID for this SatelliteManager. If the
-     * {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} is used, the satellite service will be
-     * associated with the device rather than a subscription. If an active subscription ID
-     * {@link SubscriptionManager#isActiveSubId(int)} is provided, the satellite service will be
-     * associated with that active subscription.
-     */
     private final int mSubId;
 
     /**
@@ -104,243 +93,122 @@ public class SatelliteManager {
     }
 
     /**
-     * Successful response.
+     * The request was successfully processed.
      */
-    public static final int SATELLITE_SERVICE_SUCCESS = 0;
-    /**
-     * Satellite server is not reachable.
-     */
-    public static final int SATELLITE_SERVICE_SERVER_NOT_REACHABLE = 1;
-    /**
-     * Error received from the satellite server.
-     */
-    public static final int SATELLITE_SERVICE_SERVER_ERROR = 2;
-    /**
-     * Telephony is not in a valid state to serve requests from clients.
-     */
-    public static final int SATELLITE_SERVICE_INVALID_TELEPHONY_STATE = 3;
-    /**
-     * RIL layer got an unexpected or incorrect response from modem for a request.
-     */
-    public static final int SATELLITE_SERVICE_UNEXPECTED_MODEM_RESPONSE = 4;
-    /**
-     * An error in the RIL layer occurs when processing a request. This generic RIL error should be
-     * used only when other RIL specific errors cannot be used.
-     */
-    public static final int SATELLITE_SERVICE_RIL_ERROR = 5;
-    /**
-     * RIL layer has received a request with invalid arguments from the Telephony framework.
-     */
-    public static final int SATELLITE_SERVICE_INVALID_ARGUMENTS = 6;
-    /**
-     * Satellite modem is not in a valid state to serve requests from clients.
-     */
-    public static final int SATELLITE_SERVICE_INVALID_MODEM_STATE = 7;
-    /**
-     * Invalid SIM state.
-     */
-    public static final int SATELLITE_SERVICE_INVALID_SIM_STATE = 8;
-    /**
-     * RIL layer is not in a valid state to serve requests from clients.
-     */
-    public static final int SATELLITE_SERVICE_INVALID_RIL_STATE = 9;
-    /**
-     * Radio did not start or is resetting.
-     */
-    public static final int SATELLITE_SERVICE_RADIO_NOT_AVAILABLE = 10;
-    /**
-     * The request is not supported by either the satellite modem or the network.
-     */
-    public static final int SATELLITE_SERVICE_REQUEST_NOT_SUPPORTED = 11;
-    /**
-     * Requests denied by the satellite modem or the network due to overly-frequent requests.
-     */
-    public static final int SATELLITE_SERVICE_REQUEST_RATE_LIMITED = 12;
-    /**
-     * Satellite modem or network has no resources available to handle requests from clients.
-     */
-    public static final int SATELLITE_SERVICE_NO_RESOURCES = 13;
-    /**
-     * Telephony framework failed to send a request to the satellite service on the device or the
-     * satellite modem.
-     */
-    public static final int SATELLITE_SERVICE_REQUEST_FAILED = 14;
+    public static final int SATELLITE_ERROR_NONE = 0;
     /**
      * A generic error which should be used only when other specific errors cannot be used.
      */
-    public static final int SATELLITE_SERVICE_ERROR = 15;
+    public static final int SATELLITE_ERROR = 1;
     /**
-     * Satellite service is disabled on the requested subscription or the device.
+     * Error received from the satellite server.
      */
-    public static final int SATELLITE_SERVICE_DISABLED = 16;
+    public static final int SATELLITE_SERVER_ERROR = 2;
     /**
-     * Satellite is already provisioned for the subscription or the device.
+     * Error received from the vendor service. This generic error code should be used
+     * only when the error cannot be mapped to other specific service error codes.
      */
-    public static final int SATELLITE_SERVICE_ALREADY_PROVISIONED = 17;
+    public static final int SATELLITE_SERVICE_ERROR = 3;
     /**
-     * Provisioning is already in progress.
+     * Error received from satellite modem. This generic error code should be used only when
+     * the error cannot be mapped to other specific modem error codes.
      */
-    public static final int SATELLITE_SERVICE_PROVISION_IN_PROGRESS = 18;
+    public static final int SATELLITE_MODEM_ERROR = 4;
+    /**
+     * Error received from the satellite network. This generic error code should be used only when
+     * the error cannot be mapped to other specific network error codes.
+     */
+    public static final int SATELLITE_NETWORK_ERROR = 5;
+    /**
+     * Telephony is not in a valid state to receive requests from clients.
+     */
+    public static final int SATELLITE_INVALID_TELEPHONY_STATE = 6;
+    /**
+     * Satellite modem is not in a valid state to receive requests from clients.
+     */
+    public static final int SATELLITE_INVALID_MODEM_STATE = 7;
+    /**
+     * Either vendor service, or modem, or Telephony framework has received a request with
+     * invalid arguments from its clients.
+     */
+    public static final int SATELLITE_INVALID_ARGUMENTS = 8;
+    /**
+     * Telephony framework failed to send a request to the vendor service or the satellite
+     * modem due to internal error.
+     */
+    public static final int SATELLITE_REQUEST_FAILED = 9;
+    /**
+     * Radio did not start or is resetting.
+     */
+    public static final int SATELLITE_RADIO_NOT_AVAILABLE = 10;
+    /**
+     * The request is not supported by either the satellite modem or the network.
+     */
+    public static final int SATELLITE_REQUEST_NOT_SUPPORTED = 11;
+    /**
+     * Satellite modem or network has no resources available to handle requests from clients.
+     */
+    public static final int SATELLITE_NO_RESOURCES = 12;
+    /**
+     * Satellite service is not provisioned yet.
+     */
+    public static final int SATELLITE_SERVICE_NOT_PROVISIONED = 13;
+    /**
+     * Satellite service provision is already in progress.
+     */
+    public static final int SATELLITE_SERVICE_PROVISION_IN_PROGRESS = 14;
     /**
      * The ongoing request was aborted by either the satellite modem or the network.
      */
-    public static final int SATELLITE_SERVICE_REQUEST_ABORTED = 19;
+    public static final int SATELLITE_REQUEST_ABORTED = 15;
     /**
-     * The device/subscription is barred to access the satellite service.
+     * The device/subscriber is barred from accessing the satellite service.
      */
-    public static final int SATELLITE_SERVICE_ACCESS_BARRED = 20;
-    /**
-     * The requesting feature is not supported by the satellite service provider.
-     */
-    public static final int SATELLITE_SERVICE_FEATURE_NOT_SUPPORTED = 21;
-    /**
-     * The modem of the device is not compatible with the satellite service provider.
-     */
-    public static final int SATELLITE_SERVICE_MODEM_INCOMPATIBLE = 22;
-    /**
-     * The satellite network is not ready to serve requests from clients.
-     */
-    public static final int SATELLITE_SERVICE_NETWORK_NOT_READY = 23;
-    /**
-     * The satellite server is not ready to serve requests from clients.
-     */
-    public static final int SATELLITE_SERVICE_SERVER_NOT_READY = 24;
-    /**
-     * The request was rejected by the satellite server.
-     */
-    public static final int SATELLITE_SERVICE_SERVER_REJECT = 25;
+    public static final int SATELLITE_ACCESS_BARRED = 16;
     /**
      * Satellite modem timeout to receive ACK or response from the satellite network after
      * sending a request to the network.
      */
-    public static final int SATELLITE_SERVICE_NETWORK_TIMEOUT = 26;
+    public static final int SATELLITE_NETWORK_TIMEOUT = 17;
     /**
-     * Satellite modem cannot detect any satellite signal.
+     * Satellite network is not reachable from the modem.
      */
-    public static final int SATELLITE_SERVICE_NO_SATELLITE_SIGNAL = 27;
+    public static final int SATELLITE_NOT_REACHABLE = 18;
     /**
-     * Device does not have a subscription.
+     * The device/subscriber is not authorized to register with the satellite service provider.
      */
-    public static final int SATELLITE_SERVICE_NO_SUBSCRIPTION = 28;
+    public static final int SATELLITE_NOT_AUTHORIZED = 19;
     /**
-     * Operation is not allowed by either the satellite modem, or satellite network, or satellite
-     * server.
+     * The device does not support satellite.
      */
-    public static final int SATELLITE_SERVICE_OPERATION_NOT_ALLOWED = 29;
-    /**
-     * The radio technology is not supported by the satellite service provider.
-     */
-    public static final int SATELLITE_SERVICE_RADIO_TECHNOLOGY_NOT_SUPPORTED = 30;
-    /**
-     * SIM is absent.
-     */
-    public static final int SATELLITE_SERVICE_SIM_ABSENT = 31;
-    /**
-     * SIM is busy.
-     */
-    public static final int SATELLITE_SERVICE_SIM_BUSY = 32;
-    /**
-     * Received error from SIM card.
-     */
-    public static final int SATELLITE_SERVICE_SIM_ERR = 33;
-    /**
-     * The target EF is full.
-     */
-    public static final int SATELLITE_SERVICE_SIM_FULL = 34;
-    /**
-     * The subscription/user is not authorized to register with the satellite service provider.
-     */
-    public static final int SATELLITE_SERVICE_SUBSCRIBER_NOT_AUTHORIZED = 35;
-    /**
-     * The callback was already registered with Telephony framework.
-     */
-    public static final int SATELLITE_SERVICE_CALLBACK_ALREADY_REGISTERED = 36;
-    /**
-     * The callback was not registered with Telephony framework.
-     */
-    public static final int SATELLITE_SERVICE_CALLBACK_NOT_REGISTERED = 37;
-    /**
-     * The request cannot be performed since the subscriber/user's account balance is not
-     * sufficient.
-     */
-    public static final int SATELLITE_SERVICE_NOT_SUFFICIENT_ACCOUNT_BALANCE = 38;
-    /**
-     * While processing a request from the Telephony framework, the satellite modem detects
-     * terrestrial signal, aborts the request, and switches to the terrestrial network.
-     */
-    public static final int SATELLITE_SERVICE_SWITCHED_FROM_SATELLITE_TO_TERRESTRIAL = 39;
-    /**
-     * The subscriber/user is not registered with the service provider.
-     */
-    public static final int SATELLITE_SERVICE_UNIDENTIFIED_SUBSCRIBER = 40;
-    /**
-     * The contact to be added/removed is either not existing or not valid.
-     */
-    public static final int SATELLITE_SERVICE_INVALID_CONTACT = 41;
-    /**
-     * The encoding scheme is not supported by either the satellite provider or the device.
-     */
-    public static final int SATELLITE_SERVICE_ENCODING_NOT_SUPPORTED = 42;
-    /**
-     * Received error from the satellite network. This generic error code should be used only when
-     * the error cannot be mapped to other specific network error codes.
-     */
-    public static final int SATELLITE_SERVICE_NETWORK_ERROR = 43;
-    /**
-     * Modem hit unexpected error scenario while handling this request.
-     */
-    public static final int SATELLITE_SERVICE_MODEM_ERROR = 44;
+    public static final int SATELLITE_NOT_SUPPORTED = 20;
 
     /** @hide */
-    @IntDef(prefix = {"SATELLITE_SERVICE_"}, value = {
-            SATELLITE_SERVICE_SUCCESS,
-            SATELLITE_SERVICE_SERVER_NOT_REACHABLE,
-            SATELLITE_SERVICE_SERVER_ERROR,
-            SATELLITE_SERVICE_INVALID_TELEPHONY_STATE,
-            SATELLITE_SERVICE_UNEXPECTED_MODEM_RESPONSE,
-            SATELLITE_SERVICE_RIL_ERROR,
-            SATELLITE_SERVICE_INVALID_ARGUMENTS,
-            SATELLITE_SERVICE_INVALID_MODEM_STATE,
-            SATELLITE_SERVICE_INVALID_SIM_STATE,
-            SATELLITE_SERVICE_INVALID_RIL_STATE,
-            SATELLITE_SERVICE_RADIO_NOT_AVAILABLE,
-            SATELLITE_SERVICE_REQUEST_NOT_SUPPORTED,
-            SATELLITE_SERVICE_REQUEST_RATE_LIMITED,
-            SATELLITE_SERVICE_NO_RESOURCES,
-            SATELLITE_SERVICE_REQUEST_FAILED,
+    @IntDef(prefix = {"SATELLITE_"}, value = {
+            SATELLITE_ERROR_NONE,
+            SATELLITE_ERROR,
+            SATELLITE_SERVER_ERROR,
             SATELLITE_SERVICE_ERROR,
-            SATELLITE_SERVICE_DISABLED,
-            SATELLITE_SERVICE_ALREADY_PROVISIONED,
+            SATELLITE_MODEM_ERROR,
+            SATELLITE_NETWORK_ERROR,
+            SATELLITE_INVALID_TELEPHONY_STATE,
+            SATELLITE_INVALID_MODEM_STATE,
+            SATELLITE_INVALID_ARGUMENTS,
+            SATELLITE_REQUEST_FAILED,
+            SATELLITE_RADIO_NOT_AVAILABLE,
+            SATELLITE_REQUEST_NOT_SUPPORTED,
+            SATELLITE_NO_RESOURCES,
+            SATELLITE_SERVICE_NOT_PROVISIONED,
             SATELLITE_SERVICE_PROVISION_IN_PROGRESS,
-            SATELLITE_SERVICE_REQUEST_ABORTED,
-            SATELLITE_SERVICE_ACCESS_BARRED,
-            SATELLITE_SERVICE_FEATURE_NOT_SUPPORTED,
-            SATELLITE_SERVICE_MODEM_INCOMPATIBLE,
-            SATELLITE_SERVICE_NETWORK_NOT_READY,
-            SATELLITE_SERVICE_SERVER_NOT_READY,
-            SATELLITE_SERVICE_SERVER_REJECT,
-            SATELLITE_SERVICE_NETWORK_TIMEOUT,
-            SATELLITE_SERVICE_NO_SATELLITE_SIGNAL,
-            SATELLITE_SERVICE_NO_SUBSCRIPTION,
-            SATELLITE_SERVICE_OPERATION_NOT_ALLOWED,
-            SATELLITE_SERVICE_RADIO_TECHNOLOGY_NOT_SUPPORTED,
-            SATELLITE_SERVICE_SIM_ABSENT,
-            SATELLITE_SERVICE_SIM_BUSY,
-            SATELLITE_SERVICE_SIM_ERR,
-            SATELLITE_SERVICE_SIM_FULL,
-            SATELLITE_SERVICE_SUBSCRIBER_NOT_AUTHORIZED,
-            SATELLITE_SERVICE_CALLBACK_ALREADY_REGISTERED,
-            SATELLITE_SERVICE_CALLBACK_NOT_REGISTERED,
-            SATELLITE_SERVICE_NOT_SUFFICIENT_ACCOUNT_BALANCE,
-            SATELLITE_SERVICE_SWITCHED_FROM_SATELLITE_TO_TERRESTRIAL,
-            SATELLITE_SERVICE_UNIDENTIFIED_SUBSCRIBER,
-            SATELLITE_SERVICE_INVALID_CONTACT,
-            SATELLITE_SERVICE_ENCODING_NOT_SUPPORTED,
-            SATELLITE_SERVICE_NETWORK_ERROR,
-            SATELLITE_SERVICE_MODEM_ERROR
+            SATELLITE_REQUEST_ABORTED,
+            SATELLITE_ACCESS_BARRED,
+            SATELLITE_NETWORK_TIMEOUT,
+            SATELLITE_NOT_REACHABLE,
+            SATELLITE_NOT_AUTHORIZED,
+            SATELLITE_NOT_SUPPORTED
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface SatelliteServiceResult {}
+    public @interface SatelliteError {}
 
     /**
      * Power on or off the satellite modem.
@@ -353,7 +221,7 @@ public class SatelliteManager {
      * @return The result of the operation.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteServiceResult public int setSatellitePower(boolean powerOn) {
+    @SatelliteError public int setSatellitePower(boolean powerOn) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -365,7 +233,7 @@ public class SatelliteManager {
             Rlog.e(TAG, "setSatellitePower RemoteException", ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_SERVICE_REQUEST_FAILED;
+        return SATELLITE_REQUEST_FAILED;
     }
 
     /**
@@ -373,7 +241,7 @@ public class SatelliteManager {
      *
      * @param executor The executor on which the result listener will be called.
      * @param resultListener Listener with the result if the operation is successful.
-     *                       If this method returns {@link #SATELLITE_SERVICE_SUCCESS}, the result
+     *                       If this method returns {@link #SATELLITE_ERROR_NONE}, the result
      *                       listener will return {@code true} if the satellite modem is powered on
      *                       and {@code false} otherwise.
      *
@@ -383,7 +251,7 @@ public class SatelliteManager {
      * @return The result of the operation.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteServiceResult public int isSatellitePowerOn(
+    @SatelliteError public int isSatellitePowerOn(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> resultListener) {
         Objects.requireNonNull(executor);
@@ -408,7 +276,7 @@ public class SatelliteManager {
             loge("isSatellitePowerOn() RemoteException:" + ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_SERVICE_REQUEST_FAILED;
+        return SATELLITE_REQUEST_FAILED;
     }
 
     /**
@@ -416,7 +284,7 @@ public class SatelliteManager {
      *
      * @param executor The executor on which the result listener will be called.
      * @param resultListener Listener with the result if the operation is successful.
-     *                       If this method returns {@link #SATELLITE_SERVICE_SUCCESS}, the result
+     *                       If this method returns {@link #SATELLITE_ERROR_NONE}, the result
      *                       listener will return {@code true} if the satellite service is supported
      *                       and {@code false} otherwise.
      *
@@ -426,7 +294,7 @@ public class SatelliteManager {
      * @return The result of the operation.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteServiceResult public int isSatelliteSupported(
+    @SatelliteError public int isSatelliteSupported(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> resultListener) {
         Objects.requireNonNull(executor);
@@ -451,7 +319,7 @@ public class SatelliteManager {
             loge("isSatelliteSupported() RemoteException:" + ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_SERVICE_REQUEST_FAILED;
+        return SATELLITE_REQUEST_FAILED;
     }
 
     /**
@@ -459,7 +327,7 @@ public class SatelliteManager {
      *
      * @param executor The executor on which the result listener will be called.
      * @param resultListener Listener with the result if the operation is successful.
-     *                       If this method returns {@link #SATELLITE_SERVICE_SUCCESS}, the result
+     *                       If this method returns {@link #SATELLITE_ERROR_NONE}, the result
      *                       listener will return the current {@link SatelliteCapabilities}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
@@ -468,7 +336,7 @@ public class SatelliteManager {
      * @return The result of the operation.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteServiceResult public int getSatelliteCapabilities(
+    @SatelliteError public int getSatelliteCapabilities(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<SatelliteCapabilities> resultListener) {
         Objects.requireNonNull(executor);
@@ -494,7 +362,7 @@ public class SatelliteManager {
             loge("getSatelliteCapabilities() RemoteException:" + ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_SERVICE_REQUEST_FAILED;
+        return SATELLITE_REQUEST_FAILED;
     }
 
     /**
@@ -532,7 +400,7 @@ public class SatelliteManager {
      * Start receiving satellite position updates.
      * This can be called by the pointing UI when the user starts pointing to the satellite.
      * Modem should continue to report the pointing input as the device or satellite moves.
-     * Satellite position updates are started only on {@link #SATELLITE_SERVICE_SUCCESS}.
+     * Satellite position updates are started only on {@link #SATELLITE_ERROR_NONE}.
      * All other results indicate that this operation failed.
      *
      * @param executor The executor on which the callback will be called.
@@ -546,7 +414,8 @@ public class SatelliteManager {
      * @return The result of the operation.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteServiceResult public int startSatellitePositionUpdates(
+    @SatelliteError
+    public int startSatellitePositionUpdates(
             @NonNull Executor executor, @NonNull SatelliteCallback callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
@@ -563,13 +432,13 @@ public class SatelliteManager {
             loge("startSatellitePositionUpdates RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_SERVICE_REQUEST_FAILED;
+        return SATELLITE_REQUEST_FAILED;
     }
 
     /**
      * Stop receiving satellite position updates.
      * This can be called by the pointing UI when the user stops pointing to the satellite.
-     * Satellite position updates are stopped only on {@link #SATELLITE_SERVICE_SUCCESS}.
+     * Satellite position updates are stopped only on {@link #SATELLITE_ERROR_NONE}.
      * All other results indicate that this operation failed.
      *
      * @param callback The callback that was passed in {@link
@@ -582,7 +451,8 @@ public class SatelliteManager {
      * @return The result of the operation.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteServiceResult public int stopSatellitePositionUpdates(
+    @SatelliteError
+    public int stopSatellitePositionUpdates(
             @NonNull SatelliteCallback callback) {
         Objects.requireNonNull(callback);
 
@@ -598,14 +468,14 @@ public class SatelliteManager {
             loge("stopSatellitePositionUpdates RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_SERVICE_REQUEST_FAILED;
+        return SATELLITE_REQUEST_FAILED;
     }
 
     /**
      * Get maximum number of characters per text message on satellite.
      * @param executor - The executor on which the result listener will be called.
      * @param resultListener - Listener that will be called when the operation is successful.
-     *                       If this method returns {@link #SATELLITE_SERVICE_SUCCESS}, listener
+     *                       If this method returns {@link #SATELLITE_ERROR_NONE}, listener
      *                       will be called with maximum characters limit.
      *
      * @throws SecurityException if the caller doesn't have required permission.
@@ -614,7 +484,7 @@ public class SatelliteManager {
      * @return The result of the operation.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteServiceResult
+    @SatelliteError
     public int getMaxCharactersPerSatelliteTextMessage(@NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Integer> resultListener) {
         Objects.requireNonNull(executor);
@@ -639,7 +509,7 @@ public class SatelliteManager {
             loge("getMaxCharactersPerSatelliteTextMessage() RemoteException:" + ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_SERVICE_REQUEST_FAILED;
+        return SATELLITE_REQUEST_FAILED;
     }
 
 
@@ -660,7 +530,7 @@ public class SatelliteManager {
     public void provisionSatelliteService(
             @NonNull @SatelliteImplBase.Feature int[] features,
             @Nullable @CallbackExecutor Executor executor,
-            @SatelliteServiceResult @Nullable Consumer<Integer> callback,
+            @SatelliteError @Nullable Consumer<Integer> callback,
             @Nullable CancellationSignal cancellationSignal) {
         Objects.requireNonNull(features);
 
@@ -705,7 +575,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteServiceResult
+    @SatelliteError
     public int registerForSatelliteProvisionStateChanged(
             @NonNull Executor executor, @NonNull SatelliteCallback callback) {
         Objects.requireNonNull(executor);
@@ -724,7 +594,7 @@ public class SatelliteManager {
             loge("registerForSatelliteProvisionStateChanged RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_SERVICE_REQUEST_FAILED;
+        return SATELLITE_REQUEST_FAILED;
     }
 
     /**
@@ -737,13 +607,13 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteServiceResult
+    @SatelliteError
     public int unregisterForSatelliteProvisionStateChanged(@NonNull SatelliteCallback callback) {
         Objects.requireNonNull(callback);
 
         if (callback.getCallbackStub() == null) {
             loge("unregisterForSatelliteProvisionStateChanged: callbackStub is null");
-            return SATELLITE_SERVICE_CALLBACK_NOT_REGISTERED;
+            return SATELLITE_INVALID_ARGUMENTS;
         }
 
         try {
@@ -758,7 +628,7 @@ public class SatelliteManager {
             loge("unregisterForSatelliteProvisionStateChanged RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_SERVICE_REQUEST_FAILED;
+        return SATELLITE_REQUEST_FAILED;
     }
 
     /**
@@ -772,7 +642,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteServiceResult
+    @SatelliteError
     public int getProvisionedSatelliteFeatures(
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<int[]> resultListener) {
         Objects.requireNonNull(resultListener);
@@ -797,7 +667,7 @@ public class SatelliteManager {
             loge("getProvisionedSatelliteFeatures() RemoteException:" + ex);
             ex.rethrowFromSystemServer();
         }
-        return SATELLITE_SERVICE_REQUEST_FAILED;
+        return SATELLITE_REQUEST_FAILED;
     }
 
     private static ITelephony getITelephony() {

@@ -44,6 +44,7 @@ import androidx.annotation.NonNull;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
 import com.android.systemui.accessibility.accessibilitymenu.R;
+import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
 
 import java.util.ArrayList;
@@ -71,6 +72,24 @@ public class A11yMenuOverlayLayout {
         A11yMenuShortcut.ShortcutId.ID_NOTIFICATION_VALUE.ordinal(),
         A11yMenuShortcut.ShortcutId.ID_SCREENSHOT_VALUE.ordinal()
     };
+
+    /** Predefined default shortcuts when large button setting is on. */
+    private static final int[] LARGE_SHORTCUT_LIST_DEFAULT = {
+            A11yMenuShortcut.ShortcutId.ID_ASSISTANT_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_A11YSETTING_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_POWER_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_RECENT_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_VOLUME_DOWN_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_VOLUME_UP_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_BRIGHTNESS_DOWN_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_BRIGHTNESS_UP_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_LOCKSCREEN_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_QUICKSETTING_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_NOTIFICATION_VALUE.ordinal(),
+            A11yMenuShortcut.ShortcutId.ID_SCREENSHOT_VALUE.ordinal()
+    };
+
+
 
     private final AccessibilityMenuService mService;
     private final WindowManager mWindowManager;
@@ -156,7 +175,10 @@ public class A11yMenuOverlayLayout {
      */
     private List<A11yMenuShortcut> createShortcutList() {
         List<A11yMenuShortcut> shortcutList = new ArrayList<>();
-        for (int shortcutId : SHORTCUT_LIST_DEFAULT) {
+
+        for (int shortcutId :
+                (A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService)
+                        ? LARGE_SHORTCUT_LIST_DEFAULT : SHORTCUT_LIST_DEFAULT)) {
             shortcutList.add(new A11yMenuShortcut(shortcutId));
         }
         return shortcutList;

@@ -3142,6 +3142,8 @@ public class Editor {
             }
         }
 
+        menu.setOptionalIconsVisible(true);
+
         final int keyboard = mTextView.getResources().getConfiguration().keyboard;
         menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
 
