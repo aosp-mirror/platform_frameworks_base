@@ -79,7 +79,7 @@ public final class DisplayPortAltModeInfo implements Parcelable {
      * as one of its capabilities, however may not yet have entered DisplayPort Alt Mode or has been
      * configured for data transmission.
      */
-    public static final int DISPLAYPORT_ALT_MODE_STATUS_CAPABLE = 2;
+    public static final int DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED = 2;
 
     /**
      * Port Partners:
@@ -113,7 +113,7 @@ public final class DisplayPortAltModeInfo implements Parcelable {
     @IntDef(prefix = { "DISPLAYPORT_ALT_MODE_STATUS_" }, value = {
             DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN,
             DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE,
-            DISPLAYPORT_ALT_MODE_STATUS_CAPABLE,
+            DISPLAYPORT_ALT_MODE_STATUS_CAPABLE_DISABLED,
             DISPLAYPORT_ALT_MODE_STATUS_ENABLED,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -150,10 +150,6 @@ public final class DisplayPortAltModeInfo implements Parcelable {
     /**
      * Returns the DisplayPort Alt Mode Status for a port partner acting as a sink.
      *
-     * @return {@link #DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_CAPABLE}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_ENABLED}
      */
     public @DisplayPortAltModeStatus int getPartnerSinkStatus() {
         return mPartnerSinkStatus;
@@ -162,10 +158,6 @@ public final class DisplayPortAltModeInfo implements Parcelable {
     /**
      * Returns the DisplayPort Alt Mode Status for the attached cable
      *
-     * @return {@link #DISPLAYPORT_ALT_MODE_STATUS_UNKNOWN}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_NOT_CAPABLE}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_CAPABLE}
-     *        or {@link #DISPLAYPORT_ALT_MODE_STATUS_ENABLED}
      */
     public @DisplayPortAltModeStatus int getCableStatus() {
         return mCableStatus;
