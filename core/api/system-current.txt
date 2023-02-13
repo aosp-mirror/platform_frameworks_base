@@ -842,6 +842,7 @@ package android.app {
     method public int getPendingIntentBackgroundActivityStartMode();
     method public boolean isDeferUntilActive();
     method @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed();
+    method @Deprecated @NonNull public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public void recordResponseEventWhileInBackground(@IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
     method @NonNull public android.app.BroadcastOptions setDeferUntilActive(boolean);
