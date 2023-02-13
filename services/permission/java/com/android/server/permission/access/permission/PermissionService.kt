@@ -18,6 +18,7 @@ package com.android.server.permission.access.permission
 
 import android.Manifest
 import android.app.ActivityManager
+import android.app.AppOpsManager
 import android.compat.annotation.ChangeId
 import android.compat.annotation.EnabledAfter
 import android.content.Context
@@ -59,10 +60,12 @@ import com.android.server.PermissionThread
 import com.android.server.ServiceThread
 import com.android.server.SystemConfig
 import com.android.server.permission.access.AccessCheckingService
+import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.GetStateScope
 import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.PermissionUri
 import com.android.server.permission.access.UidUri
+import com.android.server.permission.access.appop.UidAppOpPolicy
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.andInv
 import com.android.server.permission.access.util.hasAnyBit
@@ -733,18 +736,46 @@ class PermissionService(
         }
     }
 
-    private fun grantRequestedRuntimePermissions(
+    private fun setRequestedPermissionStates(
         packageState: PackageState,
         userId: Int,
-        permissionNames: IndexedList<String>
+        permissionStates: IndexedMap<String, Int>
     ) {
         service.mutateState {
-            permissionNames.forEachIndexed { _, permissionName ->
-                setRuntimePermissionGranted(
-                    packageState, userId, permissionName, isGranted = true,
-                    canManageRolePermission = false, overridePolicyFixed = false,
-                    reportError = false, "grantRequestedRuntimePermissions"
-                )
+            permissionStates.forEachIndexed { _, permissionName, permissionState ->
+                when (permissionState) {
+                    PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED,
+                    PackageInstaller.SessionParams.PERMISSION_STATE_DENIED -> {}
+                    else -> {
+                        Log.w(
+                            LOG_TAG, "setRequestedPermissionStates: Unknown permission state" +
+                            " $permissionState for permission $permissionName"
+                        )
+                        return@forEachIndexed
+                    }
+                }
+                if (permissionName !in packageState.androidPackage!!.requestedPermissions) {
+                    return@forEachIndexed
+                }
+                val permission = with(policy) { getPermissions()[permissionName] }
+                    ?: return@forEachIndexed
+                when {
+                    permission.isDevelopment || permission.isRuntime -> {
+                        if (permissionState ==
+                            PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED) {
+                            setRuntimePermissionGranted(
+                                packageState, userId, permissionName, isGranted = true,
+                                canManageRolePermission = false, overridePolicyFixed = false,
+                                reportError = false, "setRequestedPermissionStates"
+                            )
+                        }
+                    }
+                    permission.isAppOp -> setAppOpPermissionGranted(
+                        packageState, userId, permissionName,
+                        permissionState == PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED
+                    )
+                    else -> {}
+                }
             }
         }
     }
@@ -888,6 +919,18 @@ class PermissionService(
             }
             metricsLogger.write(log)
         }
+    }
+
+    private fun MutateStateScope.setAppOpPermissionGranted(
+        packageState: PackageState,
+        userId: Int,
+        permissionName: String,
+        isGranted: Boolean
+    ) {
+        val appOpPolicy = service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME) as UidAppOpPolicy
+        val appOpName = AppOpsManager.permissionToOp(permissionName)
+        val mode = if (isGranted) AppOpsManager.MODE_ALLOWED else AppOpsManager.MODE_ERRORED
+        with(appOpPolicy) { setAppOpMode(packageState.appId, userId, appOpName, mode) }
     }
 
     override fun getPermissionFlags(packageName: String, permissionName: String, userId: Int): Int {
@@ -1814,15 +1857,7 @@ class PermissionService(
             val packageState =
                 packageManagerInternal.getPackageStateInternal(androidPackage.packageName)!!
             // TODO: Add allowlisting
-            grantRequestedRuntimePermissions(
-                packageState,
-                userId,
-                params.permissionStates.mapNotNullIndexed { _, permissionName, permissionState ->
-                    permissionName.takeIf {
-                        permissionState == PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED
-                    }
-                }
-            )
+            setRequestedPermissionStates(packageState, userId, params.permissionStates)
         }
     }
 
