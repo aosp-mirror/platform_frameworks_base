@@ -2262,6 +2262,10 @@
          panel (embedded activity) instead of controls rendered by SystemUI [CHAR LIMIT=NONE] -->
     <string name="controls_panel_authorization">When you add <xliff:g id="appName" example="My app">%s</xliff:g>, it can add controls and content to this panel. In some apps, you can choose which controls show up here.</string>
 
+    <!-- Shows in a dialog presented to the user to authorize this app removal from a Device
+         controls panel [CHAR LIMIT=NONE] -->
+    <string name="controls_panel_remove_app_authorization">Remove controls for <xliff:g example="My app" id="appName">%s</xliff:g>?</string>
+
     <!-- a11y state description for a control that is currently favorited [CHAR LIMIT=NONE] -->
     <string name="accessibility_control_favorite">Favorited</string>
     <!-- a11y state description for a control that is currently favorited with its position [CHAR LIMIT=NONE] -->
@@ -2302,6 +2306,8 @@
     <string name="controls_dialog_title">Add to device controls</string>
     <!-- Controls dialog add to favorites [CHAR LIMIT=40] -->
     <string name="controls_dialog_ok">Add</string>
+    <!-- Controls dialog remove app from a panel [CHAR LIMIT=40] -->
+    <string name="controls_dialog_remove">Remove</string>
     <!-- Controls dialog message. Indicates app that suggested this control [CHAR LIMIT=NONE] -->
     <string name="controls_dialog_message">Suggested by <xliff:g id="app" example="System UI">%s</xliff:g></string>
     <!-- Controls tile secondary label when device is locked and user does not want access to controls from lockscreen [CHAR LIMIT=20] -->
@@ -2419,6 +2425,8 @@
     <string name="controls_menu_edit">Edit controls</string>
     <!-- Controls menu, add another app [CHAR LIMIT=30] -->
     <string name="controls_menu_add_another_app">Add app</string>
+    <!-- Controls menu, remove app [CHAR_LIMIT=30] -->
+    <string name="controls_menu_remove">Remove app</string>
 
     <!-- Title for the media output dialog with media related devices [CHAR LIMIT=50] -->
     <string name="media_output_dialog_add_output">Add outputs</string>

@@ -37,8 +37,18 @@ constructor(
         return getAuthorizedPanelsInternal(instantiateSharedPrefs())
     }
 
+    override fun getPreferredPackages(): Set<String> =
+        context.resources.getStringArray(R.array.config_controlsPreferredPackages).toSet()
+
     override fun addAuthorizedPanels(packageNames: Set<String>) {
         addAuthorizedPanelsInternal(instantiateSharedPrefs(), packageNames)
+    }
+
+    override fun removeAuthorizedPanels(packageNames: Set<String>) {
+        with(instantiateSharedPrefs()) {
+            val currentSet = getAuthorizedPanelsInternal(this)
+            edit().putStringSet(KEY, currentSet - packageNames).apply()
+        }
     }
 
     private fun getAuthorizedPanelsInternal(sharedPreferences: SharedPreferences): Set<String> {
@@ -63,15 +73,7 @@ constructor(
 
         // If we've never run this (i.e., the key doesn't exist), add the default packages
         if (sharedPref.getStringSet(KEY, null) == null) {
-            sharedPref
-                .edit()
-                .putStringSet(
-                    KEY,
-                    context.resources
-                        .getStringArray(R.array.config_controlsPreferredPackages)
-                        .toSet()
-                )
-                .apply()
+            sharedPref.edit().putStringSet(KEY, getPreferredPackages()).apply()
         }
         return sharedPref
     }

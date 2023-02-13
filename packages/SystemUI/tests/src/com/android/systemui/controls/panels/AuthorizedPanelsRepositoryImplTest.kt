@@ -115,6 +115,18 @@ class AuthorizedPanelsRepositoryImplTest : SysuiTestCase() {
         assertThat(sharedPrefs.getStringSet(KEY, null)).containsExactly(TEST_PACKAGE)
     }
 
+    @Test
+    fun testRemoveAuthorizedPackageRemovesIt() {
+        val sharedPrefs = FakeSharedPreferences()
+        val fileManager = FakeUserFileManager(mapOf(0 to sharedPrefs))
+        val repository = createRepository(fileManager)
+        repository.addAuthorizedPanels(setOf(TEST_PACKAGE))
+
+        repository.removeAuthorizedPanels(setOf(TEST_PACKAGE))
+
+        assertThat(sharedPrefs.getStringSet(KEY, null)).isEmpty()
+    }
+
     private fun createRepository(userFileManager: UserFileManager): AuthorizedPanelsRepositoryImpl {
         return AuthorizedPanelsRepositoryImpl(mContext, userFileManager, userTracker)
     }

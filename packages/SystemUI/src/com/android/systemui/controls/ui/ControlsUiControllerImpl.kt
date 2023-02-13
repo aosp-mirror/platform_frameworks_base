@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.app.ActivityOptions
+import android.app.Dialog
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
@@ -52,7 +53,6 @@ import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.controls.ControlsMetricsLogger
 import com.android.systemui.controls.ControlsServiceInfo
-import com.android.systemui.controls.settings.ControlsSettingsRepository
 import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.StructureInfo
@@ -64,6 +64,7 @@ import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
+import com.android.systemui.controls.settings.ControlsSettingsRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -83,7 +84,7 @@ import com.android.wm.shell.TaskViewFactory
 import dagger.Lazy
 import java.io.PrintWriter
 import java.text.Collator
-import java.util.Optional
+import java.util.*
 import java.util.function.Consumer
 import javax.inject.Inject
 
@@ -108,6 +109,7 @@ class ControlsUiControllerImpl @Inject constructor (
         private val controlsSettingsRepository: ControlsSettingsRepository,
         private val authorizedPanelsRepository: AuthorizedPanelsRepository,
         private val featureFlags: FeatureFlags,
+        private val dialogsFactory: ControlsDialogsFactory,
         dumpManager: DumpManager
 ) : ControlsUiController, Dumpable {
 
@@ -122,6 +124,7 @@ class ControlsUiControllerImpl @Inject constructor (
         private const val ADD_CONTROLS_ID = 1L
         private const val ADD_APP_ID = 2L
         private const val EDIT_CONTROLS_ID = 3L
+        private const val REMOVE_APP_ID = 4L
     }
 
     private var selectedItem: SelectedItem = SelectedItem.EMPTY_SELECTION
@@ -151,6 +154,7 @@ class ControlsUiControllerImpl @Inject constructor (
 
     private var openAppIntent: Intent? = null
     private var overflowMenuAdapter: BaseAdapter? = null
+    private var removeAppDialog: Dialog? = null
 
     private val onSeedingComplete = Consumer<Boolean> {
         accepted ->
@@ -330,6 +334,31 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
+    @VisibleForTesting
+    internal fun startRemovingApp(componentName: ComponentName, appName: CharSequence) {
+        removeAppDialog?.cancel()
+        removeAppDialog = dialogsFactory.createRemoveAppDialog(context, appName) {
+            if (!controlsController.get().removeFavorites(componentName)) {
+                return@createRemoveAppDialog
+            }
+            if (
+                    sharedPreferences.getString(PREF_COMPONENT, "") ==
+                    componentName.flattenToString()
+            ) {
+                sharedPreferences
+                        .edit()
+                        .remove(PREF_COMPONENT)
+                        .remove(PREF_STRUCTURE_OR_APP_NAME)
+                        .remove(PREF_IS_PANEL)
+                        .commit()
+            }
+
+            allStructures = controlsController.get().getFavorites()
+            selectedItem = getPreferredSelectedItem(allStructures)
+            reload(parent)
+        }.apply { show() }
+    }
+
     private fun startTargetedActivity(si: StructureInfo, klazz: Class<*>) {
         val i = Intent(activityContext, klazz)
         putIntentExtras(i, si)
@@ -433,7 +462,10 @@ class ControlsUiControllerImpl @Inject constructor (
         val currentApps = panelsAndStructures.map { it.componentName }.toSet()
         val allApps = controlsListingController.get()
                 .getCurrentServices().map { it.componentName }.toSet()
-        createMenu(extraApps = (allApps - currentApps).isNotEmpty())
+        createMenu(
+                selectionItem = selectionItem,
+                extraApps = (allApps - currentApps).isNotEmpty(),
+        )
     }
 
     private fun createPanelView(componentName: ComponentName) {
@@ -472,7 +504,7 @@ class ControlsUiControllerImpl @Inject constructor (
         }
     }
 
-    private fun createMenu(extraApps: Boolean) {
+    private fun createMenu(selectionItem: SelectionItem, extraApps: Boolean) {
         val isPanel = selectedItem is SelectedItem.PanelItem
         val selectedStructure = (selectedItem as? SelectedItem.StructureItem)?.structure
                 ?: EMPTY_STRUCTURE
@@ -488,6 +520,13 @@ class ControlsUiControllerImpl @Inject constructor (
                     add(OverflowMenuAdapter.MenuItem(
                             context.getText(R.string.controls_menu_add_another_app),
                             ADD_APP_ID
+                    ))
+                }
+                if (featureFlags.isEnabled(Flags.APP_PANELS_REMOVE_APPS_ALLOWED) &&
+                        controlsController.get().canRemoveFavorites(selectedItem.componentName)) {
+                    add(OverflowMenuAdapter.MenuItem(
+                            context.getText(R.string.controls_menu_remove),
+                            REMOVE_APP_ID,
                     ))
                 }
             } else {
@@ -529,6 +568,9 @@ class ControlsUiControllerImpl @Inject constructor (
                                 ADD_APP_ID -> startProviderSelectorActivity()
                                 ADD_CONTROLS_ID -> startFavoritingActivity(selectedStructure)
                                 EDIT_CONTROLS_ID -> startEditingActivity(selectedStructure)
+                                REMOVE_APP_ID -> startRemovingApp(
+                                        selectedStructure.componentName, selectionItem.appName
+                                )
                             }
                             dismiss()
                         }
@@ -728,6 +770,7 @@ class ControlsUiControllerImpl @Inject constructor (
             it.value.dismiss()
         }
         controlActionCoordinator.closeDialogs()
+        removeAppDialog?.cancel()
     }
 
     override fun hide(parent: ViewGroup) {
