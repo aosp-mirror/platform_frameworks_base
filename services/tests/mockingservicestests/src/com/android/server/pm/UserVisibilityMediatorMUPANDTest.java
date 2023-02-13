@@ -20,6 +20,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE;
+import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
 import static com.android.server.pm.UserVisibilityChangedEvent.onInvisible;
 import static com.android.server.pm.UserVisibilityChangedEvent.onVisible;
@@ -73,8 +75,8 @@ public final class UserVisibilityMediatorMUPANDTest
         assertUserCanBeAssignedExtraDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         // Make sure another user cannot be started on default display
-        int result2 = mMediator.assignUserToDisplayOnStart(otherUserId, visibleBgUserId,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+        int result2 = mMediator.assignUserToDisplayOnStart(otherUserId, otherUserId, BG_VISIBLE,
+                DEFAULT_DISPLAY);
         assertStartUserResult(result2, USER_ASSIGNMENT_RESULT_FAILURE,
                 "when user (%d) is starting on default display after it was started by user %d",
                 otherUserId, visibleBgUserId);
@@ -117,8 +119,8 @@ public final class UserVisibilityMediatorMUPANDTest
         assertUserCanBeAssignedExtraDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
         // Make sure another user cannot be started on default display
-        int result2 = mMediator.assignUserToDisplayOnStart(otherUserId, visibleBgUserId,
-                BG_VISIBLE, DEFAULT_DISPLAY);
+        int result2 = mMediator.assignUserToDisplayOnStart(otherUserId, otherUserId, BG_VISIBLE,
+                DEFAULT_DISPLAY);
         assertStartUserResult(result2, USER_ASSIGNMENT_RESULT_FAILURE,
                 "when user (%d) is starting on default display after it was started by user %d",
                 otherUserId, visibleBgUserId);
@@ -126,8 +128,6 @@ public final class UserVisibilityMediatorMUPANDTest
 
         listener.verify();
     }
-
-  /* TODO(b/261538337): re-add after the reverted CL is merged again
 
     @Test
     public void
@@ -226,5 +226,4 @@ public final class UserVisibilityMediatorMUPANDTest
 
         listener.verify();
     }
-  */
 }
