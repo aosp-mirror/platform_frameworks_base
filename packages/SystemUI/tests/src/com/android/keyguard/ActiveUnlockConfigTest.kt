@@ -24,13 +24,19 @@ import android.os.Handler
 import android.os.PowerManager
 import android.os.PowerManager.WAKE_REASON_BIOMETRIC
 import android.os.UserHandle
-import android.provider.Settings
+import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL
+import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO
+import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS
+import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT
+import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED
+import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_WAKE
+import android.provider.Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.settings.FakeSettings
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -41,20 +47,11 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.io.PrintWriter
 
 @SmallTest
 class ActiveUnlockConfigTest : SysuiTestCase() {
-    private val fakeWakeUri = Uri.Builder().appendPath("wake").build()
-    private val fakeUnlockIntentUri = Uri.Builder().appendPath("unlock-intent").build()
-    private val fakeBioFailUri = Uri.Builder().appendPath("bio-fail").build()
-    private val fakeFaceErrorsUri = Uri.Builder().appendPath("face-errors").build()
-    private val fakeFaceAcquiredUri = Uri.Builder().appendPath("face-acquired").build()
-    private val fakeUnlockIntentBioEnroll = Uri.Builder().appendPath("unlock-intent-bio").build()
-    private val fakeWakeupsConsideredUnlockIntents =
-        Uri.Builder().appendPath("wakeups-considered-unlock-intent").build()
-
-    @Mock
-    private lateinit var secureSettings: SecureSettings
+    private lateinit var secureSettings: FakeSettings
     @Mock
     private lateinit var contentResolver: ContentResolver
     @Mock
@@ -63,33 +60,20 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
     private lateinit var dumpManager: DumpManager
     @Mock
     private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var mockPrintWriter: PrintWriter
 
     @Captor
     private lateinit var settingsObserverCaptor: ArgumentCaptor<ContentObserver>
 
     private lateinit var activeUnlockConfig: ActiveUnlockConfig
+    private var currentUser: Int = 0
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        `when`(secureSettings.getUriFor(Settings.Secure.ACTIVE_UNLOCK_ON_WAKE))
-                .thenReturn(fakeWakeUri)
-        `when`(secureSettings.getUriFor(Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT))
-                .thenReturn(fakeUnlockIntentUri)
-        `when`(secureSettings.getUriFor(Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL))
-                .thenReturn(fakeBioFailUri)
-        `when`(secureSettings.getUriFor(Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS))
-                .thenReturn(fakeFaceErrorsUri)
-        `when`(secureSettings.getUriFor(Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO))
-                .thenReturn(fakeFaceAcquiredUri)
-        `when`(secureSettings.getUriFor(
-                Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED))
-                .thenReturn(fakeUnlockIntentBioEnroll)
-        `when`(secureSettings.getUriFor(
-            Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS))
-            .thenReturn(fakeWakeupsConsideredUnlockIntents)
-
+        currentUser = KeyguardUpdateMonitor.getCurrentUser()
+        secureSettings = FakeSettings()
         activeUnlockConfig = ActiveUnlockConfig(
                 handler,
                 secureSettings,
@@ -105,8 +89,6 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
     @Test
     fun onWakeupSettingChanged() {
-        verifyRegisterSettingObserver()
-
         // GIVEN no active unlock settings enabled
         assertFalse(
                 activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
@@ -114,9 +96,8 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
         )
 
         // WHEN unlock on wake is allowed
-        `when`(secureSettings.getIntForUser(Settings.Secure.ACTIVE_UNLOCK_ON_WAKE,
-                0, 0)).thenReturn(1)
-        updateSetting(fakeWakeUri)
+        secureSettings.putIntForUser(ACTIVE_UNLOCK_ON_WAKE, 1, currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_WAKE))
 
         // THEN active unlock triggers allowed on: wake, unlock-intent, and biometric failure
         assertTrue(
@@ -135,8 +116,6 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
     @Test
     fun onUnlockIntentSettingChanged() {
-        verifyRegisterSettingObserver()
-
         // GIVEN no active unlock settings enabled
         assertFalse(
                 activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
@@ -144,9 +123,8 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
         )
 
         // WHEN unlock on biometric failed is allowed
-        `when`(secureSettings.getIntForUser(Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT,
-                0, 0)).thenReturn(1)
-        updateSetting(fakeUnlockIntentUri)
+        secureSettings.putIntForUser(ACTIVE_UNLOCK_ON_UNLOCK_INTENT, 1, currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_UNLOCK_INTENT))
 
         // THEN active unlock triggers allowed on: biometric failure ONLY
         assertFalse(activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
@@ -159,21 +137,19 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
     @Test
     fun onBioFailSettingChanged() {
-        verifyRegisterSettingObserver()
-
         // GIVEN no active unlock settings enabled and triggering unlock intent on biometric
         // enrollment setting is disabled (empty string is disabled, null would use the default)
-        `when`(secureSettings.getStringForUser(
-                Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
-                0)).thenReturn("")
-        updateSetting(fakeUnlockIntentBioEnroll)
+        secureSettings.putStringForUser(
+                ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED, "", currentUser)
+        updateSetting(secureSettings.getUriFor(
+            ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED
+        ))
         assertFalse(activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
                 ActiveUnlockConfig.ActiveUnlockRequestOrigin.BIOMETRIC_FAIL))
 
         // WHEN unlock on biometric failed is allowed
-        `when`(secureSettings.getIntForUser(Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,
-                0, 0)).thenReturn(1)
-        updateSetting(fakeBioFailUri)
+        secureSettings.putIntForUser(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL, 1, currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL))
 
         // THEN active unlock triggers allowed on: biometric failure ONLY
         assertFalse(activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
@@ -186,17 +162,14 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
     @Test
     fun faceErrorSettingsChanged() {
-        verifyRegisterSettingObserver()
-
         // GIVEN unlock on biometric fail
-        `when`(secureSettings.getIntForUser(Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,
-                0, 0)).thenReturn(1)
-        updateSetting(fakeBioFailUri)
+        secureSettings.putIntForUser(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL, 1, currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL))
 
         // WHEN face error timeout (3), allow trigger active unlock
-        `when`(secureSettings.getStringForUser(Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS,
-                0)).thenReturn("3")
-        updateSetting(fakeFaceAcquiredUri)
+        secureSettings.putStringForUser(
+            ACTIVE_UNLOCK_ON_FACE_ERRORS, "3", currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_FACE_ERRORS))
 
         // THEN active unlock triggers allowed on error TIMEOUT
         assertTrue(activeUnlockConfig.shouldRequestActiveUnlockOnFaceError(
@@ -208,19 +181,17 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
     @Test
     fun faceAcquiredSettingsChanged() {
-        verifyRegisterSettingObserver()
-
         // GIVEN unlock on biometric fail
-        `when`(secureSettings.getIntForUser(Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,
-                0, 0)).thenReturn(1)
-        updateSetting(fakeBioFailUri)
+        secureSettings.putStringForUser(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL, "1", currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL))
 
         // WHEN face acquiredMsg DARK_GLASSESand MOUTH_COVERING are allowed to trigger
-        `when`(secureSettings.getStringForUser(Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO,
-                0)).thenReturn(
+        secureSettings.putStringForUser(
+            ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO,
                 "${BiometricFaceConstants.FACE_ACQUIRED_MOUTH_COVERING_DETECTED}" +
-                        "|${BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED}")
-        updateSetting(fakeFaceAcquiredUri)
+                        "|${BiometricFaceConstants.FACE_ACQUIRED_DARK_GLASSES_DETECTED}",
+            currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO))
 
         // THEN active unlock triggers allowed on acquired messages DARK_GLASSES & MOUTH_COVERING
         assertTrue(activeUnlockConfig.shouldRequestActiveUnlockOnFaceAcquireInfo(
@@ -236,23 +207,23 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
     @Test
     fun triggerOnUnlockIntentWhenBiometricEnrolledNone() {
-        verifyRegisterSettingObserver()
-
         // GIVEN unlock on biometric fail
-        `when`(secureSettings.getIntForUser(Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,
-                0, 0)).thenReturn(1)
-        updateSetting(fakeBioFailUri)
+        secureSettings.putIntForUser(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL, 1, currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL))
 
         // GIVEN fingerprint and face are NOT enrolled
         activeUnlockConfig.keyguardUpdateMonitor = keyguardUpdateMonitor
-        `when`(keyguardUpdateMonitor.isFaceEnrolled()).thenReturn(false)
+        `when`(keyguardUpdateMonitor.isFaceEnrolled).thenReturn(false)
         `when`(keyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(0)).thenReturn(false)
 
         // WHEN unlock intent is allowed when NO biometrics are enrolled (0)
-        `when`(secureSettings.getStringForUser(
-                Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
-                0)).thenReturn("${ActiveUnlockConfig.BiometricType.NONE.intValue}")
-        updateSetting(fakeUnlockIntentBioEnroll)
+
+        secureSettings.putStringForUser(
+            ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
+            "${ActiveUnlockConfig.BiometricType.NONE.intValue}", currentUser)
+        updateSetting(secureSettings.getUriFor(
+            ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED
+        ))
 
         // THEN active unlock triggers allowed on unlock intent
         assertTrue(activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
@@ -261,12 +232,9 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
     @Test
     fun triggerOnUnlockIntentWhenBiometricEnrolledFingerprintOrFaceOnly() {
-        verifyRegisterSettingObserver()
-
         // GIVEN unlock on biometric fail
-        `when`(secureSettings.getIntForUser(Settings.Secure.ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL,
-                0, 0)).thenReturn(1)
-        updateSetting(fakeBioFailUri)
+        secureSettings.putIntForUser(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL, 1, currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL))
 
         // GIVEN fingerprint and face are both enrolled
         activeUnlockConfig.keyguardUpdateMonitor = keyguardUpdateMonitor
@@ -275,12 +243,14 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
         // WHEN unlock intent is allowed when ONLY fingerprint is enrolled or NO biometircs
         // are enrolled
-        `when`(secureSettings.getStringForUser(
-                Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
-                0)).thenReturn(
+        secureSettings.putStringForUser(
+                ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
                 "${ActiveUnlockConfig.BiometricType.ANY_FACE.intValue}" +
-                        "|${ActiveUnlockConfig.BiometricType.ANY_FINGERPRINT.intValue}")
-        updateSetting(fakeUnlockIntentBioEnroll)
+                        "|${ActiveUnlockConfig.BiometricType.ANY_FINGERPRINT.intValue}",
+            currentUser)
+        updateSetting(secureSettings.getUriFor(
+            ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED
+        ))
 
         // THEN active unlock triggers NOT allowed on unlock intent
         assertFalse(activeUnlockConfig.shouldAllowActiveUnlockFromOrigin(
@@ -305,13 +275,12 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
     @Test
     fun isWakeupConsideredUnlockIntent_singleValue() {
-        verifyRegisterSettingObserver()
-
         // GIVEN lift is considered an unlock intent
-        `when`(secureSettings.getStringForUser(
-            Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS,
-            0)).thenReturn(PowerManager.WAKE_REASON_LIFT.toString())
-        updateSetting(fakeWakeupsConsideredUnlockIntents)
+        secureSettings.putIntForUser(
+            ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS,
+            PowerManager.WAKE_REASON_LIFT,
+            currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS))
 
         // THEN only WAKE_REASON_LIFT is considered an unlock intent
         for (wakeReason in 0..WAKE_REASON_BIOMETRIC) {
@@ -325,17 +294,15 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
     @Test
     fun isWakeupConsideredUnlockIntent_multiValue() {
-        verifyRegisterSettingObserver()
-
         // GIVEN lift and tap are considered an unlock intent
-        `when`(secureSettings.getStringForUser(
-            Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS,
-            0)).thenReturn(
+        secureSettings.putStringForUser(
+            ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS,
             PowerManager.WAKE_REASON_LIFT.toString() +
                     "|" +
-                    PowerManager.WAKE_REASON_TAP.toString()
+                    PowerManager.WAKE_REASON_TAP.toString(),
+            currentUser
         )
-        updateSetting(fakeWakeupsConsideredUnlockIntents)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS))
 
         // THEN WAKE_REASON_LIFT and WAKE_REASON TAP are considered an unlock intent
         for (wakeReason in 0..WAKE_REASON_BIOMETRIC) {
@@ -354,13 +321,10 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
 
     @Test
     fun isWakeupConsideredUnlockIntent_emptyValues() {
-        verifyRegisterSettingObserver()
-
         // GIVEN lift and tap are considered an unlock intent
-        `when`(secureSettings.getStringForUser(
-            Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS,
-            0)).thenReturn(" ")
-        updateSetting(fakeWakeupsConsideredUnlockIntents)
+        secureSettings.putStringForUser(ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS, " ",
+            currentUser)
+        updateSetting(secureSettings.getUriFor(ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS))
 
         // THEN no wake up gestures are considered an unlock intent
         for (wakeReason in 0..WAKE_REASON_BIOMETRIC) {
@@ -373,7 +337,23 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
             PowerManager.WAKE_REASON_UNFOLD_DEVICE))
     }
 
+    @Test
+    fun dump_onUnlockIntentWhenBiometricEnrolled_invalidNum_noArrayOutOfBoundsException() {
+        // GIVEN an invalid input (-1)
+        secureSettings.putStringForUser(ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED,
+            "-1", currentUser)
+
+        // WHEN the setting updates
+        updateSetting(secureSettings.getUriFor(
+            ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED
+        ))
+
+        // THEN no exception thrown
+        activeUnlockConfig.dump(mockPrintWriter, emptyArray())
+    }
+
     private fun updateSetting(uri: Uri) {
+        verifyRegisterSettingObserver()
         settingsObserverCaptor.value.onChange(
                 false,
                 listOf(uri),
@@ -383,13 +363,17 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
     }
 
     private fun verifyRegisterSettingObserver() {
-        verifyRegisterSettingObserver(fakeWakeUri)
-        verifyRegisterSettingObserver(fakeUnlockIntentUri)
-        verifyRegisterSettingObserver(fakeBioFailUri)
-        verifyRegisterSettingObserver(fakeFaceErrorsUri)
-        verifyRegisterSettingObserver(fakeFaceAcquiredUri)
-        verifyRegisterSettingObserver(fakeUnlockIntentBioEnroll)
-        verifyRegisterSettingObserver(fakeWakeupsConsideredUnlockIntents)
+        verifyRegisterSettingObserver(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_WAKE))
+        verifyRegisterSettingObserver(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_UNLOCK_INTENT))
+        verifyRegisterSettingObserver(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_BIOMETRIC_FAIL))
+        verifyRegisterSettingObserver(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_FACE_ERRORS))
+        verifyRegisterSettingObserver(secureSettings.getUriFor(ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO))
+        verifyRegisterSettingObserver(secureSettings.getUriFor(
+            ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED
+        ))
+        verifyRegisterSettingObserver(secureSettings.getUriFor(
+            ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS
+        ))
     }
 
     private fun verifyRegisterSettingObserver(uri: Uri) {
