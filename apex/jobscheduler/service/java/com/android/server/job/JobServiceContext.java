@@ -591,17 +591,16 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     @GuardedBy("mLock")
-    boolean timeoutIfExecutingLocked(String pkgName, int userId, @Nullable String namespace,
-            boolean matchJobId, int jobId, String reason) {
+    boolean stopIfExecutingLocked(String pkgName, int userId, @Nullable String namespace,
+            boolean matchJobId, int jobId, int stopReason, int internalStopReason) {
         final JobStatus executing = getRunningJobLocked();
         if (executing != null && (userId == UserHandle.USER_ALL || userId == executing.getUserId())
                 && (pkgName == null || pkgName.equals(executing.getSourcePackageName()))
                 && Objects.equals(namespace, executing.getNamespace())
                 && (!matchJobId || jobId == executing.getJobId())) {
             if (mVerb == VERB_EXECUTING) {
-                mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
-                        JobParameters.INTERNAL_STOP_REASON_TIMEOUT, reason);
-                sendStopMessageLocked("force timeout from shell");
+                mParams.setStopReason(stopReason, internalStopReason, "stop from shell");
+                sendStopMessageLocked("stop from shell");
                 return true;
             }
         }
