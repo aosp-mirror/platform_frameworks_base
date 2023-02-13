@@ -33,5 +33,27 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibilitymenu_service"/>
         </service>
+
+        <!-- Accessibility Menu Settings -->
+        <activity
+            android:name="com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity"
+            android:exported="true"
+            android:label="@string/accessibility_menu_settings_name"
+            android:launchMode="singleTop"
+            android:theme="@style/AccessibilityMenuSettings">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.accessibilityservice.SERVICE_SETTINGS"/>
+            </intent-filter>
+        </activity>
     </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
 </manifest>
