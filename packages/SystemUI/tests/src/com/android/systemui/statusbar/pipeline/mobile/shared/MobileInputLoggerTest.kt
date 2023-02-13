@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.shared
+package com.android.systemui.statusbar.pipeline.mobile.shared
 
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -23,8 +23,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.plugins.log.LogcatEchoTracker
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
+import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger.Companion.logInputChange
+import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger.Companion.logOutputChange
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -38,10 +38,10 @@ import org.mockito.Mockito
 import org.mockito.Mockito.mock
 
 @SmallTest
-class ConnectivityPipelineLoggerTest : SysuiTestCase() {
+class MobileInputLoggerTest : SysuiTestCase() {
     private val buffer = LogBufferFactory(DumpManager(), mock(LogcatEchoTracker::class.java))
         .create("buffer", 10)
-    private val logger = ConnectivityPipelineLogger(buffer)
+    private val logger = MobileInputLogger(buffer)
 
     @Test
     fun testLogNetworkCapsChange_bufferHasInfo() {

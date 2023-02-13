@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.shared
+package com.android.systemui.statusbar.pipeline.mobile.shared
 
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -25,13 +25,14 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.dagger.StatusBarConnectivityLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.toString
+import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger.Companion.toString
+import com.android.systemui.statusbar.pipeline.shared.LoggerHelper
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 
 @SysUISingleton
-class ConnectivityPipelineLogger
+class MobileInputLogger
 @Inject
 constructor(
     @StatusBarConnectivityLog private val buffer: LogBuffer,
@@ -213,7 +214,7 @@ constructor(
 
         /** Log a change in one of the **inputs** to the connectivity pipeline. */
         fun Flow<Unit>.logInputChange(
-            logger: ConnectivityPipelineLogger,
+            logger: MobileInputLogger,
             inputParamName: String,
         ): Flow<Unit> {
             return this.onEach { logger.logInputChange(inputParamName) }
@@ -226,7 +227,7 @@ constructor(
          * [toString] is used if no custom function is provided.
          */
         fun <T> Flow<T>.logInputChange(
-            logger: ConnectivityPipelineLogger,
+            logger: MobileInputLogger,
             inputParamName: String,
             prettyPrint: (T) -> String = { it.toString() }
         ): Flow<T> {
@@ -240,7 +241,7 @@ constructor(
          * [toString] is used if no custom function is provided.
          */
         fun <T> Flow<T>.logOutputChange(
-            logger: ConnectivityPipelineLogger,
+            logger: MobileInputLogger,
             outputParamName: String,
             prettyPrint: (T) -> String = { it.toString() }
         ): Flow<T> {
