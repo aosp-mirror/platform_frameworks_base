@@ -6091,6 +6091,11 @@
     <permission android:name="android.permission.REGISTER_STATS_PULL_ATOM"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide Allows an application to read restricted stats from statsd.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.READ_RESTRICTED_STATS"
+                android:protectionLevel="internal|privileged" />
+
     <!-- @SystemApi Allows an application to control the backup and restore process.
     <p>Not for use by third-party applications.
          @hide pending API council -->
