@@ -1881,6 +1881,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             out.addChange(change);
         }
 
+        TransitionInfo.AnimationOptions animOptions = null;
+        if (topApp.asActivityRecord() != null) {
+            final ActivityRecord topActivity = topApp.asActivityRecord();
+            animOptions = addCustomActivityTransition(topActivity, true/* open */, null);
+            animOptions = addCustomActivityTransition(topActivity, false/* open */, animOptions);
+        }
         final WindowManager.LayoutParams animLp =
                 getLayoutParamsForAnimationsStyle(type, sortedTargets);
         if (animLp != null && animLp.type != TYPE_APPLICATION_STARTING
@@ -1888,14 +1894,33 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // Don't send animation options if no windowAnimations have been set or if the we are
             // running an app starting animation, in which case we don't want the app to be able to
             // change its animation directly.
-            TransitionInfo.AnimationOptions animOptions =
-                    TransitionInfo.AnimationOptions.makeAnimOptionsFromLayoutParameters(animLp);
+            if (animOptions != null) {
+                animOptions.addOptionsFromLayoutParameters(animLp);
+            } else {
+                animOptions = TransitionInfo.AnimationOptions
+                        .makeAnimOptionsFromLayoutParameters(animLp);
+            }
+        }
+        if (animOptions != null) {
             out.setAnimationOptions(animOptions);
         }
-
         return out;
     }
 
+    static TransitionInfo.AnimationOptions addCustomActivityTransition(ActivityRecord topActivity,
+            boolean open, TransitionInfo.AnimationOptions animOptions) {
+        final ActivityRecord.CustomAppTransition customAnim =
+                topActivity.getCustomAnimation(open);
+        if (customAnim != null) {
+            if (animOptions == null) {
+                animOptions = TransitionInfo.AnimationOptions
+                        .makeCommonAnimOptions(topActivity.packageName);
+            }
+            animOptions.addCustomActivityTransition(open, customAnim.mEnterAnim,
+                    customAnim.mExitAnim, customAnim.mBackgroundColor);
+        }
+        return animOptions;
+    }
     /**
      * Finds the top-most common ancestor of app targets.
      *
