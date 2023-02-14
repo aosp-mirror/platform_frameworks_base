@@ -16,8 +16,6 @@
 
 package android.app.admin;
 
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_KEY;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -103,9 +101,7 @@ public abstract class PolicyKey implements Parcelable {
     /**
      * @hide
      */
-    public void writeToBundle(Bundle bundle) {
-        bundle.putString(EXTRA_POLICY_KEY, mIdentifier);
-    }
+    public abstract void writeToBundle(Bundle bundle);
 
     @Override
     public boolean equals(@Nullable Object o) {

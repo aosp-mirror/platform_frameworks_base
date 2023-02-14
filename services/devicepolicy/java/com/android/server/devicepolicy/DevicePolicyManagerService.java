@@ -264,6 +264,7 @@ import android.app.admin.StringSetPolicyValue;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.UnsafeStateException;
+import android.app.admin.UserRestrictionPolicyKey;
 import android.app.admin.WifiSsidPolicy;
 import android.app.backup.IBackupManager;
 import android.app.compat.CompatChanges;
@@ -1351,7 +1352,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (shouldMigrateToDevicePolicyEngine()) {
                 migratePoliciesToDevicePolicyEngine();
             }
-            if (isDevicePolicyEngineFlagEnabled()) {
+            if (isDevicePolicyEngineEnabled()) {
                 mDevicePolicyEngine.handlePackageChanged(packageName, userHandle);
             }
             // Persist updates if the removed package was an admin or delegate.
@@ -2044,7 +2045,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mUserManagerInternal.addUserLifecycleListener(new UserLifecycleListener());
 
         mDeviceManagementResourcesProvider.load();
-        if (isDevicePolicyEngineFlagEnabled()) {
+        if (isDevicePolicyEngineEnabled()) {
             mDevicePolicyEngine.load();
         }
 
@@ -2506,8 +2507,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (profileOwner == null || !mUserManager.isManagedProfile(userId)) {
                     continue;
                 }
-                maybeSetDefaultRestrictionsForAdminLocked(userId, profileOwner,
-                        UserRestrictionsUtils.getDefaultEnabledForManagedProfiles());
+                maybeSetDefaultRestrictionsForAdminLocked(userId, profileOwner);
                 ensureUnknownSourcesRestrictionForProfileOwnerLocked(
                         userId, profileOwner, false /* newOwner */);
             }
@@ -2522,9 +2522,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin profileOwner, boolean newOwner) {
         if (newOwner || mInjector.settingsSecureGetIntForUser(
                 Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId) != 0) {
-            profileOwner.ensureUserRestrictions().putBoolean(
-                    UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
-            saveUserRestrictionsLocked(userId);
+            if (isDevicePolicyEngineEnabled()) {
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.getPolicyDefinitionForUserRestriction(
+                                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES),
+                        EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                                profileOwner.info.getComponent(),
+                                profileOwner.getUserHandle().getIdentifier()),
+                        new BooleanPolicyValue(true),
+                        userId);
+            } else {
+                profileOwner.ensureUserRestrictions().putBoolean(
+                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
+                saveUserRestrictionsLocked(userId);
+            }
             mInjector.settingsSecurePutIntForUser(
                     Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED, 0, userId);
         }
@@ -2533,11 +2544,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /**
      * Apply default restrictions that haven't been applied to a given admin yet.
      */
-    private void maybeSetDefaultRestrictionsForAdminLocked(
-            int userId, ActiveAdmin admin, Set<String> defaultRestrictions) {
+    private void maybeSetDefaultRestrictionsForAdminLocked(int userId, ActiveAdmin admin) {
+        Set<String> defaultRestrictions =
+                UserRestrictionsUtils.getDefaultEnabledForManagedProfiles();
         if (defaultRestrictions.equals(admin.defaultEnabledRestrictionsAlreadySet)) {
             return; // The same set of default restrictions has been already applied.
         }
+        if (isDevicePolicyEngineEnabled()) {
+            for (String restriction : defaultRestrictions) {
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.getPolicyDefinitionForUserRestriction(restriction),
+                        EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                                admin.info.getComponent(),
+                                admin.getUserHandle().getIdentifier()),
+                        new BooleanPolicyValue(true),
+                        userId);
+            }
+            admin.defaultEnabledRestrictionsAlreadySet.addAll(defaultRestrictions);
+            Slogf.i(LOG_TAG, "Enabled the following restrictions by default: " +
+                    defaultRestrictions);
+            return;
+        }
+
         Slogf.i(LOG_TAG, "New user restrictions need to be set by default for user " + userId);
 
         if (VERBOSE_LOG) {
@@ -3388,7 +3416,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         updateNetworkPreferenceForUser(userId, preferentialNetworkServiceConfigs);
 
         startOwnerService(userId, "start-user");
-        if (isDevicePolicyEngineFlagEnabled()) {
+        if (isDevicePolicyEngineEnabled()) {
             mDevicePolicyEngine.handleStartUser(userId);
         }
     }
@@ -3413,7 +3441,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     void handleUnlockUser(int userId) {
         startOwnerService(userId, "unlock-user");
-        if (isDevicePolicyEngineFlagEnabled()) {
+        if (isDevicePolicyEngineEnabled()) {
             mDevicePolicyEngine.handleUnlockUser(userId);
         }
     }
@@ -3425,7 +3453,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void handleStopUser(int userId) {
         updateNetworkPreferenceForUser(userId, List.of(PreferentialNetworkServiceConfig.DEFAULT));
         mDeviceAdminServiceController.stopServicesForUser(userId, /* actionForLog= */ "stop-user");
-        if (isDevicePolicyEngineFlagEnabled()) {
+        if (isDevicePolicyEngineEnabled()) {
             mDevicePolicyEngine.handleStopUser(userId);
         }
     }
@@ -9358,8 +9386,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             mInjector.binderWithCleanCallingIdentity(() -> {
                 if (mUserManager.isManagedProfile(userHandle)) {
-                    maybeSetDefaultRestrictionsForAdminLocked(userHandle, admin,
-                            UserRestrictionsUtils.getDefaultEnabledForManagedProfiles());
+                    maybeSetDefaultRestrictionsForAdminLocked(userHandle, admin);
                     ensureUnknownSourcesRestrictionForProfileOwnerLocked(userHandle, admin,
                             true /* newOwner */);
                 }
@@ -11503,7 +11530,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final int userId = user.id;
 
-        if (isDevicePolicyEngineFlagEnabled()) {
+        if (isDevicePolicyEngineEnabled()) {
             mDevicePolicyEngine.handleUserCreated(user);
         }
 
@@ -12074,7 +12101,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setUserRestriction(ComponentName who, String key, boolean enabledFromThisOwner,
+    public void setUserRestriction(
+            ComponentName who, String callerPackage, String key, boolean enabledFromThisOwner,
             boolean parent) {
         Objects.requireNonNull(who, "ComponentName is null");
 
@@ -12083,18 +12111,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!UserRestrictionsUtils.isValidRestriction(key)) {
             return;
         }
-
         if (parent) {
             Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
         } else {
             Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
         }
-
         int userId = caller.getUserId();
         synchronized (getLockObject()) {
-            final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
-                    getProfileOwnerOrDeviceOwnerLocked(userId), parent);
-
             if (isDefaultDeviceOwner(caller)) {
                 if (!UserRestrictionsUtils.canDeviceOwnerChange(key)) {
                     throw new SecurityException("Device owner cannot set user restriction " + key);
@@ -12112,27 +12135,119 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 boolean profileOwnerCanChangeOnItself = !parent
                         && UserRestrictionsUtils.canProfileOwnerChange(
                                 key, userId == getMainUserId());
-                boolean orgOwnedProfileOwnerCanChangesGlobally = parent
+                boolean orgOwnedProfileOwnerCanChangeGlobally = parent
                         && isProfileOwnerOfOrganizationOwnedDevice(caller)
                         && UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(
                         key);
 
-                if (!profileOwnerCanChangeOnItself && !orgOwnedProfileOwnerCanChangesGlobally) {
+                if (!profileOwnerCanChangeOnItself && !orgOwnedProfileOwnerCanChangeGlobally) {
                     throw new SecurityException("Profile owner cannot set user restriction " + key);
                 }
             }
-            checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_USER_RESTRICTION);
-
-            // Save the restriction to ActiveAdmin.
-            final Bundle restrictions = activeAdmin.ensureUserRestrictions();
-            if (enabledFromThisOwner) {
-                restrictions.putBoolean(key, true);
-            } else {
-                restrictions.remove(key);
-            }
-            saveUserRestrictionsLocked(userId);
         }
-        final int eventId = enabledFromThisOwner
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_USER_RESTRICTION);
+
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
+            EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                    who, caller.getUserId());
+            PolicyDefinition<Boolean> policyDefinition =
+                    PolicyDefinition.getPolicyDefinitionForUserRestriction(key);
+            if (enabledFromThisOwner) {
+                mDevicePolicyEngine.setLocalPolicy(
+                        policyDefinition,
+                        admin,
+                        new BooleanPolicyValue(true),
+                        parent ? getProfileParentId(userId) : userId);
+            } else {
+                // Remove any local and global policy that was set by the admin
+                if (!policyDefinition.isLocalOnlyPolicy()) {
+                    mDevicePolicyEngine.removeGlobalPolicy(
+                            policyDefinition,
+                            admin);
+                }
+                if (!policyDefinition.isGlobalOnlyPolicy()) {
+                    mDevicePolicyEngine.removeLocalPolicy(
+                            policyDefinition,
+                            admin,
+                            userId);
+
+                    int parentUserId = getProfileParentId(userId);
+                    if (parentUserId != userId) {
+                        mDevicePolicyEngine.removeLocalPolicy(
+                                policyDefinition,
+                                admin,
+                                parentUserId);
+                    }
+                }
+            }
+        } else {
+            synchronized (getLockObject()) {
+                final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
+                        getProfileOwnerOrDeviceOwnerLocked(userId), parent);
+                // Save the restriction to ActiveAdmin.
+                final Bundle restrictions = activeAdmin.ensureUserRestrictions();
+                if (enabledFromThisOwner) {
+                    restrictions.putBoolean(key, true);
+                } else {
+                    restrictions.remove(key);
+                }
+                saveUserRestrictionsLocked(userId);
+            }
+        }
+        logUserRestrictionCall(key, enabledFromThisOwner, parent, caller);
+    }
+
+    @Override
+    public void setUserRestrictionGlobally(String callerPackage, String key) {
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
+        // TODO: Replace with new permission checks, for now copying this over from
+        //  setUserRestriction
+        if (!UserRestrictionsUtils.isValidRestriction(key)) {
+            return;
+        }
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+
+        int userHandle = caller.getUserId();
+        if (isDefaultDeviceOwner(caller)) {
+            if (!UserRestrictionsUtils.canDeviceOwnerChange(key)) {
+                throw new SecurityException("Device owner cannot set user restriction " + key);
+            }
+        } else if (isFinancedDeviceOwner(caller)) {
+            if (!UserRestrictionsUtils.canFinancedDeviceOwnerChange(key)) {
+                throw new SecurityException("Cannot set user restriction " + key
+                        + " when managing a financed device");
+            }
+        } else {
+            boolean profileOwnerCanChangeOnItself =
+                    UserRestrictionsUtils.canProfileOwnerChange(key, userHandle == getMainUserId());
+            boolean orgOwnedProfileOwnerCanChangeGlobally =
+                    isProfileOwnerOfOrganizationOwnedDevice(caller)
+                    && UserRestrictionsUtils.canProfileOwnerOfOrganizationOwnedDeviceChange(
+                    key);
+
+            if (!profileOwnerCanChangeOnItself && !orgOwnedProfileOwnerCanChangeGlobally) {
+                throw new SecurityException("Profile owner cannot set user restriction " + key);
+            }
+        }
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_USER_RESTRICTION);
+
+        if (!useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
+            throw new IllegalStateException("One or more admins are not targeting Android 14.");
+        }
+        EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                caller.getPackageName(), caller.getUserId());
+
+        mDevicePolicyEngine.setGlobalPolicy(
+                PolicyDefinition.getPolicyDefinitionForUserRestriction(key),
+                admin,
+                new BooleanPolicyValue(true));
+
+        logUserRestrictionCall(key, /* enabled= */ true, /* parent= */ false, caller);
+    }
+
+    private void logUserRestrictionCall(
+            String key, boolean enabled, boolean parent, CallerIdentity caller) {
+        final int eventId = enabled
                 ? DevicePolicyEnums.ADD_USER_RESTRICTION
                 : DevicePolicyEnums.REMOVE_USER_RESTRICTION;
         DevicePolicyEventLogger
@@ -12141,14 +12256,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .setStrings(key, parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
         if (SecurityLog.isLoggingEnabled()) {
-            final int eventTag = enabledFromThisOwner
+            final int eventTag = enabled
                     ? SecurityLog.TAG_USER_RESTRICTION_ADDED
                     : SecurityLog.TAG_USER_RESTRICTION_REMOVED;
-            SecurityLog.writeEvent(eventTag, who.getPackageName(), userId, key);
+            SecurityLog.writeEvent(eventTag, caller.getPackageName(), caller.getUserId(), key);
         }
     }
 
     private void saveUserRestrictionsLocked(int userId) {
+        if (isDevicePolicyEngineEnabled()) {
+            // User restrictions are handled in the policy engine
+            return;
+        }
         saveSettingsLocked(userId);
         pushUserRestrictions(userId);
         sendChangedNotification(userId);
@@ -12210,7 +12329,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public Bundle getUserRestrictions(ComponentName who, boolean parent) {
+    public Bundle getUserRestrictions(ComponentName who, String callerPackage, boolean parent) {
         if (!mHasFeature) {
             return null;
         }
@@ -12222,11 +12341,56 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 || isProfileOwner(caller)
                 || (parent && isProfileOwnerOfOrganizationOwnedDevice(caller)));
 
-        synchronized (getLockObject()) {
-            final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
-                    getProfileOwnerOrDeviceOwnerLocked(caller.getUserId()), parent);
-            return activeAdmin.userRestrictions;
+        if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
+            return getUserRestrictionsFromPolicyEngine(
+                    EnforcingAdmin.createEnterpriseEnforcingAdmin(who, caller.getUserId()),
+                    parent ? getProfileParentId(caller.getUserId()) : caller.getUserId());
+        } else {
+            synchronized (getLockObject()) {
+                final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
+                        getProfileOwnerOrDeviceOwnerLocked(caller.getUserId()), parent);
+                return activeAdmin.userRestrictions;
+            }
         }
+    }
+
+    @Override
+    public Bundle getUserRestrictionsGlobally(String callerPackage) {
+        if (!mHasFeature) {
+            return null;
+        }
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
+        if (!useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
+            throw new IllegalStateException("One or more admins are not targeting Android 14.");
+        }
+        // TODO: Replace with new permission checks, for now copying this over from
+        //  setUserRestriction
+        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
+                || isFinancedDeviceOwner(caller)
+                || isProfileOwner(caller));
+
+        return getUserRestrictionsFromPolicyEngine(
+                EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                        caller.getPackageName(), caller.getUserId()),
+                UserHandle.USER_ALL);
+    }
+
+    /**
+     * Returns user restrictions set by the given admin for the provided {@code userId}.
+     *
+     * <p>Pass in {@link UserHandle#USER_ALL} for {@code userId} to get global restrictions set by
+     * the admin
+     */
+    private Bundle getUserRestrictionsFromPolicyEngine(EnforcingAdmin admin, int userId) {
+        Set<UserRestrictionPolicyKey> restrictionKeys =
+                mDevicePolicyEngine.getUserRestrictionPolicyKeysForAdmin(
+                        admin,
+                        userId);
+        Bundle restrictions = new Bundle();
+        for (UserRestrictionPolicyKey key : restrictionKeys) {
+            restrictions.putBoolean(key.getRestriction(), true);
+        }
+        return restrictions;
     }
 
     @Override
@@ -13639,7 +13803,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             + " should be used instead.");
                 } else {
                     try {
-                        setUserRestriction(who, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                        setUserRestriction(who, who.getPackageName(),
+                                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
                                 (Integer.parseInt(value) == 0) ? true : false, /* parent */ false);
                         DevicePolicyEventLogger
                                 .createEvent(DevicePolicyEnums.SET_SECURE_SETTING)
@@ -13696,7 +13861,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_MASTER_VOLUME_MUTED);
 
         synchronized (getLockObject()) {
-            setUserRestriction(who, UserManager.DISALLOW_UNMUTE_DEVICE, on, /* parent */ false);
+            setUserRestriction(who, who.getPackageName(), UserManager.DISALLOW_UNMUTE_DEVICE, on,
+                    /* parent */ false);
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.SET_MASTER_VOLUME_MUTED)
                     .setAdmin(who)
@@ -21303,8 +21469,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return true;
         } else {
-            return isDevicePolicyEngineFlagEnabled() && !hasDPCsNotSupportingCoexistence();
+            return isDevicePolicyEngineEnabled();
         }
+    }
+
+    private boolean isDevicePolicyEngineEnabled() {
+        return isDevicePolicyEngineFlagEnabled() && !hasDPCsNotSupportingCoexistence();
     }
 
     private boolean isDevicePolicyEngineFlagEnabled() {
