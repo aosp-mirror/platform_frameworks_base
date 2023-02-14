@@ -64,7 +64,7 @@ object ItemListPageProvider : SettingsPageProvider {
 
         return SettingsEntryBuilder.createInject(
             owner = createSettingsPage(arguments),
-            displayName = "ItemList_$opParam",
+            label = "ItemList_$opParam",
         ).setUiLayoutFn {
             Preference(
                 object : PreferenceModel {
