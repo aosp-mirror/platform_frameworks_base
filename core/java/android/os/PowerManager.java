@@ -2982,6 +2982,12 @@ public final class PowerManager {
     /**
      * Signals that wake-on-lan/wake-on-wlan is allowed in Low Power Standby.
      *
+     * <p>If Low Power Standby is enabled ({@link #isLowPowerStandbyEnabled()}),
+     * wake-on-lan/wake-on-wlan may not be available while in standby.
+     * Use {@link #isAllowedInLowPowerStandby(String)} to determine whether the device allows this
+     * feature to be used during Low Power Standby with the currently active Low Power Standby
+     * policy.
+     *
      * @see #isAllowedInLowPowerStandby(String)
      */
     public static final String LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN =
