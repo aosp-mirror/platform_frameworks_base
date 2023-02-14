@@ -2537,6 +2537,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
             params.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
         }
+        if (a.getBoolean(
+                R.styleable.Window_windowNoMoveAnimation,
+                false)) {
+            params.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
+        }
         final int sysUiVis = decor.getSystemUiVisibility();
         final int statusLightFlag = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
         final int statusFlag = a.getBoolean(R.styleable.Window_windowLightStatusBar, false)
