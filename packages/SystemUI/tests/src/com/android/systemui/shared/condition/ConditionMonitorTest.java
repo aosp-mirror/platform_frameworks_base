@@ -249,6 +249,21 @@ public class ConditionMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void addCallback_preCondition_noConditions_reportAllConditionsMet() {
+        final Monitor
+                monitor = new Monitor(mExecutor, new HashSet<>(Arrays.asList(mCondition1)));
+        final Monitor.Callback callback = mock(
+                Monitor.Callback.class);
+
+        monitor.addSubscription(new Monitor.Subscription.Builder(callback).build());
+        mExecutor.runAllReady();
+        verify(callback, never()).onConditionsChanged(true);
+        mCondition1.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(true);
+    }
+
+    @Test
     public void removeCallback_noFailureOnDoubleRemove() {
         final Condition condition = mock(
                 Condition.class);
