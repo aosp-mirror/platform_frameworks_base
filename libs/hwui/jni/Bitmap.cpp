@@ -398,7 +398,7 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle, jint dstConfig
                 return NULL;
             }
             gainmap->bitmap = std::move(skBitmap);
-            bitmap->setGainmap(std::move(gainmap.get()));
+            bitmap->setGainmap(std::move(gainmap));
         }
         return createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(isMutable));
     }
@@ -421,7 +421,7 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle, jint dstConfig
             return NULL;
         }
         gainmap->bitmap = sk_sp<Bitmap>(destAllocator.getStorageObjAndReset());
-        bitmap->setGainmap(std::move(gainmap.get()));
+        bitmap->setGainmap(std::move(gainmap));
     }
     return createBitmap(env, bitmap, getPremulBitmapCreateFlags(isMutable));
 }
