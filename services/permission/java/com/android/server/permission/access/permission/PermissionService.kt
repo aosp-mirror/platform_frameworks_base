@@ -1391,6 +1391,22 @@ class PermissionService(
         return false
     }
 
+    private fun addAllowlistedRestrictedPermissionsUnchecked(
+        androidPackage: AndroidPackage,
+        appId: Int,
+        permissionNames: List<String>,
+        userId: Int
+    ) {
+        val newPermissionNames = getAllowlistedRestrictedPermissionsUnchecked(appId,
+            PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER, userId
+        )?.let {
+            IndexedSet(permissionNames).apply { this += it }.toList()
+        } ?: permissionNames
+
+        setAllowlistedRestrictedPermissionsUnchecked(androidPackage, appId, newPermissionNames,
+            PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER, userId)
+    }
+
     override fun removeAllowlistedRestrictedPermission(
         packageName: String,
         permissionName: String,
@@ -1442,7 +1458,7 @@ class PermissionService(
 
     private fun setAllowlistedRestrictedPermissions(
         packageName: String,
-        allowlistedPermissions: List<String>,
+        permissionNames: List<String>,
         allowlistedFlags: Int,
         userId: Int,
         isAddingPermission: Boolean
@@ -1477,7 +1493,7 @@ class PermissionService(
         }
 
         setAllowlistedRestrictedPermissionsUnchecked(
-            androidPackage, packageState.appId, allowlistedPermissions, allowlistedFlags, userId
+            androidPackage, packageState.appId, permissionNames, allowlistedFlags, userId
         )
 
         return true
@@ -1490,7 +1506,7 @@ class PermissionService(
     private fun setAllowlistedRestrictedPermissionsUnchecked(
         androidPackage: AndroidPackage,
         appId: Int,
-        allowlistedPermissions: List<String>,
+        permissionNames: List<String>,
         allowlistedFlags: Int,
         userId: Int
     ) {
@@ -1519,7 +1535,7 @@ class PermissionService(
                             PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM -> {
                                 mask = mask or PermissionFlags.SYSTEM_EXEMPT
                                 newFlags =
-                                    if (allowlistedPermissions.contains(requestedPermission)) {
+                                    if (permissionNames.contains(requestedPermission)) {
                                         newFlags or PermissionFlags.SYSTEM_EXEMPT
                                     } else {
                                         newFlags andInv PermissionFlags.SYSTEM_EXEMPT
@@ -1528,7 +1544,7 @@ class PermissionService(
                             PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE -> {
                                 mask = mask or PermissionFlags.UPGRADE_EXEMPT
                                 newFlags =
-                                    if (allowlistedPermissions.contains(requestedPermission)) {
+                                    if (permissionNames.contains(requestedPermission)) {
                                         newFlags or PermissionFlags.UPGRADE_EXEMPT
                                     } else {
                                         newFlags andInv PermissionFlags.UPGRADE_EXEMPT
@@ -1537,7 +1553,7 @@ class PermissionService(
                             PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER -> {
                                 mask = mask or PermissionFlags.INSTALLER_EXEMPT
                                 newFlags =
-                                    if (allowlistedPermissions.contains(requestedPermission)) {
+                                    if (permissionNames.contains(requestedPermission)) {
                                         newFlags or PermissionFlags.INSTALLER_EXEMPT
                                     } else {
                                         newFlags andInv PermissionFlags.INSTALLER_EXEMPT
@@ -1853,10 +1869,15 @@ class PermissionService(
         @Suppress("NAME_SHADOWING")
         userIds.forEach { userId ->
             service.onPackageInstalled(androidPackage.packageName, userId)
+        }
+
+        @Suppress("NAME_SHADOWING")
+        userIds.forEach { userId ->
             // TODO: Remove when this callback receives packageState directly.
             val packageState =
                 packageManagerInternal.getPackageStateInternal(androidPackage.packageName)!!
-            // TODO: Add allowlisting
+            addAllowlistedRestrictedPermissionsUnchecked(androidPackage, packageState.appId,
+                params.allowlistedRestrictedPermissions, userId)
             setRequestedPermissionStates(packageState, userId, params.permissionStates)
         }
     }
