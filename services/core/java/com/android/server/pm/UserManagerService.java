@@ -1362,15 +1362,14 @@ public class UserManagerService extends IUserManager.Stub {
         }
         try {
             if (enableQuietMode) {
-                ActivityManager.getService().stopUser(userId, /* force */true, null);
+                ActivityManager.getService().stopUser(userId, /* force= */ true, null);
                 LocalServices.getService(ActivityManagerInternal.class)
                         .killForegroundAppsForUser(userId);
             } else {
                 IProgressListener callback = target != null
                         ? new DisableQuietModeUserUnlockedCallback(target)
                         : null;
-                ActivityManager.getService().startUserInBackgroundWithListener(
-                        userId, callback);
+                ActivityManager.getService().startProfileWithListener(userId, callback);
             }
             logQuietModeEnabled(userId, enableQuietMode, callingPackage);
         } catch (RemoteException e) {

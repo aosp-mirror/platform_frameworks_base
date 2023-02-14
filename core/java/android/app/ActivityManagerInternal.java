@@ -963,4 +963,12 @@ public abstract class ActivityManagerInternal {
      * @hide
      */
     public abstract boolean canHoldWakeLocksInDeepDoze(int uid, int procstate);
+
+    /**
+     * Same as {@link android.app.IActivityManager#startProfile(int userId)}, but it would succeed
+     * even if the profile is disabled - it should only be called by
+     * {@link com.android.server.devicepolicy.DevicePolicyManagerService} when starting a profile
+     * while it's being created.
+     */
+    public abstract boolean startProfileEvenWhenDisabled(@UserIdInt int userId);
 }
