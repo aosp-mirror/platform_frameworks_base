@@ -18,6 +18,7 @@ package android.credentials;
 
 import java.util.List;
 
+import android.content.pm.ServiceInfo;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.GetCredentialRequest;
@@ -57,5 +58,7 @@ interface ICredentialManager {
     void unregisterCredentialDescription(in UnregisterCredentialDescriptionRequest request, String callingPackage);
 
     boolean isEnabledCredentialProviderService(in ComponentName componentName, String callingPackage);
+
+    List<ServiceInfo> getCredentialProviderServices(in int userId, in boolean disableSystemAppVerificationForTests, in int providerFilter);
 }
 
