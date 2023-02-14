@@ -1140,7 +1140,8 @@ public class TvInteractiveAppManagerService extends SystemService {
 
 
         @Override
-        public void notifyRecordingStarted(IBinder sessionToken, String recordingId, int userId) {
+        public void notifyRecordingStarted(IBinder sessionToken, String recordingId,
+                String requestId, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
@@ -1151,7 +1152,8 @@ public class TvInteractiveAppManagerService extends SystemService {
                     try {
                         SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
                                 resolvedUserId);
-                        getSessionLocked(sessionState).notifyRecordingStarted(recordingId);
+                        getSessionLocked(sessionState).notifyRecordingStarted(
+                                recordingId, requestId);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slogf.e(TAG, "error in notifyRecordingStarted", e);
                     }
@@ -2831,7 +2833,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void onRequestStartRecording(Uri programUri) {
+        public void onRequestStartRecording(String requestId, Uri programUri) {
             synchronized (mLock) {
                 if (DEBUG) {
                     Slogf.d(TAG, "onRequestStartRecording: " + programUri);
@@ -2840,7 +2842,8 @@ public class TvInteractiveAppManagerService extends SystemService {
                     return;
                 }
                 try {
-                    mSessionState.mClient.onRequestStartRecording(programUri, mSessionState.mSeq);
+                    mSessionState.mClient.onRequestStartRecording(
+                            requestId, programUri, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onRequestStartRecording", e);
                 }
@@ -2866,7 +2869,7 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         @Override
         public void onRequestScheduleRecording(
-                String inputId, Uri channelUri, Uri programUri, Bundle params) {
+                String requestId, String inputId, Uri channelUri, Uri programUri, Bundle params) {
             synchronized (mLock) {
                 if (DEBUG) {
                     Slogf.d(TAG, "onRequestScheduleRecording");
@@ -2876,7 +2879,7 @@ public class TvInteractiveAppManagerService extends SystemService {
                 }
                 try {
                     mSessionState.mClient.onRequestScheduleRecording(
-                            inputId, channelUri, programUri, params, mSessionState.mSeq);
+                            requestId, inputId, channelUri, programUri, params, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onRequestScheduleRecording", e);
                 }
@@ -2884,8 +2887,8 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void onRequestScheduleRecording2(String inputId, Uri channelUri, long start,
-                long duration, int repeat, Bundle params) {
+        public void onRequestScheduleRecording2(String inputId, String requestId, Uri channelUri,
+                long start, long duration, int repeat, Bundle params) {
             synchronized (mLock) {
                 if (DEBUG) {
                     Slogf.d(TAG, "onRequestScheduleRecording2");
@@ -2894,8 +2897,8 @@ public class TvInteractiveAppManagerService extends SystemService {
                     return;
                 }
                 try {
-                    mSessionState.mClient.onRequestScheduleRecording2(inputId, channelUri, start,
-                            duration, repeat, params, mSessionState.mSeq);
+                    mSessionState.mClient.onRequestScheduleRecording2(requestId, inputId,
+                            channelUri, start, duration, repeat, params, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onRequestScheduleRecording2", e);
                 }
