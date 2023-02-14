@@ -3923,6 +3923,18 @@ package android.window {
     method public abstract void onTransactionReady(int, @NonNull android.view.SurfaceControl.Transaction);
   }
 
+  public class WindowInfosListenerForTest {
+    ctor public WindowInfosListenerForTest();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
+    method public void removeWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
+  }
+
+  public static class WindowInfosListenerForTest.WindowInfo {
+    field @NonNull public final android.graphics.Rect bounds;
+    field @NonNull public final String name;
+    field @NonNull public final android.os.IBinder windowToken;
+  }
+
   public class WindowOrganizer {
     ctor public WindowOrganizer();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public int applySyncTransaction(@NonNull android.window.WindowContainerTransaction, @NonNull android.window.WindowContainerTransactionCallback);

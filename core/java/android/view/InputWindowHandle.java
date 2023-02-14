@@ -244,6 +244,10 @@ public final class InputWindowHandle {
         window = iwindow;
     }
 
+    public @Nullable IBinder getWindowToken() {
+        return windowToken;
+    }
+
     public IWindow getWindow() {
         if (window != null) {
             return window;
