@@ -18,8 +18,9 @@ package android.app.admin;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
 import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CERTIFICATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_FACTORY_RESET;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_INPUT_METHODS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_KEYGUARD;
@@ -28,7 +29,6 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MTE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_PACKAGE_STATE;
-import static android.Manifest.permission.MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SCREEN_CAPTURE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SECURITY_LOGGING;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES;
@@ -7295,6 +7295,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      * All apps within the profile will be able to access the certificate and use the private key,
      * given direct user approval.
@@ -7317,17 +7319,19 @@ public class DevicePolicyManager {
      * revoked.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if calling from a delegated certificate installer.
+     *            {@code null} if the caller is not a device admin.
      * @param privKey The private key to install.
      * @param cert The certificate to install.
      * @param alias The private key alias under which to install the certificate. If a certificate
      * with that alias already exists, it will be overwritten.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner.
+     *         owner, or {@code admin} is null and the calling application does not have the
+     *         {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate cert, @NonNull String alias) {
         return installKeyPair(admin, privKey, new Certificate[] {cert}, alias, false);
@@ -7341,6 +7345,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      * All apps within the profile will be able to access the certificate chain and use the private
      * key, given direct user approval.
@@ -7361,7 +7367,7 @@ public class DevicePolicyManager {
      * revoked.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *        {@code null} if calling from a delegated certificate installer.
+     *        {@code null} if the caller is not a device admin.
      * @param privKey The private key to install.
      * @param certs The certificate chain to install. The chain should start with the leaf
      *        certificate and include the chain of trust in order. This will be returned by
@@ -7373,11 +7379,13 @@ public class DevicePolicyManager {
      *        approval.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner.
+     *         owner, or {@code admin} is null and the calling application does not have the
+     *         {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @see android.security.KeyChain#getCertificateChain
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate[] certs, @NonNull String alias, boolean requestAccess) {
         int flags = INSTALLKEY_SET_USER_SELECTABLE;
@@ -7395,6 +7403,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      * All apps within the profile will be able to access the certificate chain and use the
      * private key, given direct user approval (if the user is allowed to select the private key).
@@ -7421,7 +7431,7 @@ public class DevicePolicyManager {
      * revoked.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *        {@code null} if calling from a delegated certificate installer.
+     *        {@code null} if the caller is not a device admin.
      * @param privKey The private key to install.
      * @param certs The certificate chain to install. The chain should start with the leaf
      *        certificate and include the chain of trust in order. This will be returned by
@@ -7432,13 +7442,15 @@ public class DevicePolicyManager {
      *        and set the key to be user-selectable. See {@link #INSTALLKEY_SET_USER_SELECTABLE} and
      *        {@link #INSTALLKEY_REQUEST_CREDENTIALS_ACCESS}.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner, or {@code admin} is null but the calling application is not a delegated
-     *         certificate installer or credential management app.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or
+     *        profile owner, or {@code admin} is null but the calling application is not a
+     *        delegated certificate installer, credential management app and does not have the
+     *        {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @see android.security.KeyChain#getCertificateChain
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate[] certs, @NonNull String alias, int flags) {
         throwIfParentInstance("installKeyPair");
@@ -7474,6 +7486,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      *
      * <p>From Android {@link android.os.Build.VERSION_CODES#S}, the credential management app
@@ -7481,15 +7495,17 @@ public class DevicePolicyManager {
      * {@code null}. Note, there can only be a credential management app on an unmanaged device.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *        {@code null} if calling from a delegated certificate installer.
+     *        {@code null} if the caller is not a device admin.
      * @param alias The private key alias under which the certificate is installed.
      * @return {@code true} if the private key alias no longer exists, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner, or {@code admin} is null but the calling application is not a delegated
-     *         certificate installer or credential management app.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device owner or
+     *        profile owner, or {@code admin} is null but the calling application is not a
+     *        delegated certificate installer, credential management app and does not have the
+     *        {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean removeKeyPair(@Nullable ComponentName admin, @NonNull String alias) {
         throwIfParentInstance("removeKeyPair");
         try {
@@ -7508,6 +7524,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      *
      * If called by the credential management app, the alias must exist in the credential
@@ -7516,10 +7534,12 @@ public class DevicePolicyManager {
      * @param alias The alias under which the key pair is installed.
      * @return {@code true} if a key pair with this alias exists, {@code false} otherwise.
      * @throws SecurityException if the caller is not a device or profile owner, a delegated
-     *         certificate installer or the credential management app.
+     *         certificate installer, the credential management app and does not have the
+     *         {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @see #setDelegatedScopes
      * @see #DELEGATION_CERT_INSTALL
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean hasKeyPair(@NonNull String alias) {
         throwIfParentInstance("hasKeyPair");
         try {
@@ -7536,6 +7556,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      * If the device supports key generation via secure hardware, this method is useful for
      * creating a key in KeyChain that never left the secure hardware. Access to the key is
@@ -7566,19 +7588,23 @@ public class DevicePolicyManager {
      * supports these features, refer to {@link #isDeviceIdAttestationSupported()} and
      * {@link #isUniqueDeviceAttestationSupported()}.
      *
-     * <p>Device owner, profile owner, their delegated certificate installer and the credential
-     * management app can use {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device
-     * information including manufacturer, model, brand, device and product in the attestation
-     * record.
-     * Only device owner, profile owner on an organization-owned device or affiliated user, and
-     * their delegated certificate installers can use {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI}
-     * and {@link #ID_TYPE_MEID} to request unique device identifiers to be attested (the serial
-     * number, IMEI and MEID correspondingly), if supported by the device
-     * (see {@link #isDeviceIdAttestationSupported()}).
-     * Additionally, device owner, profile owner on an organization-owned device and their delegated
-     * certificate installers can also request the attestation record to be signed using an
-     * individual attestation certificate by specifying the {@link #ID_TYPE_INDIVIDUAL_ATTESTATION}
-     * flag (if supported by the device, see {@link #isUniqueDeviceAttestationSupported()}).
+     * <p>Device owner, profile owner, their delegated certificate installer, the credential
+     * management app or an app that holds the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission can use
+     * {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device information including
+     * manufacturer, model, brand, device and product in the attestation record.
+     * Only device owner, profile owner on an organization-owned device or affiliated user, their
+     * delegated certificate installers or an app that holds the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission can use
+     * {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID} to request unique
+     * device identifiers to be attested (the serial number, IMEI and MEID correspondingly),
+     * if supported by the device (see {@link #isDeviceIdAttestationSupported()}).
+     * Additionally, device owner, profile owner on an organization-owned device, their delegated
+     * certificate installers and an app that holds the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission can also
+     * request the attestation record to be signed using an individual attestation certificate by
+     * specifying the {@link #ID_TYPE_INDIVIDUAL_ATTESTATION} flag (if supported by the device,
+     * see {@link #isUniqueDeviceAttestationSupported()}).
      * <p>
      * If any of {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID}
      * is set, it is implicitly assumed that {@link #ID_TYPE_BASE_INFO} is also set.
@@ -7587,7 +7613,7 @@ public class DevicePolicyManager {
      * key generation is done in StrongBox.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if calling from a delegated certificate installer.
+     *            {@code null} if the caller is not a device admin.
      * @param algorithm The key generation algorithm, see {@link java.security.KeyPairGenerator}.
      * @param keySpec Specification of the key to generate, see
      * {@link java.security.KeyPairGenerator}.
@@ -7603,12 +7629,14 @@ public class DevicePolicyManager {
      *        If any flag is specified, then an attestation challenge must be included in the
      *        {@code keySpec}.
      * @return A non-null {@code AttestedKeyPair} if the key generation succeeded, null otherwise.
-     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner, or {@code admin} is null but the calling application is not a delegated
-     *         certificate installer or credential management app. If Device ID attestation is
-     *         requested (using {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} or
-     *         {@link #ID_TYPE_MEID}), the caller must be the Device Owner or the Certificate
-     *         Installer delegate.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device owner or
+     *         profile owner, or {@code admin} is null but the calling application is not a
+     *         delegated certificate installer, credential management app and does not have the
+     *         {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
+     *         If Device ID attestation is requested (using {@link #ID_TYPE_SERIAL},
+     *         {@link #ID_TYPE_IMEI} or {@link #ID_TYPE_MEID}), the caller must be the Device Owner,
+     *         the Certificate Installer delegate or have the
+     *         {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      * @throws IllegalArgumentException in the following cases:
      *         <p>
      *         <ul>
@@ -7624,6 +7652,7 @@ public class DevicePolicyManager {
      *         specified in {@code keySpec} but the device does not have one.
      * @see KeyGenParameterSpec.Builder#setAttestationChallenge(byte[])
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public AttestedKeyPair generateKeyPair(@Nullable ComponentName admin,
             @NonNull String algorithm, @NonNull KeyGenParameterSpec keySpec,
             @AttestationIdType int idAttestationFlags) {
@@ -7890,6 +7919,8 @@ public class DevicePolicyManager {
      *    <li>Profile owner</li>
      *    <li>Delegated certificate installer</li>
      *    <li>Credential management app</li>
+     *    <li>An app that holds the
+     *    {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission</li>
      * </ul>
      *
      * <p>From Android {@link android.os.Build.VERSION_CODES#S}, the credential management app
@@ -7897,7 +7928,7 @@ public class DevicePolicyManager {
      * {@code null}. Note, there can only be a credential management app on an unmanaged device.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
-     *            {@code null} if calling from a delegated certificate installer.
+     *            {@code null} if the caller is not a device admin.
      * @param alias The private key alias under which to install the certificate. The {@code alias}
      *        should denote an existing private key. If a certificate with that alias already
      *        exists, it will be overwritten.
@@ -7910,10 +7941,12 @@ public class DevicePolicyManager {
      *        {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias}.
      * @return {@code true} if the provided {@code alias} exists and the certificates has been
      *        successfully associated with it, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner, or {@code admin} is null but the calling application is not a delegated
-     *         certificate installer or credential management app.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device owner or
+     *        profile owner, or {@code admin} is null but the calling application is not a
+     *        delegated certificate installer, credential management app and does not have the
+     *        {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      */
+    @RequiresPermission(value = MANAGE_DEVICE_POLICY_CERTIFICATES, conditional = true)
     public boolean setKeyPairCertificate(@Nullable ComponentName admin,
             @NonNull String alias, @NonNull List<Certificate> certs, boolean isUserSelectable) {
         throwIfParentInstance("setKeyPairCertificate");
@@ -7933,7 +7966,6 @@ public class DevicePolicyManager {
         }
         return false;
     }
-
 
     /**
      * @return the alias of a given CA certificate in the certificate store, or {@code null} if it

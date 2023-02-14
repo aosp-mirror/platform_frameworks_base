@@ -23,6 +23,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_ACROSS_USERS_SECURITY_CRITICAL;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CAMERA;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_CERTIFICATES;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_FACTORY_RESET;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_INPUT_METHODS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_KEYGUARD;
@@ -5994,9 +5995,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
         final boolean isCredentialManagementApp = isCredentialManagementApp(caller);
-        Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
-                || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+        if (isPermissionCheckFlagEnabled()) {
+            Preconditions.checkCallAuthorization(
+                    hasPermission(MANAGE_DEVICE_POLICY_CERTIFICATES, caller.getUserId())
+                            || isCredentialManagementApp);
+        }  else {
+            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
+                    || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+        }
         if (isCredentialManagementApp) {
             Preconditions.checkCallAuthorization(!isUserSelectable, "The credential "
                     + "management app is not allowed to install a user selectable key pair");
@@ -6059,9 +6066,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
         final boolean isCredentialManagementApp = isCredentialManagementApp(caller);
-        Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
-                || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+        if (isPermissionCheckFlagEnabled()) {
+            Preconditions.checkCallAuthorization(
+                    hasPermission(MANAGE_DEVICE_POLICY_CERTIFICATES, caller.getUserId())
+                            || isCredentialManagementApp);
+        }  else {
+            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
+                    || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+        }
         if (isCredentialManagementApp) {
             Preconditions.checkCallAuthorization(
                     isAliasInCredentialManagementAppPolicy(caller, alias),
@@ -6124,8 +6137,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private boolean canInstallCertificates(CallerIdentity caller) {
-        return isProfileOwner(caller) || isDefaultDeviceOwner(caller)
-                || isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+        if (isPermissionCheckFlagEnabled()) {
+            return hasPermission(MANAGE_DEVICE_POLICY_CERTIFICATES, caller.getUserId());
+        }  else {
+            return isProfileOwner(caller) || isDefaultDeviceOwner(caller)
+                    || isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
+        }
     }
 
     private boolean canChooseCertificates(CallerIdentity caller) {
@@ -6318,9 +6335,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     caller.getPackageName(), caller.getUid()));
             enforceIndividualAttestationSupportedIfRequested(attestationUtilsFlags);
         } else {
-            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
-                    || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+            if (isPermissionCheckFlagEnabled()) {
+                Preconditions.checkCallAuthorization(
+                        hasPermission(MANAGE_DEVICE_POLICY_CERTIFICATES, caller.getUserId())
+                                || isCredentialManagementApp);
+            }  else {
+                Preconditions.checkCallAuthorization((caller.hasAdminComponent() && (isProfileOwner(
+                        caller) || isDefaultDeviceOwner(caller))) || (caller.hasPackage() && (
+                        isCallerDelegate || isCredentialManagementApp)));
+            }
             if (isCredentialManagementApp) {
                 Preconditions.checkCallAuthorization(
                         isAliasInCredentialManagementAppPolicy(caller, alias),
@@ -6453,9 +6476,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         final boolean isCallerDelegate = isCallerDelegate(caller, DELEGATION_CERT_INSTALL);
         final boolean isCredentialManagementApp = isCredentialManagementApp(caller);
-        Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
-                || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+        if (isPermissionCheckFlagEnabled()) {
+            Preconditions.checkCallAuthorization(
+                    hasPermission(MANAGE_DEVICE_POLICY_CERTIFICATES, caller.getUserId())
+                            || isCredentialManagementApp);
+        } else {
+            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
+                    || (caller.hasPackage() && (isCallerDelegate || isCredentialManagementApp)));
+        }
         if (isCredentialManagementApp) {
             Preconditions.checkCallAuthorization(
                     isAliasInCredentialManagementAppPolicy(caller, alias),
@@ -10170,6 +10199,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      *     (2.1.1) The caller is the profile owner.
      *     (2.1.2) The caller is from another app in the same user as the profile owner, AND
      *             the caller is the delegated cert installer.
+     * (3) The caller holds the
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CERTIFICATES} permission.
      *
      *  For the device owner case, simply check that the caller is the device owner or the
      *  delegated certificate installer.
@@ -10182,19 +10213,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     @VisibleForTesting
     boolean hasDeviceIdAccessUnchecked(String packageName, int uid) {
-        ComponentName deviceOwner = getDeviceOwnerComponent(true);
-        if (deviceOwner != null && (deviceOwner.getPackageName().equals(packageName)
-                || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
-            return true;
-        }
         final int userId = UserHandle.getUserId(uid);
-        ComponentName profileOwner = getProfileOwnerAsUser(userId);
-        final boolean isCallerProfileOwnerOrDelegate = profileOwner != null
-                && (profileOwner.getPackageName().equals(packageName)
-                || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL));
-        if (isCallerProfileOwnerOrDelegate && (isProfileOwnerOfOrganizationOwnedDevice(userId)
-                || isUserAffiliatedWithDevice(userId))) {
-            return true;
+        if (isPermissionCheckFlagEnabled()) {
+            return hasPermission(MANAGE_DEVICE_POLICY_CERTIFICATES, userId);
+        } else {
+            ComponentName deviceOwner = getDeviceOwnerComponent(true);
+            if (deviceOwner != null && (deviceOwner.getPackageName().equals(packageName)
+                    || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL))) {
+                return true;
+            }
+            ComponentName profileOwner = getProfileOwnerAsUser(userId);
+            final boolean isCallerProfileOwnerOrDelegate = profileOwner != null
+                    && (profileOwner.getPackageName().equals(packageName)
+                    || isCallerDelegate(packageName, uid, DELEGATION_CERT_INSTALL));
+            if (isCallerProfileOwnerOrDelegate && (isProfileOwnerOfOrganizationOwnedDevice(userId)
+                    || isUserAffiliatedWithDevice(userId))) {
+                return true;
+            }
         }
         return false;
     }
@@ -21079,7 +21114,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_PACKAGE_STATE,
             MANAGE_DEVICE_POLICY_LOCK,
             MANAGE_DEVICE_POLICY_FACTORY_RESET,
-            MANAGE_DEVICE_POLICY_KEYGUARD);
+            MANAGE_DEVICE_POLICY_KEYGUARD,
+            MANAGE_DEVICE_POLICY_CERTIFICATES);
     private static final List<String> FINANCED_DEVICE_OWNER_PERMISSIONS = List.of(
             MANAGE_DEVICE_POLICY_ACROSS_USERS_FULL,
             MANAGE_DEVICE_POLICY_ACROSS_USERS,
@@ -21096,18 +21132,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 SET_TIME_ZONE,
                 MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
                 MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS,
-                    MANAGE_DEVICE_POLICY_WIFI,
-                    MANAGE_DEVICE_POLICY_WIPE_DATA,
-                    MANAGE_DEVICE_POLICY_SCREEN_CAPTURE,
-                    MANAGE_DEVICE_POLICY_SYSTEM_UPDATES,
-                    MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
-                    MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING,
-                    MANAGE_DEVICE_POLICY_MTE,
-                    MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
+                MANAGE_DEVICE_POLICY_WIFI,
+                MANAGE_DEVICE_POLICY_WIPE_DATA,
+                MANAGE_DEVICE_POLICY_SCREEN_CAPTURE,
+                MANAGE_DEVICE_POLICY_SYSTEM_UPDATES,
+                MANAGE_DEVICE_POLICY_SECURITY_LOGGING,
+                MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING,
+                MANAGE_DEVICE_POLICY_MTE,
+                MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
                     MANAGE_DEVICE_POLICY_PACKAGE_STATE,
-                    MANAGE_DEVICE_POLICY_LOCK,
-                    MANAGE_DEVICE_POLICY_FACTORY_RESET,
-                    MANAGE_DEVICE_POLICY_KEYGUARD);
+                MANAGE_DEVICE_POLICY_LOCK,
+                MANAGE_DEVICE_POLICY_FACTORY_RESET,
+                MANAGE_DEVICE_POLICY_KEYGUARD,
+                MANAGE_DEVICE_POLICY_CERTIFICATES);
     private static final List<String> PROFILE_OWNER_ON_USER_0_PERMISSIONS  = List.of(
             SET_TIME,
             SET_TIME_ZONE,
