@@ -33,7 +33,7 @@ import android.util.Slog;
  *
  * @hide
  */
-public final class ProviderClearSession extends ProviderSession<ClearCredentialStateRequest,
+public final class  ProviderClearSession extends ProviderSession<ClearCredentialStateRequest,
         Void>
         implements
         RemoteCredentialService.ProviderCallbacks<Void> {
@@ -120,6 +120,7 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             mRemoteCredentialService.onClearCredentialState(mProviderRequest, this);
+            mCandidateProviderMetric.setStartTimeNanoseconds(System.nanoTime());
         }
     }
 }

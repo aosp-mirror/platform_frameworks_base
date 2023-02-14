@@ -20,6 +20,7 @@ import static android.os.UserHandle.USER_SYSTEM;
 
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
+import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -76,8 +77,6 @@ import android.os.PowerExemptionManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -160,7 +159,7 @@ public class BroadcastQueueTest {
     private ActivityManagerService mAms;
     private BroadcastQueue mQueue;
     BroadcastConstants mConstants;
-    private TestBroadcastSkipPolicy mSkipPolicy;
+    private BroadcastSkipPolicy mSkipPolicy;
 
     /**
      * Desired behavior of the next
@@ -287,7 +286,10 @@ public class BroadcastQueueTest {
         mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
         mConstants.TIMEOUT = 100;
         mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
-        mSkipPolicy = new TestBroadcastSkipPolicy(mAms);
+
+        mSkipPolicy = spy(new BroadcastSkipPolicy(mAms));
+        doReturn(null).when(mSkipPolicy).shouldSkipMessage(any(), any());
+        doReturn(false).when(mSkipPolicy).disallowBackgroundStart(any());
 
         final BroadcastHistory emptyHistory = new BroadcastHistory(mConstants) {
             public void addBroadcastToHistoryLocked(BroadcastRecord original) {
@@ -322,48 +324,6 @@ public class BroadcastQueueTest {
             assertEquals(app.toShortString(), ProcessList.SCHED_GROUP_UNDEFINED,
                     mQueue.getPreferredSchedulingGroupLocked(app));
         }
-    }
-
-    private static class TestBroadcastSkipPolicy extends BroadcastSkipPolicy {
-        private final ArrayMap<String, ArraySet> mReceiversToSkip = new ArrayMap<>();
-
-        TestBroadcastSkipPolicy(ActivityManagerService service) {
-            super(service);
-        }
-
-        public String shouldSkipMessage(BroadcastRecord r, Object o) {
-            if (shouldSkipReceiver(r.intent.getAction(), o)) {
-                return "test skipped receiver";
-            }
-            return null;
-        }
-
-        private boolean shouldSkipReceiver(String action, Object o) {
-            final ArraySet<Object> receiversToSkip = mReceiversToSkip.get(action);
-            if (receiversToSkip == null) {
-                return false;
-            }
-            for (int i = 0; i < receiversToSkip.size(); ++i) {
-                if (BroadcastRecord.isReceiverEquals(o, receiversToSkip.valueAt(i))) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public void setSkipReceiver(String action, Object o) {
-            ArraySet<Object> receiversToSkip = mReceiversToSkip.get(action);
-            if (receiversToSkip == null) {
-                receiversToSkip = new ArraySet<>();
-                mReceiversToSkip.put(action, receiversToSkip);
-            }
-            receiversToSkip.add(o);
-        }
-        public boolean disallowBackgroundStart(BroadcastRecord r) {
-            // Ignored
-            return false;
-        }
-
     }
 
     private class TestInjector extends Injector {
@@ -2039,8 +1999,16 @@ public class BroadcastQueueTest {
             enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
                     List.of(greenReceiver, blueReceiver, yellowReceiver, orangeReceiver)));
 
-            mSkipPolicy.setSkipReceiver(airplane.getAction(), greenReceiver);
-            mSkipPolicy.setSkipReceiver(airplane.getAction(), orangeReceiver);
+            doAnswer(invocation -> {
+                final BroadcastRecord r = invocation.getArgument(0);
+                final Object o = invocation.getArgument(1);
+                if (airplane.getAction().equals(r.intent.getAction())
+                        && (isReceiverEquals(o, greenReceiver)
+                                || isReceiverEquals(o, orangeReceiver))) {
+                    return "test skipped receiver";
+                }
+                return null;
+            }).when(mSkipPolicy).shouldSkipMessage(any(BroadcastRecord.class), any());
         }
 
         waitForIdle();

@@ -296,6 +296,9 @@ public class RemoteAnimationTarget implements Parcelable {
         taskId = in.readInt();
         mode = in.readInt();
         leash = in.readTypedObject(SurfaceControl.CREATOR);
+        if (leash != null) {
+            leash.setUnreleasedWarningCallSite("RemoteAnimationTarget[leash]");
+        }
         isTranslucent = in.readBoolean();
         clipRect = in.readTypedObject(Rect.CREATOR);
         contentInsets = in.readTypedObject(Rect.CREATOR);
@@ -307,6 +310,9 @@ public class RemoteAnimationTarget implements Parcelable {
         windowConfiguration = in.readTypedObject(WindowConfiguration.CREATOR);
         isNotInRecents = in.readBoolean();
         startLeash = in.readTypedObject(SurfaceControl.CREATOR);
+        if (startLeash != null) {
+            startLeash.setUnreleasedWarningCallSite("RemoteAnimationTarget[startLeash]");
+        }
         startBounds = in.readTypedObject(Rect.CREATOR);
         taskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
         allowEnterPip = in.readBoolean();

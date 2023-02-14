@@ -2137,6 +2137,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (!shellTransitions) {
             forAllWindows(w -> {
                 w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
+                if (!rotateSeamlessly && w.mHasSurface) {
+                    ProtoLog.v(WM_DEBUG_ORIENTATION, "Set mOrientationChanging of %s", w);
+                    w.setOrientationChanging(true);
+                }
             }, true /* traverseTopToBottom */);
             mPinnedTaskController.startSeamlessRotationIfNeeded(transaction, oldRotation, rotation);
             if (!mDisplayRotation.hasSeamlessRotatingWindow()) {
@@ -2147,14 +2151,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mWmService.mDisplayManagerInternal.performTraversal(transaction);
         scheduleAnimation();
-
-        forAllWindows(w -> {
-            if (!w.mHasSurface) return;
-            if (!rotateSeamlessly) {
-                ProtoLog.v(WM_DEBUG_ORIENTATION, "Set mOrientationChanging of %s", w);
-                w.setOrientationChanging(true);
-            }
-        }, true /* traverseTopToBottom */);
 
         for (int i = mWmService.mRotationWatchers.size() - 1; i >= 0; i--) {
             final WindowManagerService.RotationWatcher rotationWatcher

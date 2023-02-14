@@ -119,22 +119,22 @@ private fun NavControllerWrapperImpl.NavContent(allProvider: Collection<Settings
                 arguments = spp.parameter,
                 enterTransition = {
                     slideIntoContainer(
-                        AnimatedContentScope.SlideDirection.Left, animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.Start, animationSpec = slideEffect
                     ) + fadeIn(animationSpec = fadeEffect)
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentScope.SlideDirection.Left, animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.Start, animationSpec = slideEffect
                     ) + fadeOut(animationSpec = fadeEffect)
                 },
                 popEnterTransition = {
                     slideIntoContainer(
-                        AnimatedContentScope.SlideDirection.Right, animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.End, animationSpec = slideEffect
                     ) + fadeIn(animationSpec = fadeEffect)
                 },
                 popExitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentScope.SlideDirection.Right, animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.End, animationSpec = slideEffect
                     ) + fadeOut(animationSpec = fadeEffect)
                 },
             ) { navBackStackEntry ->

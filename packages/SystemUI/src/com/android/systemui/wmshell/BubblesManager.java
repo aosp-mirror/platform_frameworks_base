@@ -25,7 +25,6 @@ import static android.service.notification.NotificationListenerService.REASON_GR
 import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
-import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ALLOW_DISMISS_ONGOING;
 import static com.android.systemui.flags.Flags.WM_BUBBLE_BAR;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -51,7 +50,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.flags.FeatureFlags;
@@ -60,6 +58,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -106,6 +105,7 @@ public class BubblesManager {
     private final NotificationLockscreenUserManager mNotifUserManager;
     private final CommonNotifCollection mCommonNotifCollection;
     private final NotifPipeline mNotifPipeline;
+    private final NotifPipelineFlags mNotifPipelineFlags;
     private final Executor mSysuiMainExecutor;
 
     private final Bubbles.SysuiProxy mSysuiProxy;
@@ -134,6 +134,7 @@ public class BubblesManager {
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
             FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Executor sysuiMainExecutor) {
         if (bubblesOptional.isPresent()) {
             return new BubblesManager(context,
@@ -152,6 +153,7 @@ public class BubblesManager {
                     notifPipeline,
                     sysUiState,
                     featureFlags,
+                    notifPipelineFlags,
                     sysuiMainExecutor);
         } else {
             return null;
@@ -175,6 +177,7 @@ public class BubblesManager {
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
             FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Executor sysuiMainExecutor) {
         mContext = context;
         mBubbles = bubbles;
@@ -187,6 +190,7 @@ public class BubblesManager {
         mNotifUserManager = notifUserManager;
         mCommonNotifCollection = notifCollection;
         mNotifPipeline = notifPipeline;
+        mNotifPipelineFlags = notifPipelineFlags;
         mSysuiMainExecutor = sysuiMainExecutor;
 
         mBarService = statusBarService == null
@@ -618,15 +622,15 @@ public class BubblesManager {
         }
     }
 
-    static BubbleEntry notifToBubbleEntry(NotificationEntry e) {
+    @VisibleForTesting
+    BubbleEntry notifToBubbleEntry(NotificationEntry e) {
         return new BubbleEntry(e.getSbn(), e.getRanking(), isDismissableFromBubbles(e),
                 e.shouldSuppressNotificationDot(), e.shouldSuppressNotificationList(),
                 e.shouldSuppressPeek());
     }
 
-    private static boolean isDismissableFromBubbles(NotificationEntry e) {
-        // TODO(b/268380968): inject FlagResolver
-        if (SystemUiSystemPropertiesFlags.getResolver().isEnabled(ALLOW_DISMISS_ONGOING)) {
+    private boolean isDismissableFromBubbles(NotificationEntry e) {
+        if (mNotifPipelineFlags.allowDismissOngoing()) {
             // Bubbles are only accessible from the unlocked state,
             // so we can calculate this from the Notification flags only.
             return e.isDismissableForState(/*isLocked=*/ false);

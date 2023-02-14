@@ -26,7 +26,6 @@ import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowBecomesInvisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.layerBecomesInvisible
@@ -106,15 +105,8 @@ class DismissSplitScreenByDivider(flicker: FlickerTest) : SplitScreenBase(flicke
     fun secondaryAppBoundsIsFullscreenAtEnd() {
         flicker.assertLayers {
             this.isVisible(secondaryApp)
-                .isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
                 .then()
                 .isInvisible(secondaryApp)
-                .isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT)
-                .then()
-                .isVisible(secondaryApp, isOptional = true)
-                .isVisible(SPLIT_SCREEN_DIVIDER_COMPONENT, isOptional = true)
-                .then()
-                .contains(SPLIT_SCREEN_DIVIDER_COMPONENT)
                 .then()
                 .invoke("secondaryAppBoundsIsFullscreenAtEnd") {
                     val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)

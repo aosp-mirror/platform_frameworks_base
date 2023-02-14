@@ -566,7 +566,10 @@ public final class DexOptHelper {
                 mPm.getDexManager().getPackageUseInfoOrDefault(p.getPackageName()), options);
     }
 
-    public void forceDexOpt(@NonNull Computer snapshot, String packageName) {
+    /** @deprecated For legacy shell command only. */
+    @Deprecated
+    public void forceDexOpt(@NonNull Computer snapshot, String packageName)
+            throws LegacyDexoptDisabledException {
         PackageManagerServiceUtils.enforceSystemOrRoot("forceDexOpt");
 
         final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
@@ -586,19 +589,7 @@ public final class DexOptHelper {
                 getDefaultCompilerFilter(), null /* splitName */,
                 DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE);
 
-        @DexOptResult int res;
-        if (useArtService()) {
-            // performDexOptWithArtService ignores the snapshot and takes its own, so it can race
-            // with the package checks above, but at worst the effect is only a bit less friendly
-            // error below.
-            res = performDexOptWithArtService(options, ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES);
-        } else {
-            try {
-                res = performDexOptInternalWithDependenciesLI(pkg, packageState, options);
-            } catch (LegacyDexoptDisabledException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        @DexOptResult int res = performDexOptInternalWithDependenciesLI(pkg, packageState, options);
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {

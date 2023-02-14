@@ -1647,7 +1647,7 @@ public class UsbManager {
     /**
      * Registers the given listener to listen for DisplayPort Alt Mode changes.
      * <p>
-     * If this method returns true, the caller should ensure to call
+     * If this method returns without Exceptions, the caller should ensure to call
      * {@link #unregisterDisplayPortAltModeListener} when it no longer requires updates.
      *
      * @param executor          Executor on which to run the listener.
@@ -1655,14 +1655,14 @@ public class UsbManager {
      *                          changes. See {@link #DisplayPortAltModeInfoListener} for listener
      *                          details.
      *
-     * @return true on successful register, false on failed register due to listener already being
-     *         registered or an internal error.
+     * @throws IllegalStateException if listener has already been registered previously but not
+     * unregistered or an unexpected system failure occurs.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_USB)
-    public boolean registerDisplayPortAltModeInfoListener(
+    public void registerDisplayPortAltModeInfoListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull DisplayPortAltModeInfoListener listener) {
         Objects.requireNonNull(executor, "registerDisplayPortAltModeInfoListener: "
@@ -1678,15 +1678,15 @@ public class UsbManager {
 
             if (mDisplayPortServiceListener == null) {
                 if (!registerDisplayPortAltModeEventsIfNeededLocked()) {
-                    return false;
+                    throw new IllegalStateException("Unexpected failure registering service "
+                            + "listener");
                 }
             }
             if (mDisplayPortListeners.containsKey(listener)) {
-                return false;
+                throw new IllegalStateException("Listener has already been registered.");
             }
 
             mDisplayPortListeners.put(listener, executor);
-            return true;
         }
     }
 

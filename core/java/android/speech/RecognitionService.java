@@ -142,6 +142,10 @@ public abstract class RecognitionService extends Service {
                 if (preflightPermissionCheckPassed) {
                     currentCallback = new Callback(listener, attributionSource);
                     sessionState = new SessionState(currentCallback);
+                    mSessions.put(listener.asBinder(), sessionState);
+                    if (DBG) {
+                        Log.d(TAG, "Added a new session to the map, pending permission checks");
+                    }
                     RecognitionService.this.onStartListening(intent, currentCallback);
                 }
 
@@ -151,16 +155,12 @@ public abstract class RecognitionService extends Service {
                     if (preflightPermissionCheckPassed) {
                         // If start listening was attempted, cancel the callback.
                         RecognitionService.this.onCancel(currentCallback);
+                        mSessions.remove(listener.asBinder());
                         finishDataDelivery(sessionState);
                         sessionState.reset();
                     }
                     Log.i(TAG, "#startListening received from a caller "
                             + "without permission " + Manifest.permission.RECORD_AUDIO + ".");
-                } else {
-                    if (DBG) {
-                        Log.d(TAG, "Added a new session to the map.");
-                    }
-                    mSessions.put(listener.asBinder(), sessionState);
                 }
             } else {
                 listener.onError(SpeechRecognizer.ERROR_CLIENT);

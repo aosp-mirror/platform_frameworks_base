@@ -630,9 +630,6 @@ public final class VirtualDeviceManager {
                 @NonNull VirtualDisplayConfig config,
                 @Nullable @CallbackExecutor Executor executor,
                 @Nullable VirtualDisplay.Callback callback) {
-            // TODO(b/205343547): Handle display groups properly instead of creating a new display
-            //  group for every new virtual display created using this API.
-            // belongs to the same display group.
             IVirtualDisplayCallback callbackWrapper =
                     new DisplayManagerGlobal.VirtualDisplayCallback(callback, executor);
             final int displayId;
