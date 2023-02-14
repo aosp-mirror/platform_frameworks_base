@@ -24,26 +24,33 @@ import static android.content.Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 
 import static com.android.systemui.flags.Flags.SCREENSHOT_APP_CLIPS;
+import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_FOR_NOTE_TRIGGERED;
 
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.ResultReceiver;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.notetask.NoteTaskController;
+import com.android.systemui.settings.UserTracker;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
@@ -70,15 +77,23 @@ import javax.inject.Inject;
 public class AppClipsTrampolineActivity extends Activity {
 
     private static final String TAG = AppClipsTrampolineActivity.class.getSimpleName();
-    public static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+    static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
     public static final String EXTRA_SCREENSHOT_URI = TAG + "SCREENSHOT_URI";
-    public static final String ACTION_FINISH_FROM_TRAMPOLINE = TAG + "FINISH_FROM_TRAMPOLINE";
-    static final String EXTRA_RESULT_RECEIVER = TAG + "RESULT_RECEIVER";
+    static final String ACTION_FINISH_FROM_TRAMPOLINE = TAG + "FINISH_FROM_TRAMPOLINE";
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    public static final String EXTRA_RESULT_RECEIVER = TAG + "RESULT_RECEIVER";
+    @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+    public static final String EXTRA_CALLING_PACKAGE_NAME = TAG + "CALLING_PACKAGE_NAME";
+    private static final ApplicationInfoFlags APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0);
 
     private final DevicePolicyManager mDevicePolicyManager;
     private final FeatureFlags mFeatureFlags;
     private final Optional<Bubbles> mOptionalBubbles;
     private final NoteTaskController mNoteTaskController;
+    private final PackageManager mPackageManager;
+    private final UserTracker mUserTracker;
+    private final UiEventLogger mUiEventLogger;
     private final ResultReceiver mResultReceiver;
 
     private Intent mKillAppClipsBroadcastIntent;
@@ -86,11 +101,15 @@ public class AppClipsTrampolineActivity extends Activity {
     @Inject
     public AppClipsTrampolineActivity(DevicePolicyManager devicePolicyManager, FeatureFlags flags,
             Optional<Bubbles> optionalBubbles, NoteTaskController noteTaskController,
+            PackageManager packageManager, UserTracker userTracker, UiEventLogger uiEventLogger,
             @Main Handler mainHandler) {
         mDevicePolicyManager = devicePolicyManager;
         mFeatureFlags = flags;
         mOptionalBubbles = optionalBubbles;
         mNoteTaskController = noteTaskController;
+        mPackageManager = packageManager;
+        mUserTracker = userTracker;
+        mUiEventLogger = uiEventLogger;
 
         mResultReceiver = createResultReceiver(mainHandler);
     }
@@ -138,8 +157,12 @@ public class AppClipsTrampolineActivity extends Activity {
             return;
         }
 
-        Intent intent = new Intent().setComponent(componentName).addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK).putExtra(EXTRA_RESULT_RECEIVER, mResultReceiver);
+        String callingPackageName = getCallingPackage();
+        Intent intent = new Intent().setComponent(componentName)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .putExtra(EXTRA_RESULT_RECEIVER, mResultReceiver)
+                .putExtra(EXTRA_CALLING_PACKAGE_NAME, callingPackageName);
+
         try {
             // Start the App Clips activity.
             startActivity(intent);
@@ -150,6 +173,9 @@ public class AppClipsTrampolineActivity extends Activity {
                     new Intent(ACTION_FINISH_FROM_TRAMPOLINE)
                             .setComponent(componentName)
                             .setPackage(componentName.getPackageName());
+
+            // Log successful triggering of screenshot for notes.
+            logScreenshotTriggeredUiEvent(callingPackageName);
         } catch (ActivityNotFoundException e) {
             setErrorResultAndFinish(CAPTURE_CONTENT_FOR_NOTE_FAILED);
         }
@@ -168,6 +194,18 @@ public class AppClipsTrampolineActivity extends Activity {
         setResult(RESULT_OK,
                 new Intent().putExtra(EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE, errorCode));
         finish();
+    }
+
+    private void logScreenshotTriggeredUiEvent(@Nullable String callingPackageName) {
+        int callingPackageUid = 0;
+        try {
+            callingPackageUid = mPackageManager.getApplicationInfoAsUser(callingPackageName,
+                    APPLICATION_INFO_FLAGS, mUserTracker.getUserId()).uid;
+        } catch (NameNotFoundException e) {
+            Log.d(TAG, "Couldn't find notes app UID " + e);
+        }
+
+        mUiEventLogger.log(SCREENSHOT_FOR_NOTE_TRIGGERED, callingPackageUid, callingPackageName);
     }
 
     private class AppClipsResultReceiver extends ResultReceiver {
