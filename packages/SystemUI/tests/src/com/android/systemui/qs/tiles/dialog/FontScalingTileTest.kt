@@ -28,6 +28,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSTileHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tiles.FontScalingTile
+import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -65,7 +66,8 @@ class FontScalingTileTest : SysuiTestCase() {
                 statusBarStateController,
                 activityStarter,
                 qsLogger,
-                dialogLaunchAnimator
+                dialogLaunchAnimator,
+                FakeSettings()
             )
         fontScalingTile.initialize()
     }

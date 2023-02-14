@@ -35,6 +35,7 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.util.settings.SystemSettings
 import javax.inject.Inject
 
 class FontScalingTile
@@ -48,7 +49,8 @@ constructor(
     statusBarStateController: StatusBarStateController,
     activityStarter: ActivityStarter,
     qsLogger: QSLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator
+    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val systemSettings: SystemSettings
 ) :
     QSTileImpl<QSTile.State?>(
         host,
@@ -74,7 +76,7 @@ constructor(
 
     override fun handleClick(view: View?) {
         mUiHandler.post {
-            val dialog: SystemUIDialog = FontScalingDialog(mContext)
+            val dialog: SystemUIDialog = FontScalingDialog(mContext, systemSettings)
             if (view != null) {
                 dialogLaunchAnimator.showFromView(
                     dialog,
