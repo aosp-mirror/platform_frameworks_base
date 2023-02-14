@@ -207,6 +207,12 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ඔබ ඔබගේ කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන තෙක් ඔබගේ පෞද්ගලික යෙදුම් අවහිර කර ඇත"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"පෞද්ගලික යෙදුම් <xliff:g id="DATE">%1$s</xliff:g> දින <xliff:g id="TIME">%2$s</xliff:g>ට අවහිර වනු ඇත. ඔබේ IT පරිපාලක ඔබේ කාර්යාල පැතිකඩ දින <xliff:g id="NUMBER">%3$d</xliff:g>කට වඩා ඉවත් කර තැබීමට ඉඩ නොදේ."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ක්‍රියාත්මක කරන්න"</string>
+    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"මම"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ටැබ්ලට විකල්ප"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV විකල්ප"</string>
@@ -338,6 +344,8 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"උපාංගයෙහි ඇඟිලි සලකුණු සංවේදකය මත සිදු කරන ඉංගිත ග්‍රහණය කළ හැකිය."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"තිර රුව ගන්න"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"සංදර්ශකයේ තිර රුවක් ගැනීමට හැකිය."</string>
+    <!-- no translation found for dream_preview_title (5570751491996100804) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"තත්ව තීරුව අබල කරන්න හෝ වෙනස් කරන්න"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"තත්ව තීරුව අක්‍රිය කිරීමට හෝ පද්ධති නිරූපක එකතු හෝ ඉවත් කිරීමට යෙදුමට අවසර දේ."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"තත්ත්ව තීරුව බවට පත්වීම"</string>
@@ -1358,8 +1366,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB හරහා PTP ක්‍රියාත්මකයි"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB ටෙදරින් ක්‍රියාත්මකයි"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB හරහා MIDI ක්‍රියාත්මකයි"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"උපාංගය වෙබ් කැමරාව ලෙස සම්බන්ධ කර ඇත"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB උපාංගය සම්බන්ධ කර ඇත"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"තවත් විකල්ප සඳහා තට්ටු කරන්න."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"සම්බන්ධිත උපාංගය ආරෝපණය කරමින්. තවත් විකල්ප සඳහා තට්ටු කරන්න."</string>
@@ -1708,8 +1715,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"නිමයි"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"කෙටිමඟ ක්‍රියාවිරහිත කරන්න"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"කෙටිමඟ භාවිතා කරන්න"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"වර්ණ අපවර්තනය"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"වර්ණ නිවැරදි කිරීම"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"තනි අත් ප්‍රකාරය"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"තවත් අඳුරු"</string>
