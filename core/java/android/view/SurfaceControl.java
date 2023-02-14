@@ -3836,7 +3836,7 @@ public final class SurfaceControl implements Parcelable {
          * whose dataspace has RANGE_EXTENDED.
          *
          * @param sc The layer whose extended range brightness is being specified
-         * @param currentBufferRatio The current sdr/hdr ratio of the current buffer. For example
+         * @param currentBufferRatio The current hdr/sdr ratio of the current buffer. For example
          *                           if the buffer was rendered with a target SDR whitepoint of
          *                           100 nits and a max display brightness of 200 nits, this should
          *                           be set to 2.0f.
@@ -3848,7 +3848,9 @@ public final class SurfaceControl implements Parcelable {
          *                           communicate extended content brightness information via
          *                           metadata such as CTA861_3 or SMPTE2086.
          *
-         * @param desiredRatio The desired sdr/hdr ratio. This can be used to communicate the max
+         *                           Must be finite && >= 1.0f
+         *
+         * @param desiredRatio The desired hdr/sdr ratio. This can be used to communicate the max
          *                     desired brightness range. This is similar to the "max luminance"
          *                     value in other HDR metadata formats, but represented as a ratio of
          *                     the target SDR whitepoint to the max display brightness. The system
@@ -3860,12 +3862,19 @@ public final class SurfaceControl implements Parcelable {
          *                     voluntarily reducing the requested range can help improve battery
          *                     life as well as can improve quality by ensuring greater bit depth
          *                     is allocated to the luminance range in use.
+         *
+         *                     Must be finite && >= 1.0f
          * @return this
-         * @hide
          **/
         public @NonNull Transaction setExtendedRangeBrightness(@NonNull SurfaceControl sc,
                 float currentBufferRatio, float desiredRatio) {
             checkPreconditions(sc);
+            if (!Float.isFinite(currentBufferRatio) || currentBufferRatio < 1.0f) {
+                throw new IllegalArgumentException("currentBufferRatio must be finite && >= 1.0f");
+            }
+            if (!Float.isFinite(desiredRatio) || desiredRatio < 1.0f) {
+                throw new IllegalArgumentException("desiredRatio must be finite && >= 1.0f");
+            }
             nativeSetExtendedRangeBrightness(mNativeObject, sc.mNativeObject, currentBufferRatio,
                     desiredRatio);
             return this;

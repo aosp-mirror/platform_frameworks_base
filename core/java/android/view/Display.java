@@ -1298,8 +1298,6 @@ public final class Display {
     /**
      * @return Whether the display supports reporting an hdr/sdr ratio. If this is false,
      *         {@link #getHdrSdrRatio()} will always be 1.0f
-     * @hide
-     * TODO: make public
      */
     public boolean isHdrSdrRatioAvailable() {
         synchronized (mLock) {
@@ -1312,9 +1310,6 @@ public final class Display {
      * @return The current hdr/sdr ratio expressed as the ratio of targetHdrPeakBrightnessInNits /
      *         targetSdrWhitePointInNits. If {@link #isHdrSdrRatioAvailable()} is false, this
      *         always returns 1.0f.
-     *
-     * @hide
-     * TODO: make public
      */
     public float getHdrSdrRatio() {
         synchronized (mLock) {
@@ -1344,8 +1339,6 @@ public final class Display {
      * @param executor The executor to invoke the listener on
      * @param listener The listener to invoke when the HDR/SDR ratio changes
      * @throws IllegalStateException if {@link #isHdrSdrRatioAvailable()} is false
-     * @hide
-     * TODO: Make public
      */
     public void registerHdrSdrRatioChangedListener(@NonNull Executor executor,
             @NonNull Consumer<Display> listener) {
@@ -1375,10 +1368,8 @@ public final class Display {
      *                  hdr/sdr ratio listener to remove.
      *
      * @see #registerHdrSdrRatioChangedListener(Executor, Consumer)
-     * @hide
-     * TODO: Make public
      */
-    public void unregisterHdrSdrRatioChangedListener(Consumer<Display> listener) {
+    public void unregisterHdrSdrRatioChangedListener(@NonNull Consumer<Display> listener) {
         HdrSdrRatioListenerWrapper toRemove = null;
         synchronized (mLock) {
             int index = findHdrSdrRatioListenerLocked(listener);
