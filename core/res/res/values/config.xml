@@ -3065,6 +3065,10 @@
     <string name="config_credentialManagerDialogComponent" translatable="false"
             >com.android.credentialmanager/com.android.credentialmanager.CredentialSelectorActivity</string>
 
+    <!-- Name of the broadcast receiver that is used to receive provider change events -->
+    <string name="config_credentialManagerReceiverComponent" translatable="false"
+            >com.android.credentialmanager/com.android.credentialmanager.CredentialProviderReceiver</string>
+
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 

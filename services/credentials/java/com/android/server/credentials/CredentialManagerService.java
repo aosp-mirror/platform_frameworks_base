@@ -17,6 +17,7 @@
 package com.android.server.credentials;
 
 import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
+import static android.Manifest.permission.LAUNCH_CREDENTIAL_SELECTOR;
 import static android.content.Context.CREDENTIAL_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -671,7 +672,8 @@ public final class CredentialManagerService
             }
 
             // Send an intent to the UI that we have new enabled providers.
-            getContext().sendBroadcast(IntentFactory.createProviderUpdateIntent());
+            getContext().sendBroadcast(IntentFactory.createProviderUpdateIntent(),
+                    LAUNCH_CREDENTIAL_SELECTOR);
         }
 
         @Override
