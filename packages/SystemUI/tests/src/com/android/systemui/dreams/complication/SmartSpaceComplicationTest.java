@@ -30,6 +30,7 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.condition.SelfExecutingMonitor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
@@ -64,7 +65,6 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
     @Mock
     private View mBcSmartspaceView;
 
-    @Mock
     private Monitor mMonitor;
 
     private final Set<Condition> mPreconditions = new HashSet<>();
@@ -72,6 +72,7 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mMonitor = SelfExecutingMonitor.createInstance();
     }
 
     /**
