@@ -596,5 +596,7 @@ interface IDevicePolicyManager {
 
     DevicePolicyState getDevicePolicyState();
 
+    void setOverrideKeepProfilesRunning(boolean enabled);
+
     boolean triggerDevicePolicyEngineMigration(boolean forceMigration);
 }
