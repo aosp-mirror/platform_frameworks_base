@@ -3635,9 +3635,20 @@ public interface WindowManager extends ViewManager {
         /**
          * The preferred refresh rate for the window.
          * <p>
-         * This must be one of the supported refresh rates obtained for the display(s) the window
-         * is on. The selected refresh rate will be applied to the display's default mode.
+         * Before API 34, this must be one of the supported refresh rates obtained
+         * for the display(s) the window is on. The selected refresh rate will be
+         * applied to the display's default mode.
          * <p>
+         * Starting API 34, this value is not limited to the supported refresh rates
+         * obtained from the display(s) for the window: it can be any refresh rate
+         * the window intends to run at. Any refresh rate can be provided as the
+         * preferred window refresh rate. The OS will select the refresh rate that
+         * best matches the {@link #preferredRefreshRate}.
+         * <p>
+         * Setting this value is the equivalent of calling {@link Surface#setFrameRate} with (
+         *     preferred_frame_rate,
+         *     {@link Surface#FRAME_RATE_COMPATIBILITY_DEFAULT},
+         *     {@link Surface#CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS}).
          * This should be used in favor of {@link LayoutParams#preferredDisplayModeId} for
          * applications that want to specify the refresh rate, but do not want to specify a
          * preference for any other displayMode properties (e.g., resolution).
