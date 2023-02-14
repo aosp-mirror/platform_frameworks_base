@@ -26,7 +26,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
@@ -35,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
+import com.android.credentialmanager.common.StartBalIntentSenderForResultContract
 import com.android.credentialmanager.createflow.CreateCredentialScreen
 import com.android.credentialmanager.getflow.GetCredentialScreen
 import com.android.credentialmanager.ui.theme.CredentialSelectorTheme
@@ -84,7 +84,7 @@ class CredentialSelectorActivity : ComponentActivity() {
             CredentialSelectorViewModel(credManRepo, userConfigRepo)
         }
         val launcher = rememberLauncherForActivityResult(
-            ActivityResultContracts.StartIntentSenderForResult()
+            StartBalIntentSenderForResultContract()
         ) {
             viewModel.onProviderActivityResult(ProviderActivityResult(it.resultCode, it.data))
         }
