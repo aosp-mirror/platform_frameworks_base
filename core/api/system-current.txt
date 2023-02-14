@@ -1299,6 +1299,7 @@ package android.app.admin {
     field public static final int EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION = 2; // 0x2
     field public static final int EXEMPT_FROM_APP_STANDBY = 0; // 0x0
     field public static final int EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS = 1; // 0x1
+    field public static final int EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION = 4; // 0x4
     field public static final int EXEMPT_FROM_HIBERNATION = 3; // 0x3
     field public static final String EXTRA_FORCE_UPDATE_ROLE_HOLDER = "android.app.extra.FORCE_UPDATE_ROLE_HOLDER";
     field public static final String EXTRA_LOST_MODE_LOCATION = "android.app.extra.LOST_MODE_LOCATION";
