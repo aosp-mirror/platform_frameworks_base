@@ -47,6 +47,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.KeyboardShortcutsModule;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -100,7 +101,8 @@ import dagger.Provides;
         QSModule.class,
         ReferenceScreenshotModule.class,
         StartCentralSurfacesModule.class,
-        VolumeModule.class
+        VolumeModule.class,
+        KeyboardShortcutsModule.class
 })
 public abstract class ReferenceSystemUIModule {
 
