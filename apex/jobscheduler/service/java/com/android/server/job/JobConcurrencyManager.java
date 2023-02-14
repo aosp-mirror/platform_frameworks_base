@@ -1863,15 +1863,17 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
-    boolean executeTimeoutCommandLocked(PrintWriter pw, String pkgName, int userId,
-            @Nullable String namespace, boolean hasJobId, int jobId) {
+    boolean executeStopCommandLocked(PrintWriter pw, String pkgName, int userId,
+            @Nullable String namespace, boolean matchJobId, int jobId,
+            int stopReason, int internalStopReason) {
         boolean foundSome = false;
         for (int i = 0; i < mActiveServices.size(); i++) {
             final JobServiceContext jc = mActiveServices.get(i);
             final JobStatus js = jc.getRunningJobLocked();
-            if (jc.timeoutIfExecutingLocked(pkgName, userId, namespace, hasJobId, jobId, "shell")) {
+            if (jc.stopIfExecutingLocked(pkgName, userId, namespace, matchJobId, jobId,
+                    stopReason, internalStopReason)) {
                 foundSome = true;
-                pw.print("Timing out: ");
+                pw.print("Stopping job: ");
                 js.printUniqueId(pw);
                 pw.print(" ");
                 pw.println(js.getServiceComponent().flattenToShortString());

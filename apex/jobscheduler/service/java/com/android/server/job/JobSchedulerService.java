@@ -4326,15 +4326,18 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     // Shell command infrastructure: immediately timeout currently executing jobs
-    int executeTimeoutCommand(PrintWriter pw, String pkgName, int userId,
-            @Nullable String namespace, boolean hasJobId, int jobId) {
+    int executeStopCommand(PrintWriter pw, String pkgName, int userId,
+            @Nullable String namespace, boolean hasJobId, int jobId,
+            int stopReason, int internalStopReason) {
         if (DEBUG) {
-            Slog.v(TAG, "executeTimeoutCommand(): " + pkgName + "/" + userId + " " + jobId);
+            Slog.v(TAG, "executeStopJobCommand(): " + pkgName + "/" + userId + " " + jobId
+                    + ": " + stopReason + "("
+                    + JobParameters.getInternalReasonCodeDescription(internalStopReason) + ")");
         }
 
         synchronized (mLock) {
-            final boolean foundSome = mConcurrencyManager.executeTimeoutCommandLocked(pw,
-                    pkgName, userId, namespace, hasJobId, jobId);
+            final boolean foundSome = mConcurrencyManager.executeStopCommandLocked(pw,
+                    pkgName, userId, namespace, hasJobId, jobId, stopReason, internalStopReason);
             if (!foundSome) {
                 pw.println("No matching executing jobs found.");
             }
