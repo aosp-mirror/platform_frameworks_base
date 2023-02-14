@@ -55,7 +55,6 @@ import com.android.systemui.theme.ThemeOverlayController
 import com.android.systemui.toast.ToastUI
 import com.android.systemui.usb.StorageNotification
 import com.android.systemui.util.NotificationChannels
-import com.android.systemui.util.leak.GarbageMonitor
 import com.android.systemui.volume.VolumeUI
 import com.android.systemui.wmshell.WMShell
 import dagger.Binds
@@ -106,12 +105,6 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(FsiChromeViewBinder::class)
     abstract fun bindFsiChromeWindowBinder(sysui: FsiChromeViewBinder): CoreStartable
-
-    /** Inject into GarbageMonitor.Service.  */
-    @Binds
-    @IntoMap
-    @ClassKey(GarbageMonitor::class)
-    abstract fun bindGarbageMonitorService(sysui: GarbageMonitor.Service): CoreStartable
 
     /** Inject into GlobalActionsComponent.  */
     @Binds
