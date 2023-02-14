@@ -10019,6 +10019,7 @@ package android.net.wifi.sharedconnectivity.app {
   public final class KnownNetworkConnectionStatus implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.os.Bundle getExtras();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork getKnownNetwork();
     method public int getStatus();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int CONNECTION_STATUS_SAVED = 1; // 0x1
@@ -10031,6 +10032,7 @@ package android.net.wifi.sharedconnectivity.app {
     ctor public KnownNetworkConnectionStatus.Builder();
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus build();
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.Builder setKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.Builder setStatus(int);
   }
 
@@ -10099,6 +10101,7 @@ package android.net.wifi.sharedconnectivity.app {
     method public int describeContents();
     method @NonNull public android.os.Bundle getExtras();
     method public int getStatus();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork getTetherNetwork();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int CONNECTION_STATUS_CONNECT_TO_HOTSPOT_FAILED = 9; // 0x9
     field public static final int CONNECTION_STATUS_ENABLING_HOTSPOT = 1; // 0x1
@@ -10118,6 +10121,7 @@ package android.net.wifi.sharedconnectivity.app {
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus build();
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.Builder setExtras(@NonNull android.os.Bundle);
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.Builder setStatus(int);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.Builder setTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
   }
 
 }
