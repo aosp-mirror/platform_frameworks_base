@@ -169,7 +169,7 @@ public class Editor {
     private static final boolean DEBUG_UNDO = false;
 
     // TODO(nona): Make this configurable.
-    private static final boolean FLAG_USE_NEW_CONTEXT_MENU = true;
+    private static final boolean FLAG_USE_NEW_CONTEXT_MENU = false;
 
     // Specifies whether to use the magnifier when pressing the insertion or selection handles.
     private static final boolean FLAG_USE_MAGNIFIER = true;
