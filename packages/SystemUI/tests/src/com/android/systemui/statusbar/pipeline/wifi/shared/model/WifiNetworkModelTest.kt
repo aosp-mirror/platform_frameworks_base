@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.wifi.data.model
+package com.android.systemui.statusbar.pipeline.wifi.shared.model
 
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableRowLogger
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel.Active.Companion.MAX_VALID_LEVEL
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel.Companion.MIN_VALID_LEVEL
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Active.Companion.MAX_VALID_LEVEL
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel.Companion.MIN_VALID_LEVEL
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
