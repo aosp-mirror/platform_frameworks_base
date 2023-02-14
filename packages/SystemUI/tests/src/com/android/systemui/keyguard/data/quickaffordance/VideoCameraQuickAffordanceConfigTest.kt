@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.data.quickaffordance
 
+import android.app.admin.DevicePolicyManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.ActivityIntentHelper
@@ -24,11 +25,14 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.camera.CameraIntentsWrapper
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -44,59 +48,94 @@ import org.mockito.MockitoAnnotations
 class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
 
     @Mock private lateinit var activityIntentHelper: ActivityIntentHelper
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     private lateinit var underTest: VideoCameraQuickAffordanceConfig
+    private lateinit var userTracker: UserTracker
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        val testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
+        userTracker = FakeUserTracker()
         underTest =
             VideoCameraQuickAffordanceConfig(
                 context = context,
                 cameraIntents = CameraIntentsWrapper(context),
                 activityIntentHelper = activityIntentHelper,
-                userTracker = FakeUserTracker(),
+                userTracker = userTracker,
+                devicePolicyManager = devicePolicyManager,
+                backgroundDispatcher = testDispatcher,
             )
     }
 
     @Test
-    fun `lockScreenState - visible when launchable`() = runTest {
-        setLaunchable(true)
+    fun `lockScreenState - visible when launchable`() =
+        testScope.runTest {
+            setLaunchable()
 
-        val lockScreenState = collectLastValue(underTest.lockScreenState)
+            val lockScreenState = collectLastValue(underTest.lockScreenState)
 
-        assertThat(lockScreenState())
-            .isInstanceOf(KeyguardQuickAffordanceConfig.LockScreenState.Visible::class.java)
-    }
-
-    @Test
-    fun `lockScreenState - hidden when not launchable`() = runTest {
-        setLaunchable(false)
-
-        val lockScreenState = collectLastValue(underTest.lockScreenState)
-
-        assertThat(lockScreenState())
-            .isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
-    }
+            assertThat(lockScreenState())
+                .isInstanceOf(KeyguardQuickAffordanceConfig.LockScreenState.Visible::class.java)
+        }
 
     @Test
-    fun `getPickerScreenState - default when launchable`() = runTest {
-        setLaunchable(true)
+    fun `lockScreenState - hidden when app not installed on device`() =
+        testScope.runTest {
+            setLaunchable(isVideoCameraAppInstalled = false)
 
-        assertThat(underTest.getPickerScreenState())
-            .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Default::class.java)
-    }
+            val lockScreenState = collectLastValue(underTest.lockScreenState)
+
+            assertThat(lockScreenState())
+                .isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
+        }
 
     @Test
-    fun `getPickerScreenState - unavailable when not launchable`() = runTest {
-        setLaunchable(false)
+    fun `lockScreenState - hidden when camera disabled by admin`() =
+        testScope.runTest {
+            setLaunchable(isCameraDisabledByAdmin = true)
 
-        assertThat(underTest.getPickerScreenState())
-            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
-    }
+            val lockScreenState = collectLastValue(underTest.lockScreenState)
 
-    private fun setLaunchable(isLaunchable: Boolean) {
+            assertThat(lockScreenState())
+                .isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
+        }
+
+    @Test
+    fun `getPickerScreenState - default when launchable`() =
+        testScope.runTest {
+            setLaunchable()
+
+            assertThat(underTest.getPickerScreenState())
+                .isInstanceOf(KeyguardQuickAffordanceConfig.PickerScreenState.Default::class.java)
+        }
+
+    @Test
+    fun `getPickerScreenState - unavailable when app not installed on device`() =
+        testScope.runTest {
+            setLaunchable(isVideoCameraAppInstalled = false)
+
+            assertThat(underTest.getPickerScreenState())
+                .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
+        }
+
+    @Test
+    fun `getPickerScreenState - unavailable when camera disabled by admin`() =
+        testScope.runTest {
+            setLaunchable(isCameraDisabledByAdmin = true)
+
+            assertThat(underTest.getPickerScreenState())
+                .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice)
+        }
+
+    private fun setLaunchable(
+        isVideoCameraAppInstalled: Boolean = true,
+        isCameraDisabledByAdmin: Boolean = false,
+    ) {
         whenever(
                 activityIntentHelper.getTargetActivityInfo(
                     any(),
@@ -105,11 +144,13 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
                 )
             )
             .thenReturn(
-                if (isLaunchable) {
+                if (isVideoCameraAppInstalled) {
                     mock()
                 } else {
                     null
                 }
             )
+        whenever(devicePolicyManager.getCameraDisabled(null, userTracker.userId))
+            .thenReturn(isCameraDisabledByAdmin)
     }
 }
