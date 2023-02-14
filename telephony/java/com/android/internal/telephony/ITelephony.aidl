@@ -69,6 +69,7 @@ import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.satellite.ISatelliteStateListener;
 import android.telephony.satellite.SatelliteCapabilities;
+import android.telephony.satellite.SatelliteDatagram;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
@@ -2894,4 +2895,17 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
                 + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     int pollPendingSatelliteDatagrams(int subId);
+
+   /**
+    * Send datagram over satellite.
+    *
+    * @param subId - The subId of the subscription used for receiving datagrams.
+    * @param datagramType - type of datagram
+    * @param datagram - datagram to send over satellite
+    * @param callback - The callback to get the error code of the request.
+    */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+                    + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void sendSatelliteDatagram(int subId, int datagramType, in SatelliteDatagram datagram,
+            IIntegerConsumer callback);
 }
