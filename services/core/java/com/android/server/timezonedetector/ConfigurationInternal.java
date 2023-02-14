@@ -104,10 +104,10 @@ public final class ConfigurationInternal {
     }
 
     /**
-     * Returns {@code true} if location time zone detection should run all the time on supported
-     * devices, even when the user has not enabled it explicitly in settings. Enabled for internal
-     * testing only. See {@link #isGeoDetectionExecutionEnabled()} and {@link #getDetectionMode()}
-     * for details.
+     * Returns {@code true} if location time zone detection should run when auto time zone detection
+     * is enabled on supported devices, even when the user has not enabled the algorithm explicitly
+     * in settings. Enabled for internal testing only. See {@link #isGeoDetectionExecutionEnabled()}
+     * and {@link #getDetectionMode()} for details.
      */
     boolean getGeoDetectionRunInBackgroundEnabledSetting() {
         return mGeoDetectionRunInBackgroundEnabled;
@@ -219,6 +219,7 @@ public final class ConfigurationInternal {
     private boolean getGeoDetectionRunInBackgroundEnabledBehavior() {
         return isGeoDetectionSupported()
                 && getLocationEnabledSetting()
+                && getAutoDetectionEnabledSetting()
                 && getGeoDetectionRunInBackgroundEnabledSetting();
     }
 
@@ -433,9 +434,9 @@ public final class ConfigurationInternal {
         }
 
         /**
-         * Sets whether location time zone detection should run all the time on supported devices,
-         * even when the user has not enabled it explicitly in settings. Enabled for internal
-         * testing only.
+         * Sets whether location time zone detection should run when auto time zone detection is
+         * enabled on supported devices, even when the user has not enabled the algorithm explicitly
+         * in settings. Enabled for internal testing only.
          */
         public Builder setGeoDetectionRunInBackgroundEnabled(boolean enabled) {
             mGeoDetectionRunInBackgroundEnabled = enabled;
