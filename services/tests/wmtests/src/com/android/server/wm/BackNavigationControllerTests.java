@@ -570,6 +570,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         final ContextWrapper contextSpy = Mockito.spy(new ContextWrapper(mWm.mContext));
         final Resources resourcesSpy = Mockito.spy(contextSpy.getResources());
 
+        spyOn(mAtm.mTaskOrganizerController);
         when(contextSpy.getResources()).thenReturn(resourcesSpy);
 
         MockitoSession mockitoSession = mockitoSession().mockStatic(BackNavigationController.class)
@@ -597,7 +598,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                         mBackAnimationAdapter, task, mRootHomeTask, bottomActivity, homeActivity);
         assertTrue(toHomeBuilder.mIsLaunchBehind);
         toHomeBuilder.build();
-        verify(animationHandler, never()).createStartingSurface(any());
+        verify(mAtm.mTaskOrganizerController, never())
+                .addWindowlessStartingSurface(any(), any(), any(), any(), any());
         animationHandler.clearBackAnimateTarget();
 
         // Back to ACTIVITY and TASK have the same logic, just with different target.
@@ -609,9 +611,11 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertFalse(toActivityBuilder.mIsLaunchBehind);
         toActivityBuilder.build();
         if (preferWindowlessSurface) {
-            verify(animationHandler).createStartingSurface(any());
+            verify(mAtm.mTaskOrganizerController)
+                    .addWindowlessStartingSurface(any(), any(), any(), any(), any());
         } else {
-            verify(animationHandler, never()).createStartingSurface(any());
+            verify(mAtm.mTaskOrganizerController, never())
+                    .addWindowlessStartingSurface(any(), any(), any(), any(), any());
         }
     }
 
