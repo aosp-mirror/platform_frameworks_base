@@ -24,6 +24,8 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.util.IndentingPrintWriter;
 
+import com.android.server.timezonedetector.StateChangeListener;
+
 /**
  * A fake implementation of {@link com.android.server.timedetector.TimeDetectorStrategy} for use
  * in tests.
@@ -31,6 +33,7 @@ import android.util.IndentingPrintWriter;
 public class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
     // State
     private TimeState mTimeState;
+    private NetworkTimeSuggestion mLatestNetworkTimeSuggestion;
 
     @Override
     public TimeState getTimeState() {
@@ -62,8 +65,12 @@ public class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
     }
 
     @Override
+    public void addNetworkTimeUpdateListener(StateChangeListener networkSuggestionUpdateListener) {
+    }
+
+    @Override
     public NetworkTimeSuggestion getLatestNetworkSuggestion() {
-        return null;
+        return mLatestNetworkTimeSuggestion;
     }
 
     @Override
@@ -80,5 +87,9 @@ public class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
 
     @Override
     public void dump(IndentingPrintWriter pw, String[] args) {
+    }
+
+    void setLatestNetworkTime(NetworkTimeSuggestion networkTimeSuggestion) {
+        mLatestNetworkTimeSuggestion = networkTimeSuggestion;
     }
 }
