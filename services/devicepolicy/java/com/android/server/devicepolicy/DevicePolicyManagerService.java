@@ -785,7 +785,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String ENABLE_DEVICE_POLICY_ENGINE_FLAG = "enable_device_policy_engine";
     private static final boolean DEFAULT_ENABLE_DEVICE_POLICY_ENGINE_FLAG = false;
 
-    // TODO(b/258425381) remove the flag after rollout.
+    // TODO(b/265683382) remove the flag after rollout.
     private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
     private static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = false;
 
@@ -1406,13 +1406,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Slogf.i(LOG_TAG, "Newly installed package is unsuspendable: " + packageName);
             return;
         }
-        try {
-            mIPackageManager.setPackagesSuspendedAsUser(packagesToSuspend, true /*suspend*/,
-                    null, null, null, PLATFORM_PACKAGE_NAME, userHandle);
-        } catch (RemoteException ignored) {
-            // shouldn't happen.
-            Slogf.wtf(LOG_TAG, "Error handling new package installed", ignored);
-        }
+        mInjector.getPackageManagerInternal()
+                .setPackagesSuspendedByAdmin(userHandle, packagesToSuspend, true /*suspend*/);
     }
 
     public void setDevicePolicySafetyChecker(DevicePolicySafetyChecker safetyChecker) {
@@ -1994,6 +1989,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (mHasFeature) {
             performPolicyVersionUpgrade();
         }
+
+        // TODO(b/265683382) move it into an upgrade step when removing the flag, so that it is
+        // executed only once on upgrading devices, not every boot.
+        if (mKeepProfilesRunning) {
+            suspendAppsForQuietProfiles();
+        }
+
         mUserData = new SparseArray<>();
         mOwners = makeOwners(injector, pathProvider);
 
@@ -2091,6 +2093,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         return packageNameAndSignature;
+    }
+
+    private void suspendAppsForQuietProfiles() {
+        PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
+        List<UserInfo> users = mUserManager.getUsers();
+        for (UserInfo user : users) {
+            if (user.isManagedProfile() && user.isQuietModeEnabled()) {
+                pmi.setPackagesSuspendedForQuietMode(user.id, true);
+            }
+        }
     }
 
     private Owners makeOwners(Injector injector, PolicyPathProvider pathProvider) {
@@ -11979,11 +11991,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (getLockObject()) {
             long id = mInjector.binderClearCallingIdentity();
             try {
-                nonSuspendedPackages = mIPackageManager.setPackagesSuspendedAsUser(packageNames,
-                        suspended, null, null, null, PLATFORM_PACKAGE_NAME, caller.getUserId());
-            } catch (RemoteException re) {
-                // Shouldn't happen.
-                Slogf.e(LOG_TAG, "Failed talking to the package manager", re);
+                nonSuspendedPackages = mInjector.getPackageManagerInternal()
+                        .setPackagesSuspendedByAdmin(caller.getUserId(), packageNames, suspended);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
@@ -14027,6 +14036,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    private Set<String> getPackagesSuspendedByAdmin(@UserIdInt int userId) {
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userId);
+            if (admin == null || admin.suspendedPackages == null) {
+                return Collections.emptySet();
+            } else {
+                return new ArraySet<>(admin.suspendedPackages);
+            }
+        }
+    }
 
     /**
      * We need to update the internal state of whether a user has completed setup or a
@@ -14549,6 +14568,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             LocalServices.getService(CrossProfileAppsInternal.class)
                     .setInteractAcrossProfilesAppOp(
                             packageName, findInteractAcrossProfilesResetMode(packageName), userId);
+        }
+
+        @Override
+        public Set<String> getPackagesSuspendedByAdmin(@UserIdInt int userId) {
+            return DevicePolicyManagerService.this.getPackagesSuspendedByAdmin(userId);
         }
 
         @Override
@@ -18928,16 +18952,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void suspendPersonalAppsInPackageManager(int userId) {
         mInjector.binderWithCleanCallingIdentity(() -> {
-            try {
-                final String[] appsToSuspend = mInjector.getPersonalAppsForSuspension(userId);
-                final String[] failedApps = mIPackageManager.setPackagesSuspendedAsUser(
-                        appsToSuspend, true, null, null, null, PLATFORM_PACKAGE_NAME, userId);
-                if (!ArrayUtils.isEmpty(failedApps)) {
-                    Slogf.wtf(LOG_TAG, "Failed to suspend apps: " + String.join(",", failedApps));
-                }
-            } catch (RemoteException re) {
-                // Shouldn't happen.
-                Slogf.e(LOG_TAG, "Failed talking to the package manager", re);
+            final String[] appsToSuspend = mInjector.getPersonalAppsForSuspension(userId);
+            final String[] failedApps = mInjector.getPackageManagerInternal()
+                    .setPackagesSuspendedByAdmin(userId, appsToSuspend, true);
+            if (!ArrayUtils.isEmpty(failedApps)) {
+                Slogf.wtf(LOG_TAG, "Failed to suspend apps: " + String.join(",", failedApps));
             }
         });
     }

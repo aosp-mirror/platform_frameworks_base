@@ -35,6 +35,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
+import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
@@ -43,6 +44,7 @@ import android.app.PendingIntent;
 import android.app.StatsManager;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -280,6 +282,19 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String TRON_USER_CREATED = "users_user_created";
     private static final String TRON_DEMO_CREATED = "users_demo_created";
 
+    // App ops that should be restricted in quiet mode
+    private static final int[] QUIET_MODE_RESTRICTED_APP_OPS = {
+            AppOpsManager.OP_COARSE_LOCATION,
+            AppOpsManager.OP_FINE_LOCATION,
+            AppOpsManager.OP_GPS,
+            AppOpsManager.OP_BODY_SENSORS,
+            AppOpsManager.OP_ACTIVITY_RECOGNITION,
+            AppOpsManager.OP_BLUETOOTH_SCAN,
+            AppOpsManager.OP_NEARBY_WIFI_DEVICES,
+            AppOpsManager.OP_RECORD_AUDIO,
+            AppOpsManager.OP_CAMERA,
+    };
+
     private final Context mContext;
     private final PackageManagerService mPm;
 
@@ -304,7 +319,8 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mPackagesLock")
     private final File mUserListFile;
 
-    private static final IBinder mUserRestriconToken = new Binder();
+    private final IBinder mUserRestrictionToken = new Binder();
+    private final IBinder mQuietModeToken = new Binder();
 
     /** Installs system packages based on user-type. */
     private final UserSystemPackageInstaller mSystemPackageInstaller;
@@ -681,6 +697,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public void onUserStarting(@NonNull TargetUser targetUser) {
+            boolean isProfileInQuietMode = false;
             synchronized (mUms.mUsersLock) {
                 final UserData user = mUms.getUserDataLU(targetUser.getUserIdentifier());
                 if (user != null) {
@@ -688,8 +705,13 @@ public class UserManagerService extends IUserManager.Stub {
                     if (targetUser.getUserIdentifier() == UserHandle.USER_SYSTEM
                             && targetUser.isFull()) {
                         mUms.setLastEnteredForegroundTimeToNow(user);
+                    } else if (user.info.isManagedProfile() && user.info.isQuietModeEnabled()) {
+                        isProfileInQuietMode = true;
                     }
                 }
+            }
+            if (isProfileInQuietMode) {
+                mUms.setAppOpsRestrictedForQuietMode(targetUser.getUserIdentifier(), true);
             }
         }
 
@@ -1256,11 +1278,12 @@ public class UserManagerService extends IUserManager.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             if (enableQuietMode) {
-                setQuietModeEnabled(
-                        userId, true /* enableQuietMode */, target, callingPackage);
+                setQuietModeEnabled(userId, true /* enableQuietMode */, target, callingPackage);
                 return true;
             }
-            if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(userId)) {
+            final boolean hasUnifiedChallenge =
+                    mLockPatternUtils.isManagedProfileWithUnifiedChallenge(userId);
+            if (hasUnifiedChallenge) {
                 KeyguardManager km = mContext.getSystemService(KeyguardManager.class);
                 // Normally only attempt to auto-unlock unified challenge if keyguard is not showing
                 // (to stop turning profile on automatically via the QS tile), except when we
@@ -1273,7 +1296,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             final boolean needToShowConfirmCredential = !dontAskCredential
                     && mLockPatternUtils.isSecure(userId)
-                    && !StorageManager.isUserKeyUnlocked(userId);
+                    && (!hasUnifiedChallenge || !StorageManager.isUserKeyUnlocked(userId));
             if (needToShowConfirmCredential) {
                 if (onlyIfCredentialNotRequired) {
                     return false;
@@ -1360,24 +1383,59 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mPackagesLock) {
             writeUserLP(profileUserData);
         }
-        try {
-            if (enableQuietMode) {
-                ActivityManager.getService().stopUser(userId, /* force= */ true, null);
-                LocalServices.getService(ActivityManagerInternal.class)
-                        .killForegroundAppsForUser(userId);
-            } else {
-                IProgressListener callback = target != null
-                        ? new DisableQuietModeUserUnlockedCallback(target)
-                        : null;
-                ActivityManager.getService().startProfileWithListener(userId, callback);
+        if (getDevicePolicyManagerInternal().isKeepProfilesRunningEnabled()) {
+            // New behavior: when quiet mode is enabled, profile user is running, but apps are
+            // suspended.
+            getPackageManagerInternal().setPackagesSuspendedForQuietMode(userId, enableQuietMode);
+            setAppOpsRestrictedForQuietMode(userId, enableQuietMode);
+
+            if (enableQuietMode
+                    && !mLockPatternUtils.isManagedProfileWithUnifiedChallenge(userId)) {
+                mContext.getSystemService(TrustManager.class).setDeviceLockedForUser(userId, true);
             }
-            logQuietModeEnabled(userId, enableQuietMode, callingPackage);
-        } catch (RemoteException e) {
-            // Should not happen, same process.
-            e.rethrowAsRuntimeException();
+
+            if (!enableQuietMode && target != null) {
+                try {
+                    mContext.startIntentSender(target, null, 0, 0, 0);
+                } catch (IntentSender.SendIntentException e) {
+                    Slog.e(LOG_TAG, "Failed to start intent after disabling quiet mode", e);
+                }
+            }
+        } else {
+            // Old behavior: when quiet is enabled, profile user is stopped.
+            // Old quiet mode behavior: profile user is stopped.
+            // TODO(b/265683382) Remove once rollout complete.
+            try {
+                if (enableQuietMode) {
+                    ActivityManager.getService().stopUser(userId, /* force= */ true, null);
+                    LocalServices.getService(ActivityManagerInternal.class)
+                            .killForegroundAppsForUser(userId);
+                } else {
+                    IProgressListener callback = target != null
+                            ? new DisableQuietModeUserUnlockedCallback(target)
+                            : null;
+                    ActivityManager.getService().startProfileWithListener(userId, callback);
+                }
+            } catch (RemoteException e) {
+                // Should not happen, same process.
+                e.rethrowAsRuntimeException();
+            }
         }
+
+        logQuietModeEnabled(userId, enableQuietMode, callingPackage);
         broadcastProfileAvailabilityChanges(profile.getUserHandle(), parent.getUserHandle(),
                 enableQuietMode);
+    }
+
+    private void setAppOpsRestrictedForQuietMode(@UserIdInt int userId, boolean restrict) {
+        for (int opCode : QUIET_MODE_RESTRICTED_APP_OPS) {
+            try {
+                mAppOpsService.setUserRestriction(
+                        opCode, restrict, mQuietModeToken, userId, /* excludedPackageTags= */ null);
+            } catch (RemoteException e) {
+                Slog.w(LOG_TAG, "Unable to limit app ops", e);
+            }
+        }
     }
 
     private void logQuietModeEnabled(@UserIdInt int userId, boolean enableQuietMode,
@@ -2863,14 +2921,11 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         if (mAppOpsService != null) { // We skip it until system-ready.
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mAppOpsService.setUserRestrictions(effective, mUserRestriconToken, userId);
-                    } catch (RemoteException e) {
-                        Slog.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
-                    }
+            mHandler.post(() -> {
+                try {
+                    mAppOpsService.setUserRestrictions(effective, mUserRestrictionToken, userId);
+                } catch (RemoteException e) {
+                    Slog.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
                 }
             });
         }
