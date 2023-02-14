@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest;
 import com.android.settingslib.dream.DreamBackend;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -66,13 +67,16 @@ public class ComplicationTypesUpdaterTest extends SysuiTestCase {
 
     private ComplicationTypesUpdater mController;
 
+    @Mock
+    private Monitor mMonitor;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mDreamBackend.getEnabledComplications()).thenReturn(new HashSet<>());
 
         mController = new ComplicationTypesUpdater(mDreamBackend, mExecutor,
-                mSecureSettings, mDreamOverlayStateController);
+                mSecureSettings, mDreamOverlayStateController, mMonitor);
     }
 
     @Test

@@ -46,6 +46,7 @@ import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.complication.dagger.DreamHomeControlsComplicationComponent;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.shared.condition.Monitor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -101,6 +102,9 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<DreamOverlayStateController.Callback> mStateCallbackCaptor;
 
+    @Mock
+    private Monitor mMonitor;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -126,7 +130,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceNotAvailable_noFavorites_doNotAddComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor);
         registrant.start();
 
         setHaveFavorites(false);
@@ -139,7 +143,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceAvailable_noFavorites_doNotAddComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor);
         registrant.start();
 
         setHaveFavorites(false);
@@ -152,7 +156,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceAvailable_noFavorites_panel_addComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor);
         registrant.start();
 
         setHaveFavorites(false);
@@ -165,7 +169,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceNotAvailable_haveFavorites_doNotAddComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor);
         registrant.start();
 
         setHaveFavorites(true);
@@ -178,7 +182,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_serviceAvailable_haveFavorites_addComplication() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor);
         registrant.start();
 
         setHaveFavorites(true);
@@ -191,7 +195,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     public void complicationAvailability_checkAvailabilityWhenDreamOverlayBecomesActive() {
         final DreamHomeControlsComplication.Registrant registrant =
                 new DreamHomeControlsComplication.Registrant(mComplication,
-                        mDreamOverlayStateController, mControlsComponent);
+                        mDreamOverlayStateController, mControlsComponent, mMonitor);
         registrant.start();
 
         setServiceAvailable(true);
