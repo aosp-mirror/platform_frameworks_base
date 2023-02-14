@@ -805,7 +805,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * This feature flag is checked once after boot and this value us used until the next reboot to
      * avoid needing to handle the flag changing on the fly.
      */
-    private final boolean mKeepProfilesRunning = isKeepProfilesRunningFlagEnabled();
+    private boolean mKeepProfilesRunning = isKeepProfilesRunningFlagEnabled();
 
     /**
      * For apps targeting U+
@@ -20963,6 +20963,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 NAMESPACE_DEVICE_POLICY_MANAGER,
                 ENABLE_WORK_PROFILE_TELEPHONY_FLAG,
                 DEFAULT_WORK_PROFILE_TELEPHONY_FLAG);
+    }
+
+    @Override
+    public void setOverrideKeepProfilesRunning(boolean enabled) {
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+        mKeepProfilesRunning = enabled;
+        Slog.i(LOG_TAG, "Keep profiles running overridden to: " + enabled);
     }
 
     @Override
