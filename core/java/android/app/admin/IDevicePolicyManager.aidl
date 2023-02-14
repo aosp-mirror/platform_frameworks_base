@@ -141,7 +141,7 @@ interface IDevicePolicyManager {
 
     boolean requestBugreport(in ComponentName who);
 
-    void setCameraDisabled(in ComponentName who, boolean disabled, boolean parent);
+    void setCameraDisabled(in ComponentName who, String callerPackageName, boolean disabled, boolean parent);
     boolean getCameraDisabled(in ComponentName who, int userHandle, boolean parent);
 
     void setScreenCaptureDisabled(in ComponentName who, boolean disabled, boolean parent);
