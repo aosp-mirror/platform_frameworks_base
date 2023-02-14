@@ -170,7 +170,12 @@ constructor(
     }
 
     private fun setUpClock(parentView: ViewGroup) {
-        val clockChangeListener = ClockRegistry.ClockChangeListener { onClockChanged(parentView) }
+        val clockChangeListener =
+            object : ClockRegistry.ClockChangeListener {
+                override fun onCurrentClockChanged() {
+                    onClockChanged(parentView)
+                }
+            }
         clockRegistry.registerClockChangeListener(clockChangeListener)
         disposables.add(
             DisposableHandle { clockRegistry.unregisterClockChangeListener(clockChangeListener) }
