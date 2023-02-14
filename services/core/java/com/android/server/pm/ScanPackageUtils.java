@@ -547,7 +547,7 @@ final class ScanPackageUtils {
      */
     public static void assertCodePolicy(AndroidPackage pkg)
             throws PackageManagerException {
-        final boolean shouldHaveCode = pkg.isHasCode();
+        final boolean shouldHaveCode = pkg.isDeclaredHavingCode();
         if (shouldHaveCode && !apkHasCode(pkg.getBaseApkPath())) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Package " + pkg.getBaseApkPath() + " code is missing");
