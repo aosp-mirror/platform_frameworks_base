@@ -506,6 +506,9 @@ SkCodec::Result ImageDecoder::extractGainmap(Bitmap* destination) {
     decoder.mOverrideOrigin.emplace(getOrigin());
     // Update mDecodeSize / mTargetSize for the overridden origin
     decoder.setTargetSize(decoder.width(), decoder.height());
+    if (decoder.gray()) {
+        decoder.setOutColorType(kGray_8_SkColorType);
+    }
 
     const bool isScaled = width() != mTargetSize.width() || height() != mTargetSize.height();
 
@@ -528,6 +531,9 @@ SkCodec::Result ImageDecoder::extractGainmap(Bitmap* destination) {
     }
 
     SkImageInfo bitmapInfo = decoder.getOutputInfo();
+    if (bitmapInfo.colorType() == kGray_8_SkColorType) {
+        bitmapInfo = bitmapInfo.makeColorType(kAlpha_8_SkColorType);
+    }
 
     SkBitmap bm;
     if (!bm.setInfo(bitmapInfo)) {
