@@ -33,6 +33,7 @@ import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -3168,7 +3169,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                             ? activityRecord.getOrganizedTaskFragment()
                             : taskFragment.getOrganizedTaskFragment();
                     if (organizedTf != null && organizedTf.getAnimationParams()
-                            .getAnimationBackgroundColor() != 0) {
+                            .getAnimationBackgroundColor() != DEFAULT_ANIMATION_BACKGROUND_COLOR) {
                         // This window is embedded and has an animation background color set on the
                         // TaskFragment. Pass this color with this window, so the handler can use it
                         // as the animation background color if needed,
@@ -3181,11 +3182,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                         final Task parentTask = activityRecord != null
                                 ? activityRecord.getTask()
                                 : taskFragment.getTask();
-                        backgroundColorForTransition = ColorUtils.setAlphaComponent(
-                                parentTask.getTaskDescription().getBackgroundColor(), 255);
+                        backgroundColorForTransition = parentTask.getTaskDescription()
+                                .getBackgroundColor();
                     }
                 }
-                animationRunnerBuilder.setTaskBackgroundColor(backgroundColorForTransition);
+                // Set to opaque for animation background to prevent it from exposing the blank
+                // background or content below.
+                animationRunnerBuilder.setTaskBackgroundColor(ColorUtils.setAlphaComponent(
+                        backgroundColorForTransition, 255));
             }
 
             animationRunnerBuilder.build()
