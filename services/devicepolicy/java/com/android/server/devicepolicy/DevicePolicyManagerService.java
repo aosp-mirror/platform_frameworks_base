@@ -143,6 +143,9 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_DELETED_GENERIC_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_DELETED_ORG_OWNED_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_DELETED_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_TELEPHONY_PAUSED_BODY;
+import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_TELEPHONY_PAUSED_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_TELEPHONY_PAUSED_TURN_ON_BUTTON;
 import static android.app.admin.ProvisioningException.ERROR_ADMIN_PACKAGE_INSTALLATION_FAILED;
 import static android.app.admin.ProvisioningException.ERROR_PRE_CONDITION_FAILED;
 import static android.app.admin.ProvisioningException.ERROR_PROFILE_CREATION_FAILED;
@@ -150,6 +153,8 @@ import static android.app.admin.ProvisioningException.ERROR_REMOVE_NON_REQUIRED_
 import static android.app.admin.ProvisioningException.ERROR_SETTING_PROFILE_OWNER_FAILED;
 import static android.app.admin.ProvisioningException.ERROR_SET_DEVICE_OWNER_FAILED;
 import static android.app.admin.ProvisioningException.ERROR_STARTING_PROFILE_FAILED;
+import static android.content.Intent.ACTION_MANAGED_PROFILE_AVAILABLE;
+import static android.content.Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -1158,6 +1163,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } else if (ACTION_TURN_PROFILE_ON_NOTIFICATION.equals(action)) {
                 Slogf.i(LOG_TAG, "requesting to turn on the profile: " + userHandle);
                 mUserManager.requestQuietModeEnabled(false, UserHandle.of(userHandle));
+            } else if (ACTION_MANAGED_PROFILE_UNAVAILABLE.equals(action)) {
+                notifyIfManagedSubscriptionsAreUnavailable(
+                        UserHandle.of(userHandle), /* managedProfileAvailable= */ false);
+            } else if (ACTION_MANAGED_PROFILE_AVAILABLE.equals(action)) {
+                notifyIfManagedSubscriptionsAreUnavailable(
+                        UserHandle.of(userHandle), /* managedProfileAvailable= */ true);
             }
         }
 
@@ -2002,7 +2013,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         filter.addAction(Intent.ACTION_USER_STOPPED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
-        filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
+        filter.addAction(ACTION_MANAGED_PROFILE_UNAVAILABLE);
+        filter.addAction(ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
         filter = new IntentFilter();
@@ -18748,6 +18760,83 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slogf.e(LOG_TAG, "Failed talking to the package manager", re);
             }
         });
+    }
+
+    private void notifyIfManagedSubscriptionsAreUnavailable(
+            UserHandle managedProfile, boolean managedProfileAvailable) {
+        if (!isManagedProfile(managedProfile.getIdentifier())) {
+            Slog.wtf(
+                    LOG_TAG,
+                    "Expected managed profile when notified of profile availability change.");
+        }
+        if (getManagedSubscriptionsPolicy().getPolicyType()
+                != ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
+            // There may be a subscription in the personal profile, in which case calls and
+            // texts may still be available. No need to notify the user.
+            return;
+        }
+        if (managedProfileAvailable) {
+            // When quiet mode is switched off calls and texts then become available to the user,
+            // so no need to keep showing the notification.
+            mInjector
+                    .getNotificationManager()
+                    .cancel(SystemMessage.NOTE_ALL_MANAGED_SUBSCRIPTIONS_AND_MANAGED_PROFILE_OFF);
+            return;
+        }
+        final Intent intent = new Intent(ACTION_TURN_PROFILE_ON_NOTIFICATION);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, managedProfile.getIdentifier());
+        final PendingIntent pendingIntent =
+                mInjector.pendingIntentGetBroadcast(
+                        mContext,
+                        /* requestCode= */ 0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        final Notification.Action turnProfileOnButton =
+                new Notification.Action.Builder(
+                        /* icon= */ null, getUnpauseWorkAppsButtonText(), pendingIntent)
+                        .build();
+
+        final Bundle extras = new Bundle();
+        extras.putString(
+                Notification.EXTRA_SUBSTITUTE_APP_NAME, getWorkProfileContentDescription());
+        final Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.DEVICE_ADMIN)
+                        .setSmallIcon(R.drawable.ic_phone_disabled)
+                        .setContentTitle(getUnpauseWorkAppsForTelephonyTitle())
+                        .setContentText(getUnpauseWorkAppsForTelephonyText())
+                        .setStyle(new Notification.BigTextStyle().bigText(
+                                getUnpauseWorkAppsForTelephonyText()))
+                        .addAction(turnProfileOnButton)
+                        .addExtras(extras)
+                        .setOngoing(false)
+                        .setShowWhen(true)
+                        .setAutoCancel(true)
+                        .build();
+
+        mInjector
+                .getNotificationManager()
+                .notifyAsUser(
+                        /* tag= */ null,
+                        SystemMessage.NOTE_ALL_MANAGED_SUBSCRIPTIONS_AND_MANAGED_PROFILE_OFF,
+                        notification,
+                        UserHandle.of(getProfileParentId(managedProfile.getIdentifier())));
+    }
+
+    private String getUnpauseWorkAppsButtonText() {
+        return getUpdatableString(
+                WORK_PROFILE_TELEPHONY_PAUSED_TURN_ON_BUTTON,
+                R.string.work_profile_telephony_paused_turn_on_button);
+    }
+
+    private String getUnpauseWorkAppsForTelephonyTitle() {
+        return getUpdatableString(
+                WORK_PROFILE_TELEPHONY_PAUSED_TITLE, R.string.work_profile_telephony_paused_title);
+    }
+
+    private String getUnpauseWorkAppsForTelephonyText() {
+        return getUpdatableString(
+                WORK_PROFILE_TELEPHONY_PAUSED_BODY,
+                R.string.work_profile_telephony_paused_text);
     }
 
     @GuardedBy("getLockObject()")
