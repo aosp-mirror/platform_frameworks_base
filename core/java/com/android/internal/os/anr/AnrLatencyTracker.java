@@ -137,14 +137,14 @@ public class AnrLatencyTracker implements AutoCloseable {
         close();
     }
 
-    /** Records the start of ActivityManagerService#dumpStackTraces. */
+    /** Records the start of StackTracesDumpHelper#dumpStackTraces. */
     public void dumpStackTracesStarted() {
         mDumpStackTracesStartUptime = getUptimeMillis();
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
                 "dumpStackTraces()");
     }
 
-    /** Records the end of ActivityManagerService#dumpStackTraces. */
+    /** Records the end of StackTracesDumpHelper#dumpStackTraces. */
     public void dumpStackTracesEnded() {
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -328,7 +328,7 @@ public class AnrLatencyTracker implements AutoCloseable {
         anrSkipped("appNotResponding");
     }
 
-    /** Records a skipped ANR in ActivityManagerService#dumpStackTraces. */
+    /** Records a skipped ANR in StackTracesDumpHelper#dumpStackTraces. */
     public void anrSkippedDumpStackTraces() {
         anrSkipped("dumpStackTraces");
     }
