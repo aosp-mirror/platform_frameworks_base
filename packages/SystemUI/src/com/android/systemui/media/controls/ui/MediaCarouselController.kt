@@ -590,6 +590,17 @@ constructor(
                     ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
             }
         }
+        // Check postcondition: mediaContent should have the same number of children as there
+        // are
+        // elements in mediaPlayers.
+        if (MediaPlayerData.players().size != mediaContent.childCount) {
+            Log.e(
+                TAG,
+                "Size of players list and number of views in carousel are out of sync. " +
+                    "Players size is ${MediaPlayerData.players().size}. " +
+                    "View count is ${mediaContent.childCount}."
+            )
+        }
     }
 
     // Returns true if new player is added
@@ -665,17 +676,6 @@ constructor(
             updatePageIndicator()
             mediaCarouselScrollHandler.onPlayersChanged()
             mediaFrame.requiresRemeasuring = true
-            // Check postcondition: mediaContent should have the same number of children as there
-            // are
-            // elements in mediaPlayers.
-            if (MediaPlayerData.players().size != mediaContent.childCount) {
-                Log.e(
-                    TAG,
-                    "Size of players list and number of views in carousel are out of sync. " +
-                        "Players size is ${MediaPlayerData.players().size}. " +
-                        "View count is ${mediaContent.childCount}."
-                )
-            }
             return existingPlayer == null
         }
 
