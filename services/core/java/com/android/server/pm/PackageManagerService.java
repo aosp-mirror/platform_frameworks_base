@@ -6679,6 +6679,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         /** @deprecated For legacy shell command only. */
         @Override
         @Deprecated
+        public void legacyForceDexOpt(String packageName) throws LegacyDexoptDisabledException {
+            mDexOptHelper.forceDexOpt(snapshotComputer(), packageName);
+        }
+
+        /** @deprecated For legacy shell command only. */
+        @Override
+        @Deprecated
         public void legacyReconcileSecondaryDexFiles(String packageName)
                 throws LegacyDexoptDisabledException {
             final Computer snapshot = snapshotComputer();

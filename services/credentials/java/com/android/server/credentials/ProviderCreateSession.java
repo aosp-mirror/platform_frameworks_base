@@ -248,6 +248,7 @@ public final class ProviderCreateSession extends ProviderSession<
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             mRemoteCredentialService.onCreateCredential(mProviderRequest, this);
+            mCandidateProviderMetric.setStartTimeNanoseconds(System.nanoTime());
         }
     }
 

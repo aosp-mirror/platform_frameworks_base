@@ -555,8 +555,9 @@ final class DevicePolicyEngine {
             if (!hasLocalPolicyLocked(policyDefinition, userId)) {
                 return null;
             }
-            return getLocalPolicyStateLocked(policyDefinition, userId)
-                    .getPoliciesSetByAdmins().get(enforcingAdmin).getValue();
+            PolicyValue<V> value = getLocalPolicyStateLocked(policyDefinition, userId)
+                    .getPoliciesSetByAdmins().get(enforcingAdmin);
+            return value == null ? null : value.getValue();
         }
     }
 

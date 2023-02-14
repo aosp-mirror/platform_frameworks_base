@@ -16,6 +16,9 @@
 
 package com.android.server.credentials;
 
+import static com.android.server.credentials.MetricUtilities.METRICS_PROVIDER_STATUS_FINAL_FAILURE;
+import static com.android.server.credentials.MetricUtilities.METRICS_PROVIDER_STATUS_FINAL_SUCCESS;
+
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -87,9 +90,14 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
         Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
+        setChosenMetric(componentName);
         if (response != null) {
+            mChosenProviderMetric.setChosenProviderStatus(
+                    METRICS_PROVIDER_STATUS_FINAL_SUCCESS);
             respondToClientWithResponseAndFinish(response);
         } else {
+            mChosenProviderMetric.setChosenProviderStatus(
+                    METRICS_PROVIDER_STATUS_FINAL_FAILURE);
             respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
                     "Invalid response from provider");
         }

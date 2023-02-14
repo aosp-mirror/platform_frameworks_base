@@ -68,7 +68,6 @@ import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.satellite.ISatelliteStateListener;
-import android.telephony.satellite.ISatelliteCapabilitiesConsumer;
 import android.telephony.satellite.SatelliteCapabilities;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
@@ -76,7 +75,6 @@ import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.ICallForwardingInfoCallback;
 import com.android.internal.telephony.IccLogicalChannelRequest;
 import com.android.internal.telephony.IImsStateCallback;
-import com.android.internal.telephony.IIntArrayConsumer;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
@@ -2704,74 +2702,129 @@ interface ITelephony {
     void getCarrierRestrictionStatus(IIntegerConsumer internalCallback, String packageName);
 
     /**
-     * Power on or off the satellite modem.
+     * Enable or disable the satellite modem.
+     *
+     * @param subId The subId of the subscription to enable or disable the satellite modem for.
+     * @param enable True to enable the satellite modem and false to disable.
+     * @param callback The callback to get the error code of the request.
      */
-    int setSatellitePower(int subId, boolean powerOn);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void setSatelliteEnabled(int subId, boolean enable, in IIntegerConsumer callback);
 
     /**
-     * Check whether the satellite modem is powered on.
+     * Request to get whether the satellite modem is enabled.
+     *
+     * @param subId The subId of the subscription to request whether satellite is enabled for.
+     * @param receiver Result receiver to get the error code of the request and whether the
+     *                 satellite modem is enabled.
      */
-    int isSatellitePowerOn(int subId, IBooleanConsumer internalCallback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestIsSatelliteEnabled(int subId, in ResultReceiver receiver);
 
     /**
-     * Check whether the satellite service is supported on the device.
+     * Request to get whether the satellite service is supported on the device.
+     *
+     * @param subId The subId of the subscription to check whether satellite is supported for.
+     * @param receiver Result receiver to get the error code of the request and whether the
+     *                 satellite service is supported on the device.
      */
-    int isSatelliteSupported(int subId, IBooleanConsumer internalCallback);
+    void requestIsSatelliteSupported(int subId, in ResultReceiver receiver);
 
     /**
-     * Get the capabilities of the satellite service.
+     * Request to get the capabilities of the satellite service.
+     *
+     * @param subId The subId of the subscription to get the capabilities for.
+     * @param receiver Result receiver to get the error code of the request and the requested
+     *                 capabilities of the satellite service.
      */
-    int getSatelliteCapabilities(int subId, ISatelliteCapabilitiesConsumer internalCallback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestSatelliteCapabilities(int subId, in ResultReceiver receiver);
 
     /**
      * Start receiving satellite pointing updates.
+     *
+     * @param subId The subId of the subscription to stop satellite position updates for.
+     * @param errorCallback The callback to get the error code of the request.
+     * @param callback The callback to handle position updates.
      */
-    int startSatellitePositionUpdates(int subId, in ISatelliteStateListener callback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void startSatellitePositionUpdates(int subId, in IIntegerConsumer errorCallback,
+            in ISatelliteStateListener callback);
 
     /**
      * Stop receiving satellite pointing updates.
+     *
+     * @param subId The subId of the subscritpion to stop satellite position updates for.
+     * @param errorCallback The callback to get the error code of the request.
+     * @param callback The callback that was passed to startSatellitePositionUpdates.
      */
-    int stopSatellitePositionUpdates(int subId, ISatelliteStateListener callback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void stopSatellitePositionUpdates(int subId, in IIntegerConsumer errorCallback,
+            in ISatelliteStateListener callback);
 
     /**
-     * Get maximum number of characters per text message on satellite.
+     * Request to get the maximum number of characters per text message on satellite.
+     *
+     * @param subId The subId to get the maximum number of characters for.
+     * @param receiver Result receiver to get the error code of the request and the requested
+     *                 maximum number of characters per text message on satellite.
      */
-    int getMaxCharactersPerSatelliteTextMessage(int subId, IIntegerConsumer internalCallback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestMaxCharactersPerSatelliteTextMessage(int subId, in ResultReceiver receiver);
 
     /**
      * Register the subscription with a satellite provider.
      * This is needed to register the subscription if the provider allows dynamic registration.
      *
      * @param subId The subId of the subscription to be provisioned.
-     * @param features List of features to be provisioned.
+     * @param token The security token of the device/subscription to be provisioned.
      * @param callback The callback to get the error code of the request.
+     *
      * @return The signal transport used by callers to cancel the provision request.
      */
-    ICancellationSignal provisionSatelliteService(int subId, in int[] features,
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    ICancellationSignal provisionSatelliteService(int subId, in String token,
             in IIntegerConsumer callback);
 
     /**
      * Register for the satellite provision state change.
      *
-     * @param subId The subId of the subscription to be provisioned.
+     * @param subId The subId of the subscription to register for provision state changes for.
+     * @param errorCallback The callback to get the error code of the request.
      * @param callback The callback to handle the satellite provision state changed event.
      */
-    int registerForSatelliteProvisionStateChanged(int subId, ISatelliteStateListener callback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void registerForSatelliteProvisionStateChanged(int subId,
+            in IIntegerConsumer errorCallback, in ISatelliteStateListener callback);
 
     /**
      * Unregister for the satellite provision state change.
      *
      * @param subId The subId of the subscription associated with the satellite service.
-     * @param callback The callback that was passed to
-     *                   registerForSatelliteProvisionStateChanged.
+     * @param errorCallback The callback to get the error code of the request.
+     * @param callback The callback that was passed to registerForSatelliteProvisionStateChanged.
      */
-    int unregisterForSatelliteProvisionStateChanged(int subId, ISatelliteStateListener callback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void unregisterForSatelliteProvisionStateChanged(int subId,
+            in IIntegerConsumer errorCallback, in ISatelliteStateListener callback);
 
     /**
-     * Get the list of provisioned satellite features.
+     * Request to get whether the device is provisioned with a satellite provider.
      *
-     * @param subId The subId of the subscription to be provisioned.
-     * @param callback The callback to get the list of provisioned satellite features.
+     * @param subId The subId of the subscription to get whether the device is provisioned for.
+     * @param receiver Result receiver to get the error code of the request and whether the
+     *                 device is provisioned with a satellite provider.
      */
-    int getProvisionedSatelliteFeatures(int subId, IIntArrayConsumer callback);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestIsSatelliteProvisioned(int subId, in ResultReceiver receiver);
 }

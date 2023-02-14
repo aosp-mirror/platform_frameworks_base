@@ -16,6 +16,7 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION;
 import static android.os.PowerManager.LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN;
 
@@ -62,6 +63,8 @@ import androidx.test.InstrumentationRegistry;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
+import com.android.server.PowerAllowlistInternal;
+import com.android.server.PowerAllowlistInternal.TempAllowlistChangeListener;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.power.LowPowerStandbyController.DeviceConfigWrapper;
 import com.android.server.testutils.OffsettableClock;
@@ -117,6 +120,8 @@ public class LowPowerStandbyControllerTest {
     private PowerManagerInternal mPowerManagerInternalMock;
     @Mock
     private NetworkPolicyManagerInternal mNetworkPolicyManagerInternalMock;
+    @Mock
+    private PowerAllowlistInternal mPowerAllowlistInternalMock;
 
     @Before
     public void setUp() throws Exception {
@@ -130,6 +135,7 @@ public class LowPowerStandbyControllerTest {
         when(mContextSpy.getSystemService(PowerManager.class)).thenReturn(powerManager);
         addLocalServiceMock(PowerManagerInternal.class, mPowerManagerInternalMock);
         addLocalServiceMock(NetworkPolicyManagerInternal.class, mNetworkPolicyManagerInternalMock);
+        addLocalServiceMock(PowerAllowlistInternal.class, mPowerAllowlistInternalMock);
 
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
@@ -169,6 +175,7 @@ public class LowPowerStandbyControllerTest {
         LocalServices.removeServiceForTest(PowerManagerInternal.class);
         LocalServices.removeServiceForTest(LowPowerStandbyControllerInternal.class);
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
+        LocalServices.removeServiceForTest(PowerAllowlistInternal.class);
         mTestPolicyFile.delete();
     }
 
@@ -614,7 +621,7 @@ public class LowPowerStandbyControllerTest {
 
         InOrder inOrder = inOrder(mPowerManagerInternalMock);
 
-        inOrder.verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[] {
+        inOrder.verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{
                 UserHandle.getUid(USER_ID_1, TEST_PKG1_APP_ID),
                 UserHandle.getUid(USER_ID_2, TEST_PKG1_APP_ID),
         });
@@ -626,7 +633,7 @@ public class LowPowerStandbyControllerTest {
         mContextSpy.sendBroadcast(intent);
         mTestLooper.dispatchAll();
 
-        inOrder.verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[] {
+        inOrder.verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{
                 UserHandle.getUid(USER_ID_1, TEST_PKG1_APP_ID)
         });
         inOrder.verifyNoMoreInteractions();
@@ -661,6 +668,39 @@ public class LowPowerStandbyControllerTest {
         mTestLooper.dispatchAll();
 
         assertFalse(mController.isPackageExempt(TEST_PKG1_APP_ID));
+    }
+
+    @Test
+    public void testAllowReason_tempPowerSaveAllowlist() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithAllowedReasons(
+                LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST));
+        mTestLooper.dispatchAll();
+
+        ArgumentCaptor<TempAllowlistChangeListener> tempAllowlistChangeListenerArgumentCaptor =
+                ArgumentCaptor.forClass(TempAllowlistChangeListener.class);
+        verify(mPowerAllowlistInternalMock).registerTempAllowlistChangeListener(
+                tempAllowlistChangeListenerArgumentCaptor.capture());
+        TempAllowlistChangeListener tempAllowlistChangeListener =
+                tempAllowlistChangeListenerArgumentCaptor.getValue();
+
+        tempAllowlistChangeListener.onAppAdded(TEST_PKG1_APP_ID);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{TEST_PKG1_APP_ID});
+
+        tempAllowlistChangeListener.onAppAdded(TEST_PKG2_APP_ID);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(
+                new int[]{TEST_PKG1_APP_ID, TEST_PKG2_APP_ID});
+
+        tempAllowlistChangeListener.onAppRemoved(TEST_PKG1_APP_ID);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{TEST_PKG2_APP_ID});
+
+        mController.setPolicy(EMPTY_POLICY);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[0]);
     }
 
     private void setInteractive() throws Exception {

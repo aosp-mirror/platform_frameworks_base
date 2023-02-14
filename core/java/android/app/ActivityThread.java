@@ -151,6 +151,8 @@ import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.provider.DeviceConfigInitializer;
+import android.provider.DeviceConfigServiceManager;
 import android.provider.Downloads;
 import android.provider.FontsContract;
 import android.provider.Settings;
@@ -8139,8 +8141,11 @@ public final class ActivityThread extends ClientTransactionHandler
         MediaFrameworkInitializer.setMediaServiceManager(new MediaServiceManager());
         BluetoothFrameworkInitializer.setBluetoothServiceManager(new BluetoothServiceManager());
         BluetoothFrameworkInitializer.setBinderCallsStatsInitializer(context -> {
-            BinderCallsStats.startForBluetooth(context); });
+            BinderCallsStats.startForBluetooth(context);
+        });
         NfcFrameworkInitializer.setNfcServiceManager(new NfcServiceManager());
+
+        DeviceConfigInitializer.setDeviceConfigServiceManager(new DeviceConfigServiceManager());
     }
 
     private void purgePendingResources() {
