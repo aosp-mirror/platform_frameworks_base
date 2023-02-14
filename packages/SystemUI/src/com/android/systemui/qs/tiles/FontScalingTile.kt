@@ -19,8 +19,12 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.R
+import com.android.systemui.accessibility.fontscaling.FontScalingDialog
+import com.android.systemui.animation.DialogCuj
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -30,6 +34,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
 
 class FontScalingTile
@@ -42,7 +47,8 @@ constructor(
     metricsLogger: MetricsLogger,
     statusBarStateController: StatusBarStateController,
     activityStarter: ActivityStarter,
-    qsLogger: QSLogger
+    qsLogger: QSLogger,
+    private val dialogLaunchAnimator: DialogLaunchAnimator
 ) :
     QSTileImpl<QSTile.State?>(
         host,
@@ -54,7 +60,7 @@ constructor(
         activityStarter,
         qsLogger
     ) {
-    private val mIcon = ResourceIcon.get(R.drawable.ic_qs_font_scaling)
+    private val icon = ResourceIcon.get(R.drawable.ic_qs_font_scaling)
 
     override fun isAvailable(): Boolean {
         return false
@@ -66,11 +72,24 @@ constructor(
         return state
     }
 
-    override fun handleClick(view: View?) {}
+    override fun handleClick(view: View?) {
+        mUiHandler.post {
+            val dialog: SystemUIDialog = FontScalingDialog(mContext)
+            if (view != null) {
+                dialogLaunchAnimator.showFromView(
+                    dialog,
+                    view,
+                    DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG)
+                )
+            } else {
+                dialog.show()
+            }
+        }
+    }
 
     override fun handleUpdateState(state: QSTile.State?, arg: Any?) {
         state?.label = mContext.getString(R.string.quick_settings_font_scaling_label)
-        state?.icon = mIcon
+        state?.icon = icon
     }
 
     override fun getLongClickIntent(): Intent? {
@@ -79,5 +98,9 @@ constructor(
 
     override fun getTileLabel(): CharSequence {
         return mContext.getString(R.string.quick_settings_font_scaling_label)
+    }
+
+    companion object {
+        private const val INTERACTION_JANK_TAG = "font_scaling"
     }
 }
