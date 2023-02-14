@@ -49,14 +49,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"以 50% 的螢幕空間顯示頂端畫面"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"以 30% 的螢幕空間顯示頂端畫面"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"以全螢幕顯示底部畫面"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"分割左側區域"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"分割右側區域"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"分割上方區域"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"分割下方區域"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"使用單手模式"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"如要退出，請從螢幕底部向上滑動，或輕觸應用程式上方的任何位置"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"啟動單手模式"</string>
@@ -102,9 +98,19 @@
     <string name="close_button_text" msgid="2913281996024033299">"關閉"</string>
     <string name="back_button_text" msgid="1469718707134137085">"返回"</string>
     <string name="handle_text" msgid="1766582106752184456">"控點"</string>
+    <!-- no translation found for app_icon_text (2823268023931811747) -->
+    <skip />
     <string name="fullscreen_text" msgid="1162316685217676079">"全螢幕"</string>
     <string name="desktop_text" msgid="1077633567027630454">"電腦模式"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"分割畫面"</string>
     <string name="more_button_text" msgid="3655388105592893530">"更多"</string>
     <string name="float_button_text" msgid="9221657008391364581">"浮動"</string>
+    <!-- no translation found for select_text (5139083974039906583) -->
+    <skip />
+    <!-- no translation found for screenshot_text (1477704010087786671) -->
+    <skip />
+    <!-- no translation found for close_text (4986518933445178928) -->
+    <skip />
+    <!-- no translation found for collapse_menu_text (7515008122450342029) -->
+    <skip />
 </resources>

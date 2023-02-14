@@ -49,14 +49,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"50% ಮೇಲಕ್ಕೆ"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"30% ಮೇಲಕ್ಕೆ"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"ಕೆಳಗಿನ ಪೂರ್ಣ ಪರದೆ"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"ಎಡಕ್ಕೆ ವಿಭಜಿಸಿ"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"ಬಲಕ್ಕೆ ವಿಭಜಿಸಿ"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"ಮೇಲಕ್ಕೆ ವಿಭಜಿಸಿ"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"ಕೆಳಕ್ಕೆ ವಿಭಜಿಸಿ"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"ಒಂದು ಕೈ ಮೋಡ್ ಬಳಸುವುದರ ಬಗ್ಗೆ"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ನಿರ್ಗಮಿಸಲು, ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಗಿನಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಅಥವಾ ಆ್ಯಪ್‌ನ ಮೇಲೆ ಎಲ್ಲಿಯಾದರೂ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ಒಂದು ಕೈ ಮೋಡ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಿ"</string>
@@ -102,9 +98,19 @@
     <string name="close_button_text" msgid="2913281996024033299">"ಮುಚ್ಚಿರಿ"</string>
     <string name="back_button_text" msgid="1469718707134137085">"ಹಿಂದಕ್ಕೆ"</string>
     <string name="handle_text" msgid="1766582106752184456">"ಹ್ಯಾಂಡಲ್"</string>
+    <!-- no translation found for app_icon_text (2823268023931811747) -->
+    <skip />
     <string name="fullscreen_text" msgid="1162316685217676079">"ಫುಲ್‌ಸ್ಕ್ರೀನ್"</string>
     <string name="desktop_text" msgid="1077633567027630454">"ಡೆಸ್ಕ್‌ಟಾಪ್ ಮೋಡ್"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್"</string>
     <string name="more_button_text" msgid="3655388105592893530">"ಇನ್ನಷ್ಟು"</string>
     <string name="float_button_text" msgid="9221657008391364581">"ಫ್ಲೋಟ್"</string>
+    <!-- no translation found for select_text (5139083974039906583) -->
+    <skip />
+    <!-- no translation found for screenshot_text (1477704010087786671) -->
+    <skip />
+    <!-- no translation found for close_text (4986518933445178928) -->
+    <skip />
+    <!-- no translation found for collapse_menu_text (7515008122450342029) -->
+    <skip />
 </resources>
