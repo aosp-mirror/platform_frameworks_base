@@ -204,6 +204,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         // This is only set in the runnable returned from requestDisplayStateLocked.
         private float mBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         private float mSdrBrightnessState = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        private float mCurrentHdrSdrRatio = Float.NaN;
         private int mDefaultModeId = INVALID_MODE_ID;
         private int mSystemPreferredModeId = INVALID_MODE_ID;
         private int mDefaultModeGroup;
@@ -729,6 +730,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.brightnessMinimum = PowerManager.BRIGHTNESS_MIN;
                 mInfo.brightnessMaximum = PowerManager.BRIGHTNESS_MAX;
                 mInfo.brightnessDefault = getDisplayDeviceConfig().getBrightnessDefault();
+                mInfo.hdrSdrRatio = mCurrentHdrSdrRatio;
             }
             return mInfo;
         }
@@ -840,12 +842,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                     private void setCommittedState(int state) {
                         // After the display state is set, let's update the committed state.
-                        getHandler().post(() -> {
-                            synchronized (getSyncRoot()) {
-                                mCommittedState = state;
-                                updateDeviceInfoLocked();
-                            }
-                        });
+                        synchronized (getSyncRoot()) {
+                            mCommittedState = state;
+                            updateDeviceInfoLocked();
+                        }
                     }
 
                     private void setDisplayBrightness(float brightnessState,
@@ -881,6 +881,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     "SdrScreenBrightness",
                                     BrightnessSynchronizer.brightnessFloatToInt(
                                             sdrBrightnessState));
+
+                            handleHdrSdrNitsChanged(nits, sdrNits);
+
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
                         }
@@ -896,6 +899,23 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                     private float backlightToNits(float backlight) {
                         return getDisplayDeviceConfig().getNitsFromBacklight(backlight);
+                    }
+
+                    void handleHdrSdrNitsChanged(float displayNits, float sdrNits) {
+                        final float newHdrSdrRatio;
+                        if (displayNits != DisplayDeviceConfig.NITS_INVALID
+                                && sdrNits != DisplayDeviceConfig.NITS_INVALID) {
+                            newHdrSdrRatio = displayNits / sdrNits;
+                        } else {
+                            newHdrSdrRatio = Float.NaN;
+                        }
+                        if (!BrightnessSynchronizer.floatEquals(
+                                mCurrentHdrSdrRatio, newHdrSdrRatio)) {
+                            synchronized (getSyncRoot()) {
+                                mCurrentHdrSdrRatio = newHdrSdrRatio;
+                                updateDeviceInfoLocked();
+                            }
+                        }
                     }
                 };
             }
