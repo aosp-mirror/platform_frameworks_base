@@ -462,6 +462,25 @@ package android.provider {
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public static java.util.Map<java.lang.String,java.util.List<android.content.ContentValues>> queryRawContactEntity(@NonNull android.content.ContentResolver, long);
   }
 
+  public class DeviceConfigInitializer {
+    method @Nullable public static android.provider.DeviceConfigServiceManager getDeviceConfigServiceManager();
+    method public static void setDeviceConfigServiceManager(@NonNull android.provider.DeviceConfigServiceManager);
+  }
+
+  public class DeviceConfigServiceManager {
+    method @NonNull public android.provider.DeviceConfigServiceManager.ServiceRegisterer getDeviceConfigUpdatableServiceRegisterer();
+  }
+
+  public static class DeviceConfigServiceManager.ServiceNotFoundException extends java.lang.Exception {
+  }
+
+  public static final class DeviceConfigServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @NonNull public android.os.IBinder getOrThrow() throws android.provider.DeviceConfigServiceManager.ServiceNotFoundException;
+    method public void register(@NonNull android.os.IBinder);
+    method @Nullable public android.os.IBinder tryGet();
+  }
+
   public final class Settings {
     field public static final int RESET_MODE_PACKAGE_DEFAULTS = 1; // 0x1
     field public static final int RESET_MODE_TRUSTED_DEFAULTS = 4; // 0x4

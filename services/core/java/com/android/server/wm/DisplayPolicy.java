@@ -1989,7 +1989,7 @@ public class DisplayPolicy {
      * Called when an app has started replacing its main window.
      */
     void addRelaunchingApp(ActivityRecord app) {
-        if (mSystemBarColorApps.contains(app)) {
+        if (mSystemBarColorApps.contains(app) && !app.hasStartingWindow()) {
             mRelaunchingSystemBarColorApps.add(app);
         }
     }

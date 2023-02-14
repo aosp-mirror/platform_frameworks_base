@@ -101,13 +101,13 @@ public abstract class SharedConnectivityService extends Service {
             @Override
             public void registerCallback(ISharedConnectivityCallback callback) {
                 checkPermissions();
-                mHandler.post(() -> registerCallback(callback));
+                mHandler.post(() -> onRegisterCallback(callback));
             }
 
             @Override
             public void unregisterCallback(ISharedConnectivityCallback callback) {
                 checkPermissions();
-                mHandler.post(() -> unregisterCallback(callback));
+                mHandler.post(() -> onUnregisterCallback(callback));
             }
 
             @Override
@@ -147,7 +147,7 @@ public abstract class SharedConnectivityService extends Service {
         };
     }
 
-    private void registerCallback(ISharedConnectivityCallback callback) {
+    private void onRegisterCallback(ISharedConnectivityCallback callback) {
         // Listener gets triggered on first register using cashed data
         if (!notifyTetherNetworkUpdate(callback) || !notifyKnownNetworkUpdate(callback)
                 || !notifySettingsStateUpdate(callback)
@@ -167,7 +167,7 @@ public abstract class SharedConnectivityService extends Service {
         }
     }
 
-    private void unregisterCallback(ISharedConnectivityCallback callback) {
+    private void onUnregisterCallback(ISharedConnectivityCallback callback) {
         DeathRecipient deathRecipient = mDeathRecipientMap.get(callback);
         if (deathRecipient != null) {
             callback.asBinder().unlinkToDeath(deathRecipient, 0);

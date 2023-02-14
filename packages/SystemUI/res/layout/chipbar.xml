@@ -60,14 +60,13 @@
             />
 
         <!-- At most one of [loading, failure_icon, undo] will be visible at a time. -->
-        <ProgressBar
+        <ImageView
             android:id="@+id/loading"
-            android:indeterminate="true"
             android:layout_width="@dimen/media_ttt_status_icon_size"
             android:layout_height="@dimen/media_ttt_status_icon_size"
             android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
-            android:indeterminateTint="?androidprv:attr/colorAccentPrimaryVariant"
-            style="?android:attr/progressBarStyleSmall"
+            android:src="@drawable/ic_progress_activity"
+            android:tint="?androidprv:attr/colorAccentPrimaryVariant"
             android:alpha="0.0"
             />
 

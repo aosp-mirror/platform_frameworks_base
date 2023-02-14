@@ -4938,6 +4938,9 @@
   <java-symbol type="bool" name="config_stopSystemPackagesByDefault"/>
   <java-symbol type="string" name="config_wearServiceComponent" />
 
+  <java-symbol type="string" name="shared_connectivity_service_package" />
+  <java-symbol type="string" name="shared_connectivity_service_intent_action" />
+
   <!-- Whether to show weather on the lockscreen by default. -->
   <java-symbol type="bool" name="config_lockscreenWeatherEnabledByDefault" />
 </resources>

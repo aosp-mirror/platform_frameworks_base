@@ -16,6 +16,9 @@
 
 package com.android.server.credentials;
 
+import static com.android.server.credentials.MetricUtilities.METRICS_PROVIDER_STATUS_QUERY_FAILURE;
+import static com.android.server.credentials.MetricUtilities.METRICS_PROVIDER_STATUS_QUERY_SUCCESS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -27,6 +30,8 @@ import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
+
+import com.android.server.credentials.metrics.CandidateProviderMetric;
 
 import java.util.UUID;
 
@@ -52,8 +57,9 @@ public abstract class ProviderSession<T, R>
     @NonNull protected final T mProviderRequest;
     @Nullable protected R mProviderResponse;
     @NonNull protected Boolean mProviderResponseSet = false;
-
-
+    // Specific candidate provider metric for the provider this session handles
+    @Nullable protected CandidateProviderMetric mCandidateProviderMetric;
+    @NonNull private int mProviderSessionUid;
 
     /**
      * Returns true if the given status reflects that the provider state is ready to be shown
@@ -119,6 +125,8 @@ public abstract class ProviderSession<T, R>
         mUserId = userId;
         mComponentName = info.getServiceInfo().getComponentName();
         mRemoteCredentialService = remoteCredentialService;
+        mCandidateProviderMetric = new CandidateProviderMetric();
+        mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
     }
 
     /** Provider status at various states of the request session. */
@@ -185,7 +193,19 @@ public abstract class ProviderSession<T, R>
     /** Updates the status .*/
     protected void updateStatusAndInvokeCallback(@NonNull Status status) {
         setStatus(status);
+        updateCandidateMetric(status);
         mCallbacks.onProviderStatusChanged(status, mComponentName);
+    }
+
+    private void updateCandidateMetric(Status status) {
+        mCandidateProviderMetric.setCandidateUid(mProviderSessionUid);
+        mCandidateProviderMetric
+                .setQueryFinishTimeNanoseconds(System.nanoTime());
+        if (isTerminatingStatus(status)) {
+            mCandidateProviderMetric.setProviderQueryStatus(METRICS_PROVIDER_STATUS_QUERY_FAILURE);
+        } else if (isCompletionStatus(status)) {
+            mCandidateProviderMetric.setProviderQueryStatus(METRICS_PROVIDER_STATUS_QUERY_SUCCESS);
+        }
     }
 
     protected void onRemoteEntrySelected(

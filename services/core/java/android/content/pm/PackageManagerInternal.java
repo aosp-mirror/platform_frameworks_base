@@ -1329,6 +1329,11 @@ public abstract class PackageManagerInternal {
 
     /** @deprecated For legacy shell command only. */
     @Deprecated
+    public abstract void legacyForceDexOpt(@NonNull String packageName)
+            throws LegacyDexoptDisabledException;
+
+    /** @deprecated For legacy shell command only. */
+    @Deprecated
     public abstract void legacyReconcileSecondaryDexFiles(String packageName)
             throws LegacyDexoptDisabledException;
 }

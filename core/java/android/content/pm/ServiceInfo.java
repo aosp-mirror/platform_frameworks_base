@@ -246,8 +246,17 @@ public class ServiceInfo extends ComponentInfo
 
     /**
      * Constant corresponding to {@code mediaProjection} in
-     * the {@link android.R.attr#foregroundServiceType} attribute.
-     * Managing a media projection session, e.g for screen recording or taking screenshots.
+     * the {@link android.R.attr#foregroundServiceType foregroundServiceType} attribute.
+     *
+     * <p>
+     * To capture through {@link android.media.projection.MediaProjection}, an app must start a
+     * foreground service with the type corresponding to this constant. This type should only be
+     * used for {@link android.media.projection.MediaProjection}. Capturing screen contents via
+     * {@link android.media.projection.MediaProjection#createVirtualDisplay(String, int, int, int,
+     * int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback,
+     * android.os.Handler) createVirtualDisplay} conveniently allows recording, presenting screen
+     * contents into a meeting, taking screenshots, or several other scenarios.
+     * </p>
      *
      * <p>Starting foreground service with this type from apps targeting API level
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and later, will require permission

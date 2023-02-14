@@ -3501,8 +3501,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void onKeyguardOccludedChangedLw(boolean occluded, boolean waitAppTransition) {
-        if (mKeyguardDelegate != null && waitAppTransition) {
+    public void onKeyguardOccludedChangedLw(boolean occluded) {
+        if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
             mPendingKeyguardOccluded = occluded;
             mKeyguardOccludedChanged = true;
         } else {

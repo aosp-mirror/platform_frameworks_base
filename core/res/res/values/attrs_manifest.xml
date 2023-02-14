@@ -1648,14 +1648,25 @@
             or has been granted the access to one of the attached USB devices/accessories.
         -->
         <flag name="connectedDevice" value="0x10" />
-        <!-- Managing a media projection session, e.g, for screen recording or taking
-            screenshots.
+        <!-- Managing a {@link android.media.projection.MediaProjection MediaProjection} session,
+             e.g., for screen recording or takingscreenshots.
 
-            <p>For apps with <code>targetSdkVersion</code>
-            {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
-            service with this type will require permission
-            {@link android.Manifest.permission#FOREGROUND_SERVICE_MEDIA_PROJECTION}, and the user
-            must have allowed the screen capture request from this app.
+             <p>
+             To capture through {@link android.media.projection.MediaProjection}, an app must start
+             a foreground service with the type corresponding to this constant. This type should
+             only be used for {@link android.media.projection.MediaProjection}. Capturing screen
+             contents via
+             {@link android.media.projection.MediaProjection#createVirtualDisplay(String, int, int,
+             int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback,
+             android.os.Handler) createVirtualDisplay} conveniently allows recording, presenting
+             screen contents into a meeting, taking screenshots, or several other scenarios.
+             </p>
+
+             <p>For apps with <code>targetSdkVersion</code>
+             {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a
+             foreground service with this type will require permission
+             {@link android.Manifest.permission#FOREGROUND_SERVICE_MEDIA_PROJECTION}, and the user
+             must have allowed the screen capture request from this app.
         -->
         <flag name="mediaProjection" value="0x20" />
         <!-- Use the camera device or record video.

@@ -34,7 +34,6 @@ import android.util.Log;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.animation.DialogLaunchAnimator;
@@ -145,7 +144,6 @@ public abstract class SysuiTestCase {
         disallowTestableLooperAsMainThread();
         mContext.cleanUpReceivers(this.getClass().getSimpleName());
         mFakeBroadcastDispatcher.cleanUpReceivers(this.getClass().getSimpleName());
-        setTestFlagResolver(null);
     }
 
     @AfterClass
@@ -206,10 +204,6 @@ public abstract class SysuiTestCase {
         } catch (InterruptedException | ExecutionException e) {
             Log.e(TAG, "Failed to wait for ui offload thread.", e);
         }
-    }
-
-    protected void setTestFlagResolver(SystemUiSystemPropertiesFlags.FlagResolver flagResolver) {
-        SystemUiSystemPropertiesFlags.TEST_RESOLVER = flagResolver;
     }
 
     public static void waitForIdleSync(Handler h) {

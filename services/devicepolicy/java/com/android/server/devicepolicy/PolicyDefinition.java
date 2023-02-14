@@ -199,6 +199,8 @@ final class PolicyDefinition<V> {
             new PolicyDefinition<>(
                     new PackagePolicyKey(
                             DevicePolicyManager.APPLICATION_RESTRICTIONS_POLICY),
+                    // Don't need to take in a resolution mechanism since its never used, but might
+                    // need some refactoring to not always assume a non-null mechanism.
                     new MostRecent<>(),
                     POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_NON_COEXISTABLE_POLICY,
                     // Application restrictions are now stored and retrieved from DPMS, so no
@@ -221,6 +223,16 @@ final class PolicyDefinition<V> {
                         DevicePolicyManager.APPLICATION_RESTRICTIONS_POLICY, packageName));
     }
 
+    static PolicyDefinition<Long> RESET_PASSWORD_TOKEN = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyManager.RESET_PASSWORD_TOKEN_POLICY),
+            // Don't need to take in a resolution mechanism since its never used, but might
+            // need some refactoring to not always assume a non-null mechanism.
+            new MostRecent<>(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_NON_COEXISTABLE_POLICY,
+            // DevicePolicyManagerService handles the enforcement, this just takes care of storage
+            (Long value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            new LongPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
             DevicePolicyManager.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
             DevicePolicyManager.PERMISSION_GRANT_POLICY, GENERIC_PERMISSION_GRANT,
@@ -230,7 +242,8 @@ final class PolicyDefinition<V> {
             DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY,
             GENERIC_PERSISTENT_PREFERRED_ACTIVITY,
             DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY, GENERIC_PACKAGE_UNINSTALL_BLOCKED,
-            DevicePolicyManager.APPLICATION_RESTRICTIONS_POLICY, GENERIC_APPLICATION_RESTRICTIONS
+            DevicePolicyManager.APPLICATION_RESTRICTIONS_POLICY, GENERIC_APPLICATION_RESTRICTIONS,
+            DevicePolicyManager.RESET_PASSWORD_TOKEN_POLICY, RESET_PASSWORD_TOKEN
     );
 
 

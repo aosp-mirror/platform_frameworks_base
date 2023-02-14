@@ -575,8 +575,6 @@ interface IPackageManager {
     boolean performDexOptSecondary(String packageName,
             String targetCompilerFilter, boolean force);
 
-    void forceDexOpt(String packageName);
-
     int getMoveStatus(int moveId);
 
     void registerMoveCallback(in IPackageMoveObserver callback);

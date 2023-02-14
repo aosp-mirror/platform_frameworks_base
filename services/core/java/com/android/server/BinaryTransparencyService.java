@@ -263,26 +263,26 @@ public class BinaryTransparencyService extends SystemService {
             Map<Integer, byte[]> contentDigests = computeApkContentDigest(apkPath);
             if (contentDigests == null) {
                 Slog.d(TAG, "Failed to compute content digest for " + apkPath);
-                return new Checksum(0, new byte[] { -1 });
-            }
-
-            // in this iteration, we'll be supporting only 2 types of digests:
-            // CHUNKED_SHA256 and CHUNKED_SHA512.
-            // And only one of them will be available per package.
-            if (contentDigests.containsKey(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256)) {
-                return new Checksum(
-                        Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256,
-                        contentDigests.get(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256));
-            } else if (contentDigests.containsKey(
-                    ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512)) {
-                return new Checksum(
-                        Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512,
-                        contentDigests.get(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512));
             } else {
-                // TODO(b/259423111): considering putting the raw values for the algorithm & digest
-                //  into the bundle to track potential other digest algorithms that may be in use
-                return new Checksum(0, new byte[] { -1 });
+                // in this iteration, we'll be supporting only 2 types of digests:
+                // CHUNKED_SHA256 and CHUNKED_SHA512.
+                // And only one of them will be available per package.
+                if (contentDigests.containsKey(
+                            ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256)) {
+                    return new Checksum(
+                            Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256,
+                            contentDigests.get(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256));
+                } else if (contentDigests.containsKey(
+                        ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512)) {
+                    return new Checksum(
+                            Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512,
+                            contentDigests.get(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512));
+                }
             }
+            // When something went wrong, fall back to simple sha256.
+            byte[] digest = PackageUtils.computeSha256DigestForLargeFileAsBytes(apkPath,
+                    PackageUtils.createLargeFileBuffer());
+            return new Checksum(Checksum.TYPE_WHOLE_SHA256, digest);
         }
 
 
@@ -1199,7 +1199,7 @@ public class BinaryTransparencyService extends SystemService {
     }
 
     /**
-     * JobService to measure all covered binaries and record result to Westworld.
+     * JobService to measure all covered binaries and record results to statsd.
      */
     public static class UpdateMeasurementsJobService extends JobService {
         private static long sTimeLastRanMs = 0;

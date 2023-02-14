@@ -29,6 +29,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.Surface;
 
 import java.util.Map;
 
@@ -74,8 +75,9 @@ public final class MediaProjectionManager {
      * Returns an {@link Intent} that <b>must</b> be passed to
      * {@link Activity#startActivityForResult(Intent, int)} (or similar) in order to start screen
      * capture. The activity will prompt the user whether to allow screen capture.  The result of
-     * this activity (received by overriding {@link Activity#onActivityResult(int, int, Intent)}
-     * should be passed to {@link #getMediaProjection(int, Intent)}.
+     * this activity (received by overriding {@link Activity#onActivityResult(int, int, Intent)
+     * onActivityResult(int, int, Intent)}) should be passed to
+     * {@link #getMediaProjection(int, Intent)}.
      * <p>
      * Identical to calling {@link #createScreenCaptureIntent(MediaProjectionConfig)} with
      * a {@link MediaProjectionConfig#createConfigForUserChoice()}.
@@ -102,8 +104,8 @@ public final class MediaProjectionManager {
      * capture. Customizes the activity and resulting {@link MediaProjection} session based up
      * the provided {@code config}. The activity will prompt the user whether to allow screen
      * capture. The result of this activity (received by overriding
-     * {@link Activity#onActivityResult(int, int, Intent)}) should be passed to
-     * {@link #getMediaProjection(int, Intent)}.
+     * {@link Activity#onActivityResult(int, int, Intent) onActivityResult(int, int, Intent)})
+     * should be passed to {@link #getMediaProjection(int, Intent)}.
      *
      * <p>
      * If {@link MediaProjectionConfig} was created from:
@@ -146,47 +148,48 @@ public final class MediaProjectionManager {
 
     /**
      * Retrieves the {@link MediaProjection} obtained from a successful screen
-     * capture request. The result code and data from the request are provided
-     * by overriding {@link Activity#onActivityResult(int, int, Intent)
-     * onActivityResult(int, int, Intent)}, which is called after starting an
-     * activity using {@link #createScreenCaptureIntent()}.
-     *
-     * <p>Starting from Android {@link android.os.Build.VERSION_CODES#R}, if
-     * your application requests the
-     * {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW
-     * SYSTEM_ALERT_WINDOW} permission, and the user has not explicitly denied
-     * it, the permission will be automatically granted until the projection is
-     * stopped. The permission allows your app to display user controls on top
-     * of the screen being captured.
-     *
-     * <p>Apps targeting SDK version {@link android.os.Build.VERSION_CODES#Q} or
-     * later must set the
-     * {@link android.R.attr#foregroundServiceType foregroundServiceType}
-     * attribute to {@code mediaProjection} in the
-     * <a href="/guide/topics/manifest/service-element">
-     * <code>&lt;service&gt;</code></a> element of the app's manifest file;
-     * {@code mediaProjection} is equivalent to
+     * capture request. The result code and data from the request are provided by overriding
+     * {@link Activity#onActivityResult(int, int, Intent) onActivityResult(int, int, Intent)},
+     * which is called after starting an activity using {@link #createScreenCaptureIntent()}.
+     * <p>
+     * Starting from Android {@link android.os.Build.VERSION_CODES#R R}, if your application
+     * requests the {@link android.Manifest.permission#SYSTEM_ALERT_WINDOW SYSTEM_ALERT_WINDOW}
+     * permission, and the user has not explicitly denied it, the permission will be automatically
+     * granted until the projection is stopped. The permission allows your app to display user
+     * controls on top of the screen being captured.
+     * </p>
+     * <p>
+     * An app targeting SDK version {@link android.os.Build.VERSION_CODES#Q Q} or later must
+     * invoke {@code getMediaProjection} and maintain the capture session
+     * ({@link MediaProjection#createVirtualDisplay(String, int, int, int, int, Surface,
+     * android.hardware.display.VirtualDisplay.Callback, Handler)
+     * MediaProjection#createVirtualDisplay}) while running a foreground service. The app must set
+     * the {@link android.R.attr#foregroundServiceType foregroundServiceType} attribute to
      * {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
-     * FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION}.
+     * FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION} in the
+     * <a href="/guide/topics/manifest/service-element"><code>&lt;service&gt;</code></a> element of
+     * the app's manifest file.
+     * </p>
      *
-     * @see <a href="/guide/components/foreground-services">
-     *      Foreground services developer guide</a>
-     * @see <a href="/guide/topics/large-screens/media-projection">
-     *      Media projection developer guide</a>
-     *
-     * @param resultCode The result code from
-     *      {@link android.app.Activity#onActivityResult(int, int, android.content.Intent)
-     *      onActivityResult(int, int, Intent)}.
-     * @param resultData The result data from
-     *      {@link android.app.Activity#onActivityResult(int, int, android.content.Intent)
-     *      onActivityResult(int, int, Intent)}.
-     * @return The media projection obtained from a successful screen capture
-     *      request, or null if the result of the screen capture request is not
-     *      {@link Activity#RESULT_OK RESULT_OK}.
+     * @param resultCode The result code from {@link Activity#onActivityResult(int, int, Intent)
+     *                   onActivityResult(int, int, Intent)}.
+     * @param resultData The result data from {@link Activity#onActivityResult(int, int, Intent)
+     *                   onActivityResult(int, int, Intent)}.
+     * @return The media projection obtained from a successful screen capture request, or null if
+     * the result of the screen capture request is not {@link Activity#RESULT_OK RESULT_OK}.
      * @throws IllegalStateException On
-     *      pre-{@link android.os.Build.VERSION_CODES#Q Q} devices if a
-     *      previously obtained {@code MediaProjection} from the same
-     *      {@code resultData} has not yet been stopped.
+     *                               pre-{@link android.os.Build.VERSION_CODES#Q Q} devices if a
+     *                               previously obtained {@code MediaProjection} from the same
+     *                               {@code resultData} has not yet been stopped.
+     * @throws SecurityException     On {@link android.os.Build.VERSION_CODES#Q Q}+ devices if not
+     *                               invoked from a foreground service with type
+     *                {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+     *                               FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION}, unless caller is a
+     *                               privileged app.
+     * @see <a href="/guide/components/foreground-services">
+     * Foreground services developer guide</a>
+     * @see <a href="/guide/topics/large-screens/media-projection">
+     * Media projection developer guide</a>
      */
     public MediaProjection getMediaProjection(int resultCode, @NonNull Intent resultData) {
         if (resultCode != Activity.RESULT_OK || resultData == null) {
