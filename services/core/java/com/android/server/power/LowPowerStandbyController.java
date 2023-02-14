@@ -19,7 +19,6 @@ package com.android.server.power;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
 import static android.os.PowerManager.lowPowerStandbyAllowedReasonsToString;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
@@ -692,8 +691,7 @@ public class LowPowerStandbyController {
         final Intent intent = new Intent(
                 PowerManager.ACTION_LOW_POWER_STANDBY_POLICY_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
-                Manifest.permission.MANAGE_LOW_POWER_STANDBY);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void onStandbyTimeoutExpired() {

@@ -2968,15 +2968,13 @@ public final class PowerManager {
             "android.os.action.LOW_POWER_STANDBY_ENABLED_CHANGED";
 
     /**
-     * Intent that is broadcast when Low Power Standby is enabled or disabled.
+     * Intent that is broadcast when Low Power Standby policy is changed.
      * This broadcast is only sent to registered receivers.
      *
-     * @see #getLowPowerStandbyPolicy
-     * @see #setLowPowerStandbyPolicy
-     * @hide
+     * @see #isExemptFromLowPowerStandby()
+     * @see #isAllowedInLowPowerStandby(int)
+     * @see #isAllowedInLowPowerStandby(String)
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_LOW_POWER_STANDBY)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOW_POWER_STANDBY_POLICY_CHANGED =
             "android.os.action.LOW_POWER_STANDBY_POLICY_CHANGED";
