@@ -303,9 +303,18 @@ class ActiveUnlockConfig @Inject constructor(
         pw.println("   requestActiveUnlockOnWakeup=$requestActiveUnlockOnWakeup")
         pw.println("   requestActiveUnlockOnUnlockIntent=$requestActiveUnlockOnUnlockIntent")
         pw.println("   requestActiveUnlockOnBioFail=$requestActiveUnlockOnBioFail")
-        pw.println("   requestActiveUnlockOnUnlockIntentWhenBiometricEnrolled=${
-            onUnlockIntentWhenBiometricEnrolled.map { BiometricType.values()[it] }
-        }")
+
+        val onUnlockIntentWhenBiometricEnrolledString =
+            onUnlockIntentWhenBiometricEnrolled.map {
+                for (biometricType in BiometricType.values()) {
+                    if (biometricType.intValue == it) {
+                        return@map biometricType.name
+                    }
+                }
+                return@map "UNKNOWN"
+            }
+        pw.println("   requestActiveUnlockOnUnlockIntentWhenBiometricEnrolled=" +
+                "$onUnlockIntentWhenBiometricEnrolledString")
         pw.println("   requestActiveUnlockOnFaceError=$faceErrorsToTriggerBiometricFailOn")
         pw.println("   requestActiveUnlockOnFaceAcquireInfo=" +
                 "$faceAcquireInfoToTriggerBiometricFailOn")
