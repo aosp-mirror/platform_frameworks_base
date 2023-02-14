@@ -35,6 +35,7 @@ import com.android.systemui.qs.tiles.DeviceControlsTile
 import com.android.systemui.qs.tiles.DndTile
 import com.android.systemui.qs.tiles.DreamTile
 import com.android.systemui.qs.tiles.FlashlightTile
+import com.android.systemui.qs.tiles.FontScalingTile
 import com.android.systemui.qs.tiles.HotspotTile
 import com.android.systemui.qs.tiles.InternetTile
 import com.android.systemui.qs.tiles.LocationTile
@@ -87,7 +88,8 @@ private val specMap = mapOf(
         "qr_code_scanner" to QRCodeScannerTile::class.java,
         "onehanded" to OneHandedModeTile::class.java,
         "color_correction" to ColorCorrectionTile::class.java,
-        "dream" to DreamTile::class.java
+        "dream" to DreamTile::class.java,
+        "font_scaling" to FontScalingTile::class.java
 )
 
 @RunWith(AndroidTestingRunner::class)
@@ -126,6 +128,7 @@ class QSFactoryImplTest : SysuiTestCase() {
     @Mock private lateinit var oneHandedModeTile: OneHandedModeTile
     @Mock private lateinit var colorCorrectionTile: ColorCorrectionTile
     @Mock private lateinit var dreamTile: DreamTile
+    @Mock private lateinit var fontScalingTile: FontScalingTile
 
     private lateinit var factory: QSFactoryImpl
 
@@ -167,7 +170,8 @@ class QSFactoryImplTest : SysuiTestCase() {
                 { qrCodeScannerTile },
                 { oneHandedModeTile },
                 { colorCorrectionTile },
-                { dreamTile }
+                { dreamTile },
+                { fontScalingTile }
         )
         // When adding/removing tiles, fix also [specMap]
     }

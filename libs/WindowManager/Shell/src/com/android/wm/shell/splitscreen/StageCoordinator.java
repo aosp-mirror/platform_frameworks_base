@@ -74,6 +74,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.IActivityTaskManager;
 import android.app.PendingIntent;
+import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -124,6 +125,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitLayout;
 import com.android.wm.shell.common.split.SplitScreenConstants.SplitPosition;
+import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.common.split.SplitWindowManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentTasksController;
@@ -208,6 +210,36 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private DefaultMixedHandler mMixedHandler;
     private final Toast mSplitUnsupportedToast;
+    private SplitRequest mSplitRequest;
+
+    class SplitRequest {
+        @SplitPosition
+        int mActivatePosition;
+        int mActivateTaskId;
+        int mActivateTaskId2;
+        Intent mStartIntent;
+        Intent mStartIntent2;
+
+        SplitRequest(int taskId, Intent startIntent, int position) {
+            mActivateTaskId = taskId;
+            mStartIntent = startIntent;
+            mActivatePosition = position;
+        }
+        SplitRequest(Intent startIntent, int position) {
+            mStartIntent = startIntent;
+            mActivatePosition = position;
+        }
+        SplitRequest(Intent startIntent, Intent startIntent2, int position) {
+            mStartIntent = startIntent;
+            mStartIntent2 = startIntent2;
+            mActivatePosition = position;
+        }
+        SplitRequest(int taskId1, int taskId2, int position) {
+            mActivateTaskId = taskId1;
+            mActivateTaskId2 = taskId2;
+            mActivatePosition = position;
+        }
+    }
 
     private final SplitWindowManager.ParentContainerCallbacks mParentContainerCallbacks =
             new SplitWindowManager.ParentContainerCallbacks() {
@@ -393,6 +425,23 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setSideStagePosition(sideStagePosition, wct);
         final WindowContainerTransaction evictWct = new WindowContainerTransaction();
         targetStage.evictAllChildren(evictWct);
+
+        // Apply surface bounds before animation start.
+        SurfaceControl.Transaction startT = mTransactionPool.acquire();
+        if (startT != null) {
+            updateSurfaceBounds(mSplitLayout, startT, false /* applyResizingOffset */);
+            startT.apply();
+            mTransactionPool.release(startT);
+        }
+        // reparent the task to an invisible split root will make the activity invisible.  Reorder
+        // the root task to front to make the entering transition from pip to split smooth.
+        wct.reorder(mRootTaskInfo.token, true);
+        wct.setForceTranslucent(mRootTaskInfo.token, true);
+        wct.reorder(targetStage.mRootTaskInfo.token, true);
+        wct.setForceTranslucent(targetStage.mRootTaskInfo.token, true);
+        // prevent the fling divider to center transition
+        mIsDropEntering = true;
+
         targetStage.addTask(task, wct);
 
         if (ENABLE_SHELL_TRANSITIONS) {
@@ -547,7 +596,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     }
                 }
 
-                if (isEnteringSplit && !openingToSide) {
+                if (isEnteringSplit && !openingToSide && apps != null) {
                     mMainExecutor.execute(() -> exitSplitScreen(
                             mSideStage.getChildCount() == 0 ? mMainStage : mSideStage,
                             EXIT_REASON_UNKNOWN));
@@ -587,7 +636,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (isEnteringSplit && mLogger.isEnterRequestedByDrag()) {
             updateWindowBounds(mSplitLayout, wct);
         }
-
+        mSplitRequest = new SplitRequest(intent.getIntent(), position);
         wct.sendPendingIntent(intent, fillInIntent, options);
         mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
@@ -686,6 +735,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         addActivityOptions(options1, mSideStage);
         wct.startTask(taskId1, options1);
+        mSplitRequest = new SplitRequest(taskId1, taskId2, splitPosition);
         startWithLegacyTransition(wct, taskId2, options2, splitPosition, splitRatio, adapter,
                 instanceId);
     }
@@ -719,6 +769,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             wct.startShortcut(mContext.getPackageName(), shortcutInfo1, options1);
         } else {
             wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
+            mSplitRequest = new SplitRequest(pendingIntent1.getIntent(),
+                    pendingIntent2 != null ? pendingIntent2.getIntent() : null, splitPosition);
         }
         startWithLegacyTransition(wct, pendingIntent2, fillInIntent2, shortcutInfo2, options2,
                 splitPosition, splitRatio, adapter, instanceId);
@@ -743,6 +795,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         addActivityOptions(options1, mSideStage);
         wct.sendPendingIntent(pendingIntent, fillInIntent, options1);
+        mSplitRequest = new SplitRequest(taskId, pendingIntent.getIntent(), splitPosition);
         startWithLegacyTransition(wct, taskId, options2, splitPosition, splitRatio, adapter,
                 instanceId);
     }
@@ -815,7 +868,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         // Set false to avoid record new bounds with old task still on top;
         mShouldUpdateRecents = false;
         mIsSplitEntering = true;
-
+        if (mSplitRequest == null) {
+            mSplitRequest = new SplitRequest(mainTaskId,
+                    mainPendingIntent != null ? mainPendingIntent.getIntent() : null,
+                    sidePosition);
+        }
         setSideStagePosition(sidePosition, wct);
         if (!mMainStage.isActive()) {
             mMainStage.activate(wct, false /* reparent */);
@@ -906,6 +963,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             WindowContainerTransaction evictWct) {
         mIsSplitEntering = false;
         mShouldUpdateRecents = true;
+        mSplitRequest = null;
         // If any stage has no child after animation finished, it means that split will display
         // nothing, such status will happen if task and intent is same app but not support
         // multi-instance, we should exit split and expand that app as full screen.
@@ -1739,7 +1797,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.init();
 
             final WindowContainerTransaction wct = new WindowContainerTransaction();
-            if (mLogger.isEnterRequestedByDrag()) {
+            if (mIsDropEntering) {
                 prepareEnterSplitScreen(wct);
             } else {
                 // TODO (b/238697912) : Add the validation to prevent entering non-recovered status
@@ -1764,6 +1822,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
         if (mMainStageListener.mHasChildren && mSideStageListener.mHasChildren) {
             mShouldUpdateRecents = true;
+            mSplitRequest = null;
             updateRecentTasksSplitPair();
 
             if (!mLogger.hasStartedSession()) {
@@ -2314,6 +2373,33 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             leftOrTop = (mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT);
         }
         mSplitLayout.flingDividerToDismiss(!leftOrTop, EXIT_REASON_FULLSCREEN_SHORTCUT);
+    }
+
+    boolean isLaunchToSplit(TaskInfo taskInfo) {
+        return getActivateSplitPosition(taskInfo) != SPLIT_POSITION_UNDEFINED;
+    }
+
+    int getActivateSplitPosition(TaskInfo taskInfo) {
+        if (mSplitRequest == null || taskInfo == null) {
+            return SPLIT_POSITION_UNDEFINED;
+        }
+        if (mSplitRequest.mActivateTaskId != 0
+                && mSplitRequest.mActivateTaskId2 == taskInfo.taskId) {
+            return mSplitRequest.mActivatePosition;
+        }
+        if (mSplitRequest.mActivateTaskId == taskInfo.taskId) {
+            return mSplitRequest.mActivatePosition;
+        }
+        final String packageName1 = SplitScreenUtils.getPackageName(mSplitRequest.mStartIntent);
+        final String basePackageName = SplitScreenUtils.getPackageName(taskInfo.baseIntent);
+        if (packageName1 != null && packageName1.equals(basePackageName)) {
+            return mSplitRequest.mActivatePosition;
+        }
+        final String packageName2 = SplitScreenUtils.getPackageName(mSplitRequest.mStartIntent2);
+        if (packageName2 != null && packageName2.equals(basePackageName)) {
+            return mSplitRequest.mActivatePosition;
+        }
+        return SPLIT_POSITION_UNDEFINED;
     }
 
     /** Synchronize split-screen state with transition and make appropriate preparations. */

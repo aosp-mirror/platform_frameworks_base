@@ -158,6 +158,8 @@ public final class DisplayDeviceConfigTest {
         assertEquals(90, mDisplayDeviceConfig.getDefaultHighBlockingZoneRefreshRate());
         assertEquals(85, mDisplayDeviceConfig.getDefaultPeakRefreshRate());
         assertEquals(45, mDisplayDeviceConfig.getDefaultRefreshRate());
+        assertEquals(82, mDisplayDeviceConfig.getDefaultRefreshRateInHbmHdr());
+        assertEquals(83, mDisplayDeviceConfig.getDefaultRefreshRateInHbmSunlight());
         assertArrayEquals(new int[]{45, 55},
                 mDisplayDeviceConfig.getLowDisplayBrightnessThresholds());
         assertArrayEquals(new int[]{50, 60},
@@ -465,6 +467,8 @@ public final class DisplayDeviceConfigTest {
                 +   "<refreshRate>\n"
                 +       "<defaultRefreshRate>45</defaultRefreshRate>\n"
                 +       "<defaultPeakRefreshRate>85</defaultPeakRefreshRate>\n"
+                +       "<defaultRefreshRateInHbmHdr>82</defaultRefreshRateInHbmHdr>\n"
+                +       "<defaultRefreshRateInHbmSunlight>83</defaultRefreshRateInHbmSunlight>\n"
                 +       "<lowerBlockingZoneConfigs>\n"
                 +           "<defaultRefreshRate>75</defaultRefreshRate>\n"
                 +           "<blockingZoneThreshold>\n"

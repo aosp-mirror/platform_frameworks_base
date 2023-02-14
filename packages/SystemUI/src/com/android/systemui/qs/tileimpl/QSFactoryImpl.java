@@ -40,6 +40,7 @@ import com.android.systemui.qs.tiles.DeviceControlsTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.DreamTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
+import com.android.systemui.qs.tiles.FontScalingTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.InternetTile;
 import com.android.systemui.qs.tiles.LocationTile;
@@ -94,6 +95,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<QRCodeScannerTile> mQRCodeScannerTileProvider;
     private final Provider<OneHandedModeTile> mOneHandedModeTileProvider;
     private final Provider<DreamTile> mDreamTileProvider;
+    private final Provider<FontScalingTile> mFontScalingTileProvider;
 
     private final Lazy<QSHost> mQsHostLazy;
     private final Provider<CustomTile.Builder> mCustomTileBuilderProvider;
@@ -129,7 +131,8 @@ public class QSFactoryImpl implements QSFactory {
             Provider<QRCodeScannerTile> qrCodeScannerTileProvider,
             Provider<OneHandedModeTile> oneHandedModeTileProvider,
             Provider<ColorCorrectionTile> colorCorrectionTileProvider,
-            Provider<DreamTile> dreamTileProvider) {
+            Provider<DreamTile> dreamTileProvider,
+            Provider<FontScalingTile> fontScalingTileProvider) {
         mQsHostLazy = qsHostLazy;
         mCustomTileBuilderProvider = customTileBuilderProvider;
 
@@ -161,6 +164,7 @@ public class QSFactoryImpl implements QSFactory {
         mOneHandedModeTileProvider = oneHandedModeTileProvider;
         mColorCorrectionTileProvider = colorCorrectionTileProvider;
         mDreamTileProvider = dreamTileProvider;
+        mFontScalingTileProvider = fontScalingTileProvider;
     }
 
     /** Creates a tile with a type based on {@code tileSpec} */
@@ -232,6 +236,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mColorCorrectionTileProvider.get();
             case "dream":
                 return mDreamTileProvider.get();
+            case "font_scaling":
+                return mFontScalingTileProvider.get();
         }
 
         // Custom tiles
