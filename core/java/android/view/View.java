@@ -17201,8 +17201,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * This is similar to {@link View#requestUnbufferedDispatch(MotionEvent)}, but does not
      * automatically terminate, and allows the specification of arbitrary input source classes.
      *
-     * <p>Prior to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, this method will fail
-     * when this View is not attached to a window.
+     * <p>Prior to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, calling this method
+     * will not result in any behavioral changes when this View is not attached to a window.
      *
      * @param source The combined input source class to request unbuffered dispatch for. All
      *               events coming from these source classes will not be buffered. Set to
