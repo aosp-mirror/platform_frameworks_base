@@ -1967,7 +1967,7 @@ class ActivityStarter {
 
         FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
                 /* caller_uid */
-                mSourceRecord != null ? mSourceRecord.getUid() : -1,
+                mSourceRecord != null ? mSourceRecord.getUid() : mCallingUid,
                 /* caller_activity_class_name */
                 mSourceRecord != null ? mSourceRecord.info.name : null,
                 /* target_task_top_activity_uid */
@@ -1988,10 +1988,12 @@ class ActivityStarter {
                 /* action */
                 action,
                 /* version */
-                2,
+                3,
                 /* multi_window - we have our source not in the target task, but both are visible */
                 targetTask != null && mSourceRecord != null
-                        && !targetTask.equals(mSourceRecord.getTask()) && targetTask.isVisible()
+                        && !targetTask.equals(mSourceRecord.getTask()) && targetTask.isVisible(),
+                /* bal_code */
+                mBalCode
         );
 
         boolean shouldBlockActivityStart =
@@ -1999,19 +2001,20 @@ class ActivityStarter {
 
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(mCallingUid)) {
             UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
-                    (shouldBlockActivityStart
-                            ? "Activity start blocked by "
-                            : "Activity start would be blocked by ")
-                            + ActivitySecurityModelFeatureFlags.DOC_LINK,
+                    "Activity start from " + r.launchedFromPackage
+                            + (shouldBlockActivityStart ? " " : " would be ")
+                            + "blocked by " + ActivitySecurityModelFeatureFlags.DOC_LINK,
                     Toast.LENGTH_SHORT).show());
         }
 
 
         if (shouldBlockActivityStart) {
             Slog.e(TAG, "Abort Launching r: " + r
-                    + " as source: " + mSourceRecord
-                    + "is in background. New task: " + newTask
-                    + ". Top activity: " + targetTopActivity);
+                    + " as source: "
+                    + (mSourceRecord != null ? mSourceRecord : r.launchedFromPackage)
+                    + " is in background. New task: " + newTask
+                    + ". Top activity: " + targetTopActivity
+                    + ". BAL Code: " + mBalCode);
 
             return false;
         }

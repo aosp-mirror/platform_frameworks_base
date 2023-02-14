@@ -1667,9 +1667,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         /* action */
                         FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__FINISH_TASK,
                         /* version */
-                        1,
+                        3,
                         /* multi_window */
-                        false
+                        false,
+                        /* bal_code */
+                        -1
                 );
             }
         }
