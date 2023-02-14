@@ -1429,6 +1429,7 @@ public final class DisplayManager {
      * hdrConversionMode.conversionMode is not {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
      *
      * @see #getHdrConversionMode
+     * @see #getHdrConversionModeSetting
      * @see #getSupportedHdrOutputTypes
      * @hide
      */
@@ -1440,15 +1441,37 @@ public final class DisplayManager {
 
     /**
      * Returns the {@link HdrConversionMode} of the device, which is set by the user.
+
+     * The HDR conversion mode chosen by user which considers the app override is returned. Apps can
+     * override HDR conversion using
+     * {@link android.view.WindowManager.LayoutParams#disableHdrConversion}.
      *
      * @see #setHdrConversionMode
      * @see #getSupportedHdrOutputTypes
+     * @see #getHdrConversionModeSetting()
      * @hide
      */
     @TestApi
     @NonNull
     public HdrConversionMode getHdrConversionMode() {
         return mGlobal.getHdrConversionMode();
+    }
+
+    /**
+     * Returns the {@link HdrConversionMode} of the device, which is set by the user.
+
+     * The HDR conversion mode chosen by user is returned irrespective of whether HDR conversion
+     * is disabled by an app.
+     *
+     * @see #setHdrConversionMode
+     * @see #getSupportedHdrOutputTypes
+     * @see #getHdrConversionMode()
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public HdrConversionMode getHdrConversionModeSetting() {
+        return mGlobal.getHdrConversionModeSetting();
     }
 
     /**

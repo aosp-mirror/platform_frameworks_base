@@ -37,6 +37,7 @@ public class DisplayControl {
     private static native void nativeSetHdrConversionMode(int conversionMode,
             int preferredHdrOutputType, int[] autoHdrTypes, int autoHdrTypesLength);
     private static native int[] nativeGetSupportedHdrOutputTypes();
+    private static native boolean nativeGetHdrOutputConversionSupport();
 
     /**
      * Create a display in SurfaceFlinger.
@@ -117,5 +118,12 @@ public class DisplayControl {
      */
     public static @Display.HdrCapabilities.HdrType int[] getSupportedHdrOutputTypes() {
         return nativeGetSupportedHdrOutputTypes();
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean getHdrOutputConversionSupport() {
+        return nativeGetHdrOutputConversionSupport();
     }
 }

@@ -247,6 +247,8 @@ public final class DisplayManagerService extends SystemService {
     // HDR conversion mode chosen by user
     @GuardedBy("mSyncRoot")
     private HdrConversionMode mHdrConversionMode = null;
+    // Actual HDR conversion mode, which takes app overrides into account.
+    private HdrConversionMode mOverrideHdrConversionMode = null;
 
     // The synchronization root for the display manager.
     // This lock guards most of the display manager's state.
@@ -2025,18 +2027,39 @@ public final class DisplayManagerService extends SystemService {
             if (hdrConversionMode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM) {
                 autoHdrOutputTypes = getEnabledAutoHdrTypesLocked();
             }
-            mInjector.setHdrConversionMode(hdrConversionMode.getConversionMode(),
-                    hdrConversionMode.getPreferredHdrOutputType(), autoHdrOutputTypes);
+
+            if (!mInjector.getHdrOutputConversionSupport()) {
+                return;
+            }
+            // If the HDR conversion is disabled by an app through WindowManager.LayoutParams, then
+            // set HDR conversion mode to HDR_CONVERSION_PASSTHROUGH.
+            if (mOverrideHdrConversionMode == null) {
+                mInjector.setHdrConversionMode(hdrConversionMode.getConversionMode(),
+                        hdrConversionMode.getPreferredHdrOutputType(), autoHdrOutputTypes);
+            } else {
+                mInjector.setHdrConversionMode(mOverrideHdrConversionMode.getConversionMode(),
+                        mOverrideHdrConversionMode.getPreferredHdrOutputType(), null);
+            }
         }
     }
 
-    private HdrConversionMode getHdrConversionModeInternal() {
+    private HdrConversionMode getHdrConversionModeSettingInternal() {
         synchronized (mSyncRoot) {
             if (mHdrConversionMode != null) {
                 return mHdrConversionMode;
             }
         }
         return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM);
+    }
+
+    private HdrConversionMode getHdrConversionModeInternal() {
+        HdrConversionMode mode;
+        synchronized (mSyncRoot) {
+            mode = mOverrideHdrConversionMode != null
+                    ? mOverrideHdrConversionMode
+                    : mHdrConversionMode;
+        }
+        return mode != null ? mode : new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM);
     }
 
     private @Display.HdrCapabilities.HdrType int[] getSupportedHdrOutputTypesInternal() {
@@ -2181,7 +2204,7 @@ public final class DisplayManagerService extends SystemService {
     private void setDisplayPropertiesInternal(int displayId, boolean hasContent,
             float requestedRefreshRate, int requestedModeId, float requestedMinRefreshRate,
             float requestedMaxRefreshRate, boolean preferMinimalPostProcessing,
-            boolean inTraversal) {
+            boolean disableHdrConversion, boolean inTraversal) {
         synchronized (mSyncRoot) {
             final LogicalDisplay display = mLogicalDisplayMapper.getDisplayLocked(displayId);
             if (display == null) {
@@ -2225,6 +2248,20 @@ public final class DisplayManagerService extends SystemService {
 
             if (shouldScheduleTraversal) {
                 scheduleTraversalLocked(inTraversal);
+            }
+
+            if (mHdrConversionMode == null) {
+                return;
+            }
+            if (mOverrideHdrConversionMode == null && disableHdrConversion) {
+                mOverrideHdrConversionMode =
+                            new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_PASSTHROUGH);
+                setHdrConversionModeInternal(mHdrConversionMode);
+                handleLogicalDisplayChangedLocked(display);
+            } else if (mOverrideHdrConversionMode != null && !disableHdrConversion) {
+                mOverrideHdrConversionMode = null;
+                setHdrConversionModeInternal(mHdrConversionMode);
+                handleLogicalDisplayChangedLocked(display);
             }
         }
     }
@@ -2782,6 +2819,10 @@ public final class DisplayManagerService extends SystemService {
 
         int[] getSupportedHdrOutputTypes() {
             return DisplayControl.getSupportedHdrOutputTypes();
+        }
+
+        boolean getHdrOutputConversionSupport() {
+            return DisplayControl.getHdrOutputConversionSupport();
         }
     }
 
@@ -3757,6 +3798,16 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public HdrConversionMode getHdrConversionModeSetting() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getHdrConversionModeSettingInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
         public HdrConversionMode getHdrConversionMode() {
             final long token = Binder.clearCallingIdentity();
             try {
@@ -4030,10 +4081,10 @@ public final class DisplayManagerService extends SystemService {
         public void setDisplayProperties(int displayId, boolean hasContent,
                 float requestedRefreshRate, int requestedMode, float requestedMinRefreshRate,
                 float requestedMaxRefreshRate, boolean requestedMinimalPostProcessing,
-                boolean inTraversal) {
+                boolean disableHdrConversion, boolean inTraversal) {
             setDisplayPropertiesInternal(displayId, hasContent, requestedRefreshRate,
                     requestedMode, requestedMinRefreshRate, requestedMaxRefreshRate,
-                    requestedMinimalPostProcessing, inTraversal);
+                    requestedMinimalPostProcessing, disableHdrConversion, inTraversal);
         }
 
         @Override
