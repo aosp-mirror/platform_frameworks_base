@@ -896,21 +896,31 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         // Subscription 1
         private const val SUB_1_ID = 1
+        private val GROUP_1 = ParcelUuid(UUID.randomUUID())
         private val SUB_1 =
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_1_ID)
-                whenever(it.groupUuid).thenReturn(ParcelUuid(UUID.randomUUID()))
+                whenever(it.groupUuid).thenReturn(GROUP_1)
             }
-        private val MODEL_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
+        private val MODEL_1 =
+            SubscriptionModel(
+                subscriptionId = SUB_1_ID,
+                groupUuid = GROUP_1,
+            )
 
         // Subscription 2
         private const val SUB_2_ID = 2
+        private val GROUP_2 = ParcelUuid(UUID.randomUUID())
         private val SUB_2 =
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_2_ID)
-                whenever(it.groupUuid).thenReturn(ParcelUuid(UUID.randomUUID()))
+                whenever(it.groupUuid).thenReturn(GROUP_2)
             }
-        private val MODEL_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
+        private val MODEL_2 =
+            SubscriptionModel(
+                subscriptionId = SUB_2_ID,
+                groupUuid = GROUP_2,
+            )
 
         // Subs 3 and 4 are considered to be in the same group ------------------------------------
         private val GROUP_ID_3_4 = ParcelUuid(UUID.randomUUID())
