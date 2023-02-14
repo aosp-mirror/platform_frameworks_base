@@ -17,13 +17,25 @@
 #include "ImageDecoder.h"
 
 #include <Gainmap.h>
+#include <SkAlphaType.h>
 #include <SkAndroidCodec.h>
 #include <SkBitmap.h>
 #include <SkBlendMode.h>
 #include <SkCanvas.h>
+#include <SkCodec.h>
+#include <SkCodecAnimation.h>
+#include <SkColorSpace.h>
+#include <SkColorType.h>
 #include <SkEncodedOrigin.h>
+#include <SkImageInfo.h>
 #include <SkGainmapInfo.h>
+#include <SkMatrix.h>
 #include <SkPaint.h>
+#include <SkPngChunkReader.h>
+#include <SkRect.h>
+#include <SkRefCnt.h>
+#include <SkSamplingOptions.h>
+#include <SkSize.h>
 #include <SkStream.h>
 #include <hwui/Bitmap.h>
 #include <log/log.h>
