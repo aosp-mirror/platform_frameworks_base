@@ -31,6 +31,7 @@ import android.util.Size;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 
 import java.io.PrintWriter;
 
@@ -40,10 +41,9 @@ import java.io.PrintWriter;
 public class PipSizeSpecHandler {
     private static final String TAG = PipSizeSpecHandler.class.getSimpleName();
 
-    @NonNull private final DisplayLayout mDisplayLayout = new DisplayLayout();
+    @NonNull private final PipDisplayLayoutState mPipDisplayLayoutState;
 
-    @VisibleForTesting
-    final SizeSpecSource mSizeSpecSourceImpl;
+    private final SizeSpecSource mSizeSpecSourceImpl;
 
     /** The preferred minimum (and default minimum) size specified by apps. */
     @Nullable private Size mOverrideMinSize;
@@ -361,8 +361,9 @@ public class PipSizeSpecHandler {
         }
     }
 
-    public PipSizeSpecHandler(Context context) {
+    public PipSizeSpecHandler(Context context, PipDisplayLayoutState pipDisplayLayoutState) {
         mContext = context;
+        mPipDisplayLayoutState = pipDisplayLayoutState;
 
         boolean enablePipSizeLargeScreen = SystemProperties
                 .getBoolean("persist.wm.debug.enable_pip_size_large_screen", false);
@@ -403,15 +404,9 @@ public class PipSizeSpecHandler {
         mSizeSpecSourceImpl.reloadResources();
     }
 
-    /** Returns the display's bounds. */
     @NonNull
-    public Rect getDisplayBounds() {
-        return new Rect(0, 0, mDisplayLayout.width(), mDisplayLayout.height());
-    }
-
-    /** Update the display layout. */
-    public void setDisplayLayout(@NonNull DisplayLayout displayLayout) {
-        mDisplayLayout.set(displayLayout);
+    private Rect getDisplayBounds() {
+        return mPipDisplayLayoutState.getDisplayBounds();
     }
 
     public Point getScreenEdgeInsets() {
@@ -423,11 +418,12 @@ public class PipSizeSpecHandler {
      */
     public Rect getInsetBounds() {
         Rect insetBounds = new Rect();
-        Rect insets = mDisplayLayout.stableInsets();
+        DisplayLayout displayLayout = mPipDisplayLayoutState.getDisplayLayout();
+        Rect insets = displayLayout.stableInsets();
         insetBounds.set(insets.left + mScreenEdgeInsets.x,
                 insets.top + mScreenEdgeInsets.y,
-                mDisplayLayout.width() - insets.right - mScreenEdgeInsets.x,
-                mDisplayLayout.height() - insets.bottom - mScreenEdgeInsets.y);
+                displayLayout.width() - insets.right - mScreenEdgeInsets.x,
+                displayLayout.height() - insets.bottom - mScreenEdgeInsets.y);
         return insetBounds;
     }
 
@@ -522,8 +518,8 @@ public class PipSizeSpecHandler {
     public void dump(PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
-        pw.println(innerPrefix + "mSizeSpecSourceImpl=" + mSizeSpecSourceImpl.toString());
-        pw.println(innerPrefix + "mDisplayLayout=" + mDisplayLayout);
+        pw.println(innerPrefix + "mSizeSpecSourceImpl=" + mSizeSpecSourceImpl);
         pw.println(innerPrefix + "mOverrideMinSize=" + mOverrideMinSize);
+        pw.println(innerPrefix + "mScreenEdgeInsets=" + mScreenEdgeInsets);
     }
 }

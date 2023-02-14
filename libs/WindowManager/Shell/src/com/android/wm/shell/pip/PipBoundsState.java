@@ -30,7 +30,6 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Size;
-import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -77,6 +76,7 @@ public class PipBoundsState {
     private final @NonNull Rect mExpandedBounds = new Rect();
     private final @NonNull Rect mNormalMovementBounds = new Rect();
     private final @NonNull Rect mExpandedMovementBounds = new Rect();
+    private final @NonNull PipDisplayLayoutState mPipDisplayLayoutState;
     private final Point mMaxSize = new Point();
     private final Point mMinSize = new Point();
     private final @NonNull Context mContext;
@@ -86,8 +86,6 @@ public class PipBoundsState {
     private @Nullable PipReentryState mPipReentryState;
     private final @Nullable PipSizeSpecHandler mPipSizeSpecHandler;
     private @Nullable ComponentName mLastPipComponentName;
-    private int mDisplayId = Display.DEFAULT_DISPLAY;
-    private final @NonNull DisplayLayout mDisplayLayout = new DisplayLayout();
     private final @NonNull MotionBoundsState mMotionBoundsState = new MotionBoundsState();
     private boolean mIsImeShowing;
     private int mImeHeight;
@@ -120,10 +118,12 @@ public class PipBoundsState {
     private @Nullable TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
     private List<Consumer<Rect>> mOnPipExclusionBoundsChangeCallbacks = new ArrayList<>();
 
-    public PipBoundsState(@NonNull Context context, PipSizeSpecHandler pipSizeSpecHandler) {
+    public PipBoundsState(@NonNull Context context, PipSizeSpecHandler pipSizeSpecHandler,
+            PipDisplayLayoutState pipDisplayLayoutState) {
         mContext = context;
         reloadResources();
         mPipSizeSpecHandler = pipSizeSpecHandler;
+        mPipDisplayLayoutState = pipDisplayLayoutState;
     }
 
     /** Reloads the resources. */
@@ -290,31 +290,16 @@ public class PipBoundsState {
         return mLastPipComponentName;
     }
 
-    /** Get the current display id. */
-    public int getDisplayId() {
-        return mDisplayId;
-    }
-
-    /** Set the current display id for the associated display layout. */
-    public void setDisplayId(int displayId) {
-        mDisplayId = displayId;
-    }
-
     /** Returns the display's bounds. */
     @NonNull
     public Rect getDisplayBounds() {
-        return new Rect(0, 0, mDisplayLayout.width(), mDisplayLayout.height());
-    }
-
-    /** Update the display layout. */
-    public void setDisplayLayout(@NonNull DisplayLayout displayLayout) {
-        mDisplayLayout.set(displayLayout);
+        return mPipDisplayLayoutState.getDisplayBounds();
     }
 
     /** Get a copy of the display layout. */
     @NonNull
     public DisplayLayout getDisplayLayout() {
-        return new DisplayLayout(mDisplayLayout);
+        return mPipDisplayLayoutState.getDisplayLayout();
     }
 
     @VisibleForTesting
@@ -568,7 +553,6 @@ public class PipBoundsState {
         pw.println(innerPrefix + "mExpandedMovementBounds=" + mExpandedMovementBounds);
         pw.println(innerPrefix + "mLastPipComponentName=" + mLastPipComponentName);
         pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
-        pw.println(innerPrefix + "mDisplayId=" + mDisplayId);
         pw.println(innerPrefix + "mStashedState=" + mStashedState);
         pw.println(innerPrefix + "mStashOffset=" + mStashOffset);
         pw.println(innerPrefix + "mIsImeShowing=" + mIsImeShowing);
