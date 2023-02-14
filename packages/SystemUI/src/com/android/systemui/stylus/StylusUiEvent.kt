@@ -31,7 +31,11 @@ enum class StylusUiEvent(private val _id: Int) : UiEventLogger.UiEventEnum {
     @UiEvent(doc = "UIEvent for Toast shown when stylus stopped charging")
     STYLUS_STOPPED_CHARGING(1303),
     @UiEvent(doc = "UIEvent for bluetooth stylus connected") BLUETOOTH_STYLUS_CONNECTED(1304),
-    @UiEvent(doc = "UIEvent for bluetooth stylus disconnected") BLUETOOTH_STYLUS_DISCONNECTED(1305);
+    @UiEvent(doc = "UIEvent for bluetooth stylus disconnected") BLUETOOTH_STYLUS_DISCONNECTED(1305),
+    @UiEvent(doc = "UIEvent for start of a USI session via battery presence")
+    USI_STYLUS_BATTERY_PRESENCE_FIRST_DETECTED(1306),
+    @UiEvent(doc = "UIEvent for end of a USI session via battery absence")
+    USI_STYLUS_BATTERY_PRESENCE_REMOVED(1307);
 
     override fun getId() = _id
 }
