@@ -83,7 +83,7 @@ interface IIncrementalService {
     /**
      * Creates a file under a storage.
      */
-    int makeFile(int storageId, in @utf8InCpp String path, in IncrementalNewFileParams params, in @nullable byte[] content);
+    int makeFile(int storageId, in @utf8InCpp String path, int mode, in IncrementalNewFileParams params, in @nullable byte[] content);
 
     /**
      * Creates a file under a storage. Content of the file is from a range inside another file.
