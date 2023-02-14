@@ -95,7 +95,7 @@ public abstract class SharedConnectivityService extends Service {
 
     @Override
     @Nullable
-    public IBinder onBind(@NonNull Intent intent) {
+    public final IBinder onBind(@NonNull Intent intent) {
         if (DEBUG) Log.i(TAG, "onBind intent=" + intent);
         return new ISharedConnectivityService.Stub() {
             @Override
