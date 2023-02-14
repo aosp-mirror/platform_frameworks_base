@@ -18,6 +18,7 @@ package android.app.admin;
 
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,6 +32,23 @@ import android.os.Parcelable;
  */
 @TestApi
 public final class MostRecent<V> extends ResolutionMechanism<V> {
+
+    /**
+     * Indicates that the most recent setter of the policy wins the resolution.
+     */
+    @NonNull
+    public static final MostRecent<?> MOST_RECENT = new MostRecent<>();
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
 
     @Override
     public String toString() {
@@ -46,15 +64,15 @@ public final class MostRecent<V> extends ResolutionMechanism<V> {
     public void writeToParcel(@NonNull Parcel dest, int flags) {}
 
     @NonNull
-    public static final Parcelable.Creator<MostRecent> CREATOR =
-            new Parcelable.Creator<MostRecent>() {
+    public static final Parcelable.Creator<MostRecent<?>> CREATOR =
+            new Parcelable.Creator<MostRecent<?>>() {
                 @Override
-                public MostRecent createFromParcel(Parcel source) {
-                    return new MostRecent();
+                public MostRecent<?> createFromParcel(Parcel source) {
+                    return new MostRecent<>();
                 }
 
                 @Override
-                public MostRecent[] newArray(int size) {
+                public MostRecent<?>[] newArray(int size) {
                     return new MostRecent[size];
                 }
             };

@@ -66,7 +66,7 @@ public final class PolicyState<V> implements Parcelable {
             PolicyValue<V> policyValue = source.readParcelable(PolicyValue.class.getClassLoader());
             mPoliciesSetByAdmins.put(admin, policyValue);
         }
-        mCurrentResolvedPolicy = source.readParcelable((PolicyValue.class.getClassLoader()));
+        mCurrentResolvedPolicy = source.readParcelable(PolicyValue.class.getClassLoader());
         mResolutionMechanism = source.readParcelable(ResolutionMechanism.class.getClassLoader());
     }
 
@@ -87,7 +87,7 @@ public final class PolicyState<V> implements Parcelable {
      */
     @Nullable
     public V getCurrentResolvedPolicy() {
-        return mCurrentResolvedPolicy.getValue();
+        return mCurrentResolvedPolicy == null ? null : mCurrentResolvedPolicy.getValue();
     }
 
     /**

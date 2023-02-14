@@ -19,10 +19,10 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.Authority;
-import android.app.admin.UnknownAuthority;
 import android.app.admin.DeviceAdminAuthority;
 import android.app.admin.DpcAuthority;
 import android.app.admin.RoleAuthority;
+import android.app.admin.UnknownAuthority;
 import android.content.ComponentName;
 import android.os.UserHandle;
 
@@ -109,6 +109,23 @@ final class EnforcingAdmin {
 
     static String getRoleAuthorityOf(String roleName) {
         return ROLE_AUTHORITY_PREFIX + roleName;
+    }
+
+    static Authority getParcelableAuthority(String authority) {
+        if (authority == null || authority.isEmpty()) {
+            return UnknownAuthority.UNKNOWN_AUTHORITY;
+        }
+        if (DPC_AUTHORITY.equals(authority)) {
+            return DpcAuthority.DPC_AUTHORITY;
+        }
+        if (DEVICE_ADMIN_AUTHORITY.equals(authority)) {
+            return DeviceAdminAuthority.DEVICE_ADMIN_AUTHORITY;
+        }
+        if (authority.startsWith(ROLE_AUTHORITY_PREFIX)) {
+            String role = authority.substring(ROLE_AUTHORITY_PREFIX.length());
+            return new RoleAuthority(Set.of(role));
+        }
+        return UnknownAuthority.UNKNOWN_AUTHORITY;
     }
 
     private EnforcingAdmin(

@@ -117,7 +117,7 @@ public final class IntentFilterPolicyKey extends PolicyKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getIdentifier(), mFilter);
+        return Objects.hash(getIdentifier());
     }
 
     @Override
@@ -133,7 +133,7 @@ public final class IntentFilterPolicyKey extends PolicyKey {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getIdentifier());
-        mFilter.writeToParcel(dest, flags);
+        dest.writeTypedObject(mFilter, flags);
     }
 
     @NonNull

@@ -47,7 +47,8 @@ public final class MostRestrictive<V> extends ResolutionMechanism<V> {
     /**
      * Returns an ordered list of most to least restrictive values for a certain policy.
      */
-    List<V> getMostToLeastRestrictiveValues() {
+    @NonNull
+    public List<V> getMostToLeastRestrictiveValues() {
         return mMostToLeastRestrictive.stream().map(PolicyValue::getValue).toList();
     }
 
@@ -55,13 +56,17 @@ public final class MostRestrictive<V> extends ResolutionMechanism<V> {
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MostRestrictive other = (MostRestrictive) o;
-        return Objects.equals(mMostToLeastRestrictive, other.mMostToLeastRestrictive);
+        try {
+            MostRestrictive<V> other = (MostRestrictive<V>) o;
+            return Objects.equals(mMostToLeastRestrictive, other.mMostToLeastRestrictive);
+        } catch (ClassCastException exception) {
+            return false;
+        }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mMostToLeastRestrictive);
+        return mMostToLeastRestrictive.hashCode();
     }
 
     /**

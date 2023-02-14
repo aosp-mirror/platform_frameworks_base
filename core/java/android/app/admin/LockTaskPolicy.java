@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -67,7 +66,7 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
     @Override
     @NonNull
     public LockTaskPolicy getValue() {
-        return super.getValue();
+        return this;
     }
 
     /**
@@ -76,6 +75,7 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
     public LockTaskPolicy(@NonNull Set<String> packages) {
         Objects.requireNonNull(packages);
         mPackages.addAll(packages);
+        setValue(this);
     }
 
     /**
@@ -89,9 +89,13 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
     }
 
     private LockTaskPolicy(Parcel source) {
-        String[] packages = Objects.requireNonNull(source.readStringArray());
-        mPackages = new HashSet<>(Arrays.stream(packages).toList());
+        int size = source.readInt();
+        mPackages = new HashSet<>();
+        for (int i = 0; i < size; i++) {
+            mPackages.add(source.readString());
+        }
         mFlags = source.readInt();
+        setValue(this);
     }
 
     /**
@@ -100,6 +104,7 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
     public LockTaskPolicy(LockTaskPolicy policy) {
         mPackages = new HashSet<>(policy.mPackages);
         mFlags = policy.mFlags;
+        setValue(this);
     }
 
     /**
@@ -144,7 +149,10 @@ public final class LockTaskPolicy extends PolicyValue<LockTaskPolicy> {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeArray(mPackages.toArray(new String[0]));
+        dest.writeInt(mPackages.size());
+        for (String p : mPackages) {
+            dest.writeString(p);
+        }
         dest.writeInt(mFlags);
     }
 
