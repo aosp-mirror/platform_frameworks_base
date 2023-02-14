@@ -24,7 +24,9 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
 import android.app.Notification;
+import android.app.compat.CompatChanges;
 import android.app.job.IJobCallback;
 import android.app.job.IJobService;
 import android.app.job.JobInfo;
@@ -32,6 +34,9 @@ import android.app.job.JobParameters;
 import android.app.job.JobProtoEnums;
 import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManagerInternal;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -57,6 +62,7 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -86,6 +92,15 @@ import java.util.Objects;
 public final class JobServiceContext implements ServiceConnection {
     private static final boolean DEBUG = JobSchedulerService.DEBUG;
     private static final boolean DEBUG_STANDBY = JobSchedulerService.DEBUG_STANDBY;
+
+    /**
+     * Whether to trigger an ANR when apps are slow to respond on pre-UDC APIs and functionality.
+     */
+    @ChangeId
+    @Disabled
+    // TODO(258236856): Enable after test is fixed
+    // @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES = 258236856L;
 
     private static final String TAG = "JobServiceContext";
     /** Amount of time the JobScheduler waits for the initial service launch+bind. */
@@ -119,6 +134,7 @@ public final class JobServiceContext implements ServiceConnection {
     /** Used for service binding, etc. */
     private final Context mContext;
     private final Object mLock;
+    private final ActivityManagerInternal mActivityManagerInternal;
     private final IBatteryStats mBatteryStats;
     private final EconomyManagerInternal mEconomyManagerInternal;
     private final JobPackageTracker mJobPackageTracker;
@@ -270,6 +286,7 @@ public final class JobServiceContext implements ServiceConnection {
         mContext = service.getContext();
         mLock = service.getLock();
         mService = service;
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mBatteryStats = batteryStats;
         mEconomyManagerInternal = LocalServices.getService(EconomyManagerInternal.class);
         mJobPackageTracker = tracker;
@@ -1121,23 +1138,31 @@ public final class JobServiceContext implements ServiceConnection {
     private void handleOpTimeoutLocked() {
         switch (mVerb) {
             case VERB_BINDING:
-                Slog.w(TAG, "Time-out while trying to bind " + getRunningJobNameLocked()
-                        + ", dropping.");
-                closeAndCleanupJobLocked(false /* needsReschedule */, "timed out while binding");
+                onSlowAppResponseLocked(/* reschedule */ false, /* updateStopReasons */ true,
+                        /* debugReason */ "timed out while binding",
+                        /* anrMessage */ "Timed out while trying to bind",
+                        CompatChanges.isChangeEnabled(ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES,
+                            mRunningJob.getUid()));
                 break;
             case VERB_STARTING:
                 // Client unresponsive - wedged or failed to respond in time. We don't really
                 // know what happened so let's log it and notify the JobScheduler
                 // FINISHED/NO-RETRY.
-                Slog.w(TAG, "No response from client for onStartJob "
-                        + getRunningJobNameLocked());
-                closeAndCleanupJobLocked(false /* needsReschedule */, "timed out while starting");
+                onSlowAppResponseLocked(/* reschedule */ false, /* updateStopReasons */ true,
+                        /* debugReason */ "timed out while starting",
+                        /* anrMessage */ "No response to onStartJob",
+                        CompatChanges.isChangeEnabled(ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES,
+                            mRunningJob.getUid()));
                 break;
             case VERB_STOPPING:
                 // At least we got somewhere, so fail but ask the JobScheduler to reschedule.
-                Slog.w(TAG, "No response from client for onStopJob "
-                        + getRunningJobNameLocked());
-                closeAndCleanupJobLocked(true /* needsReschedule */, "timed out while stopping");
+                // Don't update the stop reasons since we were already stopping the job for some
+                // other reason.
+                onSlowAppResponseLocked(/* reschedule */ true, /* updateStopReasons */ false,
+                        /* debugReason */ "timed out while stopping",
+                        /* anrMessage */ "No response to onStopJob",
+                        CompatChanges.isChangeEnabled(ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES,
+                            mRunningJob.getUid()));
                 break;
             case VERB_EXECUTING:
                 if (mPendingStopReason != JobParameters.STOP_REASON_UNDEFINED) {
@@ -1216,6 +1241,24 @@ public final class JobServiceContext implements ServiceConnection {
             // The job's host app apparently crashed during the job, so we should reschedule.
             closeAndCleanupJobLocked(true /* reschedule */, "host crashed when trying to stop");
         }
+    }
+
+    @GuardedBy("mLock")
+    private void onSlowAppResponseLocked(boolean reschedule, boolean updateStopReasons,
+            @NonNull String debugReason, @NonNull String anrMessage, boolean triggerAnr) {
+        Slog.w(TAG, anrMessage + " for " + getRunningJobNameLocked());
+        if (updateStopReasons) {
+            mParams.setStopReason(
+                    JobParameters.STOP_REASON_UNDEFINED,
+                    JobParameters.INTERNAL_STOP_REASON_ANR,
+                    debugReason);
+        }
+        if (triggerAnr) {
+            mActivityManagerInternal.appNotResponding(
+                    mRunningJob.serviceProcessName, mRunningJob.getUid(),
+                    TimeoutRecord.forJobService(anrMessage));
+        }
+        closeAndCleanupJobLocked(reschedule, debugReason);
     }
 
     /**
