@@ -258,6 +258,8 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"উজ্জ্বলতা"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"কালার ইনভার্সন"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"রঙ সংশোধন"</string>
+    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
+    <skip />
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"ব্যবহারকারীদের ম্যানেজ করুন"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"সম্পন্ন হয়েছে"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"বন্ধ করুন"</string>
@@ -613,14 +615,84 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"বিজ্ঞপ্তি"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"কীবোর্ড শর্টকাট"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"কীবোর্ড লে-আউট পাল্টান"</string>
+    <!-- no translation found for keyboard_shortcut_clear_text (4679927133259287577) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_list_title (1156178106617830429) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_list_hint (5982623262974326746) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_list_no_result (6819302191660875501) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_system (1151182120757052669) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_input (5440558509904296233) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_open_apps (1450959949739257562) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_current_app (2011953559133734491) -->
+    <skip />
+    <!-- no translation found for group_system_access_notification_shade (7116898151485382275) -->
+    <skip />
+    <!-- no translation found for group_system_full_screenshot (7389040853798023211) -->
+    <skip />
+    <!-- no translation found for group_system_access_system_app_shortcuts (4421497579210445641) -->
+    <skip />
+    <!-- no translation found for group_system_go_back (8838454003680364227) -->
+    <skip />
+    <!-- no translation found for group_system_access_home_screen (1857344316928441909) -->
+    <skip />
+    <!-- no translation found for group_system_overview_open_apps (6897128761003265350) -->
+    <skip />
+    <!-- no translation found for group_system_cycle_forward (9202444850838205990) -->
+    <skip />
+    <!-- no translation found for group_system_cycle_back (5163464503638229131) -->
+    <skip />
+    <!-- no translation found for group_system_access_all_apps_search (488070738028991753) -->
+    <skip />
+    <!-- no translation found for group_system_hide_reshow_taskbar (3809304065624351131) -->
+    <skip />
+    <!-- no translation found for group_system_access_system_settings (7961639365383008053) -->
+    <skip />
+    <!-- no translation found for group_system_access_google_assistant (1186152943161483864) -->
+    <skip />
+    <!-- no translation found for group_system_lock_screen (7391191300363416543) -->
+    <skip />
+    <!-- no translation found for group_system_quick_memo (2914234890158583919) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_system_multitasking (1065232949510862593) -->
+    <skip />
+    <!-- no translation found for system_multitasking_rhs (6593269428880305699) -->
+    <skip />
+    <!-- no translation found for system_multitasking_lhs (8839380725557952846) -->
+    <skip />
+    <!-- no translation found for system_multitasking_full_screen (1962084334200006297) -->
+    <skip />
+    <!-- no translation found for system_multitasking_replace (844285282472557186) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_input (6888282716546625610) -->
+    <skip />
+    <!-- no translation found for input_switch_input_language_next (3394291576873633793) -->
+    <skip />
+    <!-- no translation found for input_switch_input_language_previous (8823659252918609216) -->
+    <skip />
+    <!-- no translation found for input_access_emoji (8105642858900406351) -->
+    <skip />
+    <!-- no translation found for input_access_voice_typing (7291201476395326141) -->
+    <skip />
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"অ্যাপ্লিকেশন"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"সহযোগিতা"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"ব্রাউজার"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_browser (7328131901589876868) -->
+    <skip />
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"পরিচিতি"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"ইমেল"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_email (7480359963463803511) -->
+    <skip />
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"সংগীত"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6316043911946540137) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_maps (7312554713993114342) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"বিরক্ত করবে না"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ভলিউম বোতামের শর্টকাট"</string>
     <string name="battery" msgid="769686279459897127">"ব্যাটারি"</string>
@@ -783,6 +855,12 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"স্ক্রিন রেকর্ডিং"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"কোনও শীর্ষক নেই"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"স্ট্যান্ডবাই"</string>
+    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
+    <skip />
+    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
+    <skip />
+    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
+    <skip />
     <string name="magnification_window_title" msgid="4863914360847258333">"উইন্ডো বড় করে দেখা"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"উইন্ডো কন্ট্রোল বড় করে দেখা"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"বড় করুন"</string>
@@ -889,10 +967,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"কোনও সমস্যা হয়েছে। আবার চেষ্টা করুন।"</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"লোড করা হচ্ছে"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"ট্যাবলেট"</string>
-    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
-    <skip />
-    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
-    <skip />
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"আপনার মিডিয়া কাস্ট করা"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"<xliff:g id="APP_LABEL">%1$s</xliff:g> কাস্ট করা হচ্ছে"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"বন্ধ আছে, অ্যাপ চেক করুন"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"খুঁজে পাওয়া যায়নি"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"কন্ট্রোল উপলভ্য নেই"</string>
@@ -929,10 +1005,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"সম্প্রচার করা যাচ্ছে না"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"সেভ করা যাচ্ছে না। আবার চেষ্টা করুন।"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"সেভ করা যাচ্ছে না।"</string>
-    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
-    <skip />
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"কমপক্ষে ৪টি অক্ষর ব্যবহার করুন"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"১৬টির চেয়ে কম অক্ষর ব্যবহার করুন"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"বিল্ড নম্বর"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"বিল্ড নম্বর ক্লিপবোর্ডে কপি করা হয়েছে।"</string>
     <string name="basic_status" msgid="2315371112182658176">"খোলা কথোপকথন"</string>
@@ -1059,11 +1133,16 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• অন্তত একটি ডিভাইস উপলভ্য"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"শর্টকাট টাচ করে ধরে রাখুন"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"বাতিল করুন"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"এখনই উল্টান"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"আরও ভাল সেলফির জন্য ফোন আনফোল্ড করা"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"আরও ভাল সেলফির জন্য সামনের ক্যামেরায় পাল্টাতে চান?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"আরও ভাল রেজোলিউশন সহ আরও বেশি ওয়াইড ছবির জন্য ব্যাক-ক্যামেরা ব্যবহার করুন।"</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ এই স্ক্রিন বন্ধ হয়ে যাবে"</b></string>
+    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
+    <skip />
+    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
+    <skip />
+    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
+    <skip />
+    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
+    <skip />
+    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
+    <skip />
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ফোল্ড করা যায় এমন ডিভাইস খোলা হচ্ছে"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ফোল্ড করা যায় এমন ডিভাইস উল্টানো হচ্ছে"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ব্যাটারির চার্জ বাকি আছে"</string>
