@@ -28,7 +28,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.metrics.ConnectStats;
 import android.net.metrics.DnsEvent;
-import android.net.metrics.INetdEventListener;
 import android.net.metrics.NetworkMetrics;
 import android.net.metrics.WakeupEvent;
 import android.net.metrics.WakeupStats;
@@ -44,6 +43,7 @@ import com.android.internal.util.BitUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.RingBuffer;
 import com.android.internal.util.TokenBucket;
+import com.android.net.module.util.BaseNetdEventListener;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 
 import java.io.PrintWriter;
@@ -54,7 +54,7 @@ import java.util.StringJoiner;
 /**
  * Implementation of the INetdEventListener interface.
  */
-public class NetdEventListenerService extends INetdEventListener.Stub {
+public class NetdEventListenerService extends BaseNetdEventListener {
 
     public static final String SERVICE_NAME = "netd_listener";
 
@@ -208,15 +208,18 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
     public synchronized void onDnsEvent(int netId, int eventType, int returnCode, int latencyMs,
-            String hostname, String[] ipAddresses, int ipAddressesCount, int uid)
-            throws RemoteException {
+            String hostname, String[] ipAddresses, int ipAddressesCount, int uid) {
         long timestamp = System.currentTimeMillis();
         getMetricsForNetwork(timestamp, netId).addDnsResult(eventType, returnCode, latencyMs);
 
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                callback.onDnsEvent(netId, eventType, returnCode, hostname, ipAddresses,
-                        ipAddressesCount, timestamp, uid);
+                try {
+                    callback.onDnsEvent(netId, eventType, returnCode, hostname, ipAddresses,
+                            ipAddressesCount, timestamp, uid);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
         }
     }
@@ -225,11 +228,14 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
     public synchronized void onNat64PrefixEvent(int netId,
-            boolean added, String prefixString, int prefixLength)
-            throws RemoteException {
+            boolean added, String prefixString, int prefixLength) {
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                callback.onNat64PrefixEvent(netId, added, prefixString, prefixLength);
+                try {
+                    callback.onNat64PrefixEvent(netId, added, prefixString, prefixLength);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
         }
     }
@@ -238,11 +244,14 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
     public synchronized void onPrivateDnsValidationEvent(int netId,
-            String ipAddress, String hostname, boolean validated)
-            throws RemoteException {
+            String ipAddress, String hostname, boolean validated) {
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                callback.onPrivateDnsValidationEvent(netId, ipAddress, hostname, validated);
+                try {
+                    callback.onPrivateDnsValidationEvent(netId, ipAddress, hostname, validated);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
         }
     }
@@ -251,13 +260,17 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     // Called concurrently by multiple binder threads.
     // This method must not block or perform long-running operations.
     public synchronized void onConnectEvent(int netId, int error, int latencyMs, String ipAddr,
-            int port, int uid) throws RemoteException {
+            int port, int uid) {
         long timestamp = System.currentTimeMillis();
         getMetricsForNetwork(timestamp, netId).addConnectResult(error, latencyMs, ipAddr);
 
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                callback.onConnectEvent(ipAddr, port, timestamp, uid);
+                try {
+                    callback.onConnectEvent(ipAddr, port, timestamp, uid);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
             }
         }
     }
@@ -315,7 +328,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     }
 
     @Override
-    public int getInterfaceVersion() throws RemoteException {
+    public int getInterfaceVersion() {
         return this.VERSION;
     }
 
