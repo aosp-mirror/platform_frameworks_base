@@ -59,7 +59,6 @@ import com.android.credentialmanager.common.ui.ContainerCard
 import com.android.credentialmanager.common.ui.ToggleVisibilityButton
 import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateCredentialScreen(
     viewModel: CredentialSelectorViewModel,
@@ -80,10 +79,10 @@ fun CreateCredentialScreen(
                         )
                         CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
                             requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
-                            enabledProviderList = createCredentialUiState.enabledProviders,
                             disabledProviderList = createCredentialUiState.disabledProviders,
                             sortedCreateOptionsPairs =
                             createCredentialUiState.sortedCreateOptionsPairs,
+                            hasRemoteEntry = createCredentialUiState.remoteEntry != null,
                             onOptionSelected =
                             viewModel::createFlowOnEntrySelectedFromFirstUseScreen,
                             onDisabledProvidersSelected =
@@ -277,9 +276,9 @@ fun ConfirmationCard(
 @Composable
 fun ProviderSelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
-    enabledProviderList: List<EnabledProviderInfo>,
     disabledProviderList: List<DisabledProviderInfo>?,
     sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
+    hasRemoteEntry: Boolean,
     onOptionSelected: (ActiveEntry) -> Unit,
     onDisabledProvidersSelected: () -> Unit,
     onMoreOptionsSelected: () -> Unit,
@@ -302,7 +301,8 @@ fun ProviderSelectionCard(
                         CredentialType.PASSWORD ->
                             stringResource(R.string.passwords)
                         CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
-                    }),
+                    }
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 24.dp)
                     .align(alignment = Alignment.CenterHorizontally),
@@ -317,15 +317,14 @@ fun ProviderSelectionCard(
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(horizontal = 28.dp),
             )
-            Divider(
-                thickness = 18.dp,
-                color = Color.Transparent
-            )
             ContainerCard(
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
+                modifier = Modifier.padding(
+                    start = 24.dp,
+                    end = 24.dp,
+                    top = 24.dp,
+                    bottom = if (hasRemoteEntry) 24.dp else 16.dp
+                ).align(alignment = Alignment.CenterHorizontally),
             ) {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -356,28 +355,24 @@ fun ProviderSelectionCard(
                     }
                 }
             }
-            Divider(
-                thickness = 24.dp,
-                color = Color.Transparent
-            )
-            enabledProviderList.forEach { enabledProvider ->
-                if (enabledProvider.remoteEntry != null) {
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-                    ) {
-                        ActionButton(
-                            stringResource(R.string.string_more_options),
-                            onMoreOptionsSelected
-                        )
-                    }
-                    return@forEach
+            if (hasRemoteEntry) {
+                Divider(
+                    thickness = 24.dp,
+                    color = Color.Transparent
+                )
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+                ) {
+                    ActionButton(
+                        stringResource(R.string.string_more_options),
+                        onMoreOptionsSelected
+                    )
                 }
             }
             Divider(
-                thickness = 18.dp,
+                thickness = 24.dp,
                 color = Color.Transparent,
-                modifier = Modifier.padding(bottom = 16.dp)
             )
         }
     }
@@ -412,7 +407,8 @@ fun MoreOptionsSelectionCard(
                                 CredentialType.PASSWORD ->
                                     stringResource(R.string.password)
                                 CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
-                            }),
+                            }
+                        ),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 },
@@ -653,7 +649,8 @@ fun CreationSelectionCard(
                     text = createOptionInfo.footerDescription,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(
-                        start = 29.dp, top = 8.dp, bottom = 18.dp, end = 28.dp)
+                        start = 29.dp, top = 8.dp, bottom = 18.dp, end = 28.dp
+                    )
                 )
             }
             Divider(
@@ -739,7 +736,8 @@ fun MoreAboutPasskeysIntroCard(
                     TextOnSurface(
                         text =
                         stringResource(
-                            R.string.more_about_passkeys_title),
+                            R.string.more_about_passkeys_title
+                        ),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 },
@@ -865,9 +863,13 @@ fun PrimaryCreateOptionRow(
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(top = 16.dp, start = 5.dp),
                         )
-                        Row(modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 16.dp,
-                                                                       start = 5.dp),
-                            verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(
+                                top = 4.dp, bottom = 16.dp,
+                                start = 5.dp
+                            ),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             val visualTransformation = remember { PasswordVisualTransformation() }
                             // This subtitle would never be null for create password
                             val originalPassword by remember {
@@ -915,7 +917,8 @@ fun PrimaryCreateOptionRow(
                                 text = requestDisplayInfo.title,
                                 style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(
-                                    top = 16.dp, bottom = 16.dp, start = 5.dp),
+                                    top = 16.dp, bottom = 16.dp, start = 5.dp
+                                ),
                             )
                         }
                     }
@@ -957,7 +960,8 @@ fun MoreOptionsInfoRow(
                     )
                 }
                 if (requestDisplayInfo.type == CredentialType.PASSKEY ||
-                    requestDisplayInfo.type == CredentialType.PASSWORD) {
+                    requestDisplayInfo.type == CredentialType.PASSWORD
+                ) {
                     if (createOptionInfo.passwordCount != null &&
                         createOptionInfo.passkeyCount != null
                     ) {

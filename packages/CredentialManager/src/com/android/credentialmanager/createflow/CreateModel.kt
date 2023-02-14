@@ -33,8 +33,13 @@ data class CreateCredentialUiState(
   // we're showing provider selection page at the beginning
   val hasDefaultProvider: Boolean,
   val activeEntry: ActiveEntry? = null,
+  val remoteEntry: RemoteInfo? = null,
   val isFromProviderSelection: Boolean? = null,
 )
+
+internal fun hasContentToDisplay(state: CreateCredentialUiState): Boolean {
+    return state.sortedCreateOptionsPairs.isNotEmpty()
+}
 
 open class ProviderInfo(
   val icon: Drawable,

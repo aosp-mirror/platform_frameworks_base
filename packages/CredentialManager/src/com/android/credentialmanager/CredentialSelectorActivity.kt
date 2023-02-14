@@ -36,7 +36,9 @@ import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.StartBalIntentSenderForResultContract
 import com.android.credentialmanager.createflow.CreateCredentialScreen
+import com.android.credentialmanager.createflow.hasContentToDisplay
 import com.android.credentialmanager.getflow.GetCredentialScreen
+import com.android.credentialmanager.getflow.hasContentToDisplay
 import com.android.credentialmanager.ui.theme.CredentialSelectorTheme
 
 @ExperimentalMaterialApi
@@ -94,13 +96,13 @@ class CredentialSelectorActivity : ComponentActivity() {
 
         val createCredentialUiState = viewModel.uiState.createCredentialUiState
         val getCredentialUiState = viewModel.uiState.getCredentialUiState
-        if (createCredentialUiState != null) {
+        if (createCredentialUiState != null && hasContentToDisplay(createCredentialUiState)) {
             CreateCredentialScreen(
                 viewModel = viewModel,
                 createCredentialUiState = createCredentialUiState,
                 providerActivityLauncher = launcher
             )
-        } else if (getCredentialUiState != null) {
+        } else if (getCredentialUiState != null && hasContentToDisplay(getCredentialUiState)) {
             GetCredentialScreen(
                 viewModel = viewModel,
                 getCredentialUiState = getCredentialUiState,
@@ -130,7 +132,7 @@ class CredentialSelectorActivity : ComponentActivity() {
     }
 
     private fun onInitializationError(e: Exception, intent: Intent) {
-        Log.e(Constants.LOG_TAG, "Failed to show the credential selector", e)
+        Log.e(Constants.LOG_TAG, "Failed to show the credential selector; closing the activity", e)
         val resultReceiver = intent.getParcelableExtra(
             android.credentials.ui.Constants.EXTRA_RESULT_RECEIVER,
             ResultReceiver::class.java
