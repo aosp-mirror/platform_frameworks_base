@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"தொடர்க"</string>
     <string name="string_more_options" msgid="7990658711962795124">"கூடுதல் விருப்பங்கள்"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"மேலும் அறிக"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"கடவுச்சொல்லைக் காட்டும்"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"கடவுச்சொல்லை மறைக்கும்"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"கடவுச்சாவிகள் மூலம் பாதுகாப்பாக வைத்திருங்கள்"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"கடவுச்சாவிகளைப் பயன்படுத்துவதன் மூலம் கடினமான கடவுச்சொற்களை உருவாக்கவோ நினைவில்கொள்ளவோ தேவையில்லை"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"கடவுச்சாவிகள் என்பவை உங்கள் கைரேகை, முகம் அல்லது திரைப் பூட்டு மூலம் உருவாக்கப்படும் என்க்ரிப்ஷன் செய்யப்பட்ட டிஜிட்டல் சாவிகள் ஆகும்"</string>

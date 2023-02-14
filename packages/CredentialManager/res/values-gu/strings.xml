@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"ચાલુ રાખો"</string>
     <string name="string_more_options" msgid="7990658711962795124">"વધુ વિકલ્પો"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"વધુ જાણો"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"પાસવર્ડ બતાવો"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"પાસવર્ડ છુપાવો"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"પાસકી સાથે વધુ સલામત"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"પાસકી હોવાથી, તમારે જટિલ પાસવર્ડ બનાવવાની કે યાદ રાખવાની જરૂર રહેતી નથી"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"પાસકી એ એન્ક્રિપ્ટેડ ડિજિટલ કી છે, જેને તમે તમારી ફિંગરપ્રિન્ટ, ચહેરા અથવા સ્ક્રીન લૉકનો ઉપયોગ કરીને બનાવો છો"</string>
