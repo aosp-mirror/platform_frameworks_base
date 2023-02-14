@@ -13776,6 +13776,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return false;
     }
 
+    @Override
+    public boolean isStatusBarDisabled(String callerPackage) {
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
+        Preconditions.checkCallAuthorization(
+                isProfileOwner(caller) || isDefaultDeviceOwner(caller));
+
+        int userId = caller.getUserId();
+        synchronized (getLockObject()) {
+            Preconditions.checkCallAuthorization(isUserAffiliatedWithDeviceLocked(userId),
+                    "Admin " + callerPackage
+                            + " is neither the device owner or affiliated user's profile owner.");
+            if (isManagedProfile(userId)) {
+                throw new SecurityException("Managed profile cannot disable status bar");
+            }
+            DevicePolicyData policy = getUserData(userId);
+            return policy.mStatusBarDisabled;
+        }
+    }
+
+
     /**
      * We need to update the internal state of whether a user has completed setup or a
      * device has paired once. After that, we ignore any changes that reset the
