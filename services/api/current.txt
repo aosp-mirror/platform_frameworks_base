@@ -299,11 +299,11 @@ package com.android.server.wm {
   public static final class ActivityInterceptorCallback.ActivityInterceptorInfo.Builder {
     ctor public ActivityInterceptorCallback.ActivityInterceptorInfo.Builder(int, int, int, int, int, @NonNull android.content.Intent, @NonNull android.content.pm.ResolveInfo, @NonNull android.content.pm.ActivityInfo);
     method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo build();
-    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCallingFeatureId(@NonNull String);
-    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCallingPackage(@NonNull String);
-    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCheckedOptions(@NonNull android.app.ActivityOptions);
-    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setClearOptionsAnimationRunnable(@NonNull Runnable);
-    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setResolvedType(@NonNull String);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCallingFeatureId(@Nullable String);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCallingPackage(@Nullable String);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setCheckedOptions(@Nullable android.app.ActivityOptions);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setClearOptionsAnimationRunnable(@Nullable Runnable);
+    method @NonNull public com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptorInfo.Builder setResolvedType(@Nullable String);
   }
 
   public class ActivityInterceptorCallbackRegistry {
