@@ -17,12 +17,10 @@
 package android.view.accessibility;
 
 import android.accessibilityservice.IAccessibilityServiceConnection;
-import android.graphics.Matrix;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.RemoteException;
-import android.view.MagnificationSpec;
 
 /**
  * Minimal {@link IAccessibilityServiceConnection} implementation that interacts
@@ -51,24 +49,21 @@ import android.view.MagnificationSpec;
  */
 class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Default {
     private final IAccessibilityInteractionConnection mAccessibilityInteractionConnection;
+    private final AccessibilityManager mAccessibilityManager;
 
     // Fetch all views, but do not use prefetching/cache since this "connection" does not
     // receive cache invalidation events (as it is not linked to an AccessibilityService).
     private static final int FETCH_FLAGS =
             AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS
                     | AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS;
-    private static final MagnificationSpec MAGNIFICATION_SPEC = new MagnificationSpec();
     private static final int PID = Process.myPid();
     private static final Region INTERACTIVE_REGION = null;
-    private static final float[] TRANSFORM_MATRIX = new float[9];
-
-    static {
-        Matrix.IDENTITY_MATRIX.getValues(TRANSFORM_MATRIX);
-    }
 
     DirectAccessibilityConnection(
-            IAccessibilityInteractionConnection accessibilityInteractionConnection) {
+            IAccessibilityInteractionConnection accessibilityInteractionConnection,
+            AccessibilityManager accessibilityManager) {
         mAccessibilityInteractionConnection = accessibilityInteractionConnection;
+        mAccessibilityManager = accessibilityManager;
     }
 
     @Override
@@ -76,9 +71,11 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
             long accessibilityNodeId, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, long threadId,
             Bundle arguments) throws RemoteException {
+        IAccessibilityManager.WindowTransformationSpec spec =
+                mAccessibilityManager.getWindowTransformationSpec(accessibilityWindowId);
         mAccessibilityInteractionConnection.findAccessibilityNodeInfoByAccessibilityId(
                 accessibilityNodeId, INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, PID,
-                threadId, MAGNIFICATION_SPEC, TRANSFORM_MATRIX, arguments);
+                threadId, spec.magnificationSpec, spec.transformationMatrix, arguments);
         return new String[0];
     }
 
@@ -87,9 +84,11 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
             long accessibilityNodeId, String text, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long threadId)
             throws RemoteException {
+        IAccessibilityManager.WindowTransformationSpec spec =
+                mAccessibilityManager.getWindowTransformationSpec(accessibilityWindowId);
         mAccessibilityInteractionConnection.findAccessibilityNodeInfosByText(accessibilityNodeId,
                 text, INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, PID, threadId,
-                MAGNIFICATION_SPEC, TRANSFORM_MATRIX);
+                spec.magnificationSpec, spec.transformationMatrix);
         return new String[0];
     }
 
@@ -98,9 +97,11 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
             long accessibilityNodeId, String viewId, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long threadId)
             throws RemoteException {
+        IAccessibilityManager.WindowTransformationSpec spec =
+                mAccessibilityManager.getWindowTransformationSpec(accessibilityWindowId);
         mAccessibilityInteractionConnection.findAccessibilityNodeInfosByViewId(accessibilityNodeId,
                 viewId, INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, PID, threadId,
-                MAGNIFICATION_SPEC, TRANSFORM_MATRIX);
+                spec.magnificationSpec, spec.transformationMatrix);
         return new String[0];
     }
 
@@ -108,9 +109,11 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
     public String[] findFocus(int accessibilityWindowId, long accessibilityNodeId, int focusType,
             int interactionId, IAccessibilityInteractionConnectionCallback callback, long threadId)
             throws RemoteException {
+        IAccessibilityManager.WindowTransformationSpec spec =
+                mAccessibilityManager.getWindowTransformationSpec(accessibilityWindowId);
         mAccessibilityInteractionConnection.findFocus(accessibilityNodeId, focusType,
                 INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, PID, threadId,
-                MAGNIFICATION_SPEC, TRANSFORM_MATRIX);
+                spec.magnificationSpec, spec.transformationMatrix);
         return new String[0];
     }
 
@@ -118,9 +121,11 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
     public String[] focusSearch(int accessibilityWindowId, long accessibilityNodeId, int direction,
             int interactionId, IAccessibilityInteractionConnectionCallback callback, long threadId)
             throws RemoteException {
+        IAccessibilityManager.WindowTransformationSpec spec =
+                mAccessibilityManager.getWindowTransformationSpec(accessibilityWindowId);
         mAccessibilityInteractionConnection.focusSearch(accessibilityNodeId, direction,
                 INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, PID, threadId,
-                MAGNIFICATION_SPEC, TRANSFORM_MATRIX);
+                spec.magnificationSpec, spec.transformationMatrix);
         return new String[0];
     }
 
