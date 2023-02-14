@@ -68,6 +68,8 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.floatThat
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -775,4 +777,59 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
             job.cancel()
         }
+
+    @Test
+    fun testInvisibleToUserAndExpanded_playersNotListening() {
+        // Add players to carousel.
+        testPlayerOrdering()
+
+        // Make the carousel visible to user in expanded layout.
+        mediaCarouselController.currentlyExpanded = true
+        mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = true
+
+        // panel is the player for each MediaPlayerData.
+        // Verify that seekbar listening attribute in media control panel is set to true.
+        verify(panel, times(MediaPlayerData.players().size)).listening = true
+
+        // Make the carousel invisible to user.
+        mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = false
+
+        // panel is the player for each MediaPlayerData.
+        // Verify that seekbar listening attribute in media control panel is set to false.
+        verify(panel, times(MediaPlayerData.players().size)).listening = false
+    }
+
+    @Test
+    fun testVisibleToUserAndExpanded_playersListening() {
+        // Add players to carousel.
+        testPlayerOrdering()
+
+        // Make the carousel visible to user in expanded layout.
+        mediaCarouselController.currentlyExpanded = true
+        mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = true
+
+        // panel is the player for each MediaPlayerData.
+        // Verify that seekbar listening attribute in media control panel is set to true.
+        verify(panel, times(MediaPlayerData.players().size)).listening = true
+    }
+
+    @Test
+    fun testUMOCollapsed_playersNotListening() {
+        // Add players to carousel.
+        testPlayerOrdering()
+
+        // Make the carousel in collapsed layout.
+        mediaCarouselController.currentlyExpanded = false
+
+        // panel is the player for each MediaPlayerData.
+        // Verify that seekbar listening attribute in media control panel is set to false.
+        verify(panel, times(MediaPlayerData.players().size)).listening = false
+
+        // Make the carousel visible to user.
+        reset(panel)
+        mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = true
+
+        // Verify that seekbar listening attribute in media control panel is set to false.
+        verify(panel, times(MediaPlayerData.players().size)).listening = false
+    }
 }
