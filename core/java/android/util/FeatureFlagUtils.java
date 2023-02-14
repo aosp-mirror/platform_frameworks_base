@@ -96,12 +96,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_NEW_KEYBOARD_UI = "settings_new_keyboard_ui";
 
     /**
-     * Enable new shortcut list UI
-     * @hide
-     */
-    public static final String SETTINGS_NEW_KEYBOARD_SHORTCUT = "settings_new_keyboard_shortcut";
-
-    /**
      * Enable new modifier key settings UI
      * @hide
      */
@@ -212,7 +206,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, "true");
         DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "false");
-        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_SHORTCUT, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "false");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE, "false");
@@ -238,7 +231,6 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
         PERSISTENT_FLAGS.add(SETTINGS_AUTO_TEXT_WRAPPING);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_UI);
-        PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_SHORTCUT);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD);
         PERSISTENT_FLAGS.add(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE);
