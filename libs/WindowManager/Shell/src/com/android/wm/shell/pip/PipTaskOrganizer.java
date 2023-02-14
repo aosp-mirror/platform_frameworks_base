@@ -79,13 +79,11 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.pip.phone.PipMotionHelper;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
@@ -128,7 +126,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private final Context mContext;
     private final SyncTransactionQueue mSyncTransactionQueue;
     private final PipBoundsState mPipBoundsState;
-    private final PipSizeSpecHandler mPipSizeSpecHandler;
+    private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
     private final @NonNull PipMenuController mPipMenuController;
     private final PipAnimationController mPipAnimationController;
@@ -316,7 +314,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             @NonNull SyncTransactionQueue syncTransactionQueue,
             @NonNull PipTransitionState pipTransitionState,
             @NonNull PipBoundsState pipBoundsState,
-            @NonNull PipSizeSpecHandler pipSizeSpecHandler,
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState,
             @NonNull PipBoundsAlgorithm boundsHandler,
             @NonNull PipMenuController pipMenuController,
             @NonNull PipAnimationController pipAnimationController,
@@ -332,7 +330,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mSyncTransactionQueue = syncTransactionQueue;
         mPipTransitionState = pipTransitionState;
         mPipBoundsState = pipBoundsState;
-        mPipSizeSpecHandler = pipSizeSpecHandler;
+        mPipDisplayLayoutState = pipDisplayLayoutState;
         mPipBoundsAlgorithm = boundsHandler;
         mPipMenuController = pipMenuController;
         mPipTransitionController = pipTransitionController;
@@ -653,7 +651,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         // If the displayId of the task is different than what PipBoundsHandler has, then update
         // it. This is possible if we entered PiP on an external display.
-        if (info.displayId != mPipBoundsState.getDisplayId()
+        if (info.displayId != mPipDisplayLayoutState.getDisplayId()
                 && mOnDisplayIdChangeCallback != null) {
             mOnDisplayIdChangeCallback.accept(info.displayId);
         }
@@ -1621,15 +1619,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         return animator;
     }
 
-    /** Computes destination bounds in old rotation and returns source hint rect if available. */
+    /** Computes destination bounds in old rotation and returns source hint rect if available.
+     *
+     * Note: updates the internal state of {@link PipDisplayLayoutState} by applying a rotation
+     * transformation onto the display layout.
+     */
     private @Nullable Rect computeRotatedBounds(int rotationDelta, int direction,
             Rect outDestinationBounds, Rect sourceHintRect) {
         if (direction == TRANSITION_DIRECTION_TO_PIP) {
-            DisplayLayout layoutCopy = mPipBoundsState.getDisplayLayout();
-
-            layoutCopy.rotateTo(mContext.getResources(), mNextRotation);
-            mPipBoundsState.setDisplayLayout(layoutCopy);
-            mPipSizeSpecHandler.setDisplayLayout(layoutCopy);
+            mPipDisplayLayoutState.rotateTo(mNextRotation);
 
             final Rect displayBounds = mPipBoundsState.getDisplayBounds();
             outDestinationBounds.set(mPipBoundsAlgorithm.getEntryDestinationBounds());

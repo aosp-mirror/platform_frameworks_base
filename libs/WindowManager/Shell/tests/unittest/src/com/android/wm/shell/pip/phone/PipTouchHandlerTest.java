@@ -35,6 +35,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipKeepClearAlgorithmInterface;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -92,6 +93,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
     private PipMotionHelper mMotionHelper;
     private PipResizeGestureHandler mPipResizeGestureHandler;
     private PipSizeSpecHandler mPipSizeSpecHandler;
+    private PipDisplayLayoutState mPipDisplayLayoutState;
 
     private DisplayLayout mDisplayLayout;
     private Rect mInsetBounds;
@@ -105,8 +107,9 @@ public class PipTouchHandlerTest extends ShellTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext);
-        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler);
+        mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
+        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler, mPipDisplayLayoutState);
         mPipSnapAlgorithm = new PipSnapAlgorithm();
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState, mPipSnapAlgorithm,
                 new PipKeepClearAlgorithmInterface() {}, mPipSizeSpecHandler);
@@ -124,8 +127,7 @@ public class PipTouchHandlerTest extends ShellTestCase {
         mPipTouchHandler.setPipResizeGestureHandler(mPipResizeGestureHandler);
 
         mDisplayLayout = new DisplayLayout(mContext, mContext.getDisplay());
-        mPipBoundsState.setDisplayLayout(mDisplayLayout);
-        mPipSizeSpecHandler.setDisplayLayout(mDisplayLayout);
+        mPipDisplayLayoutState.setDisplayLayout(mDisplayLayout);
         mInsetBounds = new Rect(mPipBoundsState.getDisplayBounds().left + INSET,
                 mPipBoundsState.getDisplayBounds().top + INSET,
                 mPipBoundsState.getDisplayBounds().right - INSET,
