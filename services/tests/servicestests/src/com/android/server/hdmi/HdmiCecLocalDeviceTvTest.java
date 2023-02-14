@@ -29,9 +29,11 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -238,6 +240,61 @@ public class HdmiCecLocalDeviceTvTest {
             assertThat(mCallbackResult.size()).isEqualTo(1);
             return mCallbackResult.get(0);
         }
+    }
+
+
+    private void initiateArcAndValidate() {
+        HdmiCecMessage initiateArc = HdmiCecMessageBuilder.buildInitiateArc(
+                ADDR_AUDIO_SYSTEM,
+                ADDR_TV);
+
+        mNativeWrapper.onCecMessage(initiateArc);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage reportArcInitiated = HdmiCecMessageBuilder.buildReportArcInitiated(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+        // <Report ARC Initiated> should only be sent after SAD querying is done
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
+
+        // Finish querying SADs
+        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
+        mNativeWrapper.clearResultMessages();
+    }
+
+    private void initateSamAndValidate() {
+        // Record that previous system audio mode is on.
+        mHdmiCecLocalDeviceTv.setSystemAudioControlFeatureEnabled(true);
+
+        HdmiCecFeatureAction action = new SystemAudioAutoInitiationAction(mHdmiCecLocalDeviceTv,
+                ADDR_AUDIO_SYSTEM);
+        mHdmiCecLocalDeviceTv.addAndStartAction(action);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage giveSystemAudioModeStatus =
+                HdmiCecMessageBuilder.buildGiveSystemAudioModeStatus(
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        ADDR_AUDIO_SYSTEM);
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(giveSystemAudioModeStatus);
+
+        HdmiCecMessage reportSystemAudioMode =
+                HdmiCecMessageBuilder.buildReportSystemAudioMode(
+                        ADDR_AUDIO_SYSTEM,
+                        mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress(),
+                        true);
+        mHdmiControlService.handleCecCommand(reportSystemAudioMode);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiControlService.isSystemAudioActivated()).isTrue();
     }
 
     @Test
@@ -1531,30 +1588,7 @@ public class HdmiCecLocalDeviceTvTest {
         mNativeWrapper.onCecMessage(reportPhysicalAddress);
         mTestLooper.dispatchAll();
 
-        HdmiCecMessage initiateArc = HdmiCecMessageBuilder.buildInitiateArc(
-                ADDR_AUDIO_SYSTEM,
-                ADDR_TV);
-
-        mNativeWrapper.onCecMessage(initiateArc);
-        mTestLooper.dispatchAll();
-
-        HdmiCecMessage reportArcInitiated = HdmiCecMessageBuilder.buildReportArcInitiated(
-                ADDR_TV,
-                ADDR_AUDIO_SYSTEM);
-        // <Report ARC Initiated> should only be sent after SAD querying is done
-        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(reportArcInitiated);
-
-        // Finish querying SADs
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mNativeWrapper.clearResultMessages();
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(SAD_QUERY);
-        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
-        mTestLooper.dispatchAll();
-
-        assertThat(mNativeWrapper.getResultMessages()).contains(reportArcInitiated);
-        mNativeWrapper.clearResultMessages();
+        initiateArcAndValidate();
 
         mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
         mTestLooper.dispatchAll();
@@ -1564,5 +1598,60 @@ public class HdmiCecLocalDeviceTvTest {
                 ADDR_AUDIO_SYSTEM);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestArcTermination);
+    }
+
+    @Test
+    public void fromArcToEarc_SamRemainsOn() {
+        initateSamAndValidate();
+
+        // Emulate Audio device on port 0x2000 (supports ARC and eARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        initiateArcAndValidate();
+
+        assertThat(mHdmiControlService.isSystemAudioActivated()).isTrue();
+
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage requestArcTermination = HdmiCecMessageBuilder.buildRequestArcTermination(
+                ADDR_TV,
+                ADDR_AUDIO_SYSTEM);
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestArcTermination);
+        assertThat(mHdmiControlService.isSystemAudioActivated()).isTrue();
+    }
+
+    @Test
+    public void disableEarc_SamRemainsOn() {
+        initateSamAndValidate();
+
+        // Emulate Audio device on port 0x2000 (supports ARC and eARC)
+        mNativeWrapper.setPortConnectionStatus(2, true);
+        HdmiCecMessage reportPhysicalAddress =
+                HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
+                        ADDR_AUDIO_SYSTEM, 0x2000, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mNativeWrapper.onCecMessage(reportPhysicalAddress);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlService.setEarcEnabled(HdmiControlManager.EARC_FEATURE_ENABLED);
+        mTestLooper.dispatchAll();
+        assertThat(mHdmiControlService.isSystemAudioActivated()).isTrue();
+
+        mHdmiControlService.initializeEarcLocalDevice(HdmiControlService.INITIATED_BY_BOOT_UP);
+        HdmiEarcLocalDevice mHdmiEarcLocalDeviceTx = mHdmiControlService.getEarcLocalDevice();
+        mHdmiEarcLocalDeviceTx.handleEarcStateChange(Constants.HDMI_EARC_STATUS_EARC_CONNECTED);
+        mTestLooper.moveTimeForward(HdmiEarcLocalDeviceTx.REPORT_CAPS_MAX_DELAY_MS + 1);
+        mTestLooper.dispatchAll();
+        verify(mAudioManager, times(1)).setWiredDeviceConnectionState(
+                any(), eq(1));
+
+        assertThat(mHdmiControlService.isSystemAudioActivated()).isTrue();
+
     }
 }
