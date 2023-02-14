@@ -60,6 +60,8 @@ import javax.inject.Named;
 /** Quick settings tile: Screensaver (dream) **/
 public class DreamTile extends QSTileImpl<QSTile.BooleanState> {
 
+    public static final String TILE_SPEC = "dream";
+
     private static final String LOG_TAG = "QSDream";
     // TODO: consider 1 animated icon instead
     private final Icon mIconDocked = ResourceIcon.get(R.drawable.ic_qs_screen_saver);
