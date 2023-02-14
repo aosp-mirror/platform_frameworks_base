@@ -1317,27 +1317,36 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * Returns the associated {@link Choreographer} instance with the
-     * current instance of the SurfaceControl.
-     * Must be called from a thread that already has a {@link android.os.Looper}
-     * associated with it.
-     * If there is no {@link Choreographer} associated with the SurfaceControl then a new instance
-     * of the {@link Choreographer} is created.
+     * When called for the first time a new instance of the {@link Choreographer} is created
+     * with a {@link android.os.Looper} of the current thread. Every subsequent call will return
+     * the same instance of the Choreographer.
+     *
+     * @see #getChoreographer(Looper) to create Choreographer with a different
+     * looper than current thread looper.
      *
      * @hide
      */
     @TestApi
     public @NonNull Choreographer getChoreographer() {
-        return getChoreographer(Looper.myLooper());
+        checkNotReleased();
+        synchronized (mChoreographerLock) {
+            if (mChoreographer == null) {
+                return getChoreographer(Looper.myLooper());
+            }
+            return mChoreographer;
+        }
     }
 
     /**
-     * Returns the associated {@link Choreographer} instance with the
-     * current instance of the SurfaceControl.
-     * If there is no {@link Choreographer} associated with the SurfaceControl then a new instance
-     * of the {@link Choreographer} is created.
+     * When called for the first time a new instance of the {@link Choreographer} is created with
+     * the sourced {@link android.os.Looper}. Every subsequent call will return the same
+     * instance of the Choreographer.
      *
-     * @param looper the choreographer is attached on this looper
+     * @see #getChoreographer()
+     *
+     * @throws IllegalStateException when a {@link Choreographer} instance exists with a different
+     * looper than sourced.
+     * @param looper the choreographer is attached on this looper.
      *
      * @hide
      */
@@ -1345,11 +1354,12 @@ public final class SurfaceControl implements Parcelable {
     public @NonNull Choreographer getChoreographer(@NonNull Looper looper) {
         checkNotReleased();
         synchronized (mChoreographerLock) {
-            if (mChoreographer != null) {
-                return mChoreographer;
+            if (mChoreographer == null) {
+                mChoreographer = Choreographer.getInstanceForSurfaceControl(mNativeHandle, looper);
+            } else if (!mChoreographer.isTheLooperSame(looper)) {
+                throw new IllegalStateException(
+                        "Choreographer already exists with a different looper");
             }
-
-            mChoreographer = Choreographer.getInstanceForSurfaceControl(mNativeHandle, looper);
             return mChoreographer;
         }
     }
