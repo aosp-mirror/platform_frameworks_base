@@ -243,6 +243,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
      */
     private void addOverlayWindowLocked(WindowManager.LayoutParams layoutParams) {
         mWindow = new PhoneWindow(mContext);
+        // Default to SystemUI name for TalkBack.
+        mWindow.setTitle("");
         mWindow.setAttributes(layoutParams);
         mWindow.setWindowManager(null, layoutParams.token, "DreamOverlay", true);
 
