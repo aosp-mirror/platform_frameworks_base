@@ -67,12 +67,15 @@ oneway interface IRecognitionService {
      * given recognizerIntent. For more information see {@link #startListening} and
      * {@link RecognizerIntent}.
      */
-    void checkRecognitionSupport(in Intent recognizerIntent, in IRecognitionSupportCallback listener);
+    void checkRecognitionSupport(
+        in Intent recognizerIntent,
+        in AttributionSource attributionSource,
+        in IRecognitionSupportCallback listener);
 
     /**
      * Requests RecognitionService to download the support for the given recognizerIntent. For more
      * information see {@link #checkRecognitionSupport},  {@link #startListening} and
      * {@link RecognizerIntent}.
      */
-    void triggerModelDownload(in Intent recognizerIntent);
+    void triggerModelDownload(in Intent recognizerIntent, in AttributionSource attributionSource);
 }
