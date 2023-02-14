@@ -24,8 +24,8 @@ import java.util.Objects;
 /**
  * Class representing the target user of a policy set by an admin
  * (set from {@link DevicePolicyManager}), this is passed in to
- * {@link PolicyUpdatesReceiver#onPolicySetResult} and
- * {@link PolicyUpdatesReceiver#onPolicyChanged}.
+ * {@link PolicyUpdateReceiver#onPolicySetResult} and
+ * {@link PolicyUpdateReceiver#onPolicyChanged}.
  */
 public final class TargetUser {
     /**
