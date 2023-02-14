@@ -4037,10 +4037,10 @@ public class AudioService extends IAudioService.Stub
         vgs.adjustVolume(direction, flags);
     }
 
-    /** @see AudioManager#getLastAudibleVolumeGroupVolume(int) */
+    /** @see AudioManager#getLastAudibleVolumeForVolumeGroup(int) */
     @android.annotation.EnforcePermission(android.Manifest.permission.QUERY_AUDIO_STATE)
-    public int getLastAudibleVolumeGroupVolume(int groupId) {
-        super.getLastAudibleVolumeGroupVolume_enforcePermission();
+    public int getLastAudibleVolumeForVolumeGroup(int groupId) {
+        super.getLastAudibleVolumeForVolumeGroup_enforcePermission();
         synchronized (VolumeStreamState.class) {
             if (sVolumeGroupStates.indexOfKey(groupId) < 0) {
                 Log.e(TAG, ": no volume group found for id " + groupId);
