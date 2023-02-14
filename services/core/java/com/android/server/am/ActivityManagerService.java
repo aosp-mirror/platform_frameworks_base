@@ -9507,6 +9507,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return retList;
     }
 
+    /* @hide */
     @Override
     public ParceledListSlice<ApplicationStartInfo> getHistoricalProcessStartReasons(
             String packageName, int maxNum, int userId) {
@@ -9521,6 +9522,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         return new ParceledListSlice<ApplicationStartInfo>(results);
     }
 
+
+    /* @hide */
     @Override
     public void setApplicationStartInfoCompleteListener(
             IApplicationStartInfoCompleteListener listener, int userId) {
@@ -9530,6 +9533,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceNotIsolatedCaller("setApplicationStartInfoCompleteListener");
     }
 
+
+    /* @hide */
     @Override
     public void removeApplicationStartInfoCompleteListener(int userId) {
         if (!mConstants.mFlagApplicationStartInfoEnabled) {

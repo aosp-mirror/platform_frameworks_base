@@ -31,7 +31,11 @@ import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Provide information related to a processes startup. */
+/**
+ * Provide information related to a processes startup.
+ *
+ * @hide
+ */
 public final class ApplicationStartInfo implements Parcelable {
 
     /**

@@ -3688,6 +3688,8 @@ public class ActivityManager {
      *
      * @return a list of {@link ApplicationStartInfo} records matching the criteria, sorted in
      *         the order from most recent to least recent.
+     *
+     * @hide
      */
     @NonNull
     public List<ApplicationStartInfo> getHistoricalProcessStartReasons(
@@ -3719,7 +3721,6 @@ public class ActivityManager {
      * @hide
      */
     @NonNull
-    @SystemApi
     @RequiresPermission(Manifest.permission.DUMP)
     public List<ApplicationStartInfo> getExternalHistoricalProcessStartReasons(
             @NonNull String packageName, @IntRange(from = 0) int maxNum) {
@@ -3736,6 +3737,8 @@ public class ActivityManager {
      * Callback to receive {@link ApplicationStartInfo} object once recording of startup related
      * metrics is complete.
      * Use with {@link #setApplicationStartInfoCompleteListener}.
+     *
+     * @hide
      */
     public interface ApplicationStartInfoCompleteListener {
         /** {@link ApplicationStartInfo} is complete, no more info will be added. */
@@ -3761,6 +3764,8 @@ public class ActivityManager {
      *                    complete. Will replace existing listener if one is already attached.
      *
      * @throws IllegalArgumentException if executor or listener are null.
+     *
+     * @hide
      */
     public void setApplicationStartInfoCompleteListener(@NonNull final Executor executor,
             @NonNull final ApplicationStartInfoCompleteListener listener) {
@@ -3783,6 +3788,8 @@ public class ActivityManager {
 
     /**
      * Removes the callback set by {@link #setApplicationStartInfoCompleteListener} if there is one.
+     *
+     * @hide
      */
     public void removeApplicationStartInfoCompleteListener() {
         try {
