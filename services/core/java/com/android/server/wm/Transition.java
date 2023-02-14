@@ -2022,7 +2022,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final DisplayContent dc = wc.asDisplayContent();
             if (dc == null || !mChanges.get(dc).hasChanged()) continue;
             dc.sendNewConfiguration();
-            setReady(dc, true);
+            // Set to ready if no other change controls the ready state. But if there is, such as
+            // if an activity is pausing, it will call setReady(ar, false) and wait for the next
+            // resumed activity. Then do not set to ready because the transition only contains
+            // partial participants. Otherwise the transition may only handle HIDE and miss OPEN.
+            if (!mReadyTracker.mUsed) {
+                setReady(dc, true);
+            }
         }
     }
 
