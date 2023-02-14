@@ -895,20 +895,19 @@ public class StackScrollAlgorithm {
         ExpandableViewState childViewState = child.getViewState();
         float baseZ = ambientState.getBaseZHeight();
 
-        // Handles HUN shadow when Shade is opened
-
         if (child.mustStayOnScreen() && !childViewState.headsUpIsVisible
                 && !ambientState.isDozingAndNotPulsing(child)
                 && childViewState.getYTranslation() < ambientState.getTopPadding()
                 + ambientState.getStackTranslation()) {
-            // Handles HUN shadow when Shade is opened, and AmbientState.mScrollY > 0
-            // Calculate the HUN's z-value based on its overlapping fraction with QQS Panel.
-            // When scrolling down shade to make HUN back to in-position in Notification Panel,
-            // The over-lapping fraction goes to 0, and shadows hides gradually.
+
             if (childrenOnTop != 0.0f) {
-                // To elevate the later HUN over previous HUN
+                // To elevate the later HUN over previous HUN when multiple HUNs exist
                 childrenOnTop++;
             } else {
+                // Handles HUN shadow when Shade is opened, and AmbientState.mScrollY > 0
+                // Calculate the HUN's z-value based on its overlapping fraction with QQS Panel.
+                // When scrolling down shade to make HUN back to in-position in Notification Panel,
+                // The overlapping fraction goes to 0, and shadows hides gradually.
                 float overlap = ambientState.getTopPadding()
                         + ambientState.getStackTranslation() - childViewState.getYTranslation();
                 // To prevent over-shadow during HUN entry
@@ -916,7 +915,6 @@ public class StackScrollAlgorithm {
                         1.0f,
                         overlap / childViewState.height
                 );
-                MathUtils.saturate(childrenOnTop);
             }
             childViewState.setZTranslation(baseZ
                     + childrenOnTop * mPinnedZTranslationExtra);
@@ -946,7 +944,6 @@ public class StackScrollAlgorithm {
             childViewState.setZTranslation(baseZ);
         }
 
-        // Handles HUN shadow when shade is closed.
         // While HUN is showing and Shade is closed: headerVisibleAmount stays 0, shadow stays.
         // During HUN-to-Shade (eg. dragging down HUN to open Shade): headerVisibleAmount goes
         // gradually from 0 to 1, shadow hides gradually.
