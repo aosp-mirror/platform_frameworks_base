@@ -2,7 +2,7 @@
 #define _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
 
 #include <android/data_space.h>
-#include <jpegrecoverymap/recoverymap.h>
+#include <jpegrecoverymap/jpegr.h>
 
 extern "C" {
     #include "jpeglib.h"
@@ -77,7 +77,7 @@ private:
 class P010Yuv420ToJpegREncoder {
 public:
     /** Encode YUV data to jpeg/r,  which is output to a stream.
-     *  This method will call RecoveryMap::EncodeJPEGR() method. If encoding failed,
+     *  This method will call JpegR::EncodeJPEGR() method. If encoding failed,
      *  Corresponding error code (defined in jpegrerrorcode.h) will be printed and this
      *  method will be terminated and return false.
      *
