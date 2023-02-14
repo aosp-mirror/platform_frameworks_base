@@ -31,6 +31,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
+import android.app.BackgroundStartPrivileges;
 import android.app.IUidObserver;
 import android.app.compat.CompatChanges;
 import android.app.job.IJobScheduler;
@@ -3839,6 +3840,25 @@ public class JobSchedulerService extends com.android.server.SystemService
                             validateRunUserInitiatedJobsPermission(callingUid, callingPkgName);
                     if (callingResult != JobScheduler.RESULT_SUCCESS) {
                         return callingResult;
+                    }
+                }
+
+                final int uid = sourceUid != -1 ? sourceUid : callingUid;
+                final int procState = mActivityManagerInternal.getUidProcessState(uid);
+                if (DEBUG) {
+                    Slog.d(TAG, "Uid " + uid + " proc state="
+                            + ActivityManager.procStateToString(procState));
+                }
+                if (procState != ActivityManager.PROCESS_STATE_TOP) {
+                    final BackgroundStartPrivileges bsp =
+                            mActivityManagerInternal.getBackgroundStartPrivileges(uid);
+                    if (DEBUG) {
+                        Slog.d(TAG, "Uid " + uid + ": " + bsp);
+                    }
+                    if (!bsp.allowsBackgroundActivityStarts()) {
+                        Slog.e(TAG,
+                                "Uid " + uid + " not in a state to schedule user-initiated jobs");
+                        return JobScheduler.RESULT_FAILURE;
                     }
                 }
             }

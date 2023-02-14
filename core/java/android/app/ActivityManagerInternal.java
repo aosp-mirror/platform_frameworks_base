@@ -464,6 +464,11 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isActivityStartsLoggingEnabled();
     /** Returns true if the background activity starts is enabled. */
     public abstract boolean isBackgroundActivityStartsEnabled();
+    /**
+     * Returns The current {@link BackgroundStartPrivileges} of the UID.
+     */
+    @NonNull
+    public abstract BackgroundStartPrivileges getBackgroundStartPrivileges(int uid);
     public abstract void reportCurKeyguardUsageEvent(boolean keyguardShowing);
 
     /** @see com.android.server.am.ActivityManagerService#monitor */

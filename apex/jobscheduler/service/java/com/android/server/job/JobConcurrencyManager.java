@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.BackgroundStartPrivileges;
 import android.app.UserSwitchObserver;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -388,6 +389,12 @@ class JobConcurrencyManager {
     private final ArrayList<ContextAssignment> mRecycledPreferredUidOnly = new ArrayList<>();
     private final ArrayList<ContextAssignment> mRecycledStoppable = new ArrayList<>();
     private final AssignmentInfo mRecycledAssignmentInfo = new AssignmentInfo();
+    private final SparseIntArray mRecycledPrivilegedState = new SparseIntArray();
+
+    private static final int PRIVILEGED_STATE_UNDEFINED = 0;
+    private static final int PRIVILEGED_STATE_NONE = 1;
+    private static final int PRIVILEGED_STATE_BAL = 2;
+    private static final int PRIVILEGED_STATE_TOP = 3;
 
     private final Pools.Pool<ContextAssignment> mContextAssignmentPool =
             new Pools.SimplePool<>(MAX_RETAINED_OBJECTS);
@@ -792,7 +799,7 @@ class JobConcurrencyManager {
 
         cleanUpAfterAssignmentChangesLocked(
                 mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable,
-                mRecycledAssignmentInfo);
+                mRecycledAssignmentInfo, mRecycledPrivilegedState);
 
         noteConcurrency();
     }
@@ -915,7 +922,8 @@ class JobConcurrencyManager {
                 continue;
             }
 
-            final boolean hasImmediacyPrivilege = hasImmediacyPrivilegeLocked(nextPending);
+            final boolean hasImmediacyPrivilege =
+                    hasImmediacyPrivilegeLocked(nextPending, mRecycledPrivilegedState);
             if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
                 Slog.w(TAG, "Already running similar job to: " + nextPending);
             }
@@ -1183,7 +1191,8 @@ class JobConcurrencyManager {
             final ArraySet<ContextAssignment> idle,
             final List<ContextAssignment> preferredUidOnly,
             final List<ContextAssignment> stoppable,
-            final AssignmentInfo assignmentInfo) {
+            final AssignmentInfo assignmentInfo,
+            final SparseIntArray privilegedState) {
         for (int s = stoppable.size() - 1; s >= 0; --s) {
             final ContextAssignment assignment = stoppable.get(s);
             assignment.clear();
@@ -1205,20 +1214,58 @@ class JobConcurrencyManager {
         stoppable.clear();
         preferredUidOnly.clear();
         assignmentInfo.clear();
+        privilegedState.clear();
         mWorkCountTracker.resetStagingCount();
         mActivePkgStats.forEach(mPackageStatsStagingCountClearer);
     }
 
     @VisibleForTesting
     @GuardedBy("mLock")
-    boolean hasImmediacyPrivilegeLocked(@NonNull JobStatus job) {
+    boolean hasImmediacyPrivilegeLocked(@NonNull JobStatus job,
+            @NonNull SparseIntArray cachedPrivilegedState) {
+        if (!job.shouldTreatAsExpeditedJob() && !job.shouldTreatAsUserInitiatedJob()) {
+            return false;
+        }
         // EJs & user-initiated jobs for the TOP app should run immediately.
         // However, even for user-initiated jobs, if the app has not recently been in TOP or BAL
         // state, we don't give the immediacy privilege so that we can try and maintain
         // reasonably concurrency behavior.
-        return job.lastEvaluatedBias == JobInfo.BIAS_TOP_APP
-                // TODO(): include BAL state for user-initiated jobs
-                && (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob());
+        if (job.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
+            return true;
+        }
+        final int uid = job.getSourceUid();
+        final int privilegedState = cachedPrivilegedState.get(uid, PRIVILEGED_STATE_UNDEFINED);
+        switch (privilegedState) {
+            case PRIVILEGED_STATE_TOP:
+                return true;
+            case PRIVILEGED_STATE_BAL:
+                return job.shouldTreatAsUserInitiatedJob();
+            case PRIVILEGED_STATE_NONE:
+                return false;
+            case PRIVILEGED_STATE_UNDEFINED:
+            default:
+                final ActivityManagerInternal activityManagerInternal =
+                        LocalServices.getService(ActivityManagerInternal.class);
+                final int procState = activityManagerInternal.getUidProcessState(uid);
+                if (procState == ActivityManager.PROCESS_STATE_TOP) {
+                    cachedPrivilegedState.put(uid, PRIVILEGED_STATE_TOP);
+                    return true;
+                }
+                if (job.shouldTreatAsExpeditedJob()) {
+                    // EJs only get the TOP privilege.
+                    return false;
+                }
+
+                final BackgroundStartPrivileges bsp =
+                        activityManagerInternal.getBackgroundStartPrivileges(uid);
+                final boolean balAllowed = bsp.allowsBackgroundActivityStarts();
+                if (DEBUG) {
+                    Slog.d(TAG, "Job " + job.toShortString() + " bal state: " + bsp);
+                }
+                cachedPrivilegedState.put(uid,
+                        balAllowed ? PRIVILEGED_STATE_BAL : PRIVILEGED_STATE_NONE);
+                return balAllowed;
+        }
     }
 
     @GuardedBy("mLock")
