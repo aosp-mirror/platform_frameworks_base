@@ -33,6 +33,7 @@ android_test {
         "Harrier",
     ],
     platform_apis: true,
+    certificate: "platform",
     test_suites: ["device-tests"],
     data: [
         ":AppEnumerationCrossUserPackageVisibilityTestApp",
