@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.hardware.BatteryState
 import android.hardware.input.InputManager
+import android.hardware.input.InputSettings
 import android.os.Handler
 import android.util.ArrayMap
 import android.util.Log
@@ -235,9 +236,9 @@ constructor(
      */
     private fun onStylusUsed() {
         if (!featureFlags.isEnabled(Flags.TRACK_STYLUS_EVER_USED)) return
-        if (inputManager.isStylusEverUsed(context)) return
+        if (InputSettings.isStylusEverUsed(context)) return
 
-        inputManager.setStylusEverUsed(context, true)
+        InputSettings.setStylusEverUsed(context, true)
         executeStylusCallbacks { cb -> cb.onStylusFirstUsed() }
     }
 
