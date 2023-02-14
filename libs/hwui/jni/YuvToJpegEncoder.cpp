@@ -238,7 +238,7 @@ void Yuv422IToJpegEncoder::configSamplingFactors(jpeg_compress_struct* cinfo) {
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-using namespace android::recoverymap;
+using namespace android::jpegrecoverymap;
 
 jpegr_color_gamut P010Yuv420ToJpegREncoder::findColorGamut(JNIEnv* env, int aDataSpace) {
     switch (aDataSpace & ADataSpace::STANDARD_MASK) {
