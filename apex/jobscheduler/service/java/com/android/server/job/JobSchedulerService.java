@@ -3743,7 +3743,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Enforce that only the app itself (or shared uid participant) can schedule a
         // job that runs one of the app's services, as well as verifying that the
         // named service properly requires the BIND_JOB_SERVICE permission
-        private void enforceValidJobRequest(int uid, JobInfo job) {
+        private void enforceValidJobRequest(int uid, int pid, JobInfo job) {
             final PackageManager pm = getContext()
                     .createContextAsUser(UserHandle.getUserHandleForUid(uid), 0)
                     .getPackageManager();
@@ -3766,6 +3766,10 @@ public class JobSchedulerService extends com.android.server.SystemService
             } catch (NameNotFoundException e) {
                 throw new IllegalArgumentException(
                         "Tried to schedule job for non-existent component: " + service);
+            }
+            if (job.isPersisted() && !canPersistJobs(pid, uid)) {
+                throw new IllegalArgumentException("Requested job cannot be persisted without"
+                        + " holding android.permission.RECEIVE_BOOT_COMPLETED permission");
             }
         }
 
@@ -3895,13 +3899,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             final int uid = Binder.getCallingUid();
             final int userId = UserHandle.getUserId(uid);
 
-            enforceValidJobRequest(uid, job);
-            if (job.isPersisted()) {
-                if (!canPersistJobs(pid, uid)) {
-                    throw new IllegalArgumentException("Error: requested job be persisted without"
-                            + " holding RECEIVE_BOOT_COMPLETED permission.");
-                }
-            }
+            enforceValidJobRequest(uid, pid, job);
 
             final int result = validateJob(job, uid, -1, null, null);
             if (result != JobScheduler.RESULT_SUCCESS) {
@@ -3928,9 +3926,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 Slog.d(TAG, "Enqueueing job: " + job.toString() + " work: " + work);
             }
             final int uid = Binder.getCallingUid();
+            final int pid = Binder.getCallingPid();
             final int userId = UserHandle.getUserId(uid);
 
-            enforceValidJobRequest(uid, job);
+            enforceValidJobRequest(uid, pid, job);
             if (work == null) {
                 throw new NullPointerException("work is null");
             }
