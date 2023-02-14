@@ -17,6 +17,7 @@
 package android.telephony.satellite;
 
 import android.telephony.satellite.PointingInfo;
+import android.telephony.satellite.SatelliteDatagram;
 
 /**
  * Interface for satellite state listener.
@@ -26,4 +27,7 @@ oneway interface ISatelliteStateListener {
     void onSatelliteProvisionStateChanged(in boolean provisioned);
     void onSatellitePositionUpdate(in PointingInfo pointingInfo);
     void onMessageTransferStateUpdate(in int state);
+    void onSatelliteModemStateChange(in int state);
+    void onPendingMessageCount(in int count);
+    void onSatelliteDatagrams(in SatelliteDatagram[] datagrams);
 }

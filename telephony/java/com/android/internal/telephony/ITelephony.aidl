@@ -2844,4 +2844,54 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void requestIsSatelliteProvisioned(int subId, in ResultReceiver receiver);
+
+    /**
+     * Register for listening to satellite modem state changes.
+     *
+     * @param subId - The subId of the subscription used for listening to satellite state changes.
+     * @param callback - The callback to handle the satellite state changed event.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int registerForSatelliteModemStateChange(int subId, ISatelliteStateListener callback);
+
+    /**
+     * Unregister to stop listening to satellite modem state changes.
+     *
+     * @param subId - The subId of the subscription associated with the satellite service.
+     * @param callback - The callback that was passed to registerForSatelliteStateChange.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int unregisterForSatelliteModemStateChange(int subId, ISatelliteStateListener callback);
+
+   /**
+     * Register to receive incoming datagrams over satellite.
+     *
+     * @param subId - The subId of the subscription used for receiving datagrams.
+     * @param datagramType - type of datagram
+     * @param callback - The callback to receive incoming datagrams.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+                + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int registerForSatelliteDatagram(int subId, int datagramType, ISatelliteStateListener callback);
+
+   /**
+     * Unregister to stop receiving incoming datagrams over satellite.
+     *
+     * @param subId - The subId of the subscription associated with the satellite service.
+     * @param callback - The callback that was passed to registerForSatelliteDatagram.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+                + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int unregisterForSatelliteDatagram(int subId, ISatelliteStateListener callback);
+
+   /**
+    * Poll pending satellite datagrams over satellite.
+    *
+    * @param subId - The subId of the subscription used for receiving datagrams.
+    */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+                + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    int pollPendingSatelliteDatagrams(int subId);
 }
