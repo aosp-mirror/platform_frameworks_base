@@ -185,6 +185,7 @@ public class KeyguardIndicationController {
     private boolean mPowerCharged;
     private boolean mBatteryOverheated;
     private boolean mEnableBatteryDefender;
+    private boolean mIncompatibleCharger;
     private int mChargingSpeed;
     private int mChargingWattage;
     private int mBatteryLevel;
@@ -903,6 +904,10 @@ public class KeyguardIndicationController {
             chargingId = R.string.keyguard_plugged_in_charging_limited;
             String percentage = NumberFormat.getPercentInstance().format(mBatteryLevel / 100f);
             return mContext.getResources().getString(chargingId, percentage);
+        } else if (mPowerPluggedIn && mIncompatibleCharger) {
+            chargingId = R.string.keyguard_plugged_in_incompatible_charger;
+            String percentage = NumberFormat.getPercentInstance().format(mBatteryLevel / 100f);
+            return mContext.getResources().getString(chargingId, percentage);
         } else if (mPowerCharged) {
             return mContext.getResources().getString(R.string.keyguard_charged);
         }
@@ -1063,6 +1068,7 @@ public class KeyguardIndicationController {
             mBatteryPresent = status.present;
             mBatteryOverheated = status.isOverheated();
             mEnableBatteryDefender = mBatteryOverheated && status.isPluggedIn();
+            mIncompatibleCharger = status.incompatibleCharger.orElse(false);
             try {
                 mChargingTimeRemaining = mPowerPluggedIn
                         ? mBatteryInfo.computeChargeTimeRemaining() : -1;
