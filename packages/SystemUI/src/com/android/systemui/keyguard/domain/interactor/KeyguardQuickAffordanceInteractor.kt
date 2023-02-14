@@ -415,8 +415,9 @@ constructor(
             withContext(backgroundDispatcher) {
                 devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId)
             }
-        val flagsToCheck = DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL
-        // TODO(b/268218507): "or" with DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL
+        val flagsToCheck =
+            DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL or
+                DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL
         return flagsToCheck and flags != 0
     }
 
