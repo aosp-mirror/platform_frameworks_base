@@ -153,7 +153,7 @@ class InstallingSession {
         mInstallSource = installSource;
         mVolumeUuid = sessionParams.volumeUuid;
         mPackageAbiOverride = sessionParams.abiOverride;
-        mPermissionStates = sessionParams.getFinalPermissionStates();
+        mPermissionStates = sessionParams.getPermissionStates();
         mAllowlistedRestrictedPermissions = sessionParams.whitelistedRestrictedPermissions;
         mAutoRevokePermissionsMode = sessionParams.autoRevokePermissionsMode;
         mSigningDetails = signingDetails;
