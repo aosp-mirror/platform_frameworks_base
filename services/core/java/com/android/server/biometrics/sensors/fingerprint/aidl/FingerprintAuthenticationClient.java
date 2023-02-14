@@ -228,7 +228,16 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
 
     @Override
     public void onError(int errorCode, int vendorCode) {
-        super.onError(errorCode, vendorCode);
+        if (getContext().getResources().getBoolean(R.bool.config_powerPressMapping)
+                && errorCode == BiometricFingerprintConstants.FINGERPRINT_ERROR_VENDOR
+                && vendorCode == getContext().getResources()
+                .getInteger(R.integer.config_powerPressCode)) {
+            // Translating vendor code to internal code
+            super.onError(BiometricFingerprintConstants.BIOMETRIC_ERROR_POWER_PRESSED,
+                    0 /* vendorCode */);
+        } else {
+            super.onError(errorCode, vendorCode);
+        }
 
         if (errorCode == BiometricFingerprintConstants.FINGERPRINT_ERROR_BAD_CALIBRATION) {
             BiometricNotificationUtils.showBadCalibrationNotification(getContext());
