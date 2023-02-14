@@ -813,6 +813,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         boolean hasParticipatedDisplay = false;
+        boolean reportTaskStackChanged = false;
         // Commit all going-invisible containers
         for (int i = 0; i < mParticipants.size(); ++i) {
             final WindowContainer<?> participant = mParticipants.valueAt(i);
@@ -855,6 +856,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         && ar.isVisible()) {
                     // Transient launch was committed, so report enteringAnimation
                     ar.mEnteringAnimation = true;
+                    reportTaskStackChanged = true;
+
                     // Since transient launches don't automatically take focus, make sure we
                     // synchronize focus since we committed to the launch.
                     if (ar.isTopRunningActivity()) {
@@ -877,6 +880,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 }
             }
         }
+
+        if (reportTaskStackChanged) {
+            mController.mAtm.getTaskChangeNotificationController().notifyTaskStackChanged();
+        }
+
         // dispatch legacy callback in a different loop. This is because multiple legacy handlers
         // (fixed-rotation/displaycontent) make global changes, so we want to ensure that we've
         // processed all the participants first (in particular, we want to trigger pip-enter first)
