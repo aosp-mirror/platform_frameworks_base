@@ -2304,6 +2304,14 @@
     <!-- Title of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=25] -->
     <string name="inattentive_sleep_warning_title">Standby</string>
 
+    <!-- Font scaling -->
+    <!-- Font scaling: Quick Settings dialog title [CHAR LIMIT=30] -->
+    <string name="font_scaling_dialog_title">Font Size</string>
+    <!-- Content Description for the icon button to make fonts smaller. [CHAR LIMIT=30] -->
+    <string name="font_scaling_smaller">Make smaller</string>
+    <!-- Content Description for the icon button to make fonts larger. [CHAR LIMIT=30] -->
+    <string name="font_scaling_larger">Make larger</string>
+
     <!-- Window Magnification strings -->
     <!-- Title for Magnification Window [CHAR LIMIT=NONE] -->
     <string name="magnification_window_title">Magnification Window</string>
