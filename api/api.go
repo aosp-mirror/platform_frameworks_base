@@ -147,17 +147,6 @@ func createMergedTxt(ctx android.LoadHookContext, txt MergedTxtDefinition) {
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
-func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
-	props := genruleProps{}
-	props.Name = proptools.StringPtr(ctx.ModuleName() + "-current.srcjar")
-	props.Tools = []string{"merge_zips"}
-	props.Out = []string{"current.srcjar"}
-	props.Cmd = proptools.StringPtr("$(location merge_zips) $(out) $(in)")
-	props.Srcs = append([]string{":api-stubs-docs-non-updatable"}, createSrcs(modules, "{.public.stubs.source}")...)
-	props.Visibility = []string{"//visibility:private"} // Used by make module in //development, mind
-	ctx.CreateModule(genrule.GenRuleFactory, &props)
-}
-
 func createMergedAnnotationsFilegroups(ctx android.LoadHookContext, modules, system_server_modules []string) {
 	for _, i := range []struct{
 		name    string
@@ -381,8 +370,6 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 		sort.Strings(bootclasspath)
 	}
 	createMergedTxts(ctx, bootclasspath, system_server_classpath)
-
-	createMergedStubsSrcjar(ctx, bootclasspath)
 
 	createMergedPublicStubs(ctx, bootclasspath)
 	createMergedSystemStubs(ctx, bootclasspath)
