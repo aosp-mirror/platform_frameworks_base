@@ -23,8 +23,8 @@ import java.util.Objects;
 
 /**
  * Class containing identifiers for policy APIs in {@link DevicePolicyManager}, for example they
- * will be passed in {@link PolicyUpdatesReceiver#onPolicySetResult} and
- * {@link PolicyUpdatesReceiver#onPolicyChanged} to communicate updates of a certain policy back
+ * will be passed in {@link PolicyUpdateReceiver#onPolicySetResult} and
+ * {@link PolicyUpdateReceiver#onPolicyChanged} to communicate updates of a certain policy back
  * to the admin.
  */
 public final class DevicePolicyIdentifiers {

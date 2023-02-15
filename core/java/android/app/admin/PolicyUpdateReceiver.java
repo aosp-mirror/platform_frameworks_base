@@ -35,15 +35,15 @@ import java.util.Objects;
  * <p>The callback methods happen on the main thread of the process. Thus, long-running
  * operations must be done on another thread.
  *
- * <p>When publishing your {@code PolicyUpdatesReceiver} subclass as a receiver, it must
+ * <p>When publishing your {@code PolicyUpdateReceiver} subclass as a receiver, it must
  * require the {@link android.Manifest.permission#BIND_DEVICE_ADMIN} permission.
  *
  * <p>Admins can implement {@link DeviceAdminService} to ensure they receive all policy updates
  * (for policies they have set) via {@link #onPolicyChanged} by constantly being bound to by the
  * system. For more information see {@link DeviceAdminService}.
  */
-public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
-    private static String TAG = "PolicyUpdatesReceiver";
+public abstract class PolicyUpdateReceiver extends BroadcastReceiver {
+    private static String TAG = "PolicyUpdateReceiver";
 
     /**
      * Action for a broadcast sent to admins to communicate back the result of setting a policy in
@@ -81,32 +81,32 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
 
     /**
      * A string extra holding the package name the policy applies to, (see
-     * {@link PolicyUpdatesReceiver#onPolicyChanged} and
-     * {@link PolicyUpdatesReceiver#onPolicySetResult})
+     * {@link PolicyUpdateReceiver#onPolicyChanged} and
+     * {@link PolicyUpdateReceiver#onPolicySetResult})
      */
     public static final String EXTRA_PACKAGE_NAME =
             "android.app.admin.extra.PACKAGE_NAME";
 
     /**
      * A string extra holding the permission name the policy applies to, (see
-     * {@link PolicyUpdatesReceiver#onPolicyChanged} and
-     * {@link PolicyUpdatesReceiver#onPolicySetResult})
+     * {@link PolicyUpdateReceiver#onPolicyChanged} and
+     * {@link PolicyUpdateReceiver#onPolicySetResult})
      */
     public static final String EXTRA_PERMISSION_NAME =
             "android.app.admin.extra.PERMISSION_NAME";
 
     /**
      * An {@link android.content.IntentFilter} extra holding the intent filter the policy relates
-     * to, (see {@link PolicyUpdatesReceiver#onPolicyChanged} and
-     * {@link PolicyUpdatesReceiver#onPolicySetResult})
+     * to, (see {@link PolicyUpdateReceiver#onPolicyChanged} and
+     * {@link PolicyUpdateReceiver#onPolicySetResult})
      */
     public static final String EXTRA_INTENT_FILTER =
             "android.app.admin.extra.INTENT_FILTER";
 
     /**
      * A string extra holding the account type this policy applies to, (see
-     * {@link PolicyUpdatesReceiver#onPolicyChanged} and
-     * {@link PolicyUpdatesReceiver#onPolicySetResult})
+     * {@link PolicyUpdateReceiver#onPolicyChanged} and
+     * {@link PolicyUpdateReceiver#onPolicySetResult})
      */
     public static final String EXTRA_ACCOUNT_TYPE =
             "android.app.admin.extra.ACCOUNT_TYPE";
@@ -216,7 +216,7 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
      * {@link DevicePolicyManager} to notify the admin whether it has been successful or not.
      *
      * <p>Admins wishing to receive this callback should include
-     * {@link PolicyUpdatesReceiver#ACTION_DEVICE_POLICY_SET_RESULT} in the intent filter for their
+     * {@link PolicyUpdateReceiver#ACTION_DEVICE_POLICY_SET_RESULT} in the intent filter for their
      * receiver in the manifest, the receiver must be protected by
      * {@link android.Manifest.permission#BIND_DEVICE_ADMIN} to ensure that only the system can
      * send updates.
@@ -225,8 +225,8 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
      * @param policyIdentifier Key to identify which policy this callback relates to.
      * @param additionalPolicyParams Bundle containing additional params that may be required to
      *                               identify some of the policy
-     *                               (e.g. {@link PolicyUpdatesReceiver#EXTRA_PACKAGE_NAME}
-     *                               and {@link PolicyUpdatesReceiver#EXTRA_PERMISSION_NAME}).
+     *                               (e.g. {@link PolicyUpdateReceiver#EXTRA_PACKAGE_NAME}
+     *                               and {@link PolicyUpdateReceiver#EXTRA_PERMISSION_NAME}).
      *                               Each policy will document the required additional params if
      *                               needed.
      * @param targetUser The {@link TargetUser} which this policy relates to.
@@ -249,7 +249,7 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
      * Callback triggered when a policy previously set by the admin has changed.
      *
      * <p>Admins wishing to receive this callback should include
-     * {@link PolicyUpdatesReceiver#ACTION_DEVICE_POLICY_CHANGED} in the intent filter for their
+     * {@link PolicyUpdateReceiver#ACTION_DEVICE_POLICY_CHANGED} in the intent filter for their
      * receiver in the manifest, the receiver must be protected by
      * {@link android.Manifest.permission#BIND_DEVICE_ADMIN} to ensure that only the system can
      * send updates.
@@ -258,8 +258,8 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
      * @param policyIdentifier Key to identify which policy this callback relates to.
      * @param additionalPolicyParams Bundle containing additional params that may be required to
      *                               identify some of the policy
-     *                               (e.g. {@link PolicyUpdatesReceiver#EXTRA_PACKAGE_NAME}
-     *                               and {@link PolicyUpdatesReceiver#EXTRA_PERMISSION_NAME}).
+     *                               (e.g. {@link PolicyUpdateReceiver#EXTRA_PACKAGE_NAME}
+     *                               and {@link PolicyUpdateReceiver#EXTRA_PERMISSION_NAME}).
      *                               Each policy will document the required additional params if
      *                               needed.
      * @param targetUser The {@link TargetUser} which this policy relates to.
