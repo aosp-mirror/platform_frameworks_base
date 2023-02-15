@@ -16,7 +16,6 @@
 
 package com.android.server.companion.virtual;
 
-import static android.companion.virtual.VirtualDeviceParams.RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS;
 import static android.content.pm.ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
@@ -29,7 +28,6 @@ import android.app.compat.CompatChanges;
 import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.VirtualDeviceParams.ActivityPolicy;
-import android.companion.virtual.VirtualDeviceParams.RecentsPolicy;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
@@ -137,8 +135,8 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             new ArraySet<>();
     @Nullable private final SecureWindowCallback mSecureWindowCallback;
     @Nullable private final List<String> mDisplayCategories;
-    @RecentsPolicy
-    private final int mDefaultRecentsPolicy;
+
+    private final boolean mShowTasksInHostDeviceRecents;
 
     /**
      * Creates a window policy controller that is generic to the different use cases of virtual
@@ -166,7 +164,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
      *   virtual display.
      * @param intentListenerCallback Callback that is called to intercept intents when matching
      *   passed in filters.
-     * @param defaultRecentsPolicy a policy to indicate how to handle activities in recents.
+     * @param showTasksInHostDeviceRecents whether to show activities in recents on the host device.
      */
     public GenericWindowPolicyController(int windowFlags, int systemWindowFlags,
             @NonNull ArraySet<UserHandle> allowedUsers,
@@ -181,7 +179,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull SecureWindowCallback secureWindowCallback,
             @NonNull IntentListenerCallback intentListenerCallback,
             @NonNull List<String> displayCategories,
-            @RecentsPolicy int defaultRecentsPolicy) {
+            boolean showTasksInHostDeviceRecents) {
         super();
         mAllowedUsers = allowedUsers;
         mAllowedCrossTaskNavigations = new ArraySet<>(allowedCrossTaskNavigations);
@@ -196,7 +194,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
         mSecureWindowCallback = secureWindowCallback;
         mIntentListenerCallback = intentListenerCallback;
         mDisplayCategories = displayCategories;
-        mDefaultRecentsPolicy = defaultRecentsPolicy;
+        mShowTasksInHostDeviceRecents = showTasksInHostDeviceRecents;
     }
 
     /**
@@ -337,7 +335,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
 
     @Override
     public boolean canShowTasksInHostDeviceRecents() {
-        return (mDefaultRecentsPolicy & RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS) != 0;
+        return mShowTasksInHostDeviceRecents;
     }
 
     @Override

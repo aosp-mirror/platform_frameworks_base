@@ -847,7 +847,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                         this::onSecureWindowShown,
                         this::shouldInterceptIntent,
                         displayCategories,
-                        mParams.getDefaultRecentsPolicy());
+                        mParams.getDevicePolicy(
+                                VirtualDeviceParams.POLICY_TYPE_RECENTS)
+                                == VirtualDeviceParams.DEVICE_POLICY_DEFAULT);
         gwpc.registerRunningAppsChangedListener(/* listener= */ this);
         return gwpc;
     }
