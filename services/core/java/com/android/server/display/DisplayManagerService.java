@@ -257,6 +257,9 @@ public final class DisplayManagerService extends SystemService {
     private HdrConversionMode mHdrConversionMode = null;
     // Actual HDR conversion mode, which takes app overrides into account.
     private HdrConversionMode mOverrideHdrConversionMode = null;
+    @GuardedBy("mSyncRoot")
+    private int mSystemPreferredHdrOutputType = Display.HdrCapabilities.HDR_TYPE_INVALID;
+
 
     // The synchronization root for the display manager.
     // This lock guards most of the display manager's state.
@@ -2071,8 +2074,17 @@ public final class DisplayManagerService extends SystemService {
 
     // TODO (b/264979880) - Add unit test for HDR output control methods.
     private void setHdrConversionModeInternal(HdrConversionMode hdrConversionMode) {
+        if (!mInjector.getHdrOutputConversionSupport()) {
+            return;
+        }
         int[] autoHdrOutputTypes = null;
         synchronized (mSyncRoot) {
+            if (hdrConversionMode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM
+                    && hdrConversionMode.getPreferredHdrOutputType()
+                    != Display.HdrCapabilities.HDR_TYPE_INVALID) {
+                throw new IllegalArgumentException("preferredHdrOutputType must not be set if"
+                        + " the conversion mode is HDR_CONVERSION_SYSTEM");
+            }
             mHdrConversionMode = hdrConversionMode;
             storeHdrConversionModeLocked(mHdrConversionMode);
 
@@ -2082,13 +2094,11 @@ public final class DisplayManagerService extends SystemService {
                 autoHdrOutputTypes = getEnabledAutoHdrTypesLocked();
             }
 
-            if (!mInjector.getHdrOutputConversionSupport()) {
-                return;
-            }
             // If the HDR conversion is disabled by an app through WindowManager.LayoutParams, then
             // set HDR conversion mode to HDR_CONVERSION_PASSTHROUGH.
             if (mOverrideHdrConversionMode == null) {
-                mInjector.setHdrConversionMode(hdrConversionMode.getConversionMode(),
+                mSystemPreferredHdrOutputType =
+                        mInjector.setHdrConversionMode(hdrConversionMode.getConversionMode(),
                         hdrConversionMode.getPreferredHdrOutputType(), autoHdrOutputTypes);
             } else {
                 mInjector.setHdrConversionMode(mOverrideHdrConversionMode.getConversionMode(),
@@ -2098,6 +2108,9 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private HdrConversionMode getHdrConversionModeSettingInternal() {
+        if (!mInjector.getHdrOutputConversionSupport()) {
+            return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_UNSUPPORTED);
+        }
         synchronized (mSyncRoot) {
             if (mHdrConversionMode != null) {
                 return mHdrConversionMode;
@@ -2107,13 +2120,21 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private HdrConversionMode getHdrConversionModeInternal() {
+        if (!mInjector.getHdrOutputConversionSupport()) {
+            return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_UNSUPPORTED);
+        }
         HdrConversionMode mode;
         synchronized (mSyncRoot) {
             mode = mOverrideHdrConversionMode != null
                     ? mOverrideHdrConversionMode
                     : mHdrConversionMode;
+            if (mode == null
+                    || mode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM) {
+                return new HdrConversionMode(
+                        HdrConversionMode.HDR_CONVERSION_SYSTEM, mSystemPreferredHdrOutputType);
+            }
         }
-        return mode != null ? mode : new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM);
+        return mode;
     }
 
     private @Display.HdrCapabilities.HdrType int[] getSupportedHdrOutputTypesInternal() {
@@ -2890,9 +2911,9 @@ public final class DisplayManagerService extends SystemService {
             return WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT;
         }
 
-        void setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
+        int setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
                 int[] autoHdrTypes) {
-            DisplayControl.setHdrConversionMode(conversionMode, preferredHdrOutputType,
+            return DisplayControl.setHdrConversionMode(conversionMode, preferredHdrOutputType,
                     autoHdrTypes);
         }
 

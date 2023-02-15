@@ -1417,7 +1417,6 @@ package android.hardware.display {
     method public boolean areUserDisabledHdrTypesAllowed();
     method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearGlobalUserPreferredDisplayMode();
     method @Nullable public android.view.Display.Mode getGlobalUserPreferredDisplayMode();
-    method @NonNull public android.hardware.display.HdrConversionMode getHdrConversionMode();
     method @NonNull public android.hardware.display.HdrConversionMode getHdrConversionModeSetting();
     method @NonNull public int[] getSupportedHdrOutputTypes();
     method @NonNull public int[] getUserDisabledHdrTypes();
@@ -1437,19 +1436,6 @@ package android.hardware.display {
     field public static final int SWITCHING_TYPE_WITHIN_GROUPS = 1; // 0x1
     field public static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 16384; // 0x4000
     field public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 512; // 0x200
-  }
-
-  public final class HdrConversionMode implements android.os.Parcelable {
-    ctor public HdrConversionMode(int, int);
-    ctor public HdrConversionMode(int);
-    method public int describeContents();
-    method public int getConversionMode();
-    method public int getPreferredHdrOutputType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.HdrConversionMode> CREATOR;
-    field public static final int HDR_CONVERSION_FORCE = 3; // 0x3
-    field public static final int HDR_CONVERSION_PASSTHROUGH = 1; // 0x1
-    field public static final int HDR_CONVERSION_SYSTEM = 2; // 0x2
   }
 
 }

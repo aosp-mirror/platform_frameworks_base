@@ -58,9 +58,9 @@ static void nativeOverrideHdrTypes(JNIEnv* env, jclass clazz, jobject tokenObjec
     }
 }
 
-static void nativeSetHdrConversionMode(JNIEnv* env, jclass clazz, jint hdrConversionMode,
-                                       jint preferredHdrOutputType, jintArray autoHdrOutputTypes,
-                                       jint autoHdrOutputTypesLength) {
+static int nativeSetHdrConversionMode(JNIEnv* env, jclass clazz, jint hdrConversionMode,
+                                      jint preferredHdrOutputType, jintArray autoHdrOutputTypes,
+                                      jint autoHdrOutputTypesLength) {
     gui::HdrConversionStrategy hdrConversionStrategy;
     switch (hdrConversionMode) {
         case gui::IHdrConversionConstants::HdrConversionModePassthrough: {
@@ -83,8 +83,13 @@ static void nativeSetHdrConversionMode(JNIEnv* env, jclass clazz, jint hdrConver
             break;
         }
     }
-
-    SurfaceComposerClient::setHdrConversionStrategy(hdrConversionStrategy);
+    ui::Hdr prefHdrType;
+    SurfaceComposerClient::setHdrConversionStrategy(hdrConversionStrategy, &prefHdrType);
+    if (static_cast<jint>(prefHdrType) == 0) {
+        return -1;
+    } else {
+        return static_cast<jint>(prefHdrType);
+    }
 }
 
 static jintArray nativeGetSupportedHdrOutputTypes(JNIEnv* env, jclass clazz) {
@@ -155,7 +160,7 @@ static const JNINativeMethod sDisplayMethods[] = {
             (void*)nativeGetPhysicalDisplayIds },
     {"nativeGetPhysicalDisplayToken", "(J)Landroid/os/IBinder;",
             (void*)nativeGetPhysicalDisplayToken },
-    {"nativeSetHdrConversionMode", "(II[II)V",
+    {"nativeSetHdrConversionMode", "(II[II)I",
             (void*)nativeSetHdrConversionMode },
     {"nativeGetSupportedHdrOutputTypes", "()[I",
             (void*)nativeGetSupportedHdrOutputTypes },
