@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Intent;
@@ -39,6 +40,7 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -63,6 +65,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public final class SuspendPackageHelper {
+
+    private static final String SYSTEM_EXEMPT_FROM_SUSPENSION = "system_exempt_from_suspension";
+
     // TODO(b/198166813): remove PMS dependency
     private final PackageManagerService mPm;
     private final PackageManagerServiceInjector mInjector;
@@ -502,6 +507,10 @@ public final class SuspendPackageHelper {
             final String requiredPermissionControllerPackage =
                     getKnownPackageName(snapshot, KnownPackages.PACKAGE_PERMISSION_CONTROLLER,
                             userId);
+            final AppOpsManager appOpsManager = mInjector.getSystemService(AppOpsManager.class);
+            final boolean isSystemExemptFlagEnabled = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
+                    SYSTEM_EXEMPT_FROM_SUSPENSION, /* defaultValue= */ true);
             for (int i = 0; i < packageNames.length; i++) {
                 canSuspend[i] = false;
                 final String packageName = packageNames[i];
@@ -558,6 +567,7 @@ public final class SuspendPackageHelper {
                 PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
                 AndroidPackage pkg = packageState == null ? null : packageState.getPkg();
                 if (pkg != null) {
+                    final int uid = UserHandle.getUid(userId, packageState.getAppId());
                     // Cannot suspend SDK libs as they are controlled by SDK manager.
                     if (pkg.isSdkLibrary()) {
                         Slog.w(TAG, "Cannot suspend package: " + packageName
@@ -572,6 +582,13 @@ public final class SuspendPackageHelper {
                         Slog.w(TAG, "Cannot suspend package: " + packageName
                                 + " providing static shared library: "
                                 + pkg.getStaticSharedLibraryName());
+                        continue;
+                    }
+                    if (isSystemExemptFlagEnabled && appOpsManager.checkOpNoThrow(
+                            AppOpsManager.OP_SYSTEM_EXEMPT_FROM_SUSPENSION, uid, packageName)
+                            == AppOpsManager.MODE_ALLOWED) {
+                        Slog.w(TAG, "Cannot suspend package \"" + packageName
+                                + "\": has OP_SYSTEM_EXEMPT_FROM_SUSPENSION set");
                         continue;
                     }
                 }
