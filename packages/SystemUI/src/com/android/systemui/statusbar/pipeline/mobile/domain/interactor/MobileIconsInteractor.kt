@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionMod
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.util.CarrierConfigTracker
@@ -111,7 +110,6 @@ class MobileIconsInteractorImpl
 constructor(
     private val mobileConnectionsRepo: MobileConnectionsRepository,
     private val carrierConfigTracker: CarrierConfigTracker,
-    private val logger: ConnectivityPipelineLogger,
     @MobileSummaryLog private val tableLogger: TableLogBuffer,
     connectivityRepository: ConnectivityRepository,
     userSetupRepo: UserSetupRepository,
