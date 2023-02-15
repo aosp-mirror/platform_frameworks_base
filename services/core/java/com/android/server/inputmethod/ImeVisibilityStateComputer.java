@@ -284,7 +284,7 @@ public final class ImeVisibilityStateComputer {
 
     void setWindowState(IBinder windowToken, @NonNull ImeTargetWindowState newState) {
         final ImeTargetWindowState state = mRequestWindowStateMap.get(windowToken);
-        if (state != null && newState.hasEdiorFocused()) {
+        if (state != null && newState.hasEditorFocused()) {
             // Inherit the last requested IME visible state when the target window is still
             // focused with an editor.
             newState.setRequestedImeVisible(state.mRequestedImeVisible);
@@ -340,7 +340,7 @@ public final class ImeVisibilityStateComputer {
         // state is ALWAYS_HIDDEN or STATE_HIDDEN with forward navigation).
         // Because the app might leverage these flags to hide soft-keyboard with showing their own
         // UI for input.
-        if (state.hasEdiorFocused() && shouldRestoreImeVisibility(state)) {
+        if (state.hasEditorFocused() && shouldRestoreImeVisibility(state)) {
             if (DEBUG) Slog.v(TAG, "Will show input to restore visibility");
             // Inherit the last requested IME visible state when the target window is still
             // focused with an editor.
@@ -352,7 +352,7 @@ public final class ImeVisibilityStateComputer {
 
         switch (softInputVisibility) {
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
-                if (state.hasImeFocusChanged() && (!state.hasEdiorFocused() || !doAutoShow)) {
+                if (state.hasImeFocusChanged() && (!state.hasEditorFocused() || !doAutoShow)) {
                     if (WindowManager.LayoutParams.mayUseInputMethod(state.getWindowFlags())) {
                         // There is no focus view, and this window will
                         // be behind any soft input window, so hide the
@@ -361,7 +361,7 @@ public final class ImeVisibilityStateComputer {
                         return new ImeVisibilityResult(STATE_HIDE_IME_NOT_ALWAYS,
                                 SoftInputShowHideReason.HIDE_UNSPECIFIED_WINDOW);
                     }
-                } else if (state.hasEdiorFocused() && doAutoShow && isForwardNavigation) {
+                } else if (state.hasEditorFocused() && doAutoShow && isForwardNavigation) {
                     // There is a focus view, and we are navigating forward
                     // into the window, so show the input window for the user.
                     // We only do this automatically if the window can resize
@@ -437,7 +437,7 @@ public final class ImeVisibilityStateComputer {
                         SoftInputShowHideReason.HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR);
             }
         }
-        if (!state.hasEdiorFocused() && mInputShown && state.isStartInputByGainFocus()
+        if (!state.hasEditorFocused() && mInputShown && state.isStartInputByGainFocus()
                 && mService.mInputMethodDeviceConfigs.shouldHideImeWhenNoEditorFocus()) {
             // Hide the soft-keyboard when the system do nothing for softInputModeState
             // of the window being gained focus without an editor. This behavior benefits
@@ -620,7 +620,7 @@ public final class ImeVisibilityStateComputer {
             return mImeFocusChanged;
         }
 
-        boolean hasEdiorFocused() {
+        boolean hasEditorFocused() {
             return mHasFocusedEditor;
         }
 
