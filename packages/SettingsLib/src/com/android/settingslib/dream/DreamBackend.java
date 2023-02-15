@@ -55,6 +55,7 @@ public class DreamBackend {
         public ComponentName settingsComponentName;
         public CharSequence description;
         public Drawable previewImage;
+        public boolean supportsComplications = false;
 
         @Override
         public String toString() {
@@ -175,6 +176,7 @@ public class DreamBackend {
             if (dreamMetadata != null) {
                 dreamInfo.settingsComponentName = dreamMetadata.settingsActivity;
                 dreamInfo.previewImage = dreamMetadata.previewImage;
+                dreamInfo.supportsComplications = dreamMetadata.showComplications;
             }
             dreamInfos.add(dreamInfo);
         }
