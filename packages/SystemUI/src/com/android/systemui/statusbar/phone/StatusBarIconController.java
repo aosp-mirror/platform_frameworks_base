@@ -79,12 +79,30 @@ public interface StatusBarIconController {
 
     /** Refresh the state of an IconManager by recreating the views */
     void refreshIconGroup(IconManager iconManager);
-    /** */
+
+    /**
+     * Adds or updates an icon for a given slot for a **tile service icon**.
+     *
+     * TODO(b/265307726): Merge with {@link #setIcon(String, StatusBarIcon)} or make this method
+     *   much more clearly distinct from that method.
+     */
     void setExternalIcon(String slot);
-    /** */
+
+    /**
+     * Adds or updates an icon for the given slot for **internal system icons**.
+     *
+     * TODO(b/265307726): Rename to `setInternalIcon`, or merge this appropriately with the
+     * {@link #setIcon(String, StatusBarIcon)} method.
+     */
     void setIcon(String slot, int resourceId, CharSequence contentDescription);
-    /** */
+
+    /**
+     * Adds or updates an icon for the given slot for an **externally-provided icon**.
+     *
+     * TODO(b/265307726): Rename to `setExternalIcon` or something similar.
+     */
     void setIcon(String slot, StatusBarIcon icon);
+
     /** */
     void setWifiIcon(String slot, WifiIconState state);
 
@@ -133,8 +151,16 @@ public interface StatusBarIconController {
      * TAG_PRIMARY to refer to the first icon at a given slot.
      */
     void removeIcon(String slot, int tag);
+
     /** */
     void removeAllIconsForSlot(String slot);
+
+    /**
+     * Removes all the icons for the given slot.
+     *
+     * Only use this for icons that have come from **an external process**.
+     */
+    void removeAllIconsForExternalSlot(String slot);
 
     // TODO: See if we can rename this tunable name.
     String ICON_HIDE_LIST = "icon_blacklist";

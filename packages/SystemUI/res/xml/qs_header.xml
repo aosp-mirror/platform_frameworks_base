@@ -56,13 +56,9 @@
         <Layout
             android:layout_width="wrap_content"
             android:layout_height="@dimen/new_qs_header_non_clickable_element_height"
-            app:layout_constrainedWidth="true"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/space"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/carrier_group"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintHorizontal_chainStyle="spread_inside"
         />
     </Constraint>
 
@@ -87,39 +83,27 @@
     <Constraint
         android:id="@+id/statusIcons">
         <Layout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="@dimen/new_qs_header_non_clickable_element_height"
-            app:layout_constraintStart_toEndOf="@id/space"
+            app:layout_constraintWidth_default="wrap"
+            app:layout_constraintStart_toEndOf="@id/date"
             app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
             app:layout_constraintTop_toTopOf="@id/date"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="1"
+            app:layout_constraintBottom_toBottomOf="@id/date"
             />
     </Constraint>
 
     <Constraint
         android:id="@+id/batteryRemainingIcon">
         <Layout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="@dimen/new_qs_header_non_clickable_element_height"
+            app:layout_constraintWidth_default="wrap"
             app:layout_constraintHeight_min="@dimen/new_qs_header_non_clickable_element_height"
-            app:layout_constraintStart_toEndOf="@id/statusIcons"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/date"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="1"
-            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintBottom_toBottomOf="@id/date"
             />
     </Constraint>
 
-
-    <Constraint
-        android:id="@id/space">
-        <Layout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintStart_toEndOf="@id/date"
-            app:layout_constraintEnd_toStartOf="@id/statusIcons"
-            />
-    </Constraint>
 </ConstraintSet>

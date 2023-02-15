@@ -145,7 +145,6 @@ open class QSTileViewImpl @JvmOverloads constructor(
     private val launchableViewDelegate = LaunchableViewDelegate(
         this,
         superSetVisibility = { super.setVisibility(it) },
-        superSetTransitionVisibility = { super.setTransitionVisibility(it) },
     )
     private var lastDisabledByPolicy = false
 
@@ -360,10 +359,6 @@ open class QSTileViewImpl @JvmOverloads constructor(
 
     override fun setVisibility(visibility: Int) {
         launchableViewDelegate.setVisibility(visibility)
-    }
-
-    override fun setTransitionVisibility(visibility: Int) {
-        launchableViewDelegate.setTransitionVisibility(visibility)
     }
 
     // Accessibility

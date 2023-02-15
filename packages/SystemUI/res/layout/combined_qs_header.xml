@@ -148,9 +148,4 @@
         <include layout="@layout/ongoing_privacy_chip"/>
     </FrameLayout>
 
-    <Space
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:id="@+id/space"
-    />
 </com.android.systemui.util.NoRemeasureMotionLayout>
