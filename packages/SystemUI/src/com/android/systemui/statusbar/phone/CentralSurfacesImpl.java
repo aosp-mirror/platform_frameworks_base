@@ -185,6 +185,7 @@ import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -488,6 +489,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     // settings
     private QSPanelController mQSPanelController;
+    @VisibleForTesting
+    QuickSettingsController mQsController;
 
     KeyguardIndicationController mKeyguardIndicationController;
 
@@ -1419,7 +1422,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 || isOccluded()
                 || !mKeyguardStateController.canDismissLockScreen()
                 || mKeyguardViewMediator.isAnySimPinSecure()
-                || (mNotificationPanelViewController.isQsExpanded() && trackingTouch)
+                || (mQsController.getExpanded() && trackingTouch)
                 || mNotificationPanelViewController.getBarState() == StatusBarState.SHADE_LOCKED) {
             return;
         }
@@ -1580,6 +1583,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mCentralSurfacesComponent.getLockIconViewController().init();
         mStackScrollerController =
                 mCentralSurfacesComponent.getNotificationStackScrollLayoutController();
+        mQsController = mCentralSurfacesComponent.getQuickSettingsController();
         mStackScroller = mStackScrollerController.getView();
         mNotifListContainer = mCentralSurfacesComponent.getNotificationListContainer();
         mPresenter = mCentralSurfacesComponent.getNotificationPresenter();
@@ -1699,7 +1703,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 && !isShadeDisabled()
                 && ((mDisabled2 & StatusBarManager.DISABLE2_QUICK_SETTINGS) == 0)
                 && !mDozing;
-        mNotificationPanelViewController.setQsExpansionEnabledPolicy(expandEnabled);
+        mQsController.setExpansionEnabledPolicy(expandEnabled);
         Log.d(TAG, "updateQsExpansionEnabled - QS Expand enabled: " + expandEnabled);
     }
 
@@ -3234,12 +3238,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mStatusBarKeyguardViewManager.onBackPressed();
             return true;
         }
-        if (mNotificationPanelViewController.isQsCustomizing()) {
-            mNotificationPanelViewController.closeQsCustomizer();
+        if (mQsController.isCustomizing()) {
+            mQsController.closeQsCustomizer();
             return true;
         }
-        if (mNotificationPanelViewController.isQsExpanded()) {
-                mNotificationPanelViewController.animateCloseQs(false /* animateAway */);
+        if (mQsController.getExpanded()) {
+            mNotificationPanelViewController.animateCloseQs(false);
             return true;
         }
         if (mNotificationPanelViewController.closeUserSwitcherIfOpen()) {
@@ -3601,7 +3605,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             mFalsingCollector.onScreenOff();
             mScrimController.onScreenTurnedOff();
             if (mCloseQsBeforeScreenOff) {
-                mNotificationPanelViewController.closeQs();
+                mQsController.closeQs();
                 mCloseQsBeforeScreenOff = false;
             }
             updateIsKeyguard();
