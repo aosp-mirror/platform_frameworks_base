@@ -615,8 +615,8 @@ public class VoiceInteractionService extends Service {
      *
      * @hide
      */
-    // TODO: add MANAGE_HOTWORD_DETECTION permission to protect this API and update java doc.
     @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION)
     @NonNull
     public final VisualQueryDetector createVisualQueryDetector(
             @Nullable PersistableBundle options,
