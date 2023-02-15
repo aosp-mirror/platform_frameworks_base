@@ -20,6 +20,10 @@ import static android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY;
 import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_ERRORED;
+import static android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_DEFAULT;
+import static android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKED;
@@ -63,6 +67,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -70,7 +75,6 @@ import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
-import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionGroupInfo;
@@ -129,6 +133,7 @@ import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.KnownPackages;
+import com.android.server.pm.PackageInstallerService;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -3633,8 +3638,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
     }
 
-    private void grantRequestedRuntimePermissionsInternal(@NonNull AndroidPackage pkg,
-            @Nullable List<String> permissions, int userId) {
+    private void grantRequestedPermissionsInternal(@NonNull AndroidPackage pkg,
+            @Nullable ArrayMap<String, Integer> permissionStates, int userId) {
         final int immutableFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
                 | PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 
@@ -3649,15 +3654,26 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final int myUid = Process.myUid();
 
         for (String permission : pkg.getRequestedPermissions()) {
-            final boolean shouldGrantPermission;
+            Integer permissionState = permissionStates.get(permission);
+            if (permissionState == null || permissionState == PERMISSION_STATE_DEFAULT) {
+                continue;
+            }
+
+            final boolean shouldGrantRuntimePermission;
+            final boolean isAppOpPermission;
             synchronized (mLock) {
                 final Permission bp = mRegistry.getPermission(permission);
-                shouldGrantPermission = bp != null && (bp.isRuntime() || bp.isDevelopment())
+                if (bp == null) {
+                    continue;
+                }
+                shouldGrantRuntimePermission = (bp.isRuntime() || bp.isDevelopment())
                         && (!instantApp || bp.isInstant())
                         && (supportsRuntimePermissions || !bp.isRuntimeOnly())
-                        && (permissions.contains(permission));
+                        && permissionState == PERMISSION_STATE_GRANTED;
+                isAppOpPermission = bp.isAppOp();
             }
-            if (shouldGrantPermission) {
+
+            if (shouldGrantRuntimePermission) {
                 final int flags = getPermissionFlagsInternal(pkg.getPackageName(), permission,
                         myUid, userId);
                 if (supportsRuntimePermissions) {
@@ -3674,6 +3690,17 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                                 0, myUid, userId, false, mDefaultPermissionCallback);
                     }
                 }
+            } else if (isAppOpPermission
+                    && PackageInstallerService.INSTALLER_CHANGEABLE_APP_OP_PERMISSIONS
+                    .contains(permission)) {
+                int mode =
+                        permissionState == PERMISSION_STATE_GRANTED ? MODE_ALLOWED : MODE_ERRORED;
+                int uid = UserHandle.getUid(userId, pkg.getUid());
+                String appOp = AppOpsManager.permissionToOp(permission);
+                mHandler.post(() -> {
+                    AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+                    appOpsManager.setUidMode(appOp, uid, mode);
+                });
             }
         }
     }
@@ -4991,15 +5018,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             addAllowlistedRestrictedPermissionsInternal(pkg,
                     params.getAllowlistedRestrictedPermissions(),
                     FLAG_PERMISSION_WHITELIST_INSTALLER, userId);
-            var grantedPermissions = new ArrayList<String>();
-            var permissionStates = params.getPermissionStates();
-            for (int index = 0; index < permissionStates.size(); index++) {
-                if (permissionStates.valueAt(index)
-                        == PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED) {
-                    grantedPermissions.add(permissionStates.keyAt(index));
-                }
-            }
-            grantRequestedRuntimePermissionsInternal(pkg, grantedPermissions, userId);
+            grantRequestedPermissionsInternal(pkg, params.getPermissionStates(), userId);
         }
     }
 
