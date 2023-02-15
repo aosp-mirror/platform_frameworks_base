@@ -48,10 +48,7 @@ void DrawGainmapBitmap(SkCanvas* c, const sk_sp<const SkImage>& image, const SkR
         gainmapSrc.fRight *= sX;
         gainmapSrc.fTop *= sY;
         gainmapSrc.fBottom *= sY;
-        // TODO: Temporary workaround for SkGainmapShader::Make not having a const variant
-        sk_sp<SkImage> mutImage = sk_ref_sp(const_cast<SkImage*>(image.get()));
-        sk_sp<SkImage> mutGainmap = sk_ref_sp(const_cast<SkImage*>(gainmapImage.get()));
-        auto shader = SkGainmapShader::Make(mutImage, src, sampling, mutGainmap, gainmapSrc,
+        auto shader = SkGainmapShader::Make(image, src, sampling, gainmapImage, gainmapSrc,
                                             sampling, gainmapInfo, dst, targetSdrHdrRatio,
                                             c->imageInfo().refColorSpace());
         gainmapPaint.setShader(shader);
