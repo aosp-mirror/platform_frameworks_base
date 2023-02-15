@@ -9944,7 +9944,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         super.dumpDebug(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
         proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
-        proto.write(IS_ANIMATING, isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION));
+        proto.write(IS_ANIMATING, isAnimating(TRANSITION | PARENTS | CHILDREN,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_WINDOW_ANIMATION));
         if (mThumbnail != null){
             mThumbnail.dumpDebug(proto, THUMBNAIL);
         }
