@@ -88,4 +88,13 @@ abstract class SpaEnvironment(context: Context) {
     open val sliceProviderAuthorities: String? = null
 
     // TODO: add other environment setup here.
+    companion object {
+        /**
+         * Whether debug mode is on or off.
+         *
+         * If set to true, this will also enable all the pages under development (allows browsing
+         * and searching).
+         */
+        const val IS_DEBUG = false
+    }
 }
