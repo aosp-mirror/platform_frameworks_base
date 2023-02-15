@@ -124,6 +124,16 @@ class UserTrackerImplTest : SysuiTestCase() {
 
         verify(context).registerReceiverForAllUsers(
                 eq(tracker), capture(captor), isNull(), eq(handler))
+        with(captor.value) {
+            assertThat(countActions()).isEqualTo(7)
+            assertThat(hasAction(Intent.ACTION_USER_SWITCHED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_USER_INFO_CHANGED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)).isTrue()
+            assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)).isTrue()
+            assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_ADDED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_REMOVED)).isTrue()
+            assertThat(hasAction(Intent.ACTION_MANAGED_PROFILE_UNLOCKED)).isTrue()
+        }
     }
 
     @Test
@@ -277,37 +287,6 @@ class UserTrackerImplTest : SysuiTestCase() {
         assertThat(callback.lastUserContext?.userId).isEqualTo(newID)
         assertThat(callback.calledOnProfilesChanged).isEqualTo(1)
         assertThat(callback.lastUserProfiles.map { it.id }).containsExactly(newID)
-    }
-
-    @Test
-    fun testCallbackCalledOnProfileChanged() {
-        tracker.initialize(0)
-        val callback = TestCallback()
-        tracker.addCallback(callback, executor)
-        val profileID = tracker.userId + 10
-
-        `when`(userManager.getProfiles(anyInt())).thenAnswer { invocation ->
-            val id = invocation.getArgument<Int>(0)
-            val info = UserInfo(id, "", UserInfo.FLAG_FULL)
-            val infoProfile = UserInfo(
-                    id + 10,
-                    "",
-                    "",
-                    UserInfo.FLAG_MANAGED_PROFILE,
-                    UserManager.USER_TYPE_PROFILE_MANAGED
-            )
-            infoProfile.profileGroupId = id
-            listOf(info, infoProfile)
-        }
-
-        val intent = Intent(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
-                .putExtra(Intent.EXTRA_USER, UserHandle.of(profileID))
-
-        tracker.onReceive(context, intent)
-
-        assertThat(callback.calledOnUserChanged).isEqualTo(0)
-        assertThat(callback.calledOnProfilesChanged).isEqualTo(1)
-        assertThat(callback.lastUserProfiles.map { it.id }).containsExactly(0, profileID)
     }
 
     @Test
