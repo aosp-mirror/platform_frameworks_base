@@ -712,6 +712,15 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_NO_DISMISS = 0x00002000;
 
+    /**
+     * Bit to be bitwise-ORed into the {@link #flags} field that should be
+     * set by the system if the app that sent this notification does not have the permission to send
+     * full screen intents.
+     *
+     * This flag is for internal use only; applications cannot set this flag directly.
+     * @hide
+     */
+    public static final int FLAG_FSI_REQUESTED_BUT_DENIED = 0x00004000;
 
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,

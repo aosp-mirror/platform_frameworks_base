@@ -48,6 +48,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
@@ -73,6 +74,8 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ALLOW_DISMISS_ONGOING;
+import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.FSI_FORCE_DEMOTE;
+import static com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -82,6 +85,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -111,6 +115,7 @@ import static org.mockito.Mockito.when;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -170,6 +175,8 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.permission.PermissionCheckerManager;
+import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -203,6 +210,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.Flag;
 import com.android.internal.config.sysui.TestableFlagResolver;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
@@ -319,6 +327,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     private Looper mMainLooper;
     @Mock
     private NotificationManager mMockNm;
+    @Mock
+    private PermissionManager mPermissionManager;
     @Mock
     private DevicePolicyManagerInternal mDevicePolicyManager;
 
@@ -527,7 +537,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mAppOpsManager, mAppOpsService, mUm, mHistoryManager, mStatsManager,
                 mock(TelephonyManager.class),
                 mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class),
-                mTelecomManager, mLogger, mTestFlagResolver);
+                mTelecomManager, mLogger, mTestFlagResolver, mPermissionManager);
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
@@ -604,6 +614,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 PKG, mContext.getUserId(), PKG, TEST_CHANNEL_ID));
         clearInvocations(mRankingHandler);
         when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
+
+        mTestFlagResolver.setFlagOverride(FSI_FORCE_DEMOTE, false);
+        mTestFlagResolver.setFlagOverride(SHOW_STICKY_HUN_FOR_DENIED_FSI, false);
     }
 
     @After
@@ -10109,6 +10122,84 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // no notification should be sent if the flag is off
         mInternalService.sendReviewPermissionsNotification();
         verify(mMockNm, never()).notify(anyString(), anyInt(), any(Notification.class));
+    }
+
+    private void verifyStickyHun(Flag flag, int permissionState, boolean isSticky)
+            throws Exception {
+
+        mTestFlagResolver.setFlagOverride(flag, true);
+
+        when(mPermissionManager.checkPermissionForDataDelivery(
+                eq(Manifest.permission.USE_FULL_SCREEN_INTENT), any(), any()))
+                .thenReturn(permissionState);
+
+        Notification n = new Notification.Builder(mContext, "test")
+                .setFullScreenIntent(mock(PendingIntent.class), true)
+                .build();
+
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid);
+
+        final int stickyFlag = n.flags & Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
+
+        if (isSticky) {
+            assertNotSame(0, stickyFlag);
+        } else {
+            assertSame(0, stickyFlag);
+        }
+    }
+
+    @Test
+    public void testFixNotification_flagEnableStickyHun_fsiPermissionHardDenied_showStickyHun()
+            throws Exception {
+
+        verifyStickyHun(/* flag= */ SHOW_STICKY_HUN_FOR_DENIED_FSI,
+                /* permissionState= */ PermissionCheckerManager.PERMISSION_HARD_DENIED,
+                /* isSticky= */ true);
+    }
+
+    @Test
+    public void testFixNotification_flagEnableStickyHun_fsiPermissionSoftDenied_showStickyHun()
+            throws Exception {
+
+        verifyStickyHun(/* flag= */ SHOW_STICKY_HUN_FOR_DENIED_FSI,
+                /* permissionState= */ PermissionCheckerManager.PERMISSION_SOFT_DENIED,
+                /* isSticky= */ true);
+    }
+
+    @Test
+    public void testFixNotification_flagEnableStickyHun_fsiPermissionGranted_showFsi()
+            throws Exception {
+
+        verifyStickyHun(/* flag= */ SHOW_STICKY_HUN_FOR_DENIED_FSI,
+                /* permissionState= */ PermissionCheckerManager.PERMISSION_GRANTED,
+                /* isSticky= */ false);
+    }
+
+    @Test
+    public void testFixNotification_flagForceStickyHun_fsiPermissionHardDenied_showStickyHun()
+            throws Exception {
+
+        verifyStickyHun(/* flag= */ FSI_FORCE_DEMOTE,
+                /* permissionState= */ PermissionCheckerManager.PERMISSION_HARD_DENIED,
+                /* isSticky= */ true);
+    }
+
+    @Test
+    public void testFixNotification_flagForceStickyHun_fsiPermissionSoftDenied_showStickyHun()
+            throws Exception {
+
+        verifyStickyHun(/* flag= */ FSI_FORCE_DEMOTE,
+                /* permissionState= */ PermissionCheckerManager.PERMISSION_SOFT_DENIED,
+                /* isSticky= */ true);
+    }
+
+    @Test
+    public void testFixNotification_flagForceStickyHun_fsiPermissionGranted_showStickyHun()
+            throws Exception {
+
+        verifyStickyHun(/* flag= */ FSI_FORCE_DEMOTE,
+                /* permissionState= */ PermissionCheckerManager.PERMISSION_GRANTED,
+                /* isSticky= */ true);
     }
 
     @Test
