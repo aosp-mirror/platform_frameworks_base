@@ -24,6 +24,7 @@ import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_O
 import static android.service.timezone.TimeZoneProviderStatus.OPERATION_STATUS_UNKNOWN;
 
 import static com.android.server.timezonedetector.ConfigurationInternal.DETECTION_MODE_MANUAL;
+import static com.android.server.timezonedetector.ConfigurationInternal.DETECTION_MODE_TELEPHONY;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
 import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
@@ -1385,6 +1386,37 @@ public class LocationTimeZoneProviderControllerTest {
     }
 
     /**
+     * A controller-state-only test to prove that "run in background" doesn't enable the
+     * location-based time zone detection algorithm to run when auto detection is disabled.
+     */
+    @Test
+    public void geoDetectionRunInBackground_obeysAutoDetectionDisabled() {
+        LocationTimeZoneProviderController controller = new LocationTimeZoneProviderController(
+                mTestThreadingDomain, mTestMetricsLogger, mTestPrimaryLocationTimeZoneProvider,
+                mTestSecondaryLocationTimeZoneProvider, false /* recordStateChanges */);
+
+        // A configuration where the user has auto detection disabled.
+        ConfigurationInternal autoTimeZoneDisabledConfig =
+                new ConfigurationInternal.Builder(USER1_CONFIG_GEO_DETECTION_DISABLED)
+                        .setLocationEnabledSetting(true)
+                        .setAutoDetectionEnabledSetting(false)
+                        .setGeoDetectionEnabledSetting(true)
+                        .setGeoDetectionRunInBackgroundEnabled(true)
+                        .build();
+        assertEquals(DETECTION_MODE_MANUAL, autoTimeZoneDisabledConfig.getDetectionMode());
+        assertFalse(autoTimeZoneDisabledConfig.isGeoDetectionExecutionEnabled());
+
+        TestEnvironment testEnvironment = new TestEnvironment(
+                mTestThreadingDomain, controller, autoTimeZoneDisabledConfig);
+
+        // Initialize and check initial state.
+        controller.initialize(testEnvironment, mTestCallback);
+
+        assertControllerState(controller, STATE_STOPPED);
+        mTestMetricsLogger.assertStateChangesAndCommit(STATE_PROVIDERS_INITIALIZING, STATE_STOPPED);
+    }
+
+    /**
      * A controller-state-only test to prove that "run in background" configuration behaves as
      * intended. Provider states are well covered by other "enabled" tests.
      */
@@ -1398,7 +1430,7 @@ public class LocationTimeZoneProviderControllerTest {
         ConfigurationInternal runInBackgroundDisabledConfig =
                 new ConfigurationInternal.Builder(USER1_CONFIG_GEO_DETECTION_DISABLED)
                         .setLocationEnabledSetting(true)
-                        .setAutoDetectionEnabledSetting(false)
+                        .setAutoDetectionEnabledSetting(true)
                         .setGeoDetectionEnabledSetting(false)
                         .setGeoDetectionRunInBackgroundEnabled(false)
                         .build();
@@ -1408,7 +1440,7 @@ public class LocationTimeZoneProviderControllerTest {
                 new ConfigurationInternal.Builder(runInBackgroundDisabledConfig)
                         .setGeoDetectionRunInBackgroundEnabled(true)
                         .build();
-        assertEquals(DETECTION_MODE_MANUAL, runInBackgroundEnabledConfig.getDetectionMode());
+        assertEquals(DETECTION_MODE_TELEPHONY, runInBackgroundEnabledConfig.getDetectionMode());
         assertTrue(runInBackgroundEnabledConfig.isGeoDetectionExecutionEnabled());
 
         TestEnvironment testEnvironment = new TestEnvironment(

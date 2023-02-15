@@ -1570,7 +1570,7 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<SharedConnectivityManager>() {
                     @Override
                     public SharedConnectivityManager createService(ContextImpl ctx) {
-                        return new SharedConnectivityManager(ctx);
+                        return SharedConnectivityManager.create(ctx);
                     }
                 });
 

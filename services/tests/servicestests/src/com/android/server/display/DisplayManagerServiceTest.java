@@ -183,6 +183,10 @@ public class DisplayManagerServiceTest {
         int[] getSupportedHdrOutputTypes() {
             return new int[]{};
         }
+
+        boolean getHdrOutputConversionSupport() {
+            return false;
+        }
    }
 
     private final DisplayManagerService.Injector mBasicInjector = new BasicInjector();

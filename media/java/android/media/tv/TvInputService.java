@@ -1117,7 +1117,6 @@ public abstract class TvInputService extends Service {
          * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
          * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
          * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
-         * @hide
          */
         public void notifyTimeShiftMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1141,9 +1140,12 @@ public abstract class TvInputService extends Service {
          * <p>This should be called when time-shifting is enabled.
          *
          * @param speeds An ordered array of playback speeds, expressed as values relative to the
-         *               normal playback speed 1.0.
+         *               normal playback speed (1.0), at which the current content can be played as
+         *               a time-shifted broadcast. This is an empty array if the supported playback
+         *               speeds are unknown or the video/broadcast is not in time shift mode. If
+         *               currently in time shift mode, this array will normally include at least
+         *               the values 1.0 (normal speed) and 0.0 (paused).
          * @see PlaybackParams#getSpeed()
-         * @hide
          */
         public void notifyAvailableSpeeds(@NonNull float[] speeds) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1191,7 +1193,6 @@ public abstract class TvInputService extends Service {
          *
          * @param available {@code true} if cueing message is available; {@code false} if it becomes
          *                  unavailable.
-         * @hide
          */
         public void notifyCueingMessageAvailability(boolean available) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1575,7 +1576,6 @@ public abstract class TvInputService extends Service {
          * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
          * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
          * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
-         * @hide
          */
         public void onTimeShiftSetMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
         }

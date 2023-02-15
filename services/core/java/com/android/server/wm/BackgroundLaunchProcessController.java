@@ -102,6 +102,41 @@ class BackgroundLaunchProcessController {
             boolean hasActivityInVisibleTask, boolean hasBackgroundActivityStartPrivileges,
             long lastStopAppSwitchesTime, long lastActivityLaunchTime,
             long lastActivityFinishTime) {
+        // Allow if the proc is instrumenting with background activity starts privs.
+        if (hasBackgroundActivityStartPrivileges) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[Process(" + pid
+                        + ")] Activity start allowed: process instrumenting with background "
+                        + "activity starts privileges");
+            }
+            return BAL_ALLOW_BAL_PERMISSION;
+        }
+        // Allow if the flag was explicitly set.
+        if (isBackgroundStartAllowedByToken(uid, packageName, isCheckingForFgsStart)) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[Process(" + pid
+                        + ")] Activity start allowed: process allowed by token");
+            }
+            return BAL_ALLOW_BAL_PERMISSION;
+        }
+        // Allow if the caller is bound by a UID that's currently foreground.
+        if (isBoundByForegroundUid()) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[Process(" + pid
+                        + ")] Activity start allowed: process bound by foreground uid");
+            }
+            return BAL_ALLOW_VISIBLE_WINDOW;
+        }
+        // Allow if the caller has an activity in any foreground task.
+        if (hasActivityInVisibleTask
+                && (appSwitchState == APP_SWITCH_ALLOW || appSwitchState == APP_SWITCH_FG_ONLY)) {
+            if (DEBUG_ACTIVITY_STARTS) {
+                Slog.d(TAG, "[Process(" + pid
+                        + ")] Activity start allowed: process has activity in foreground task");
+            }
+            return BAL_ALLOW_FOREGROUND;
+        }
+
         // If app switching is not allowed, we ignore all the start activity grace period
         // exception so apps cannot start itself in onPause() after pressing home button.
         if (appSwitchState == APP_SWITCH_ALLOW) {
@@ -128,40 +163,6 @@ class BackgroundLaunchProcessController {
                 }
 
             }
-        }
-        // Allow if the proc is instrumenting with background activity starts privs.
-        if (hasBackgroundActivityStartPrivileges) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[Process(" + pid
-                        + ")] Activity start allowed: process instrumenting with background "
-                        + "activity starts privileges");
-            }
-            return BAL_ALLOW_BAL_PERMISSION;
-        }
-        // Allow if the caller has an activity in any foreground task.
-        if (hasActivityInVisibleTask
-                && (appSwitchState == APP_SWITCH_ALLOW || appSwitchState == APP_SWITCH_FG_ONLY)) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[Process(" + pid
-                        + ")] Activity start allowed: process has activity in foreground task");
-            }
-            return BAL_ALLOW_FOREGROUND;
-        }
-        // Allow if the caller is bound by a UID that's currently foreground.
-        if (isBoundByForegroundUid()) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[Process(" + pid
-                        + ")] Activity start allowed: process bound by foreground uid");
-            }
-            return BAL_ALLOW_VISIBLE_WINDOW;
-        }
-        // Allow if the flag was explicitly set.
-        if (isBackgroundStartAllowedByToken(uid, packageName, isCheckingForFgsStart)) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[Process(" + pid
-                        + ")] Activity start allowed: process allowed by token");
-            }
-            return BAL_ALLOW_BAL_PERMISSION;
         }
         return BAL_BLOCK;
     }

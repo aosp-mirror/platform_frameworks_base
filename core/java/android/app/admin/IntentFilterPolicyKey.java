@@ -18,6 +18,7 @@ package android.app.admin;
 
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_INTENT_FILTER;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_BUNDLE_KEY;
+import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_KEY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -100,7 +101,7 @@ public final class IntentFilterPolicyKey extends PolicyKey {
      */
     @Override
     public void writeToBundle(Bundle bundle) {
-        super.writeToBundle(bundle);
+        bundle.putString(EXTRA_POLICY_KEY, getIdentifier());
         Bundle extraPolicyParams = new Bundle();
         extraPolicyParams.putParcelable(EXTRA_INTENT_FILTER, mFilter);
         bundle.putBundle(EXTRA_POLICY_BUNDLE_KEY, extraPolicyParams);
@@ -117,7 +118,7 @@ public final class IntentFilterPolicyKey extends PolicyKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getIdentifier(), mFilter);
+        return Objects.hash(getIdentifier());
     }
 
     @Override
@@ -133,7 +134,7 @@ public final class IntentFilterPolicyKey extends PolicyKey {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(getIdentifier());
-        mFilter.writeToParcel(dest, flags);
+        dest.writeTypedObject(mFilter, flags);
     }
 
     @NonNull

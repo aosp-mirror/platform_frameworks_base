@@ -16,20 +16,24 @@
 
 package android.companion.virtual.sensor;
 
+import android.companion.virtual.sensor.VirtualSensor;
+
 /**
- * Interface for notification of listener registration changes for a virtual sensor.
+ * Interface for notifying the sensor owner about whether and how sensor events should be injected.
  *
  * @hide
  */
-oneway interface IVirtualSensorStateChangeCallback {
+oneway interface IVirtualSensorCallback {
 
     /**
-     * Called when the registered listeners to a virtual sensor have changed.
+     * Called when the requested sensor event injection parameters have changed.
      *
+     * @param sensor The sensor whose requested injection parameters have changed.
      * @param enabled Whether the sensor is enabled.
      * @param samplingPeriodMicros The requested sensor's sampling period in microseconds.
      * @param batchReportingLatencyMicros The requested maximum time interval in microseconds
      * between the delivery of two batches of sensor events.
      */
-    void onStateChanged(boolean enabled, int samplingPeriodMicros, int batchReportLatencyMicros);
+    void onConfigurationChanged(in VirtualSensor sensor, boolean enabled, int samplingPeriodMicros,
+            int batchReportLatencyMicros);
 }

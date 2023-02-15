@@ -1958,8 +1958,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity,
                 injector.getBackgroundHandler());
         mDexOptHelper = new DexOptHelper(this);
-        mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mBroadcastHelper,
-                mProtectedPackages);
+        mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mUserManager,
+                mBroadcastHelper, mProtectedPackages);
         mDistractingPackageHelper = new DistractingPackageHelper(this, mInjector, mBroadcastHelper,
                 mSuspendPackageHelper);
         mStorageEventHelper = new StorageEventHelper(this, mDeletePackageHelper,
@@ -6141,7 +6141,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             enforceCanSetPackagesSuspendedAsUser(snapshot, callingPackage, callingUid, userId,
                     "setPackagesSuspendedAsUser");
             return mSuspendPackageHelper.setPackagesSuspended(snapshot, packageNames, suspended,
-                    appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid);
+                    appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid,
+                    false /* forQuietMode */);
         }
 
         @Override
@@ -6501,6 +6502,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             synchronized (mLock) {
                 PackageManagerService.this.flushPackageRestrictionsAsUserInternalLocked(userId);
             }
+        }
+
+        @Override
+        public String[] setPackagesSuspendedByAdmin(
+                @UserIdInt int userId, @NonNull String[] packageNames, boolean suspended) {
+            return mSuspendPackageHelper.setPackagesSuspendedByAdmin(
+                    snapshotComputer(), userId, packageNames, suspended);
+        }
+
+        @Override
+        public void setPackagesSuspendedForQuietMode(int userId, boolean suspended) {
+            mSuspendPackageHelper.setPackagesSuspendedForQuietMode(
+                    snapshotComputer(), userId, suspended);
         }
 
         @Override

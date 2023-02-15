@@ -106,6 +106,7 @@ public class AudioManager {
 
     private Context mOriginalContext;
     private Context mApplicationContext;
+    private int mOriginalContextDeviceId = DEVICE_ID_DEFAULT;
     private @Nullable VirtualDeviceManager mVirtualDeviceManager; // Lazy initialized.
     private static final String TAG = "AudioManager";
     private static final boolean DEBUG = false;
@@ -844,6 +845,7 @@ public class AudioManager {
     }
 
     private void setContext(Context context) {
+        mOriginalContextDeviceId = context.getDeviceId();
         mApplicationContext = context.getApplicationContext();
         if (mApplicationContext != null) {
             mOriginalContext = null;
@@ -3958,7 +3960,7 @@ public class AudioManager {
     }
 
     /**
-     * Checks whether this {@link AudioManager} instance is asociated with {@link VirtualDevice}
+     * Checks whether this {@link AudioManager} instance is associated with {@link VirtualDevice}
      * configured with custom device policy for audio. If there is such device, request to play
      * sound effect is forwarded to {@link VirtualDeviceManager}.
      *
@@ -3967,16 +3969,22 @@ public class AudioManager {
      * false otherwise.
      */
     private boolean delegateSoundEffectToVdm(@SystemSoundEffect int effectType) {
-        int deviceId = getContext().getDeviceId();
-        if (deviceId != DEVICE_ID_DEFAULT) {
+        if (hasCustomPolicyVirtualDeviceContext()) {
             VirtualDeviceManager vdm = getVirtualDeviceManager();
-            if (vdm != null && vdm.getDevicePolicy(deviceId, POLICY_TYPE_AUDIO)
-                    != DEVICE_POLICY_DEFAULT) {
-                vdm.playSoundEffect(deviceId, effectType);
-                return true;
-            }
+            vdm.playSoundEffect(mOriginalContextDeviceId, effectType);
+            return true;
         }
         return false;
+    }
+
+    private boolean hasCustomPolicyVirtualDeviceContext() {
+        if (mOriginalContextDeviceId == DEVICE_ID_DEFAULT) {
+            return false;
+        }
+
+        VirtualDeviceManager vdm = getVirtualDeviceManager();
+        return vdm != null && vdm.getDevicePolicy(mOriginalContextDeviceId, POLICY_TYPE_AUDIO)
+                != DEVICE_POLICY_DEFAULT;
     }
 
     /**
@@ -4677,6 +4685,16 @@ public class AudioManager {
             throw new IllegalArgumentException(
                     "Illegal null audio policy when locking audio focus");
         }
+
+        if (hasCustomPolicyVirtualDeviceContext()) {
+            // If the focus request was made within context associated with VirtualDevice
+            // configured with custom device policy for audio, bypass audio service focus handling.
+            // The custom device policy for audio means that audio associated with this device
+            // is likely rerouted to VirtualAudioDevice and playback on the VirtualAudioDevice
+            // shouldn't affect non-virtual audio tracks (and vice versa).
+            return AUDIOFOCUS_REQUEST_GRANTED;
+        }
+
         registerAudioFocusRequest(afr);
         final IAudioService service = getService();
         final int status;
@@ -4949,16 +4967,19 @@ public class AudioManager {
     @SuppressLint("RequiresPermission") // no permission enforcement, but only "undoes" what would
     // have been done by a matching requestAudioFocus
     public int abandonAudioFocus(OnAudioFocusChangeListener l, AudioAttributes aa) {
-        int status = AUDIOFOCUS_REQUEST_FAILED;
+        if (hasCustomPolicyVirtualDeviceContext()) {
+            // If this AudioManager instance is running within VirtualDevice context configured
+            // with custom device policy for audio, the audio focus handling is bypassed.
+            return AUDIOFOCUS_REQUEST_GRANTED;
+        }
         unregisterAudioFocusRequest(l);
         final IAudioService service = getService();
         try {
-            status = service.abandonAudioFocus(mAudioFocusDispatcher,
+            return service.abandonAudioFocus(mAudioFocusDispatcher,
                     getIdForAudioFocusListener(l), aa, getContext().getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return status;
     }
 
     //====================================================================
@@ -7625,22 +7646,13 @@ public class AudioManager {
         return codecConfigList;
     }
 
-    /**
-     * Returns a list of audio formats that corresponds to encoding formats
-     * supported on offload path for Le audio playback.
-     *
-     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
-     * supported for offload Le Audio playback
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @NonNull
-    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio() {
+    private List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio(
+            @AudioSystem.BtOffloadDeviceType int deviceType) {
         ArrayList<Integer> formatsList = new ArrayList<>();
         ArrayList<BluetoothLeAudioCodecConfig> leAudioCodecConfigList = new ArrayList<>();
 
         int status = AudioSystem.getHwOffloadFormatsSupportedForBluetoothMedia(
-                AudioSystem.DEVICE_OUT_BLE_HEADSET, formatsList);
+                deviceType, formatsList);
         if (status != AudioManager.SUCCESS) {
             Log.e(TAG, "getHwOffloadEncodingFormatsSupportedForLeAudio failed:" + status);
             return leAudioCodecConfigList;
@@ -7655,6 +7667,34 @@ public class AudioManager {
             }
         }
         return leAudioCodecConfigList;
+    }
+
+    /**
+     * Returns a list of audio formats that corresponds to encoding formats
+     * supported on offload path for Le audio playback.
+     *
+     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
+     * supported for offload Le Audio playback
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio() {
+        return getHwOffloadFormatsSupportedForLeAudio(AudioSystem.DEVICE_OUT_BLE_HEADSET);
+    }
+
+    /**
+     * Returns a list of audio formats that corresponds to encoding formats
+     * supported on offload path for Le Broadcast playback.
+     *
+     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
+     * supported for offload Le Broadcast playback
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeBroadcast() {
+        return getHwOffloadFormatsSupportedForLeAudio(AudioSystem.DEVICE_OUT_BLE_BROADCAST);
     }
 
     // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the

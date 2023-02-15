@@ -87,7 +87,7 @@ object ArgumentPageProvider : SettingsPageProvider {
 
         return SettingsEntryBuilder.createInject(
             owner = createSettingsPage(arguments),
-            displayName = "${name}_$stringParam",
+            label = "${name}_$stringParam",
         )
             .setSearchDataFn { ArgumentPageModel.genInjectSearchData() }
             .setUiLayoutFn {

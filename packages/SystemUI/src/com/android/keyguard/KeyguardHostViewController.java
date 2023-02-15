@@ -202,18 +202,8 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
         mKeyguardSecurityContainerController.onPause();
     }
 
-    /**
-     * Reinflate the view flipper child view.
-     */
-    public void reinflateViewFlipper() {
-        mKeyguardSecurityContainerController.reinflateViewFlipper();
-    }
-
-    /**
-     * Reinflate the view flipper child view.
-     */
-    public void reinflateViewFlipper() {
-        mKeyguardSecurityContainerController.reinflateViewFlipper();
+    public void resetSecurityContainer() {
+        mKeyguardSecurityContainerController.reset();
     }
 
     /**
@@ -242,19 +232,23 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     /**
      * Starts the animation when the Keyguard gets shown.
      */
-    public void appear() {
+    public void appear(int statusBarHeight) {
         // We might still be collapsed and the view didn't have time to layout yet or still
         // be small, let's wait on the predraw to do the animation in that case.
-        mView.getViewTreeObserver().addOnPreDrawListener(
-                new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        mView.getViewTreeObserver().removeOnPreDrawListener(this);
-                        mKeyguardSecurityContainerController.startAppearAnimation();
-                        return true;
-                    }
-                });
-        mView.requestLayout();
+        if (mView.getHeight() != 0 && mView.getHeight() != statusBarHeight) {
+            mKeyguardSecurityContainerController.startAppearAnimation();
+        } else {
+            mView.getViewTreeObserver().addOnPreDrawListener(
+                    new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            mView.getViewTreeObserver().removeOnPreDrawListener(this);
+                            mKeyguardSecurityContainerController.startAppearAnimation();
+                            return true;
+                        }
+                    });
+            mView.requestLayout();
+        }
     }
 
     /**

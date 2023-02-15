@@ -59,7 +59,7 @@ public class AndroidPackageUtils {
             AndroidPackage aPkg) {
         PackageImpl pkg = (PackageImpl) aPkg;
         ArrayList<String> paths = new ArrayList<>();
-        if (pkg.isHasCode()) {
+        if (pkg.isDeclaredHavingCode()) {
             paths.add(pkg.getBaseApkPath());
         }
         String[] splitCodePaths = pkg.getSplitCodePaths();
@@ -156,7 +156,7 @@ public class AndroidPackageUtils {
         return NativeLibraryHelper.Handle.create(
                 AndroidPackageUtils.getAllCodePaths(pkg),
                 pkg.isMultiArch(),
-                pkg.isExtractNativeLibs(),
+                pkg.isExtractNativeLibrariesRequested(),
                 pkg.isDebuggable()
         );
     }
@@ -243,7 +243,7 @@ public class AndroidPackageUtils {
         } else if (pkg.isSignedWithPlatformKey()) {
             isAllowedToUseHiddenApis = true;
         } else if (packageState.isSystem()) {
-            isAllowedToUseHiddenApis = pkg.isUsesNonSdkApi()
+            isAllowedToUseHiddenApis = pkg.isNonSdkApiRequested()
                     || SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(
                     pkg.getPackageName());
         } else {

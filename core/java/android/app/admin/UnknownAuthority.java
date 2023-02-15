@@ -19,6 +19,7 @@ package android.app.admin;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 
 /**
@@ -32,11 +33,19 @@ import android.os.Parcel;
 public final class UnknownAuthority extends Authority {
 
     /**
+     * Object representing an unknown authority.
+     *
      * @hide
      */
+    @TestApi
+    @NonNull
     public static final UnknownAuthority UNKNOWN_AUTHORITY = new UnknownAuthority();
 
-    private UnknownAuthority() {}
+    /**
+     * Creates an authority that represents an admin that can set a policy but
+     * doesn't have a known authority (e.g. a system components).
+     */
+    public UnknownAuthority() {}
 
     @Override
     public String toString() {
@@ -45,12 +54,13 @@ public final class UnknownAuthority extends Authority {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        return super.equals(o);
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass();
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return 0;
     }
 
     @Override
@@ -66,7 +76,7 @@ public final class UnknownAuthority extends Authority {
             new Creator<UnknownAuthority>() {
                 @Override
                 public UnknownAuthority createFromParcel(Parcel source) {
-                    return new UnknownAuthority();
+                    return UNKNOWN_AUTHORITY;
                 }
 
                 @Override

@@ -16,8 +16,11 @@
 
 package android.app.admin;
 
+import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_KEY;
+
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,6 +42,14 @@ public final class NoArgsPolicyKey extends PolicyKey {
 
     private NoArgsPolicyKey(Parcel source) {
         this(source.readString());
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void writeToBundle(Bundle bundle) {
+        bundle.putString(EXTRA_POLICY_KEY, getIdentifier());
     }
 
     @Override

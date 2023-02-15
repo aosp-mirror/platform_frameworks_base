@@ -125,7 +125,7 @@ public abstract class GameSessionService extends Service {
         final Context windowContext = createWindowContext(display,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, /*options=*/ null);
         SurfaceControlViewHost surfaceControlViewHost =
-                new SurfaceControlViewHost(windowContext, display, hostToken);
+                new SurfaceControlViewHost(windowContext, display, hostToken, "GameSessionService");
 
         gameSession.attach(
                 gameSessionController,

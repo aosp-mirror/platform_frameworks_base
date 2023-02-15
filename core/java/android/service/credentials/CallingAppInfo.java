@@ -21,6 +21,10 @@ import android.content.pm.SigningInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.Preconditions;
+
+import java.util.Objects;
+
 /**
  * Information pertaining to the calling application, including the package name and a list of
  * app signatures.
@@ -37,8 +41,9 @@ public final class CallingAppInfo implements Parcelable {
      */
     public CallingAppInfo(@NonNull String packageName,
             @NonNull SigningInfo signingInfo) {
-        mPackageName = packageName;
-        mSigningInfo = signingInfo;
+        mPackageName = Preconditions.checkStringNotEmpty(packageName, "package name"
+                + "must not be null or empty");
+        mSigningInfo = Objects.requireNonNull(signingInfo);
     }
 
     private CallingAppInfo(@NonNull Parcel in) {

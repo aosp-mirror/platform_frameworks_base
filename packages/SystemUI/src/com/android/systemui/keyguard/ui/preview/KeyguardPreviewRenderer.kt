@@ -97,6 +97,7 @@ constructor(
                     context,
                     displayManager.getDisplay(bundle.getInt(KEY_DISPLAY_ID)),
                     hostToken,
+                    "KeyguardPreviewRenderer"
                 )
             disposables.add(DisposableHandle { host.release() })
         }

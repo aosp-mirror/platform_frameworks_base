@@ -17,6 +17,7 @@
 package android.app.admin;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,6 +33,23 @@ import java.util.Set;
  */
 @TestApi
 public final class StringSetUnion extends ResolutionMechanism<Set<String>> {
+
+    /**
+     * Union resolution for policies represented {@code Set<String>} which resolves as the union of
+     * all sets.
+     */
+    @NonNull
+    public static final StringSetUnion STRING_SET_UNION = new StringSetUnion();
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass();
+    }
+    @Override
+    public int hashCode() {
+        return 0;
+    }
 
     @Override
     public String toString() {

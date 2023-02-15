@@ -704,15 +704,15 @@ public class TransitionTests extends WindowTestsBase {
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         ArraySet<WindowContainer> participants = transition.mParticipants;
 
-        final Task newTask = createTask(mDisplayContent);
-        doReturn(false).when(newTask).isTranslucent(any());
         final Task oldTask = createTask(mDisplayContent);
-        doReturn(false).when(oldTask).isTranslucent(any());
+        final Task newTask = createTask(mDisplayContent);
 
         final ActivityRecord closing = createActivityRecord(oldTask);
         closing.setOccludesParent(true);
+        closing.visibleIgnoringKeyguard = true;
         final ActivityRecord opening = createActivityRecord(newTask);
-        opening.setOccludesParent(false);
+        opening.setOccludesParent(true);
+        opening.visibleIgnoringKeyguard = true;
         // Start states.
         changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
         changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, false /* exChg */));
@@ -735,8 +735,8 @@ public class TransitionTests extends WindowTestsBase {
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
 
-        assertTrue((info.getChanges().get(0).getFlags() & FLAG_TRANSLUCENT) == 0);
-        assertTrue((info.getChanges().get(1).getFlags() & FLAG_TRANSLUCENT) == 0);
+        assertFalse(info.getChanges().get(0).hasFlags(FLAG_TRANSLUCENT));
+        assertFalse(info.getChanges().get(1).hasFlags(FLAG_TRANSLUCENT));
     }
 
     @Test
@@ -745,15 +745,15 @@ public class TransitionTests extends WindowTestsBase {
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         ArraySet<WindowContainer> participants = transition.mParticipants;
 
-        final Task newTask = createTask(mDisplayContent);
-        doReturn(true).when(newTask).isTranslucent(any());
         final Task oldTask = createTask(mDisplayContent);
-        doReturn(false).when(oldTask).isTranslucent(any());
+        final Task newTask = createTask(mDisplayContent);
 
         final ActivityRecord closing = createActivityRecord(oldTask);
         closing.setOccludesParent(true);
+        closing.visibleIgnoringKeyguard = true;
         final ActivityRecord opening = createActivityRecord(newTask);
         opening.setOccludesParent(false);
+        opening.visibleIgnoringKeyguard = true;
         // Start states.
         changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
         changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, false /* exChg */));
@@ -776,8 +776,186 @@ public class TransitionTests extends WindowTestsBase {
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
 
-        assertTrue((info.getChanges().get(0).getFlags() & FLAG_TRANSLUCENT) != 0);
-        assertTrue((info.getChanges().get(1).getFlags() & FLAG_TRANSLUCENT) == 0);
+        assertTrue(info.getChanges().get(0).hasFlags(FLAG_TRANSLUCENT));
+        assertFalse(info.getChanges().get(1).hasFlags(FLAG_TRANSLUCENT));
+    }
+
+    @Test
+    public void testOpenOpaqueTaskFragment() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment closingTaskFragment = createTaskFragmentWithActivity(task);
+        final TaskFragment openingTaskFragment = createTaskFragmentWithActivity(task);
+
+        final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
+        closing.setOccludesParent(true);
+        closing.visibleIgnoringKeyguard = true;
+        final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
+        opening.setOccludesParent(true);
+        opening.visibleIgnoringKeyguard = true;
+        // Start states.
+        changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
+                false /* vis */, true /* exChg */));
+        changes.put(closingTaskFragment, new Transition.ChangeInfo(closingTaskFragment,
+                true /* vis */, false /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(opening, false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, false /* exChg */));
+        fillChangeMap(changes, openingTaskFragment);
+        // End states.
+        closing.setVisibleRequested(false);
+        opening.setVisibleRequested(true);
+
+        final int transit = transition.mType;
+        int flags = 0;
+
+        // Check basic both tasks participating
+        participants.add(closingTaskFragment);
+        participants.add(openingTaskFragment);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
+        assertEquals(2, info.getChanges().size());
+        assertEquals(transit, info.getType());
+
+        assertFalse(info.getChanges().get(0).hasFlags(FLAG_TRANSLUCENT));
+        assertFalse(info.getChanges().get(1).hasFlags(FLAG_TRANSLUCENT));
+    }
+
+    @Test
+    public void testOpenTranslucentTaskFragment() {
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment closingTaskFragment = createTaskFragmentWithActivity(task);
+        final TaskFragment openingTaskFragment = createTaskFragmentWithActivity(task);
+
+        final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
+        closing.setOccludesParent(true);
+        closing.visibleIgnoringKeyguard = true;
+        final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
+        opening.setOccludesParent(false);
+        opening.visibleIgnoringKeyguard = true;
+        // Start states.
+        changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
+                false /* vis */, true /* exChg */));
+        changes.put(closingTaskFragment, new Transition.ChangeInfo(closingTaskFragment,
+                true /* vis */, false /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(opening, false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, false /* exChg */));
+        fillChangeMap(changes, openingTaskFragment);
+        // End states.
+        closing.setVisibleRequested(false);
+        opening.setVisibleRequested(true);
+
+        final int transit = transition.mType;
+        int flags = 0;
+
+        // Check basic both tasks participating
+        participants.add(closingTaskFragment);
+        participants.add(openingTaskFragment);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
+        assertEquals(2, info.getChanges().size());
+        assertEquals(transit, info.getType());
+
+        assertTrue(info.getChanges().get(0).hasFlags(FLAG_TRANSLUCENT));
+        assertFalse(info.getChanges().get(1).hasFlags(FLAG_TRANSLUCENT));
+    }
+
+    @Test
+    public void testCloseOpaqueTaskFragment_withFinishingActivity() {
+        final Transition transition = createTestTransition(TRANSIT_CLOSE);
+        ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment openingTaskFragment = createTaskFragmentWithActivity(task);
+        final TaskFragment closingTaskFragment = createTaskFragmentWithActivity(task);
+
+        final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
+        opening.setOccludesParent(true);
+        opening.visibleIgnoringKeyguard = true;
+        final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
+        closing.setOccludesParent(true);
+        closing.visibleIgnoringKeyguard = true;
+        closing.finishing = true;
+        // Start states.
+        changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
+                false /* vis */, true /* exChg */));
+        changes.put(closingTaskFragment, new Transition.ChangeInfo(closingTaskFragment,
+                true /* vis */, false /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(opening, false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, false /* exChg */));
+        fillChangeMap(changes, openingTaskFragment);
+        // End states.
+        closing.setVisibleRequested(false);
+        opening.setVisibleRequested(true);
+
+        final int transit = transition.mType;
+        int flags = 0;
+
+        // Check basic both tasks participating
+        participants.add(closingTaskFragment);
+        participants.add(openingTaskFragment);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
+        assertEquals(2, info.getChanges().size());
+        assertEquals(transit, info.getType());
+
+        assertFalse(info.getChanges().get(0).hasFlags(FLAG_TRANSLUCENT));
+        assertFalse(info.getChanges().get(1).hasFlags(FLAG_TRANSLUCENT));
+    }
+
+    @Test
+    public void testCloseTranslucentTaskFragment_withFinishingActivity() {
+        final Transition transition = createTestTransition(TRANSIT_CLOSE);
+        ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
+        ArraySet<WindowContainer> participants = transition.mParticipants;
+
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment openingTaskFragment = createTaskFragmentWithActivity(task);
+        final TaskFragment closingTaskFragment = createTaskFragmentWithActivity(task);
+
+        final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
+        opening.setOccludesParent(true);
+        opening.visibleIgnoringKeyguard = true;
+        final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
+        closing.setOccludesParent(false);
+        closing.visibleIgnoringKeyguard = true;
+        closing.finishing = true;
+        // Start states.
+        changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
+                false /* vis */, true /* exChg */));
+        changes.put(closingTaskFragment, new Transition.ChangeInfo(closingTaskFragment,
+                true /* vis */, false /* exChg */));
+        changes.put(opening, new Transition.ChangeInfo(opening, false /* vis */, true /* exChg */));
+        changes.put(closing, new Transition.ChangeInfo(closing, true /* vis */, false /* exChg */));
+        fillChangeMap(changes, openingTaskFragment);
+        // End states.
+        closing.setVisibleRequested(false);
+        opening.setVisibleRequested(true);
+
+        final int transit = transition.mType;
+        int flags = 0;
+
+        // Check basic both tasks participating
+        participants.add(closingTaskFragment);
+        participants.add(openingTaskFragment);
+        ArrayList<Transition.ChangeInfo> targets =
+                Transition.calculateTargets(participants, changes);
+        TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, mMockT);
+        assertEquals(2, info.getChanges().size());
+        assertEquals(transit, info.getType());
+
+        assertTrue(info.getChanges().get(0).hasFlags(FLAG_TRANSLUCENT));
+        assertFalse(info.getChanges().get(1).hasFlags(FLAG_TRANSLUCENT));
     }
 
     @Test

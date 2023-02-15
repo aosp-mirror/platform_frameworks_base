@@ -20,6 +20,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ApplicationExitInfo;
@@ -339,6 +340,24 @@ class ProcessRecord implements WindowProcessListener {
      */
     @GuardedBy("mService")
     private boolean mInFullBackup;
+
+    /**
+     * A set of tokens that currently contribute to this process being temporarily allowed
+     * to start certain components (eg. activities or foreground services) even if it's not
+     * in the foreground.
+     */
+    @GuardedBy("mBackgroundStartPrivileges")
+    private final ArrayMap<Binder, BackgroundStartPrivileges> mBackgroundStartPrivileges =
+            new ArrayMap<>();
+
+    /**
+     * The merged BackgroundStartPrivileges based on what's in {@link #mBackgroundStartPrivileges}.
+     * This is lazily generated using {@link #getBackgroundStartPrivileges()}.
+     */
+    @Nullable
+    @GuardedBy("mBackgroundStartPrivileges")
+    private BackgroundStartPrivileges mBackgroundStartPrivilegesMerged =
+            BackgroundStartPrivileges.NONE;
 
     /**
      * Controller for driving the process state on the window manager side.
@@ -1325,11 +1344,50 @@ class ProcessRecord implements WindowProcessListener {
         Objects.requireNonNull(entity);
         mWindowProcessController.addOrUpdateBackgroundStartPrivileges(entity,
                 backgroundStartPrivileges);
+        setBackgroundStartPrivileges(entity, backgroundStartPrivileges);
     }
 
     void removeBackgroundStartPrivileges(Binder entity) {
         Objects.requireNonNull(entity);
         mWindowProcessController.removeBackgroundStartPrivileges(entity);
+        setBackgroundStartPrivileges(entity, null);
+    }
+
+    @NonNull
+    BackgroundStartPrivileges getBackgroundStartPrivileges() {
+        synchronized (mBackgroundStartPrivileges) {
+            if (mBackgroundStartPrivilegesMerged == null) {
+                // Lazily generate the merged version when it's actually needed.
+                mBackgroundStartPrivilegesMerged = BackgroundStartPrivileges.NONE;
+                for (int i = mBackgroundStartPrivileges.size() - 1; i >= 0; --i) {
+                    mBackgroundStartPrivilegesMerged =
+                            mBackgroundStartPrivilegesMerged.merge(
+                                    mBackgroundStartPrivileges.valueAt(i));
+                }
+            }
+            return mBackgroundStartPrivilegesMerged;
+        }
+    }
+
+    private void setBackgroundStartPrivileges(@NonNull Binder entity,
+            @Nullable BackgroundStartPrivileges backgroundStartPrivileges) {
+        synchronized (mBackgroundStartPrivileges) {
+            final boolean changed;
+            if (backgroundStartPrivileges == null) {
+                changed = mBackgroundStartPrivileges.remove(entity) != null;
+            } else {
+                final BackgroundStartPrivileges oldBsp =
+                        mBackgroundStartPrivileges.put(entity, backgroundStartPrivileges);
+                // BackgroundStartPrivileges tries to reuse the same object and avoid creating
+                // additional objects. For now, we just compare the reference to see if something
+                // has changed.
+                // TODO: actually compare the individual values to see if there's a change
+                changed = backgroundStartPrivileges != oldBsp;
+            }
+            if (changed) {
+                mBackgroundStartPrivilegesMerged = null;
+            }
+        }
     }
 
     @Override

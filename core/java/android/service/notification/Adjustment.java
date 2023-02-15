@@ -51,8 +51,17 @@ public final class Adjustment implements Parcelable {
 
     /** @hide */
     @StringDef (prefix = { "KEY_" }, value = {
-            KEY_CONTEXTUAL_ACTIONS, KEY_GROUP_KEY, KEY_IMPORTANCE, KEY_PEOPLE, KEY_SNOOZE_CRITERIA,
-            KEY_TEXT_REPLIES, KEY_USER_SENTIMENT, KEY_IMPORTANCE_PROPOSAL, KEY_SENSITIVE_CONTENT
+            KEY_PEOPLE,
+            KEY_SNOOZE_CRITERIA,
+            KEY_GROUP_KEY,
+            KEY_USER_SENTIMENT,
+            KEY_CONTEXTUAL_ACTIONS,
+            KEY_TEXT_REPLIES,
+            KEY_IMPORTANCE,
+            KEY_IMPORTANCE_PROPOSAL,
+            KEY_SENSITIVE_CONTENT,
+            KEY_RANKING_SCORE,
+            KEY_NOT_CONVERSATION
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Keys {}
@@ -65,6 +74,7 @@ public final class Adjustment implements Parcelable {
      */
     @SystemApi
     public static final String KEY_PEOPLE = "key_people";
+
     /**
      * Parcelable {@code ArrayList} of {@link SnoozeCriterion}. These criteria may be visible to
      * users. If a user chooses to snooze a notification until one of these criterion, the
@@ -72,6 +82,7 @@ public final class Adjustment implements Parcelable {
      * {@link NotificationAssistantService#onNotificationSnoozedUntilContext}.
      */
     public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
+
     /**
      * Data type: String. Used to change what {@link Notification#getGroup() group} a notification
      * belongs to.

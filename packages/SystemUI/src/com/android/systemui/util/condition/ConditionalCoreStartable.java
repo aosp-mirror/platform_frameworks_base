@@ -43,11 +43,6 @@ public abstract class ConditionalCoreStartable implements CoreStartable {
 
     @Override
     public final void start() {
-        if (mConditionSet == null || mConditionSet.isEmpty()) {
-            onStart();
-            return;
-        }
-
         mStartToken = mMonitor.addSubscription(
                 new Monitor.Subscription.Builder(allConditionsMet -> {
                     if (allConditionsMet) {
@@ -63,11 +58,6 @@ public abstract class ConditionalCoreStartable implements CoreStartable {
 
     @Override
     public final void onBootCompleted() {
-        if (mConditionSet == null || mConditionSet.isEmpty()) {
-            bootCompleted();
-            return;
-        }
-
         mBootCompletedToken = mMonitor.addSubscription(
                 new Monitor.Subscription.Builder(allConditionsMet -> {
                     if (allConditionsMet) {

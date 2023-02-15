@@ -164,13 +164,13 @@ constructor(
                 mediaCarouselScrollHandler.scrollToStart()
             }
         }
-    private var currentlyExpanded = true
+
+    @VisibleForTesting
+    var currentlyExpanded = true
         set(value) {
             if (field != value) {
                 field = value
-                for (player in MediaPlayerData.players()) {
-                    player.setListening(field)
-                }
+                updateSeekbarListening(mediaCarouselScrollHandler.visibleToUser)
             }
         }
 
@@ -259,6 +259,7 @@ constructor(
                 executor,
                 this::onSwipeToDismiss,
                 this::updatePageIndicatorLocation,
+                this::updateSeekbarListening,
                 this::closeGuts,
                 falsingCollector,
                 falsingManager,
@@ -590,6 +591,17 @@ constructor(
                     ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
             }
         }
+        // Check postcondition: mediaContent should have the same number of children as there
+        // are
+        // elements in mediaPlayers.
+        if (MediaPlayerData.players().size != mediaContent.childCount) {
+            Log.e(
+                TAG,
+                "Size of players list and number of views in carousel are out of sync. " +
+                    "Players size is ${MediaPlayerData.players().size}. " +
+                    "View count is ${mediaContent.childCount}."
+            )
+        }
     }
 
     // Returns true if new player is added
@@ -618,7 +630,9 @@ constructor(
                     )
                 newPlayer.mediaViewHolder?.player?.setLayoutParams(lp)
                 newPlayer.bindPlayer(data, key)
-                newPlayer.setListening(currentlyExpanded)
+                newPlayer.setListening(
+                    mediaCarouselScrollHandler.visibleToUser && currentlyExpanded
+                )
                 MediaPlayerData.addMediaPlayer(
                     key,
                     data,
@@ -665,17 +679,6 @@ constructor(
             updatePageIndicator()
             mediaCarouselScrollHandler.onPlayersChanged()
             mediaFrame.requiresRemeasuring = true
-            // Check postcondition: mediaContent should have the same number of children as there
-            // are
-            // elements in mediaPlayers.
-            if (MediaPlayerData.players().size != mediaContent.childCount) {
-                Log.e(
-                    TAG,
-                    "Size of players list and number of views in carousel are out of sync. " +
-                        "Players size is ${MediaPlayerData.players().size}. " +
-                        "View count is ${mediaContent.childCount}."
-                )
-            }
             return existingPlayer == null
         }
 
@@ -912,6 +915,13 @@ constructor(
         pageIndicator.translationY =
             (mediaCarousel.measuredHeight - pageIndicator.height - layoutParams.bottomMargin)
                 .toFloat()
+    }
+
+    /** Update listening to seekbar. */
+    private fun updateSeekbarListening(visibleToUser: Boolean) {
+        for (player in MediaPlayerData.players()) {
+            player.setListening(visibleToUser && currentlyExpanded)
+        }
     }
 
     /** Update the dimension of this carousel. */

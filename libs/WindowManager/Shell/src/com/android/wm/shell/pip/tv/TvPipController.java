@@ -740,7 +740,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             if (mRegistered) return;
 
             mContext.registerReceiverForAllUsers(this, mIntentFilter, SYSTEMUI_PERMISSION,
-                    mMainHandler);
+                    mMainHandler, Context.RECEIVER_NOT_EXPORTED);
             mRegistered = true;
         }
 

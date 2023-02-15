@@ -168,6 +168,9 @@ public class Editor {
     private static final String TAG = "Editor";
     private static final boolean DEBUG_UNDO = false;
 
+    // TODO(nona): Make this configurable.
+    private static final boolean FLAG_USE_NEW_CONTEXT_MENU = false;
+
     // Specifies whether to use the magnifier when pressing the insertion or selection handles.
     private static final boolean FLAG_USE_MAGNIFIER = true;
 
@@ -198,16 +201,6 @@ public class Editor {
     private static final int ACTION_MODE_MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START = 50;
     private static final int ACTION_MODE_MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
 
-    // Ordering constants used to place the Context Menu items in their menu.
-    private static final int CONTEXT_MENU_ITEM_ORDER_UNDO = 2;
-    private static final int CONTEXT_MENU_ITEM_ORDER_REDO = 3;
-    private static final int CONTEXT_MENU_ITEM_ORDER_CUT = 4;
-    private static final int CONTEXT_MENU_ITEM_ORDER_COPY = 5;
-    private static final int CONTEXT_MENU_ITEM_ORDER_PASTE = 6;
-    private static final int CONTEXT_MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 7;
-    private static final int CONTEXT_MENU_ITEM_ORDER_SELECT_ALL = 8;
-    private static final int CONTEXT_MENU_ITEM_ORDER_SHARE = 9;
-    private static final int CONTEXT_MENU_ITEM_ORDER_AUTOFILL = 10;
     private static final int CONTEXT_MENU_ITEM_ORDER_REPLACE = 11;
 
     private static final int CONTEXT_MENU_GROUP_UNDO_REDO = Menu.FIRST;
@@ -3142,56 +3135,76 @@ public class Editor {
             }
         }
 
-        menu.setOptionalIconsVisible(true);
+        final int menuItemOrderUndo = 2;
+        final int menuItemOrderRedo = 3;
+        final int menuItemOrderCut = 4;
+        final int menuItemOrderCopy = 5;
+        final int menuItemOrderPaste = 6;
+        final int menuItemOrderPasteAsPlainText;
+        final int menuItemOrderSelectAll;
+        final int menuItemOrderShare;
+        final int menuItemOrderAutofill;
+        if (FLAG_USE_NEW_CONTEXT_MENU) {
+            menuItemOrderPasteAsPlainText = 7;
+            menuItemOrderSelectAll = 8;
+            menuItemOrderShare = 9;
+            menuItemOrderAutofill = 10;
 
-        final int keyboard = mTextView.getResources().getConfiguration().keyboard;
-        menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
+            menu.setOptionalIconsVisible(true);
+            menu.setGroupDividerEnabled(true);
 
-        menu.setGroupDividerEnabled(true);
+            final int keyboard = mTextView.getResources().getConfiguration().keyboard;
+            menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
+        } else {
+            menuItemOrderShare = 7;
+            menuItemOrderSelectAll = 8;
+            menuItemOrderAutofill = 10;
+            menuItemOrderPasteAsPlainText = 11;
+        }
 
-        menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_UNDO, CONTEXT_MENU_ITEM_ORDER_UNDO,
+        menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_UNDO, menuItemOrderUndo,
                 com.android.internal.R.string.undo)
                 .setAlphabeticShortcut('z')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canUndo());
-        menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_REDO, CONTEXT_MENU_ITEM_ORDER_REDO,
+        menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_REDO, menuItemOrderRedo,
                 com.android.internal.R.string.redo)
                 .setAlphabeticShortcut('z', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canRedo());
 
-        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_CUT, CONTEXT_MENU_ITEM_ORDER_CUT,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_CUT, menuItemOrderCut,
                 com.android.internal.R.string.cut)
                 .setAlphabeticShortcut('x')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canCut());
-        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_COPY, CONTEXT_MENU_ITEM_ORDER_COPY,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_COPY, menuItemOrderCopy,
                 com.android.internal.R.string.copy)
                 .setAlphabeticShortcut('c')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canCopy());
-        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE, CONTEXT_MENU_ITEM_ORDER_PASTE,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE, menuItemOrderPaste,
                 com.android.internal.R.string.paste)
                 .setAlphabeticShortcut('v')
                 .setEnabled(mTextView.canPaste())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
         menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE_AS_PLAIN_TEXT,
-                        CONTEXT_MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
+                        menuItemOrderPasteAsPlainText,
                 com.android.internal.R.string.paste_as_plain_text)
                 .setAlphabeticShortcut('v', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
                 .setEnabled(mTextView.canPasteAsPlainText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
         menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_SELECT_ALL,
-                        CONTEXT_MENU_ITEM_ORDER_SELECT_ALL, com.android.internal.R.string.selectAll)
+                        menuItemOrderSelectAll, com.android.internal.R.string.selectAll)
                 .setAlphabeticShortcut('a')
                 .setEnabled(mTextView.canSelectAllText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
 
-        menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_SHARE, CONTEXT_MENU_ITEM_ORDER_SHARE,
+        menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_SHARE, menuItemOrderShare,
                 com.android.internal.R.string.share)
                 .setEnabled(mTextView.canShare())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_AUTOFILL, CONTEXT_MENU_ITEM_ORDER_AUTOFILL,
+        menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_AUTOFILL, menuItemOrderAutofill,
                 android.R.string.autofill)
                 .setEnabled(mTextView.canRequestAutofill())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);

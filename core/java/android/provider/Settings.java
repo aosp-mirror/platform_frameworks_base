@@ -18162,6 +18162,12 @@ public final class Settings {
                     "gesture_touch_and_hold_watchface_enabled";
 
             /**
+             * Whether screenshot is enabled.
+             * @hide
+             */
+            public static final String SCREENSHOT_ENABLED = "screenshot_enabled";
+
+            /**
              * Whether bedtime mode is enabled.
              * @hide
              */

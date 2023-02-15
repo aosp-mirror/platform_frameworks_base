@@ -55,6 +55,9 @@ import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.companion.virtual.sensor.IVirtualSensorCallback;
+import android.companion.virtual.sensor.VirtualSensor;
+import android.companion.virtual.sensor.VirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.content.ComponentName;
 import android.content.Context;
@@ -102,6 +105,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.AdoptShellPermissionsRule;
 import com.android.internal.app.BlockedAppStreamingActivity;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.sensors.SensorManagerInternal;
@@ -225,6 +229,10 @@ public class VirtualDeviceManagerServiceTest {
     @Mock
     private SensorManagerInternal mSensorManagerInternalMock;
     @Mock
+    private IVirtualSensorCallback mVirtualSensorCallback;
+    @Mock
+    private VirtualSensorCallback mSensorCallback;
+    @Mock
     private IVirtualDeviceActivityListener mActivityListener;
     @Mock
     private IVirtualDeviceSoundEffectListener mSoundEffectListener;
@@ -333,7 +341,8 @@ public class VirtualDeviceManagerServiceTest {
         mInputController = new InputController(new Object(), mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mContext.getSystemService(WindowManager.class), threadVerifier);
-        mSensorController = new SensorController(new Object(), VIRTUAL_DEVICE_ID_1);
+        mSensorController =
+                new SensorController(new Object(), VIRTUAL_DEVICE_ID_1, mVirtualSensorCallback);
         mCameraAccessController =
                 new CameraAccessController(mContext, mLocalService, mCameraAccessBlockedCallback);
 
@@ -448,6 +457,42 @@ public class VirtualDeviceManagerServiceTest {
         int nonExistentDeviceId = DEVICE_ID_DEFAULT;
         int ownerUid = mLocalService.getDeviceOwnerUid(nonExistentDeviceId);
         assertThat(ownerUid).isEqualTo(Process.INVALID_UID);
+    }
+
+    @Test
+    public void getVirtualSensor_defaultDeviceId_returnsNull() {
+        assertThat(mLocalService.getVirtualSensor(DEVICE_ID_DEFAULT, SENSOR_HANDLE)).isNull();
+    }
+
+    @Test
+    public void getVirtualSensor_invalidDeviceId_returnsNull() {
+        assertThat(mLocalService.getVirtualSensor(DEVICE_ID_INVALID, SENSOR_HANDLE)).isNull();
+    }
+
+    @Test
+    public void getVirtualSensor_noSensors_returnsNull() {
+        assertThat(mLocalService.getVirtualSensor(VIRTUAL_DEVICE_ID_1, SENSOR_HANDLE)).isNull();
+    }
+
+    @Test
+    public void getVirtualSensor_returnsCorrectSensor() {
+        VirtualDeviceParams params = new VirtualDeviceParams.Builder()
+                .setDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
+                .addVirtualSensorConfig(
+                        new VirtualSensorConfig.Builder(Sensor.TYPE_ACCELEROMETER, DEVICE_NAME_1)
+                                .build())
+                .setVirtualSensorCallback(BackgroundThread.getExecutor(), mSensorCallback)
+                .build();
+
+        doReturn(SENSOR_HANDLE).when(mSensorManagerInternalMock).createRuntimeSensor(
+                anyInt(), anyInt(), anyString(), anyString(), any());
+        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
+
+        VirtualSensor sensor = mLocalService.getVirtualSensor(VIRTUAL_DEVICE_ID_1, SENSOR_HANDLE);
+        assertThat(sensor).isNotNull();
+        assertThat(sensor.getDeviceId()).isEqualTo(VIRTUAL_DEVICE_ID_1);
+        assertThat(sensor.getHandle()).isEqualTo(SENSOR_HANDLE);
+        assertThat(sensor.getType()).isEqualTo(Sensor.TYPE_ACCELEROMETER);
     }
 
     @Test
@@ -884,18 +929,6 @@ public class VirtualDeviceManagerServiceTest {
             assertThrows(SecurityException.class,
                     () -> mDeviceImpl.createVirtualNavigationTouchpad(NAVIGATION_TOUCHPAD_CONFIG,
                             BINDER));
-        }
-    }
-
-    @Test
-    public void createVirtualSensor_noPermission_failsSecurityException() {
-        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
-            assertThrows(
-                    SecurityException.class,
-                    () -> mDeviceImpl.createVirtualSensor(
-                            BINDER,
-                            new VirtualSensorConfig.Builder(
-                                    Sensor.TYPE_ACCELEROMETER, DEVICE_NAME_1).build()));
         }
     }
 

@@ -19,10 +19,10 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.Authority;
-import android.app.admin.UnknownAuthority;
 import android.app.admin.DeviceAdminAuthority;
 import android.app.admin.DpcAuthority;
 import android.app.admin.RoleAuthority;
+import android.app.admin.UnknownAuthority;
 import android.content.ComponentName;
 import android.os.UserHandle;
 
@@ -71,9 +71,10 @@ final class EnforcingAdmin {
     private final boolean mIsRoleAuthority;
     private final ActiveAdmin mActiveAdmin;
 
-    static EnforcingAdmin createEnforcingAdmin(@NonNull String packageName, int userId) {
+    static EnforcingAdmin createEnforcingAdmin(@NonNull String packageName, int userId,
+            ActiveAdmin admin) {
         Objects.requireNonNull(packageName);
-        return new EnforcingAdmin(packageName, userId);
+        return new EnforcingAdmin(packageName, userId, admin);
     }
 
     static EnforcingAdmin createEnterpriseEnforcingAdmin(
@@ -90,6 +91,15 @@ final class EnforcingAdmin {
         return new EnforcingAdmin(
                 componentName.getPackageName(), componentName, Set.of(DPC_AUTHORITY), userId,
                 activeAdmin);
+    }
+
+
+    static EnforcingAdmin createEnterpriseEnforcingAdmin(
+            @NonNull String packageName, int userId) {
+        Objects.requireNonNull(packageName);
+        return new EnforcingAdmin(
+                packageName, /* componentName= */ null, Set.of(DPC_AUTHORITY), userId,
+                /* activeAdmin= */ null);
     }
 
     static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName, int userId) {
@@ -111,11 +121,27 @@ final class EnforcingAdmin {
         return ROLE_AUTHORITY_PREFIX + roleName;
     }
 
+    static Authority getParcelableAuthority(String authority) {
+        if (authority == null || authority.isEmpty()) {
+            return UnknownAuthority.UNKNOWN_AUTHORITY;
+        }
+        if (DPC_AUTHORITY.equals(authority)) {
+            return DpcAuthority.DPC_AUTHORITY;
+        }
+        if (DEVICE_ADMIN_AUTHORITY.equals(authority)) {
+            return DeviceAdminAuthority.DEVICE_ADMIN_AUTHORITY;
+        }
+        if (authority.startsWith(ROLE_AUTHORITY_PREFIX)) {
+            String role = authority.substring(ROLE_AUTHORITY_PREFIX.length());
+            return new RoleAuthority(Set.of(role));
+        }
+        return UnknownAuthority.UNKNOWN_AUTHORITY;
+    }
+
     private EnforcingAdmin(
-            String packageName, ComponentName componentName, Set<String> authorities, int userId,
-            ActiveAdmin activeAdmin) {
+            String packageName, @Nullable ComponentName componentName, Set<String> authorities,
+            int userId, @Nullable ActiveAdmin activeAdmin) {
         Objects.requireNonNull(packageName);
-        Objects.requireNonNull(componentName);
         Objects.requireNonNull(authorities);
 
         // Role authorities should not be using this constructor
@@ -127,7 +153,7 @@ final class EnforcingAdmin {
         mActiveAdmin = activeAdmin;
     }
 
-    private EnforcingAdmin(String packageName, int userId) {
+    private EnforcingAdmin(String packageName, int userId, ActiveAdmin activeAdmin) {
         Objects.requireNonNull(packageName);
 
         // Only role authorities use this constructor.
@@ -137,7 +163,7 @@ final class EnforcingAdmin {
         mComponentName = null;
         // authorities will be loaded when needed
         mAuthorities = null;
-        mActiveAdmin = null;
+        mActiveAdmin = activeAdmin;
     }
 
     private static Set<String> getRoleAuthoritiesOrDefault(String packageName, int userId) {
@@ -244,10 +270,12 @@ final class EnforcingAdmin {
     @Override
     public int hashCode() {
         if (mIsRoleAuthority) {
-            // TODO(b/256854977): should we add UserId?
-            return Objects.hash(mPackageName);
+            return Objects.hash(mPackageName, mUserId);
         } else {
-            return Objects.hash(mComponentName, getAuthorities());
+            return Objects.hash(
+                    mComponentName == null ? mPackageName : mComponentName,
+                    mUserId,
+                    getAuthorities());
         }
     }
 
@@ -256,8 +284,10 @@ final class EnforcingAdmin {
         serializer.attributeBoolean(/* namespace= */ null, ATTR_IS_ROLE, mIsRoleAuthority);
         serializer.attributeInt(/* namespace= */ null, ATTR_USER_ID, mUserId);
         if (!mIsRoleAuthority) {
-            serializer.attribute(
-                    /* namespace= */ null, ATTR_CLASS_NAME, mComponentName.getClassName());
+            if (mComponentName != null) {
+                serializer.attribute(
+                        /* namespace= */ null, ATTR_CLASS_NAME, mComponentName.getClassName());
+            }
             // Role authorities get recomputed on load so no need to save them.
             serializer.attribute(
                     /* namespace= */ null,
@@ -274,10 +304,11 @@ final class EnforcingAdmin {
         int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
 
         if (isRoleAuthority) {
-            return new EnforcingAdmin(packageName, userId);
+            return new EnforcingAdmin(packageName, userId, null);
         } else {
             String className = parser.getAttributeValue(/* namespace= */ null, ATTR_CLASS_NAME);
-            ComponentName componentName = new ComponentName(packageName, className);
+            ComponentName componentName = className == null
+                    ? null :  new ComponentName(packageName, className);
             Set<String> authorities = Set.of(authoritiesStr.split(ATTR_AUTHORITIES_SEPARATOR));
             return new EnforcingAdmin(packageName, componentName, authorities, userId, null);
         }

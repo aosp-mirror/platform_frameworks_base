@@ -742,13 +742,6 @@ public final class SurfaceControl implements Parcelable {
      */
     public static final int POWER_MODE_ON_SUSPEND = 4;
 
-    /**
-     * internal representation of how to interpret pixel value, used only to convert to ColorSpace.
-     */
-    private static final int INTERNAL_DATASPACE_SRGB = 142671872;
-    private static final int INTERNAL_DATASPACE_DISPLAY_P3 = 143261696;
-    private static final int INTERNAL_DATASPACE_SCRGB = 411107328;
-
     private void assignNativeObject(long nativeObject, String callsite) {
         if (mNativeObject != 0) {
             release();
@@ -1317,27 +1310,36 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * Returns the associated {@link Choreographer} instance with the
-     * current instance of the SurfaceControl.
-     * Must be called from a thread that already has a {@link android.os.Looper}
-     * associated with it.
-     * If there is no {@link Choreographer} associated with the SurfaceControl then a new instance
-     * of the {@link Choreographer} is created.
+     * When called for the first time a new instance of the {@link Choreographer} is created
+     * with a {@link android.os.Looper} of the current thread. Every subsequent call will return
+     * the same instance of the Choreographer.
+     *
+     * @see #getChoreographer(Looper) to create Choreographer with a different
+     * looper than current thread looper.
      *
      * @hide
      */
     @TestApi
     public @NonNull Choreographer getChoreographer() {
-        return getChoreographer(Looper.myLooper());
+        checkNotReleased();
+        synchronized (mChoreographerLock) {
+            if (mChoreographer == null) {
+                return getChoreographer(Looper.myLooper());
+            }
+            return mChoreographer;
+        }
     }
 
     /**
-     * Returns the associated {@link Choreographer} instance with the
-     * current instance of the SurfaceControl.
-     * If there is no {@link Choreographer} associated with the SurfaceControl then a new instance
-     * of the {@link Choreographer} is created.
+     * When called for the first time a new instance of the {@link Choreographer} is created with
+     * the sourced {@link android.os.Looper}. Every subsequent call will return the same
+     * instance of the Choreographer.
      *
-     * @param looper the choreographer is attached on this looper
+     * @see #getChoreographer()
+     *
+     * @throws IllegalStateException when a {@link Choreographer} instance exists with a different
+     * looper than sourced.
+     * @param looper the choreographer is attached on this looper.
      *
      * @hide
      */
@@ -1345,11 +1347,12 @@ public final class SurfaceControl implements Parcelable {
     public @NonNull Choreographer getChoreographer(@NonNull Looper looper) {
         checkNotReleased();
         synchronized (mChoreographerLock) {
-            if (mChoreographer != null) {
-                return mChoreographer;
+            if (mChoreographer == null) {
+                mChoreographer = Choreographer.getInstanceForSurfaceControl(mNativeHandle, looper);
+            } else if (!mChoreographer.isTheLooperSame(looper)) {
+                throw new IllegalStateException(
+                        "Choreographer already exists with a different looper");
             }
-
-            mChoreographer = Choreographer.getInstanceForSurfaceControl(mNativeHandle, looper);
             return mChoreographer;
         }
     }
@@ -2185,18 +2188,9 @@ public final class SurfaceControl implements Parcelable {
         ColorSpace[] colorSpaces = { srgb, srgb };
         if (dataspaces.length == 2) {
             for (int i = 0; i < 2; ++i) {
-                switch(dataspaces[i]) {
-                    case INTERNAL_DATASPACE_DISPLAY_P3:
-                        colorSpaces[i] = ColorSpace.get(ColorSpace.Named.DISPLAY_P3);
-                        break;
-                    case INTERNAL_DATASPACE_SCRGB:
-                        colorSpaces[i] = ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB);
-                        break;
-                    case INTERNAL_DATASPACE_SRGB:
-                    // Other dataspace is not recognized, use SRGB color space instead,
-                    // the default value of the array is already SRGB, thus do nothing.
-                    default:
-                        break;
+                ColorSpace cs = ColorSpace.getFromDataSpace(dataspaces[i]);
+                if (cs != null) {
+                    colorSpaces[i] = cs;
                 }
             }
         }
@@ -3842,7 +3836,7 @@ public final class SurfaceControl implements Parcelable {
          * whose dataspace has RANGE_EXTENDED.
          *
          * @param sc The layer whose extended range brightness is being specified
-         * @param currentBufferRatio The current sdr/hdr ratio of the current buffer. For example
+         * @param currentBufferRatio The current hdr/sdr ratio of the current buffer. For example
          *                           if the buffer was rendered with a target SDR whitepoint of
          *                           100 nits and a max display brightness of 200 nits, this should
          *                           be set to 2.0f.
@@ -3854,7 +3848,9 @@ public final class SurfaceControl implements Parcelable {
          *                           communicate extended content brightness information via
          *                           metadata such as CTA861_3 or SMPTE2086.
          *
-         * @param desiredRatio The desired sdr/hdr ratio. This can be used to communicate the max
+         *                           Must be finite && >= 1.0f
+         *
+         * @param desiredRatio The desired hdr/sdr ratio. This can be used to communicate the max
          *                     desired brightness range. This is similar to the "max luminance"
          *                     value in other HDR metadata formats, but represented as a ratio of
          *                     the target SDR whitepoint to the max display brightness. The system
@@ -3866,12 +3862,19 @@ public final class SurfaceControl implements Parcelable {
          *                     voluntarily reducing the requested range can help improve battery
          *                     life as well as can improve quality by ensuring greater bit depth
          *                     is allocated to the luminance range in use.
+         *
+         *                     Must be finite && >= 1.0f
          * @return this
-         * @hide
          **/
         public @NonNull Transaction setExtendedRangeBrightness(@NonNull SurfaceControl sc,
                 float currentBufferRatio, float desiredRatio) {
             checkPreconditions(sc);
+            if (!Float.isFinite(currentBufferRatio) || currentBufferRatio < 1.0f) {
+                throw new IllegalArgumentException("currentBufferRatio must be finite && >= 1.0f");
+            }
+            if (!Float.isFinite(desiredRatio) || desiredRatio < 1.0f) {
+                throw new IllegalArgumentException("desiredRatio must be finite && >= 1.0f");
+            }
             nativeSetExtendedRangeBrightness(mNativeObject, sc.mNativeObject, currentBufferRatio,
                     desiredRatio);
             return this;
