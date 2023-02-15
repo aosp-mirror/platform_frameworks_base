@@ -262,7 +262,6 @@ class LockscreenShadeTransitionController @Inject constructor(
 
     fun setStackScroller(nsslController: NotificationStackScrollLayoutController) {
         this.nsslController = nsslController
-        touchHelper.host = nsslController.view
         touchHelper.expandCallback = nsslController.expandHelperCallback
     }
 
@@ -736,14 +735,12 @@ class DragDownHelper(
 
     private var dragDownAmountOnStart = 0.0f
     lateinit var expandCallback: ExpandHelper.Callback
-    lateinit var host: View
 
     private var minDragDistance = 0
     private var initialTouchX = 0f
     private var initialTouchY = 0f
     private var touchSlop = 0f
     private var slopMultiplier = 0f
-    private val temp2 = IntArray(2)
     private var draggedFarEnough = false
     private var startingChild: ExpandableView? = null
     private var lastHeight = 0f
@@ -923,7 +920,6 @@ class DragDownHelper(
     }
 
     private fun findView(x: Float, y: Float): ExpandableView? {
-        host.getLocationOnScreen(temp2)
-        return expandCallback.getChildAtRawPosition(x + temp2[0], y + temp2[1])
+        return expandCallback.getChildAtRawPosition(x, y)
     }
 }
