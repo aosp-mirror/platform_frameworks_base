@@ -124,12 +124,11 @@ public class PackageWatchdogTest {
 
     @Before
     public void setUp() throws Exception {
-        mAllocatedWatchdogs = new ArrayList<>();
         MockitoAnnotations.initMocks(this);
         new File(InstrumentationRegistry.getContext().getFilesDir(),
                 "package-watchdog.xml").delete();
         adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG,
-                Manifest.permission.ALLOWLISTED_WRITE_DEVICE_CONFIG);
+                Manifest.permission.WRITE_DEVICE_CONFIG);
         mTestLooper = new TestLooper();
         mSpyContext = spy(InstrumentationRegistry.getContext());
         when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
@@ -183,6 +182,7 @@ public class PackageWatchdogTest {
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT), false);
 
+        mAllocatedWatchdogs = new ArrayList<>();
     }
 
     @After
