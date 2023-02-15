@@ -228,16 +228,14 @@ public class NetworkTimeUpdateService extends Binder {
     }
 
     private void onPollNetworkTime(@NonNull String reason) {
-        // If we don't have any default network, don't bother.
         Network network;
         synchronized (mLock) {
             network = mDefaultNetwork;
         }
-        if (network == null) return;
 
         mWakeLock.acquire();
         try {
-            mEngine.refreshIfRequiredAndReschedule(network, reason, mRefreshCallbacks);
+            mEngine.refreshAndRescheduleIfRequired(network, reason, mRefreshCallbacks);
         } finally {
             mWakeLock.release();
         }
@@ -338,10 +336,10 @@ public class NetworkTimeUpdateService extends Binder {
          * Attempts to refresh the network time if required, i.e. if there isn't a recent-enough
          * network time available. It must also schedule the next call. This is a blocking call.
          *
-         * @param network the network to use
+         * @param network the network to use, or null if no network is available
          * @param reason the reason for the refresh (for logging)
          */
-        void refreshIfRequiredAndReschedule(@NonNull Network network, @NonNull String reason,
+        void refreshAndRescheduleIfRequired(@Nullable Network network, @NonNull String reason,
                 @NonNull RefreshCallbacks refreshCallbacks);
 
         void dump(@NonNull PrintWriter pw);
@@ -391,7 +389,7 @@ public class NetworkTimeUpdateService extends Binder {
         /**
          * Records the time of the last refresh attempt (successful or otherwise) by this service.
          * This is used when scheduling the next refresh attempt. In cases where {@link
-         * #refreshIfRequiredAndReschedule} is called too frequently, this will prevent each call
+         * #refreshAndRescheduleIfRequired} is called too frequently, this will prevent each call
          * resulting in a network request. See also {@link #mShortPollingIntervalMillis}.
          *
          * <p>Time servers are a shared resource and so Android should avoid loading them.
@@ -443,9 +441,19 @@ public class NetworkTimeUpdateService extends Binder {
         }
 
         @Override
-        public void refreshIfRequiredAndReschedule(
-                @NonNull Network network, @NonNull String reason,
+        public void refreshAndRescheduleIfRequired(
+                @Nullable Network network, @NonNull String reason,
                 @NonNull RefreshCallbacks refreshCallbacks) {
+            if (network == null) {
+                // If we don't have any default network, don't do anything: When a new network
+                // is available then this method will be called again.
+                logToDebugAndDumpsys("refreshIfRequiredAndReschedule:"
+                        + " reason=" + reason
+                        + ": No default network available. No refresh attempted and no next"
+                        + " attempt scheduled.");
+                return;
+            }
+
             // Attempt to refresh the network time if there is no latest time result, or if the
             // latest time result is considered too old.
             NtpTrustedTime.TimeResult initialTimeResult = mNtpTrustedTime.getCachedTimeResult();
