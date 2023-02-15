@@ -17,14 +17,14 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.util.Log;
@@ -253,7 +253,7 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
         }
 
         @Override
-        public void recognitionCallback(int model, RecognitionEvent event) {
+        public void recognitionCallback(int model, RecognitionEventSys event) {
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(model);
                 if (state == null || state == ModelState.INACTIVE) {
@@ -261,15 +261,16 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
                     reboot();
                     return;
                 }
-                if (event.recognitionStillActive && event.status != RecognitionStatus.SUCCESS
-                        && event.status != RecognitionStatus.FORCED) {
+                if (event.recognitionEvent.recognitionStillActive
+                        && event.recognitionEvent.status != RecognitionStatus.SUCCESS
+                        && event.recognitionEvent.status != RecognitionStatus.FORCED) {
                     Log.wtfStack(TAG,
                             "recognitionStillActive is only allowed when the recognition status "
                                     + "is SUCCESS");
                     reboot();
                     return;
                 }
-                if (!event.recognitionStillActive) {
+                if (!event.recognitionEvent.recognitionStillActive) {
                     mModelStates.replace(model, ModelState.INACTIVE);
                 }
             }
@@ -278,7 +279,7 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
         }
 
         @Override
-        public void phraseRecognitionCallback(int model, PhraseRecognitionEvent event) {
+        public void phraseRecognitionCallback(int model, PhraseRecognitionEventSys event) {
             synchronized (mModelStates) {
                 ModelState state = mModelStates.get(model);
                 if (state == null || state == ModelState.INACTIVE) {
@@ -286,16 +287,16 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
                     reboot();
                     return;
                 }
-                if (event.common.recognitionStillActive
-                        && event.common.status != RecognitionStatus.SUCCESS
-                        && event.common.status != RecognitionStatus.FORCED) {
+                if (event.phraseRecognitionEvent.common.recognitionStillActive
+                        && event.phraseRecognitionEvent.common.status != RecognitionStatus.SUCCESS
+                        && event.phraseRecognitionEvent.common.status != RecognitionStatus.FORCED) {
                     Log.wtfStack(TAG,
                             "recognitionStillActive is only allowed when the recognition status "
                                     + "is SUCCESS");
                     reboot();
                     return;
                 }
-                if (!event.common.recognitionStillActive) {
+                if (!event.phraseRecognitionEvent.common.recognitionStillActive) {
                     mModelStates.replace(model, ModelState.INACTIVE);
                 }
             }
