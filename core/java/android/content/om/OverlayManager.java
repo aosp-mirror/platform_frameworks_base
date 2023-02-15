@@ -323,8 +323,27 @@ public class OverlayManager {
      *
      * @hide
      */
+    private void commitToSystemServer(@NonNull final OverlayManagerTransaction transaction) {
+        try {
+            mService.commit(transaction);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Commit the overlay manager transaction.
+     *
+     * <p>Applications can register overlays and unregister the registered overlays in an atomic
+     * operation via {@link OverlayManagerTransaction}.
+     *
+     * @see OverlayManagerTransaction
+     *
+     * @param transaction the series of overlay related requests to perform
+     * @throws Exception if not all the requests could be successfully
+     */
     public void commit(@NonNull final OverlayManagerTransaction transaction) {
-        if (transaction.isSelfTargetingTransaction()
+        if (transaction.isSelfTargeting()
                 || mService == null
                 || mService.asBinder() == null) {
             try {
@@ -335,11 +354,7 @@ public class OverlayManager {
             return;
         }
 
-        try {
-            mService.commit(transaction);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        commitToSystemServer(transaction);
     }
 
     /**
