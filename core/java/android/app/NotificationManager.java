@@ -1577,32 +1577,6 @@ public class NotificationManager {
         }
     }
 
-    /**
-     * @hide
-     */
-    @TestApi
-    public void allowAssistantAdjustment(String capability) {
-        INotificationManager service = getService();
-        try {
-            service.allowAssistantAdjustment(capability);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
-    public void disallowAssistantAdjustment(String capability) {
-        INotificationManager service = getService();
-        try {
-            service.disallowAssistantAdjustment(capability);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     /** @hide */
     @TestApi
     public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String pkg) {

@@ -104,6 +104,14 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
             "android.app.admin.extra.INTENT_FILTER";
 
     /**
+     * A string extra holding the account type this policy applies to, (see
+     * {@link PolicyUpdatesReceiver#onPolicyChanged} and
+     * {@link PolicyUpdatesReceiver#onPolicySetResult})
+     */
+    public static final String EXTRA_ACCOUNT_TYPE =
+            "android.app.admin.extra.ACCOUNT_TYPE";
+
+    /**
      * @hide
      */
     public static final String EXTRA_POLICY_CHANGED_KEY =
@@ -214,7 +222,7 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
      * send updates.
      *
      * @param context the running context as per {@link #onReceive}
-     * @param policyKey Key to identify which policy this callback relates to.
+     * @param policyIdentifier Key to identify which policy this callback relates to.
      * @param additionalPolicyParams Bundle containing additional params that may be required to
      *                               identify some of the policy
      *                               (e.g. {@link PolicyUpdatesReceiver#EXTRA_PACKAGE_NAME}
@@ -230,7 +238,7 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
      */
     public void onPolicySetResult(
             @NonNull Context context,
-            @NonNull String policyKey,
+            @NonNull String policyIdentifier,
             @NonNull Bundle additionalPolicyParams,
             @NonNull TargetUser targetUser,
             @NonNull PolicyUpdateResult policyUpdateResult) {}
@@ -247,7 +255,7 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
      * send updates.
      *
      * @param context the running context as per {@link #onReceive}
-     * @param policyKey Key to identify which policy this callback relates to.
+     * @param policyIdentifier Key to identify which policy this callback relates to.
      * @param additionalPolicyParams Bundle containing additional params that may be required to
      *                               identify some of the policy
      *                               (e.g. {@link PolicyUpdatesReceiver#EXTRA_PACKAGE_NAME}
@@ -264,7 +272,7 @@ public abstract class PolicyUpdatesReceiver extends BroadcastReceiver {
      */
     public void onPolicyChanged(
             @NonNull Context context,
-            @NonNull String policyKey,
+            @NonNull String policyIdentifier,
             @NonNull Bundle additionalPolicyParams,
             @NonNull TargetUser targetUser,
             @NonNull PolicyUpdateResult policyUpdateResult) {}

@@ -38,6 +38,7 @@ import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
+import com.android.internal.R;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.credentials.metrics.CandidateProviderMetric;
 import com.android.server.credentials.metrics.ChosenProviderMetric;
@@ -79,6 +80,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     protected final Map<String, ProviderSession> mProviders = new HashMap<>();
     protected ChosenProviderMetric mChosenProviderMetric = new ChosenProviderMetric();
     //TODO improve design to allow grouped metrics per request
+    protected final String mHybridService;
 
     protected RequestSession(@NonNull Context context,
             @UserIdInt int userId, int callingUid, @NonNull T clientRequest, U clientCallback,
@@ -97,6 +99,8 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         mRequestId = new Binder();
         mCredentialManagerUi = new CredentialManagerUi(mContext,
                 mUserId, this);
+        mHybridService = context.getResources().getString(
+                R.string.config_defaultCredentialManagerHybridService);
     }
 
     public abstract ProviderSession initiateProviderSession(CredentialProviderInfo providerInfo,

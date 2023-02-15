@@ -1447,22 +1447,25 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     private static boolean isTranslucent(@NonNull WindowContainer wc) {
         final TaskFragment taskFragment = wc.asTaskFragment();
-        if (taskFragment != null) {
-            if (taskFragment.isTranslucent(null /* starting */)) {
-                return true;
-            }
-            final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
-            if (adjacentTaskFragment != null) {
-                // Treat the TaskFragment as translucent if its adjacent TF is, otherwise everything
-                // behind two adjacent TaskFragments are occluded.
-                return adjacentTaskFragment.isTranslucent(null /* starting */);
-            }
+        if (taskFragment == null) {
+            return !wc.fillsParent();
         }
-        // TODO(b/172695805): hierarchical check. This is non-trivial because for containers
-        //                    it is effected by child visibility but needs to work even
-        //                    before visibility is committed. This means refactoring some
-        //                    checks to use requested visibility.
-        return !wc.fillsParent();
+
+        // Check containers differently as they are affected by child visibility.
+
+        if (taskFragment.isTranslucentForTransition()) {
+            // TaskFragment doesn't contain occluded ActivityRecord.
+            return true;
+        }
+        final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
+        if (adjacentTaskFragment != null) {
+            // When the TaskFragment has an adjacent TaskFragment, sibling behind them should be
+            // hidden unless any of them are translucent.
+            return adjacentTaskFragment.isTranslucentForTransition();
+        } else {
+            // Non-filling without adjacent is considered as translucent.
+            return !wc.fillsParent();
+        }
     }
 
     /**
@@ -1878,6 +1881,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             out.addChange(change);
         }
 
+        TransitionInfo.AnimationOptions animOptions = null;
+        if (topApp.asActivityRecord() != null) {
+            final ActivityRecord topActivity = topApp.asActivityRecord();
+            animOptions = addCustomActivityTransition(topActivity, true/* open */, null);
+            animOptions = addCustomActivityTransition(topActivity, false/* open */, animOptions);
+        }
         final WindowManager.LayoutParams animLp =
                 getLayoutParamsForAnimationsStyle(type, sortedTargets);
         if (animLp != null && animLp.type != TYPE_APPLICATION_STARTING
@@ -1885,14 +1894,33 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // Don't send animation options if no windowAnimations have been set or if the we are
             // running an app starting animation, in which case we don't want the app to be able to
             // change its animation directly.
-            TransitionInfo.AnimationOptions animOptions =
-                    TransitionInfo.AnimationOptions.makeAnimOptionsFromLayoutParameters(animLp);
+            if (animOptions != null) {
+                animOptions.addOptionsFromLayoutParameters(animLp);
+            } else {
+                animOptions = TransitionInfo.AnimationOptions
+                        .makeAnimOptionsFromLayoutParameters(animLp);
+            }
+        }
+        if (animOptions != null) {
             out.setAnimationOptions(animOptions);
         }
-
         return out;
     }
 
+    static TransitionInfo.AnimationOptions addCustomActivityTransition(ActivityRecord topActivity,
+            boolean open, TransitionInfo.AnimationOptions animOptions) {
+        final ActivityRecord.CustomAppTransition customAnim =
+                topActivity.getCustomAnimation(open);
+        if (customAnim != null) {
+            if (animOptions == null) {
+                animOptions = TransitionInfo.AnimationOptions
+                        .makeCommonAnimOptions(topActivity.packageName);
+            }
+            animOptions.addCustomActivityTransition(open, customAnim.mEnterAnim,
+                    customAnim.mExitAnim, customAnim.mBackgroundColor);
+        }
+        return animOptions;
+    }
     /**
      * Finds the top-most common ancestor of app targets.
      *
@@ -2019,7 +2047,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final DisplayContent dc = wc.asDisplayContent();
             if (dc == null || !mChanges.get(dc).hasChanged()) continue;
             dc.sendNewConfiguration();
-            setReady(dc, true);
+            // Set to ready if no other change controls the ready state. But if there is, such as
+            // if an activity is pausing, it will call setReady(ar, false) and wait for the next
+            // resumed activity. Then do not set to ready because the transition only contains
+            // partial participants. Otherwise the transition may only handle HIDE and miss OPEN.
+            if (!mReadyTracker.mUsed) {
+                setReady(dc, true);
+            }
         }
     }
 

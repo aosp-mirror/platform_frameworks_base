@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
-import android.companion.virtual.sensor.IVirtualSensorStateChangeCallback;
+import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
 import android.content.IntentFilter;
@@ -112,16 +112,10 @@ interface IVirtualDevice {
     boolean sendTouchEvent(IBinder token, in VirtualTouchEvent event);
 
     /**
-     * Creates a virtual sensor, capable of injecting sensor events into the system.
+     * Returns all virtual sensors for this device.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void createVirtualSensor(IBinder tokenm, in VirtualSensorConfig config);
-
-    /**
-     * Removes the sensor corresponding to the given token from the system.
-     */
-    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void unregisterSensor(IBinder token);
+    List<VirtualSensor> getVirtualSensorList();
 
     /**
      * Sends an event to the virtual sensor corresponding to the given token.

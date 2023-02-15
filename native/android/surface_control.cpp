@@ -621,6 +621,30 @@ void ASurfaceTransaction_setHdrMetadata_cta861_3(ASurfaceTransaction* aSurfaceTr
     transaction->setHdrMetadata(surfaceControl, hdrMetadata);
 }
 
+void ASurfaceTransaction_setExtendedRangeBrightness(ASurfaceTransaction* aSurfaceTransaction,
+                                                    ASurfaceControl* aSurfaceControl,
+                                                    float currentBufferRatio, float desiredRatio) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    if (!isfinite(currentBufferRatio) || currentBufferRatio < 1.0f) {
+        ALOGE("Ignore setExtendedRangeBrightness, currentBufferRatio %f isn't finite or >= 1.0f",
+              currentBufferRatio);
+        return;
+    }
+
+    if (!isfinite(desiredRatio) || desiredRatio < 1.0f) {
+        ALOGE("Ignore setExtendedRangeBrightness, desiredRatio %f isn't finite or >= 1.0f",
+              desiredRatio);
+        return;
+    }
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->setExtendedRangeBrightness(surfaceControl, currentBufferRatio, desiredRatio);
+}
+
 void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,
                                   ASurfaceControl* aSurfaceControl,
                                   float r, float g, float b, float alpha,

@@ -51,11 +51,13 @@ data class SettingsEntry(
     // The unique id of this entry, which is computed by name + owner + fromPage + toPage.
     val id: String,
 
-    // The name of the page, which is used to compute the unique id, and need to be stable.
+    // The name of the entry, which is used to compute the unique id, and need to be stable.
     private val name: String,
 
-    // The display name of the page, for better readability.
-    val displayName: String,
+    // The label of the entry, for better readability.
+    // For migration mapping, this should match the android:key field in the old architecture
+    // if applicable.
+    val label: String,
 
     // The owner page of this entry.
     val owner: SettingsPage,

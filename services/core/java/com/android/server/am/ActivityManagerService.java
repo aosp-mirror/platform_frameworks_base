@@ -184,6 +184,7 @@ import android.app.AppOpsManager.AttributionFlags;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
+import android.app.ApplicationStartInfo;
 import android.app.ApplicationThreadConstants;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
@@ -192,6 +193,7 @@ import android.app.ContentProviderHolder;
 import android.app.ForegroundServiceDelegationOptions;
 import android.app.IActivityController;
 import android.app.IActivityManager;
+import android.app.IApplicationStartInfoCompleteListener;
 import android.app.IApplicationThread;
 import android.app.IForegroundServiceObserver;
 import android.app.IInstrumentationWatcher;
@@ -485,6 +487,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ActivityManagerService extends IActivityManager.Stub
@@ -6450,6 +6453,44 @@ public class ActivityManagerService extends IActivityManager.Stub
         return entry == null ? null : entry.second;
     }
 
+    private static class GetBackgroundStartPrivilegesFunctor implements Consumer<ProcessRecord> {
+        private BackgroundStartPrivileges mBackgroundStartPrivileges =
+                BackgroundStartPrivileges.NONE;
+        private int mUid;
+
+        void prepare(int uid) {
+            mUid = uid;
+            mBackgroundStartPrivileges = BackgroundStartPrivileges.NONE;
+        }
+
+        @NonNull
+        BackgroundStartPrivileges getResult() {
+            return mBackgroundStartPrivileges;
+        }
+
+        public void accept(ProcessRecord pr) {
+            if (pr.uid == mUid) {
+                mBackgroundStartPrivileges =
+                        mBackgroundStartPrivileges.merge(pr.getBackgroundStartPrivileges());
+            }
+        }
+    }
+
+    private final GetBackgroundStartPrivilegesFunctor mGetBackgroundStartPrivilegesFunctor =
+            new GetBackgroundStartPrivilegesFunctor();
+
+    /**
+     * Returns the current complete {@link BackgroundStartPrivileges} of the UID.
+     */
+    @NonNull
+    private BackgroundStartPrivileges getBackgroundStartPrivileges(int uid) {
+        synchronized (mProcLock) {
+            mGetBackgroundStartPrivilegesFunctor.prepare(uid);
+            mProcessList.forEachLruProcessesLOSP(false, mGetBackgroundStartPrivilegesFunctor);
+            return mGetBackgroundStartPrivilegesFunctor.getResult();
+        }
+    }
+
     /**
      * @return allowlist tag for a uid from mPendingTempAllowlist, null if not currently on
      * the allowlist
@@ -6768,6 +6809,21 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     void appNotResponding(@NonNull ProcessRecord anrProcess, @NonNull TimeoutRecord timeoutRecord) {
         mAnrHelper.appNotResponding(anrProcess, timeoutRecord);
+    }
+
+    private void appNotResponding(@NonNull String processName, int uid,
+            @NonNull TimeoutRecord timeoutRecord) {
+        Objects.requireNonNull(processName);
+        Objects.requireNonNull(timeoutRecord);
+
+        synchronized (this) {
+            final ProcessRecord app = getProcessRecordLocked(processName, uid);
+            if (app == null) {
+                Slog.e(TAG, "Unknown process: " + processName);
+                return;
+            }
+            mAnrHelper.appNotResponding(app, timeoutRecord);
+        }
     }
 
     void startPersistentApps(int matchFlags) {
@@ -9449,6 +9505,37 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         return retList;
+    }
+
+    @Override
+    public ParceledListSlice<ApplicationStartInfo> getHistoricalProcessStartReasons(
+            String packageName, int maxNum, int userId) {
+        if (!mConstants.mFlagApplicationStartInfoEnabled) {
+            return new ParceledListSlice<ApplicationStartInfo>(
+                new ArrayList<ApplicationStartInfo>());
+        }
+        enforceNotIsolatedCaller("getHistoricalProcessStartReasons");
+
+        final ArrayList<ApplicationStartInfo> results = new ArrayList<ApplicationStartInfo>();
+
+        return new ParceledListSlice<ApplicationStartInfo>(results);
+    }
+
+    @Override
+    public void setApplicationStartInfoCompleteListener(
+            IApplicationStartInfoCompleteListener listener, int userId) {
+        if (!mConstants.mFlagApplicationStartInfoEnabled) {
+            return;
+        }
+        enforceNotIsolatedCaller("setApplicationStartInfoCompleteListener");
+    }
+
+    @Override
+    public void removeApplicationStartInfoCompleteListener(int userId) {
+        if (!mConstants.mFlagApplicationStartInfoEnabled) {
+            return;
+        }
+        enforceNotIsolatedCaller("removeApplicationStartInfoCompleteListener");
     }
 
     @Override
@@ -16851,13 +16938,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean startProfile(@UserIdInt int userId) {
-        return mUserController.startProfile(userId);
+        return mUserController.startProfile(userId, /* evenWhenDisabled= */ false,
+                /* unlockListener= */ null);
     }
 
     @Override
     public boolean startProfileWithListener(@UserIdInt int userId,
             @Nullable IProgressListener unlockListener) {
-        return mUserController.startProfile(userId, unlockListener);
+        return mUserController.startProfile(userId, /* evenWhenDisabled= */ false, unlockListener);
     }
 
     @Override
@@ -17817,6 +17905,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mConstants.mFlagBackgroundActivityStartsEnabled;
         }
 
+        @Override
+        public BackgroundStartPrivileges getBackgroundStartPrivileges(int uid) {
+            return ActivityManagerService.this.getBackgroundStartPrivileges(uid);
+        }
+
         public void reportCurKeyguardUsageEvent(boolean keyguardShowing) {
             ActivityManagerService.this.reportGlobalUsageEvent(keyguardShowing
                     ? UsageEvents.Event.KEYGUARD_SHOWN
@@ -17935,6 +18028,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         null, null, OP_NONE, null, false, false, -1, SYSTEM_UID,
                         Binder.getCallingUid(), Binder.getCallingPid(), UserHandle.USER_ALL);
             }
+        }
+
+        @Override
+        public void appNotResponding(@NonNull String processName, int uid,
+                @NonNull TimeoutRecord timeoutRecord) {
+            ActivityManagerService.this.appNotResponding(processName, uid, timeoutRecord);
         }
 
         @Override
@@ -18455,6 +18554,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // If it's PROCESS_STATE_IMPORTANT_FOREGROUND, then we allow it only wheen the UID
             // has a SHORT_FGS.
             return mOomAdjuster.hasUidShortForegroundService(uid);
+        }
+
+        @Override
+        public boolean startProfileEvenWhenDisabled(@UserIdInt int userId) {
+            return mUserController.startProfile(userId, /* evenWhenDisabled= */ true,
+                    /* unlockListener= */ null);
         }
     }
 

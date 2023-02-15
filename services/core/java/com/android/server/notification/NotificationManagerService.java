@@ -393,12 +393,17 @@ public class NotificationManagerService extends SystemService {
     static final int INVALID_UID = -1;
     static final String ROOT_PKG = "root";
 
-    static final String[] DEFAULT_ALLOWED_ADJUSTMENTS = new String[] {
+    static final String[] ALLOWED_ADJUSTMENTS = new String[] {
+            Adjustment.KEY_PEOPLE,
+            Adjustment.KEY_SNOOZE_CRITERIA,
+            Adjustment.KEY_USER_SENTIMENT,
             Adjustment.KEY_CONTEXTUAL_ACTIONS,
             Adjustment.KEY_TEXT_REPLIES,
-            Adjustment.KEY_NOT_CONVERSATION,
             Adjustment.KEY_IMPORTANCE,
-            Adjustment.KEY_RANKING_SCORE
+            Adjustment.KEY_IMPORTANCE_PROPOSAL,
+            Adjustment.KEY_SENSITIVE_CONTENT,
+            Adjustment.KEY_RANKING_SCORE,
+            Adjustment.KEY_NOT_CONVERSATION
     };
 
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
@@ -2567,27 +2572,6 @@ public class NotificationManagerService extends SystemService {
             for (String name : properties.getKeyset()) {
                 if (SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE.equals(name)) {
                     mAssistants.resetDefaultAssistantsIfNecessary();
-                } else if (SystemUiDeviceConfigFlags.ENABLE_NAS_PRIORITIZER.equals(name)) {
-                    String value = properties.getString(name, null);
-                    if ("true".equals(value)) {
-                        mAssistants.allowAdjustmentType(Adjustment.KEY_IMPORTANCE);
-                    } else if ("false".equals(value)) {
-                        mAssistants.disallowAdjustmentType(Adjustment.KEY_IMPORTANCE);
-                    }
-                } else if (SystemUiDeviceConfigFlags.ENABLE_NAS_RANKING.equals(name)) {
-                    String value = properties.getString(name, null);
-                    if ("true".equals(value)) {
-                        mAssistants.allowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
-                    } else if ("false".equals(value)) {
-                        mAssistants.disallowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
-                    }
-                } else if (SystemUiDeviceConfigFlags.ENABLE_NAS_NOT_CONVERSATION.equals(name)) {
-                    String value = properties.getString(name, null);
-                    if ("true".equals(value)) {
-                        mAssistants.allowAdjustmentType(Adjustment.KEY_NOT_CONVERSATION);
-                    } else if ("false".equals(value)) {
-                        mAssistants.disallowAdjustmentType(Adjustment.KEY_NOT_CONVERSATION);
-                    }
                 } else if (SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED.equals(name)) {
                     String value = properties.getString(name, null);
                     if ("true".equals(value)) {
@@ -4254,22 +4238,6 @@ public class NotificationManagerService extends SystemService {
             }
 
             return mAssistants.getAllowedAssistantAdjustments();
-        }
-
-        @Override
-        public void allowAssistantAdjustment(String adjustmentType) {
-            checkCallerIsSystemOrSystemUiOrShell();
-            mAssistants.allowAdjustmentType(adjustmentType);
-
-            handleSavePolicyFile();
-        }
-
-        @Override
-        public void disallowAssistantAdjustment(String adjustmentType) {
-            checkCallerIsSystemOrSystemUiOrShell();
-            mAssistants.disallowAdjustmentType(adjustmentType);
-
-            handleSavePolicyFile();
         }
 
         /**
@@ -10146,8 +10114,6 @@ public class NotificationManagerService extends SystemService {
     public class NotificationAssistants extends ManagedServices {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
-        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES_OLD = "q_allowed_adjustments";
-        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "s_allowed_adjustments";
         private static final String ATT_TYPES = "types";
 
         private final Object mLock = new Object();
@@ -10224,10 +10190,9 @@ public class NotificationManagerService extends SystemService {
                 IPackageManager pm) {
             super(context, lock, up, pm);
 
-            // Add all default allowed adjustment types. Will be overwritten by values in xml,
-            // if they exist
-            for (int i = 0; i < DEFAULT_ALLOWED_ADJUSTMENTS.length; i++) {
-                mAllowedAdjustments.add(DEFAULT_ALLOWED_ADJUSTMENTS[i]);
+            // Add all default allowed adjustment types.
+            for (int i = 0; i < ALLOWED_ADJUSTMENTS.length; i++) {
+                mAllowedAdjustments.add(ALLOWED_ADJUSTMENTS[i]);
             }
         }
 
@@ -10283,52 +10248,6 @@ public class NotificationManagerService extends SystemService {
         protected String getRequiredPermission() {
             // only signature/privileged apps can be bound.
             return android.Manifest.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE;
-        }
-
-        @Override
-        protected void writeExtraXmlTags(TypedXmlSerializer out) throws IOException {
-            synchronized (mLock) {
-                out.startTag(null, TAG_ALLOWED_ADJUSTMENT_TYPES);
-                out.attribute(null, ATT_TYPES, TextUtils.join(",", mAllowedAdjustments));
-                out.endTag(null, TAG_ALLOWED_ADJUSTMENT_TYPES);
-            }
-        }
-
-        @Override
-        protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {
-            if (TAG_ALLOWED_ADJUSTMENT_TYPES_OLD.equals(tag)
-                    || TAG_ALLOWED_ADJUSTMENT_TYPES.equals(tag)) {
-                final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
-                synchronized (mLock) {
-                    mAllowedAdjustments.clear();
-                    if (!TextUtils.isEmpty(types)) {
-                        mAllowedAdjustments.addAll(Arrays.asList(types.split(",")));
-                    }
-                    if (TAG_ALLOWED_ADJUSTMENT_TYPES_OLD.equals(tag)) {
-                        if (DEBUG) Slog.d(TAG, "Migrate allowed adjustments.");
-                        mAllowedAdjustments.addAll(
-                                Arrays.asList(DEFAULT_ALLOWED_ADJUSTMENTS));
-                    }
-                }
-            }
-        }
-
-        protected void allowAdjustmentType(String type) {
-            synchronized (mLock) {
-                mAllowedAdjustments.add(type);
-            }
-            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
-                mHandler.post(() -> notifyCapabilitiesChanged(info));
-            }
-        }
-
-        protected void disallowAdjustmentType(String type) {
-            synchronized (mLock) {
-                mAllowedAdjustments.remove(type);
-            }
-            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
-                    mHandler.post(() -> notifyCapabilitiesChanged(info));
-            }
         }
 
         protected List<String> getAllowedAssistantAdjustments() {
@@ -10400,15 +10319,6 @@ public class NotificationManagerService extends SystemService {
 
         void setUserSet(int userId, boolean set) {
             mIsUserChanged.put(userId, set);
-        }
-
-        private void notifyCapabilitiesChanged(final ManagedServiceInfo info) {
-            final INotificationListener assistant = (INotificationListener) info.service;
-            try {
-                assistant.onAllowedAdjustmentsChanged();
-            } catch (RemoteException ex) {
-                Slog.e(TAG, "unable to notify assistant (capabilities): " + info, ex);
-            }
         }
 
         private void notifySeen(final ManagedServiceInfo info,

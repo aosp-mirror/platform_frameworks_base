@@ -226,6 +226,16 @@ final class DisplayDeviceInfo {
     public static final int DIFF_COLOR_MODE = 1 << 2;
 
     /**
+     * Diff result: The hdr/sdr ratio differs
+     */
+    public static final int DIFF_HDR_SDR_RATIO = 1 << 3;
+
+    /**
+     * Diff result: Catch-all for "everything changed"
+     */
+    public static final int DIFF_EVERYTHING = 0XFFFFFFFF;
+
+    /**
      * Gets the name of the display device, which may be derived from EDID or
      * other sources. The name may be localized and displayed to the user.
      */
@@ -414,6 +424,9 @@ final class DisplayDeviceInfo {
     public float brightnessMaximum;
     public float brightnessDefault;
 
+    // NaN means unsupported
+    public float hdrSdrRatio = Float.NaN;
+
     /**
      * Install orientation of display panel relative to its natural orientation.
      */
@@ -448,6 +461,9 @@ final class DisplayDeviceInfo {
         }
         if (colorMode != other.colorMode) {
             diff |= DIFF_COLOR_MODE;
+        }
+        if (!BrightnessSynchronizer.floatEquals(hdrSdrRatio, other.hdrSdrRatio)) {
+            diff |= DIFF_HDR_SDR_RATIO;
         }
         if (!Objects.equals(name, other.name)
                 || !Objects.equals(uniqueId, other.uniqueId)
@@ -527,6 +543,7 @@ final class DisplayDeviceInfo {
         brightnessMinimum = other.brightnessMinimum;
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
+        hdrSdrRatio = other.hdrSdrRatio;
         roundedCorners = other.roundedCorners;
         installOrientation = other.installOrientation;
         displayShape = other.displayShape;
@@ -575,6 +592,7 @@ final class DisplayDeviceInfo {
         sb.append(", brightnessMinimum ").append(brightnessMinimum);
         sb.append(", brightnessMaximum ").append(brightnessMaximum);
         sb.append(", brightnessDefault ").append(brightnessDefault);
+        sb.append(", hdrSdrRatio ").append(hdrSdrRatio);
         if (roundedCorners != null) {
             sb.append(", roundedCorners ").append(roundedCorners);
         }

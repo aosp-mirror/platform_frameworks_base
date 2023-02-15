@@ -19,7 +19,6 @@ package com.android.server.power;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
 import static android.os.PowerManager.lowPowerStandbyAllowedReasonsToString;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
@@ -692,8 +691,7 @@ public class LowPowerStandbyController {
         final Intent intent = new Intent(
                 PowerManager.ACTION_LOW_POWER_STANDBY_POLICY_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
-                Manifest.permission.MANAGE_LOW_POWER_STANDBY);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     private void onStandbyTimeoutExpired() {
@@ -812,7 +810,7 @@ public class LowPowerStandbyController {
         }
     }
 
-    @NonNull
+    @Nullable
     LowPowerStandbyPolicy getPolicy() {
         synchronized (mLock) {
             if (!mSupportedConfig) {
@@ -914,20 +912,22 @@ public class LowPowerStandbyController {
             final int[] allowlistUids = getAllowlistUidsLocked();
             ipw.print("Allowed UIDs=");
             ipw.println(Arrays.toString(allowlistUids));
-            ipw.println();
 
             final LowPowerStandbyPolicy policy = getPolicy();
-            ipw.println("mPolicy:");
-            ipw.increaseIndent();
-            ipw.print("mIdentifier=");
-            ipw.println(policy.getIdentifier());
-            ipw.print("mExemptPackages=");
-            ipw.println(String.join(",", policy.getExemptPackages()));
-            ipw.print("mAllowedReasons=");
-            ipw.println(lowPowerStandbyAllowedReasonsToString(policy.getAllowedReasons()));
-            ipw.print("mAllowedFeatures=");
-            ipw.println(String.join(",", policy.getAllowedFeatures()));
-            ipw.decreaseIndent();
+            if (policy != null) {
+                ipw.println();
+                ipw.println("mPolicy:");
+                ipw.increaseIndent();
+                ipw.print("mIdentifier=");
+                ipw.println(policy.getIdentifier());
+                ipw.print("mExemptPackages=");
+                ipw.println(String.join(",", policy.getExemptPackages()));
+                ipw.print("mAllowedReasons=");
+                ipw.println(lowPowerStandbyAllowedReasonsToString(policy.getAllowedReasons()));
+                ipw.print("mAllowedFeatures=");
+                ipw.println(String.join(",", policy.getAllowedFeatures()));
+                ipw.decreaseIndent();
+            }
 
             ipw.println();
             ipw.println("UID allowed reasons:");
@@ -967,17 +967,19 @@ public class LowPowerStandbyController {
                 proto.write(LowPowerStandbyControllerDumpProto.ALLOWLIST, appId);
             }
 
-            long policyToken = proto.start(LowPowerStandbyControllerDumpProto.POLICY);
             final LowPowerStandbyPolicy policy = getPolicy();
-            proto.write(LowPowerStandbyPolicyProto.IDENTIFIER, policy.getIdentifier());
-            for (String exemptPackage : policy.getExemptPackages()) {
-                proto.write(LowPowerStandbyPolicyProto.EXEMPT_PACKAGES, exemptPackage);
+            if (policy != null) {
+                long policyToken = proto.start(LowPowerStandbyControllerDumpProto.POLICY);
+                proto.write(LowPowerStandbyPolicyProto.IDENTIFIER, policy.getIdentifier());
+                for (String exemptPackage : policy.getExemptPackages()) {
+                    proto.write(LowPowerStandbyPolicyProto.EXEMPT_PACKAGES, exemptPackage);
+                }
+                proto.write(LowPowerStandbyPolicyProto.ALLOWED_REASONS, policy.getAllowedReasons());
+                for (String feature : policy.getAllowedFeatures()) {
+                    proto.write(LowPowerStandbyPolicyProto.ALLOWED_FEATURES, feature);
+                }
+                proto.end(policyToken);
             }
-            proto.write(LowPowerStandbyPolicyProto.ALLOWED_REASONS, policy.getAllowedReasons());
-            for (String feature : policy.getAllowedFeatures()) {
-                proto.write(LowPowerStandbyPolicyProto.ALLOWED_FEATURES, feature);
-            }
-            proto.end(policyToken);
             proto.end(token);
         }
     }
@@ -1047,6 +1049,9 @@ public class LowPowerStandbyController {
                     "Adding to allowlist: uid=" + uid + ", allowedReason=" + allowedReason);
         }
         synchronized (mLock) {
+            if (!mSupportedConfig) {
+                return;
+            }
             if (allowedReason != 0 && !hasAllowedReasonLocked(uid, allowedReason)) {
                 addAllowedReasonLocked(uid, allowedReason);
                 if ((getPolicy().getAllowedReasons() & allowedReason) != 0) {
@@ -1062,6 +1067,9 @@ public class LowPowerStandbyController {
             Slog.i(TAG, "Removing from allowlist: uid=" + uid + ", allowedReason=" + allowedReason);
         }
         synchronized (mLock) {
+            if (!mSupportedConfig) {
+                return;
+            }
             if (allowedReason != 0 && hasAllowedReasonLocked(uid, allowedReason)) {
                 removeAllowedReasonLocked(uid, allowedReason);
                 if ((getPolicy().getAllowedReasons() & allowedReason) != 0) {
@@ -1077,6 +1085,9 @@ public class LowPowerStandbyController {
         final PackageManager packageManager = mContext.getPackageManager();
         final LowPowerStandbyPolicy policy = getPolicy();
         final List<Integer> appIds = new ArrayList<>();
+        if (policy == null) {
+            return appIds;
+        }
 
         for (String packageName : policy.getExemptPackages()) {
             try {
@@ -1100,6 +1111,9 @@ public class LowPowerStandbyController {
         final List<UserHandle> userHandles = userManager.getUserHandles(true);
         final ArraySet<Integer> uids = new ArraySet<>(mUidAllowedReasons.size());
         final LowPowerStandbyPolicy policy = getPolicy();
+        if (policy == null) {
+            return new int[0];
+        }
 
         final int policyAllowedReasons = policy.getAllowedReasons();
         for (int i = 0; i < mUidAllowedReasons.size(); i++) {

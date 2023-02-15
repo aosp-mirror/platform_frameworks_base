@@ -22,6 +22,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -37,6 +38,8 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
     private static final int DEFAULT_SEEKBAR_MAX = 6;
     private static final int DEFAULT_SEEKBAR_PROGRESS = 0;
 
+    private ViewGroup mIconStartFrame;
+    private ViewGroup mIconEndFrame;
     private ImageView mIconStart;
     private ImageView mIconEnd;
     private SeekBar mSeekbar;
@@ -62,6 +65,8 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
         LayoutInflater.from(context).inflate(
                 R.layout.seekbar_with_icon_buttons, this, /* attachToRoot= */ true);
 
+        mIconStartFrame = findViewById(R.id.icon_start_frame);
+        mIconEndFrame = findViewById(R.id.icon_end_frame);
         mIconStart = findViewById(R.id.icon_start);
         mIconEnd = findViewById(R.id.icon_end);
         mSeekbar = findViewById(R.id.seekbar);
@@ -80,24 +85,22 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
             mSeekbar.setMax(max);
             setProgress(progress);
 
-            int iconStartContentDescriptionId = typedArray.getResourceId(
+            int iconStartFrameContentDescriptionId = typedArray.getResourceId(
                     R.styleable.SeekBarWithIconButtonsView_Layout_iconStartContentDescription,
                     /* defValue= */ 0);
-            int iconEndContentDescriptionId = typedArray.getResourceId(
+            int iconEndFrameContentDescriptionId = typedArray.getResourceId(
                     R.styleable.SeekBarWithIconButtonsView_Layout_iconEndContentDescription,
                     /* defValue= */ 0);
-            if (iconStartContentDescriptionId != 0) {
+            if (iconStartFrameContentDescriptionId != 0) {
                 final String contentDescription =
-                        context.getString(iconStartContentDescriptionId);
-                mIconStart.setContentDescription(contentDescription);
+                        context.getString(iconStartFrameContentDescriptionId);
+                mIconStartFrame.setContentDescription(contentDescription);
             }
-            if (iconEndContentDescriptionId != 0) {
+            if (iconEndFrameContentDescriptionId != 0) {
                 final String contentDescription =
-                        context.getString(iconEndContentDescriptionId);
-                mIconEnd.setContentDescription(contentDescription);
+                        context.getString(iconEndFrameContentDescriptionId);
+                mIconEndFrame.setContentDescription(contentDescription);
             }
-
-            typedArray.recycle();
         } else {
             mSeekbar.setMax(DEFAULT_SEEKBAR_MAX);
             setProgress(DEFAULT_SEEKBAR_PROGRESS);
@@ -109,7 +112,7 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
             final int progress = mSeekbar.getProgress();
             if (progress > 0) {
                 mSeekbar.setProgress(progress - 1);
-                setIconViewEnabled(mIconStart, mSeekbar.getProgress() > 0);
+                setIconViewAndFrameEnabled(mIconStart, mSeekbar.getProgress() > 0);
             }
         });
 
@@ -117,13 +120,15 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
             final int progress = mSeekbar.getProgress();
             if (progress < mSeekbar.getMax()) {
                 mSeekbar.setProgress(progress + 1);
-                setIconViewEnabled(mIconEnd, mSeekbar.getProgress() < mSeekbar.getMax());
+                setIconViewAndFrameEnabled(mIconEnd, mSeekbar.getProgress() < mSeekbar.getMax());
             }
         });
     }
 
-    private static void setIconViewEnabled(View iconView, boolean enabled) {
+    private static void setIconViewAndFrameEnabled(View iconView, boolean enabled) {
         iconView.setEnabled(enabled);
+        final ViewGroup iconFrame = (ViewGroup) iconView.getParent();
+        iconFrame.setEnabled(enabled);
     }
 
     /**
@@ -141,12 +146,22 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
      * Icon End will need to be enabled when the seekbar progress is less than Max.
      */
     private void updateIconViewIfNeeded(int progress) {
-        setIconViewEnabled(mIconStart, progress > 0);
-        setIconViewEnabled(mIconEnd, progress < mSeekbar.getMax());
+        setIconViewAndFrameEnabled(mIconStart, progress > 0);
+        setIconViewAndFrameEnabled(mIconEnd, progress < mSeekbar.getMax());
+    }
+
+    /**
+     * Sets max to the seekbar in the layout.
+     */
+    public void setMax(int max) {
+        mSeekbar.setMax(max);
     }
 
     /**
      * Sets progress to the seekbar in the layout.
+     * If the progress is smaller than or equals to 0, the IconStart will be disabled. If the
+     * progress is larger than or equals to Max, the IconEnd will be disabled. The seekbar progress
+     * will be constrained in {@link SeekBar}.
      */
     public void setProgress(int progress) {
         mSeekbar.setProgress(progress);

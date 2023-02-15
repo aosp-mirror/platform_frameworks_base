@@ -32,13 +32,13 @@
     "com/android/server/sensors/SensorManagerInternal$ProximityActiveListener"
 
 #define RUNTIME_SENSOR_CALLBACK_CLASS \
-    "com/android/server/sensors/SensorManagerInternal$RuntimeSensorStateChangeCallback"
+    "com/android/server/sensors/SensorManagerInternal$RuntimeSensorCallback"
 
 namespace android {
 
 static JavaVM* sJvm = nullptr;
 static jmethodID sMethodIdOnProximityActive;
-static jmethodID sMethodIdOnStateChanged;
+static jmethodID sMethodIdOnConfigurationChanged;
 
 class NativeSensorService {
 public:
@@ -67,13 +67,13 @@ private:
     };
     sp<ProximityActiveListenerDelegate> mProximityActiveListenerDelegate;
 
-    class RuntimeSensorCallbackDelegate : public SensorService::RuntimeSensorStateChangeCallback {
+    class RuntimeSensorCallbackDelegate : public SensorService::RuntimeSensorCallback {
     public:
         RuntimeSensorCallbackDelegate(JNIEnv* env, jobject callback);
         ~RuntimeSensorCallbackDelegate();
 
-        void onStateChanged(bool enabled, int64_t samplingPeriodNs,
-                            int64_t batchReportLatencyNs) override;
+        status_t onConfigurationChanged(int32_t handle, bool enabled, int64_t samplingPeriodNs,
+                                        int64_t batchReportLatencyNs) override;
 
     private:
         jobject mCallback;
@@ -231,12 +231,13 @@ NativeSensorService::RuntimeSensorCallbackDelegate::~RuntimeSensorCallbackDelega
     AndroidRuntime::getJNIEnv()->DeleteGlobalRef(mCallback);
 }
 
-void NativeSensorService::RuntimeSensorCallbackDelegate::onStateChanged(
-        bool enabled, int64_t samplingPeriodNs, int64_t batchReportLatencyNs) {
+status_t NativeSensorService::RuntimeSensorCallbackDelegate::onConfigurationChanged(
+        int32_t handle, bool enabled, int64_t samplingPeriodNs, int64_t batchReportLatencyNs) {
     auto jniEnv = GetOrAttachJNIEnvironment(sJvm);
-    jniEnv->CallVoidMethod(mCallback, sMethodIdOnStateChanged, static_cast<jboolean>(enabled),
-                           static_cast<jint>(ns2us(samplingPeriodNs)),
-                           static_cast<jint>(ns2us(batchReportLatencyNs)));
+    return jniEnv->CallIntMethod(mCallback, sMethodIdOnConfigurationChanged,
+                                 static_cast<jint>(handle), static_cast<jboolean>(enabled),
+                                 static_cast<jint>(ns2us(samplingPeriodNs)),
+                                 static_cast<jint>(ns2us(batchReportLatencyNs)));
 }
 
 static jlong startSensorServiceNative(JNIEnv* env, jclass, jobject listener) {
@@ -292,8 +293,8 @@ int register_android_server_sensor_SensorService(JavaVM* vm, JNIEnv* env) {
     jclass listenerClass = FindClassOrDie(env, PROXIMITY_ACTIVE_CLASS);
     sMethodIdOnProximityActive = GetMethodIDOrDie(env, listenerClass, "onProximityActive", "(Z)V");
     jclass runtimeSensorCallbackClass = FindClassOrDie(env, RUNTIME_SENSOR_CALLBACK_CLASS);
-    sMethodIdOnStateChanged =
-            GetMethodIDOrDie(env, runtimeSensorCallbackClass, "onStateChanged", "(ZII)V");
+    sMethodIdOnConfigurationChanged =
+            GetMethodIDOrDie(env, runtimeSensorCallbackClass, "onConfigurationChanged", "(IZII)I");
     return jniRegisterNativeMethods(env, "com/android/server/sensors/SensorService", methods,
                                     NELEM(methods));
 }

@@ -148,7 +148,7 @@ constructor(
                         withContext(backgroundDispatcher) {
                             manager.getUserInfo(lastSelectedNonGuestUserHandle)
                         }
-                    if (info != null && info.isEnabled && info.supportsSwitchToByUser()) {
+                    if (info != null && info.isEnabled && info.supportsSwitchTo()) {
                         newUserId = info.id
                     }
                 }

@@ -234,13 +234,14 @@ public abstract class DisplayManagerInternal {
      * @param requestedMinimalPostProcessing The preferred minimal post processing setting for the
      * display. This is true when there is at least one visible window that wants minimal post
      * processng on.
+     * @param disableHdrConversion The preferred HDR conversion setting for the window.
      * @param inTraversal True if called from WindowManagerService during a window traversal
      * prior to call to performTraversalInTransactionFromWindowManager.
      */
     public abstract void setDisplayProperties(int displayId, boolean hasContent,
             float requestedRefreshRate, int requestedModeId, float requestedMinRefreshRate,
             float requestedMaxRefreshRate, boolean requestedMinimalPostProcessing,
-            boolean inTraversal);
+            boolean disableHdrConversion, boolean inTraversal);
 
     /**
      * Applies an offset to the contents of a display, for example to avoid burn-in.

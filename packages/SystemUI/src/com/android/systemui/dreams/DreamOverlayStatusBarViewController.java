@@ -259,7 +259,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
                         mConnectivityManager.getActiveNetwork());
         final boolean available = capabilities != null
                 && capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
-        showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, !available);
+        showIcon(DreamOverlayStatusBarView.STATUS_ICON_WIFI_UNAVAILABLE, !available,
+                R.string.wifi_unavailable_dream_overlay_content_description);
     }
 
     private void updateAlarmStatusIcon() {
@@ -274,7 +275,8 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
 
     private void updateAssistantAttentionIcon() {
         showIcon(DreamOverlayStatusBarView.STATUS_ICON_ASSISTANT_ATTENTION_ACTIVE,
-                mDreamOverlayStateController.hasAssistantAttention());
+                mDreamOverlayStateController.hasAssistantAttention(),
+                R.string.assistant_attention_content_description);
     }
 
     private void updateVisibility() {
@@ -304,13 +306,16 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
         @DreamOverlayStatusBarView.StatusIconType int iconType = Resources.ID_NULL;
         showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_CAMERA_DISABLED,
-                !micBlocked && cameraBlocked);
+                !micBlocked && cameraBlocked,
+                R.string.camera_blocked_dream_overlay_content_description);
         showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_MIC_DISABLED,
-                micBlocked && !cameraBlocked);
+                micBlocked && !cameraBlocked,
+                R.string.microphone_blocked_dream_overlay_content_description);
         showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED,
-                micBlocked && cameraBlocked);
+                micBlocked && cameraBlocked,
+                R.string.camera_and_microphone_blocked_dream_overlay_content_description);
     }
 
     private String buildNotificationsContentDescription(int notificationCount) {
@@ -323,11 +328,13 @@ public class DreamOverlayStatusBarViewController extends ViewController<DreamOve
     private void updatePriorityModeStatusIcon() {
         showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_PRIORITY_MODE_ON,
-                mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF);
+                mZenModeController.getZen() != Settings.Global.ZEN_MODE_OFF,
+                R.string.priority_mode_dream_overlay_content_description);
     }
 
-    private void showIcon(@DreamOverlayStatusBarView.StatusIconType int iconType, boolean show) {
-        showIcon(iconType, show, null);
+    private void showIcon(@DreamOverlayStatusBarView.StatusIconType int iconType, boolean show,
+            int contentDescriptionResId) {
+        showIcon(iconType, show, mResources.getString(contentDescriptionResId));
     }
 
     private void showIcon(

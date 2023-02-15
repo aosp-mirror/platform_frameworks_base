@@ -183,13 +183,17 @@ final class SpeechRecognitionManagerServiceImpl extends
                         @Override
                         public void checkRecognitionSupport(
                                 Intent recognizerIntent,
+                                AttributionSource attributionSource,
                                 IRecognitionSupportCallback callback) {
-                            service.checkRecognitionSupport(recognizerIntent, callback);
+                            service.checkRecognitionSupport(
+                                    recognizerIntent, attributionSource, callback);
                         }
 
                         @Override
-                        public void triggerModelDownload(Intent recognizerIntent) {
-                            service.triggerModelDownload(recognizerIntent);
+                        public void triggerModelDownload(
+                                Intent recognizerIntent,
+                                AttributionSource attributionSource) {
+                            service.triggerModelDownload(recognizerIntent, attributionSource);
                         }
                     });
                 } catch (RemoteException e) {

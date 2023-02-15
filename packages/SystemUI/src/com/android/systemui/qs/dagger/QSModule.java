@@ -30,6 +30,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.external.QSExternalModule;
+import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -40,11 +41,14 @@ import com.android.systemui.statusbar.policy.SafetyController;
 import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.util.settings.SecureSettings;
 
+import java.util.Map;
+
 import javax.inject.Named;
 
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.Multibinds;
 
 /**
  * Module for QS dependencies
@@ -52,6 +56,11 @@ import dagger.Provides;
 @Module(subcomponents = {QSFragmentComponent.class},
         includes = {MediaModule.class, QSExternalModule.class, QSFlagsModule.class})
 public interface QSModule {
+
+    /** A map of internal QS tiles. Ensures that this can be injected even if
+     * it is empty */
+    @Multibinds
+    Map<String, QSTileImpl<?>> tileMap();
 
     @Provides
     @SysUISingleton

@@ -50,22 +50,22 @@ fun SettingsPage.debugBrief(): String {
 }
 
 fun SettingsEntry.debugBrief(): String {
-    return "${owner.displayName}:$displayName"
+    return "${owner.displayName}:$label"
 }
 
 fun SettingsEntry.debugContent(entryRepository: SettingsEntryRepository): String {
     val searchData = getSearchData()
     val statusData = getStatusData()
-    val entryPathWithName = entryRepository.getEntryPathWithDisplayName(id)
+    val entryPathWithLabel = entryRepository.getEntryPathWithLabel(id)
     val entryPathWithTitle = entryRepository.getEntryPathWithTitle(id,
-        searchData?.title ?: displayName)
+        searchData?.title ?: label)
     val content = listOf(
         "------ STATIC ------",
         "id = $id",
         "owner = ${owner.debugBrief()} ${owner.debugArguments()}",
         "linkFrom = ${fromPage?.debugBrief()} ${fromPage?.debugArguments()}",
         "linkTo = ${toPage?.debugBrief()} ${toPage?.debugArguments()}",
-        "hierarchy_path = $entryPathWithName",
+        "hierarchy_path = $entryPathWithLabel",
         "------ ATTRIBUTION ------",
         "allowSearch = $isAllowSearch",
         "isSearchDynamic = $isSearchDataDynamic",

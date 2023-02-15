@@ -19,6 +19,7 @@ package com.android.server.companion.virtual;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.sensor.VirtualSensor;
 import android.os.LocaleList;
 import android.util.ArraySet;
 
@@ -76,6 +77,15 @@ public abstract class VirtualDeviceManagerInternal {
      * or {@link android.os.Process#INVALID_UID} if no such device exists.
      */
     public abstract int getDeviceOwnerUid(int deviceId);
+
+    /**
+     * Returns the VirtualSensor for the given deviceId and sensor handle, if any.
+     *
+     * @param deviceId the virtual device that owns the sensor
+     * @param handle the sensor handle
+     * @return the VirtualSensor with the given handle, or {@code null} if no such sensor exists.
+     */
+    public abstract @Nullable VirtualSensor getVirtualSensor(int deviceId, int handle);
 
     /**
      * Finds VirtualDevices where an app is running.

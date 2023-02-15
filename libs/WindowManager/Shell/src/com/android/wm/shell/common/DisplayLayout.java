@@ -25,7 +25,6 @@ import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON
 import static android.util.RotationUtils.rotateBounds;
 import static android.util.RotationUtils.rotateInsets;
 import static android.view.Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -46,9 +45,9 @@ import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.Surface;
+import android.view.WindowInsets;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -372,23 +371,20 @@ public class DisplayLayout {
 
         // Only navigation bar
         if (hasNavigationBar) {
-            final InsetsSource extraNavBar = insetsState.peekSource(ITYPE_EXTRA_NAVIGATION_BAR);
-            final boolean hasExtraNav = extraNavBar != null && extraNavBar.isVisible();
+            final Insets insets = insetsState.calculateInsets(
+                    insetsState.getDisplayFrame(),
+                    WindowInsets.Type.navigationBars(),
+                    false /* ignoreVisibility */);
+            outInsets.set(insets.left, insets.top, insets.right, insets.bottom);
             int position = navigationBarPosition(res, displayWidth, displayHeight, displayRotation);
             int navBarSize =
                     getNavigationBarSize(res, position, displayWidth > displayHeight, uiMode);
             if (position == NAV_BAR_BOTTOM) {
-                outInsets.bottom = hasExtraNav
-                        ? Math.max(navBarSize, extraNavBar.getFrame().height())
-                        : navBarSize;
+                outInsets.bottom = Math.max(outInsets.bottom , navBarSize);
             } else if (position == NAV_BAR_RIGHT) {
-                outInsets.right = hasExtraNav
-                        ? Math.max(navBarSize, extraNavBar.getFrame().width())
-                        : navBarSize;
+                outInsets.right = Math.max(outInsets.right , navBarSize);
             } else if (position == NAV_BAR_LEFT) {
-                outInsets.left = hasExtraNav
-                        ? Math.max(navBarSize, extraNavBar.getFrame().width())
-                        : navBarSize;
+                outInsets.left = Math.max(outInsets.left , navBarSize);
             }
         }
 

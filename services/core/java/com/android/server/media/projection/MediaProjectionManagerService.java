@@ -287,19 +287,16 @@ public final class MediaProjectionManagerService extends SystemService
             if (packageName == null || packageName.isEmpty()) {
                 throw new IllegalArgumentException("package name must not be empty");
             }
-
-            final UserHandle callingUser = Binder.getCallingUserHandle();
-            final long callingToken = Binder.clearCallingIdentity();
+            final ApplicationInfo ai;
+            try {
+                ai = mPackageManager.getApplicationInfo(packageName, 0);
+            } catch (NameNotFoundException e) {
+                throw new IllegalArgumentException("No package matching :" + packageName);
+            }
 
             MediaProjection projection;
+            final long callingToken = Binder.clearCallingIdentity();
             try {
-                ApplicationInfo ai;
-                try {
-                    ai = mPackageManager.getApplicationInfoAsUser(packageName, 0, callingUser);
-                } catch (NameNotFoundException e) {
-                    throw new IllegalArgumentException("No package matching :" + packageName);
-                }
-
                 projection = new MediaProjection(type, uid, packageName, ai.targetSdkVersion,
                         ai.isPrivilegedApp());
                 if (isPermanentGrant) {

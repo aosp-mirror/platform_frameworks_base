@@ -558,4 +558,18 @@ public class RecognizerIntent {
      * @see #EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS
      */
     public static final String EXTRA_SEGMENTED_SESSION = "android.speech.extra.SEGMENTED_SESSION";
+
+    /**
+     * Optional boolean indicating whether the recognizer should return the timestamp
+     * of each word in the final recognition results.
+     */
+    public static final String EXTRA_REQUEST_WORD_TIMING =
+            "android.speech.extra.REQUEST_WORD_TIMING";
+
+    /**
+     * Optional boolean indicating whether the recognizer should return the confidence
+     * level of each word in the final recognition results.
+     */
+    public static final String EXTRA_REQUEST_WORD_CONFIDENCE =
+            "android.speech.extra.REQUEST_WORD_CONFIDENCE";
 }

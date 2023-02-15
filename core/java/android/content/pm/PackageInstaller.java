@@ -30,8 +30,6 @@ import static android.content.pm.PackageInfo.INSTALL_LOCATION_AUTO;
 import static android.content.pm.PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
 import static android.content.pm.PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL;
 
-import static com.android.internal.util.XmlUtils.writeStringAttribute;
-
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.CurrentTimeMillisLong;
@@ -84,7 +82,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.ExceptionUtils;
-import android.util.Log;
 
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.util.ArrayUtils;
@@ -92,7 +89,6 @@ import com.android.internal.util.DataClass;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.modules.utils.TypedXmlSerializer;
 
 import java.io.Closeable;
 import java.io.File;
@@ -2313,11 +2309,6 @@ public class PackageInstaller {
         private final ArrayMap<String, Integer> mPermissionStates;
 
         /**
-         * @see #getFinalPermissionStates()
-         */
-        private ArrayMap<String, Integer> mFinalPermissionStates;
-
-        /**
          * Construct parameters for a new package install session.
          *
          * @param mode one of {@link #MODE_FULL_INSTALL} or
@@ -2561,11 +2552,6 @@ public class PackageInstaller {
             if (TextUtils.isEmpty(permissionName)) {
                 throw new IllegalArgumentException("Provided permissionName cannot be "
                         + (permissionName == null ? "null" : "empty"));
-            }
-
-            if (mFinalPermissionStates != null) {
-                Log.wtf(TAG, "Requested permission " + permissionName + " but final permissions"
-                        + " were already decided for this session: " + mFinalPermissionStates);
             }
 
             switch (state) {
@@ -3008,48 +2994,10 @@ public class PackageInstaller {
             }
         }
 
-        /**
-         * This is only for use by system server. If you need the actual grant state, use
-         * {@link #getFinalPermissionStates()}.
-         * <p/>
-         * This is implemented here to avoid exposing the raw permission sets to external callers,
-         * so that enforcement done in the either of the final methods is the single source of truth
-         * for default grant/deny policy.
-         *
-         * @hide
-         */
-        public void writePermissionStateXml(@NonNull TypedXmlSerializer out,
-                @NonNull String grantTag, @NonNull String denyTag, @NonNull String attrName)
-                throws IOException {
-            for (int index = 0; index < mPermissionStates.size(); index++) {
-                var permissionName = mPermissionStates.keyAt(index);
-                var state = mPermissionStates.valueAt(index);
-                String tag = state == PERMISSION_STATE_GRANTED ? grantTag : denyTag;
-                out.startTag(null, tag);
-                writeStringAttribute(out, attrName, permissionName);
-                out.endTag(null, tag);
-            }
-        }
-
-        /**
-         * Snapshot of final permission states taken when this method is first called, to separate
-         * what the caller wanted and the effective state that should be applied to the session.
-         *
-         * This prevents someone from adding more permissions after the fact.
-         *
-         * @hide
-         */
+        /** @hide */
         @NonNull
-        public ArrayMap<String, Integer> getFinalPermissionStates() {
-            if (mFinalPermissionStates == null) {
-                mFinalPermissionStates = new ArrayMap<>(mPermissionStates);
-                if (!mFinalPermissionStates.containsKey(
-                        Manifest.permission.USE_FULL_SCREEN_INTENT)) {
-                    mFinalPermissionStates.put(Manifest.permission.USE_FULL_SCREEN_INTENT,
-                            PERMISSION_STATE_GRANTED);
-                }
-            }
-            return mFinalPermissionStates;
+        public ArrayMap<String, Integer> getPermissionStates() {
+            return mPermissionStates;
         }
 
         /** @hide */

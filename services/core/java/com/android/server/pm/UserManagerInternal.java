@@ -238,8 +238,9 @@ public abstract class UserManagerInternal {
      * the user is created (as it will be passed back to it through
      * {@link UserLifecycleListener#onUserCreated(UserInfo, Object)});
      */
-    public abstract UserInfo createUserEvenWhenDisallowed(String name, String userType,
-            int flags, String[] disallowedPackages, @Nullable Object token)
+    public abstract @NonNull UserInfo createUserEvenWhenDisallowed(
+            @Nullable String name, @NonNull String userType, @UserInfo.UserInfoFlag int flags,
+            @Nullable String[] disallowedPackages, @Nullable Object token)
             throws UserManager.CheckedUserOperationException;
 
     /**

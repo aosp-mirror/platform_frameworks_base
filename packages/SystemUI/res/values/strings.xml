@@ -1700,34 +1700,105 @@
     <string name="keyboard_shortcut_group_system">System</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the home screen. -->
     <string name="keyboard_shortcut_group_system_home">Home</string>
-    <!-- User visible title for the the keyboard shortcut that takes the user to the recents screen. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the recents screen. -->
     <string name="keyboard_shortcut_group_system_recents">Recents</string>
-    <!-- User visible title for the the keyboard shortcut that triggers the back action. -->
+    <!-- User visible title for the keyboard shortcut that triggers the back action. -->
     <string name="keyboard_shortcut_group_system_back">Back</string>
-    <!-- User visible title for the the keyboard shortcut that triggers the notification shade. -->
+    <!-- User visible title for the keyboard shortcut that triggers the notification shade. -->
     <string name="keyboard_shortcut_group_system_notifications">Notifications</string>
-    <!-- User visible title for the the keyboard shortcut that triggers the keyboard shortcuts helper. -->
+    <!-- User visible title for the keyboard shortcut that triggers the keyboard shortcuts helper. -->
     <string name="keyboard_shortcut_group_system_shortcuts_helper">Keyboard Shortcuts</string>
-    <!-- User visible title for the the keyboard shortcut that switches to the next hardware keyboard layout. [CHAR LIMIT=30] -->
+    <!-- User visible title for the keyboard shortcut that switches to the next hardware keyboard layout. -->
     <string name="keyboard_shortcut_group_system_switch_input">Switch keyboard layout</string>
 
-    <!-- User visible title for the system-wide applications keyboard shortcuts list. -->
+    <!-- Content description for the clear text button in shortcut search list. [CHAR LIMIT=NONE] -->
+    <string name="keyboard_shortcut_clear_text">Clear text</string>
+    <!-- The title for keyboard shortcut search list [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_list_title">Shortcuts</string>
+    <!-- The hint for keyboard shortcut search list [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_list_hint">Search shortcuts</string>
+    <!-- The description for no shortcuts results [CHAR LIMIT=25] -->
+    <string name="keyboard_shortcut_search_list_no_result">No shortcuts found</string>
+    <!-- The title of system category in shortcut search list. [CHAR LIMIT=15] -->
+    <string name="keyboard_shortcut_search_category_system">System</string>
+    <!-- The title of input category in shortcut search list. [CHAR LIMIT=15] -->
+    <string name="keyboard_shortcut_search_category_input">Input</string>
+    <!-- The title of open apps category in shortcut search list. [CHAR LIMIT=15] -->
+    <string name="keyboard_shortcut_search_category_open_apps">Open apps</string>
+    <!-- The title of current app category in shortcut search list. [CHAR LIMIT=15] -->
+    <string name="keyboard_shortcut_search_category_current_app">Current app</string>
+
+    <!-- User visible title for the keyboard shortcut that triggers the notification shade. [CHAR LIMIT=70] -->
+    <string name="group_system_access_notification_shade">Access notification shade</string>
+    <!-- User visible title for the keyboard shortcut that takes a full screenshot. [CHAR LIMIT=70] -->
+    <string name="group_system_full_screenshot">Take a full screenshot</string>
+    <!-- User visible title for the keyboard shortcut that access list of system / apps shortcuts. [CHAR LIMIT=70] -->
+    <string name="group_system_access_system_app_shortcuts">Access list of system / apps shortcuts</string>
+    <!-- User visible title for the keyboard shortcut that goes back to previous state. [CHAR LIMIT=70] -->
+    <string name="group_system_go_back">Back: go back to previous state (back button)</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the home screen. [CHAR LIMIT=70] -->
+    <string name="group_system_access_home_screen">Access home screen</string>
+    <!-- User visible title for the keyboard shortcut that triggers overview of open apps. [CHAR LIMIT=70] -->
+    <string name="group_system_overview_open_apps">Overview of open apps</string>
+    <!-- User visible title for the keyboard shortcut that cycles through recent apps (forward). [CHAR LIMIT=70] -->
+    <string name="group_system_cycle_forward">Cycle through recent apps (forward)</string>
+    <!-- User visible title for the keyboard shortcut that cycles through recent apps (back). [CHAR LIMIT=70] -->
+    <string name="group_system_cycle_back">Cycle through recent apps (back)</string>
+    <!-- User visible title for the keyboard shortcut that accesses list of all apps and search. [CHAR LIMIT=70] -->
+    <string name="group_system_access_all_apps_search">Access list of all apps and search (i.e. Search/Launcher)</string>
+    <!-- User visible title for the keyboard shortcut that hides and (re)showes taskbar. [CHAR LIMIT=70] -->
+    <string name="group_system_hide_reshow_taskbar">Hide and (re)show taskbar</string>
+    <!-- User visible title for the keyboard shortcut that accesses system settings. [CHAR LIMIT=70] -->
+    <string name="group_system_access_system_settings">Access system settings</string>
+    <!-- User visible title for the keyboard shortcut that accesses Google Assistant. [CHAR LIMIT=70] -->
+    <string name="group_system_access_google_assistant">Access Google Assistant</string>
+    <!-- User visible title for the keyboard shortcut that locks screen. [CHAR LIMIT=70] -->
+    <string name="group_system_lock_screen">Lock screen</string>
+    <!-- User visible title for the keyboard shortcut that pulls up Notes app for quick memo. [CHAR LIMIT=70] -->
+    <string name="group_system_quick_memo">Pull up Notes app for quick memo</string>
+
+    <!-- User visible title for the system multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_system_multitasking">System multitasking</string>
+    <!-- User visible title for the keyboard shortcut that enters split screen with current app to RHS [CHAR LIMIT=70] -->
+    <string name="system_multitasking_rhs">Enter Split screen with current app to RHS</string>
+    <!-- User visible title for the keyboard shortcut that enters split screen with current app to LHS [CHAR LIMIT=70] -->
+    <string name="system_multitasking_lhs">Enter Split screen with current app to LHS</string>
+    <!-- User visible title for the keyboard shortcut that switches from split screen to full screen [CHAR LIMIT=70] -->
+    <string name="system_multitasking_full_screen">Switch from Split screen to full screen</string>
+    <!-- User visible title for the keyboard shortcut that replaces an app from one to another during split screen [CHAR LIMIT=70] -->
+    <string name="system_multitasking_replace">During Split screen: replace an app from one to another</string>
+
+    <!-- User visible title for the input keyboard shortcuts list. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_input">Input</string>
+    <!-- User visible title for the keyboard shortcut that switches input language (next language). [CHAR LIMIT=70] -->
+    <string name="input_switch_input_language_next">Switch input language (next language)</string>
+    <!-- User visible title for the keyboard shortcut that switches input language (previous language). [CHAR LIMIT=70] -->
+    <string name="input_switch_input_language_previous">Switch input language (previous language)</string>
+    <!-- User visible title for the keyboard shortcut that accesses emoji. [CHAR LIMIT=70] -->
+    <string name="input_access_emoji">Access emoji</string>
+    <!-- User visible title for the keyboard shortcut that accesses voice typing. [CHAR LIMIT=70] -->
+    <string name="input_access_voice_typing">Access voice typing</string>
+
+    <!-- User visible title for the system-wide applications keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications">Applications</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the assist app. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the assist app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_assist">Assist</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the browser app. -->
-    <string name="keyboard_shortcut_group_applications_browser">Browser</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the contacts app. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the browser app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_browser">Browser (Chrome as default)</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the contacts app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_contacts">Contacts</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the email app. -->
-    <string name="keyboard_shortcut_group_applications_email">Email</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the SMS messaging app. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the email app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_email">Email (Gmail as default)</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the SMS messaging app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_sms">SMS</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the music app. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the music app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_music">Music</string>
-    <!-- User visible title for the keyboard shortcut that takes the user to the YouTube app. -->
-    <!-- User visible title for the keyboard shortcut that takes the user to the calendar app. -->
+    <!-- User visible title for the keyboard shortcut that takes the user to the calendar app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_calendar">Calendar</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the calculator app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_calculator">Calculator</string>
+    <!-- User visible title for the keyboard shortcut that takes the user to the maps app. [CHAR LIMIT=70] -->
+    <string name="keyboard_shortcut_group_applications_maps">Maps</string>
 
     <!-- SysUI Tuner: Label for screen about do not disturb settings [CHAR LIMIT=60] -->
     <string name="volume_and_do_not_disturb">Do Not Disturb</string>
@@ -2232,6 +2303,14 @@
 
     <!-- Title of the overlay warning the user to interact with the device or it will go to sleep. [CHAR LIMIT=25] -->
     <string name="inattentive_sleep_warning_title">Standby</string>
+
+    <!-- Font scaling -->
+    <!-- Font scaling: Quick Settings dialog title [CHAR LIMIT=30] -->
+    <string name="font_scaling_dialog_title">Font Size</string>
+    <!-- Content Description for the icon button to make fonts smaller. [CHAR LIMIT=30] -->
+    <string name="font_scaling_smaller">Make smaller</string>
+    <!-- Content Description for the icon button to make fonts larger. [CHAR LIMIT=30] -->
+    <string name="font_scaling_larger">Make larger</string>
 
     <!-- Window Magnification strings -->
     <!-- Title for Magnification Window [CHAR LIMIT=NONE] -->
@@ -2950,4 +3029,22 @@
     [CHAR LIMIT=32]
     -->
     <string name="lock_screen_settings">Lock screen settings</string>
+
+    <!-- Content description for Wi-Fi not available icon on dream [CHAR LIMIT=NONE]-->
+    <string name="wifi_unavailable_dream_overlay_content_description">Wi-Fi not available</string>
+
+    <!-- Content description for camera blocked icon on dream [CHAR LIMIT=NONE] -->
+    <string name="camera_blocked_dream_overlay_content_description">Camera blocked</string>
+
+    <!-- Content description for camera and microphone blocked icon on dream [CHAR LIMIT=NONE] -->
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description">Camera and microphone blocked</string>
+
+    <!-- Content description for camera and microphone disabled icon on dream [CHAR LIMIT=NONE] -->
+    <string name="microphone_blocked_dream_overlay_content_description">Microphone blocked</string>
+
+    <!-- Content description for priority mode icon on dream [CHAR LIMIT=NONE] -->
+    <string name="priority_mode_dream_overlay_content_description">Priority mode on</string>
+
+    <!-- Content description for when assistant attention is active [CHAR LIMIT=NONE] -->
+    <string name="assistant_attention_content_description">Assistant attention on</string>
 </resources>

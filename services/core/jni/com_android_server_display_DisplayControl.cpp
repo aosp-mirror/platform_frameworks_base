@@ -110,6 +110,15 @@ static jintArray nativeGetSupportedHdrOutputTypes(JNIEnv* env, jclass clazz) {
     return array;
 }
 
+static jboolean nativeGetHdrOutputConversionSupport(JNIEnv* env, jclass clazz) {
+    bool isSupported;
+    status_t err = SurfaceComposerClient::getHdrOutputConversionSupport(&isSupported);
+    if (err == OK) {
+        return isSupported;
+    }
+    return JNI_FALSE;
+}
+
 static jlongArray nativeGetPhysicalDisplayIds(JNIEnv* env, jclass clazz) {
     const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
     ScopedLongArrayRW values(env, env->NewLongArray(displayIds.size()));
@@ -150,6 +159,8 @@ static const JNINativeMethod sDisplayMethods[] = {
             (void*)nativeSetHdrConversionMode },
     {"nativeGetSupportedHdrOutputTypes", "()[I",
             (void*)nativeGetSupportedHdrOutputTypes },
+     {"nativeGetHdrOutputConversionSupport", "()Z",
+            (void*) nativeGetHdrOutputConversionSupport },
         // clang-format on
 };
 

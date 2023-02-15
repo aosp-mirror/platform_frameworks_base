@@ -20,12 +20,15 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.hardware.display.DisplayManager
 import android.util.AttributeSet
+import android.util.Log
+import android.view.Display
 import android.view.Window
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.android.test.silkfx.R
 import com.android.test.silkfx.app.WindowObserver
+import java.util.function.Consumer
 
 class ColorModeControls : LinearLayout, WindowObserver {
     private val COLOR_MODE_HDR10 = 3
@@ -64,6 +67,38 @@ class ColorModeControls : LinearLayout, WindowObserver {
         findViewById<Button>(R.id.mode_hdr10)!!.setOnClickListener {
             setColorMode(COLOR_MODE_HDR10)
         }
+    }
+
+    private val hdrsdrListener = Consumer<Display> { display ->
+        Log.d("SilkFX", "HDR/SDR changed ${display.hdrSdrRatio}")
+    }
+
+    private val displayChangedListener = object : DisplayManager.DisplayListener {
+        override fun onDisplayAdded(displayId: Int) {
+            Log.d("SilkFX", "onDisplayAdded")
+        }
+
+        override fun onDisplayRemoved(displayId: Int) {
+            Log.d("SilkFX", "onDisplayRemoved")
+        }
+
+        override fun onDisplayChanged(displayId: Int) {
+            Log.d("SilkFX", "onDisplayChanged")
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        Log.d("SilkFX", "is hdr/sdr available: ${display.isHdrSdrRatioAvailable}; " +
+                "current ration = ${display.hdrSdrRatio}")
+        display.registerHdrSdrRatioChangedListener({ it.run() }, hdrsdrListener)
+        displayManager.registerDisplayListener(displayChangedListener, handler)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        display.unregisterHdrSdrRatioChangedListener(hdrsdrListener)
+        displayManager.unregisterDisplayListener(displayChangedListener)
     }
 
     private fun setColorMode(newMode: Int) {

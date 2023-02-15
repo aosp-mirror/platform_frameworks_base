@@ -17,11 +17,12 @@
 package android.app.admin;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,14 +37,26 @@ import java.util.Objects;
 @TestApi
 public final class TopPriority<V> extends ResolutionMechanism<V> {
 
-    private final List<String> mHighestToLowestPriorityAuthorities;
+    private final List<Authority> mHighestToLowestPriorityAuthorities;
 
     /**
      * @hide
      */
-    public TopPriority(@NonNull List<String> highestToLowestPriorityAuthorities) {
+    public TopPriority(@NonNull List<Authority> highestToLowestPriorityAuthorities) {
         mHighestToLowestPriorityAuthorities = Objects.requireNonNull(
                 highestToLowestPriorityAuthorities);
+    }
+
+    /**
+     * Returns an object with the specified order of highest to lowest authorities.
+     */
+    private TopPriority(@NonNull Parcel source) {
+        mHighestToLowestPriorityAuthorities = new ArrayList<>();
+        int size = source.readInt();
+        for (int i = 0; i < size; i++) {
+            mHighestToLowestPriorityAuthorities.add(
+                    source.readParcelable(Authority.class.getClassLoader()));
+        }
     }
 
     /**
@@ -51,8 +64,26 @@ public final class TopPriority<V> extends ResolutionMechanism<V> {
      * certain policy.
      */
     @NonNull
-    List<String> getHighestToLowestPriorityAuthorities() {
+    public List<Authority> getHighestToLowestPriorityAuthorities() {
         return mHighestToLowestPriorityAuthorities;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        try {
+            TopPriority<V> other = (TopPriority<V>) o;
+            return Objects.equals(
+                    mHighestToLowestPriorityAuthorities, other.mHighestToLowestPriorityAuthorities);
+        } catch (ClassCastException exception) {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return mHighestToLowestPriorityAuthorities.hashCode();
     }
 
     @Override
@@ -67,7 +98,10 @@ public final class TopPriority<V> extends ResolutionMechanism<V> {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeStringArray(mHighestToLowestPriorityAuthorities.toArray(new String[0]));
+        dest.writeInt(mHighestToLowestPriorityAuthorities.size());
+        for (Authority authority : mHighestToLowestPriorityAuthorities) {
+            dest.writeParcelable(authority, flags);
+        }
     }
 
     @NonNull
@@ -75,9 +109,7 @@ public final class TopPriority<V> extends ResolutionMechanism<V> {
             new Parcelable.Creator<TopPriority<?>>() {
                 @Override
                 public TopPriority<?> createFromParcel(Parcel source) {
-                    String[] highestToLowestPriorityAuthorities = source.readStringArray();
-                    return new TopPriority<>(
-                            Arrays.stream(highestToLowestPriorityAuthorities).toList());
+                    return new TopPriority<>(source);
                 }
 
                 @Override

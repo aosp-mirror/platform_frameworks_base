@@ -36,6 +36,7 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.Context;
 import android.os.Handler;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
@@ -125,6 +126,9 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     private final ReferenceWithHistory<ExternalTimeSuggestion> mLastExternalSuggestion =
             new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
+    @GuardedBy("this")
+    private final ArraySet<StateChangeListener> mNetworkTimeUpdateListeners = new ArraySet<>();
+
     /**
      * Used by {@link TimeDetectorStrategyImpl} to interact with device configuration / settings
      * / system properties. It can be faked for testing.
@@ -180,6 +184,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
          * Dumps the time debug log to the supplied {@link PrintWriter}.
          */
         void dumpDebugLog(PrintWriter printWriter);
+
+        /**
+         * Requests that the supplied runnable is invoked asynchronously.
+         */
+        void runAsync(@NonNull Runnable runnable);
     }
 
     static TimeDetectorStrategy create(
@@ -307,12 +316,27 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         NetworkTimeSuggestion lastNetworkSuggestion = mLastNetworkSuggestion.get();
         if (lastNetworkSuggestion == null || !lastNetworkSuggestion.equals(suggestion)) {
             mLastNetworkSuggestion.set(suggestion);
+            notifyNetworkTimeUpdateListenersAsynchronously();
         }
 
         // Now perform auto time detection. The new suggestion may be used to modify the system
         // clock.
         String reason = "New network time suggested. suggestion=" + suggestion;
         doAutoTimeDetection(reason);
+    }
+
+    @GuardedBy("this")
+    private void notifyNetworkTimeUpdateListenersAsynchronously() {
+        for (StateChangeListener listener : mNetworkTimeUpdateListeners) {
+            // This is queuing asynchronous notification, so no need to surrender the "this" lock.
+            mEnvironment.runAsync(listener::onChange);
+        }
+    }
+
+    @Override
+    public synchronized void addNetworkTimeUpdateListener(
+            @NonNull StateChangeListener networkSuggestionUpdateListener) {
+        mNetworkTimeUpdateListeners.add(networkSuggestionUpdateListener);
     }
 
     @Override
@@ -324,6 +348,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     @Override
     public synchronized void clearLatestNetworkSuggestion() {
         mLastNetworkSuggestion.set(null);
+
+        notifyNetworkTimeUpdateListenersAsynchronously();
 
         // The loss of network time may change the time signal to use to set the system clock.
         String reason = "Network time cleared";

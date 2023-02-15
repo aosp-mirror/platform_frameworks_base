@@ -238,7 +238,7 @@ void Yuv422IToJpegEncoder::configSamplingFactors(jpeg_compress_struct* cinfo) {
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-using namespace android::recoverymap;
+using namespace android::jpegrecoverymap;
 
 jpegr_color_gamut P010Yuv420ToJpegREncoder::findColorGamut(JNIEnv* env, int aDataSpace) {
     switch (aDataSpace & ADataSpace::STANDARD_MASK) {
@@ -294,7 +294,7 @@ bool P010Yuv420ToJpegREncoder::encode(JNIEnv* env,
         return false;
     }
 
-    RecoveryMap recoveryMap;
+    JpegR jpegREncoder;
 
     jpegr_uncompressed_struct p010;
     p010.data = hdr;
@@ -314,7 +314,7 @@ bool P010Yuv420ToJpegREncoder::encode(JNIEnv* env,
     std::unique_ptr<uint8_t[]> jpegr_data = std::make_unique<uint8_t[]>(jpegR.maxLength);
     jpegR.data = jpegr_data.get();
 
-    if (int success = recoveryMap.encodeJPEGR(&p010, &yuv420,
+    if (int success = jpegREncoder.encodeJPEGR(&p010, &yuv420,
             hdrTransferFunction,
             &jpegR, jpegQuality, nullptr); success != android::OK) {
         ALOGW("Encode JPEG/R failed, error code: %d.", success);

@@ -115,7 +115,7 @@ class SettingsEntryRepositoryTest {
     fun testGetEntryPath() {
         SpaEnvironmentFactory.reset(spaEnvironment)
         assertThat(
-            entryRepository.getEntryPathWithDisplayName(
+            entryRepository.getEntryPathWithLabel(
                 genEntryId("Layer2Entry1", SppLayer2.createSettingsPage())
             )
         ).containsExactly("Layer2Entry1", "INJECT_SppLayer2", "INJECT_SppLayer1", "ROOT_SppHome")
@@ -129,7 +129,7 @@ class SettingsEntryRepositoryTest {
         ).containsExactly("entryTitle", "SppLayer2", "TitleLayer1", "TitleHome").inOrder()
 
         assertThat(
-            entryRepository.getEntryPathWithDisplayName(
+            entryRepository.getEntryPathWithLabel(
                 genEntryId(
                     "INJECT",
                     SppLayer1.createSettingsPage(),

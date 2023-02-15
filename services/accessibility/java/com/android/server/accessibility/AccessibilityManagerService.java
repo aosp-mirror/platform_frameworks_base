@@ -529,6 +529,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    public IAccessibilityManager.WindowTransformationSpec getWindowTransformationSpec(
+            int windowId) {
+        IAccessibilityManager.WindowTransformationSpec windowTransformationSpec =
+                new IAccessibilityManager.WindowTransformationSpec();
+        Pair<float[], MagnificationSpec> result =
+                getWindowTransformationMatrixAndMagnificationSpec(windowId);
+        windowTransformationSpec.transformationMatrix = result.first;
+        windowTransformationSpec.magnificationSpec = result.second;
+        return windowTransformationSpec;
+    }
+
+    @Override
     public void onServiceInfoChangedLocked(AccessibilityUserState userState) {
         mSecurityPolicy.onBoundServicesChangedLocked(userState.mUserId,
                 userState.mBoundServices);

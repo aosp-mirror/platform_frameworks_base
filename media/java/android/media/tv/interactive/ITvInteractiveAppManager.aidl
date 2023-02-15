@@ -91,7 +91,8 @@ interface ITvInteractiveAppManager {
     void notifyContentAllowed(in IBinder sessionToken, int userId);
     void notifyContentBlocked(in IBinder sessionToken, in String rating, int userId);
     void notifySignalStrength(in IBinder sessionToken, int stength, int userId);
-    void notifyRecordingStarted(in IBinder sessionToken, in String recordingId, int userId);
+    void notifyRecordingStarted(in IBinder sessionToken, in String recordingId, String requestId,
+            int userId);
     void notifyRecordingStopped(in IBinder sessionToken, in String recordingId, int userId);
     void notifyTvMessage(in IBinder sessionToken, in String type, in Bundle data, int userId);
     void setSurface(in IBinder sessionToken, in Surface surface, int userId);

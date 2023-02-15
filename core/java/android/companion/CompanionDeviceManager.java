@@ -491,7 +491,7 @@ public final class CompanionDeviceManager {
      * @param associationId id of the device association.
      * @param flags system data types to be enabled.
      */
-    public void enableSystemDataSync(int associationId, @DataSyncTypes int flags) {
+    public void enableSystemDataSyncForTypes(int associationId, @DataSyncTypes int flags) {
         if (!checkFeaturePresent()) {
             return;
         }
@@ -513,7 +513,7 @@ public final class CompanionDeviceManager {
      * @param associationId id of the device association.
      * @param flags system data types to be disabled.
      */
-    public void disableSystemDataSync(int associationId, @DataSyncTypes int flags) {
+    public void disableSystemDataSyncForTypes(int associationId, @DataSyncTypes int flags) {
         if (!checkFeaturePresent()) {
             return;
         }

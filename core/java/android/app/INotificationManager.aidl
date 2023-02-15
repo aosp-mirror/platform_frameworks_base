@@ -80,8 +80,6 @@ interface INotificationManager
     boolean isImportanceLocked(String pkg, int uid);
 
     List<String> getAllowedAssistantAdjustments(String pkg);
-    void allowAssistantAdjustment(String adjustmentType);
-    void disallowAssistantAdjustment(String adjustmentType);
 
     boolean shouldHideSilentStatusIcons(String callingPkg);
     void setHideSilentStatusIcons(boolean hide);

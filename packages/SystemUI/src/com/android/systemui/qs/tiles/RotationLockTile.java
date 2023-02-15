@@ -57,6 +57,9 @@ import javax.inject.Inject;
 /** Quick settings tile: Rotation **/
 public class RotationLockTile extends QSTileImpl<BooleanState> implements
         BatteryController.BatteryStateChangeCallback {
+
+    public static final String TILE_SPEC = "rotation";
+
     private static final String EMPTY_SECONDARY_STRING = "";
 
     private final Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_auto_rotate);

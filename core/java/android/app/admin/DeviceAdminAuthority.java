@@ -19,6 +19,7 @@ package android.app.admin;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 
 /**
@@ -31,11 +32,18 @@ import android.os.Parcel;
 public final class DeviceAdminAuthority extends Authority {
 
     /**
+     * Object representing a device admin authority.
+     *
      * @hide
      */
+    @TestApi
+    @NonNull
     public static final DeviceAdminAuthority DEVICE_ADMIN_AUTHORITY = new DeviceAdminAuthority();
 
-    private DeviceAdminAuthority() {}
+    /**
+     * Creates an authority that represents a device admin.
+     */
+    public DeviceAdminAuthority() {}
 
     @Override
     public String toString() {
@@ -44,12 +52,13 @@ public final class DeviceAdminAuthority extends Authority {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        return super.equals(o);
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass();
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return 0;
     }
 
     @Override
@@ -65,7 +74,7 @@ public final class DeviceAdminAuthority extends Authority {
             new Creator<DeviceAdminAuthority>() {
                 @Override
                 public DeviceAdminAuthority createFromParcel(Parcel source) {
-                    return new DeviceAdminAuthority();
+                    return DEVICE_ADMIN_AUTHORITY;
                 }
 
                 @Override

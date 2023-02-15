@@ -17,12 +17,15 @@ package android.hardware.hdmi;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+@Presubmit
 @SmallTest
 @RunWith(JUnit4.class)
 /** Tests for {@link HdmiUtils} class. */

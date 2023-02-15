@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.model
 
+import android.os.ParcelUuid
+
 /**
  * SystemUI representation of [SubscriptionInfo]. Currently we only use two fields on the
  * subscriptions themselves: subscriptionId and isOpportunistic. Any new fields that we need can be
@@ -29,4 +31,7 @@ data class SubscriptionModel(
      * filtering in certain cases. See [MobileIconsInteractor] for the filtering logic
      */
     val isOpportunistic: Boolean = false,
+
+    /** Subscriptions in the same group may be filtered or treated as a single subscription */
+    val groupUuid: ParcelUuid? = null,
 )

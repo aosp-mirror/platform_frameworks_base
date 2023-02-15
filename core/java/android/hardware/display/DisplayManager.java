@@ -541,7 +541,8 @@ public final class DisplayManager {
             EVENT_FLAG_DISPLAY_ADDED,
             EVENT_FLAG_DISPLAY_CHANGED,
             EVENT_FLAG_DISPLAY_REMOVED,
-            EVENT_FLAG_DISPLAY_BRIGHTNESS
+            EVENT_FLAG_DISPLAY_BRIGHTNESS,
+            EVENT_FLAG_HDR_SDR_RATIO_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventsMask {}
@@ -583,6 +584,19 @@ public final class DisplayManager {
      * @hide
      */
     public static final long EVENT_FLAG_DISPLAY_BRIGHTNESS = 1L << 3;
+
+    /**
+     * Event flag to register for a display's hdr/sdr ratio changes. This notification is sent
+     * through the {@link DisplayListener#onDisplayChanged} callback method. New hdr/sdr
+     * values can be retrieved via {@link Display#getHdrSdrRatio()}.
+     *
+     * Requires that {@link Display#isHdrSdrRatioAvailable()} is true.
+     *
+     * @see #registerDisplayListener(DisplayListener, Handler, long)
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_HDR_SDR_RATIO_CHANGED = 1L << 4;
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -1429,6 +1443,7 @@ public final class DisplayManager {
      * hdrConversionMode.conversionMode is not {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
      *
      * @see #getHdrConversionMode
+     * @see #getHdrConversionModeSetting
      * @see #getSupportedHdrOutputTypes
      * @hide
      */
@@ -1440,15 +1455,37 @@ public final class DisplayManager {
 
     /**
      * Returns the {@link HdrConversionMode} of the device, which is set by the user.
+
+     * The HDR conversion mode chosen by user which considers the app override is returned. Apps can
+     * override HDR conversion using
+     * {@link android.view.WindowManager.LayoutParams#disableHdrConversion}.
      *
      * @see #setHdrConversionMode
      * @see #getSupportedHdrOutputTypes
+     * @see #getHdrConversionModeSetting()
      * @hide
      */
     @TestApi
     @NonNull
     public HdrConversionMode getHdrConversionMode() {
         return mGlobal.getHdrConversionMode();
+    }
+
+    /**
+     * Returns the {@link HdrConversionMode} of the device, which is set by the user.
+
+     * The HDR conversion mode chosen by user is returned irrespective of whether HDR conversion
+     * is disabled by an app.
+     *
+     * @see #setHdrConversionMode
+     * @see #getSupportedHdrOutputTypes
+     * @see #getHdrConversionMode()
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public HdrConversionMode getHdrConversionModeSetting() {
+        return mGlobal.getHdrConversionModeSetting();
     }
 
     /**
