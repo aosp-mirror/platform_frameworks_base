@@ -115,7 +115,7 @@ public class NetworkTimeUpdateService extends Binder {
         TimeDetectorInternal timeDetectorInternal =
                 LocalServices.getService(TimeDetectorInternal.class);
         // Broadcast alarms sent by system are immutable
-        Intent pollIntent = new Intent(ACTION_POLL, null);
+        Intent pollIntent = new Intent(ACTION_POLL, null).setPackage("android");
         PendingIntent pendingPollIntent = PendingIntent.getBroadcast(mContext, POLL_REQUEST,
                 pollIntent, PendingIntent.FLAG_IMMUTABLE);
         mRefreshCallbacks = new Engine.RefreshCallbacks() {
