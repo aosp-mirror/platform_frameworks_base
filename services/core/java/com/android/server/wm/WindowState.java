@@ -22,6 +22,7 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.graphics.GraphicsProtos.dumpPointProto;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
@@ -1475,15 +1476,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Slog.v(TAG_WM, "Win " + this + " config changed: " + getConfiguration());
         }
 
-        final boolean dragResizingChanged = isDragResizeChanged()
-                && !isDragResizingChangeReported();
-
         final boolean attachedFrameChanged = LOCAL_LAYOUT
                 && mLayoutAttached && getParentWindow().frameChanged();
 
         if (DEBUG) {
             Slog.v(TAG_WM, "Resizing " + this + ": configChanged=" + configChanged
-                    + " dragResizingChanged=" + dragResizingChanged
                     + " last=" + mWindowFrames.mLastFrame + " frame=" + mWindowFrames.mFrame);
         }
 
@@ -1492,13 +1489,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (didFrameInsetsChange
                 || configChanged
                 || insetsChanged
-                || dragResizingChanged
                 || shouldSendRedrawForSync()
                 || attachedFrameChanged) {
             ProtoLog.v(WM_DEBUG_RESIZE,
-                        "Resize reasons for w=%s:  %s configChanged=%b dragResizingChanged=%b",
+                        "Resize reasons for w=%s:  %s configChanged=%b didFrameInsetsChange=%b",
                         this, mWindowFrames.getInsetsChangedInfo(),
-                        configChanged, dragResizingChanged);
+                        configChanged, didFrameInsetsChange);
 
             if (insetsChanged) {
                 mWindowFrames.setInsetsChanged(false);
@@ -1518,18 +1514,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             onResizeHandled();
             mWmService.makeWindowFreezingScreenIfNeededLocked(this);
 
-            // If the orientation is changing, or we're starting or ending a drag resizing action,
-            // or we're resizing an embedded Activity, then we need to hold off on unfreezing the
-            // display until this window has been redrawn; to do that, we need to go through the
-            // process of getting informed by the application when it has finished drawing.
-            if (getOrientationChanging() || dragResizingChanged
-                    || isEmbeddedActivityResizeChanged()) {
-                if (dragResizingChanged) {
-                    ProtoLog.v(WM_DEBUG_RESIZE,
-                            "Resize start waiting for draw, "
-                                    + "mDrawState=DRAW_PENDING in %s, surfaceController %s",
-                            this, winAnimator.mSurfaceController);
-                }
+            // Reset the drawn state if the window need to redraw for the change, so the transition
+            // can wait until it has finished drawing to start.
+            if ((configChanged || getOrientationChanging()) && isVisibleRequested()) {
                 winAnimator.mDrawState = DRAW_PENDING;
                 if (mActivityRecord != null) {
                     mActivityRecord.clearAllDrawn();
@@ -1560,6 +1547,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean getOrientationChanging() {
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            // Shell transition doesn't use the methods for display frozen state.
+            return false;
+        }
         // In addition to the local state flag, we must also consider the difference in the last
         // reported configuration vs. the current state. If the client code has not been informed of
         // the change, logic dependent on having finished processing the orientation, such as
@@ -2361,33 +2352,27 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
-        if (getDisplayContent().getImeInputTarget() != this && !isImeLayeringTarget()) {
-            super.onConfigurationChanged(newParentConfig);
-            return;
-        }
-
         mTempConfiguration.setTo(getConfiguration());
         super.onConfigurationChanged(newParentConfig);
-        final boolean windowConfigChanged = mTempConfiguration.windowConfiguration
-                .diff(newParentConfig.windowConfiguration, false) != 0;
+        final int diff = getConfiguration().diff(mTempConfiguration);
+        if (diff != 0) {
+            mLastConfigReportedToClient = false;
+        }
 
+        if (getDisplayContent().getImeInputTarget() != this && !isImeLayeringTarget()) {
+            return;
+        }
         // When the window configuration changed, we need to update the IME control target in
         // case the app may lose the IME inets control when exiting from split-screen mode, or the
         // IME parent may failed to attach to the app during rotating the screen.
         // See DisplayContent#shouldImeAttachedToApp, DisplayContent#isImeControlledByApp
-        if (windowConfigChanged) {
+        if ((diff & CONFIG_WINDOW_CONFIGURATION) != 0) {
             // If the window was the IME layering target, updates the IME surface parent in case
             // the IME surface may be wrongly positioned when the window configuration affects the
             // IME surface association. (e.g. Attach IME surface on the display instead of the
             // app when the app bounds being letterboxed.)
             mDisplayContent.updateImeControlTarget(isImeLayeringTarget() /* updateImeParent */);
         }
-    }
-
-    @Override
-    void onMergedOverrideConfigurationChanged() {
-        super.onMergedOverrideConfigurationChanged();
-        mLastConfigReportedToClient = false;
     }
 
     void onWindowReplacementTimeout() {
@@ -4142,20 +4127,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord == null || mActivityRecord.isFullyTransparentBarAllowed(frame);
     }
 
-    /**
-     * Whether this window belongs to a resizing embedded activity.
-     */
-    private boolean isEmbeddedActivityResizeChanged() {
-        if (mActivityRecord == null || !isVisibleRequested()) {
-            // No need to update if the window is in the background.
-            return false;
-        }
-
-        final TaskFragment embeddedTaskFragment = mActivityRecord.getOrganizedTaskFragment();
-        return embeddedTaskFragment != null
-                && mDisplayContent.mChangingContainers.contains(embeddedTaskFragment);
-    }
-
     boolean isDragResizeChanged() {
         return mDragResizing != computeDragResizing();
     }
@@ -4166,13 +4137,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWmService.mRoot.mWaitingForDrawn.add(this);
         }
         super.setWaitingForDrawnIfResizingChanged();
-    }
-
-    /**
-     * @return Whether we reported a drag resize change to the application or not already.
-     */
-    private boolean isDragResizingChangeReported() {
-        return mDragResizingChangeReported;
     }
 
     /**
