@@ -260,6 +260,11 @@ object Flags {
     // TODO(b/244064524): Tracking Bug
     @JvmField val QS_SECONDARY_DATA_SUB_INFO = releasedFlag(508, "qs_secondary_data_sub_info")
 
+    /** Enables Font Scaling Quick Settings tile */
+    // TODO(b/269341316): Tracking Bug
+    @JvmField
+    val ENABLE_FONT_SCALING_TILE = unreleasedFlag(509, "enable_font_scaling_tile", teamfood = false)
+
     // 600- status bar
 
     // TODO(b/256614753): Tracking Bug
