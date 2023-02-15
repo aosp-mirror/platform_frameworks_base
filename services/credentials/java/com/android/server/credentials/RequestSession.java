@@ -82,6 +82,19 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     //TODO improve design to allow grouped metrics per request
     protected final String mHybridService;
 
+    @NonNull protected RequestSessionStatus mRequestSessionStatus =
+            RequestSessionStatus.IN_PROGRESS;
+
+    /** The status in which a given request session is. */
+    enum RequestSessionStatus {
+        /** Request is in progress. This is the status a request session is instantiated with. */
+        IN_PROGRESS,
+        /** Request has been cancelled by the developer. */
+        CANCELLED,
+        /** Request is complete. */
+        COMPLETE
+    }
+
     protected RequestSession(@NonNull Context context,
             @UserIdInt int userId, int callingUid, @NonNull T clientRequest, U clientCallback,
             @NonNull String requestType,
@@ -112,6 +125,10 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
 
     @Override // from CredentialManagerUiCallbacks
     public void onUiSelection(UserSelectionDialogResult selection) {
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Log.i(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
         if (isSessionCancelled()) {
             finishSession(/*propagateCancellation=*/true);
             return;
@@ -128,27 +145,12 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
                 selection.getEntrySubkey(), selection.getPendingIntentProviderResponse());
     }
 
-    @Override // from CredentialManagerUiCallbacks
-    public void onUiCancellation(boolean isUserCancellation) {
-        Log.i(TAG, "Ui canceled. Canceled by user: " + isUserCancellation);
-        if (isSessionCancelled()) {
-            finishSession(/*propagateCancellation=*/true);
-            return;
-        }
-        // User canceled the activity
-        finishSession(/*propagateCancellation=*/false);
-    }
-
-    @Override
-    public void onUiSelectorInvocationFailure() {
-        Log.i(TAG, "onUiSelectorInvocationFailure");
-    }
-
     protected void finishSession(boolean propagateCancellation) {
         Log.i(TAG, "finishing session");
         if (propagateCancellation) {
             mProviders.values().forEach(ProviderSession::cancelProviderRemoteSession);
         }
+        mRequestSessionStatus = RequestSessionStatus.COMPLETE;
         mProviders.clear();
     }
 
