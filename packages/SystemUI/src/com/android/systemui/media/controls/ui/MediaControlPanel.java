@@ -347,6 +347,11 @@ public class MediaControlPanel {
         mSeekBarViewModel.setListening(listening);
     }
 
+    @VisibleForTesting
+    public boolean getListening() {
+        return mSeekBarViewModel.getListening();
+    }
+
     /** Sets whether the user is touching the seek bar to change the track position. */
     private void setIsScrubbing(boolean isScrubbing) {
         if (mMediaData == null || mMediaData.getSemanticActions() == null) {
@@ -1139,8 +1144,10 @@ public class MediaControlPanel {
                         /* pixelDensity= */ getContext().getResources().getDisplayMetrics().density,
                         mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
                         /* opacity= */ 100,
-                        /* shouldFillRipple= */ false,
                         /* sparkleStrength= */ 0f,
+                        /* baseRingFadeParams= */ null,
+                        /* sparkleRingFadeParams= */ null,
+                        /* centerFillFadeParams= */ null,
                         /* shouldDistort= */ false
                 )
         );

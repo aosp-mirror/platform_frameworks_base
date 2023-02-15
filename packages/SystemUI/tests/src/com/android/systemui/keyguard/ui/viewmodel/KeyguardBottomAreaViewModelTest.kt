@@ -35,6 +35,7 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
@@ -125,9 +126,19 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 ),
             )
         repository = FakeKeyguardRepository()
+        val featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
+                set(Flags.FACE_AUTH_REFACTOR, true)
+            }
 
         val keyguardInteractor =
-            KeyguardInteractor(repository = repository, commandQueue = commandQueue)
+            KeyguardInteractor(
+                repository = repository,
+                commandQueue = commandQueue,
+                featureFlags = featureFlags,
+                bouncerRepository = FakeKeyguardBouncerRepository(),
+            )
         whenever(userTracker.userHandle).thenReturn(mock())
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
@@ -191,10 +202,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         keyguardStateController = keyguardStateController,
                         userTracker = userTracker,
                         activityStarter = activityStarter,
-                        featureFlags =
-                            FakeFeatureFlags().apply {
-                                set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
-                            },
+                        featureFlags = featureFlags,
                         repository = { quickAffordanceRepository },
                         launchAnimator = launchAnimator,
                     ),

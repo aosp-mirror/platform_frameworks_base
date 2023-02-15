@@ -73,6 +73,23 @@ public class GestureNavigationSettingsObserver extends ContentObserver {
                 mOnPropertiesChangedListener);
     }
 
+    public void registerForCurrentUser() {
+        ContentResolver r = mContext.getContentResolver();
+        r.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.BACK_GESTURE_INSET_SCALE_LEFT),
+                false, this);
+        r.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.BACK_GESTURE_INSET_SCALE_RIGHT),
+                false, this);
+        r.registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
+                false, this);
+        DeviceConfig.addOnPropertiesChangedListener(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                runnable -> mMainHandler.post(runnable),
+                mOnPropertiesChangedListener);
+    }
+
     public void unregister() {
         mContext.getContentResolver().unregisterContentObserver(this);
         DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);

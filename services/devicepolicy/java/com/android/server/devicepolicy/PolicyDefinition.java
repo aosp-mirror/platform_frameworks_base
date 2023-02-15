@@ -18,10 +18,23 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.BooleanPolicyValue;
+import android.app.admin.DevicePolicyIdentifiers;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.IntegerPolicyValue;
+import android.app.admin.IntentFilterPolicyKey;
+import android.app.admin.LockTaskPolicy;
+import android.app.admin.NoArgsPolicyKey;
+import android.app.admin.PackagePermissionPolicyKey;
+import android.app.admin.PackagePolicyKey;
+import android.app.admin.PolicyKey;
+import android.app.admin.PolicyValue;
+import android.app.admin.UserRestrictionPolicyKey;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.os.Bundle;
+import android.os.UserManager;
 
 import com.android.internal.util.function.QuadFunction;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -30,6 +43,7 @@ import com.android.modules.utils.TypedXmlSerializer;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,35 +58,55 @@ final class PolicyDefinition<V> {
     // Only use this flag if a policy can not be applied globally.
     private static final int POLICY_FLAG_LOCAL_ONLY_POLICY = 1 << 1;
 
+    // Only use this flag if a policy is inheritable by child profile from parent.
+    private static final int POLICY_FLAG_INHERITABLE = 1 << 2;
+
+    // Use this flag if admin policies should be treated independently of each other and should not
+    // have any resolution logic applied, this should only be used for very limited policies were
+    // this would make sense and the enforcing logic should handle it appropriately, e.g.
+    // application restrictions set by different admins for a single package should not be merged,
+    // but saved and queried independent of each other.
+    // Currently, support is  added for local only policies, if you need to add a non coexistable
+    // global policy please add support.
+    private static final int POLICY_FLAG_NON_COEXISTABLE_POLICY = 1 << 3;
+
+    // Add this flag to any policy that is a user restriction, the reason for this is that there
+    // are some special APIs to handle user restriction policies and this is the way we can identify
+    // them.
+    private static final int POLICY_FLAG_USER_RESTRICTION_POLICY = 1 << 4;
+
     private static final MostRestrictive<Boolean> FALSE_MORE_RESTRICTIVE = new MostRestrictive<>(
-            List.of(false, true));
+            List.of(new BooleanPolicyValue(false), new BooleanPolicyValue(true)));
 
     private static final MostRestrictive<Boolean> TRUE_MORE_RESTRICTIVE = new MostRestrictive<>(
-            List.of(true, false));
+            List.of(new BooleanPolicyValue(true), new BooleanPolicyValue(false)));
 
     static PolicyDefinition<Boolean> AUTO_TIMEZONE = new PolicyDefinition<>(
-            new DefaultPolicyKey(DevicePolicyManager.AUTO_TIMEZONE_POLICY),
-            // auto timezone is enabled by default, hence disabling it is more restrictive.
-            FALSE_MORE_RESTRICTIVE,
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY),
+            // auto timezone is disabled by default, hence enabling it is more restrictive.
+            TRUE_MORE_RESTRICTIVE,
             POLICY_FLAG_GLOBAL_ONLY_POLICY,
             (Boolean value, Context context, Integer userId, PolicyKey policyKey) ->
                     PolicyEnforcerCallbacks.setAutoTimezoneEnabled(value, context),
             new BooleanPolicySerializer());
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual permission grant policy with the correct arguments (packageName and permission name)
+    // actual policy with the correct arguments (packageName and permission name)
     // when reading the policies from xml.
     static final PolicyDefinition<Integer> GENERIC_PERMISSION_GRANT =
             new PolicyDefinition<>(
-                    new PermissionGrantStatePolicyKey(
-                            DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY),
+                    new PackagePermissionPolicyKey(DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY),
                     // TODO: is this really the best mechanism, what makes denied more
                     //  restrictive than
                     //  granted?
                     new MostRestrictive<>(
-                            List.of(DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED,
-                                    DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED,
-                                    DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT)),
+                            List.of(
+                                    new IntegerPolicyValue(
+                                            DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED),
+                                    new IntegerPolicyValue(
+                                            DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED),
+                                    new IntegerPolicyValue(
+                                            DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT))),
                     POLICY_FLAG_LOCAL_ONLY_POLICY,
                     PolicyEnforcerCallbacks::setPermissionGrantState,
                     new IntegerPolicySerializer());
@@ -87,40 +121,44 @@ final class PolicyDefinition<V> {
             return GENERIC_PERMISSION_GRANT;
         }
         return GENERIC_PERMISSION_GRANT.createPolicyDefinition(
-                new PermissionGrantStatePolicyKey(
-                        DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY,
+                new PackagePermissionPolicyKey(
+                        DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY,
                         packageName,
                         permissionName));
     }
 
     static PolicyDefinition<LockTaskPolicy> LOCK_TASK = new PolicyDefinition<>(
-            new DefaultPolicyKey(DevicePolicyManager.LOCK_TASK_POLICY),
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.LOCK_TASK_POLICY),
             new TopPriority<>(List.of(
                     // TODO(b/258166155): add correct device lock role name
-                    EnforcingAdmin.getRoleAuthorityOf("DeviceLock"),
+                    EnforcingAdmin.getRoleAuthorityOf(
+                            "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER"),
                     EnforcingAdmin.DPC_AUTHORITY)),
             POLICY_FLAG_LOCAL_ONLY_POLICY,
             (LockTaskPolicy value, Context context, Integer userId, PolicyKey policyKey) ->
                     PolicyEnforcerCallbacks.setLockTask(value, context, userId),
-            new LockTaskPolicy.LockTaskPolicySerializer());
+            new LockTaskPolicySerializer());
 
-    static PolicyDefinition<Set<String>> USER_CONTROLLED_DISABLED_PACKAGES = new PolicyDefinition<>(
-            new DefaultPolicyKey(DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES_POLICY),
-            new SetUnion<>(),
-            (Set<String> value, Context context, Integer userId, PolicyKey policyKey) ->
-                    PolicyEnforcerCallbacks.setUserControlDisabledPackages(value, userId),
-            new SetPolicySerializer<>());
+    static PolicyDefinition<Set<String>> USER_CONTROLLED_DISABLED_PACKAGES =
+            new PolicyDefinition<>(
+                    new NoArgsPolicyKey(
+                            DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY),
+                    new StringSetUnion(),
+                    (Set<String> value, Context context, Integer userId, PolicyKey policyKey) ->
+                            PolicyEnforcerCallbacks.setUserControlDisabledPackages(value, userId),
+                    new StringSetPolicySerializer());
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual permission grant policy with the correct arguments (packageName and permission name)
-    // when reading the policies from xml.
+    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
+    // xml.
     static PolicyDefinition<ComponentName> GENERIC_PERSISTENT_PREFERRED_ACTIVITY =
             new PolicyDefinition<>(
-                    new PersistentPreferredActivityPolicyKey(
-                            DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY),
+                    new IntentFilterPolicyKey(
+                            DevicePolicyIdentifiers.PERSISTENT_PREFERRED_ACTIVITY_POLICY),
             new TopPriority<>(List.of(
                     // TODO(b/258166155): add correct device lock role name
-                    EnforcingAdmin.getRoleAuthorityOf("DeviceLock"),
+                    EnforcingAdmin.getRoleAuthorityOf(
+                            "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER"),
                     EnforcingAdmin.DPC_AUTHORITY)),
             POLICY_FLAG_LOCAL_ONLY_POLICY,
             PolicyEnforcerCallbacks::addPersistentPreferredActivity,
@@ -136,17 +174,18 @@ final class PolicyDefinition<V> {
             return GENERIC_PERSISTENT_PREFERRED_ACTIVITY;
         }
         return GENERIC_PERSISTENT_PREFERRED_ACTIVITY.createPolicyDefinition(
-                new PersistentPreferredActivityPolicyKey(
-                        DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY, intentFilter));
+                new IntentFilterPolicyKey(
+                        DevicePolicyIdentifiers.PERSISTENT_PREFERRED_ACTIVITY_POLICY,
+                        intentFilter));
     }
 
     // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
-    // actual uninstall blocked policy with the correct arguments (i.e. packageName)
-    // when reading the policies from xml.
+    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
+    // xml.
     static PolicyDefinition<Boolean> GENERIC_PACKAGE_UNINSTALL_BLOCKED =
             new PolicyDefinition<>(
-                    new PackageSpecificPolicyKey(
-                            DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY),
+                    new PackagePolicyKey(
+                            DevicePolicyIdentifiers.PACKAGE_UNINSTALL_BLOCKED_POLICY),
                     TRUE_MORE_RESTRICTIVE,
                     POLICY_FLAG_LOCAL_ONLY_POLICY,
                     PolicyEnforcerCallbacks::setUninstallBlocked,
@@ -162,21 +201,169 @@ final class PolicyDefinition<V> {
             return GENERIC_PACKAGE_UNINSTALL_BLOCKED;
         }
         return GENERIC_PACKAGE_UNINSTALL_BLOCKED.createPolicyDefinition(
-                new PackageSpecificPolicyKey(
-                        DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY, packageName));
+                new PackagePolicyKey(
+                        DevicePolicyIdentifiers.PACKAGE_UNINSTALL_BLOCKED_POLICY, packageName));
     }
 
-    private static final Map<String, PolicyDefinition<?>> sPolicyDefinitions = Map.of(
-            DevicePolicyManager.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE,
-            DevicePolicyManager.PERMISSION_GRANT_POLICY_KEY, GENERIC_PERMISSION_GRANT,
-            DevicePolicyManager.LOCK_TASK_POLICY, LOCK_TASK,
-            DevicePolicyManager.USER_CONTROL_DISABLED_PACKAGES_POLICY,
-            USER_CONTROLLED_DISABLED_PACKAGES,
-            DevicePolicyManager.PERSISTENT_PREFERRED_ACTIVITY_POLICY,
-            GENERIC_PERSISTENT_PREFERRED_ACTIVITY,
-            DevicePolicyManager.PACKAGE_UNINSTALL_BLOCKED_POLICY, GENERIC_PACKAGE_UNINSTALL_BLOCKED
-    );
+    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
+    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
+    // xml.
+    static PolicyDefinition<Bundle> GENERIC_APPLICATION_RESTRICTIONS =
+            new PolicyDefinition<>(
+                    new PackagePolicyKey(
+                            DevicePolicyIdentifiers.APPLICATION_RESTRICTIONS_POLICY),
+                    // Don't need to take in a resolution mechanism since its never used, but might
+                    // need some refactoring to not always assume a non-null mechanism.
+                    new MostRecent<>(),
+                    POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_NON_COEXISTABLE_POLICY,
+                    // Application restrictions are now stored and retrieved from DPMS, so no
+                    // enforcing is required, however DPMS calls into UM to set restrictions for
+                    // backwards compatibility.
+                    (Bundle value, Context context, Integer userId, PolicyKey policyKey) -> true,
+                    new BundlePolicySerializer());
 
+    /**
+     * Passing in {@code null} for {@code packageName} will return
+     * {@link #GENERIC_APPLICATION_RESTRICTIONS}.
+     */
+    static PolicyDefinition<Bundle> APPLICATION_RESTRICTIONS(
+            String packageName) {
+        if (packageName == null) {
+            return GENERIC_APPLICATION_RESTRICTIONS;
+        }
+        return GENERIC_APPLICATION_RESTRICTIONS.createPolicyDefinition(
+                new PackagePolicyKey(
+                        DevicePolicyIdentifiers.APPLICATION_RESTRICTIONS_POLICY, packageName));
+    }
+
+    static PolicyDefinition<Long> RESET_PASSWORD_TOKEN = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.RESET_PASSWORD_TOKEN_POLICY),
+            // Don't need to take in a resolution mechanism since its never used, but might
+            // need some refactoring to not always assume a non-null mechanism.
+            new MostRecent<>(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_NON_COEXISTABLE_POLICY,
+            // DevicePolicyManagerService handles the enforcement, this just takes care of storage
+            (Long value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            new LongPolicySerializer());
+
+    private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
+    private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
+
+    static {
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY,
+                GENERIC_PERMISSION_GRANT);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.LOCK_TASK_POLICY, LOCK_TASK);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.USER_CONTROL_DISABLED_PACKAGES_POLICY,
+                USER_CONTROLLED_DISABLED_PACKAGES);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERSISTENT_PREFERRED_ACTIVITY_POLICY,
+                GENERIC_PERSISTENT_PREFERRED_ACTIVITY);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PACKAGE_UNINSTALL_BLOCKED_POLICY,
+                GENERIC_PACKAGE_UNINSTALL_BLOCKED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.APPLICATION_RESTRICTIONS_POLICY,
+                GENERIC_APPLICATION_RESTRICTIONS);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.RESET_PASSWORD_TOKEN_POLICY,
+                RESET_PASSWORD_TOKEN);
+
+        // User Restriction Policies
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_WIFI, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_CHANGE_WIFI_STATE, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_WIFI_TETHERING, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_GRANT_ADMIN, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_WIFI_DIRECT, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_ADD_WIFI_CONFIG, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_LOCALE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_INSTALL_APPS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_UNINSTALL_APPS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_SHARE_LOCATION, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_AIRPLANE_MODE, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_BRIGHTNESS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_AMBIENT_DISPLAY, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY,
+                POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_BLUETOOTH, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_BLUETOOTH, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_BLUETOOTH_SHARING, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_USB_FILE_TRANSFER, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_CREDENTIALS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_REMOVE_USER, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_DEBUGGING_FEATURES, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_VPN, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_LOCATION, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_DATE_TIME, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_CONFIG_TETHERING, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_NETWORK_RESET, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_FACTORY_RESET, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_USER, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_MANAGED_PROFILE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_CLONE_PROFILE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.ENSURE_VERIFY_APPS, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_CELL_BROADCASTS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_APPS_CONTROL, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MOUNT_PHYSICAL_MEDIA, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_UNMUTE_MICROPHONE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADJUST_VOLUME, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_OUTGOING_CALLS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_SMS, /* flags= */ 0);
+        // TODO: check if its global only
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_FUN, /* flags= */ 0);
+        // TODO: check if its global only
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CREATE_WINDOWS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE, /* flags= */ 0);
+        // TODO: check if its global only
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_OUTGOING_BEAM, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_WALLPAPER, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_SET_WALLPAPER, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_SAFE_BOOT, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_RECORD_AUDIO, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_RUN_IN_BACKGROUND, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CAMERA, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_UNMUTE_DEVICE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_DATA_ROAMING, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_SET_USER_ICON, /* flags= */ 0);
+            // TODO: double check flags
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_OEM_UNLOCK, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_UNIFIED_PASSWORD, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.ALLOW_PARENT_PROFILE_APP_LINKING, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_AUTOFILL, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONTENT_CAPTURE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONTENT_SUGGESTIONS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_USER_SWITCH, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_PRINTING, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_CONFIG_PRIVATE_DNS, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MICROPHONE_TOGGLE, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CAMERA_TOGGLE, /* flags= */ 0);
+        // TODO: check if its global only
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_BIOMETRIC, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_DEFAULT_APPS, /* flags= */ 0);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_CELLULAR_2G, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(
+                UserManager.DISALLOW_ULTRA_WIDEBAND_RADIO, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+
+        for (String key : USER_RESTRICTION_FLAGS.keySet()) {
+            createAndAddUserRestrictionPolicyDefinition(key, USER_RESTRICTION_FLAGS.get(key));
+        }
+    }
 
     private final PolicyKey mPolicyKey;
     private final ResolutionMechanism<V> mResolutionMechanism;
@@ -191,11 +378,26 @@ final class PolicyDefinition<V> {
                 mPolicyEnforcerCallback, mPolicySerializer);
     }
 
+    static PolicyDefinition<Boolean> getPolicyDefinitionForUserRestriction(
+            @UserManager.UserRestrictionKey String restriction) {
+        String key = DevicePolicyIdentifiers.getIdentifierForUserRestriction(restriction);
+
+        if (!POLICY_DEFINITIONS.containsKey(key)) {
+            throw new IllegalArgumentException("Unsupported user restriction " + restriction);
+        }
+        // All user restrictions are of type boolean
+        return (PolicyDefinition<Boolean>) POLICY_DEFINITIONS.get(key);
+    }
+
     @NonNull
     PolicyKey getPolicyKey() {
         return mPolicyKey;
     }
 
+    @NonNull
+    ResolutionMechanism<V> getResolutionMechanism() {
+        return mResolutionMechanism;
+    }
     /**
      * Returns {@code true} if the policy is a global policy by nature and can't be applied locally.
      */
@@ -210,14 +412,48 @@ final class PolicyDefinition<V> {
         return (mPolicyFlags & POLICY_FLAG_LOCAL_ONLY_POLICY) != 0;
     }
 
+    /**
+     * Returns {@code true} if the policy is inheritable by child profiles.
+     */
+    boolean isInheritable() {
+        return (mPolicyFlags & POLICY_FLAG_INHERITABLE) != 0;
+    }
+
+    /**
+     * Returns {@code true} if the policy engine should not try to resolve policies set by different
+     * admins and should just store it and pass it on to the enforcing logic.
+     */
+    boolean isNonCoexistablePolicy() {
+        return (mPolicyFlags & POLICY_FLAG_NON_COEXISTABLE_POLICY) != 0;
+    }
+
+    boolean isUserRestrictionPolicy() {
+        return (mPolicyFlags & POLICY_FLAG_USER_RESTRICTION_POLICY) != 0;
+    }
+
     @Nullable
-    V resolvePolicy(LinkedHashMap<EnforcingAdmin, V> adminsPolicy) {
+    PolicyValue<V> resolvePolicy(LinkedHashMap<EnforcingAdmin, PolicyValue<V>> adminsPolicy) {
         return mResolutionMechanism.resolve(adminsPolicy);
     }
 
     boolean enforcePolicy(@Nullable V value, Context context, int userId) {
         return mPolicyEnforcerCallback.apply(value, context, userId, mPolicyKey);
     }
+
+    private static void createAndAddUserRestrictionPolicyDefinition(
+            String restriction, int flags) {
+        String identifier = DevicePolicyIdentifiers.getIdentifierForUserRestriction(restriction);
+        UserRestrictionPolicyKey key = new UserRestrictionPolicyKey(identifier, restriction);
+        flags |= POLICY_FLAG_USER_RESTRICTION_POLICY;
+        PolicyDefinition<Boolean> definition = new PolicyDefinition<>(
+                key,
+                TRUE_MORE_RESTRICTIVE,
+                flags,
+                PolicyEnforcerCallbacks::setUserRestriction,
+                new BooleanPolicySerializer());
+        POLICY_DEFINITIONS.put(key.getIdentifier(), definition);
+    }
+
 
     /**
      * Callers must ensure that {@code policyType} have implemented an appropriate
@@ -247,6 +483,10 @@ final class PolicyDefinition<V> {
         mPolicyEnforcerCallback = policyEnforcerCallback;
         mPolicySerializer = policySerializer;
 
+        if (isNonCoexistablePolicy() && !isLocalOnlyPolicy()) {
+            throw new UnsupportedOperationException("Non-coexistable global policies not supported,"
+                    + "please add support.");
+        }
         // TODO: maybe use this instead of manually adding to the map
 //        sPolicyDefinitions.put(policyDefinitionKey, this);
     }
@@ -261,26 +501,27 @@ final class PolicyDefinition<V> {
         // TODO: can we avoid casting?
         PolicyKey policyKey = readPolicyKeyFromXml(parser);
         PolicyDefinition<V> genericPolicyDefinition =
-                (PolicyDefinition<V>) sPolicyDefinitions.get(policyKey.mKey);
+                (PolicyDefinition<V>) POLICY_DEFINITIONS.get(policyKey.getIdentifier());
         return genericPolicyDefinition.createPolicyDefinition(policyKey);
     }
 
     static <V> PolicyKey readPolicyKeyFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         // TODO: can we avoid casting?
-        PolicyKey policyKey = DefaultPolicyKey.readGenericPolicyKeyFromXml(parser);
-        PolicyDefinition<V> genericPolicyDefinition =
-                (PolicyDefinition<V>) sPolicyDefinitions.get(policyKey.mKey);
+        PolicyKey policyKey = PolicyKey.readGenericPolicyKeyFromXml(parser);
+        PolicyDefinition<PolicyValue<V>> genericPolicyDefinition =
+                (PolicyDefinition<PolicyValue<V>>) POLICY_DEFINITIONS.get(
+                        policyKey.getIdentifier());
         return genericPolicyDefinition.mPolicyKey.readFromXml(parser);
     }
 
     void savePolicyValueToXml(TypedXmlSerializer serializer, String attributeName, V value)
             throws IOException {
-        mPolicySerializer.saveToXml(serializer, attributeName, value);
+        mPolicySerializer.saveToXml(mPolicyKey, serializer, attributeName, value);
     }
 
     @Nullable
-    V readPolicyValueFromXml(TypedXmlPullParser parser, String attributeName) {
+    PolicyValue<V> readPolicyValueFromXml(TypedXmlPullParser parser, String attributeName) {
         return mPolicySerializer.readFromXml(parser, attributeName);
     }
 

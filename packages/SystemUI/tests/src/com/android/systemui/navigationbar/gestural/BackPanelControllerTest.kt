@@ -98,15 +98,6 @@ class BackPanelControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun handlesDragSlopCrossed() {
-        startTouch()
-        continueTouch(START_X + touchSlop + 1)
-
-        assertThat(mBackPanelController.currentState)
-            .isEqualTo(BackPanelController.GestureState.ENTRY)
-    }
-
-    @Test
     fun handlesBackCommitted() {
         startTouch()
         // Move once to cross the touch slop

@@ -22,7 +22,6 @@ import android.view.ViewGroup
 import android.window.OnBackAnimationCallback
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.internal.policy.SystemBarUtils
 import com.android.keyguard.KeyguardHostViewController
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -98,14 +97,14 @@ object KeyguardBouncerViewBinder {
                     viewModel.setBouncerViewDelegate(delegate)
                     launch {
                         viewModel.show.collect {
+                            // Reset Security Container entirely.
+                            hostViewController.reinflateViewFlipper()
                             hostViewController.showPromptReason(it.promptReason)
                             it.errorMessage?.let { errorMessage ->
                                 hostViewController.showErrorMessage(errorMessage)
                             }
                             hostViewController.showPrimarySecurityScreen()
-                            hostViewController.appear(
-                                SystemBarUtils.getStatusBarHeight(view.context)
-                            )
+                            hostViewController.appear()
                             hostViewController.onResume()
                         }
                     }
@@ -157,15 +156,6 @@ object KeyguardBouncerViewBinder {
                         viewModel.isInteractable.collect { isInteractable ->
                             hostViewController.setInteractable(isInteractable)
                         }
-                    }
-
-                    launch {
-                        viewModel.isBouncerVisible
-                            .filter { !it }
-                            .collect {
-                                // Remove existing input for security reasons.
-                                hostViewController.resetSecurityContainer()
-                            }
                     }
 
                     launch {

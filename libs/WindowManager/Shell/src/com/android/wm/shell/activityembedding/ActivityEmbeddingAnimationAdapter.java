@@ -22,7 +22,6 @@ import static android.graphics.Matrix.MTRANS_Y;
 import android.annotation.CallSuper;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.view.Choreographer;
 import android.view.SurfaceControl;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -71,7 +70,6 @@ class ActivityEmbeddingAnimationAdapter {
     final float[] mVecs = new float[4];
     @NonNull
     final Rect mRect = new Rect();
-    private boolean mIsFirstFrame = true;
     private int mOverrideLayer = LAYER_NO_OVERRIDE;
 
     ActivityEmbeddingAnimationAdapter(@NonNull Animation animation,
@@ -117,20 +115,21 @@ class ActivityEmbeddingAnimationAdapter {
         mOverrideLayer = layer;
     }
 
+    /** Called to prepare for the starting state. */
+    final void prepareForFirstFrame(@NonNull SurfaceControl.Transaction startTransaction) {
+        startTransaction.show(mLeash);
+        if (mOverrideLayer != LAYER_NO_OVERRIDE) {
+            startTransaction.setLayer(mLeash, mOverrideLayer);
+        }
+        mAnimation.getTransformationAt(0, mTransformation);
+        onAnimationUpdateInner(startTransaction);
+    }
+
     /** Called on frame update. */
     final void onAnimationUpdate(@NonNull SurfaceControl.Transaction t, long currentPlayTime) {
-        if (mIsFirstFrame) {
-            t.show(mLeash);
-            if (mOverrideLayer != LAYER_NO_OVERRIDE) {
-                t.setLayer(mLeash, mOverrideLayer);
-            }
-            mIsFirstFrame = false;
-        }
-
         // Extract the transformation to the current time.
         mAnimation.getTransformation(Math.min(currentPlayTime, mAnimation.getDuration()),
                 mTransformation);
-        t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
         onAnimationUpdateInner(t);
     }
 

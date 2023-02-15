@@ -1351,7 +1351,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     private int mDeviceId;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mSource;
-    private int mDisplayId;
+    private int mDisplayId = INVALID_DISPLAY;
     private @Nullable byte[] mHmac;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mMetaState;
@@ -1602,7 +1602,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mScanCode = scancode;
         mFlags = flags;
         mSource = source;
-        mDisplayId = INVALID_DISPLAY;
     }
 
     /**
@@ -1628,7 +1627,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mDeviceId = deviceId;
         mFlags = flags;
         mSource = InputDevice.SOURCE_KEYBOARD;
-        mDisplayId = INVALID_DISPLAY;
     }
 
     /**

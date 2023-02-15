@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
@@ -26,12 +28,15 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
@@ -42,6 +47,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
+import com.android.server.LocalServices;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -50,8 +56,10 @@ import com.android.server.pm.pkg.mutate.PackageUserStateWrite;
 import com.android.server.utils.WatchedArrayMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public final class SuspendPackageHelper {
@@ -59,6 +67,7 @@ public final class SuspendPackageHelper {
     private final PackageManagerService mPm;
     private final PackageManagerServiceInjector mInjector;
 
+    private final UserManagerService mUserManager;
     private final BroadcastHelper mBroadcastHelper;
     private final ProtectedPackages mProtectedPackages;
 
@@ -66,8 +75,10 @@ public final class SuspendPackageHelper {
      * Constructor for {@link PackageManagerService}.
      */
     SuspendPackageHelper(PackageManagerService pm, PackageManagerServiceInjector injector,
-            BroadcastHelper broadcastHelper, ProtectedPackages protectedPackages) {
+            UserManagerService userManager, BroadcastHelper broadcastHelper,
+            ProtectedPackages protectedPackages) {
         mPm = pm;
+        mUserManager = userManager;
         mInjector = injector;
         mBroadcastHelper = broadcastHelper;
         mProtectedPackages = protectedPackages;
@@ -90,17 +101,19 @@ public final class SuspendPackageHelper {
      * @param callingPackage The caller's package name.
      * @param userId The user where packages reside.
      * @param callingUid The caller's uid.
+     * @param forQuietMode Whether suspension is for quiet mode, in which case no apps are exempt.
      * @return The names of failed packages.
      */
     @Nullable
     String[] setPackagesSuspended(@NonNull Computer snapshot, @Nullable String[] packageNames,
             boolean suspended, @Nullable PersistableBundle appExtras,
             @Nullable PersistableBundle launcherExtras, @Nullable SuspendDialogInfo dialogInfo,
-            @NonNull String callingPackage, @UserIdInt int userId, int callingUid) {
+            @NonNull String callingPackage, @UserIdInt int userId, int callingUid,
+            boolean forQuietMode) {
         if (ArrayUtils.isEmpty(packageNames)) {
             return packageNames;
         }
-        if (suspended && !isSuspendAllowedForUser(snapshot, userId, callingUid)) {
+        if (suspended && !forQuietMode && !isSuspendAllowedForUser(snapshot, userId, callingUid)) {
             Slog.w(TAG, "Cannot suspend due to restrictions on user " + userId);
             return packageNames;
         }
@@ -115,8 +128,9 @@ public final class SuspendPackageHelper {
         final ArraySet<String> changedPackagesList = new ArraySet<>(packageNames.length);
         final IntArray changedUids = new IntArray(packageNames.length);
 
-        final boolean[] canSuspend = suspended
-                ? canSuspendPackageForUser(snapshot, packageNames, userId, callingUid) : null;
+        final boolean[] canSuspend = suspended && !forQuietMode
+                ? canSuspendPackageForUser(snapshot, packageNames, userId, callingUid)
+                : null;
         for (int i = 0; i < packageNames.length; i++) {
             final String packageName = packageNames[i];
             if (callingPackage.equals(packageName)) {
@@ -595,6 +609,100 @@ public final class SuspendPackageHelper {
                 (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
                         mPm.snapshotComputer(), callingUid, intentExtras),
                 null /* bOptions */));
+    }
+
+    /**
+     * Suspends packages on behalf of an admin.
+     *
+     * @return array of packages that are unsuspendable, either because admin is not allowed to
+     * suspend them (e.g. current dialer) or there was other problem (e.g. package not found).
+     */
+    public String[] setPackagesSuspendedByAdmin(
+            Computer snapshot, int userId, String[] packageNames, boolean suspend) {
+        final Set<String> toSuspend = new ArraySet<>(packageNames);
+        List<String> unsuspendable = new ArrayList<>();
+
+        if (mUserManager.isQuietModeEnabled(userId)) {
+            // If the user is in quiet mode, most apps will already be suspended, we shouldn't
+            // re-suspend or unsuspend them.
+            final Set<String> quiet = packagesToSuspendInQuietMode(snapshot, userId);
+            quiet.retainAll(toSuspend);
+            if (!quiet.isEmpty()) {
+                Slog.i(TAG, "Ignoring quiet packages: " + String.join(", ", quiet));
+                toSuspend.removeAll(quiet);
+            }
+
+            // Some of the already suspended packages might not be suspendable by the admin
+            // (e.g. current dialer package), we need to report it back as unsuspendable the same
+            // way as if quiet mode wasn't enabled. In that latter case they'd be returned by
+            // setPackagesSuspended below after unsuccessful attempt to suspend them.
+            if (suspend) {
+                unsuspendable = getUnsuspendablePackages(snapshot, userId, quiet);
+            }
+        }
+        if (!toSuspend.isEmpty()) {
+            unsuspendable.addAll(Arrays.asList(
+                    setPackagesSuspended(
+                            snapshot, toSuspend.toArray(new String[0]), suspend,
+                            null /* appExtras */, null /* launcherExtras */, null /* dialogInfo */,
+                            PackageManagerService.PLATFORM_PACKAGE_NAME, userId, Process.SYSTEM_UID,
+                            false /* forQuietMode */)));
+        }
+        return unsuspendable.toArray(String[]::new);
+    }
+
+    private List<String> getUnsuspendablePackages(
+            Computer snapshot, int userId, Set<String> packages) {
+        final String[] toSuspendArray = packages.toArray(String[]::new);
+        final boolean[] mask =
+                canSuspendPackageForUser(snapshot, toSuspendArray, userId, Process.SYSTEM_UID);
+        final List<String> result = new ArrayList<>();
+        for (int i = 0; i < mask.length; i++) {
+            if (!mask[i]) {
+                result.add(toSuspendArray[i]);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Suspends or unsuspends all packages in the given user when quiet mode is toggled to prevent
+     * usage while quiet mode is enabled.
+     */
+    public void setPackagesSuspendedForQuietMode(
+            Computer snapshot, int userId, boolean suspend) {
+        final Set<String> toSuspend = packagesToSuspendInQuietMode(snapshot, userId);
+        if (!suspend) {
+            // Note: this method is called from DPMS constructor to suspend apps on upgrade, but
+            // it won't enter here because 'suspend' will equal 'true'.
+            final DevicePolicyManagerInternal dpm =
+                    LocalServices.getService(DevicePolicyManagerInternal.class);
+            if (dpm != null) {
+                toSuspend.removeAll(dpm.getPackagesSuspendedByAdmin(userId));
+            } else {
+                Slog.wtf(TAG,
+                        "DevicePolicyManager unavailable while suspending apps for quiet mode");
+            }
+        }
+
+        if (toSuspend.isEmpty()) {
+            return;
+        }
+
+        setPackagesSuspended(snapshot, toSuspend.toArray(new String[0]),
+                suspend, null /* appExtras */, null /* launcherExtras */, null /* dialogInfo */,
+                PackageManagerService.PLATFORM_PACKAGE_NAME, userId, Process.SYSTEM_UID,
+                true /* forQuietMode */);
+    }
+
+    private Set<String> packagesToSuspendInQuietMode(Computer snapshot, int userId) {
+        final List<PackageInfo> pkgInfos = snapshot.getInstalledPackages(
+                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId).getList();
+        final Set<String> result = new ArraySet<>();
+        for (PackageInfo info : pkgInfos) {
+            result.add(info.packageName);
+        }
+        return result;
     }
 
     private String getKnownPackageName(@NonNull Computer snapshot,

@@ -158,19 +158,19 @@ public class BackupManagerService extends IBackupManager.Stub {
     /**
      * The user that the backup is activated by default for.
      *
-     * If there is a {@link UserManager#getMainUser()}, this will be that user. If not, it will be
-     * {@link UserHandle#USER_SYSTEM}.
+     * <p>If there is a {@link UserManager#getMainUser()}, this will be that user. If not, it will
+     * be {@link UserHandle#USER_SYSTEM}.
+     *
+     * <p>Note: on the first ever boot of a new device, this might change once the first user is
+     * unlocked. See {@link #updateDefaultBackupUserIdIfNeeded()}.
      *
      * @see #isBackupActivatedForUser(int)
      */
-    @UserIdInt private final int mDefaultBackupUserId;
+    @UserIdInt private int mDefaultBackupUserId;
+
+    private boolean mHasFirstUserUnlockedSinceBoot = false;
 
     public BackupManagerService(Context context) {
-        this(context, new SparseArray<>());
-    }
-
-    @VisibleForTesting
-    BackupManagerService(Context context, SparseArray<UserBackupManagerService> userServices) {
         mContext = context;
         mGlobalDisable = isBackupDisabled();
         HandlerThread handlerThread =
@@ -178,7 +178,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
         mUserManager = UserManager.get(context);
-        mUserServices = userServices;
+        mUserServices = new SparseArray<>();
         Set<ComponentName> transportWhitelist =
                 SystemConfig.getInstance().getBackupTransportWhitelist();
         mTransportWhitelist = (transportWhitelist == null) ? emptySet() : transportWhitelist;
@@ -186,6 +186,9 @@ public class BackupManagerService extends IBackupManager.Stub {
                 mUserRemovedReceiver, new IntentFilter(Intent.ACTION_USER_REMOVED));
         UserHandle mainUser = getUserManager().getMainUser();
         mDefaultBackupUserId = mainUser == null ? UserHandle.USER_SYSTEM : mainUser.getIdentifier();
+        if (DEBUG) {
+            Slog.d(TAG, "Default backup user id = " + mDefaultBackupUserId);
+        }
     }
 
     // TODO: Remove this when we implement DI by injecting in the construtor.
@@ -358,17 +361,6 @@ public class BackupManagerService extends IBackupManager.Stub {
     @VisibleForTesting
     protected void postToHandler(Runnable runnable) {
         mHandler.post(runnable);
-    }
-
-    /**
-     * Called from {@link BackupManagerService.Lifecycle} when a user {@code userId} is unlocked.
-     * Starts the backup service for this user if backup is active for this user. Offloads work onto
-     * the handler thread {@link #mHandlerThread} to keep unlock time low since backup is not
-     * essential for device functioning.
-     */
-    @VisibleForTesting
-    void onUnlockUser(int userId) {
-        postToHandler(() -> startServiceForUser(userId));
     }
 
     /**
@@ -1687,7 +1679,15 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
-            sInstance.onUnlockUser(user.getUserIdentifier());
+            // Starts the backup service for this user if backup is active for this user. Offloads
+            // work onto the handler thread {@link #mHandlerThread} to keep unlock time low since
+            // backup is not essential for device functioning.
+            sInstance.postToHandler(
+                    () -> {
+                        sInstance.updateDefaultBackupUserIdIfNeeded();
+                        sInstance.startServiceForUser(user.getUserIdentifier());
+                        sInstance.mHasFirstUserUnlockedSinceBoot = true;
+                    });
         }
 
         @Override
@@ -1698,6 +1698,44 @@ public class BackupManagerService extends IBackupManager.Stub {
         @VisibleForTesting
         void publishService(String name, IBinder service) {
             publishBinderService(name, service);
+        }
+    }
+
+    /**
+     * On the first ever boot of a new device, the 'main' user might not exist for a short period of
+     * time and be created after {@link BackupManagerService} is created. In this case the {@link
+     * #mDefaultBackupUserId} will be the system user initially, but we need to change it to the
+     * newly created {@link UserManager#getMainUser()} later.
+     *
+     * <p>{@link Lifecycle#onUserUnlocking(SystemService.TargetUser)} (for any user) is the earliest
+     * point where we know that a main user (if there is going to be one) is created.
+     */
+    private void updateDefaultBackupUserIdIfNeeded() {
+        // The default user can only change before any user unlocks since boot, and it will only
+        // change from the system user to a non-system user.
+        if (mHasFirstUserUnlockedSinceBoot || mDefaultBackupUserId != UserHandle.USER_SYSTEM) {
+            return;
+        }
+
+        UserHandle mainUser = getUserManager().getMainUser();
+        if (mainUser == null) {
+            return;
+        }
+
+        if (mDefaultBackupUserId != mainUser.getIdentifier()) {
+            int oldDefaultBackupUserId = mDefaultBackupUserId;
+            mDefaultBackupUserId = mainUser.getIdentifier();
+            // We don't expect the service to be started for the old default user but we attempt to
+            // stop its service to be safe.
+            if (!isBackupActivatedForUser(oldDefaultBackupUserId)) {
+                stopServiceForUser(oldDefaultBackupUserId);
+            }
+            Slog.i(
+                    TAG,
+                    "Default backup user changed from "
+                            + oldDefaultBackupUserId
+                            + " to "
+                            + mDefaultBackupUserId);
         }
     }
 }

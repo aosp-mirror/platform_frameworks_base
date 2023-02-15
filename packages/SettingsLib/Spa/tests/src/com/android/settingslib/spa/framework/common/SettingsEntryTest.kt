@@ -68,7 +68,7 @@ class SettingsEntryTest {
         val owner = createSettingsPage("mySpp")
         val entry = SettingsEntryBuilder.create(owner, "myEntry").build()
         assertThat(entry.id).isEqualTo(genEntryId("myEntry", owner))
-        assertThat(entry.displayName).isEqualTo("myEntry")
+        assertThat(entry.label).isEqualTo("myEntry")
         assertThat(entry.owner.sppName).isEqualTo("mySpp")
         assertThat(entry.owner.displayName).isEqualTo("mySpp")
         assertThat(entry.fromPage).isNull()
@@ -87,14 +87,14 @@ class SettingsEntryTest {
         val entryFrom =
             SettingsEntryBuilder.createLinkFrom("myEntry", owner).setLink(toPage = toPage).build()
         assertThat(entryFrom.id).isEqualTo(genEntryId("myEntry", owner, owner, toPage))
-        assertThat(entryFrom.displayName).isEqualTo("myEntry")
+        assertThat(entryFrom.label).isEqualTo("myEntry")
         assertThat(entryFrom.fromPage!!.sppName).isEqualTo("mySpp")
         assertThat(entryFrom.toPage!!.sppName).isEqualTo("toSpp")
 
         val entryTo =
             SettingsEntryBuilder.createLinkTo("myEntry", owner).setLink(fromPage = fromPage).build()
         assertThat(entryTo.id).isEqualTo(genEntryId("myEntry", owner, fromPage, owner))
-        assertThat(entryTo.displayName).isEqualTo("myEntry")
+        assertThat(entryTo.label).isEqualTo("myEntry")
         assertThat(entryTo.fromPage!!.sppName).isEqualTo("fromSpp")
         assertThat(entryTo.toPage!!.sppName).isEqualTo("mySpp")
     }
@@ -108,7 +108,7 @@ class SettingsEntryTest {
                 INJECT_ENTRY_NAME_TEST, owner, toPage = owner
             )
         )
-        assertThat(entryInject.displayName).isEqualTo("${INJECT_ENTRY_NAME_TEST}_mySpp")
+        assertThat(entryInject.label).isEqualTo("${INJECT_ENTRY_NAME_TEST}_mySpp")
         assertThat(entryInject.fromPage).isNull()
         assertThat(entryInject.toPage).isNotNull()
     }
@@ -122,7 +122,7 @@ class SettingsEntryTest {
                 ROOT_ENTRY_NAME_TEST, owner, toPage = owner
             )
         )
-        assertThat(entryInject.displayName).isEqualTo("myRootEntry")
+        assertThat(entryInject.label).isEqualTo("myRootEntry")
         assertThat(entryInject.fromPage).isNull()
         assertThat(entryInject.toPage).isNotNull()
     }
@@ -133,14 +133,14 @@ class SettingsEntryTest {
         val owner = createSettingsPage("SppHome")
         val entryBuilder =
             SettingsEntryBuilder.create(owner, "myEntry")
-                .setDisplayName("myEntryDisplay")
+                .setLabel("myEntryDisplay")
                 .setIsSearchDataDynamic(false)
                 .setHasMutableStatus(true)
                 .setSearchDataFn { null }
                 .setSliceDataFn { _, _ -> null }
         val entry = entryBuilder.build()
         assertThat(entry.id).isEqualTo(genEntryId("myEntry", owner))
-        assertThat(entry.displayName).isEqualTo("myEntryDisplay")
+        assertThat(entry.label).isEqualTo("myEntryDisplay")
         assertThat(entry.fromPage).isNull()
         assertThat(entry.toPage).isNull()
         assertThat(entry.isAllowSearch).isTrue()
@@ -152,14 +152,14 @@ class SettingsEntryTest {
         val ownerDisabled = createSettingsPage("SppDisabled")
         val entryBuilderDisabled =
             SettingsEntryBuilder.create(ownerDisabled, "myEntry")
-                .setDisplayName("myEntryDisplay")
+                .setLabel("myEntryDisplay")
                 .setIsSearchDataDynamic(false)
                 .setHasMutableStatus(true)
                 .setSearchDataFn { null }
                 .setSliceDataFn { _, _ -> null }
         val entryDisabled = entryBuilderDisabled.build()
         assertThat(entryDisabled.id).isEqualTo(genEntryId("myEntry", ownerDisabled))
-        assertThat(entryDisabled.displayName).isEqualTo("myEntryDisplay")
+        assertThat(entryDisabled.label).isEqualTo("myEntryDisplay")
         assertThat(entryDisabled.fromPage).isNull()
         assertThat(entryDisabled.toPage).isNull()
         assertThat(entryDisabled.isAllowSearch).isFalse()
@@ -175,7 +175,7 @@ class SettingsEntryTest {
         SpaEnvironmentFactory.reset()
         val entry3 = entryBuilder.build()
         assertThat(entry3.id).isEqualTo(genEntryId("myEntry", owner))
-        assertThat(entry3.displayName).isEqualTo("myEntryDisplay")
+        assertThat(entry3.label).isEqualTo("myEntryDisplay")
         assertThat(entry3.fromPage).isNull()
         assertThat(entry3.toPage).isNull()
         assertThat(entry3.isAllowSearch).isFalse()

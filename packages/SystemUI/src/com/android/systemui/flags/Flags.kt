@@ -68,7 +68,7 @@ object Flags {
     @JvmField val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
 
     // TODO(b/254512538): Tracking Bug
-    val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply", teamfood = true)
+    val INSTANT_VOICE_REPLY = releasedFlag(111, "instant_voice_reply")
 
     // TODO(b/254512425): Tracking Bug
     val NOTIFICATION_MEMORY_MONITOR_ENABLED =
@@ -95,12 +95,12 @@ object Flags {
         unreleasedFlag(259395680, "simplified_appear_fraction", teamfood = true)
 
     // TODO(b/257315550): Tracking Bug
-    val NO_HUN_FOR_OLD_WHEN = unreleasedFlag(118, "no_hun_for_old_when", teamfood = true)
+    val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
 
     // TODO(b/260335638): Tracking Bug
     @JvmField
     val NOTIFICATION_INLINE_REPLY_ANIMATION =
-        unreleasedFlag(174148361, "notification_inline_reply_animation", teamfood = true)
+        releasedFlag(174148361, "notification_inline_reply_animation")
 
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
         releasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
@@ -343,8 +343,7 @@ object Flags {
     val MEDIA_EXPLICIT_INDICATOR = releasedFlag(911, "media_explicit_indicator")
 
     // TODO(b/265813373): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE =
-        unreleasedFlag(912, "media_ttt_dismiss_gesture", teamfood = true)
+    val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE = releasedFlag(912, "media_ttt_dismiss_gesture")
 
     // TODO(b/266157412): Tracking Bug
     val MEDIA_RETAIN_SESSIONS = releasedFlag(913, "media_retain_sessions")
@@ -469,8 +468,7 @@ object Flags {
         sysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", default = false)
 
     // TODO(b/254512728): Tracking Bug
-    @JvmField
-    val NEW_BACK_AFFORDANCE = releasedFlag(1203, "new_back_affordance")
+    @JvmField val NEW_BACK_AFFORDANCE = releasedFlag(1203, "new_back_affordance")
 
     // TODO(b/255854141): Tracking Bug
     @JvmField
@@ -510,10 +508,13 @@ object Flags {
     @JvmField val SCREENSHOT_METADATA = unreleasedFlag(1302, "screenshot_metadata", teamfood = true)
 
     // TODO(b/266955521): Tracking bug
-    @JvmField val SCREENSHOT_DETECTION = unreleasedFlag(1303, "screenshot_detection")
+    @JvmField val SCREENSHOT_DETECTION = releasedFlag(1303, "screenshot_detection")
 
     // TODO(b/251205791): Tracking Bug
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag(1304, "screenshot_app_clips")
+
+    // TODO(b/268484562): Tracking bug
+    @JvmField val SCREENSHOT_METADATA_REFACTOR = releasedFlag(1305, "screenshot_metadata_refactor")
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
@@ -525,28 +526,26 @@ object Flags {
 
     // 1500 - chooser aka sharesheet
     // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled", teamfood = true)
+    val CHOOSER_UNBUNDLED = releasedFlag(1500, "chooser_unbundled")
 
     // TODO(b/266983432) Tracking Bug
-    val SHARESHEET_CUSTOM_ACTIONS =
-        unreleasedFlag(1501, "sharesheet_custom_actions", teamfood = true)
+    val SHARESHEET_CUSTOM_ACTIONS = releasedFlag(1501, "sharesheet_custom_actions")
 
     // TODO(b/266982749) Tracking Bug
-    val SHARESHEET_RESELECTION_ACTION =
-        unreleasedFlag(1502, "sharesheet_reselection_action", teamfood = true)
+    val SHARESHEET_RESELECTION_ACTION = releasedFlag(1502, "sharesheet_reselection_action")
 
     // TODO(b/266983474) Tracking Bug
-    val SHARESHEET_IMAGE_AND_TEXT_PREVIEW =
-        unreleasedFlag(1503, "sharesheet_image_text_preview", teamfood = true)
+    val SHARESHEET_IMAGE_AND_TEXT_PREVIEW = releasedFlag(1503, "sharesheet_image_text_preview")
 
     // TODO(b/267355521) Tracking Bug
     val SHARESHEET_SCROLLABLE_IMAGE_PREVIEW =
-        unreleasedFlag(1504, "sharesheet_scrollable_image_preview")
+        releasedFlag(1504, "sharesheet_scrollable_image_preview")
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
     // TODO(b/267162944): Tracking bug
-    @JvmField val CLIPBOARD_MINIMIZED_LAYOUT = unreleasedFlag(1702, "clipboard_data_model")
+    @JvmField
+    val CLIPBOARD_MINIMIZED_LAYOUT = unreleasedFlag(1702, "clipboard_data_model", teamfood = true)
 
     // 1800 - shade container
     @JvmField
@@ -567,6 +566,12 @@ object Flags {
     @JvmField
     val CONTROLS_MANAGEMENT_NEW_FLOWS =
         releasedFlag(2002, "controls_management_new_flows", teamfood = true)
+
+    // Enables removing app from Home control panel as a part of a new flow
+    // TODO(b/269132640): Tracking Bug
+    @JvmField
+    val APP_PANELS_REMOVE_APPS_ALLOWED =
+        unreleasedFlag(2003, "app_panels_remove_apps_allowed", teamfood = false)
 
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
@@ -605,7 +610,7 @@ object Flags {
     // TODO(b/20911786): Tracking Bug
     @JvmField
     val OUTPUT_SWITCHER_SHOW_API_ENABLED =
-        unreleasedFlag(2503, "output_switcher_show_api_enabled", teamfood = true)
+        releasedFlag(2503, "output_switcher_show_api_enabled", teamfood = true)
 
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug
@@ -617,7 +622,11 @@ object Flags {
     // TODO(b259590361): Tracking bug
     val EXPERIMENTAL_FLAG = unreleasedFlag(2, "exp_flag_release")
 
-    // 2600 - keyboard shortcut
+    // 2600 - keyboard
     // TODO(b/259352579): Tracking Bug
     @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+
+    // TODO(b/259428678): Tracking Bug
+    @JvmField
+    val KEYBOARD_BACKLIGHT_INDICATOR = unreleasedFlag(2601, "keyboard_backlight_indicator")
 }

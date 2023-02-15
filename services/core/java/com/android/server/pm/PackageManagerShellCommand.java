@@ -2002,8 +2002,8 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    public int runForceDexOpt() throws RemoteException {
-        mInterface.forceDexOpt(getNextArgRequired());
+    public int runForceDexOpt() throws RemoteException, LegacyDexoptDisabledException {
+        mPm.legacyForceDexOpt(getNextArgRequired());
         return 0;
     }
 
@@ -3123,12 +3123,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 translateUserId(userId, UserHandle.USER_NULL, "runSetUserRestriction");
         final IUserManager um = IUserManager.Stub.asInterface(
                 ServiceManager.getService(Context.USER_SERVICE));
-        try {
-            um.setUserRestriction(restriction, value, translatedUserId);
-        } catch (IllegalArgumentException e) {
-            getErrPrintWriter().println(e.getMessage());
-            return 1;
-        }
+        um.setUserRestriction(restriction, value, translatedUserId);
         return 0;
     }
 
@@ -3198,7 +3193,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |= PackageManager.INSTALL_REQUEST_DOWNGRADE;
                     break;
                 case "-g":
-                    sessionParams.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
+                    sessionParams.installFlags |=
+                            PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS;
                     break;
                 case "--restrict-permissions":
                     sessionParams.installFlags &=

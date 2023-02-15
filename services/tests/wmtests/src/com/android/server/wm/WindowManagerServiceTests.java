@@ -200,7 +200,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final WindowSurfaceController surfaceController = mock(WindowSurfaceController.class);
         doReturn(true).when(surfaceController).hasSurface();
         spyOn(win);
-        doReturn(true).when(win).isExitAnimationRunningSelfOrParent();
+        doReturn(true).when(win).isAnimationRunningSelfOrParent();
         win.mWinAnimator.mSurfaceController = surfaceController;
         win.mViewVisibility = View.VISIBLE;
         win.mHasSurface = true;
@@ -498,6 +498,51 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         verify(mWm.mInputManager).setInTouchMode(
                 !currentTouchMode, callingPid, callingUid, /* hasPermission= */ true,
                 virtualDisplay.getDisplay().getDisplayId());
+    }
+
+    @Test
+    public void testSetInTouchModeOnAllDisplays_perDisplayFocusDisabled() {
+        testSetInTouchModeOnAllDisplays(/* perDisplayFocusEnabled= */ false);
+    }
+
+    @Test
+    public void testSetInTouchModeOnAllDisplays_perDisplayFocusEnabled() {
+        testSetInTouchModeOnAllDisplays(/* perDisplayFocusEnabled= */ true);
+    }
+
+    private void testSetInTouchModeOnAllDisplays(boolean perDisplayFocusEnabled) {
+        // Create a couple of extra displays.
+        // setInTouchModeOnAllDisplays should ignore the ownFocus setting.
+        final VirtualDisplay virtualDisplay = createVirtualDisplay(/* ownFocus= */ false);
+        final VirtualDisplay virtualDisplayOwnFocus = createVirtualDisplay(/* ownFocus= */ true);
+
+        // Enable or disable global touch mode (config_perDisplayFocusEnabled setting).
+        // setInTouchModeOnAllDisplays should ignore this value.
+        Resources mockResources = mock(Resources.class);
+        spyOn(mContext);
+        when(mContext.getResources()).thenReturn(mockResources);
+        doReturn(perDisplayFocusEnabled).when(mockResources).getBoolean(
+                com.android.internal.R.bool.config_perDisplayFocusEnabled);
+
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        doReturn(false).when(mWm).checkCallingPermission(anyString(), anyString(), anyBoolean());
+        when(mWm.mAtmService.instrumentationSourceHasPermission(callingPid,
+                android.Manifest.permission.MODIFY_TOUCH_MODE_STATE)).thenReturn(true);
+
+        for (boolean inTouchMode : new boolean[]{true, false}) {
+            mWm.setInTouchModeOnAllDisplays(inTouchMode);
+            for (int i = 0; i < mWm.mRoot.mChildren.size(); ++i) {
+                DisplayContent dc = mWm.mRoot.mChildren.get(i);
+                // All displays that are not already in the desired touch mode are requested to
+                // change their touch mode.
+                if (dc.isInTouchMode() != inTouchMode) {
+                    verify(mWm.mInputManager).setInTouchMode(
+                            true, callingPid, callingUid, /* hasPermission= */ true,
+                            dc.getDisplay().getDisplayId());
+                }
+            }
+        }
     }
 
     private VirtualDisplay createVirtualDisplay(boolean ownFocus) {

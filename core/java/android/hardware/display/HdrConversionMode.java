@@ -19,7 +19,6 @@ package android.hardware.display;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.Display;
@@ -35,17 +34,22 @@ import java.lang.annotation.RetentionPolicy;
  * <p>
  * HDR conversion mode has a conversionMode and preferredHdrOutputType. </p><p>
  * The conversionMode can be one of:
- * HDR_CONVERSION_PASSSTHROUGH : HDR conversion is disabled. The output HDR type will change
- * dynamically to match the content. In this mode, preferredHdrOutputType should not be set.
- * HDR_CONVERSION_AUTO: The output HDR type is selected by the implementation. In this mode,
- * preferredHdrOutputType should not be set.
- * HDR_CONVERSION_FORCE : The implementation converts all content to this HDR type, when possible.
+ * {@link HdrConversionMode#HDR_CONVERSION_UNSUPPORTED} : HDR conversion is unsupported. In this
+ * mode, preferredHdrOutputType should not be set.
+ * {@link HdrConversionMode#HDR_CONVERSION_PASSTHROUGH} : HDR conversion is disabled. The output HDR
+ * type will change dynamically to match the content. In this mode, preferredHdrOutputType should
+ * not be set.
+ * {@link HdrConversionMode#HDR_CONVERSION_SYSTEM}: The output HDR type is selected by the
+ * implementation. In this mode, preferredHdrOutputType will be the mode preferred by the system
+ * when querying. However, it should be set to HDR_TYPE_INVALID when setting the mode.
+ * {@link HdrConversionMode#HDR_CONVERSION_FORCE}: The implementation converts all content to this
+ * HDR type, when possible.
  * In this mode, preferredHdrOutputType should be set.
  * </p>
- * @hide
  */
-@TestApi
 public final class HdrConversionMode implements Parcelable {
+    /** HDR output conversion is unsupported */
+    public static final int HDR_CONVERSION_UNSUPPORTED = 0;
     /** HDR output conversion is disabled */
     public static final int HDR_CONVERSION_PASSTHROUGH = 1;
     /** HDR output conversion is managed by the device manufacturer's implementation. */
@@ -82,18 +86,20 @@ public final class HdrConversionMode implements Parcelable {
     private final @ConversionMode int mConversionMode;
     private @Display.HdrCapabilities.HdrType int mPreferredHdrOutputType;
 
-    public HdrConversionMode(int conversionMode, int preferredHdrOutputType) {
-        if (conversionMode != HdrConversionMode.HDR_CONVERSION_FORCE
-                && preferredHdrOutputType != -1) {
+    public HdrConversionMode(@ConversionMode int conversionMode,
+            @Display.HdrCapabilities.HdrType int preferredHdrOutputType) {
+        if ((conversionMode == HdrConversionMode.HDR_CONVERSION_PASSTHROUGH
+                || conversionMode == HDR_CONVERSION_UNSUPPORTED)
+                && preferredHdrOutputType != Display.HdrCapabilities.HDR_TYPE_INVALID) {
             throw new IllegalArgumentException("preferredHdrOutputType must not be set if"
-                    + " the conversion mode is not HDR_CONVERSION_FORCE");
+                    + " the conversion mode is " + hdrConversionModeString(conversionMode));
         }
 
         mConversionMode = conversionMode;
         mPreferredHdrOutputType = preferredHdrOutputType;
     }
 
-    public HdrConversionMode(int conversionMode) {
+    public HdrConversionMode(@ConversionMode int conversionMode) {
         mConversionMode = conversionMode;
         mPreferredHdrOutputType = Display.HdrCapabilities.HDR_TYPE_INVALID;
     }
@@ -102,10 +108,12 @@ public final class HdrConversionMode implements Parcelable {
         this(source.readInt(), source.readInt());
     }
 
+    @ConversionMode
     public int getConversionMode() {
         return mConversionMode;
     }
 
+    @Display.HdrCapabilities.HdrType
     public int getPreferredHdrOutputType() {
         return mPreferredHdrOutputType;
     }
@@ -144,7 +152,7 @@ public final class HdrConversionMode implements Parcelable {
                 && mPreferredHdrOutputType == other.getPreferredHdrOutputType();
     }
 
-    private static String hdrConversionModeString(int hdrConversionMode) {
+    private static String hdrConversionModeString(@ConversionMode int hdrConversionMode) {
         switch (hdrConversionMode) {
             case HDR_CONVERSION_PASSTHROUGH:
                 return "HDR_CONVERSION_PASSTHROUGH";
@@ -153,7 +161,7 @@ public final class HdrConversionMode implements Parcelable {
             case HDR_CONVERSION_FORCE:
                 return "HDR_CONVERSION_FORCE";
             default:
-                return "HDR_CONVERSION_UNKNOWN";
+                return "HDR_CONVERSION_UNSUPPORTED";
         }
     }
 }

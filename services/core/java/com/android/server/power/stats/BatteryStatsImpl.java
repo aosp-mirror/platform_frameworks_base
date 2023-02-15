@@ -12084,11 +12084,16 @@ public class BatteryStatsImpl extends BatteryStats {
             final SparseDoubleArray uidEstimatedConsumptionMah;
             final long dataConsumedChargeUC;
             if (consumedChargeUC > 0 && isMobileRadioEnergyConsumerSupportedLocked()) {
-                // Crudely attribute power consumption. Added (totalRadioDurationMs / 2) to the
-                // numerator for long rounding.
-                final long phoneConsumedChargeUC =
-                        (consumedChargeUC * phoneOnDurationMs + totalRadioDurationMs / 2)
-                                / totalRadioDurationMs;
+                final long phoneConsumedChargeUC;
+                if (totalRadioDurationMs == 0) {
+                    phoneConsumedChargeUC = 0;
+                } else {
+                    // Crudely attribute power consumption. Added (totalRadioDurationMs / 2) to the
+                    // numerator for long rounding.
+                    phoneConsumedChargeUC =
+                            (consumedChargeUC * phoneOnDurationMs + totalRadioDurationMs / 2)
+                                    / totalRadioDurationMs;
+                }
                 dataConsumedChargeUC = consumedChargeUC - phoneConsumedChargeUC;
 
                 mGlobalEnergyConsumerStats.updateStandardBucket(

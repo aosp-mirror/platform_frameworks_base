@@ -47,6 +47,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
+import com.android.server.location.gnss.TimeDetectorNetworkTimeHelper;
 import com.android.server.timezonedetector.CallerIdentityInjector;
 import com.android.server.timezonedetector.CurrentUserIdentityInjector;
 
@@ -405,13 +406,19 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         // TODO(b/222295093): Return the latest network time from mTimeDetectorStrategy once we can
         //  be sure that all uses of NtpTrustedTime results in a suggestion being made to the time
         //  detector. mNtpTrustedTime can be removed once this happens.
-        NtpTrustedTime.TimeResult ntpResult = mNtpTrustedTime.getCachedTimeResult();
-        if (ntpResult != null) {
-            UnixEpochTime unixEpochTime = new UnixEpochTime(
-                    ntpResult.getElapsedRealtimeMillis(), ntpResult.getTimeMillis());
-            return new NetworkTimeSuggestion(unixEpochTime, ntpResult.getUncertaintyMillis());
+        if (TimeDetectorNetworkTimeHelper.isInUse()) {
+            // The new implementation.
+            return mTimeDetectorStrategy.getLatestNetworkSuggestion();
         } else {
-            return null;
+            // The old implementation.
+            NtpTrustedTime.TimeResult ntpResult = mNtpTrustedTime.getCachedTimeResult();
+            if (ntpResult != null) {
+                UnixEpochTime unixEpochTime = new UnixEpochTime(
+                        ntpResult.getElapsedRealtimeMillis(), ntpResult.getTimeMillis());
+                return new NetworkTimeSuggestion(unixEpochTime, ntpResult.getUncertaintyMillis());
+            } else {
+                return null;
+            }
         }
     }
 

@@ -171,8 +171,9 @@ final class BroadcastReceiverBatch {
     // Add a ReceiverInfo for a registered receiver.
     void schedule(@Nullable IIntentReceiver receiver, Intent intent,
             int resultCode, @Nullable String data, @Nullable Bundle extras, boolean ordered,
-            boolean sticky, boolean assumeDelivered, int sendingUser, int callingUid,
-            String callingPackage, int processState, @Nullable BroadcastRecord r, int index) {
+            boolean sticky, boolean assumeDelivered, int sendingUser, int sendingUid,
+            @Nullable String sendingPackage, int processState, @Nullable BroadcastRecord r,
+            int index) {
         ReceiverInfo ri = new ReceiverInfo();
         ri.intent = intent;
         ri.data = data;
@@ -185,8 +186,8 @@ final class BroadcastReceiverBatch {
         ri.receiver = receiver;
         ri.ordered = ordered;
         ri.sticky = sticky;
-        ri.sentFromUid = callingUid;
-        ri.sentFromPackage = callingPackage;
+        ri.sendingUid = sendingUid;
+        ri.sendingPackage = sendingPackage;
 
         mReceivers.add(ri);
         mCookies.add(cookiePool.next().set(r, index));
@@ -195,7 +196,7 @@ final class BroadcastReceiverBatch {
     void schedule(@Nullable Intent intent, @Nullable ActivityInfo activityInfo,
             @Nullable CompatibilityInfo compatInfo, int resultCode, @Nullable String data,
             @Nullable Bundle extras, boolean sync, boolean assumeDelivered, int sendingUser,
-            int callingUid, @Nullable String callingPackage, int processState,
+            int sendingUid, @Nullable String sendingPackage, int processState,
             @Nullable BroadcastRecord r, int index) {
         ReceiverInfo ri = new ReceiverInfo();
         ri.intent = intent;
@@ -209,8 +210,8 @@ final class BroadcastReceiverBatch {
         ri.activityInfo = activityInfo;
         ri.compatInfo = compatInfo;
         ri.sync = sync;
-        ri.sentFromUid = callingUid;
-        ri.sentFromPackage = callingPackage;
+        ri.sendingUid = sendingUid;
+        ri.sendingPackage = sendingPackage;
         mReceivers.add(ri);
         mCookies.add(cookiePool.next().set(r, index));
     }
@@ -223,21 +224,21 @@ final class BroadcastReceiverBatch {
     ArrayList<ReceiverInfo> registeredReceiver(@Nullable IIntentReceiver receiver,
             @Nullable Intent intent, int resultCode, @Nullable String data,
             @Nullable Bundle extras, boolean ordered, boolean sticky, boolean assumeDelivered,
-            int sendingUser, int callingUid, String callingPackage, int processState) {
+            int sendingUser, int sendingUid, @Nullable String sendingPackage, int processState) {
         reset();
         schedule(receiver, intent, resultCode, data, extras, ordered, sticky, assumeDelivered,
-                sendingUser, callingUid, callingPackage, processState, null, 0);
+                sendingUser, sendingUid, sendingPackage, processState, null, 0);
         return receivers();
     }
 
     ArrayList<ReceiverInfo> manifestReceiver(@Nullable Intent intent,
             @Nullable ActivityInfo activityInfo, @Nullable CompatibilityInfo compatInfo,
             int resultCode, @Nullable String data, @Nullable Bundle extras, boolean sync,
-            boolean assumeDelivered, int sendingUser, int callingUid, String callingPackage,
-            int processState) {
+            boolean assumeDelivered, int sendingUser, int sendingUid,
+            @Nullable String sendingPackage, int processState) {
         reset();
         schedule(intent, activityInfo, compatInfo, resultCode, data, extras, sync, assumeDelivered,
-                sendingUser, callingUid, callingPackage, processState, null, 0);
+                sendingUser, sendingUid, sendingPackage, processState, null, 0);
         return receivers();
     }
 

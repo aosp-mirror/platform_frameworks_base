@@ -284,6 +284,9 @@ interface IWindowManager
     @UnsupportedAppUsage
     void removeRotationWatcher(IRotationWatcher watcher);
 
+    /** Registers the listener to the context token and returns the current proposed rotation. */
+    int registerProposedRotationListener(IBinder contextToken, IRotationWatcher listener);
+
     /**
      * Determine the preferred edge of the screen to pin the compact options menu against.
      *

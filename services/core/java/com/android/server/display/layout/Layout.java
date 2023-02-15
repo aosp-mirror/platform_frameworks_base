@@ -36,6 +36,8 @@ import java.util.Objects;
  * a foldable device is folded, and a second instance for when the device is unfolded.
  */
 public class Layout {
+    public static final String DEFAULT_DISPLAY_GROUP_NAME = "";
+
     private static final String TAG = "Layout";
     private static int sNextNonDefaultDisplayId = DEFAULT_DISPLAY + 1;
 
@@ -79,15 +81,19 @@ public class Layout {
      * @param address Address of the device.
      * @param isDefault Indicates if the device is meant to be the default display.
      * @param isEnabled Indicates if this display is usable and can be switched on
+     * @param displayGroupName Name of the display group to which the display is assigned.
      * @param idProducer Produces the logical display id.
      * @param brightnessThrottlingMapId Name of which throttling policy should be used.
      * @param leadDisplayId Display that this one follows (-1 if none).
+     * @exception IllegalArgumentException When a default display owns a display group other than
+     *            DEFAULT_DISPLAY_GROUP.
      * @return The new Display.
      */
     public Display createDisplayLocked(
             @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled,
-            DisplayIdProducer idProducer, String brightnessThrottlingMapId, int leadDisplayId) {
-        return createDisplayLocked(address, isDefault, isEnabled, idProducer,
+            String displayGroupName, DisplayIdProducer idProducer, String brightnessThrottlingMapId,
+            int leadDisplayId) {
+        return createDisplayLocked(address, isDefault, isEnabled, displayGroupName, idProducer,
                 brightnessThrottlingMapId, POSITION_UNKNOWN, leadDisplayId);
     }
 
@@ -97,16 +103,19 @@ public class Layout {
      * @param address Address of the device.
      * @param isDefault Indicates if the device is meant to be the default display.
      * @param isEnabled Indicates if this display is usable and can be switched on
+     * @param displayGroupName Name of the display group to which the display is assigned.
      * @param idProducer Produces the logical display id.
      * @param brightnessThrottlingMapId Name of which throttling policy should be used.
      * @param position Indicates the position this display is facing in this layout.
      * @param leadDisplayId Display that this one follows (-1 if none).
+     * @exception IllegalArgumentException When a default display owns a display group other than
+     *            DEFAULT_DISPLAY_GROUP.
      * @return The new Display.
      */
     public Display createDisplayLocked(
             @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled,
-            DisplayIdProducer idProducer, String brightnessThrottlingMapId, int position,
-            int leadDisplayId) {
+            String displayGroupName, DisplayIdProducer idProducer, String brightnessThrottlingMapId,
+            int position, int leadDisplayId) {
         if (contains(address)) {
             Slog.w(TAG, "Attempting to add second definition for display-device: " + address);
             return null;
@@ -122,8 +131,14 @@ public class Layout {
         // Note that the logical display ID is saved into the layout, so when switching between
         // different layouts, a logical display can be destroyed and later recreated with the
         // same logical display ID.
+        if (displayGroupName == null) {
+            displayGroupName = DEFAULT_DISPLAY_GROUP_NAME;
+        }
+        if (isDefault && !displayGroupName.equals(DEFAULT_DISPLAY_GROUP_NAME)) {
+            throw new IllegalArgumentException("Default display should own DEFAULT_DISPLAY_GROUP");
+        }
         final int logicalDisplayId = idProducer.getId(isDefault);
-        final Display display = new Display(address, logicalDisplayId, isEnabled,
+        final Display display = new Display(address, logicalDisplayId, isEnabled, displayGroupName,
                 brightnessThrottlingMapId, position, leadDisplayId);
 
         mDisplays.add(display);
@@ -220,6 +235,9 @@ public class Layout {
         // Indicates if this display is usable and can be switched on
         private final boolean mIsEnabled;
 
+        // Name of display group to which the display is assigned
+        private final String mDisplayGroupName;
+
         // The direction the display faces
         // {@link DeviceStateToLayoutMap.POSITION_FRONT} or
         // {@link DeviceStateToLayoutMap.POSITION_REAR}.
@@ -240,10 +258,12 @@ public class Layout {
         private String mRefreshRateZoneId;
 
         Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled,
-                String brightnessThrottlingMapId, int position, int leadDisplayId) {
+                @NonNull String displayGroupName, String brightnessThrottlingMapId, int position,
+                int leadDisplayId) {
             mAddress = address;
             mLogicalDisplayId = logicalDisplayId;
             mIsEnabled = isEnabled;
+            mDisplayGroupName = displayGroupName;
             mPosition = position;
             mBrightnessThrottlingMapId = brightnessThrottlingMapId;
 
@@ -260,6 +280,7 @@ public class Layout {
             return "{"
                     + "dispId: " + mLogicalDisplayId
                     + "(" + (mIsEnabled ? "ON" : "OFF") + ")"
+                    + ", displayGroupName: " + mDisplayGroupName
                     + ", addr: " + mAddress
                     +  ((mPosition == POSITION_UNKNOWN) ? "" : ", position: " + mPosition)
                     + ", brightnessThrottlingMapId: " + mBrightnessThrottlingMapId
@@ -279,6 +300,7 @@ public class Layout {
             return otherDisplay.mIsEnabled == this.mIsEnabled
                     && otherDisplay.mPosition == this.mPosition
                     && otherDisplay.mLogicalDisplayId == this.mLogicalDisplayId
+                    && this.mDisplayGroupName.equals(otherDisplay.mDisplayGroupName)
                     && this.mAddress.equals(otherDisplay.mAddress)
                     && Objects.equals(mBrightnessThrottlingMapId,
                     otherDisplay.mBrightnessThrottlingMapId)
@@ -292,6 +314,7 @@ public class Layout {
             result = 31 * result + Boolean.hashCode(mIsEnabled);
             result = 31 * result + mPosition;
             result = 31 * result + mLogicalDisplayId;
+            result = 31 * result + mDisplayGroupName.hashCode();
             result = 31 * result + mAddress.hashCode();
             result = 31 * result + mBrightnessThrottlingMapId.hashCode();
             result = 31 * result + Objects.hashCode(mRefreshRateZoneId);
@@ -311,6 +334,9 @@ public class Layout {
             return mIsEnabled;
         }
 
+        public String getDisplayGroupName() {
+            return mDisplayGroupName;
+        }
 
         public void setRefreshRateZoneId(@Nullable String refreshRateZoneId) {
             mRefreshRateZoneId = refreshRateZoneId;

@@ -33,7 +33,7 @@ import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.UserHandle;
+import android.os.Process;
 import android.util.ArraySet;
 import android.view.Display;
 import android.window.DisplayWindowPolicyController;
@@ -101,7 +101,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         int uidAmount = (expectedUid0 && expectedUid1) ? 2 : (expectedUid0 || expectedUid1) ? 1 : 0;
         assertEquals(expectedTopActivity == null ? null :
                 expectedTopActivity.info.getComponentName(), mDwpc.mTopActivity);
-        assertEquals(expectedTopActivity == null ? UserHandle.USER_NULL :
+        assertEquals(expectedTopActivity == null ? Process.INVALID_UID :
                 expectedTopActivity.info.applicationInfo.uid, mDwpc.mTopActivityUid);
         assertEquals(uidAmount, mDwpc.mRunningUids.size());
         assertTrue(mDwpc.mRunningUids.contains(TEST_USER_0_ID) == expectedUid0);
@@ -224,7 +224,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 new ComponentName("fake.package", "DisallowedActivity");
 
         ComponentName mTopActivity = null;
-        int mTopActivityUid = UserHandle.USER_NULL;
+        int mTopActivityUid = Process.INVALID_UID;
         ArraySet<Integer> mRunningUids = new ArraySet<>();
 
         @Override
@@ -254,8 +254,8 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
         }
 
         @Override
-        public void onTopActivityChanged(ComponentName topActivity, int uid) {
-            super.onTopActivityChanged(topActivity, uid);
+        public void onTopActivityChanged(ComponentName topActivity, int uid, int userId) {
+            super.onTopActivityChanged(topActivity, uid, userId);
             mTopActivity = topActivity;
             mTopActivityUid = uid;
         }

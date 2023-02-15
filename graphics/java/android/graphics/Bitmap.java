@@ -1899,7 +1899,6 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Returns whether or not this Bitmap contains a Gainmap.
-     * @hide
      */
     public boolean hasGainmap() {
         checkRecycled("Bitmap is recycled");
@@ -1908,7 +1907,6 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Returns the gainmap or null if the bitmap doesn't contain a gainmap
-     * @hide
      */
     public @Nullable Gainmap getGainmap() {
         checkRecycled("Bitmap is recycled");
@@ -1916,6 +1914,14 @@ public final class Bitmap implements Parcelable {
             mGainmap = nativeExtractGainmap(mNativePtr);
         }
         return mGainmap;
+    }
+
+    /**
+     * Sets a gainmap on this bitmap, or removes the gainmap if null
+     */
+    public void setGainmap(@Nullable Gainmap gainmap) {
+        checkRecycled("Bitmap is recycled");
+        nativeSetGainmap(mNativePtr, gainmap == null ? 0 : gainmap.mNativePtr);
     }
 
     /**
@@ -2403,6 +2409,7 @@ public final class Bitmap implements Parcelable {
     private static native void nativeSetImmutable(long nativePtr);
 
     private static native Gainmap nativeExtractGainmap(long nativePtr);
+    private static native void nativeSetGainmap(long bitmapPtr, long gainmapPtr);
 
     // ---------------- @CriticalNative -------------------
 

@@ -350,7 +350,14 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @see android.R.attr#colorMode
      */
     public static final int COLOR_MODE_HDR = 2;
-    // 3 Corresponds to android::uirenderer::ColorMode::Hdr10.
+
+    /**
+     * Comparison point against COLOR_MODE_HDR that uses 1010102
+     * Only for internal test usages
+     * @hide
+     */
+    public static final int COLOR_MODE_HDR10 = 3;
+
     /**
      * Value of {@link #colorMode} indicating that the activity should use an
      * 8 bit alpha buffer if the presentation display supports it.

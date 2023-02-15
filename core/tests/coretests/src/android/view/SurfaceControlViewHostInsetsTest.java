@@ -69,7 +69,6 @@ public class SurfaceControlViewHostInsetsTest {
 
     private InsetsState statusBarState(boolean visible) {
         final InsetsState insetsState = new InsetsState();
-        final int id = InsetsSource.createId(null /* owner */, 0 /* index */, statusBars());
         insetsState.setDisplayFrame(new Rect(0, 0, 1000, 1000));
         insetsState.getOrCreateSource(
                 InsetsSource.createId(null /* owner */, 0 /* index */, statusBars()), statusBars())

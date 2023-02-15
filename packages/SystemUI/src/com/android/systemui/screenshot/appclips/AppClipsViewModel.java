@@ -18,6 +18,8 @@ package com.android.systemui.screenshot;
 
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_FAILED;
 
+import static androidx.annotation.VisibleForTesting.PACKAGE_PRIVATE;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.HardwareRenderer;
@@ -29,6 +31,7 @@ import android.net.Uri;
 import android.os.Process;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -49,7 +52,8 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 /** A {@link ViewModel} to help with the App Clips screenshot flow. */
-final class AppClipsViewModel extends ViewModel {
+@VisibleForTesting(otherwise = PACKAGE_PRIVATE)
+public final class AppClipsViewModel extends ViewModel {
 
     private final AppClipsCrossProcessHelper mAppClipsCrossProcessHelper;
     private final ImageExporter mImageExporter;
@@ -76,7 +80,8 @@ final class AppClipsViewModel extends ViewModel {
     }
 
     /** Grabs a screenshot and updates the {@link Bitmap} set in screenshot {@link LiveData}. */
-    void performScreenshot() {
+    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
+    public void performScreenshot() {
         mBgExecutor.execute(() -> {
             Bitmap screenshot = mAppClipsCrossProcessHelper.takeScreenshot();
             mMainExecutor.execute(() -> {
@@ -90,12 +95,14 @@ final class AppClipsViewModel extends ViewModel {
     }
 
     /** Returns a {@link LiveData} that holds the captured screenshot. */
-    LiveData<Bitmap> getScreenshot() {
+    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
+    public LiveData<Bitmap> getScreenshot() {
         return mScreenshotLiveData;
     }
 
     /** Returns a {@link LiveData} that holds the {@link Uri} where screenshot is saved. */
-    LiveData<Uri> getResultLiveData() {
+    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
+    public LiveData<Uri> getResultLiveData() {
         return mResultLiveData;
     }
 
@@ -103,7 +110,8 @@ final class AppClipsViewModel extends ViewModel {
      * Returns a {@link LiveData} that holds the error codes for
      * {@link Intent#EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE}.
      */
-    LiveData<Integer> getErrorLiveData() {
+    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
+    public LiveData<Integer> getErrorLiveData() {
         return mErrorLiveData;
     }
 
@@ -111,7 +119,8 @@ final class AppClipsViewModel extends ViewModel {
      * Saves the provided {@link Drawable} to storage then informs the result {@link Uri} to
      * {@link LiveData}.
      */
-    void saveScreenshotThenFinish(Drawable screenshotDrawable, Rect bounds) {
+    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
+    public void saveScreenshotThenFinish(Drawable screenshotDrawable, Rect bounds) {
         mBgExecutor.execute(() -> {
             // Render the screenshot bitmap in background.
             Bitmap screenshotBitmap = renderBitmap(screenshotDrawable, bounds);
@@ -151,7 +160,8 @@ final class AppClipsViewModel extends ViewModel {
     }
 
     /** Helper factory to help with injecting {@link AppClipsViewModel}. */
-    static final class Factory implements ViewModelProvider.Factory {
+    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
+    public static final class Factory implements ViewModelProvider.Factory {
 
         private final AppClipsCrossProcessHelper mAppClipsCrossProcessHelper;
         private final ImageExporter mImageExporter;

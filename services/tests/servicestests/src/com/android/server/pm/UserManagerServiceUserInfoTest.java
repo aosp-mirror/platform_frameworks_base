@@ -22,6 +22,7 @@ import static android.content.pm.UserInfo.FLAG_EPHEMERAL;
 import static android.content.pm.UserInfo.FLAG_FULL;
 import static android.content.pm.UserInfo.FLAG_GUEST;
 import static android.content.pm.UserInfo.FLAG_INITIALIZED;
+import static android.content.pm.UserInfo.FLAG_MAIN;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
 import static android.content.pm.UserInfo.FLAG_PROFILE;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
@@ -204,6 +205,13 @@ public class UserManagerServiceUserInfoTest {
     public void testSupportSwitchTo_profile() throws Exception {
         UserInfo userInfo = createUser(100, FLAG_PROFILE, null);
         assertFalse("Switching to a profiles should be disabled", userInfo.supportsSwitchTo());
+    }
+
+    /** Test UserInfo.canHaveProfile for main user */
+    @Test
+    public void testCanHaveProfile() throws Exception {
+        UserInfo userInfo = createUser(100, FLAG_MAIN, null);
+        assertTrue("Main users can have profile", userInfo.canHaveProfile());
     }
 
     /** Tests upgradeIfNecessaryLP (but without locking) for upgrading from version 8 to 9+. */

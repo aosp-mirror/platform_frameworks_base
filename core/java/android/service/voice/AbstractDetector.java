@@ -16,8 +16,6 @@
 
 package android.service.voice;
 
-import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
-
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,6 +25,7 @@ import android.media.AudioFormat;
 import android.media.permission.Identity;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
@@ -38,6 +37,7 @@ import android.util.Slog;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -57,7 +57,7 @@ abstract class AbstractDetector implements HotwordDetector {
     protected final Object mLock = new Object();
 
     private final IVoiceInteractionManagerService mManagerService;
-    private final Handler mHandler;
+    private final Executor mExecutor;
     private final HotwordDetector.Callback mCallback;
     private Consumer<AbstractDetector> mOnDestroyListener;
     private final AtomicBoolean mIsDetectorActive;
@@ -68,11 +68,12 @@ abstract class AbstractDetector implements HotwordDetector {
 
     AbstractDetector(
             IVoiceInteractionManagerService managerService,
+            Executor executor,
             HotwordDetector.Callback callback) {
         mManagerService = managerService;
-        // TODO: this needs to be supplied from above
-        mHandler = new Handler(Looper.getMainLooper());
         mCallback = callback;
+        mExecutor = executor != null ? executor : new HandlerExecutor(
+                new Handler(Looper.getMainLooper()));
         mIsDetectorActive = new AtomicBoolean(true);
     }
 
@@ -106,7 +107,7 @@ abstract class AbstractDetector implements HotwordDetector {
                     audioFormat,
                     options,
                     mToken,
-                    new BinderCallback(mHandler, mCallback));
+                    new BinderCallback(mExecutor, mCallback));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -205,13 +206,13 @@ abstract class AbstractDetector implements HotwordDetector {
 
     private static class BinderCallback
             extends IMicrophoneHotwordDetectionVoiceInteractionCallback.Stub {
-        private final Handler mHandler;
         // TODO: these need to be weak references.
         private final HotwordDetector.Callback mCallback;
+        private final Executor mExecutor;
 
-        BinderCallback(Handler handler, HotwordDetector.Callback callback) {
-            this.mHandler = handler;
+        BinderCallback(Executor executor, HotwordDetector.Callback callback) {
             this.mCallback = callback;
+            this.mExecutor = executor;
         }
 
         /** TODO: onDetected */
@@ -220,33 +221,27 @@ abstract class AbstractDetector implements HotwordDetector {
                 @Nullable HotwordDetectedResult hotwordDetectedResult,
                 @Nullable AudioFormat audioFormat,
                 @Nullable ParcelFileDescriptor audioStreamIgnored) {
-            mHandler.sendMessage(obtainMessage(
-                    HotwordDetector.Callback::onDetected,
-                    mCallback,
-                    new AlwaysOnHotwordDetector.EventPayload.Builder()
-                            .setCaptureAudioFormat(audioFormat)
-                            .setHotwordDetectedResult(hotwordDetectedResult)
-                            .build()));
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                mCallback.onDetected(new AlwaysOnHotwordDetector.EventPayload.Builder()
+                        .setCaptureAudioFormat(audioFormat)
+                        .setHotwordDetectedResult(hotwordDetectedResult)
+                        .build());
+            }));
         }
 
         /** Called when the detection fails due to an error. */
         @Override
         public void onError() {
             Slog.v(TAG, "BinderCallback#onError");
-            mHandler.sendMessage(obtainMessage(
-                    HotwordDetector.Callback::onError,
-                    mCallback));
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> mCallback.onError()));
         }
 
         @Override
         public void onRejected(@Nullable HotwordRejectedResult result) {
-            if (result == null) {
-                result = new HotwordRejectedResult.Builder().build();
-            }
-            mHandler.sendMessage(obtainMessage(
-                    HotwordDetector.Callback::onRejected,
-                    mCallback,
-                    result));
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                mCallback.onRejected(
+                        result != null ? result : new HotwordRejectedResult.Builder().build());
+            }));
         }
     }
 }

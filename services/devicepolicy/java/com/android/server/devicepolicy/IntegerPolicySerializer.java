@@ -18,6 +18,8 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.IntegerPolicyValue;
+import android.app.admin.PolicyKey;
 import android.util.Log;
 
 import com.android.modules.utils.TypedXmlPullParser;
@@ -31,17 +33,18 @@ import java.util.Objects;
 final class IntegerPolicySerializer extends PolicySerializer<Integer> {
 
     @Override
-    void saveToXml(TypedXmlSerializer serializer, String attributeName, @NonNull Integer value)
-            throws IOException {
+    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer, String attributeName,
+            @NonNull Integer value) throws IOException {
         Objects.requireNonNull(value);
         serializer.attributeInt(/* namespace= */ null, attributeName, value);
     }
 
     @Nullable
     @Override
-    Integer readFromXml(TypedXmlPullParser parser, String attributeName) {
+    IntegerPolicyValue readFromXml(TypedXmlPullParser parser, String attributeName) {
         try {
-            return parser.getAttributeInt(/* namespace= */ null, attributeName);
+            return new IntegerPolicyValue(
+                    parser.getAttributeInt(/* namespace= */ null, attributeName));
         } catch (XmlPullParserException e) {
             Log.e(DevicePolicyEngine.TAG, "Error parsing Integer policy value", e);
             return null;

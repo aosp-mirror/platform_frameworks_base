@@ -19,6 +19,7 @@ package android.credentials;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -48,6 +49,17 @@ public final class GetCredentialRequest implements Parcelable {
     private final Bundle mData;
 
     /**
+     * True/False value to determine if the calling app info should be
+     * removed from the request that is sent to the providers.
+     * Developers must set this to false if they wish to remove the
+     * {@link android.service.credentials.CallingAppInfo} from the query phases requests that
+     * providers receive.
+     * If not set, the default value will be true and the calling app info will be
+     * propagated to the providers.
+     */
+    private final boolean mAlwaysSendAppInfoToProvider;
+
+    /**
      * Returns the list of credential options to be requested.
      */
     @NonNull
@@ -63,10 +75,21 @@ public final class GetCredentialRequest implements Parcelable {
         return mData;
     }
 
+    /**
+     * Returns a value to determine if the calling app info should be always
+     * sent to the provider in every phase (if true), or should be removed
+     * from the query phase, and only sent as part of the request in the final phase,
+     * after the user has made a selection on the UI (if false).
+     */
+    public boolean alwaysSendAppInfoToProvider() {
+        return mAlwaysSendAppInfoToProvider;
+    }
+
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedList(mCredentialOptions, flags);
         dest.writeBundle(mData);
+        dest.writeBoolean(mAlwaysSendAppInfoToProvider);
     }
 
     @Override
@@ -78,11 +101,13 @@ public final class GetCredentialRequest implements Parcelable {
     public String toString() {
         return "GetCredentialRequest {credentialOption=" + mCredentialOptions
                 + ", data=" + mData
+                + ", alwaysSendAppInfoToProvider="
+                + mAlwaysSendAppInfoToProvider
                 + "}";
     }
 
     private GetCredentialRequest(@NonNull List<CredentialOption> credentialOptions,
-            @NonNull Bundle data) {
+            @NonNull Bundle data, @NonNull boolean alwaysSendAppInfoToProvider) {
         Preconditions.checkCollectionNotEmpty(
                 credentialOptions,
                 /*valueName=*/ "credentialOptions");
@@ -92,6 +117,7 @@ public final class GetCredentialRequest implements Parcelable {
         mCredentialOptions = credentialOptions;
         mData = requireNonNull(data,
                 "data must not be null");
+        mAlwaysSendAppInfoToProvider = alwaysSendAppInfoToProvider;
     }
 
     private GetCredentialRequest(@NonNull Parcel in) {
@@ -104,6 +130,8 @@ public final class GetCredentialRequest implements Parcelable {
         Bundle data = in.readBundle();
         mData = data;
         AnnotationValidations.validate(NonNull.class, null, mData);
+
+        mAlwaysSendAppInfoToProvider = in.readBoolean();
     }
 
     @NonNull public static final Parcelable.Creator<GetCredentialRequest> CREATOR =
@@ -128,6 +156,9 @@ public final class GetCredentialRequest implements Parcelable {
         @NonNull
         private final Bundle mData;
 
+        @NonNull
+        private boolean mAlwaysSendAppInfoToProvider = true;
+
         /**
          * @param data the top request level data
          */
@@ -142,6 +173,25 @@ public final class GetCredentialRequest implements Parcelable {
         public Builder addCredentialOption(@NonNull CredentialOption credentialOption) {
             mCredentialOptions.add(requireNonNull(
                     credentialOption, "credentialOption must not be null"));
+            return this;
+        }
+
+        /**
+         * Sets a true/false value to determine if the calling app info should be
+         * removed from the request that is sent to the providers.
+         *
+         * Developers must set this to false if they wish to remove the
+         * {@link android.service.credentials.CallingAppInfo} from the query phases requests that
+         * providers receive. Note that the calling app info will still be sent in the
+         * final phase after the user has made a selection on the UI.
+         *
+         * If not set, the default value will be true and the calling app info will be
+         * propagated to the providers in every phase.
+         */
+        @SuppressLint("MissingGetterMatchingBuilder")
+        @NonNull
+        public Builder setAlwaysSendAppInfoToProvider(boolean value) {
+            mAlwaysSendAppInfoToProvider = value;
             return this;
         }
 
@@ -171,7 +221,8 @@ public final class GetCredentialRequest implements Parcelable {
             Preconditions.checkCollectionElementsNotNull(
                     mCredentialOptions,
                     /*valueName=*/ "credentialOptions");
-            return new GetCredentialRequest(mCredentialOptions, mData);
+            return new GetCredentialRequest(mCredentialOptions, mData,
+                    mAlwaysSendAppInfoToProvider);
         }
     }
 }

@@ -102,7 +102,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setPrimaryScrimmed(true)
         verify(repository).setPanelExpansion(EXPANSION_VISIBLE)
         verify(repository).setPrimaryShowingSoon(true)
-        verify(keyguardStateController).notifyBouncerShowing(true)
+        verify(keyguardStateController).notifyPrimaryBouncerShowing(true)
         verify(mPrimaryBouncerCallbackInteractor).dispatchStartingToShow()
         verify(repository).setPrimaryVisible(true)
         verify(repository).setPrimaryShow(any(KeyguardBouncerModel::class.java))
@@ -118,7 +118,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testShow_keyguardIsDone() {
         `when`(bouncerView.delegate?.showNextSecurityScreenOrFinish()).thenReturn(true)
-        verify(keyguardStateController, never()).notifyBouncerShowing(true)
+        verify(keyguardStateController, never()).notifyPrimaryBouncerShowing(true)
         verify(mPrimaryBouncerCallbackInteractor, never()).dispatchStartingToShow()
     }
 
@@ -126,7 +126,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     fun testHide() {
         underTest.hide()
         verify(falsingCollector).onBouncerHidden()
-        verify(keyguardStateController).notifyBouncerShowing(false)
+        verify(keyguardStateController).notifyPrimaryBouncerShowing(false)
         verify(repository).setPrimaryShowingSoon(false)
         verify(repository).setPrimaryVisible(false)
         verify(repository).setPrimaryHide(true)

@@ -113,6 +113,30 @@ public class BackupAgentTest {
                 .isEqualTo(DATA_TYPE_BACKED_UP);
     }
 
+    @Test
+    public void testClearLogger_clearsPendingLogs() throws Exception {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, BackupDestination.CLOUD, OperationType.BACKUP);
+
+        agent.onFullBackup(new FullBackupDataOutput(/* quota = */ 0));
+        agent.clearBackupRestoreEventLogger();
+
+        assertThat(agent.getBackupRestoreEventLogger().getLoggingResults().size()).isEqualTo(0);
+    }
+
+    @Test
+    public void testClearLoggerBetweenBackups_restartsSuccessCount() throws Exception {
+        BackupAgent agent = new TestFullBackupAgent();
+        agent.onCreate(USER_HANDLE, BackupDestination.CLOUD, OperationType.BACKUP);
+
+        agent.onFullBackup(new FullBackupDataOutput(/* quota = */ 0));
+        agent.clearBackupRestoreEventLogger();
+        agent.onFullBackup(new FullBackupDataOutput(/* quota = */ 0));
+
+        assertThat(agent.getBackupRestoreEventLogger().getLoggingResults().get(
+                0).getSuccessCount()).isEqualTo(1);
+    }
+
     private BackupAgent getAgentForBackupDestination(@BackupDestination int backupDestination) {
         BackupAgent agent = new TestFullBackupAgent();
         agent.onCreate(USER_HANDLE, backupDestination);

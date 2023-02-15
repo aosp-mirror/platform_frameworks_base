@@ -31,6 +31,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
@@ -855,6 +856,32 @@ public class NotificationManager {
     }
 
     /**
+     * Returns whether the calling app can send fullscreen intents.
+     * <p>From Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, apps may not have
+     * permission to use {@link android.Manifest.permission#USE_FULL_SCREEN_INTENT}. If permission
+     * is denied, notification will show up as an expanded heads up notification on lockscreen.
+     * <p> To request access, add the {@link android.Manifest.permission#USE_FULL_SCREEN_INTENT}
+     * permission to your manifest, and use
+     * {@link android.provider.Settings#ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT}.
+     */
+    public boolean canSendFullScreenIntent() {
+        final int result = PermissionChecker.checkPermissionForPreflight(mContext,
+                android.Manifest.permission.USE_FULL_SCREEN_INTENT,
+                mContext.getAttributionSource());
+
+        switch (result) {
+            case PermissionChecker.PERMISSION_GRANTED:
+                return true;
+            case PermissionChecker.PERMISSION_SOFT_DENIED:
+            case PermissionChecker.PERMISSION_HARD_DENIED:
+                return false;
+            default:
+                if (localLOGV) Log.v(TAG, "Unknown PermissionChecker result: " + result);
+                return false;
+        }
+    }
+
+    /**
      * Creates a group container for {@link NotificationChannel} objects.
      *
      * This can be used to rename an existing group.
@@ -1545,32 +1572,6 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.getAllowedAssistantAdjustments(mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
-    public void allowAssistantAdjustment(String capability) {
-        INotificationManager service = getService();
-        try {
-            service.allowAssistantAdjustment(capability);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    @TestApi
-    public void disallowAssistantAdjustment(String capability) {
-        INotificationManager service = getService();
-        try {
-            service.disallowAssistantAdjustment(capability);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

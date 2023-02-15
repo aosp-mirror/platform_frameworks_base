@@ -81,6 +81,7 @@ import android.util.apk.ApkSignatureVerifier;
 import android.util.apk.ApkSigningBlockUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.expresslog.Histogram;
 import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.pm.ApexManager;
@@ -140,6 +141,10 @@ public class BinaryTransparencyService extends SystemService {
             "enable_biometric_property_verification";
 
     private static final boolean DEBUG = false;     // toggle this for local debug
+
+    private static final Histogram digestAllPackagesLatency = new Histogram(
+            "binary_transparency.value_digest_all_packages_latency_uniform",
+            new Histogram.UniformOptions(50, 0, 500));
 
     private final Context mContext;
     private String mVbmetaDigest;
@@ -263,26 +268,26 @@ public class BinaryTransparencyService extends SystemService {
             Map<Integer, byte[]> contentDigests = computeApkContentDigest(apkPath);
             if (contentDigests == null) {
                 Slog.d(TAG, "Failed to compute content digest for " + apkPath);
-                return new Checksum(0, new byte[] { -1 });
-            }
-
-            // in this iteration, we'll be supporting only 2 types of digests:
-            // CHUNKED_SHA256 and CHUNKED_SHA512.
-            // And only one of them will be available per package.
-            if (contentDigests.containsKey(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256)) {
-                return new Checksum(
-                        Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256,
-                        contentDigests.get(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256));
-            } else if (contentDigests.containsKey(
-                    ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512)) {
-                return new Checksum(
-                        Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512,
-                        contentDigests.get(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512));
             } else {
-                // TODO(b/259423111): considering putting the raw values for the algorithm & digest
-                //  into the bundle to track potential other digest algorithms that may be in use
-                return new Checksum(0, new byte[] { -1 });
+                // in this iteration, we'll be supporting only 2 types of digests:
+                // CHUNKED_SHA256 and CHUNKED_SHA512.
+                // And only one of them will be available per package.
+                if (contentDigests.containsKey(
+                            ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256)) {
+                    return new Checksum(
+                            Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256,
+                            contentDigests.get(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256));
+                } else if (contentDigests.containsKey(
+                        ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512)) {
+                    return new Checksum(
+                            Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512,
+                            contentDigests.get(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512));
+                }
             }
+            // When something went wrong, fall back to simple sha256.
+            byte[] digest = PackageUtils.computeSha256DigestForLargeFileAsBytes(apkPath,
+                    PackageUtils.createLargeFileBuffer());
+            return new Checksum(Checksum.TYPE_WHOLE_SHA256, digest);
         }
 
 
@@ -350,8 +355,9 @@ public class BinaryTransparencyService extends SystemService {
                     writeAppInfoToLog(appInfo);
                 }
             }
+            long timeSpentMeasuring = System.currentTimeMillis() - currentTimeMs;
+            digestAllPackagesLatency.logSample(timeSpentMeasuring);
             if (DEBUG) {
-                long timeSpentMeasuring = System.currentTimeMillis() - currentTimeMs;
                 Slog.d(TAG, "Measured " + packagesMeasured.size()
                         + " packages altogether in " + timeSpentMeasuring + "ms");
             }
@@ -584,7 +590,7 @@ public class BinaryTransparencyService extends SystemService {
                             + packageInfo.applicationInfo.sourceDir);
                     if (packageInfo.applicationInfo.sourceDir.startsWith("/data/apex/")) {
                         String origPackageFilepath = getOriginalApexPreinstalledLocation(
-                                packageInfo.packageName, packageInfo.applicationInfo.sourceDir);
+                                packageInfo.packageName);
                         pw.println("|--> Pre-installed package install location: "
                                 + origPackageFilepath);
 
@@ -1199,7 +1205,7 @@ public class BinaryTransparencyService extends SystemService {
     }
 
     /**
-     * JobService to measure all covered binaries and record result to Westworld.
+     * JobService to measure all covered binaries and record results to statsd.
      */
     public static class UpdateMeasurementsJobService extends JobService {
         private static long sTimeLastRanMs = 0;
@@ -1628,8 +1634,7 @@ public class BinaryTransparencyService extends SystemService {
     }
 
     @NonNull
-    private String getOriginalApexPreinstalledLocation(String packageName,
-            String currentInstalledLocation) {
+    private String getOriginalApexPreinstalledLocation(String packageName) {
         try {
             final String moduleName = apexPackageNameToModuleName(packageName);
             IApexService apexService = IApexService.Stub.asInterface(

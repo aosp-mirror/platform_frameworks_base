@@ -156,7 +156,8 @@ import android.net.vcn.IVcnManagementService;
 import android.net.vcn.VcnManager;
 import android.net.wifi.WifiFrameworkInitializer;
 import android.net.wifi.nl80211.WifiNl80211Manager;
-import android.nfc.NfcManager;
+import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
+import android.nfc.NfcFrameworkInitializer;
 import android.ondevicepersonalization.OnDevicePersonalizationFrameworkInitializer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
@@ -481,13 +482,6 @@ public final class SystemServiceRegistry {
                 IBatteryPropertiesRegistrar registrar = IBatteryPropertiesRegistrar.Stub
                         .asInterface(ServiceManager.getServiceOrThrow("batteryproperties"));
                 return new BatteryManager(ctx, stats, registrar);
-            }});
-
-        registerService(Context.NFC_SERVICE, NfcManager.class,
-                new CachedServiceFetcher<NfcManager>() {
-            @Override
-            public NfcManager createService(ContextImpl ctx) {
-                return new NfcManager(ctx);
             }});
 
         registerService(Context.DROPBOX_SERVICE, DropBoxManager.class,
@@ -1572,6 +1566,13 @@ public final class SystemServiceRegistry {
                                                 Context.GRAMMATICAL_INFLECTION_SERVICE)));
                     }});
 
+        registerService(Context.SHARED_CONNECTIVITY_SERVICE, SharedConnectivityManager.class,
+                new CachedServiceFetcher<SharedConnectivityManager>() {
+                    @Override
+                    public SharedConnectivityManager createService(ContextImpl ctx) {
+                        return SharedConnectivityManager.create(ctx);
+                    }
+                });
 
         sInitializing = true;
         try {
@@ -1581,6 +1582,7 @@ public final class SystemServiceRegistry {
             JobSchedulerFrameworkInitializer.registerServiceWrappers();
             BlobStoreManagerFrameworkInitializer.initialize();
             BluetoothFrameworkInitializer.registerServiceWrappers();
+            NfcFrameworkInitializer.registerServiceWrappers();
             TelephonyFrameworkInitializer.registerServiceWrappers();
             AppSearchManagerFrameworkInitializer.initialize();
             HealthServicesInitializer.registerServiceWrappers();

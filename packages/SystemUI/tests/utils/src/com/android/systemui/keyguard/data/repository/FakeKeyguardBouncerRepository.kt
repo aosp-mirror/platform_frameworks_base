@@ -57,10 +57,10 @@ class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
     override val bouncerPromptReason = 0
     override val bouncerErrorMessage: CharSequence? = null
     private val _isAlternateBouncerVisible = MutableStateFlow(false)
-    override val isAlternateBouncerVisible = _isAlternateBouncerVisible.asStateFlow()
+    override val alternateBouncerVisible = _isAlternateBouncerVisible.asStateFlow()
     override var lastAlternateBouncerVisibleTime: Long = 0L
     private val _isAlternateBouncerUIAvailable = MutableStateFlow<Boolean>(false)
-    override val isAlternateBouncerUIAvailable = _isAlternateBouncerUIAvailable.asStateFlow()
+    override val alternateBouncerUIAvailable = _isAlternateBouncerUIAvailable.asStateFlow()
 
     override fun setPrimaryScrimmed(isScrimmed: Boolean) {
         _primaryBouncerScrimmed.value = isScrimmed

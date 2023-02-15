@@ -26,8 +26,6 @@
     <string name="install_done" msgid="5987363587661783896">"App geïnstalleerd."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Wil je deze app installeren?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Wil je deze app updaten?"</string>
-    <string name="install_confirm_question_update_owner_changed" msgid="4215696609006069124">"Updates voor deze app worden momenteel beheerd door <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nAls je updatet, krijg je volgende updates in plaats daarvan van <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g>."</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="8778026710268011466">"Updates voor deze app worden momenteel beheerd door <xliff:g id="EXISTING_UPDATE_OWNER">%1$s</xliff:g>.\n\nWil je deze update van <xliff:g id="NEW_UPDATE_OWNER">%2$s</xliff:g> installeren?"</string>
     <string name="install_failed" msgid="5777824004474125469">"App niet geïnstalleerd."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"De installatie van het pakket is geblokkeerd."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"App die niet is geïnstalleerd als pakket conflicteert met een bestaand pakket."</string>
@@ -70,8 +68,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> verwijderen…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"Verwijdering voltooid."</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> verwijderd"</string>
-    <!-- no translation found for uninstall_done_clone_app (5578308154544195413) -->
-    <skip />
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"Kloon van <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> verwijderd"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"Verwijdering mislukt."</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> kan niet worden verwijderd."</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>-kloon verwijderen…"</string>

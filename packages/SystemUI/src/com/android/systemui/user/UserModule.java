@@ -21,6 +21,7 @@ import android.os.UserHandle;
 
 import com.android.settingslib.users.EditUserInfoController;
 import com.android.systemui.user.data.repository.UserRepositoryModule;
+import com.android.systemui.user.domain.interactor.HeadlessSystemUserModeModule;
 import com.android.systemui.user.ui.dialog.UserDialogModule;
 
 import dagger.Binds;
@@ -36,6 +37,7 @@ import dagger.multibindings.IntoMap;
         includes = {
                 UserDialogModule.class,
                 UserRepositoryModule.class,
+                HeadlessSystemUserModeModule.class,
         }
 )
 public abstract class UserModule {

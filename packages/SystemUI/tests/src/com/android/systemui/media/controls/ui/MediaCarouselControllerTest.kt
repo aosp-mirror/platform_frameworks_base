@@ -21,12 +21,20 @@ import android.content.res.Configuration
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.MathUtils.abs
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
@@ -49,8 +57,10 @@ import javax.inject.Provider
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -58,6 +68,8 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.floatThat
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -90,11 +102,14 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Mock lateinit var mediaCarousel: MediaScrollView
     @Mock lateinit var pageIndicator: PageIndicator
     @Mock lateinit var mediaFlags: MediaFlags
+    @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
     @Captor lateinit var listener: ArgumentCaptor<MediaDataManager.Listener>
     @Captor
     lateinit var configListener: ArgumentCaptor<ConfigurationController.ConfigurationListener>
-    @Captor lateinit var newConfig: ArgumentCaptor<Configuration>
     @Captor lateinit var visualStabilityCallback: ArgumentCaptor<OnReorderingAllowedListener>
+    @Captor lateinit var keyguardCallback: ArgumentCaptor<KeyguardUpdateMonitorCallback>
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -102,6 +117,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        transitionRepository = FakeKeyguardTransitionRepository()
         mediaCarouselController =
             MediaCarouselController(
                 context,
@@ -119,11 +135,14 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 logger,
                 debugLogger,
                 mediaFlags,
+                keyguardUpdateMonitor,
+                KeyguardTransitionInteractor(repository = transitionRepository),
             )
         verify(configurationController).addCallback(capture(configListener))
         verify(mediaDataManager).addListener(capture(listener))
         verify(visualStabilityProvider)
             .addPersistentReorderingAllowedListener(capture(visualStabilityCallback))
+        verify(keyguardUpdateMonitor).registerCallback(capture(keyguardCallback))
         whenever(mediaControlPanelFactory.get()).thenReturn(panel)
         whenever(panel.mediaViewController).thenReturn(mediaViewController)
         whenever(mediaDataManager.smartspaceMediaData).thenReturn(smartspaceMediaData)
@@ -131,7 +150,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         MediaPlayerData.clear()
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testPlayerOrdering() {
         // Test values: key, data, last active time
@@ -308,7 +326,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         }
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testOrderWithSmartspace_prioritized() {
         testPlayerOrdering()
@@ -316,7 +333,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         // If smartspace is prioritized
         MediaPlayerData.addMediaRecommendation(
             SMARTSPACE_KEY,
-            EMPTY_SMARTSPACE_MEDIA_DATA,
+            EMPTY_SMARTSPACE_MEDIA_DATA.copy(isActive = true),
             panel,
             true,
             clock
@@ -326,7 +343,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertTrue(MediaPlayerData.playerKeys().elementAt(2).isSsMediaRec)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testOrderWithSmartspace_prioritized_updatingVisibleMediaPlayers() {
         testPlayerOrdering()
@@ -343,7 +359,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertTrue(MediaPlayerData.visiblePlayerKeys().elementAt(2).isSsMediaRec)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testOrderWithSmartspace_notPrioritized() {
         testPlayerOrdering()
@@ -351,7 +366,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         // If smartspace is not prioritized
         MediaPlayerData.addMediaRecommendation(
             SMARTSPACE_KEY,
-            EMPTY_SMARTSPACE_MEDIA_DATA,
+            EMPTY_SMARTSPACE_MEDIA_DATA.copy(isActive = true),
             panel,
             false,
             clock
@@ -362,7 +377,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertTrue(MediaPlayerData.playerKeys().elementAt(idx).isSsMediaRec)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testPlayingExistingMediaPlayerFromCarousel_visibleMediaPlayersNotUpdated() {
         testPlayerOrdering()
@@ -400,7 +414,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         )
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testSwipeDismiss_logged() {
         mediaCarouselController.mediaCarouselScrollHandler.dismissCallback.invoke()
@@ -408,7 +421,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logSwipeDismiss()
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testSettingsButton_logged() {
         mediaCarouselController.settingsButton.callOnClick()
@@ -416,18 +428,16 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logCarouselSettings()
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testLocationChangeQs_logged() {
         mediaCarouselController.onDesiredLocationChanged(
-            MediaHierarchyManager.LOCATION_QS,
+            LOCATION_QS,
             mediaHostState,
             animate = false
         )
-        verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QS)
+        verify(logger).logCarouselPosition(LOCATION_QS)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testLocationChangeQqs_logged() {
         mediaCarouselController.onDesiredLocationChanged(
@@ -438,7 +448,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QQS)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testLocationChangeLockscreen_logged() {
         mediaCarouselController.onDesiredLocationChanged(
@@ -449,7 +458,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_LOCKSCREEN)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testLocationChangeDream_logged() {
         mediaCarouselController.onDesiredLocationChanged(
@@ -460,7 +468,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_DREAM_OVERLAY)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testRecommendationRemoved_logged() {
         val packageName = "smartspace package"
@@ -474,7 +481,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(logger).logRecommendationRemoved(eq(packageName), eq(instanceId!!))
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testMediaLoaded_ScrollToActivePlayer() {
         listener.value.onMediaDataLoaded(
@@ -532,7 +538,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         )
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testMediaLoadedFromRecommendationCard_ScrollToActivePlayer() {
         listener.value.onSmartspaceMediaDataLoaded(
@@ -576,7 +581,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertEquals(playerIndex, 0)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testRecommendationRemovedWhileNotVisible_updateHostVisibility() {
         var result = false
@@ -588,7 +592,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertEquals(true, result)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testRecommendationRemovedWhileVisible_thenReorders_updateHostVisibility() {
         var result = false
@@ -602,7 +605,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertEquals(true, result)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testGetCurrentVisibleMediaContentIntent() {
         val clickIntent1 = mock(PendingIntent::class.java)
@@ -649,7 +651,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         assertEquals(mediaCarouselController.getCurrentVisibleMediaContentIntent(), clickIntent2)
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testSetCurrentState_UpdatePageIndicatorAlphaWhenSquish() {
         val delta = 0.0001F
@@ -671,7 +672,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(pageIndicator).alpha = floatThat { abs(it - 1.0F) < delta }
     }
 
-    @Ignore("b/253229241")
     @Test
     fun testOnConfigChanged_playersAreAddedBack() {
         listener.value.onMediaDataLoaded(
@@ -697,7 +697,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
         val playersSize = MediaPlayerData.players().size
 
-        configListener.value.onConfigChanged(capture(newConfig))
+        configListener.value.onConfigChanged(Configuration())
 
         assertEquals(playersSize, MediaPlayerData.players().size)
         assertEquals(
@@ -739,5 +739,97 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
         assertTrue(MediaPlayerData.visiblePlayerKeys().elementAt(0).isSsMediaRec)
         assertFalse(MediaPlayerData.visiblePlayerKeys().elementAt(0).data.active)
+    }
+
+    @Test
+    fun testOnLockDownMode_hideMediaCarousel() {
+        whenever(keyguardUpdateMonitor.isUserInLockdown(context.userId)).thenReturn(true)
+        mediaCarouselController.mediaCarousel = mediaCarousel
+
+        keyguardCallback.value.onStrongAuthStateChanged(context.userId)
+
+        verify(mediaCarousel).visibility = View.GONE
+    }
+
+    @Test
+    fun testLockDownModeOff_showMediaCarousel() {
+        whenever(keyguardUpdateMonitor.isUserInLockdown(context.userId)).thenReturn(false)
+        whenever(keyguardUpdateMonitor.isUserUnlocked(context.userId)).thenReturn(true)
+        mediaCarouselController.mediaCarousel = mediaCarousel
+
+        keyguardCallback.value.onStrongAuthStateChanged(context.userId)
+
+        verify(mediaCarousel).visibility = View.VISIBLE
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun testKeyguardGone_showMediaCarousel() =
+        runTest(UnconfinedTestDispatcher()) {
+            mediaCarouselController.mediaCarousel = mediaCarousel
+
+            val job = mediaCarouselController.listenForAnyStateToGoneKeyguardTransition(this)
+            transitionRepository.sendTransitionStep(
+                TransitionStep(to = KeyguardState.GONE, transitionState = TransitionState.FINISHED)
+            )
+
+            verify(mediaCarousel).visibility = View.VISIBLE
+
+            job.cancel()
+        }
+
+    @Test
+    fun testInvisibleToUserAndExpanded_playersNotListening() {
+        // Add players to carousel.
+        testPlayerOrdering()
+
+        // Make the carousel visible to user in expanded layout.
+        mediaCarouselController.currentlyExpanded = true
+        mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = true
+
+        // panel is the player for each MediaPlayerData.
+        // Verify that seekbar listening attribute in media control panel is set to true.
+        verify(panel, times(MediaPlayerData.players().size)).listening = true
+
+        // Make the carousel invisible to user.
+        mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = false
+
+        // panel is the player for each MediaPlayerData.
+        // Verify that seekbar listening attribute in media control panel is set to false.
+        verify(panel, times(MediaPlayerData.players().size)).listening = false
+    }
+
+    @Test
+    fun testVisibleToUserAndExpanded_playersListening() {
+        // Add players to carousel.
+        testPlayerOrdering()
+
+        // Make the carousel visible to user in expanded layout.
+        mediaCarouselController.currentlyExpanded = true
+        mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = true
+
+        // panel is the player for each MediaPlayerData.
+        // Verify that seekbar listening attribute in media control panel is set to true.
+        verify(panel, times(MediaPlayerData.players().size)).listening = true
+    }
+
+    @Test
+    fun testUMOCollapsed_playersNotListening() {
+        // Add players to carousel.
+        testPlayerOrdering()
+
+        // Make the carousel in collapsed layout.
+        mediaCarouselController.currentlyExpanded = false
+
+        // panel is the player for each MediaPlayerData.
+        // Verify that seekbar listening attribute in media control panel is set to false.
+        verify(panel, times(MediaPlayerData.players().size)).listening = false
+
+        // Make the carousel visible to user.
+        reset(panel)
+        mediaCarouselController.mediaCarouselScrollHandler.visibleToUser = true
+
+        // Verify that seekbar listening attribute in media control panel is set to false.
+        verify(panel, times(MediaPlayerData.players().size)).listening = false
     }
 }

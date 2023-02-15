@@ -193,6 +193,7 @@ import android.hardware.configstore.V1_1.ISurfaceFlingerConfigs;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputSettings;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -637,7 +638,8 @@ public class WindowManagerService extends IWindowManager.Stub
     String mLastANRState;
 
     // The root of the device window hierarchy.
-    RootWindowContainer mRoot;
+    @NonNull
+    final RootWindowContainer mRoot;
 
     // Whether the system should use BLAST for ViewRootImpl
     final boolean mUseBLAST;
@@ -659,19 +661,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mDisableTransitionAnimation;
 
-    class RotationWatcher {
-        final IRotationWatcher mWatcher;
-        final IBinder.DeathRecipient mDeathRecipient;
-        final int mDisplayId;
-        RotationWatcher(IRotationWatcher watcher, IBinder.DeathRecipient deathRecipient,
-                int displayId) {
-            mWatcher = watcher;
-            mDeathRecipient = deathRecipient;
-            mDisplayId = displayId;
-        }
-    }
-
-    ArrayList<RotationWatcher> mRotationWatchers = new ArrayList<>();
+    final RotationWatcherController mRotationWatcherController;
     final WallpaperVisibilityListeners mWallpaperVisibilityListeners =
             new WallpaperVisibilityListeners();
 
@@ -743,7 +733,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private final DisplayHashController mDisplayHashController;
 
     volatile float mMaximumObscuringOpacityForTouch =
-            InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
+            InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
 
     @VisibleForTesting
     final WindowContextListenerController mWindowContextListenerController =
@@ -885,11 +875,11 @@ public class WindowManagerService extends IWindowManager.Stub
             ContentResolver resolver = mContext.getContentResolver();
             mMaximumObscuringOpacityForTouch = Settings.Global.getFloat(resolver,
                     Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH,
-                    InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
+                    InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
             if (mMaximumObscuringOpacityForTouch < 0.0f
                     || mMaximumObscuringOpacityForTouch > 1.0f) {
                 mMaximumObscuringOpacityForTouch =
-                        InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
+                        InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
             }
         }
 
@@ -1264,6 +1254,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
 
+        mRotationWatcherController = new RotationWatcherController(this);
         mDisplayNotificationController = new DisplayWindowListenerController(this);
         mTaskSystemBarsListenerController = new TaskSystemBarsListenerController();
 
@@ -1338,6 +1329,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mConstants.start(new HandlerExecutor(mH));
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
+        LocalServices.addService(
+                ImeTargetVisibilityPolicy.class, new ImeTargetVisibilityPolicyImpl());
         mEmbeddedWindowController = new EmbeddedWindowController(mAtmService);
 
         mDisplayAreaPolicyProvider = DisplayAreaPolicy.Provider.fromResources(
@@ -3842,8 +3835,9 @@ public class WindowManagerService extends IWindowManager.Stub
      *
      * If {@code com.android.internal.R.bool.config_perDisplayFocusEnabled} is set to true, then
      * only the display represented by the {@code displayId} parameter will be requested to switch
-     * the touch mode state. Otherwise all all displays will be requested to switch their touch mode
-     * state (disregarding {@code displayId} parameter).
+     * the touch mode state. Otherwise all displays that do not maintain their own focus and touch
+     * mode will be requested to switch their touch mode state (disregarding {@code displayId}
+     * parameter).
      *
      * To be able to change touch mode state, the caller must either own the focused window, or must
      * have the {@link android.Manifest.permission#MODIFY_TOUCH_MODE_STATE} permission. Instrumented
@@ -3855,27 +3849,9 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     @Override // Binder call
     public void setInTouchMode(boolean inTouch, int displayId) {
-        boolean perDisplayFocusEnabled = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_perDisplayFocusEnabled);
-        setInTouchMode(inTouch, displayId, perDisplayFocusEnabled);
-    }
-
-    /**
-     * Sets the touch mode state on all displays (disregarding the value of
-     * {@code com.android.internal.R.bool.config_perDisplayFocusEnabled}).
-     *
-     * @param inTouch the touch mode to set
-     */
-    @Override // Binder call
-    public void setInTouchModeOnAllDisplays(boolean inTouch) {
-        setInTouchMode(inTouch, /* any display id */ DEFAULT_DISPLAY,
-                /* perDisplayFocusEnabled= */ false);
-    }
-
-    private void setInTouchMode(boolean inTouch, int displayId, boolean perDisplayFocusEnabled) {
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (perDisplayFocusEnabled && (displayContent == null
+            if (mPerDisplayFocusEnabled && (displayContent == null
                     || displayContent.isInTouchMode() == inTouch)) {
                 return;
             }
@@ -3886,15 +3862,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-            final boolean hasPermission =
-                    mAtmService.instrumentationSourceHasPermission(pid, MODIFY_TOUCH_MODE_STATE)
-                            || checkCallingPermission(MODIFY_TOUCH_MODE_STATE, "setInTouchMode()",
-                            /* printlog= */ false);
+            final boolean hasPermission = hasTouchModePermission(pid);
             final long token = Binder.clearCallingIdentity();
             try {
-                // If perDisplayFocusEnabled is set or the display maintains its own touch mode,
+                // If mPerDisplayFocusEnabled is set or the display maintains its own touch mode,
                 // then just update the display pointed by displayId
-                if (perDisplayFocusEnabled || displayHasOwnTouchMode) {
+                if (mPerDisplayFocusEnabled || displayHasOwnTouchMode) {
                     if (mInputManager.setInTouchMode(inTouch, pid, uid, hasPermission, displayId)) {
                         displayContent.setInTouchMode(inTouch);
                     }
@@ -3915,6 +3888,41 @@ public class WindowManagerService extends IWindowManager.Stub
                 Binder.restoreCallingIdentity(token);
             }
         }
+    }
+
+    /**
+     * Sets the touch mode state forcibly on all displays (disregarding both the value of
+     * {@code com.android.internal.R.bool.config_perDisplayFocusEnabled} and whether the display
+     * maintains its own focus and touch mode).
+     *
+     * @param inTouch the touch mode to set
+     */
+    @Override // Binder call
+    public void setInTouchModeOnAllDisplays(boolean inTouch) {
+        final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
+        final boolean hasPermission = hasTouchModePermission(pid);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                for (int i = 0; i < mRoot.mChildren.size(); ++i) {
+                    DisplayContent dc = mRoot.mChildren.get(i);
+                    if (dc.isInTouchMode() != inTouch
+                            && mInputManager.setInTouchMode(inTouch, pid, uid, hasPermission,
+                            dc.mDisplayId)) {
+                        dc.setInTouchMode(inTouch);
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private boolean hasTouchModePermission(int pid) {
+        return mAtmService.instrumentationSourceHasPermission(pid, MODIFY_TOUCH_MODE_STATE)
+                || checkCallingPermission(MODIFY_TOUCH_MODE_STATE, "setInTouchMode()",
+                /* printlog= */ false);
     }
 
     /**
@@ -4513,58 +4521,44 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent displayContent;
         synchronized (mGlobalLock) {
             displayContent = mRoot.getDisplayContent(displayId);
-        }
-        if (displayContent == null) {
-            throw new IllegalArgumentException("Trying to register rotation event "
-                    + "for invalid display: " + displayId);
-        }
-
-        final IBinder watcherBinder = watcher.asBinder();
-        IBinder.DeathRecipient dr = new IBinder.DeathRecipient() {
-            @Override
-            public void binderDied() {
-                synchronized (mGlobalLock) {
-                    for (int i=0; i<mRotationWatchers.size(); i++) {
-                        if (watcherBinder == mRotationWatchers.get(i).mWatcher.asBinder()) {
-                            RotationWatcher removed = mRotationWatchers.remove(i);
-                            IBinder binder = removed.mWatcher.asBinder();
-                            if (binder != null) {
-                                binder.unlinkToDeath(this, 0);
-                            }
-                            i--;
-                        }
-                    }
-                }
+            if (displayContent == null) {
+                throw new IllegalArgumentException("Trying to register rotation event "
+                        + "for invalid display: " + displayId);
             }
-        };
-
-        synchronized (mGlobalLock) {
-            try {
-                watcher.asBinder().linkToDeath(dr, 0);
-                mRotationWatchers.add(new RotationWatcher(watcher, dr, displayId));
-            } catch (RemoteException e) {
-                // Client died, no cleanup needed.
-            }
-
+            mRotationWatcherController.registerDisplayRotationWatcher(watcher, displayId);
             return displayContent.getRotation();
         }
     }
 
     @Override
     public void removeRotationWatcher(IRotationWatcher watcher) {
-        final IBinder watcherBinder = watcher.asBinder();
         synchronized (mGlobalLock) {
-            for (int i=0; i<mRotationWatchers.size(); i++) {
-                RotationWatcher rotationWatcher = mRotationWatchers.get(i);
-                if (watcherBinder == rotationWatcher.mWatcher.asBinder()) {
-                    RotationWatcher removed = mRotationWatchers.remove(i);
-                    IBinder binder = removed.mWatcher.asBinder();
-                    if (binder != null) {
-                        binder.unlinkToDeath(removed.mDeathRecipient, 0);
-                    }
-                    i--;
+            mRotationWatcherController.removeRotationWatcher(watcher);
+        }
+    }
+
+    @Surface.Rotation
+    @Override
+    public int registerProposedRotationListener(IBinder contextToken, IRotationWatcher listener) {
+        synchronized (mGlobalLock) {
+            final WindowContainer<?> wc =
+                    mRotationWatcherController.getAssociatedWindowContainer(contextToken);
+            if (wc == null) {
+                Slog.w(TAG, "Register rotation listener from non-existing token, uid="
+                        + Binder.getCallingUid());
+                return Surface.ROTATION_0;
+            }
+            mRotationWatcherController.registerProposedRotationListener(listener, contextToken);
+            final WindowOrientationListener orientationListener =
+                    wc.mDisplayContent.getDisplayRotation().getOrientationListener();
+            if (orientationListener != null) {
+                // It may be -1 if sensor is disabled.
+                final int rotation = orientationListener.getProposedRotation();
+                if (rotation >= Surface.ROTATION_0) {
+                    return rotation;
                 }
             }
+            return wc.getWindowConfiguration().getRotation();
         }
     }
 
@@ -6010,7 +6004,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean isTransitionTraceEnabled() {
-        return mTransitionTracer.isEnabled();
+        return mTransitionTracer.isActiveTracingEnabled();
     }
 
     @Override
@@ -6786,6 +6780,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.println(defaultDisplayContent.getLastOrientation());
             pw.print("  mWaitingForConfig=");
                     pw.println(defaultDisplayContent.mWaitingForConfig);
+            mRotationWatcherController.dump(pw);
 
             pw.print("  Animation settings: disabled="); pw.print(mAnimationsDisabled);
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
@@ -8028,6 +8023,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void setWallpaperShowWhenLocked(IBinder binder, boolean showWhenLocked) {
+            synchronized (mGlobalLock) {
+                final WindowToken token = mRoot.getWindowToken(binder);
+                if (token == null || token.asWallpaperToken() == null) {
+                    ProtoLog.w(WM_ERROR,
+                            "setWallpaperShowWhenLocked: non-existent wallpaper token: %s", binder);
+                    return;
+                }
+                token.asWallpaperToken().setShowWhenLocked(showWhenLocked);
+            }
+        }
+
+        @Override
         public boolean isUidFocused(int uid) {
             synchronized (mGlobalLock) {
                 for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
@@ -8125,14 +8133,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
                 }
                 if (dc != null && dc.getImeTarget(IME_TARGET_CONTROL) != null) {
-                    ImeTracker.get().onProgress(statsToken,
+                    ImeTracker.forLogging().onProgress(statsToken,
                             ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
                     ProtoLog.d(WM_DEBUG_IME, "hideIme Control target: %s ",
                             dc.getImeTarget(IME_TARGET_CONTROL));
                     dc.getImeTarget(IME_TARGET_CONTROL).hideInsets(WindowInsets.Type.ime(),
                             true /* fromIme */, statsToken);
                 } else {
-                    ImeTracker.get().onFailed(statsToken,
+                    ImeTracker.forLogging().onFailed(statsToken,
                             ImeTracker.PHASE_WM_HAS_IME_INSETS_CONTROL_TARGET);
                 }
                 if (dc != null) {
@@ -8384,6 +8392,47 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             return null;
+        }
+    }
+
+    private final class ImeTargetVisibilityPolicyImpl extends ImeTargetVisibilityPolicy {
+
+        // TODO(b/258048231): Track IME visibility change in bugreport when invocations.
+        @Override
+        public boolean showImeScreenShot(@NonNull IBinder imeTarget, int displayId) {
+            synchronized (mGlobalLock) {
+                final WindowState imeTargetWindow = mWindowMap.get(imeTarget);
+                if (imeTargetWindow == null) {
+                    return false;
+                }
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    Slog.w(TAG, "Invalid displayId:" + displayId + ", fail to show ime screenshot");
+                    return false;
+                }
+
+                dc.showImeScreenshot(imeTargetWindow);
+                return true;
+            }
+        }
+
+        // TODO(b/258048231): Track IME visibility change in bugreport when invocations.
+        @Override
+        public boolean updateImeParent(@NonNull IBinder imeTarget, int displayId) {
+            synchronized (mGlobalLock) {
+                final WindowState imeTargetWindow = mWindowMap.get(imeTarget);
+                if (imeTargetWindow == null) {
+                    return false;
+                }
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    Slog.w(TAG, "Invalid displayId:" + displayId + ", fail to update ime parent");
+                    return false;
+                }
+
+                dc.updateImeParent();
+                return true;
+            }
         }
     }
 

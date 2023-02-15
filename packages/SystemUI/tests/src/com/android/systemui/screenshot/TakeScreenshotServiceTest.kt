@@ -38,7 +38,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.SCREENSHOT_METADATA
+import com.android.systemui.flags.Flags.SCREENSHOT_METADATA_REFACTOR
 import com.android.systemui.flags.Flags.SCREENSHOT_WORK_PROFILE_POLICY
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_OTHER
@@ -126,7 +126,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
         // Flipped in selected test cases
         flags.set(SCREENSHOT_WORK_PROFILE_POLICY, false)
-        flags.set(SCREENSHOT_METADATA, false)
+        flags.set(SCREENSHOT_METADATA_REFACTOR, false)
 
         service.attach(
             mContext,
@@ -183,7 +183,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
     @Test
     fun takeScreenshotFullscreen_screenshotDataEnabled() {
-        flags.set(SCREENSHOT_METADATA, true)
+        flags.set(SCREENSHOT_METADATA_REFACTOR, true)
 
         val request =
             ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER)
@@ -260,7 +260,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
     @Test
     fun takeScreenshotFullscreen_userLocked() {
-        flags.set(SCREENSHOT_METADATA, true)
+        flags.set(SCREENSHOT_METADATA_REFACTOR, true)
 
         whenever(userManager.isUserUnlocked).thenReturn(false)
 
@@ -302,7 +302,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
     @Test
     fun takeScreenshotFullscreen_screenCaptureDisabled_allUsers() {
-        flags.set(SCREENSHOT_METADATA, true)
+        flags.set(SCREENSHOT_METADATA_REFACTOR, true)
 
         whenever(devicePolicyManager.getScreenCaptureDisabled(isNull(), eq(UserHandle.USER_ALL)))
             .thenReturn(true)
@@ -353,7 +353,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
     @Test
     fun takeScreenshotFullscreen_userLocked_metadataDisabled() {
-        flags.set(SCREENSHOT_METADATA, false)
+        flags.set(SCREENSHOT_METADATA_REFACTOR, false)
         whenever(userManager.isUserUnlocked).thenReturn(false)
 
         val request =
@@ -394,7 +394,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
     @Test
     fun takeScreenshotFullscreen_screenCaptureDisabled_allUsers_metadataDisabled() {
-        flags.set(SCREENSHOT_METADATA, false)
+        flags.set(SCREENSHOT_METADATA_REFACTOR, false)
 
         whenever(devicePolicyManager.getScreenCaptureDisabled(isNull(), eq(UserHandle.USER_ALL)))
             .thenReturn(true)
@@ -445,7 +445,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
 
     @Test
     fun takeScreenshot_workProfile_nullBitmap_metadataDisabled() {
-        flags.set(SCREENSHOT_METADATA, false)
+        flags.set(SCREENSHOT_METADATA_REFACTOR, false)
 
         val request =
             ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER)
@@ -487,7 +487,7 @@ class TakeScreenshotServiceTest : SysuiTestCase() {
     }
     @Test
     fun takeScreenshot_workProfile_nullBitmap() {
-        flags.set(SCREENSHOT_METADATA, true)
+        flags.set(SCREENSHOT_METADATA_REFACTOR, true)
 
         val request =
             ScreenshotRequest.Builder(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_OTHER)

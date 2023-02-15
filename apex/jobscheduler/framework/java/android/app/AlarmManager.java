@@ -36,7 +36,9 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.text.TextUtils;
 import android.util.Log;
@@ -89,6 +91,14 @@ import java.util.concurrent.Executor;
 @SystemService(Context.ALARM_SERVICE)
 public class AlarmManager {
     private static final String TAG = "AlarmManager";
+
+    /**
+     * Prefix used by {{@link #makeTag(long, WorkSource)}} to make a tag on behalf of the caller
+     * when the {@link #set(int, long, long, long, OnAlarmListener, Handler, WorkSource)} API is
+     * used. This prefix is a unique sequence of characters to differentiate with other tags that
+     * apps may provide to other APIs that accept a listener callback.
+     */
+    private static final String GENERATED_TAG_PREFIX = "$android.alarm.generated";
 
     /** @hide */
     @IntDef(prefix = { "RTC", "ELAPSED" }, value = {
@@ -300,6 +310,15 @@ public class AlarmManager {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     public static final long SCHEDULE_EXACT_ALARM_DOES_NOT_ELEVATE_BUCKET = 262645982L;
+
+    /**
+     * Exact alarms expecting a {@link OnAlarmListener} callback will be dropped when the calling
+     * app goes into cached state.
+     *
+     * @hide
+     */
+    @ChangeId
+    public static final long EXACT_LISTENER_ALARMS_DROPPED_ON_CACHED = 265195908L;
 
     @UnsupportedAppUsage
     private final IAlarmManager mService;
@@ -667,7 +686,7 @@ public class AlarmManager {
      * than supplying a PendingIntent to be sent when the alarm time is reached, this variant
      * supplies an {@link OnAlarmListener} instance that will be invoked at that time.
      * <p>
-     * The OnAlarmListener {@link OnAlarmListener#onAlarm() onAlarm()} method will be
+     * The OnAlarmListener's {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      * invoked via the specified target Executor.
      *
      * <p>
@@ -798,12 +817,23 @@ public class AlarmManager {
      * The OnAlarmListener's {@link OnAlarmListener#onAlarm() onAlarm()} method will be
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
+     * <p>
+     * This API should only be used to set alarms that are relevant in the context of the app's
+     * current lifecycle, as the {@link OnAlarmListener} instance supplied is only valid as long as
+     * the process is alive, and the system can clean up the app process as soon as it is out of
+     * lifecycle. To schedule alarms that fire reliably even after the current lifecycle completes,
+     * and wakes up the app if required, use any of the other scheduling APIs that accept a
+     * {@link PendingIntent} instance.
      *
-     * <p class="note"><strong>Note:</strong>
+     * <p>
      * On previous android versions {@link Build.VERSION_CODES#S} and
      * {@link Build.VERSION_CODES#TIRAMISU}, apps targeting SDK level 31 or higher needed to hold
      * the {@link Manifest.permission#SCHEDULE_EXACT_ALARM SCHEDULE_EXACT_ALARM} permission to use
      * this API, unless the app was exempt from battery restrictions.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * Starting with android version {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system will
+     * explicitly drop any alarms set via this API when the calling app goes out of lifecycle.
      *
      */
     public void setExact(@AlarmType int type, long triggerAtMillis, @Nullable String tag,
@@ -912,6 +942,24 @@ public class AlarmManager {
     }
 
     /**
+     * This is only used to make an identifying tag for the deprecated
+     * {@link #set(int, long, long, long, OnAlarmListener, Handler, WorkSource)} API which doesn't
+     * accept a tag. For all other APIs, the tag provided by the app is used, even if it is
+     * {@code null}.
+     */
+    private static String makeTag(long triggerMillis, WorkSource ws) {
+        final StringBuilder tagBuilder = new StringBuilder(GENERATED_TAG_PREFIX);
+
+        tagBuilder.append(":");
+        final int attributionUid =
+                (ws == null || ws.isEmpty()) ? Process.myUid() : ws.getAttributionUid();
+        tagBuilder.append(UserHandle.formatUid(attributionUid));
+        tagBuilder.append(":");
+        tagBuilder.append(triggerMillis);
+        return tagBuilder.toString();
+    }
+
+    /**
      * Direct callback version of {@link #set(int, long, long, long, PendingIntent, WorkSource)}.
      * Note that repeating alarms must use the PendingIntent variant, not an OnAlarmListener.
      * <p>
@@ -919,15 +967,26 @@ public class AlarmManager {
      * invoked via the specified target Handler, or on the application's main looper
      * if {@code null} is passed as the {@code targetHandler} parameter.
      *
+     * <p>The behavior of this API when {@code windowMillis < 0} is undefined.
+     *
+     * @deprecated Better alternative APIs exist for setting an alarm with this method:
+     * <ul>
+     *     <li>For alarms with {@code windowMillis > 0}, use
+     *     {@link #setWindow(int, long, long, String, Executor, WorkSource, OnAlarmListener)}</li>
+     *     <li>For alarms with {@code windowMillis = 0}, use
+     *     {@link #setExact(int, long, String, Executor, WorkSource, OnAlarmListener)}</li>
+     * </ul>
+     *
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
     public void set(@AlarmType int type, long triggerAtMillis, long windowMillis,
             long intervalMillis, @NonNull OnAlarmListener listener, @Nullable Handler targetHandler,
             @Nullable WorkSource workSource) {
-        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener, null,
-                targetHandler, workSource, null);
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, null, listener,
+                makeTag(triggerAtMillis, workSource), targetHandler, workSource, null);
     }
 
     /**
@@ -944,6 +1003,10 @@ public class AlarmManager {
      * {@link Manifest.permission#SCHEDULE_EXACT_ALARM}, unless you are on the system's power
      * allowlist. This can be set, for example, by marking the app as {@code <allow-in-power-save>}
      * within the system config.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * Starting with android version {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system will
+     * explicitly drop any alarms set via this API when the calling app goes out of lifecycle.
      *
      * @param type            type of alarm
      * @param triggerAtMillis The exact time in milliseconds, that the alarm should be delivered,
@@ -1255,6 +1318,10 @@ public class AlarmManager {
      * alarm will be allowed to execute even when the system is in low-power idle modes.
      *
      * <p> See {@link #setExactAndAllowWhileIdle(int, long, PendingIntent)} for more details.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * Starting with android version {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the system will
+     * explicitly drop any alarms set via this API when the calling app goes out of lifecycle.
      *
      * @param type            type of alarm
      * @param triggerAtMillis The exact time in milliseconds, that the alarm should be delivered,

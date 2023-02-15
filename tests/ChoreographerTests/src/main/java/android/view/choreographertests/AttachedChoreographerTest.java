@@ -16,7 +16,9 @@
 
 package android.view.choreographertests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -63,6 +65,7 @@ public class AttachedChoreographerTest {
     private DisplayManager mDisplayManager;
     private SurfaceView mSurfaceView;
     private SurfaceHolder mSurfaceHolder;
+    private Choreographer mChoreographer;
     private boolean mIsFirstCallback = true;
     private int mCallbackMissedCounter = 0;
 
@@ -127,37 +130,60 @@ public class AttachedChoreographerTest {
 
     @Test
     public void testCreateChoreographer() {
+        Looper testLooper = Looper.myLooper();
         mScenario.onActivity(activity -> {
             if (waitForCountDown(mSurfaceCreationCountDown, /* timeoutInSeconds */ 1L)) {
                 fail("Unable to create surface within 1 Second");
             }
             SurfaceControl sc = mSurfaceView.getSurfaceControl();
+            mChoreographer = sc.getChoreographer();
             mTestCompleteSignal.countDown();
             SurfaceControl sc1 = new SurfaceControl(sc, "AttachedChoreographerTests");
             // Create attached choreographer with getChoreographer
-            sc1.getChoreographer();
+            Choreographer choreographer1 = sc1.getChoreographer();
             assertTrue(sc1.hasChoreographer());
             assertTrue(sc1.isValid());
-            sc1.release();
+            assertEquals(choreographer1, sc1.getChoreographer());
+            assertEquals(choreographer1, sc1.getChoreographer(Looper.myLooper()));
+            assertEquals(choreographer1, sc1.getChoreographer(Looper.getMainLooper()));
+            assertThrows(IllegalStateException.class, () -> sc1.getChoreographer(testLooper));
 
             SurfaceControl sc2 = new SurfaceControl(sc, "AttachedChoreographerTests");
             // Create attached choreographer with Looper.myLooper
-            sc2.getChoreographer(Looper.myLooper());
+            Choreographer choreographer2 = sc2.getChoreographer(Looper.myLooper());
             assertTrue(sc2.hasChoreographer());
             assertTrue(sc2.isValid());
-            sc2.release();
+            assertEquals(choreographer2, sc2.getChoreographer(Looper.myLooper()));
+            assertEquals(choreographer2, sc2.getChoreographer(Looper.getMainLooper()));
+            assertEquals(choreographer2, sc2.getChoreographer());
+            assertThrows(IllegalStateException.class, () -> sc2.getChoreographer(testLooper));
 
             SurfaceControl sc3 = new SurfaceControl(sc, "AttachedChoreographerTests");
             // Create attached choreographer with Looper.myLooper
-            sc3.getChoreographer(Looper.getMainLooper());
+            Choreographer choreographer3 = sc3.getChoreographer(Looper.getMainLooper());
             assertTrue(sc3.hasChoreographer());
             assertTrue(sc3.isValid());
+            assertEquals(choreographer3, sc3.getChoreographer(Looper.getMainLooper()));
+            assertEquals(choreographer3, sc3.getChoreographer(Looper.myLooper()));
+            assertEquals(choreographer3, sc3.getChoreographer());
+            assertThrows(IllegalStateException.class, () -> sc3.getChoreographer(testLooper));
+
+            assertNotEquals(choreographer1, choreographer2);
+            assertNotEquals(choreographer1, choreographer3);
+            assertNotEquals(choreographer2, choreographer3);
+            sc1.release();
+            sc2.release();
             sc3.release();
             mTestCompleteSignal.countDown();
         });
         if (waitForCountDown(mTestCompleteSignal, /* timeoutInSeconds */ 2L)) {
             fail("Test not finished in 2 Seconds");
         }
+        SurfaceControl surfaceControl = mSurfaceView.getSurfaceControl();
+        assertTrue(surfaceControl.hasChoreographer());
+        assertEquals(mChoreographer, surfaceControl.getChoreographer());
+        assertThrows(IllegalStateException.class,
+                () -> surfaceControl.getChoreographer(testLooper));
     }
 
     @Test

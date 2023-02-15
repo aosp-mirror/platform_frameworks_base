@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ॲप वापरात असताना हार्ट रेट, तापमान आणि रक्तातील ऑक्सिजनची टक्केवारी यांसारखा शरीर सेन्सर डेटा अ‍ॅक्सेस करण्याची अनुमती ॲपला देते."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"बॅकग्राउंडमध्ये असताना, हार्ट रेट यासारखा शरीर सेन्सर डेटा अ‍ॅक्सेस करा"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ॲप हे बॅकग्राउंडमध्ये असताना हार्ट रेट, तापमान आणि रक्तातील ऑक्सिजनची टक्केवारी यांसारखा शरीर सेन्सर डेटा अ‍ॅक्सेस करण्याची अनुमती ॲपला द्या."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ॲप वापरात असताना, शरीर सेन्सर मनगट तापमान डेटा अ‍ॅक्सेस करा."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ॲप वापरात असताना, शरीर सेन्सर मनगट तापमान डेटा अ‍ॅक्सेस करण्याची ॲपला अनुमती देते."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ॲप बॅकग्राउंडमध्ये असताना, शरीर सेन्सर मनगट तापमान डेटा अ‍ॅक्सेस करा."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ॲप बॅकग्राउंडमध्ये असताना, शरीर सेन्सर मनगट तापमान डेटा अ‍ॅक्सेस करण्याची ॲपला अनुमती देते."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"कॅलेंडर इव्हेंट आणि तपशील वाचा"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"हा अ‍ॅप आपल्या टॅब्लेटवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"हे अ‍ॅप तुमच्या Android TV डिव्हाइसवर स्टोअर केलेले सर्व कॅलेंडर इव्हेंट वाचू आणि शेअर करू शकतो किंवा तुमचा कॅलेंडर डेटा सेव्ह करू शकतो."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android सुरू करत आहे…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"टॅबलेट सुरू होत आहे…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"डिव्‍हाइस सुरू होत आहे…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"संचयन ऑप्टिमाइझ करत आहे."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"सिस्‍टम अपडेट संपत आहे…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> श्रेणीसुधारित करत आहे…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_1">%2$d</xliff:g> पैकी <xliff:g id="NUMBER_0">%1$d</xliff:g> अ‍ॅप ऑप्टिमाइझ करत आहे."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> तयार करत आहे."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"अ‍ॅप्स सुरू करत आहे."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"बूट समाप्त होत आहे."</string>
@@ -1364,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB मार्फत PTP सुरू केले"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB टेदरिंग सुरू केले"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB मार्फत MIDI सुरू केले"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB अ‍ॅक्सेसरी कनेक्ट केली आहे"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"अधिक पर्यायांसाठी टॅप करा."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"चार्जर लावलेले डिव्हाइस. आणखी पर्यायांसाठी टॅप करा"</string>
@@ -1712,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"पूर्ण झाले"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"शॉर्टकट बंद करा"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट वापरा"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"रंगांची उलटापालट"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"रंग सुधारणा"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"एकहाती मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"आणखी डिम"</string>
@@ -1850,6 +1847,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"पूर्ण स्क्रीनवर पाहत आहात"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहेर पडण्यासाठी, वरून खाली स्वाइप करा."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"समजले"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"अधिक चांगल्या दृश्यासाठी फिरवा"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"अधिक चांगल्या दृश्यासाठी स्प्लिट स्क्रीनमधून बाहेर पडा"</string>
     <string name="done_label" msgid="7283767013231718521">"पूर्ण झाले"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"तास परिपत्रक स्लायडर"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"मिनिटे परिपत्रक स्लायडर"</string>
@@ -1861,6 +1860,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2 रे कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3 रे कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> क्लोन केलेले"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"अनपिन करण्‍यापूर्वी पिन विचारा"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"अनपिन करण्‍यापूर्वी अनलॉक नमुन्यासाठी विचारा"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
@@ -2315,4 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"सहयोगी अ‍ॅपला बॅकग्राउंडमधून फोरग्राउंड सेवा सुरू करण्याची अनुमती देते."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"मायक्रोफोन उपलब्ध आहे"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"मायक्रोफोन ब्लॉक केलेला आहे"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ड्युअल स्क्रीन"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ड्युअल स्क्रीन सुरू आहे"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"आशय दाखवण्यासाठी <xliff:g id="APP_NAME">%1$s</xliff:g> दोन्ही डिस्प्ले वापरत आहे"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"डिव्हाइस खूप गरम आहे"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"तुमचा फोन खूप गरम होत असल्यामुळे ड्युअल स्क्रीन उपलब्ध नाही"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"बंद करा"</string>
 </resources>

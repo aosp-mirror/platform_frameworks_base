@@ -619,10 +619,11 @@ public class DragEvent implements Parcelable {
             }
             if (in.readInt() != 0) {
                 event.mDragSurface = SurfaceControl.CREATOR.createFromParcel(in);
+                event.mDragSurface.setUnreleasedWarningCallSite("DragEvent");
             }
             if (in.readInt() != 0) {
                 event.mDragAndDropPermissions =
-                        IDragAndDropPermissions.Stub.asInterface(in.readStrongBinder());;
+                        IDragAndDropPermissions.Stub.asInterface(in.readStrongBinder());
             }
             return event;
         }

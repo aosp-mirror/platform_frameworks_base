@@ -22,6 +22,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.LargeTest;
+import android.platform.test.annotations.Presubmit;
+
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
@@ -36,7 +39,7 @@ import org.junit.runner.RunWith;
 
 import java.util.concurrent.TimeUnit;
 
-// TODO: Add @Presubmit
+@Presubmit
 @RunWith(DeviceJUnit4ClassRunner.class)
 public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
     private static final String PACKAGE_NAME = "android.transparency.test.app";
@@ -103,6 +106,7 @@ public final class BinaryTransparencyHostTest extends BaseHostJUnit4Test {
         }
     }
 
+    @LargeTest
     @Test
     public void testRebootlessApexUpdateTriggersJobScheduling() throws Exception {
         try {

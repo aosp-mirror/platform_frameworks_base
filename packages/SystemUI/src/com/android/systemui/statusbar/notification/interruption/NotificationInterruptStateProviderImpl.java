@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.interruption;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR;
+import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -87,7 +88,10 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD(1236),
 
         @UiEvent(doc = "HUN suppressed for old when")
-        HUN_SUPPRESSED_OLD_WHEN(1237);
+        HUN_SUPPRESSED_OLD_WHEN(1237),
+
+        @UiEvent(doc = "HUN snooze bypassed for potentially suppressed FSI")
+        HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI(1269);
 
         private final int mId;
 
@@ -409,7 +413,15 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        if (isSnoozedPackage(sbn)) {
+        final boolean isSnoozedPackage = isSnoozedPackage(sbn);
+        final boolean fsiRequiresKeyguard = mFlags.fullScreenIntentRequiresKeyguard();
+        final boolean hasFsi = sbn.getNotification().fullScreenIntent != null;
+
+        // Assume any notification with an FSI is time-sensitive (like an alarm or incoming call)
+        // and ignore whether HUNs have been snoozed for the package.
+        final boolean shouldBypassSnooze = fsiRequiresKeyguard && hasFsi;
+
+        if (isSnoozedPackage && !shouldBypassSnooze) {
             if (log) mLogger.logNoHeadsUpPackageSnoozed(entry);
             return false;
         }
@@ -447,6 +459,19 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                 return false;
             }
         }
+
+        if (isSnoozedPackage) {
+            if (log) {
+                mLogger.logHeadsUpPackageSnoozeBypassedHasFsi(entry);
+                final int uid = entry.getSbn().getUid();
+                final String packageName = entry.getSbn().getPackageName();
+                mUiEventLogger.log(HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI, uid,
+                        packageName);
+            }
+
+            return true;
+        }
+
         if (log) mLogger.logHeadsUp(entry);
         return true;
     }

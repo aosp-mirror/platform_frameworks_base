@@ -45,6 +45,7 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -99,6 +100,8 @@ public class UsbManager {
      * audio source function is enabled
      * <li> {@link #USB_FUNCTION_MIDI} boolean extra indicating whether the
      * MIDI function is enabled
+     * <li> {@link #USB_FUNCTION_UVC} boolean extra indicating whether the
+     * UVC function is enabled
      * </ul>
      * If the sticky intent has not been found, that indicates USB is disconnected,
      * USB is not configured, MTP function is enabled, and all the other functions are disabled.
@@ -312,6 +315,14 @@ public class UsbManager {
      */
     @SystemApi
     public static final String USB_FUNCTION_NCM = "ncm";
+
+    /**
+     * Name of the UVC USB function.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * @hide
+     */
+    public static final String USB_FUNCTION_UVC = "uvc";
 
     /**
      * Name of Gadget Hal Not Present;
@@ -683,8 +694,17 @@ public class UsbManager {
     @SystemApi
     public static final long FUNCTION_NCM = 1 << 10;
 
+    /**
+     * Code for the uvc usb function. Passed as a mask into {@link #setCurrentFunctions(long)}
+     * Only supported if {@link #isUvcSupportEnabled()} returns true.
+     * Must be equal to {@link GadgetFunction#UVC}
+     * @hide
+     */
+    @SystemApi
+    public static final long FUNCTION_UVC = 1 << 7;
+
     private static final long SETTABLE_FUNCTIONS = FUNCTION_MTP | FUNCTION_PTP | FUNCTION_RNDIS
-            | FUNCTION_MIDI | FUNCTION_NCM;
+            | FUNCTION_MIDI | FUNCTION_NCM | FUNCTION_UVC;
 
     private static final Map<String, Long> FUNCTION_NAME_TO_CODE = new HashMap<>();
 
@@ -702,6 +722,7 @@ public class UsbManager {
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_AUDIO_SOURCE, FUNCTION_AUDIO_SOURCE);
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_ADB, FUNCTION_ADB);
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_NCM, FUNCTION_NCM);
+        FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_UVC, FUNCTION_UVC);
     }
 
     /** @hide */
@@ -715,6 +736,7 @@ public class UsbManager {
             FUNCTION_AUDIO_SOURCE,
             FUNCTION_ADB,
             FUNCTION_NCM,
+            FUNCTION_UVC,
     })
     public @interface UsbFunctionMode {}
 
@@ -1337,6 +1359,21 @@ public class UsbManager {
     }
 
     /**
+     * Returns whether UVC is advertised to be supported or not. SELinux
+     * enforces that this function returns {@code false} when called from a
+     * process that doesn't belong either to a system app, or the
+     * DeviceAsWebcam Service.
+     *
+     * @return true if UVC is supported, false if UVC is not supported or if
+     *         called from a non-system app that isn't DeviceAsWebcam Service.
+     * @hide
+     */
+    @SystemApi
+    public static boolean isUvcSupportEnabled() {
+        return SystemProperties.getBoolean("ro.usb.uvc.enabled", false);
+    }
+
+    /**
      * Enable/Disable the USB data signaling.
      * <p>
      * Enables/Disables USB data path of all USB ports.
@@ -1610,7 +1647,7 @@ public class UsbManager {
     /**
      * Registers the given listener to listen for DisplayPort Alt Mode changes.
      * <p>
-     * If this method returns true, the caller should ensure to call
+     * If this method returns without Exceptions, the caller should ensure to call
      * {@link #unregisterDisplayPortAltModeListener} when it no longer requires updates.
      *
      * @param executor          Executor on which to run the listener.
@@ -1618,14 +1655,14 @@ public class UsbManager {
      *                          changes. See {@link #DisplayPortAltModeInfoListener} for listener
      *                          details.
      *
-     * @return true on successful register, false on failed register due to listener already being
-     *         registered or an internal error.
+     * @throws IllegalStateException if listener has already been registered previously but not
+     * unregistered or an unexpected system failure occurs.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_USB)
-    public boolean registerDisplayPortAltModeInfoListener(
+    public void registerDisplayPortAltModeInfoListener(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull DisplayPortAltModeInfoListener listener) {
         Objects.requireNonNull(executor, "registerDisplayPortAltModeInfoListener: "
@@ -1641,15 +1678,15 @@ public class UsbManager {
 
             if (mDisplayPortServiceListener == null) {
                 if (!registerDisplayPortAltModeEventsIfNeededLocked()) {
-                    return false;
+                    throw new IllegalStateException("Unexpected failure registering service "
+                            + "listener");
                 }
             }
             if (mDisplayPortListeners.containsKey(listener)) {
-                return false;
+                throw new IllegalStateException("Listener has already been registered.");
             }
 
             mDisplayPortListeners.put(listener, executor);
-            return true;
         }
     }
 
@@ -1716,7 +1753,7 @@ public class UsbManager {
 
     /**
      * Returns whether the given functions are valid inputs to UsbManager.
-     * Currently the empty functions or any of MTP, PTP, RNDIS, MIDI, NCM are accepted.
+     * Currently the empty functions or any of MTP, PTP, RNDIS, MIDI, NCM, UVC are accepted.
      *
      * Only one function may be set at a time, except for RNDIS and NCM, which can be set together
      * because from a user perspective they are the same function (tethering).
@@ -1761,6 +1798,9 @@ public class UsbManager {
         }
         if ((functions & FUNCTION_NCM) != 0) {
             joiner.add(UsbManager.USB_FUNCTION_NCM);
+        }
+        if ((functions & FUNCTION_UVC) != 0) {
+            joiner.add(UsbManager.USB_FUNCTION_UVC);
         }
         if ((functions & FUNCTION_ADB) != 0) {
             joiner.add(UsbManager.USB_FUNCTION_ADB);

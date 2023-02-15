@@ -178,6 +178,28 @@ public class AutofillFeatureFlags {
     public static final String DEVICE_CONFIG_AUTOFILL_PCC_CLASSIFICATION_ENABLED =
             "pcc_classification_enabled";
 
+    /**
+     * Give preference to autofill provider's detection.
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PREFER_PROVIDER_OVER_PCC = "prefer_provider_over_pcc";
+
+    /**
+     * Indicates the Autofill Hints that would be requested by the service from the Autofill
+     * Provider.
+     */
+    public static final String DEVICE_CONFIG_AUTOFILL_PCC_FEATURE_PROVIDER_HINTS =
+            "pcc_classification_hints";
+
+    /**
+     * Use data from secondary source if primary not present .
+     * For eg: if we prefer PCC over provider, and PCC detection didn't classify a field, however,
+     * autofill provider did, this flag would decide whether we use that result, and show some
+     * presentation for that particular field.
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PCC_USE_FALLBACK = "pcc_use_fallback";
+
     // END AUTOFILL PCC CLASSIFICATION FLAGS
 
 
@@ -206,7 +228,8 @@ public class AutofillFeatureFlags {
 
     // AUTOFILL PCC CLASSIFICATION FLAGS DEFAULTS
     // Default for whether the pcc classification is enabled for autofill.
-    private static final boolean DEFAULT_AUTOFILL_PCC_CLASSIFICATION_ENABLED = false;
+    /** @hide */
+    public static final boolean DEFAULT_AUTOFILL_PCC_CLASSIFICATION_ENABLED = false;
     // END AUTOFILL PCC CLASSIFICATION FLAGS DEFAULTS
 
 

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model
 
+import android.telephony.Annotation
+
 /**
  * Model for demo wifi commands, ported from [NetworkControllerImpl]
  *
@@ -24,7 +26,7 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model
 sealed interface FakeWifiEventModel {
     data class Wifi(
         val level: Int?,
-        val activity: Int?,
+        @Annotation.DataActivityType val activity: Int,
         val ssid: String?,
         val validated: Boolean?,
     ) : FakeWifiEventModel
@@ -33,6 +35,7 @@ sealed interface FakeWifiEventModel {
         val subscriptionId: Int,
         val level: Int,
         val numberOfLevels: Int,
+        @Annotation.DataActivityType val activity: Int,
     ) : FakeWifiEventModel
 
     object WifiDisabled : FakeWifiEventModel

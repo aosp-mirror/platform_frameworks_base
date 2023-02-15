@@ -633,7 +633,6 @@ public class TvView extends ViewGroup {
      * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
      * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
      * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
-     * @hide
      */
     public void timeShiftSetMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
         if (mSession != null) {
@@ -722,14 +721,14 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Enables or disables TV message detecting in the streams of bound TV input.
+     * Enables or disables TV message detection in the stream of the bound TV input.
      *
      * @param type The type of {@link android.media.tv.TvInputManager.TvMessageType}
-     * @param enabled {@code true} if you want to enable TV message detecting
+     * @param enabled {@code true} if you want to enable TV message detection
      *                {@code false} otherwise.
-     * @hide
      */
-    public void setTvMessageEnabled(@TvInputManager.TvMessageType String type, boolean enabled) {
+    public void setTvMessageEnabled(@NonNull @TvInputManager.TvMessageType String type,
+            boolean enabled) {
     }
 
     @Override
@@ -1193,7 +1192,6 @@ public class TvView extends ViewGroup {
          * @param inputId The ID of the TV input bound to this view.
          * @param available The current availability of cueing message. {@code true} if cueing
          *                  message is available; {@code false} if it becomes unavailable.
-         * @hide
          */
         public void onCueingMessageAvailability(@NonNull String inputId, boolean available) {
         }
@@ -1206,7 +1204,6 @@ public class TvView extends ViewGroup {
          * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
          * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
          * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
-         * @hide
          */
         public void onTimeShiftMode(
                 @NonNull String inputId, @TvInputManager.TimeShiftMode int mode) {
@@ -1217,11 +1214,14 @@ public class TvView extends ViewGroup {
          *
          * @param inputId The ID of the TV input bound to this view.
          * @param speeds An ordered array of playback speeds, expressed as values relative to the
-         *               normal playback speed 1.0.
+         *               normal playback speed (1.0), at which the current content can be played as
+         *               a time-shifted broadcast. This is an empty array if the supported playback
+         *               speeds are unknown or the video/broadcast is not in time shift mode. If
+         *               currently in time shift mode, this array will normally include at least
+         *               the values 1.0 (normal speed) and 0.0 (paused).
          * @see PlaybackParams#getSpeed()
-         * @hide
          */
-        public void onAvailableSpeeds(@NonNull String inputId, float[] speeds) {
+        public void onAvailableSpeeds(@NonNull String inputId, @NonNull float[] speeds) {
         }
 
         /**
@@ -1233,14 +1233,14 @@ public class TvView extends ViewGroup {
         }
 
         /**
-         * This is called when the session has been tuned to the given channel.
+         * This is called when a new TV Message has been received.
          *
+         * @param inputId The ID of the TV input bound to this view.
          * @param type The type of {@link android.media.tv.TvInputManager.TvMessageType}
          * @param data The raw data of the message
-         * @hide
          */
-        public void onTvMessage(@NonNull String inputId, @TvInputManager.TvMessageType String type,
-                Bundle data) {
+        public void onTvMessage(@NonNull String inputId,
+                @NonNull @TvInputManager.TvMessageType String type, @NonNull Bundle data) {
         }
     }
 

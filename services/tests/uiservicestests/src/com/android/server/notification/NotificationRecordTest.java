@@ -788,6 +788,24 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSensitiveContent() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertFalse(record.hasSensitiveContent());
+
+        Bundle signals = new Bundle();
+        signals.putBoolean(Adjustment.KEY_SENSITIVE_CONTENT, true);
+        record.addAdjustment(new Adjustment(mPkg, record.getKey(), signals, null, sbn.getUserId()));
+
+        record.applyAdjustments();
+
+        assertTrue(record.hasSensitiveContent());
+    }
+
+    @Test
     public void testIsInterruptive_textChanged_notSeen() {
         StatusBarNotification sbn = getNotification(PKG_O, false /* noisy */,
                 false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,

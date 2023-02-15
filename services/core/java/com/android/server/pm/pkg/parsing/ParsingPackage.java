@@ -163,19 +163,20 @@ public interface ParsingPackage {
 
     ParsingPackage setAllowAudioPlaybackCapture(boolean allowAudioPlaybackCapture);
 
-    ParsingPackage setAllowBackup(boolean allowBackup);
+    ParsingPackage setBackupAllowed(boolean allowBackup);
 
-    ParsingPackage setAllowClearUserData(boolean allowClearUserData);
+    ParsingPackage setClearUserDataAllowed(boolean allowClearUserData);
 
-    ParsingPackage setAllowClearUserDataOnFailedRestore(boolean allowClearUserDataOnFailedRestore);
+    ParsingPackage setClearUserDataOnFailedRestoreAllowed(
+            boolean allowClearUserDataOnFailedRestore);
 
-    ParsingPackage setAllowTaskReparenting(boolean allowTaskReparenting);
+    ParsingPackage setTaskReparentingAllowed(boolean allowTaskReparenting);
 
     ParsingPackage setResourceOverlay(boolean isResourceOverlay);
 
     ParsingPackage setBackupInForeground(boolean backupInForeground);
 
-    ParsingPackage setCantSaveState(boolean cantSaveState);
+    ParsingPackage setSaveStateDisallowed(boolean cantSaveState);
 
     ParsingPackage setDebuggable(boolean debuggable);
 
@@ -185,19 +186,19 @@ public interface ParsingPackage {
 
     ParsingPackage setExternalStorage(boolean externalStorage);
 
-    ParsingPackage setExtractNativeLibs(boolean extractNativeLibs);
+    ParsingPackage setExtractNativeLibrariesRequested(boolean extractNativeLibs);
 
     ParsingPackage setFullBackupOnly(boolean fullBackupOnly);
 
-    ParsingPackage setHasCode(boolean hasCode);
+    ParsingPackage setDeclaredHavingCode(boolean hasCode);
 
-    ParsingPackage setHasFragileUserData(boolean hasFragileUserData);
+    ParsingPackage setUserDataFragile(boolean hasFragileUserData);
 
     ParsingPackage setGame(boolean isGame);
 
     ParsingPackage setIsolatedSplitLoading(boolean isolatedSplitLoading);
 
-    ParsingPackage setKillAfterRestore(boolean killAfterRestore);
+    ParsingPackage setKillAfterRestoreAllowed(boolean killAfterRestore);
 
     ParsingPackage setLargeHeap(boolean largeHeap);
 
@@ -231,15 +232,15 @@ public interface ParsingPackage {
 
     ParsingPackage setStaticSharedLibrary(boolean staticSharedLibrary);
 
-    ParsingPackage setSupportsRtl(boolean supportsRtl);
+    ParsingPackage setRtlSupported(boolean supportsRtl);
 
     ParsingPackage setTestOnly(boolean testOnly);
 
     ParsingPackage setUseEmbeddedDex(boolean useEmbeddedDex);
 
-    ParsingPackage setUsesCleartextTraffic(boolean usesCleartextTraffic);
+    ParsingPackage setCleartextTrafficAllowed(boolean usesCleartextTraffic);
 
-    ParsingPackage setUsesNonSdkApi(boolean usesNonSdkApi);
+    ParsingPackage setNonSdkApiRequested(boolean usesNonSdkApi);
 
     ParsingPackage setVisibleToInstantApps(boolean visibleToInstantApps);
 
@@ -255,7 +256,7 @@ public interface ParsingPackage {
 
     ParsingPackage setBackupAgentName(String backupAgentName);
 
-    ParsingPackage setBannerRes(int banner);
+    ParsingPackage setBannerResourceId(int banner);
 
     ParsingPackage setCategory(int category);
 
@@ -265,7 +266,7 @@ public interface ParsingPackage {
 
     ParsingPackage setCompatibleWidthLimitDp(int compatibleWidthLimitDp);
 
-    ParsingPackage setDescriptionRes(int descriptionRes);
+    ParsingPackage setDescriptionResourceId(int descriptionRes);
 
     ParsingPackage setEnabled(boolean enabled);
 
@@ -281,24 +282,24 @@ public interface ParsingPackage {
 
     ParsingPackage setCrossProfile(boolean crossProfile);
 
-    ParsingPackage setFullBackupContentRes(int fullBackupContentRes);
+    ParsingPackage setFullBackupContentResourceId(int fullBackupContentRes);
 
-    ParsingPackage setDataExtractionRulesRes(int dataExtractionRulesRes);
+    ParsingPackage setDataExtractionRulesResourceId(int dataExtractionRulesRes);
 
     ParsingPackage setHasDomainUrls(boolean hasDomainUrls);
 
-    ParsingPackage setIconRes(int iconRes);
+    ParsingPackage setIconResourceId(int iconRes);
 
     ParsingPackage setInstallLocation(int installLocation);
 
     /** @see R#styleable.AndroidManifest_sharedUserMaxSdkVersion */
     ParsingPackage setLeavingSharedUser(boolean leavingSharedUser);
 
-    ParsingPackage setLabelRes(int labelRes);
+    ParsingPackage setLabelResourceId(int labelRes);
 
     ParsingPackage setLargestWidthLimitDp(int largestWidthLimitDp);
 
-    ParsingPackage setLogoRes(int logo);
+    ParsingPackage setLogoResourceId(int logo);
 
     ParsingPackage setManageSpaceActivityName(String manageSpaceActivityName);
 
@@ -308,7 +309,7 @@ public interface ParsingPackage {
 
     ParsingPackage setMaxSdkVersion(int maxSdkVersion);
 
-    ParsingPackage setNetworkSecurityConfigRes(int networkSecurityConfigRes);
+    ParsingPackage setNetworkSecurityConfigResourceId(int networkSecurityConfigRes);
 
     ParsingPackage setNonLocalizedLabel(CharSequence nonLocalizedLabel);
 
@@ -334,9 +335,9 @@ public interface ParsingPackage {
 
     ParsingPackage setRestrictedAccountType(String restrictedAccountType);
 
-    ParsingPackage setRoundIconRes(int roundIconRes);
+    ParsingPackage setRoundIconResourceId(int roundIconRes);
 
-    ParsingPackage setSharedUserLabelRes(int sharedUserLabelRes);
+    ParsingPackage setSharedUserLabelResourceId(int sharedUserLabelRes);
 
     ParsingPackage setSigningDetails(@NonNull SigningDetails signingDetails);
 
@@ -344,23 +345,23 @@ public interface ParsingPackage {
 
     ParsingPackage setStaticSharedLibraryVersion(long staticSharedLibraryVersion);
 
-    ParsingPackage setSupportsLargeScreens(int supportsLargeScreens);
+    ParsingPackage setLargeScreensSupported(int supportsLargeScreens);
 
-    ParsingPackage setSupportsNormalScreens(int supportsNormalScreens);
+    ParsingPackage setNormalScreensSupported(int supportsNormalScreens);
 
-    ParsingPackage setSupportsSmallScreens(int supportsSmallScreens);
+    ParsingPackage setSmallScreensSupported(int supportsSmallScreens);
 
-    ParsingPackage setSupportsExtraLargeScreens(int supportsExtraLargeScreens);
+    ParsingPackage setExtraLargeScreensSupported(int supportsExtraLargeScreens);
 
     ParsingPackage setTargetSandboxVersion(int targetSandboxVersion);
 
-    ParsingPackage setThemeRes(int theme);
+    ParsingPackage setThemeResourceId(int theme);
 
     ParsingPackage setRequestForegroundServiceExemption(boolean requestForegroundServiceExemption);
 
     ParsingPackage setUpgradeKeySets(@NonNull Set<String> upgradeKeySets);
 
-    ParsingPackage setUse32BitAbi(boolean use32BitAbi);
+    ParsingPackage set32BitAbiPreferred(boolean use32BitAbi);
 
     ParsingPackage setVolumeUuid(@Nullable String volumeUuid);
 
@@ -385,7 +386,7 @@ public interface ParsingPackage {
     ParsingPackage setResetEnabledSettingsOnAppDataCleared(
             boolean resetEnabledSettingsOnAppDataCleared);
 
-    ParsingPackage setLocaleConfigRes(int localeConfigRes);
+    ParsingPackage setLocaleConfigResourceId(int localeConfigRes);
 
     ParsingPackage setAllowUpdateOwnership(boolean value);
 
@@ -508,15 +509,15 @@ public interface ParsingPackage {
     @Nullable
     String getZygotePreloadName();
 
-    boolean isAllowBackup();
+    boolean isBackupAllowed();
 
-    boolean isAllowTaskReparenting();
+    boolean isTaskReparentingAllowed();
 
     boolean isAnyDensity();
 
     boolean isHardwareAccelerated();
 
-    boolean isCantSaveState();
+    boolean isSaveStateDisallowed();
 
     boolean isProfileable();
 
@@ -528,11 +529,11 @@ public interface ParsingPackage {
 
     boolean isStaticSharedLibrary();
 
-    boolean isSupportsExtraLargeScreens();
+    boolean isExtraLargeScreensSupported();
 
-    boolean isSupportsLargeScreens();
+    boolean isLargeScreensSupported();
 
-    boolean isSupportsNormalScreens();
+    boolean isNormalScreensSupported();
 
-    boolean isSupportsSmallScreens();
+    boolean isSmallScreensSupported();
 }

@@ -133,18 +133,15 @@ public final class TvInputManager {
             VIDEO_UNAVAILABLE_REASON_CAS_REBOOTING, VIDEO_UNAVAILABLE_REASON_CAS_UNKNOWN})
     public @interface VideoUnavailableReason {}
 
-    /**
-     * @hide
-     */
+    /** Indicates that this TV message contains watermarking data */
     public static final String TV_MESSAGE_TYPE_WATERMARK = "Watermark";
-    /**
-     * @hide
-     */
-    public static final String TV_MESSAGE_TYPE_ATSC_CC = "ATSC_CC";
+
+    /** Indicates that this TV message contains Closed Captioning data */
+    public static final String TV_MESSAGE_TYPE_CLOSED_CAPTION = "CC";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TV_MESSAGE_TYPE_WATERMARK, TV_MESSAGE_TYPE_ATSC_CC})
+    @StringDef({TV_MESSAGE_TYPE_WATERMARK, TV_MESSAGE_TYPE_CLOSED_CAPTION})
     public @interface TvMessageType {}
 
     static final int VIDEO_UNAVAILABLE_REASON_START = 0;
@@ -320,25 +317,21 @@ public final class TvInputManager {
     /**
      * Time shift mode: off.
      * <p>Time shift is disabled.
-     * @hide
      */
     public static final int TIME_SHIFT_MODE_OFF = 1;
     /**
      * Time shift mode: local.
      * <p>Time shift is handle locally, using on-device data. E.g. playing a local file.
-     * @hide
      */
     public static final int TIME_SHIFT_MODE_LOCAL = 2;
     /**
      * Time shift mode: network.
      * <p>Time shift is handle remotely via network. E.g. online streaming.
-     * @hide
      */
     public static final int TIME_SHIFT_MODE_NETWORK = 3;
     /**
      * Time shift mode: auto.
      * <p>Time shift mode is handled automatically.
-     * @hide
      */
     public static final int TIME_SHIFT_MODE_AUTO = 4;
 
@@ -777,7 +770,11 @@ public final class TvInputManager {
          * Informs the app available speeds for time-shifting.
          * @param session A {@link TvInputManager.Session} associated with this callback.
          * @param speeds An ordered array of playback speeds, expressed as values relative to the
-         *               normal playback speed 1.0.
+         *               normal playback speed (1.0), at which the current content can be played as
+         *               a time-shifted broadcast. This is an empty array if the supported playback
+         *               speeds are unknown or the video/broadcast is not in time shift mode. If
+         *               currently in time shift mode, this array will normally include at least
+         *               the values 1.0 (normal speed) and 0.0 (paused).
          * @see PlaybackParams#getSpeed()
          */
         public void onAvailableSpeeds(Session session, float[] speeds) {
@@ -792,11 +789,11 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when the session receives a new Tv Message
+         * This is called when the session receives a new TV Message
          *
-         * @param type the type of {@link TvMessageType}
-         * @param data the raw data of the message
-         * @hide
+         * @param session A {@link TvInputManager.Session} associated with this callback.
+         * @param type The type of message received, such as {@link #TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The raw data of the message
          */
         public void onTvMessage(Session session, @TvInputManager.TvMessageType String type,
                 Bundle data) {

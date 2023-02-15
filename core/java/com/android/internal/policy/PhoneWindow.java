@@ -1942,9 +1942,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                // If we have a session send it the volume command, otherwise
-                // use the suggested stream.
-                if (mMediaController != null) {
+                // If we have a session and no active phone call send it the volume command,
+                // otherwise use the suggested stream.
+                if (mMediaController != null && !isActivePhoneCallKnown()) {
                     getMediaSessionManager().dispatchVolumeKeyEventToSessionAsSystemService(event,
                             mMediaController.getSessionToken());
                 } else {
@@ -1993,6 +1993,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         return false;
+    }
+
+    private boolean isActivePhoneCallKnown() {
+        boolean isActivePhoneCallKnown = false;
+        AudioManager audioManager =
+                (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+        int audioManagerMode = audioManager.getMode();
+        if (audioManagerMode == AudioManager.MODE_IN_CALL
+                || audioManagerMode == AudioManager.MODE_IN_COMMUNICATION) {
+            isActivePhoneCallKnown = true;
+        }
+        return isActivePhoneCallKnown;
     }
 
     private KeyguardManager getKeyguardManager() {

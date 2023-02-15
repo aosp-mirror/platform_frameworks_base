@@ -58,6 +58,7 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -104,6 +105,7 @@ public class BubblesManager {
     private final NotificationLockscreenUserManager mNotifUserManager;
     private final CommonNotifCollection mCommonNotifCollection;
     private final NotifPipeline mNotifPipeline;
+    private final NotifPipelineFlags mNotifPipelineFlags;
     private final Executor mSysuiMainExecutor;
 
     private final Bubbles.SysuiProxy mSysuiProxy;
@@ -132,6 +134,7 @@ public class BubblesManager {
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
             FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Executor sysuiMainExecutor) {
         if (bubblesOptional.isPresent()) {
             return new BubblesManager(context,
@@ -150,6 +153,7 @@ public class BubblesManager {
                     notifPipeline,
                     sysUiState,
                     featureFlags,
+                    notifPipelineFlags,
                     sysuiMainExecutor);
         } else {
             return null;
@@ -173,6 +177,7 @@ public class BubblesManager {
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
             FeatureFlags featureFlags,
+            NotifPipelineFlags notifPipelineFlags,
             Executor sysuiMainExecutor) {
         mContext = context;
         mBubbles = bubbles;
@@ -185,6 +190,7 @@ public class BubblesManager {
         mNotifUserManager = notifUserManager;
         mCommonNotifCollection = notifCollection;
         mNotifPipeline = notifPipeline;
+        mNotifPipelineFlags = notifPipelineFlags;
         mSysuiMainExecutor = sysuiMainExecutor;
 
         mBarService = statusBarService == null
@@ -616,10 +622,21 @@ public class BubblesManager {
         }
     }
 
-    static BubbleEntry notifToBubbleEntry(NotificationEntry e) {
-        return new BubbleEntry(e.getSbn(), e.getRanking(), e.isDismissable(),
+    @VisibleForTesting
+    BubbleEntry notifToBubbleEntry(NotificationEntry e) {
+        return new BubbleEntry(e.getSbn(), e.getRanking(), isDismissableFromBubbles(e),
                 e.shouldSuppressNotificationDot(), e.shouldSuppressNotificationList(),
                 e.shouldSuppressPeek());
+    }
+
+    private boolean isDismissableFromBubbles(NotificationEntry e) {
+        if (mNotifPipelineFlags.allowDismissOngoing()) {
+            // Bubbles are only accessible from the unlocked state,
+            // so we can calculate this from the Notification flags only.
+            return e.isDismissableForState(/*isLocked=*/ false);
+        } else {
+            return e.legacyIsDismissableRecursive();
+        }
     }
 
     /**

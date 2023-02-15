@@ -20,7 +20,6 @@ import android.view.MotionEvent
 import com.android.systemui.log.dagger.ShadeLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.plugins.log.LogMessage
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
@@ -232,6 +231,21 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
                 "NPVC not intercepting touch, instantExpanding: $bool1, " +
                     "!notificationsDragEnabled: $bool2, touchDisabled: $bool3"
             }
+        )
+    }
+
+    fun logLastFlingWasExpanding(
+            expand: Boolean
+    ) {
+        buffer.log(
+                TAG,
+                LogLevel.VERBOSE,
+                {
+                    bool1 = expand
+                },
+                {
+                    "NPVC mLastFlingWasExpanding set to: $bool1"
+                }
         )
     }
 }

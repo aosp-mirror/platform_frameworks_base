@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.kidsmode;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -68,7 +69,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
     private static final String TAG = "KidsModeTaskOrganizer";
 
     private static final int[] CONTROLLED_ACTIVITY_TYPES =
-            {ACTIVITY_TYPE_UNDEFINED, ACTIVITY_TYPE_STANDARD};
+            {ACTIVITY_TYPE_UNDEFINED, ACTIVITY_TYPE_STANDARD, ACTIVITY_TYPE_HOME};
     private static final int[] CONTROLLED_WINDOWING_MODES =
             {WINDOWING_MODE_FULLSCREEN, WINDOWING_MODE_UNDEFINED};
 
@@ -92,6 +93,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     private KidsModeSettingsObserver mKidsModeSettingsObserver;
     private boolean mEnabled;
+
+    private ActivityManager.RunningTaskInfo mHomeTask;
 
     private final BroadcastReceiver mUserSwitchIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -219,6 +222,13 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         }
         super.onTaskAppeared(taskInfo, leash);
 
+        // Only allow home to draw under system bars.
+        if (taskInfo.getActivityType() == ACTIVITY_TYPE_HOME) {
+            final WindowContainerTransaction wct = getWindowContainerTransaction();
+            wct.setBounds(taskInfo.token, new Rect(0, 0, mDisplayWidth, mDisplayHeight));
+            mSyncQueue.queue(wct);
+            mHomeTask = taskInfo;
+        }
         mSyncQueue.runInSync(t -> {
             // Reset several properties back to fullscreen (PiP, for example, leaves all these
             // properties in a bad state).
@@ -291,6 +301,13 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         }
         mLaunchRootTask = null;
         mLaunchRootLeash = null;
+        if (mHomeTask != null && mHomeTask.token != null) {
+            final WindowContainerToken homeToken = mHomeTask.token;
+            final WindowContainerTransaction wct = getWindowContainerTransaction();
+            wct.setBounds(homeToken, null);
+            mSyncQueue.queue(wct);
+        }
+        mHomeTask = null;
         unregisterOrganizer();
     }
 
@@ -320,7 +337,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             final SurfaceControl rootLeash = mLaunchRootLeash;
             mSyncQueue.runInSync(t -> {
                 t.setPosition(rootLeash, taskBounds.left, taskBounds.top);
-                t.setWindowCrop(rootLeash, taskBounds.width(), taskBounds.height());
+                t.setWindowCrop(rootLeash, mDisplayWidth, mDisplayHeight);
             });
         }
     }
@@ -351,7 +368,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         final SurfaceControl finalLeash = mLaunchRootLeash;
         mSyncQueue.runInSync(t -> {
             t.setPosition(finalLeash, taskBounds.left, taskBounds.top);
-            t.setWindowCrop(finalLeash, taskBounds.width(), taskBounds.height());
+            t.setWindowCrop(finalLeash, mDisplayWidth, mDisplayHeight);
         });
     }
 

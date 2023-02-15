@@ -21,9 +21,11 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.UserHandle;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -304,4 +306,20 @@ public abstract class DevicePolicyManagerInternal {
      * True if either the entire device or the user is organization managed.
      */
     public abstract boolean isUserOrganizationManaged(@UserIdInt int userId);
+
+    /**
+     * Returns the list of packages suspended by admin on a given user.
+     */
+    public abstract Set<String> getPackagesSuspendedByAdmin(@UserIdInt int userId);
+
+    /**
+     * Returns whether the application exemptions feature flag is enabled.
+     */
+    public abstract boolean isApplicationExemptionsFlagEnabled();
+
+    /**
+    * Returns the application restrictions set by each admin for the given {@code packageName}.
+     */
+    public abstract Map<String, Bundle> getApplicationRestrictionsPerAdmin(
+            String packageName, int userId);
 }

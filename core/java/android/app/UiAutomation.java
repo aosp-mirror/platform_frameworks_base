@@ -17,6 +17,7 @@
 package android.app;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityService.Callbacks;
 import android.accessibilityservice.AccessibilityService.IAccessibilityServiceClientWrapper;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -58,6 +59,7 @@ import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
+import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -462,6 +464,48 @@ public final class UiAutomation {
     public void destroy() {
         disconnect();
         mIsDestroyed = true;
+    }
+
+    /**
+     * Clears the accessibility cache.
+     *
+     * @return {@code true} if the cache was cleared
+     * @see AccessibilityService#clearCache()
+     */
+    public boolean clearCache() {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        final AccessibilityCache cache = AccessibilityInteractionClient.getCache(connectionId);
+        if (cache == null) {
+            return false;
+        }
+        cache.clear();
+        return true;
+    }
+
+    /**
+     * Checks if {@code node} is in the accessibility cache.
+     *
+     * @param node the node to check.
+     * @return {@code true} if {@code node} is in the cache.
+     * @hide
+     * @see AccessibilityService#isNodeInCache(AccessibilityNodeInfo)
+     */
+    @TestApi
+    public boolean isNodeInCache(@NonNull AccessibilityNodeInfo node) {
+        final int connectionId;
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+            connectionId = mConnectionId;
+        }
+        final AccessibilityCache cache = AccessibilityInteractionClient.getCache(connectionId);
+        if (cache == null) {
+            return false;
+        }
+        return cache.isNodeInCache(node);
     }
 
     /**
@@ -1447,10 +1491,7 @@ public final class UiAutomation {
      *
      * @param command The command to execute.
      * @return File descriptors (out, in, err) to the standard output/input/error streams.
-     *
-     * @hide
      */
-    @TestApi
     @SuppressLint("ArrayReturn") // For consistency with other APIs
     public @NonNull ParcelFileDescriptor[] executeShellCommandRwe(@NonNull String command) {
         return executeShellCommandInternal(command, true /* includeStderr */);
@@ -1626,7 +1667,9 @@ public final class UiAutomation {
                         if (isGenerationChangedLocked()) {
                             return;
                         }
-                        mLastEventTimeMillis = event.getEventTime();
+                        // It is not guaranteed that the accessibility framework sends events by the
+                        // order of event timestamp.
+                        mLastEventTimeMillis = Math.max(mLastEventTimeMillis, event.getEventTime());
                         if (mWaitingForEventDelivery) {
                             mEventQueue.add(AccessibilityEvent.obtain(event));
                         }

@@ -17,10 +17,12 @@
 package com.android.credentialmanager
 
 import android.app.slice.Slice
+import android.app.slice.SliceItem
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
 import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
+import android.credentials.ui.AuthenticationEntry
 import android.credentials.ui.CreateCredentialProviderData
 import android.credentials.ui.DisabledProviderData
 import android.credentials.ui.Entry
@@ -147,12 +149,11 @@ class GetFlowUtils {
                         credentialEntryList = getCredentialOptionInfoList(
                             it.providerFlattenedComponentName, it.credentialEntries, context
                         ),
-                        authenticationEntry = getAuthenticationEntry(
+                        authenticationEntryList = getAuthenticationEntryList(
                             it.providerFlattenedComponentName,
                             providerLabel,
                             providerIcon,
-                            it.authenticationEntry
-                        ),
+                            it.authenticationEntries),
                         remoteEntry = getRemoteEntry(
                             it.providerFlattenedComponentName,
                             it.remoteEntry
@@ -177,7 +178,9 @@ class GetFlowUtils {
         }
 
 
-        /* From service data structure to UI credential entry list representation. */
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         private fun getCredentialOptionInfoList(
             providerId: String,
             credentialEntries: List<Entry>,
@@ -256,30 +259,44 @@ class GetFlowUtils {
             }
         }
 
-        private fun getAuthenticationEntry(
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
+        private fun getAuthenticationEntryList(
             providerId: String,
             providerDisplayName: String,
             providerIcon: Drawable,
-            authEntry: Entry?,
-        ): AuthenticationEntryInfo? {
-            if (authEntry == null) {
-                return null
+            authEntryList: List<AuthenticationEntry>,
+        ): List<AuthenticationEntryInfo> {
+            val result: MutableList<AuthenticationEntryInfo> = mutableListOf()
+            authEntryList.forEach { entry ->
+                val structuredAuthEntry =
+                    AuthenticationAction.fromSlice(entry.slice) ?: return@forEach
+
+                // TODO: replace with official jetpack code.
+                val titleItem: SliceItem? = entry.slice.items.firstOrNull {
+                    it.hasHint(
+                        "androidx.credentials.provider.authenticationAction.SLICE_HINT_TITLE")
+                }
+                val title: String = titleItem?.text?.toString() ?: providerDisplayName
+
+                result.add(AuthenticationEntryInfo(
+                    providerId = providerId,
+                    entryKey = entry.key,
+                    entrySubkey = entry.subkey,
+                    pendingIntent = structuredAuthEntry.pendingIntent,
+                    fillInIntent = entry.frameworkExtrasIntent,
+                    title = title,
+                    icon = providerIcon,
+                    isUnlockedAndEmpty = entry.status != AuthenticationEntry.STATUS_LOCKED,
+                    isLastUnlocked =
+                    entry.status == AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT
+                ))
             }
-            val structuredAuthEntry =
-                AuthenticationAction.fromSlice(authEntry.slice) ?: return null
-            return AuthenticationEntryInfo(
-                providerId = providerId,
-                entryKey = authEntry.key,
-                entrySubkey = authEntry.subkey,
-                pendingIntent = structuredAuthEntry.pendingIntent,
-                fillInIntent = authEntry.frameworkExtrasIntent,
-                title = providerDisplayName,
-                icon = providerIcon,
-            )
+            return result
         }
 
         private fun getRemoteEntry(providerId: String, remoteEntry: Entry?): RemoteEntryInfo? {
-            // TODO: should also call fromSlice after getting the official jetpack code.
             if (remoteEntry == null) {
                 return null
             }
@@ -294,6 +311,9 @@ class GetFlowUtils {
             )
         }
 
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         private fun getActionEntryList(
             providerId: String,
             actionEntries: List<Entry>,
@@ -321,7 +341,9 @@ class GetFlowUtils {
 
 class CreateFlowUtils {
     companion object {
-        // Returns the list (potentially empty) of enabled provider.
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         fun toEnabledProviderList(
             providerDataList: List<CreateCredentialProviderData>,
             context: Context,
@@ -346,7 +368,9 @@ class CreateFlowUtils {
             return providerList
         }
 
-        // Returns the list (potentially empty) of disabled provider.
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         fun toDisabledProviderList(
             providerDataList: List<DisabledProviderData>?,
             context: Context,
@@ -449,8 +473,14 @@ class CreateFlowUtils {
                         createOptionsPairs.add(Pair(it, enabledProvider))
                     }
                 }
-                if (enabledProvider.remoteEntry != null) {
-                    remoteEntry = enabledProvider.remoteEntry!!
+                val currRemoteEntry = enabledProvider.remoteEntry
+                if (currRemoteEntry != null) {
+                    if (remoteEntry != null) {
+                        // There can only be at most one remote entry
+                        Log.d(Constants.LOG_TAG, "Found more than one remote entry.")
+                        return null
+                    }
+                    remoteEntry = currRemoteEntry
                 }
             }
             val initialScreenState = toCreateScreenState(
@@ -459,10 +489,7 @@ class CreateFlowUtils {
                 /*requestDisplayInfo=*/requestDisplayInfo,
                 /*defaultProvider=*/defaultProvider, /*remoteEntry=*/remoteEntry,
                 /*isPasskeyFirstUse=*/isPasskeyFirstUse
-            )
-            if (initialScreenState == null) {
-                return null
-            }
+            ) ?: return null
             return CreateCredentialUiState(
                 enabledProviders = enabledProviders,
                 disabledProviders = disabledProviders,
@@ -479,6 +506,7 @@ class CreateFlowUtils {
                     lastSeenProviderWithNonEmptyCreateOptions,
                     /*remoteEntry=*/remoteEntry
                 ),
+                remoteEntry = remoteEntry,
             )
         }
 
@@ -535,6 +563,9 @@ class CreateFlowUtils {
             } else null
         }
 
+        /**
+         * Note: caller required handle empty list due to parsing error.
+         */
         private fun toCreationOptionInfoList(
             providerId: String,
             creationEntries: List<Entry>,

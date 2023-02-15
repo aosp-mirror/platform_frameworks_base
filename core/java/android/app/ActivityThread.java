@@ -109,6 +109,8 @@ import android.net.ConnectivityManager;
 import android.net.Proxy;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.nfc.NfcFrameworkInitializer;
+import android.nfc.NfcServiceManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.BluetoothServiceManager;
@@ -149,6 +151,8 @@ import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.provider.DeviceConfigInitializer;
+import android.provider.DeviceConfigServiceManager;
 import android.provider.Downloads;
 import android.provider.FontsContract;
 import android.provider.Settings;
@@ -505,6 +509,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     static volatile Handler sMainThreadHandler;  // set once in main()
+    private long mStartSeq; // Only accesssed from the main thread
 
     Bundle mCoreSettings = null;
 
@@ -785,10 +790,10 @@ public final class ActivityThread extends ClientTransactionHandler
     static final class ReceiverData extends BroadcastReceiver.PendingResult {
         public ReceiverData(Intent intent, int resultCode, String resultData, Bundle resultExtras,
                 boolean ordered, boolean sticky, boolean assumeDelivered, IBinder token,
-                int sendingUser, int sentFromUid, String sentFromPackage) {
+                int sendingUser, int sendingUid, String sendingPackage) {
             super(resultCode, resultData, resultExtras, TYPE_COMPONENT, ordered, sticky,
-                    assumeDelivered, token, sendingUser, intent.getFlags(), sentFromUid,
-                    sentFromPackage);
+                    assumeDelivered, token, sendingUser, intent.getFlags(), sendingUid,
+                    sendingPackage);
             this.intent = intent;
         }
 
@@ -925,6 +930,7 @@ public final class ActivityThread extends ClientTransactionHandler
         int samplingInterval;
         boolean autoStopProfiler;
         boolean streamingOutput;
+        int mClockType;
         boolean profiling;
         boolean handlingProfiling;
         public void setProfiler(ProfilerInfo profilerInfo) {
@@ -951,6 +957,7 @@ public final class ActivityThread extends ClientTransactionHandler
             samplingInterval = profilerInfo.samplingInterval;
             autoStopProfiler = profilerInfo.autoStopProfiler;
             streamingOutput = profilerInfo.streamingOutput;
+            mClockType = profilerInfo.clockType;
         }
         public void startProfiling() {
             if (profileFd == null || profiling) {
@@ -959,8 +966,8 @@ public final class ActivityThread extends ClientTransactionHandler
             try {
                 int bufferSize = SystemProperties.getInt("debug.traceview-buffer-size-mb", 8);
                 VMDebug.startMethodTracing(profileFile, profileFd.getFileDescriptor(),
-                        bufferSize * 1024 * 1024, 0, samplingInterval != 0, samplingInterval,
-                        streamingOutput);
+                        bufferSize * 1024 * 1024, mClockType, samplingInterval != 0,
+                        samplingInterval, streamingOutput);
                 profiling = true;
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Profiling failed on path " + profileFile, e);
@@ -1044,11 +1051,11 @@ public final class ActivityThread extends ClientTransactionHandler
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
                 CompatibilityInfo compatInfo, int resultCode, String data, Bundle extras,
                 boolean ordered, boolean assumeDelivered, int sendingUser, int processState,
-                int sentFromUid, String sentFromPackage) {
+                int sendingUid, String sendingPackage) {
             updateProcessState(processState, false);
             ReceiverData r = new ReceiverData(intent, resultCode, data, extras,
                     ordered, false, assumeDelivered, mAppThread.asBinder(), sendingUser,
-                    sentFromUid, sentFromPackage);
+                    sendingUid, sendingPackage);
             r.info = info;
             sendMessage(H.RECEIVER, r);
         }
@@ -1060,12 +1067,12 @@ public final class ActivityThread extends ClientTransactionHandler
                     scheduleRegisteredReceiver(r.receiver, r.intent,
                             r.resultCode, r.data, r.extras, r.ordered, r.sticky,
                             r.assumeDelivered, r.sendingUser, r.processState,
-                            r.sentFromUid, r.sentFromPackage);
+                            r.sendingUid, r.sendingPackage);
                 } else {
                     scheduleReceiver(r.intent, r.activityInfo, r.compatInfo,
                             r.resultCode, r.data, r.extras, r.sync,
                             r.assumeDelivered, r.sendingUser, r.processState,
-                            r.sentFromUid, r.sentFromPackage);
+                            r.sendingUid, r.sendingPackage);
                 }
             }
         }
@@ -1296,7 +1303,7 @@ public final class ActivityThread extends ClientTransactionHandler
         public void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
                 int resultCode, String dataStr, Bundle extras, boolean ordered,
                 boolean sticky, boolean assumeDelivered, int sendingUser, int processState,
-                int sentFromUid, String sentFromPackage)
+                int sendingUid, String sendingPackage)
                 throws RemoteException {
             updateProcessState(processState, false);
 
@@ -1307,16 +1314,16 @@ public final class ActivityThread extends ClientTransactionHandler
             if (receiver instanceof LoadedApk.ReceiverDispatcher.InnerReceiver) {
                 ((LoadedApk.ReceiverDispatcher.InnerReceiver) receiver).performReceive(intent,
                         resultCode, dataStr, extras, ordered, sticky, assumeDelivered, sendingUser,
-                        sentFromUid, sentFromPackage);
+                        sendingUid, sendingPackage);
             } else {
                 if (!assumeDelivered) {
                     Log.wtf(TAG, "scheduleRegisteredReceiver() called for " + receiver
                             + " and " + intent + " without mechanism to finish delivery");
                 }
-                if (sentFromUid != Process.INVALID_UID || sentFromPackage != null) {
+                if (sendingUid != Process.INVALID_UID || sendingPackage != null) {
                     Log.wtf(TAG,
                             "scheduleRegisteredReceiver() called for " + receiver + " and " + intent
-                                    + " from " + sentFromPackage + " (UID: " + sentFromUid
+                                    + " from " + sendingPackage + " (UID: " + sendingUid
                                     + ") without mechanism to propagate the sender's identity");
                 }
                 receiver.performReceive(intent, resultCode, dataStr, extras, ordered, sticky,
@@ -6685,6 +6692,7 @@ public final class ActivityThread extends ClientTransactionHandler
             mProfiler.samplingInterval = data.initProfilerInfo.samplingInterval;
             mProfiler.autoStopProfiler = data.initProfilerInfo.autoStopProfiler;
             mProfiler.streamingOutput = data.initProfilerInfo.streamingOutput;
+            mProfiler.mClockType = data.initProfilerInfo.clockType;
             if (data.initProfilerInfo.attachAgentDuringBind) {
                 agent = data.initProfilerInfo.agent;
             }
@@ -6986,6 +6994,12 @@ public final class ActivityThread extends ClientTransactionHandler
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+
+        try {
+            mgr.finishAttachApplication(mStartSeq);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -7791,6 +7805,8 @@ public final class ActivityThread extends ClientTransactionHandler
         sCurrentActivityThread = this;
         mConfigurationController = new ConfigurationController(this);
         mSystemThread = system;
+        mStartSeq = startSeq;
+
         if (!system) {
             android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
                                                     UserHandle.myUserId());
@@ -8125,7 +8141,11 @@ public final class ActivityThread extends ClientTransactionHandler
         MediaFrameworkInitializer.setMediaServiceManager(new MediaServiceManager());
         BluetoothFrameworkInitializer.setBluetoothServiceManager(new BluetoothServiceManager());
         BluetoothFrameworkInitializer.setBinderCallsStatsInitializer(context -> {
-            BinderCallsStats.startForBluetooth(context); });
+            BinderCallsStats.startForBluetooth(context);
+        });
+        NfcFrameworkInitializer.setNfcServiceManager(new NfcServiceManager());
+
+        DeviceConfigInitializer.setDeviceConfigServiceManager(new DeviceConfigServiceManager());
     }
 
     private void purgePendingResources() {

@@ -26,7 +26,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConn
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -50,7 +49,6 @@ class FullMobileConnectionRepository(
     override val tableLogBuffer: TableLogBuffer,
     private val defaultNetworkName: NetworkNameModel,
     private val networkNameSeparator: String,
-    private val globalMobileDataSettingChangedEvent: Flow<Unit>,
     @Application scope: CoroutineScope,
     private val mobileRepoFactory: MobileConnectionRepositoryImpl.Factory,
     private val carrierMergedRepoFactory: CarrierMergedConnectionRepository.Factory,
@@ -84,12 +82,11 @@ class FullMobileConnectionRepository(
             tableLogBuffer,
             defaultNetworkName,
             networkNameSeparator,
-            globalMobileDataSettingChangedEvent,
         )
     }
 
     private val carrierMergedRepo: MobileConnectionRepository by lazy {
-        carrierMergedRepoFactory.build(subId, tableLogBuffer, defaultNetworkName)
+        carrierMergedRepoFactory.build(subId, tableLogBuffer)
     }
 
     @VisibleForTesting
@@ -120,11 +117,22 @@ class FullMobileConnectionRepository(
     override val connectionInfo =
         activeRepo
             .flatMapLatest { it.connectionInfo }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                initialValue = activeRepo.value.connectionInfo.value,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.connectionInfo.value)
 
     override val dataEnabled =
         activeRepo
             .flatMapLatest { it.dataEnabled }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = "dataEnabled",
+                initialValue = activeRepo.value.dataEnabled.value,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.dataEnabled.value)
 
     override val numberOfLevels =
@@ -135,6 +143,11 @@ class FullMobileConnectionRepository(
     override val networkName =
         activeRepo
             .flatMapLatest { it.networkName }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                initialValue = activeRepo.value.networkName.value,
+            )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.networkName.value)
 
     class Factory
@@ -150,7 +163,6 @@ class FullMobileConnectionRepository(
             startingIsCarrierMerged: Boolean,
             defaultNetworkName: NetworkNameModel,
             networkNameSeparator: String,
-            globalMobileDataSettingChangedEvent: Flow<Unit>,
         ): FullMobileConnectionRepository {
             val mobileLogger =
                 logFactory.getOrCreate(tableBufferLogName(subId), MOBILE_CONNECTION_BUFFER_SIZE)
@@ -161,7 +173,6 @@ class FullMobileConnectionRepository(
                 mobileLogger,
                 defaultNetworkName,
                 networkNameSeparator,
-                globalMobileDataSettingChangedEvent,
                 scope,
                 mobileRepoFactory,
                 carrierMergedRepoFactory,
@@ -173,7 +184,7 @@ class FullMobileConnectionRepository(
             const val MOBILE_CONNECTION_BUFFER_SIZE = 100
 
             /** Returns a log buffer name for a mobile connection with the given [subId]. */
-            fun tableBufferLogName(subId: Int): String = "MobileConnectionLog [$subId]"
+            fun tableBufferLogName(subId: Int): String = "MobileConnectionLog[$subId]"
         }
     }
 }

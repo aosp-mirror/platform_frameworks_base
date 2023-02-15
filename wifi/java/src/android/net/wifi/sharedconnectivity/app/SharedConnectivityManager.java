@@ -19,7 +19,6 @@ package android.net.wifi.sharedconnectivity.app;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.ComponentName;
@@ -36,6 +35,8 @@ import android.os.IInterface;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.R;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,14 +47,18 @@ import java.util.concurrent.Executor;
  * This class is the library used by consumers of Shared Connectivity data to bind to the service,
  * receive callbacks from, and send user actions to the service.
  *
+ * The methods {@link #connectTetherNetwork}, {@link #disconnectTetherNetwork},
+ * {@link #connectKnownNetwork} and {@link #forgetKnownNetwork} are not valid and will return false
+ * if not called between {@link SharedConnectivityClientCallback#onServiceConnected()}
+ * and {@link SharedConnectivityClientCallback#onServiceDisconnected()} or if
+ * {@link SharedConnectivityClientCallback#onRegisterCallbackFailed} was called.
+ *
  * @hide
  */
 @SystemApi
 public class SharedConnectivityManager {
     private static final String TAG = SharedConnectivityManager.class.getSimpleName();
     private static final boolean DEBUG = true;
-    private static final String SERVICE_PACKAGE_NAME = "sharedconnectivity_service_package";
-    private static final String SERVICE_CLASS_NAME = "sharedconnectivity_service_class";
 
     private static final class SharedConnectivityCallbackProxy extends
             ISharedConnectivityCallback.Stub {
@@ -102,35 +107,125 @@ public class SharedConnectivityManager {
                     Binder.restoreCallingIdentity(token);
                 }
             }
-        };
+        }
+
+        @Override
+        public void onTetherNetworkConnectionStatusChanged(
+                @NonNull TetherNetworkConnectionStatus status) {
+            if (mCallback != null) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() ->
+                            mCallback.onTetherNetworkConnectionStatusChanged(status));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
+
+        @Override
+        public void onKnownNetworkConnectionStatusChanged(
+                @NonNull KnownNetworkConnectionStatus status) {
+            if (mCallback != null) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() ->
+                            mCallback.onKnownNetworkConnectionStatusChanged(status));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
+        }
     }
 
     private ISharedConnectivityService mService;
     private final Map<SharedConnectivityClientCallback, SharedConnectivityCallbackProxy>
             mProxyMap = new HashMap<>();
+    private final Map<SharedConnectivityClientCallback, SharedConnectivityCallbackProxy>
+            mCallbackProxyCache = new HashMap<>();
+    // Used for testing
+    private final ServiceConnection mServiceConnection;
 
     /**
-     * Constructor for new instance of {@link SharedConnectivityManager}.
+     * Creates a new instance of {@link SharedConnectivityManager}.
      *
      * Automatically binds to implementation of {@link SharedConnectivityService} specified in
      * device overlay.
+     *
+     * @return An instance of {@link SharedConnectivityManager} or null if the shared connectivity
+     * service is not found.
+     * @hide
      */
-    @SuppressLint("ManagerConstructor")
-    public SharedConnectivityManager(@NonNull Context context) {
-        ServiceConnection serviceConnection = new ServiceConnection() {
+    @Nullable
+    public static SharedConnectivityManager create(@NonNull Context context) {
+        Resources resources = context.getResources();
+        try {
+            String servicePackageName = resources.getString(
+                    R.string.shared_connectivity_service_package);
+            String serviceIntentAction = resources.getString(
+                    R.string.shared_connectivity_service_intent_action);
+            return new SharedConnectivityManager(context, servicePackageName, serviceIntentAction);
+        } catch (Resources.NotFoundException e) {
+            Log.e(TAG, "To support shared connectivity service on this device, the service's"
+                    + " package name and intent action string must be defined");
+        }
+        return null;
+    }
+
+    private SharedConnectivityManager(@NonNull Context context, String servicePackageName,
+            String serviceIntentAction) {
+        mServiceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 mService = ISharedConnectivityService.Stub.asInterface(service);
+                if (!mCallbackProxyCache.isEmpty()) {
+                    synchronized (mCallbackProxyCache) {
+                        mCallbackProxyCache.keySet().forEach(callback -> {
+                            registerCallbackInternal(callback, mCallbackProxyCache.get(callback));
+                        });
+                        mCallbackProxyCache.clear();
+                    }
+                }
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 if (DEBUG) Log.i(TAG, "onServiceDisconnected");
                 mService = null;
-                mProxyMap.clear();
+                if (!mCallbackProxyCache.isEmpty()) {
+                    synchronized (mCallbackProxyCache) {
+                        mCallbackProxyCache.keySet().forEach(
+                                SharedConnectivityClientCallback::onServiceDisconnected);
+                        mCallbackProxyCache.clear();
+                    }
+                }
+                if (!mProxyMap.isEmpty()) {
+                    synchronized (mProxyMap) {
+                        mProxyMap.keySet().forEach(
+                                SharedConnectivityClientCallback::onServiceDisconnected);
+                        mProxyMap.clear();
+                    }
+                }
             }
         };
-        bind(context, serviceConnection);
+
+        context.bindService(
+                new Intent().setPackage(servicePackageName).setAction(serviceIntentAction),
+                mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void registerCallbackInternal(SharedConnectivityClientCallback callback,
+            SharedConnectivityCallbackProxy proxy) {
+        try {
+            mService.registerCallback(proxy);
+            synchronized (mProxyMap) {
+                mProxyMap.put(callback, proxy);
+            }
+            callback.onServiceConnected();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception in registerCallback", e);
+            callback.onRegisterCallbackFailed(e);
+        }
     }
 
     /**
@@ -141,49 +236,46 @@ public class SharedConnectivityManager {
         mService = (ISharedConnectivityService) service;
     }
 
-    private void bind(Context context, ServiceConnection serviceConnection) {
-        Resources resources = context.getResources();
-        int packageNameId = resources.getIdentifier(SERVICE_PACKAGE_NAME, "string",
-                context.getPackageName());
-        int classNameId = resources.getIdentifier(SERVICE_CLASS_NAME, "string",
-                context.getPackageName());
-        if (packageNameId == 0 || classNameId == 0) {
-            throw new Resources.NotFoundException("Package and class names for"
-                    + " shared connectivity service must be defined");
-        }
-
-        Intent intent = new Intent();
-        intent.setComponent(new ComponentName(resources.getString(packageNameId),
-                resources.getString(classNameId)));
-        context.bindService(
-                intent,
-                serviceConnection, Context.BIND_AUTO_CREATE);
+    /**
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public ServiceConnection getServiceConnection() {
+        return mServiceConnection;
     }
 
     /**
      * Registers a callback for receiving updates to the list of Tether Networks and Known Networks.
+     * The {@link SharedConnectivityClientCallback#onRegisterCallbackFailed} will be called if the
+     * registration failed.
      *
      * @param executor The Executor used to invoke the callback.
      * @param callback The callback of type {@link SharedConnectivityClientCallback} that is invoked
      *                 when the service updates either the list of Tether Networks or Known
      *                 Networks.
-     * @return Returns true if the registration was successful, false otherwise.
      */
-    public boolean registerCallback(@NonNull @CallbackExecutor Executor executor,
+    public void registerCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull SharedConnectivityClientCallback callback) {
         Objects.requireNonNull(executor, "executor cannot be null");
         Objects.requireNonNull(callback, "callback cannot be null");
-        if (mService == null || mProxyMap.containsKey(callback)) return false;
-        try {
-            SharedConnectivityCallbackProxy proxy =
-                    new SharedConnectivityCallbackProxy(executor, callback);
-            mService.registerCallback(proxy);
-            mProxyMap.put(callback, proxy);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Exception in registerCallback", e);
-            return false;
+
+        if (mProxyMap.containsKey(callback) || mCallbackProxyCache.containsKey(callback)) {
+            Log.e(TAG, "Callback already registered");
+            callback.onRegisterCallbackFailed(new IllegalStateException(
+                    "Callback already registered"));
+            return;
         }
-        return true;
+
+        SharedConnectivityCallbackProxy proxy =
+                new SharedConnectivityCallbackProxy(executor, callback);
+        if (mService == null) {
+            synchronized (mCallbackProxyCache) {
+                mCallbackProxyCache.put(callback, proxy);
+            }
+            return;
+        }
+        registerCallbackInternal(callback, proxy);
     }
 
     /**
@@ -194,10 +286,24 @@ public class SharedConnectivityManager {
     public boolean unregisterCallback(
             @NonNull SharedConnectivityClientCallback callback) {
         Objects.requireNonNull(callback, "callback cannot be null");
-        if (mService == null || !mProxyMap.containsKey(callback)) return false;
+
+        if (!mProxyMap.containsKey(callback) && !mCallbackProxyCache.containsKey(callback)) {
+            Log.e(TAG, "Callback not found, cannot unregister");
+            return false;
+        }
+
+        if (mService == null) {
+            synchronized (mCallbackProxyCache) {
+                mCallbackProxyCache.remove(callback);
+            }
+            return true;
+        }
+
         try {
             mService.unregisterCallback(mProxyMap.get(callback));
-            mProxyMap.remove(callback);
+            synchronized (mProxyMap) {
+                mProxyMap.remove(callback);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Exception in unregisterCallback", e);
             return false;
@@ -215,7 +321,12 @@ public class SharedConnectivityManager {
      *         connection was successful.
      */
     public boolean connectTetherNetwork(@NonNull TetherNetwork network) {
-        if (mService == null) return false;
+        Objects.requireNonNull(network, "Tether network cannot be null");
+
+        if (mService == null) {
+            return false;
+        }
+
         try {
             mService.connectTetherNetwork(network);
         } catch (RemoteException e) {
@@ -233,7 +344,10 @@ public class SharedConnectivityManager {
      *         disconnection was successful.
      */
     public boolean disconnectTetherNetwork() {
-        if (mService == null) return false;
+        if (mService == null) {
+            return false;
+        }
+
         try {
             mService.disconnectTetherNetwork();
         } catch (RemoteException e) {
@@ -253,7 +367,12 @@ public class SharedConnectivityManager {
      *         connection was successful.
      */
     public boolean connectKnownNetwork(@NonNull KnownNetwork network) {
-        if (mService == null) return false;
+        Objects.requireNonNull(network, "Known network cannot be null");
+
+        if (mService == null) {
+            return false;
+        }
+
         try {
             mService.connectKnownNetwork(network);
         } catch (RemoteException e) {
@@ -271,7 +390,12 @@ public class SharedConnectivityManager {
      *         forget action was successful.
      */
     public boolean forgetKnownNetwork(@NonNull KnownNetwork network) {
-        if (mService == null) return false;
+        Objects.requireNonNull(network, "Known network cannot be null");
+
+        if (mService == null) {
+            return false;
+        }
+
         try {
             mService.forgetKnownNetwork(network);
         } catch (RemoteException e) {

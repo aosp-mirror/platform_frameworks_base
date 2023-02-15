@@ -107,12 +107,15 @@ public class DeviceStateControllerTests {
         assertEquals(DeviceStateController.DeviceState.FOLDED, mCurrentState);
         mTarget.onStateChanged(mHalfFoldedStates[0]);
         assertEquals(DeviceStateController.DeviceState.HALF_FOLDED, mCurrentState);
+        mTarget.onStateChanged(mConcurrentDisplayState);
+        assertEquals(DeviceStateController.DeviceState.CONCURRENT, mCurrentState);
     }
 
     private final int[] mFoldedStates = {0};
     private final int[] mOpenDeviceStates = {1};
     private final int[] mHalfFoldedStates = {2};
     private final int[] mRearDisplayStates = {3};
+    private final int mConcurrentDisplayState = 4;
 
     private class DeviceStateControllerBuilder {
         private boolean mSupportFold = false;
@@ -140,6 +143,14 @@ public class DeviceStateControllerTests {
                 when(mMockContext.getResources()
                         .getIntArray(R.array.config_rearDisplayDeviceStates))
                         .thenReturn(mRearDisplayStates);
+                when(mMockContext.getResources()
+                        .getInteger(R.integer.config_deviceStateConcurrentRearDisplay))
+                        .thenReturn(mConcurrentDisplayState);
+            } else {
+                // Match the default value in framework resources
+                when(mMockContext.getResources()
+                        .getInteger(R.integer.config_deviceStateConcurrentRearDisplay))
+                        .thenReturn(-1);
             }
 
             if (enableFold) {

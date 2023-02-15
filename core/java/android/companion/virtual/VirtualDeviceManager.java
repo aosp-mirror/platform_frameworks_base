@@ -27,6 +27,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
@@ -34,7 +35,6 @@ import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChan
 import android.companion.virtual.camera.VirtualCameraDevice;
 import android.companion.virtual.camera.VirtualCameraInput;
 import android.companion.virtual.sensor.VirtualSensor;
-import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -378,13 +378,16 @@ public final class VirtualDeviceManager {
                 new IVirtualDeviceActivityListener.Stub() {
 
                     @Override
-                    public void onTopActivityChanged(int displayId, ComponentName topActivity) {
+                    public void onTopActivityChanged(int displayId, ComponentName topActivity,
+                            @UserIdInt int userId) {
                         final long token = Binder.clearCallingIdentity();
                         try {
                             synchronized (mActivityListenersLock) {
                                 for (int i = 0; i < mActivityListeners.size(); i++) {
                                     mActivityListeners.valueAt(i)
                                             .onTopActivityChanged(displayId, topActivity);
+                                    mActivityListeners.valueAt(i)
+                                          .onTopActivityChanged(displayId, topActivity, userId);
                                 }
                             }
                         } finally {
@@ -424,8 +427,6 @@ public final class VirtualDeviceManager {
                 };
         @Nullable
         private VirtualCameraDevice mVirtualCameraDevice;
-        @NonNull
-        private final List<VirtualSensor> mVirtualSensors = new ArrayList<>();
         @Nullable
         private VirtualAudioDevice mVirtualAudioDevice;
 
@@ -444,10 +445,6 @@ public final class VirtualDeviceManager {
                     params,
                     mActivityListenerBinder,
                     mSoundEffectListener);
-            final List<VirtualSensorConfig> virtualSensorConfigs = params.getVirtualSensorConfigs();
-            for (int i = 0; i < virtualSensorConfigs.size(); ++i) {
-                mVirtualSensors.add(createVirtualSensor(virtualSensorConfigs.get(i)));
-            }
         }
 
         /**
@@ -474,20 +471,19 @@ public final class VirtualDeviceManager {
         }
 
         /**
-         * Returns this device's sensor with the given type and name, if any.
+         * Returns this device's sensors.
          *
          * @see VirtualDeviceParams.Builder#addVirtualSensorConfig
          *
-         * @param type The type of the sensor.
-         * @param name The name of the sensor.
-         * @return The matching sensor if found, {@code null} otherwise.
+         * @return A list of all sensors for this device, or an empty list if no sensors exist.
          */
-        @Nullable
-        public VirtualSensor getVirtualSensor(int type, @NonNull String name) {
-            return mVirtualSensors.stream()
-                    .filter(sensor -> sensor.getType() == type && sensor.getName().equals(name))
-                    .findAny()
-                    .orElse(null);
+        @NonNull
+        public List<VirtualSensor> getVirtualSensorList() {
+            try {
+                return mVirtualDevice.getVirtualSensorList();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**
@@ -626,9 +622,6 @@ public final class VirtualDeviceManager {
                 @NonNull VirtualDisplayConfig config,
                 @Nullable @CallbackExecutor Executor executor,
                 @Nullable VirtualDisplay.Callback callback) {
-            // TODO(b/205343547): Handle display groups properly instead of creating a new display
-            //  group for every new virtual display created using this API.
-            // belongs to the same display group.
             IVirtualDisplayCallback callbackWrapper =
                     new DisplayManagerGlobal.VirtualDisplayCallback(callback, executor);
             final int displayId;
@@ -937,28 +930,6 @@ public final class VirtualDeviceManager {
         }
 
         /**
-         * Creates a virtual sensor, capable of injecting sensor events into the system. Only for
-         * internal use, since device sensors must remain valid for the entire lifetime of the
-         * device.
-         *
-         * @param config The configuration of the sensor.
-         * @hide
-         */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-        @NonNull
-        public VirtualSensor createVirtualSensor(@NonNull VirtualSensorConfig config) {
-            Objects.requireNonNull(config);
-            try {
-                final IBinder token = new Binder(
-                        "android.hardware.sensor.VirtualSensor:" + config.getName());
-                mVirtualDevice.createVirtualSensor(token, config);
-                return new VirtualSensor(config.getType(), config.getName(), mVirtualDevice, token);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        /**
          * Adds an activity listener to listen for events such as top activity change or virtual
          * display task stack became empty.
          *
@@ -1087,8 +1058,23 @@ public final class VirtualDeviceManager {
          *
          * @param displayId The display ID on which the activity change happened.
          * @param topActivity The component name of the top activity.
+         * @deprecated Use {@link #onTopActivityChanged(int, ComponentName, int)} instead
          */
         void onTopActivityChanged(int displayId, @NonNull ComponentName topActivity);
+
+        /**
+         * Called when the top activity is changed.
+         *
+         * <p>Note: When there are no activities running on the virtual display, the
+         * {@link #onDisplayEmpty(int)} will be called. If the value topActivity is cached, it
+         * should be cleared when {@link #onDisplayEmpty(int)} is called.
+         *
+         * @param displayId   The display ID on which the activity change happened.
+         * @param topActivity The component name of the top activity.
+         * @param userId      The user ID associated with the top activity.
+         */
+        default void onTopActivityChanged(int displayId, @NonNull ComponentName topActivity,
+                @UserIdInt int userId) {}
 
         /**
          * Called when the display becomes empty (e.g. if the user hits back on the last
@@ -1113,6 +1099,12 @@ public final class VirtualDeviceManager {
 
         public void onTopActivityChanged(int displayId, ComponentName topActivity) {
             mExecutor.execute(() -> mActivityListener.onTopActivityChanged(displayId, topActivity));
+        }
+
+        public void onTopActivityChanged(int displayId, ComponentName topActivity,
+                @UserIdInt int userId) {
+            mExecutor.execute(() ->
+                    mActivityListener.onTopActivityChanged(displayId, topActivity, userId));
         }
 
         public void onDisplayEmpty(int displayId) {

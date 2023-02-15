@@ -97,8 +97,9 @@ public class ClipboardListener implements
             return;
         }
 
-        if (!isUserSetupComplete()) {
-            // just show a toast, user should not access intents from this state
+        if (!isUserSetupComplete() // user should not access intents from this state
+                || clipData == null // shouldn't happen, but just in case
+                || clipData.getItemCount() == 0) {
             if (shouldShowToast(clipData)) {
                 mUiEventLogger.log(CLIPBOARD_TOAST_SHOWN, 0, clipSource);
                 mClipboardToast.showCopiedToast();

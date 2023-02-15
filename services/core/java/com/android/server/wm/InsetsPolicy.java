@@ -532,7 +532,8 @@ class InsetsPolicy {
             // fake control to the client, so that it can re-show the bar during this scenario.
             return mDummyControlTarget;
         }
-        if (!canBeTopFullscreenOpaqueWindow(focusedWin) && mPolicy.topAppHidesStatusBar()
+        if (!canBeTopFullscreenOpaqueWindow(focusedWin)
+                && mPolicy.topAppHidesSystemBar(Type.statusBars())
                 && (notificationShade == null || !notificationShade.canReceiveKeys())) {
             // Non-fullscreen focused window should not break the state that the top-fullscreen-app
             // window hides status bar, unless the notification shade can receive keys.
@@ -592,6 +593,14 @@ class InsetsPolicy {
             // fake control to the client, so that it can re-show the bar during this scenario.
             return mDummyControlTarget;
         }
+        final WindowState notificationShade = mPolicy.getNotificationShade();
+        if (!canBeTopFullscreenOpaqueWindow(focusedWin)
+                && mPolicy.topAppHidesSystemBar(Type.navigationBars())
+                && (notificationShade == null || !notificationShade.canReceiveKeys())) {
+            // Non-fullscreen focused window should not break the state that the top-fullscreen-app
+            // window hides navigation bar, unless the notification shade can receive keys.
+            return mPolicy.getTopFullscreenOpaqueWindow();
+        }
         return focusedWin;
     }
 
@@ -634,6 +643,12 @@ class InsetsPolicy {
         final SparseArray<InsetsSourceControl> controlsReady = new SparseArray<>();
         final InsetsSourceControl[] controls =
                 mStateController.getControlsForDispatch(mDummyControlTarget);
+        if (controls == null) {
+            if (callback != null) {
+                DisplayThread.getHandler().post(callback);
+            }
+            return;
+        }
         for (InsetsSourceControl control : controls) {
             if (isTransient(control.getType()) && control.getLeash() != null) {
                 typesReady |= control.getType();
@@ -712,7 +727,8 @@ class InsetsPolicy {
 
         InsetsPolicyAnimationControlListener(boolean show, Runnable finishCallback, int types) {
             super(show, false /* hasCallbacks */, types, BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
-                    false /* disable */, 0 /* floatingImeBottomInsets */, null);
+                    false /* disable */, 0 /* floatingImeBottomInsets */,
+                    null /* loggingListener */, null /* jankContext */);
             mFinishCallback = finishCallback;
             mControlCallbacks = new InsetsPolicyAnimationControlCallbacks(this);
         }

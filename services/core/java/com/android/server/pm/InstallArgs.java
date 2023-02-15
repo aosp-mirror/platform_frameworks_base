@@ -26,6 +26,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 
 import com.android.internal.util.Preconditions;
 
@@ -47,7 +48,8 @@ final class InstallArgs {
     final String mVolumeUuid;
     final UserHandle mUser;
     final String mAbiOverride;
-    final String[] mInstallGrantPermissions;
+    @NonNull
+    final ArrayMap<String, Integer> mPermissionStates;
     final List<String> mAllowlistedRestrictedPermissions;
     final int mAutoRevokePermissionsMode;
     /** If non-null, drop an async trace when the install completes */
@@ -68,8 +70,8 @@ final class InstallArgs {
 
     InstallArgs(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
             int installFlags, InstallSource installSource, String volumeUuid,
-            UserHandle user, String[] instructionSets,
-            String abiOverride, String[] installGrantPermissions,
+            UserHandle user, String[] instructionSets, String abiOverride,
+            @NonNull ArrayMap<String, Integer> permissionStates,
             List<String> allowlistedRestrictedPermissions,
             int autoRevokePermissionsMode, String traceMethod, int traceCookie,
             SigningDetails signingDetails, int installReason, int installScenario,
@@ -84,7 +86,7 @@ final class InstallArgs {
         mUser = user;
         mInstructionSets = instructionSets;
         mAbiOverride = abiOverride;
-        mInstallGrantPermissions = installGrantPermissions;
+        mPermissionStates = permissionStates;
         mAllowlistedRestrictedPermissions = allowlistedRestrictedPermissions;
         mAutoRevokePermissionsMode = autoRevokePermissionsMode;
         mTraceMethod = traceMethod;
@@ -103,8 +105,8 @@ final class InstallArgs {
      * when cleaning up old installs, or used as a move source.
      */
     InstallArgs(String codePath, String[] instructionSets) {
-        this(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
-                null, null, instructionSets, null, null, null, MODE_DEFAULT, null, 0,
+        this(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY, null, null,
+                instructionSets, null, new ArrayMap<>(), null, MODE_DEFAULT, null, 0,
                 SigningDetails.UNKNOWN, PackageManager.INSTALL_REASON_UNKNOWN,
                 PackageManager.INSTALL_SCENARIO_DEFAULT, false, DataLoaderType.NONE,
                 PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, false);

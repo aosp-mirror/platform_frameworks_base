@@ -76,7 +76,7 @@ public final class AppClipsScreenshotHelperServiceTest extends SysuiTestCase {
     }
 
     @Test
-    public void bubblesPresent_screenshotFailed_ShouldReturnNull() throws RemoteException {
+    public void bubblesPresent_screenshotFailed_shouldReturnNull() throws RemoteException {
         when(mBubblesOptional.isEmpty()).thenReturn(false);
         when(mBubblesOptional.get()).thenReturn(mBubbles);
         when(mBubbles.getScreenshotExcludingBubble(DEFAULT_DISPLAY)).thenReturn(mScreenshotSync);

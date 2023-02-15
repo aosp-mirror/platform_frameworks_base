@@ -19,8 +19,7 @@ package com.android.credentialmanager.createflow
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import com.android.credentialmanager.common.DialogState
-import com.android.credentialmanager.common.ProviderActivityState
+import com.android.credentialmanager.common.BaseEntry
 import com.android.credentialmanager.common.CredentialType
 import java.time.Instant
 
@@ -34,12 +33,13 @@ data class CreateCredentialUiState(
   // we're showing provider selection page at the beginning
   val hasDefaultProvider: Boolean,
   val activeEntry: ActiveEntry? = null,
-  val selectedEntry: EntryInfo? = null,
-  val providerActivityState: ProviderActivityState =
-    ProviderActivityState.NOT_APPLICABLE,
+  val remoteEntry: RemoteInfo? = null,
   val isFromProviderSelection: Boolean? = null,
-  val dialogState: DialogState = DialogState.ACTIVE,
 )
+
+internal fun hasContentToDisplay(state: CreateCredentialUiState): Boolean {
+    return state.sortedCreateOptionsPairs.isNotEmpty()
+}
 
 open class ProviderInfo(
   val icon: Drawable,
@@ -61,14 +61,6 @@ class DisabledProviderInfo(
   displayName: String,
 ) : ProviderInfo(icon, id, displayName)
 
-open class EntryInfo (
-  val providerId: String,
-  val entryKey: String,
-  val entrySubkey: String,
-  val pendingIntent: PendingIntent?,
-  val fillInIntent: Intent?,
-)
-
 class CreateOptionInfo(
     providerId: String,
     entryKey: String,
@@ -82,7 +74,14 @@ class CreateOptionInfo(
     val totalCredentialCount: Int?,
     val lastUsedTime: Instant?,
     val footerDescription: String?,
-) : EntryInfo(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
+) : BaseEntry(
+    providerId,
+    entryKey,
+    entrySubkey,
+    pendingIntent,
+    fillInIntent,
+    shouldTerminateUiUponSuccessfulProviderResult = true,
+)
 
 class RemoteInfo(
   providerId: String,
@@ -90,7 +89,14 @@ class RemoteInfo(
   entrySubkey: String,
   pendingIntent: PendingIntent?,
   fillInIntent: Intent?,
-) : EntryInfo(providerId, entryKey, entrySubkey, pendingIntent, fillInIntent)
+) : BaseEntry(
+    providerId,
+    entryKey,
+    entrySubkey,
+    pendingIntent,
+    fillInIntent,
+    shouldTerminateUiUponSuccessfulProviderResult = true,
+)
 
 data class RequestDisplayInfo(
   val title: String,
@@ -106,7 +112,7 @@ data class RequestDisplayInfo(
  */
 data class ActiveEntry (
   val activeProvider: EnabledProviderInfo,
-  val activeEntryInfo: EntryInfo,
+  val activeEntryInfo: BaseEntry,
 )
 
 /** The name of the current screen. */

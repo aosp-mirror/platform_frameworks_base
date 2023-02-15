@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
+import static com.android.systemui.statusbar.phone.AutoTileManager.DEVICE_CONTROLS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -50,6 +51,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
@@ -70,6 +72,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -77,6 +80,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.stubbing.Answer;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -541,6 +545,61 @@ public class AutoTileManagerTest extends SysuiTestCase {
         verify(mQsTileHost, times(1)).removeTile(eq("work"));
         verify(mAutoAddTracker, times(1)).setTileRemoved(eq("work"));
     }
+
+    @Test
+    public void testAddControlsTileIfNotPresent() {
+        String spec = DEVICE_CONTROLS;
+        when(mAutoAddTracker.isAdded(eq(spec))).thenReturn(false);
+        when(mQsTileHost.getTiles()).thenReturn(new ArrayList<>());
+
+        mAutoTileManager.init();
+        ArgumentCaptor<DeviceControlsController.Callback> captor =
+                ArgumentCaptor.forClass(DeviceControlsController.Callback.class);
+
+        verify(mDeviceControlsController).setCallback(captor.capture());
+
+        captor.getValue().onControlsUpdate(3);
+        verify(mQsTileHost).addTile(spec, 3);
+        verify(mAutoAddTracker).setTileAdded(spec);
+    }
+
+    @Test
+    public void testDontAddControlsTileIfPresent() {
+        String spec = DEVICE_CONTROLS;
+        when(mAutoAddTracker.isAdded(eq(spec))).thenReturn(false);
+        when(mQsTileHost.getTiles()).thenReturn(new ArrayList<>());
+
+        mAutoTileManager.init();
+        ArgumentCaptor<DeviceControlsController.Callback> captor =
+                ArgumentCaptor.forClass(DeviceControlsController.Callback.class);
+
+        verify(mDeviceControlsController).setCallback(captor.capture());
+
+        captor.getValue().removeControlsAutoTracker();
+        verify(mQsTileHost, never()).addTile(spec, 3);
+        verify(mAutoAddTracker, never()).setTileAdded(spec);
+        verify(mAutoAddTracker).setTileRemoved(spec);
+    }
+
+    @Test
+    public void testRemoveControlsTileFromTrackerWhenRequested() {
+        String spec = "controls";
+        when(mAutoAddTracker.isAdded(eq(spec))).thenReturn(true);
+        QSTile mockTile = mock(QSTile.class);
+        when(mockTile.getTileSpec()).thenReturn(spec);
+        when(mQsTileHost.getTiles()).thenReturn(List.of(mockTile));
+
+        mAutoTileManager.init();
+        ArgumentCaptor<DeviceControlsController.Callback> captor =
+                ArgumentCaptor.forClass(DeviceControlsController.Callback.class);
+
+        verify(mDeviceControlsController).setCallback(captor.capture());
+
+        captor.getValue().onControlsUpdate(3);
+        verify(mQsTileHost, never()).addTile(spec, 3);
+        verify(mAutoAddTracker, never()).setTileAdded(spec);
+    }
+
 
     @Test
     public void testEmptyArray_doesNotCrash() {

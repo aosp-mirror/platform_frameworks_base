@@ -28,10 +28,10 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAG
 import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
 import static android.provider.Settings.Secure.CONTRAST_LEVEL;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
-import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_MENU_IN_SYSTEM;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.CONTRAST_DEFAULT_VALUE;
 import static android.view.accessibility.AccessibilityManager.CONTRAST_NOT_SET;
+import static android.view.accessibility.AccessibilityManager.FlashNotificationReason;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
@@ -137,6 +137,7 @@ import com.android.internal.accessibility.AccessibilityShortcutController.Framew
 import com.android.internal.accessibility.AccessibilityShortcutController.LaunchableFrameworkFeatureInfo;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity;
+import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
@@ -171,7 +172,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -216,9 +216,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private static final String SET_PIP_ACTION_REPLACEMENT =
             "setPictureInPictureActionReplacingConnection";
-
-    @VisibleForTesting
-    static final String MENU_SERVICE_RELATIVE_CLASS_NAME = ".AccessibilityMenuService";
 
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
@@ -313,6 +310,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     boolean mRestarting;
     boolean mInputSessionRequested;
     private SparseArray<SurfaceControl> mA11yOverlayLayers = new SparseArray<>();
+
+    private final FlashNotificationsController mFlashNotificationsController;
 
     private AccessibilityUserState getCurrentUserStateLocked() {
         return getUserStateLocked(mCurrentUserId);
@@ -441,6 +440,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mInputFilter = inputFilter;
             mHasInputFilter = true;
         }
+        mFlashNotificationsController = new FlashNotificationsController(mContext);
         init();
     }
 
@@ -470,7 +470,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 new MagnificationScaleProvider(mContext));
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
-        mProxyManager = new ProxyManager(mLock, mA11yWindowManager);
+        mProxyManager = new ProxyManager(mLock, mA11yWindowManager, mContext);
+        mFlashNotificationsController = new FlashNotificationsController(mContext);
         init();
     }
 
@@ -479,6 +480,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         registerBroadcastReceivers();
         new AccessibilityContentObserver(mMainHandler).register(
                 mContext.getContentResolver());
+        disableAccessibilityMenuToMigrateIfNeeded();
     }
 
     @Override
@@ -524,6 +526,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             return new Pair<>(outTransformationMatrix, pair.second);
         }
+    }
+
+    @Override
+    public IAccessibilityManager.WindowTransformationSpec getWindowTransformationSpec(
+            int windowId) {
+        IAccessibilityManager.WindowTransformationSpec windowTransformationSpec =
+                new IAccessibilityManager.WindowTransformationSpec();
+        Pair<float[], MagnificationSpec> result =
+                getWindowTransformationMatrixAndMagnificationSpec(windowId);
+        windowTransformationSpec.transformationMatrix = result.first;
+        windowTransformationSpec.magnificationSpec = result.second;
+        return windowTransformationSpec;
     }
 
     @Override
@@ -850,91 +864,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * Migrates the Accessibility Menu to the version provided by the system build,
-     * if necessary based on presence of the service on the device.
+     * Disables the component returned by
+     * {@link AccessibilityUtils#getAccessibilityMenuComponentToMigrate} so that it does not appear
+     * in Settings or other places that query for installed accessibility services.
+     *
+     * <p>
+     * SettingsProvider is responsible for migrating users off of Menu-outside-system,
+     * which it performs in its initialization before AccessibilityManagerService is started.
+     * </p>
      */
-    @VisibleForTesting
-    void migrateAccessibilityMenuIfNecessaryLocked(AccessibilityUserState userState) {
-        final Set<ComponentName> menuComponentNames = findA11yMenuComponentNamesLocked();
-        final ComponentName menuOutsideSystem = getA11yMenuOutsideSystem(menuComponentNames);
-        final boolean shouldMigrateToMenuInSystem = menuComponentNames.size() == 2
-                && menuComponentNames.contains(ACCESSIBILITY_MENU_IN_SYSTEM)
-                && menuOutsideSystem != null;
-
-        if (!shouldMigrateToMenuInSystem) {
-            if (menuComponentNames.size() == 1) {
-                // If only one Menu package exists then reset its component to the default state.
-                mPackageManager.setComponentEnabledSetting(
-                        menuComponentNames.stream().findFirst().get(),
-                        PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
-                        PackageManager.DONT_KILL_APP);
-            }
-            return;
+    private void disableAccessibilityMenuToMigrateIfNeeded() {
+        int userId;
+        synchronized (mLock) {
+            userId = mCurrentUserId;
         }
-
-        // Hide Menu-outside-system so that it does not appear in Settings.
-        mPackageManager.setComponentEnabledSetting(
-                menuOutsideSystem,
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP);
-        // Migrate the accessibility shortcuts.
-        migrateA11yMenuInSettingLocked(userState,
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, menuOutsideSystem);
-        migrateA11yMenuInSettingLocked(userState,
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT, menuOutsideSystem);
-        migrateA11yMenuInSettingLocked(userState,
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, menuOutsideSystem);
-        // If Menu-outside-system is currently enabled by the user then automatically
-        // disable it and enable Menu-in-system.
-        migrateA11yMenuInSettingLocked(userState,
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, menuOutsideSystem);
-    }
-
-    /**
-     * Returns all {@link ComponentName}s whose class name ends in {@link
-     * #MENU_SERVICE_RELATIVE_CLASS_NAME}.
-     **/
-    private Set<ComponentName> findA11yMenuComponentNamesLocked() {
-        Set<ComponentName> result = new ArraySet<>();
-        final var flags =
-                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DISABLED_COMPONENTS
-                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
-        for (ResolveInfo resolveInfo : mPackageManager.queryIntentServicesAsUser(
-                new Intent(AccessibilityService.SERVICE_INTERFACE), flags, mCurrentUserId)) {
-            final ComponentName componentName = resolveInfo.serviceInfo.getComponentName();
-            if (componentName.getClassName().endsWith(MENU_SERVICE_RELATIVE_CLASS_NAME)) {
-                result.add(componentName);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Returns the first {@link ComponentName} in the provided set that is not equal to {@link
-     * AccessibilityManager#ACCESSIBILITY_MENU_IN_SYSTEM}.
-     */
-    private static ComponentName getA11yMenuOutsideSystem(Set<ComponentName> menuComponentNames) {
-        Optional<ComponentName> menuOutsideSystem = menuComponentNames.stream().filter(
-                name -> !name.equals(ACCESSIBILITY_MENU_IN_SYSTEM)).findFirst();
-        if (menuOutsideSystem.isEmpty()) {
-            return null;
-        }
-        return menuOutsideSystem.get();
-    }
-
-    /**
-     * Replaces <code>toRemove</code> with {@link AccessibilityManager#ACCESSIBILITY_MENU_IN_SYSTEM}
-     * in the requested setting, if present already.
-     */
-    private void migrateA11yMenuInSettingLocked(AccessibilityUserState userState, String setting,
-            ComponentName toRemove) {
-        mTempComponentNameSet.clear();
-        readComponentNamesFromSettingLocked(setting, userState.mUserId, mTempComponentNameSet);
-        if (mTempComponentNameSet.contains(toRemove)) {
-            mTempComponentNameSet.remove(toRemove);
-            mTempComponentNameSet.add(ACCESSIBILITY_MENU_IN_SYSTEM);
-            persistComponentNamesToSettingLocked(setting, mTempComponentNameSet, userState.mUserId);
+        final ComponentName menuToMigrate =
+                AccessibilityUtils.getAccessibilityMenuComponentToMigrate(mPackageManager, userId);
+        if (menuToMigrate != null) {
+            mPackageManager.setComponentEnabledSetting(
+                    menuToMigrate,
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP);
         }
     }
 
@@ -1707,8 +1657,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mCurrentUserId = userId;
             AccessibilityUserState userState = getCurrentUserStateLocked();
 
-            migrateAccessibilityMenuIfNecessaryLocked(userState);
-
             readConfigurationForUserStateLocked(userState);
             mSecurityPolicy.onSwitchUserLocked(mCurrentUserId, userState.mEnabledServices);
             // Even if reading did not yield change, we have to update
@@ -1980,6 +1928,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityServiceInfo accessibilityServiceInfo;
             try {
                 accessibilityServiceInfo = new AccessibilityServiceInfo(resolveInfo, mContext);
+                if (!accessibilityServiceInfo.isWithinParcelableSize()) {
+                    Slog.e(LOG_TAG, "Skipping service "
+                            + accessibilityServiceInfo.getResolveInfo().getComponentInfo()
+                            + " because service info size is larger than safe parcelable limits.");
+                    continue;
+                }
                 if (userState.mCrashedServices.contains(serviceInfo.getComponentName())) {
                     // Restore the crashed attribute.
                     accessibilityServiceInfo.crashed = true;
@@ -2490,6 +2444,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                     inputFilter = mInputFilter;
                     setInputFilter = true;
+                    mProxyManager.setAccessibilityInputFilter(mInputFilter);
                 }
                 mInputFilter.setUserAndEnabledFeatures(userState.mUserId, flags);
                 mInputFilter.setCombinedGenericMotionEventSources(
@@ -2720,6 +2675,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         somethingChanged |= readMagnificationModeForDefaultDisplayLocked(userState);
         somethingChanged |= readMagnificationCapabilitiesLocked(userState);
         somethingChanged |= readMagnificationFollowTypingLocked(userState);
+        somethingChanged |= readAlwaysOnMagnificationLocked(userState);
         somethingChanged |= readUiContrastLocked(userState);
         return somethingChanged;
     }
@@ -3879,6 +3835,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return mProxyManager.unregisterProxy(displayId);
     }
 
+    boolean isDisplayProxyed(int displayId) {
+        return mProxyManager.isProxyed(displayId);
+    }
+
     @Override public float getUiContrast() {
         if (mTraceManager.isA11yTracingEnabledForTypes(FLAGS_ACCESSIBILITY_MANAGER)) {
             mTraceManager.logTrace(LOG_TAG + ".getUiContrast", FLAGS_ACCESSIBILITY_MANAGER);
@@ -3889,6 +3849,40 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (contrast != CONTRAST_NOT_SET) return contrast;
             readUiContrastLocked(userState);
             return userState.getUiContrastLocked();
+        }
+    }
+
+    @Override
+    public boolean startFlashNotificationSequence(String opPkg,
+            @FlashNotificationReason int reason, IBinder token) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mFlashNotificationsController.startFlashNotificationSequence(opPkg,
+                    reason, token);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public boolean stopFlashNotificationSequence(String opPkg) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mFlashNotificationsController.stopFlashNotificationSequence(opPkg);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public boolean startFlashNotificationEvent(String opPkg,
+            @FlashNotificationReason int reason, String reasonPkg) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mFlashNotificationsController.startFlashNotificationEvent(opPkg,
+                    reason, reasonPkg);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -4339,6 +4333,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private final Uri mMagnificationFollowTypingUri = Settings.Secure.getUriFor(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED);
 
+        private final Uri mAlwaysOnMagnificationUri = Settings.Secure.getUriFor(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED);
+
         private final Uri mUiContrastUri = Settings.Secure.getUriFor(
                 CONTRAST_LEVEL);
 
@@ -4382,6 +4379,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mMagnificationCapabilityUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mMagnificationFollowTypingUri, false, this, UserHandle.USER_ALL);
+            contentResolver.registerContentObserver(
+                    mAlwaysOnMagnificationUri, false, this, UserHandle.USER_ALL);
             contentResolver.registerContentObserver(
                     mUiContrastUri, false, this, UserHandle.USER_ALL);
         }
@@ -4453,6 +4452,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 } else if (mMagnificationFollowTypingUri.equals(uri)) {
                     readMagnificationFollowTypingLocked(userState);
+                } else if (mAlwaysOnMagnificationUri.equals(uri)) {
+                    readAlwaysOnMagnificationLocked(userState);
                 } else if (mUiContrastUri.equals(uri)) {
                     if (readUiContrastLocked(userState)) {
                         updateUiContrastLocked(userState);
@@ -4561,6 +4562,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (followTypeEnabled != userState.isMagnificationFollowTypingEnabled()) {
             userState.setMagnificationFollowTypingEnabled(followTypeEnabled);
             mMagnificationController.setMagnificationFollowTypingEnabled(followTypeEnabled);
+            return true;
+        }
+        return false;
+    }
+
+    boolean readAlwaysOnMagnificationLocked(AccessibilityUserState userState) {
+        final boolean isSettingsAlwaysOnEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
+                1, userState.mUserId) == 1;
+        final boolean isAlwaysOnFeatureFlagEnabled = mMagnificationController
+                .isAlwaysOnMagnificationFeatureFlagEnabled();
+        final boolean isAlwaysOnEnabled = isAlwaysOnFeatureFlagEnabled && isSettingsAlwaysOnEnabled;
+        if (isAlwaysOnEnabled != userState.isAlwaysOnMagnificationEnabled()) {
+            userState.setAlwaysOnMagnificationEnabled(isAlwaysOnEnabled);
+            mMagnificationController.setAlwaysOnMagnificationEnabled(isAlwaysOnEnabled);
             return true;
         }
         return false;

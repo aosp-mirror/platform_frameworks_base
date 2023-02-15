@@ -301,7 +301,7 @@ public final class OverlayManagerService extends SystemService {
                     && shellPkgName.equals(overlayInfo.packageName));
 
             initIfNeeded();
-            onSwitchUser(UserHandle.USER_SYSTEM);
+            onStartUser(UserHandle.USER_SYSTEM);
 
             publishBinderService(Context.OVERLAY_SERVICE, mService);
             publishLocalService(OverlayManagerService.class, this);
@@ -324,7 +324,7 @@ public final class OverlayManagerService extends SystemService {
                 final UserInfo userInfo = users.get(i);
                 if (!userInfo.supportsSwitchTo() && userInfo.id != UserHandle.USER_SYSTEM) {
                     // Initialize any users that can't be switched to, as their state would
-                    // never be setup in onSwitchUser(). We will switch to the system user right
+                    // never be setup in onStartUser(). We will switch to the system user right
                     // after this, and its state will be setup there.
                     updatePackageManagerLocked(mImpl.updateOverlaysForUser(users.get(i).id));
                 }
@@ -333,13 +333,13 @@ public final class OverlayManagerService extends SystemService {
     }
 
     @Override
-    public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
-        onSwitchUser(to.getUserIdentifier());
+    public void onUserStarting(TargetUser user) {
+        onStartUser(user.getUserIdentifier());
     }
 
-    private void onSwitchUser(@UserIdInt int newUserId) {
+    private void onStartUser(@UserIdInt int newUserId) {
         try {
-            traceBegin(TRACE_TAG_RRO, "OMS#onSwitchUser " + newUserId);
+            traceBegin(TRACE_TAG_RRO, "OMS#onStartUser " + newUserId);
             // ensure overlays in the settings are up-to-date, and propagate
             // any asset changes to the rest of the system
             synchronized (mLock) {

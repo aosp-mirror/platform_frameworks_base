@@ -77,80 +77,6 @@ public abstract class IntentResolver<F, R extends Object> {
         }
     }
 
-    public static boolean filterEquals(IntentFilter f1, IntentFilter f2) {
-        int s1 = f1.countActions();
-        int s2 = f2.countActions();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasAction(f1.getAction(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countCategories();
-        s2 = f2.countCategories();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasCategory(f1.getCategory(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countDataTypes();
-        s2 = f2.countDataTypes();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasExactDataType(f1.getDataType(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countDataSchemes();
-        s2 = f2.countDataSchemes();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasDataScheme(f1.getDataScheme(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countDataAuthorities();
-        s2 = f2.countDataAuthorities();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasDataAuthority(f1.getDataAuthority(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countDataPaths();
-        s2 = f2.countDataPaths();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasDataPath(f1.getDataPath(i))) {
-                return false;
-            }
-        }
-        s1 = f1.countDataSchemeSpecificParts();
-        s2 = f2.countDataSchemeSpecificParts();
-        if (s1 != s2) {
-            return false;
-        }
-        for (int i=0; i<s1; i++) {
-            if (!f2.hasDataSchemeSpecificPart(f1.getDataSchemeSpecificPart(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /**
      * Returns whether an intent matches the IntentFilter with a pre-resolved type.
      */
@@ -200,7 +126,7 @@ public abstract class IntentResolver<F, R extends Object> {
                 if (cur == null) {
                     break;
                 }
-                if (filterEquals(getIntentFilter(cur), matching)) {
+                if (IntentFilter.filterEquals(getIntentFilter(cur), matching)) {
                     if (res == null) {
                         res = new ArrayList<>();
                     }
@@ -225,7 +151,7 @@ public abstract class IntentResolver<F, R extends Object> {
         } else {
             ArrayList<F> res = null;
             for (F cur : mFilters) {
-                if (filterEquals(getIntentFilter(cur), matching)) {
+                if (IntentFilter.filterEquals(getIntentFilter(cur), matching)) {
                     if (res == null) {
                         res = new ArrayList<>();
                     }

@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
 import android.hardware.biometrics.BiometricSourceType
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
@@ -54,13 +55,12 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class KeyguardRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarStateController: StatusBarStateController
@@ -321,29 +321,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             whenever(keyguardUpdateMonitor.isUdfpsSupported).thenReturn(false)
             assertThat(underTest.isUdfpsSupported()).isFalse()
-        }
-
-    @Test
-    fun isBouncerShowing() =
-        runTest(UnconfinedTestDispatcher()) {
-            whenever(keyguardStateController.isBouncerShowing).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isBouncerShowing.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest).isFalse()
-
-            val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
-
-            whenever(keyguardStateController.isBouncerShowing).thenReturn(true)
-            captor.value.onBouncerShowingChanged()
-            assertThat(latest).isTrue()
-
-            whenever(keyguardStateController.isBouncerShowing).thenReturn(false)
-            captor.value.onBouncerShowingChanged()
-            assertThat(latest).isFalse()
-
-            job.cancel()
         }
 
     @Test

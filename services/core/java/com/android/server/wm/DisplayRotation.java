@@ -635,7 +635,8 @@ public class DisplayRotation {
 
         if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
             if (!mDisplayContent.mTransitionController.isCollecting()) {
-                throw new IllegalStateException("Trying to rotate outside a transition");
+                // The remote may be too slow to response before transition timeout.
+                Slog.e(TAG, "Trying to continue rotation outside a transition");
             }
             mDisplayContent.mTransitionController.collect(mDisplayContent);
         }
@@ -1493,6 +1494,15 @@ public class DisplayRotation {
         }
     }
 
+    void dispatchProposedRotation(@Surface.Rotation int rotation) {
+        if (mService.mRotationWatcherController.hasProposedRotationListeners()) {
+            synchronized (mLock) {
+                mService.mRotationWatcherController.dispatchProposedRotation(
+                        mDisplayContent, rotation);
+            }
+        }
+    }
+
     private static String allowAllRotationsToString(int allowAll) {
         switch (allowAll) {
             case -1:
@@ -1798,6 +1808,7 @@ public class DisplayRotation {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "onProposedRotationChanged, rotation=%d", rotation);
             // Send interaction power boost to improve redraw performance.
             mService.mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
+            dispatchProposedRotation(rotation);
             if (isRotationChoiceAllowed(rotation)) {
                 final boolean isValid = isValidRotationChoice(rotation);
                 sendProposedRotationChangeToStatusBarInternal(rotation, isValid);

@@ -169,18 +169,18 @@ public class JobSchedulerImpl extends JobScheduler {
     }
 
     @Override
-    public boolean canRunLongJobs() {
+    public boolean canRunUserInitiatedJobs() {
         try {
-            return mBinder.canRunLongJobs(mContext.getOpPackageName());
+            return mBinder.canRunUserInitiatedJobs(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return false;
         }
     }
 
     @Override
-    public boolean hasRunLongJobsPermission(String packageName, int userId) {
+    public boolean hasRunUserInitiatedJobsPermission(String packageName, int userId) {
         try {
-            return mBinder.hasRunLongJobsPermission(packageName, userId);
+            return mBinder.hasRunUserInitiatedJobsPermission(packageName, userId);
         } catch (RemoteException e) {
             return false;
         }

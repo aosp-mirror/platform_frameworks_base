@@ -21,6 +21,10 @@ import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositoryImpl
@@ -63,6 +67,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     private lateinit var testScope: TestScope
 
     private lateinit var keyguardRepository: FakeKeyguardRepository
+    private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var shadeRepository: ShadeRepository
 
     // Used to issue real transition steps for test input
@@ -79,6 +84,10 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     private lateinit var fromOccludedTransitionInteractor: FromOccludedTransitionInteractor
     private lateinit var fromGoneTransitionInteractor: FromGoneTransitionInteractor
     private lateinit var fromAodTransitionInteractor: FromAodTransitionInteractor
+    private lateinit var fromAlternateBouncerTransitionInteractor:
+        FromAlternateBouncerTransitionInteractor
+    private lateinit var fromPrimaryBouncerTransitionInteractor:
+        FromPrimaryBouncerTransitionInteractor
 
     @Before
     fun setUp() {
@@ -86,16 +95,18 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         testScope = TestScope()
 
         keyguardRepository = FakeKeyguardRepository()
+        bouncerRepository = FakeKeyguardBouncerRepository()
         shadeRepository = FakeShadeRepository()
 
         /* Used to issue full transition steps, to better simulate a real device */
         transitionRepository = KeyguardTransitionRepositoryImpl()
         runner = KeyguardTransitionRunner(transitionRepository)
 
+        val featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, true) }
         fromLockscreenTransitionInteractor =
             FromLockscreenTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor = createKeyguardInteractor(featureFlags),
                 shadeRepository = shadeRepository,
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
@@ -105,7 +116,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDreamingTransitionInteractor =
             FromDreamingTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor = createKeyguardInteractor(featureFlags),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -114,7 +125,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromAodTransitionInteractor =
             FromAodTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor = createKeyguardInteractor(featureFlags),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -123,7 +134,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromGoneTransitionInteractor =
             FromGoneTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor = createKeyguardInteractor(featureFlags),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -132,7 +143,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromDozingTransitionInteractor =
             FromDozingTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor = createKeyguardInteractor(featureFlags),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
@@ -141,15 +152,33 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         fromOccludedTransitionInteractor =
             FromOccludedTransitionInteractor(
                 scope = testScope,
-                keyguardInteractor = KeyguardInteractor(keyguardRepository, commandQueue),
+                keyguardInteractor = createKeyguardInteractor(featureFlags),
                 keyguardTransitionRepository = mockTransitionRepository,
                 keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
             )
         fromOccludedTransitionInteractor.start()
+
+        fromAlternateBouncerTransitionInteractor =
+            FromAlternateBouncerTransitionInteractor(
+                scope = testScope,
+                keyguardInteractor = createKeyguardInteractor(featureFlags),
+                keyguardTransitionRepository = mockTransitionRepository,
+                keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
+            )
+        fromAlternateBouncerTransitionInteractor.start()
+
+        fromPrimaryBouncerTransitionInteractor =
+            FromPrimaryBouncerTransitionInteractor(
+                scope = testScope,
+                keyguardInteractor = createKeyguardInteractor(featureFlags),
+                keyguardTransitionRepository = mockTransitionRepository,
+                keyguardTransitionInteractor = KeyguardTransitionInteractor(transitionRepository),
+            )
+        fromPrimaryBouncerTransitionInteractor.start()
     }
 
     @Test
-    fun `DREAMING to LOCKSCREEN`() =
+    fun `DREAMING to LOCKSCREEN - dreaming state changes first`() =
         testScope.runTest {
             // GIVEN a device is dreaming and occluded
             keyguardRepository.setDreamingWithOverlay(true)
@@ -179,7 +208,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             )
             // AND dreaming has stopped
             keyguardRepository.setDreamingWithOverlay(false)
-            // AND occluded has stopped
+            advanceUntilIdle()
+            // AND then occluded has stopped
             keyguardRepository.setKeyguardOccluded(false)
             advanceUntilIdle()
 
@@ -197,7 +227,56 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
-    fun `LOCKSCREEN to BOUNCER via bouncer showing call`() =
+    fun `DREAMING to LOCKSCREEN - occluded state changes first`() =
+        testScope.runTest {
+            // GIVEN a device is dreaming and occluded
+            keyguardRepository.setDreamingWithOverlay(true)
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+
+            // GIVEN a prior transition has run to DREAMING
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.DREAMING,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // WHEN doze is complete
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            // AND occluded has stopped
+            keyguardRepository.setKeyguardOccluded(false)
+            advanceUntilIdle()
+            // AND then dreaming has stopped
+            keyguardRepository.setDreamingWithOverlay(false)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to BOUNCER should occur
+            assertThat(info.ownerName).isEqualTo("FromDreamingTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DREAMING)
+            assertThat(info.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `LOCKSCREEN to PRIMARY_BOUNCER via bouncer showing call`() =
         testScope.runTest {
             // GIVEN a device that has at least woken up
             keyguardRepository.setWakefulnessModel(startingToWake())
@@ -219,18 +298,18 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             )
             runCurrent()
 
-            // WHEN the bouncer is set to show
-            keyguardRepository.setBouncerShowing(true)
+            // WHEN the primary bouncer is set to show
+            bouncerRepository.setPrimaryVisible(true)
             runCurrent()
 
             val info =
                 withArgCaptor<TransitionInfo> {
                     verify(mockTransitionRepository).startTransition(capture())
                 }
-            // THEN a transition to BOUNCER should occur
+            // THEN a transition to PRIMARY_BOUNCER should occur
             assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
-            assertThat(info.to).isEqualTo(KeyguardState.BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
             assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()
@@ -636,6 +715,297 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             coroutineContext.cancelChildren()
         }
 
+    @Test
+    fun `ALTERNATE_BOUNCER to PRIMARY_BOUNCER`() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to ALTERNATE_BOUNCER
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.ALTERNATE_BOUNCER,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // WHEN the alternateBouncer stops showing and then the primary bouncer shows
+            bouncerRepository.setPrimaryVisible(true)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to PRIMARY_BOUNCER should occur
+            assertThat(info.ownerName).isEqualTo("FromAlternateBouncerTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.ALTERNATE_BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `ALTERNATE_BOUNCER to AOD`() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to ALTERNATE_BOUNCER
+            bouncerRepository.setAlternateVisible(true)
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.ALTERNATE_BOUNCER,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // GIVEN the primary bouncer isn't showing, aod available and starting to sleep
+            bouncerRepository.setPrimaryVisible(false)
+            keyguardRepository.setAodAvailable(true)
+            keyguardRepository.setWakefulnessModel(startingToSleep())
+
+            // WHEN the alternateBouncer stops showing
+            bouncerRepository.setAlternateVisible(false)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to AOD should occur
+            assertThat(info.ownerName).isEqualTo("FromAlternateBouncerTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.ALTERNATE_BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.AOD)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `ALTERNATE_BOUNCER to DOZING`() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to ALTERNATE_BOUNCER
+            bouncerRepository.setAlternateVisible(true)
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.ALTERNATE_BOUNCER,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // GIVEN the primary bouncer isn't showing, aod not available and starting to sleep
+            // to sleep
+            bouncerRepository.setPrimaryVisible(false)
+            keyguardRepository.setAodAvailable(false)
+            keyguardRepository.setWakefulnessModel(startingToSleep())
+
+            // WHEN the alternateBouncer stops showing
+            bouncerRepository.setAlternateVisible(false)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to DOZING should occur
+            assertThat(info.ownerName).isEqualTo("FromAlternateBouncerTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.ALTERNATE_BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.DOZING)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `ALTERNATE_BOUNCER to LOCKSCREEN`() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to ALTERNATE_BOUNCER
+            bouncerRepository.setAlternateVisible(true)
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.ALTERNATE_BOUNCER,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // GIVEN the primary bouncer isn't showing and device not sleeping
+            bouncerRepository.setPrimaryVisible(false)
+            keyguardRepository.setWakefulnessModel(startingToWake())
+
+            // WHEN the alternateBouncer stops showing
+            bouncerRepository.setAlternateVisible(false)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to LOCKSCREEN should occur
+            assertThat(info.ownerName).isEqualTo("FromAlternateBouncerTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.ALTERNATE_BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `PRIMARY_BOUNCER to AOD`() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to PRIMARY_BOUNCER
+            bouncerRepository.setPrimaryVisible(true)
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // GIVEN aod available and starting to sleep
+            keyguardRepository.setAodAvailable(true)
+            keyguardRepository.setWakefulnessModel(startingToSleep())
+
+            // WHEN the primaryBouncer stops showing
+            bouncerRepository.setPrimaryVisible(false)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to AOD should occur
+            assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.AOD)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `PRIMARY_BOUNCER to DOZING`() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to PRIMARY_BOUNCER
+            bouncerRepository.setPrimaryVisible(true)
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // GIVEN aod not available and starting to sleep to sleep
+            keyguardRepository.setAodAvailable(false)
+            keyguardRepository.setWakefulnessModel(startingToSleep())
+
+            // WHEN the primaryBouncer stops showing
+            bouncerRepository.setPrimaryVisible(false)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to DOZING should occur
+            assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.DOZING)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `PRIMARY_BOUNCER to LOCKSCREEN`() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to PRIMARY_BOUNCER
+            bouncerRepository.setPrimaryVisible(true)
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // GIVEN device not sleeping
+            keyguardRepository.setWakefulnessModel(startingToWake())
+
+            // WHEN the alternateBouncer stops showing
+            bouncerRepository.setPrimaryVisible(false)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture())
+                }
+            // THEN a transition to LOCKSCREEN should occur
+            assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
     private fun startingToWake() =
         WakefulnessModel(
             WakefulnessState.STARTING_TO_WAKE,
@@ -651,4 +1021,13 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             WakeSleepReason.OTHER,
             WakeSleepReason.OTHER
         )
+
+    private fun createKeyguardInteractor(featureFlags: FeatureFlags): KeyguardInteractor {
+        return KeyguardInteractor(
+            keyguardRepository,
+            commandQueue,
+            featureFlags,
+            bouncerRepository,
+        )
+    }
 }

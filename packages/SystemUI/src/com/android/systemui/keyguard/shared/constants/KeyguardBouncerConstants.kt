@@ -26,4 +26,10 @@ object KeyguardBouncerConstants {
     const val EXPANSION_HIDDEN = 1f
     const val EXPANSION_VISIBLE = 0f
     const val ALPHA_EXPANSION_THRESHOLD = 0.95f
+
+    /**
+     * This value is used for denoting the PIN length at which we want to layout the view in which
+     * PIN hinting is enabled
+     */
+    const val DEFAULT_PIN_LENGTH = 6
 }

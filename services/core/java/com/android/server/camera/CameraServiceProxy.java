@@ -247,7 +247,7 @@ public class CameraServiceProxy extends SystemService
         private long mDurationOrStartTimeMs;  // Either start time, or duration once completed
 
         CameraUsageEvent(String cameraId, int facing, String clientName, int apiLevel,
-                boolean isNdk, int action, int latencyMs, int operatingMode) {
+                boolean isNdk, int action, int latencyMs, int operatingMode, boolean deviceError) {
             mCameraId = cameraId;
             mCameraFacing = facing;
             mClientName = clientName;
@@ -258,6 +258,7 @@ public class CameraServiceProxy extends SystemService
             mAction = action;
             mLatencyMs = latencyMs;
             mOperatingMode = operatingMode;
+            mDeviceError = deviceError;
         }
 
         public void markCompleted(int internalReconfigure, long requestCount,
@@ -1108,7 +1109,7 @@ public class CameraServiceProxy extends SystemService
                     CameraUsageEvent openEvent = new CameraUsageEvent(
                             cameraId, facing, clientName, apiLevel, isNdk,
                             FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__OPEN,
-                            latencyMs, sessionType);
+                            latencyMs, sessionType, deviceError);
                     mCameraUsageHistory.add(openEvent);
                     break;
                 case CameraSessionStats.CAMERA_STATE_ACTIVE:
@@ -1135,7 +1136,7 @@ public class CameraServiceProxy extends SystemService
                     CameraUsageEvent newEvent = new CameraUsageEvent(
                             cameraId, facing, clientName, apiLevel, isNdk,
                             FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__SESSION,
-                            latencyMs, sessionType);
+                            latencyMs, sessionType, deviceError);
                     CameraUsageEvent oldEvent = mActiveCameraUsage.put(cameraId, newEvent);
                     if (oldEvent != null) {
                         Slog.w(TAG, "Camera " + cameraId + " was already marked as active");
@@ -1154,6 +1155,8 @@ public class CameraServiceProxy extends SystemService
                                 resultErrorCount, deviceError, streamStats, userTag,
                                 videoStabilizationMode);
                         mCameraUsageHistory.add(doneEvent);
+                        // Do not double count device error
+                        deviceError = false;
 
                         // Check current active camera IDs to see if this package is still
                         // talking to some camera
@@ -1177,7 +1180,7 @@ public class CameraServiceProxy extends SystemService
                         CameraUsageEvent closeEvent = new CameraUsageEvent(
                                 cameraId, facing, clientName, apiLevel, isNdk,
                                 FrameworkStatsLog.CAMERA_ACTION_EVENT__ACTION__CLOSE,
-                                latencyMs, sessionType);
+                                latencyMs, sessionType, deviceError);
                         mCameraUsageHistory.add(closeEvent);
                     }
 

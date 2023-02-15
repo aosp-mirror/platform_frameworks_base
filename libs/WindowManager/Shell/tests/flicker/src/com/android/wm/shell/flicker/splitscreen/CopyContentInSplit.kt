@@ -24,8 +24,8 @@ import com.android.server.wm.flicker.FlickerBuilder
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.traces.common.ComponentNameMatcher
-import com.android.server.wm.traces.common.EdgeExtensionComponentMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.EdgeExtensionComponentMatcher
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
@@ -115,7 +115,6 @@ class CopyContentInSplit(flicker: FlickerTest) : SplitScreenBase(flicker) {
 
     /** {@inheritDoc} */
     @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
-
 
     /** {@inheritDoc} */
     @Presubmit

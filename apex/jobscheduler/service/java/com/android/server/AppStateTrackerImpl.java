@@ -425,6 +425,12 @@ public class AppStateTrackerImpl implements AppStateTracker {
          */
         public void removeAlarmsForUid(int uid) {
         }
+
+        /**
+         * Called when a uid goes into cached, so its alarms using a listener should be removed.
+         */
+        public void removeListenerAlarmsForCachedUid(int uid) {
+        }
     }
 
     public AppStateTrackerImpl(Context context, Looper looper) {
@@ -496,7 +502,8 @@ public class AppStateTrackerImpl implements AppStateTracker {
                 mIActivityManager.registerUidObserver(new UidObserver(),
                         ActivityManager.UID_OBSERVER_GONE
                                 | ActivityManager.UID_OBSERVER_IDLE
-                                | ActivityManager.UID_OBSERVER_ACTIVE,
+                                | ActivityManager.UID_OBSERVER_ACTIVE
+                                | ActivityManager.UID_OBSERVER_CACHED,
                         ActivityManager.PROCESS_STATE_UNKNOWN, null);
                 mAppOpsService.startWatchingMode(TARGET_OP, null,
                         new AppOpsWatcher());
@@ -731,6 +738,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
 
         @Override
         public void onUidCachedChanged(int uid, boolean cached) {
+            mHandler.onUidCachedChanged(uid, cached);
         }
 
         @Override
@@ -800,6 +808,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         private static final int MSG_ON_UID_ACTIVE = 12;
         private static final int MSG_ON_UID_GONE = 13;
         private static final int MSG_ON_UID_IDLE = 14;
+        private static final int MSG_ON_UID_CACHED = 15;
 
         MyHandler(Looper looper) {
             super(looper);
@@ -858,6 +867,12 @@ public class AppStateTrackerImpl implements AppStateTracker {
 
         public void onUidIdle(int uid, boolean disabled) {
             obtainMessage(MSG_ON_UID_IDLE, uid, disabled ? 1 : 0).sendToTarget();
+        }
+
+        public void onUidCachedChanged(int uid, boolean cached) {
+            if (cached) {
+                obtainMessage(MSG_ON_UID_CACHED, uid, 0).sendToTarget();
+            }
         }
 
         @Override
@@ -953,6 +968,15 @@ public class AppStateTrackerImpl implements AppStateTracker {
                         handleUidDisabled(msg.arg1);
                     }
                     return;
+                case MSG_ON_UID_CACHED:
+                    handleUidCached(msg.arg1);
+                    return;
+            }
+        }
+
+        private void handleUidCached(int uid) {
+            for (Listener l : cloneListeners()) {
+                l.removeListenerAlarmsForCachedUid(uid);
             }
         }
 

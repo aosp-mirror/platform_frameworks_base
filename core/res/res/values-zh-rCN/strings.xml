@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允许应用在使用期间访问身体传感器数据，如心率、体温和血氧浓度。"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在后台运行时可访问身体传感器数据，如心率"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允许应用在后台运行时访问身体传感器数据，如心率、体温和血氧浓度。"</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"在应用使用期间访问身体传感器的手腕温度数据。"</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"允许应用在使用期间访问身体传感器的手腕温度数据。"</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"在应用于后台运行时访问身体传感器的手腕温度数据。"</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"允许应用在后台运行时访问身体传感器的手腕温度数据。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"读取日历活动和详情"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"此应用可读取您平板电脑上存储的所有日历活动，并分享或保存您的日历数据。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"此应用可读取您的 Android TV 设备上存储的所有日历活动，以及分享或保存您的日历数据。"</string>
@@ -636,7 +632,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"光线太亮"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"检测到按下“电源”按钮的操作"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"请尝试调整指纹"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"请在每次放手指时略微更改手指的位置"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"每次放手指时，请略微变换手指的位置"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"未能识别指纹"</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android 正在启动…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"平板电脑正在启动…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"设备正在启动…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"正在优化存储空间。"</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"正在完成系统更新…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"正在升级<xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"正在优化第<xliff:g id="NUMBER_0">%1$d</xliff:g>个应用（共<xliff:g id="NUMBER_1">%2$d</xliff:g>个）。"</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"正在准备升级<xliff:g id="APPNAME">%1$s</xliff:g>。"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"正在启动应用。"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"即将完成启动。"</string>
@@ -1364,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"已开启 USB PTP 模式"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"已开启 USB 网络共享模式"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"已开启 USB MIDI 模式"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB 配件已连接"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"点按即可查看更多选项。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"正在为连接的设备充电。点按即可查看更多选项。"</string>
@@ -1712,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完成"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"关闭快捷方式"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快捷方式"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"颜色反转"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"色彩校正"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"单手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"极暗"</string>
@@ -1850,6 +1847,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"目前处于全屏模式"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"要退出，请从顶部向下滑动。"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"知道了"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"旋转可改善预览效果"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"退出分屏可改善预览效果"</string>
     <string name="done_label" msgid="7283767013231718521">"完成"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"小时转盘"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"分钟转盘"</string>
@@ -1861,6 +1860,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"第二个工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"第三个工作<xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g>克隆"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"取消时要求输入PIN码"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"取消时要求绘制解锁图案"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"取消时要求输入密码"</string>
@@ -2315,4 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"允许配套应用从后台启动前台服务。"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"麦克风可用"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"麦克风已被屏蔽"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"双屏幕"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"双屏幕功能已开启"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>正在使用双屏幕显示内容"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"设备过热"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"手机过热，因此无法使用双屏幕功能"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"关闭"</string>
 </resources>

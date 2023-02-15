@@ -78,18 +78,28 @@ public class TvRecordingClient {
      *
      * @param view The related {@link TvInteractiveAppView} instance that is linked to this TV
      *             recording client. {@code null} to unlink the view.
-     * @param recordingId The ID of the recording which is assigned by applications. {@code null} is
-     *                    valid only when the TvInteractiveAppView parameter is null.
-     * @hide
+     * @param recordingId The ID of the recording which is assigned by the TV application.
+     *                    {@code null} if and only if the TvInteractiveAppView parameter is
+     *                    {@code null}.
+     * @throws IllegalArgumentException when recording ID is {@code null} and the
+     *                                  TvInteractiveAppView is not {@code null}; or when recording
+     *                                  ID is not {@code null} and the TvInteractiveAppView is
+     *                                  {@code null}.
+     * @see TvInteractiveAppView#notifyRecordingScheduled(String, String)
+     * @see TvInteractiveAppView#notifyRecordingStarted(String, String)
      */
     public void setTvInteractiveAppView(
             @Nullable TvInteractiveAppView view, @Nullable String recordingId) {
         if (view != null && recordingId == null) {
             throw new IllegalArgumentException(
-                    "null recordingId is allowed only when the view is null");
+                    "null recordingId is not allowed only when the view is not null");
+        }
+        if (view == null && recordingId != null) {
+            throw new IllegalArgumentException(
+                    "recordingId should be null when the view is null");
         }
         mTvIAppView = view;
-        mRecordingId = view == null ? null : recordingId;
+        mRecordingId = recordingId;
     }
 
     /**

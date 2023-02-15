@@ -25,6 +25,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
+import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
@@ -99,6 +100,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import java.io.PrintWriter;
@@ -144,6 +146,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final CommandQueue mCommandQueue;
     private final UserTracker mUserTracker;
     private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
+    private final Optional<UnfoldTransitionProgressForwarder> mUnfoldTransitionProgressForwarder;
     private final UiEventLogger mUiEventLogger;
     private final DisplayTracker mDisplayTracker;
 
@@ -415,6 +418,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             params.putBoolean(KEY_EXTRA_SUPPORTS_WINDOW_CORNERS, mSupportsRoundedCornersOnWindows);
             params.putBinder(KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER,
                     mSysuiUnlockAnimationController.asBinder());
+            mUnfoldTransitionProgressForwarder.ifPresent(
+                    unfoldProgressForwarder -> params.putBinder(
+                            KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER,
+                            unfoldProgressForwarder.asBinder()));
             // Add all the interfaces exposed by the shell
             mShellInterface.createExternalInterfaces(params);
 
@@ -512,7 +519,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             DisplayTracker displayTracker,
             KeyguardUnlockAnimationController sysuiUnlockAnimationController,
             AssistUtils assistUtils,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            Optional<UnfoldTransitionProgressForwarder> unfoldTransitionProgressForwarder
+    ) {
         // b/241601880: This component shouldn't be running for a non-primary user
         if (!Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             Log.e(TAG_OPS, "Unexpected initialization for non-primary user", new Throwable());
@@ -538,6 +547,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mSysUiState.addCallback(this::notifySystemUiStateFlags);
         mUiEventLogger = uiEventLogger;
         mDisplayTracker = displayTracker;
+        mUnfoldTransitionProgressForwarder = unfoldTransitionProgressForwarder;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 

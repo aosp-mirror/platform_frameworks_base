@@ -465,12 +465,6 @@
     <string-array translatable="false" name="config_cdma_dun_supported_types">
     </string-array>
 
-    <!-- Package name of the system app that implements the shared connectivity service -->
-    <string translatable="false" name="sharedconnectivity_service_package"></string>
-
-     <!-- Class name in the system app that implements the shared connectivity service -->
-    <string translatable="false" name="sharedconnectivity_service_class"></string>
-
     <!-- Flag indicating whether we should enable the automatic brightness.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
@@ -1316,7 +1310,7 @@
     <!-- Default value for led color when battery is medium charged -->
     <integer name="config_notificationsBatteryMediumARGB">0xFFFFFF00</integer>
 
-    <!-- Default value for led color when battery is fully charged -->
+    <!-- Default value for led color when battery is fully or nearly fully charged -->
     <integer name="config_notificationsBatteryFullARGB">0xFF00FF00</integer>
 
     <!-- Default value for LED on time when the battery is low on charge in miliseconds -->
@@ -1330,6 +1324,9 @@
 
     <!-- Default value for LED off time when the battery is low on charge in miliseconds -->
     <integer name="config_notificationsBatteryLedOff">2875</integer>
+
+    <!-- Battery level percent that is treated as nearly full. -->
+    <integer name="config_notificationsBatteryNearlyFullLevel">90</integer>
 
     <!-- If true, only colorized CallStyle notifications will apply custom colors -->
     <bool name="config_callNotificationActionColorsRequireColorized">true</bool>
@@ -2192,6 +2189,8 @@
     <bool name="config_enableDefaultNotesForWorkProfile">false</bool>
     <!-- The name of the package that will hold the system financed device controller role. -->
     <string name="config_systemFinancedDeviceController" translatable="false">com.android.devicelockcontroller</string>
+    <!-- The name of the package that will hold the call streaming role. -->
+    <string name="config_systemCallStreaming" translatable="false"></string>
 
     <!-- The component name of the wear service class that will be started by the system server. -->
     <string name="config_wearServiceComponent" translatable="false"></string>
@@ -2784,6 +2783,10 @@
      it can't be deleted or downgraded to non-admin status. -->
     <bool name="config_isMainUserPermanentAdmin">false</bool>
 
+    <!-- Whether switch to headless system user is allowed. If allowed,
+    headless system user can run in the foreground even though it is not a full user. -->
+    <bool name="config_canSwitchToHeadlessSystemUser">false</bool>
+
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 
@@ -2995,6 +2998,12 @@
          Can be customized for other product types -->
     <string name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.wifi.WifiDebuggingSecondaryUserActivity</string>
+
+    <!-- Package name of the system service that implements the shared connectivity service -->
+    <string translatable="false" name="shared_connectivity_service_package"></string>
+
+    <!-- Intent action used when binding to the shared connectivity service -->
+    <string translatable="false" name="shared_connectivity_service_intent_action"></string>
 
     <!-- Component name of the activity that shows the usb containment status. -->
     <string name="config_usbContaminantActivity" translatable="false"
@@ -4377,6 +4386,18 @@
      See android.credentials.CredentialManager
     -->
     <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
+
+    <!-- The component name, flattened to a string, for the system's credential manager
+      provider service. This service allows credential retrieval and storage od credentials.
+
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, there will be no user configurable
+     provider to service credential manager requests. However, credential manager system
+     services that do not require user consent, will still work.
+
+     See android.credentials.CredentialManager
+    -->
+    <string name="config_defaultCredentialProviderService" translatable="false"></string>
 
     <!-- The package name for the system's smartspace service.
      This service returns smartspace results.
@@ -6268,6 +6289,9 @@
         trusted certificate using the SHA-256 digest algorithm. -->
     <string-array name="config_healthConnectMigrationKnownSigners">
     </string-array>
+
+    <!-- Package name of Health Connect data migrator application.  -->
+    <string name="config_healthConnectMigratorPackageName"></string>
 
     <!-- The Universal Stylus Initiative (USI) protocol version supported by each display.
          (@see https://universalstylus.org/).

@@ -92,6 +92,14 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
     }
 
     @Test
+    fun start_registersCallbacks() {
+        startable.start()
+
+        verify(stylusManager, times(1)).registerCallback(startable)
+        verify(stylusManager, times(1)).registerBatteryCallback(startable)
+    }
+
+    @Test
     fun onStylusAdded_internal_updatesNotificationSuppression() {
         startable.onStylusAdded(STYLUS_DEVICE_ID)
 

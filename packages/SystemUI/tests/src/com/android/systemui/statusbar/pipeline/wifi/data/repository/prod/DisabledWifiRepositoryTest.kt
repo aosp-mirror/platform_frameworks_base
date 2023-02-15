@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test

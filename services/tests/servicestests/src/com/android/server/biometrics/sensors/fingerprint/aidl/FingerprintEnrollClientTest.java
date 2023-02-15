@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED;
+
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -27,7 +29,6 @@ import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.biometrics.fingerprint.PointerContext;
@@ -275,12 +276,11 @@ public class FingerprintEnrollClientTest {
     @Test
     public void testPowerPressForwardsAcquireMessage() throws RemoteException {
         final FingerprintEnrollClient client = createClient();
-
-        client.onAcquired(BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR,
-                BiometricFingerprintConstants.BIOMETRIC_ERROR_POWER_PRESSED);
+        client.start(mCallback);
+        client.onPowerPressed();
 
         verify(mClientMonitorCallbackConverter).onAcquired(anyInt(),
-                eq(BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED), eq(0));
+                eq(FINGERPRINT_ACQUIRED_POWER_PRESSED), anyInt());
     }
 
     private void showHideOverlay(Consumer<FingerprintEnrollClient> block)

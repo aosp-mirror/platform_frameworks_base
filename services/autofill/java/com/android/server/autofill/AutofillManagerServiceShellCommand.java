@@ -116,6 +116,11 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  set default-augmented-service-enabled USER_ID [true|false]");
             pw.println("    Enable / disable the default augmented autofill service for the user.");
             pw.println("");
+            pw.println("  set temporary-detection-service USER_ID [COMPONENT_NAME DURATION]");
+            pw.println("    Temporarily (for DURATION ms) changes the autofill detection service "
+                    + "implementation.");
+            pw.println("    To reset, call with [COMPONENT_NAME 0].");
+            pw.println("");
             pw.println("  get default-augmented-service-enabled USER_ID");
             pw.println("    Checks whether the default augmented autofill service is enabled for "
                     + "the user.");
@@ -175,6 +180,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return setTemporaryAugmentedService(pw);
             case "default-augmented-service-enabled":
                 return setDefaultAugmentedServiceEnabled(pw);
+            case "temporary-detection-service":
+                return setTemporaryDetectionService(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -315,6 +322,27 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 pw.println("Invalid mode: " + mode);
                 return -1;
         }
+    }
+
+    private int setTemporaryDetectionService(PrintWriter pw) {
+        final int userId = getNextIntArgRequired();
+        final String serviceName = getNextArg();
+        final int duration = getNextIntArgRequired();
+
+        if (serviceName == null) {
+            mService.resetTemporaryDetectionService(userId);
+            return 0;
+        }
+
+        if (duration <= 0) {
+            mService.resetTemporaryDetectionService(userId);
+            return 0;
+        }
+
+        mService.setTemporaryDetectionService(userId, serviceName, duration);
+        pw.println("Autofill Detection Service temporarily set to " + serviceName + " for "
+                + duration + "ms");
+        return 0;
     }
 
     private int setTemporaryAugmentedService(PrintWriter pw) {

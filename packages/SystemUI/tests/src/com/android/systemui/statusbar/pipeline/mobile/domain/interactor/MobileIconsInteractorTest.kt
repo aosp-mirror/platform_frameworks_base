@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
+import android.os.ParcelUuid
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.settingslib.mobile.MobileMappings
@@ -27,11 +28,14 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobile
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSetupRepository
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
+import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -50,6 +54,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class MobileIconsInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconsInteractor
+    private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var connectionsRepository: FakeMobileConnectionsRepository
     private val userSetupRepository = FakeUserSetupRepository()
     private val mobileMappingsProxy = FakeMobileMappingsProxy()
@@ -62,6 +67,8 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        connectivityRepository = FakeConnectivityRepository()
 
         connectionsRepository = FakeMobileConnectionsRepository(mobileMappingsProxy, tableLogBuffer)
         connectionsRepository.setMobileConnectionRepositoryMap(
@@ -79,6 +86,8 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 connectionsRepository,
                 carrierConfigTracker,
                 logger = mock(),
+                tableLogger = mock(),
+                connectivityRepository,
                 userSetupRepository,
                 testScope.backgroundScope,
             )
@@ -97,6 +106,21 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
+    // Based on the logic from the old pipeline, we'll never filter subs when there are more than 2
+    @Test
+    fun filteredSubscriptions_moreThanTwo_doesNotFilter() =
+        testScope.runTest {
+            connectionsRepository.setSubscriptions(listOf(SUB_1, SUB_3_OPP, SUB_4_OPP))
+            connectionsRepository.setActiveMobileDataSubscriptionId(SUB_4_ID)
+
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(listOf(SUB_1, SUB_3_OPP, SUB_4_OPP))
+
+            job.cancel()
+        }
+
     @Test
     fun filteredSubscriptions_nonOpportunistic_updatesWithMultipleSubs() =
         testScope.runTest {
@@ -111,9 +135,49 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun filteredSubscriptions_bothOpportunistic_configFalse_showsActive_3() =
+    fun filteredSubscriptions_opportunistic_differentGroups_doesNotFilter() =
         testScope.runTest {
             connectionsRepository.setSubscriptions(listOf(SUB_3_OPP, SUB_4_OPP))
+            connectionsRepository.setActiveMobileDataSubscriptionId(SUB_3_ID)
+
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(listOf(SUB_3_OPP, SUB_4_OPP))
+
+            job.cancel()
+        }
+
+    @Test
+    fun filteredSubscriptions_opportunistic_nonGrouped_doesNotFilter() =
+        testScope.runTest {
+            val (sub1, sub2) =
+                createSubscriptionPair(
+                    subscriptionIds = Pair(SUB_1_ID, SUB_2_ID),
+                    opportunistic = Pair(true, true),
+                    grouped = false,
+                )
+            connectionsRepository.setSubscriptions(listOf(sub1, sub2))
+            connectionsRepository.setActiveMobileDataSubscriptionId(SUB_1_ID)
+
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(listOf(sub1, sub2))
+
+            job.cancel()
+        }
+
+    @Test
+    fun filteredSubscriptions_opportunistic_grouped_configFalse_showsActive_3() =
+        testScope.runTest {
+            val (sub3, sub4) =
+                createSubscriptionPair(
+                    subscriptionIds = Pair(SUB_3_ID, SUB_4_ID),
+                    opportunistic = Pair(true, true),
+                    grouped = true,
+                )
+            connectionsRepository.setSubscriptions(listOf(sub3, sub4))
             connectionsRepository.setActiveMobileDataSubscriptionId(SUB_3_ID)
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
                 .thenReturn(false)
@@ -122,15 +186,21 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
 
             // Filtered subscriptions should show the active one when the config is false
-            assertThat(latest).isEqualTo(listOf(SUB_3_OPP))
+            assertThat(latest).isEqualTo(listOf(sub3))
 
             job.cancel()
         }
 
     @Test
-    fun filteredSubscriptions_bothOpportunistic_configFalse_showsActive_4() =
+    fun filteredSubscriptions_opportunistic_grouped_configFalse_showsActive_4() =
         testScope.runTest {
-            connectionsRepository.setSubscriptions(listOf(SUB_3_OPP, SUB_4_OPP))
+            val (sub3, sub4) =
+                createSubscriptionPair(
+                    subscriptionIds = Pair(SUB_3_ID, SUB_4_ID),
+                    opportunistic = Pair(true, true),
+                    grouped = true,
+                )
+            connectionsRepository.setSubscriptions(listOf(sub3, sub4))
             connectionsRepository.setActiveMobileDataSubscriptionId(SUB_4_ID)
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
                 .thenReturn(false)
@@ -139,15 +209,21 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
 
             // Filtered subscriptions should show the active one when the config is false
-            assertThat(latest).isEqualTo(listOf(SUB_4_OPP))
+            assertThat(latest).isEqualTo(listOf(sub4))
 
             job.cancel()
         }
 
     @Test
-    fun filteredSubscriptions_oneOpportunistic_configTrue_showsPrimary_active_1() =
+    fun filteredSubscriptions_oneOpportunistic_grouped_configTrue_showsPrimary_active_1() =
         testScope.runTest {
-            connectionsRepository.setSubscriptions(listOf(SUB_1, SUB_3_OPP))
+            val (sub1, sub3) =
+                createSubscriptionPair(
+                    subscriptionIds = Pair(SUB_1_ID, SUB_3_ID),
+                    opportunistic = Pair(false, true),
+                    grouped = true,
+                )
+            connectionsRepository.setSubscriptions(listOf(sub1, sub3))
             connectionsRepository.setActiveMobileDataSubscriptionId(SUB_1_ID)
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
                 .thenReturn(true)
@@ -157,15 +233,21 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
             // Filtered subscriptions should show the primary (non-opportunistic) if the config is
             // true
-            assertThat(latest).isEqualTo(listOf(SUB_1))
+            assertThat(latest).isEqualTo(listOf(sub1))
 
             job.cancel()
         }
 
     @Test
-    fun filteredSubscriptions_oneOpportunistic_configTrue_showsPrimary_nonActive_1() =
+    fun filteredSubscriptions_oneOpportunistic_grouped_configTrue_showsPrimary_nonActive_1() =
         testScope.runTest {
-            connectionsRepository.setSubscriptions(listOf(SUB_1, SUB_3_OPP))
+            val (sub1, sub3) =
+                createSubscriptionPair(
+                    subscriptionIds = Pair(SUB_1_ID, SUB_3_ID),
+                    opportunistic = Pair(false, true),
+                    grouped = true,
+                )
+            connectionsRepository.setSubscriptions(listOf(sub1, sub3))
             connectionsRepository.setActiveMobileDataSubscriptionId(SUB_3_ID)
             whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
                 .thenReturn(true)
@@ -175,7 +257,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
 
             // Filtered subscriptions should show the primary (non-opportunistic) if the config is
             // true
-            assertThat(latest).isEqualTo(listOf(SUB_1))
+            assertThat(latest).isEqualTo(listOf(sub1))
 
             job.cancel()
         }
@@ -609,6 +691,59 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun isForceHidden_repoHasMobileHidden_true() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isForceHidden.onEach { latest = it }.launchIn(this)
+
+            connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.MOBILE))
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
+    @Test
+    fun isForceHidden_repoDoesNotHaveMobileHidden_false() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isForceHidden.onEach { latest = it }.launchIn(this)
+
+            connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.WIFI))
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
+    /**
+     * Convenience method for creating a pair of subscriptions to test the filteredSubscriptions
+     * flow.
+     */
+    private fun createSubscriptionPair(
+        subscriptionIds: Pair<Int, Int>,
+        opportunistic: Pair<Boolean, Boolean> = Pair(false, false),
+        grouped: Boolean = false,
+    ): Pair<SubscriptionModel, SubscriptionModel> {
+        val groupUuid = if (grouped) ParcelUuid(UUID.randomUUID()) else null
+        val sub1 =
+            SubscriptionModel(
+                subscriptionId = subscriptionIds.first,
+                isOpportunistic = opportunistic.first,
+                groupUuid = groupUuid,
+            )
+
+        val sub2 =
+            SubscriptionModel(
+                subscriptionId = subscriptionIds.second,
+                isOpportunistic = opportunistic.second,
+                groupUuid = groupUuid,
+            )
+
+        return Pair(sub1, sub2)
+    }
+
     companion object {
         private val tableLogBuffer =
             TableLogBuffer(8, "MobileIconsInteractorTest", FakeSystemClock())
@@ -622,11 +757,21 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID, tableLogBuffer)
 
         private const val SUB_3_ID = 3
-        private val SUB_3_OPP = SubscriptionModel(subscriptionId = SUB_3_ID, isOpportunistic = true)
+        private val SUB_3_OPP =
+            SubscriptionModel(
+                subscriptionId = SUB_3_ID,
+                isOpportunistic = true,
+                groupUuid = ParcelUuid(UUID.randomUUID()),
+            )
         private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID, tableLogBuffer)
 
         private const val SUB_4_ID = 4
-        private val SUB_4_OPP = SubscriptionModel(subscriptionId = SUB_4_ID, isOpportunistic = true)
+        private val SUB_4_OPP =
+            SubscriptionModel(
+                subscriptionId = SUB_4_ID,
+                isOpportunistic = true,
+                groupUuid = ParcelUuid(UUID.randomUUID()),
+            )
         private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID, tableLogBuffer)
     }
 }

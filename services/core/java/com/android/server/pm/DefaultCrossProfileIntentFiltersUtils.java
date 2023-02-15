@@ -320,12 +320,26 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 MOBILE_NETWORK_SETTINGS);
     }
 
+    /** Call intent with tel scheme */
+    private static final DefaultCrossProfileIntentFilter CALL =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    SKIP_CURRENT_PROFILE,
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_CALL)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addDataScheme("tel")
+                    .build();
+
     /**
      * Returns default telephony related intent filters for managed profile.
      */
     public static List<DefaultCrossProfileIntentFilter> getDefaultManagedProfileTelephonyFilters() {
         return Arrays.asList(
                 DIAL_DATA,
+                DIAL_MIME,
+                DIAL_RAW,
+                CALL,
                 SMS_MMS);
     }
 

@@ -17,7 +17,9 @@
 package com.android.server.companion.virtual;
 
 import android.annotation.NonNull;
-import android.companion.virtual.sensor.IVirtualSensorStateChangeCallback;
+import android.annotation.Nullable;
+import android.companion.virtual.sensor.IVirtualSensorCallback;
+import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
 import android.os.IBinder;
@@ -40,17 +42,30 @@ public class SensorController {
 
     private static final String TAG = "SensorController";
 
+    // See system/core/libutils/include/utils/Errors.h
+    private static final int OK = 0;
+    private static final int UNKNOWN_ERROR = (-2147483647 - 1); // INT32_MIN value
+    private static final int BAD_VALUE = -22;
+
     private final Object mLock;
     private final int mVirtualDeviceId;
     @GuardedBy("mLock")
     private final Map<IBinder, SensorDescriptor> mSensorDescriptors = new ArrayMap<>();
 
+    @NonNull
+    private final SensorManagerInternal.RuntimeSensorCallback mRuntimeSensorCallback;
     private final SensorManagerInternal mSensorManagerInternal;
+    private final VirtualDeviceManagerInternal mVdmInternal;
 
-    public SensorController(@NonNull Object lock, int virtualDeviceId) {
+
+
+    public SensorController(@NonNull Object lock, int virtualDeviceId,
+            @Nullable IVirtualSensorCallback virtualSensorCallback) {
         mLock = lock;
         mVirtualDeviceId = virtualDeviceId;
+        mRuntimeSensorCallback = new RuntimeSensorCallbackWrapper(virtualSensorCallback);
         mSensorManagerInternal = LocalServices.getService(SensorManagerInternal.class);
+        mVdmInternal = LocalServices.getService(VirtualDeviceManagerInternal.class);
     }
 
     void close() {
@@ -67,36 +82,23 @@ public class SensorController {
         }
     }
 
-    void createSensor(@NonNull IBinder deviceToken, @NonNull VirtualSensorConfig config) {
-        Objects.requireNonNull(deviceToken);
+    int createSensor(@NonNull IBinder sensorToken, @NonNull VirtualSensorConfig config) {
+        Objects.requireNonNull(sensorToken);
         Objects.requireNonNull(config);
         try {
-            createSensorInternal(deviceToken, config);
+            return createSensorInternal(sensorToken, config);
         } catch (SensorCreationException e) {
             throw new RuntimeException(
                     "Failed to create virtual sensor '" + config.getName() + "'.", e);
         }
     }
 
-    private void createSensorInternal(IBinder deviceToken, VirtualSensorConfig config)
+    private int createSensorInternal(IBinder sensorToken, VirtualSensorConfig config)
             throws SensorCreationException {
-        final SensorManagerInternal.RuntimeSensorStateChangeCallback runtimeSensorCallback =
-                (enabled, samplingPeriodMicros, batchReportLatencyMicros) -> {
-                    IVirtualSensorStateChangeCallback callback = config.getStateChangeCallback();
-                    if (callback != null) {
-                        try {
-                            callback.onStateChanged(
-                                    enabled, samplingPeriodMicros, batchReportLatencyMicros);
-                        } catch (RemoteException e) {
-                            throw new RuntimeException("Failed to call sensor callback.", e);
-                        }
-                    }
-                };
-
         final int handle = mSensorManagerInternal.createRuntimeSensor(mVirtualDeviceId,
                 config.getType(), config.getName(),
                 config.getVendor() == null ? "" : config.getVendor(),
-                runtimeSensorCallback);
+                mRuntimeSensorCallback);
         if (handle <= 0) {
             throw new SensorCreationException("Received an invalid virtual sensor handle.");
         }
@@ -104,8 +106,8 @@ public class SensorController {
         // The handle is valid from here, so ensure that all failures clean it up.
         final BinderDeathRecipient binderDeathRecipient;
         try {
-            binderDeathRecipient = new BinderDeathRecipient(deviceToken);
-            deviceToken.linkToDeath(binderDeathRecipient, /* flags= */ 0);
+            binderDeathRecipient = new BinderDeathRecipient(sensorToken);
+            sensorToken.linkToDeath(binderDeathRecipient, /* flags= */ 0);
         } catch (RemoteException e) {
             mSensorManagerInternal.removeRuntimeSensor(handle);
             throw new SensorCreationException("Client died before sensor could be created.", e);
@@ -114,8 +116,9 @@ public class SensorController {
         synchronized (mLock) {
             SensorDescriptor sensorDescriptor = new SensorDescriptor(
                     handle, config.getType(), config.getName(), binderDeathRecipient);
-            mSensorDescriptors.put(deviceToken, sensorDescriptor);
+            mSensorDescriptors.put(sensorToken, sensorDescriptor);
         }
+        return handle;
     }
 
     boolean sendSensorEvent(@NonNull IBinder token, @NonNull VirtualSensorEvent event) {
@@ -178,6 +181,39 @@ public class SensorController {
         }
     }
 
+    private final class RuntimeSensorCallbackWrapper
+            implements SensorManagerInternal.RuntimeSensorCallback {
+        @Nullable
+        private IVirtualSensorCallback mCallback;
+
+        RuntimeSensorCallbackWrapper(@Nullable IVirtualSensorCallback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public int onConfigurationChanged(int handle, boolean enabled, int samplingPeriodMicros,
+                int batchReportLatencyMicros) {
+            if (mCallback == null) {
+                Slog.e(TAG, "No sensor callback configured for sensor handle " + handle);
+                return BAD_VALUE;
+            }
+            VirtualSensor sensor = mVdmInternal.getVirtualSensor(mVirtualDeviceId, handle);
+            if (sensor == null) {
+                Slog.e(TAG, "No sensor found for deviceId=" + mVirtualDeviceId
+                        + " and sensor handle=" + handle);
+                return BAD_VALUE;
+            }
+            try {
+                mCallback.onConfigurationChanged(sensor, enabled, samplingPeriodMicros,
+                        batchReportLatencyMicros);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call sensor callback: " + e);
+                return UNKNOWN_ERROR;
+            }
+            return OK;
+        }
+    }
+
     @VisibleForTesting
     static final class SensorDescriptor {
 
@@ -207,10 +243,10 @@ public class SensorController {
     }
 
     private final class BinderDeathRecipient implements IBinder.DeathRecipient {
-        private final IBinder mDeviceToken;
+        private final IBinder mSensorToken;
 
-        BinderDeathRecipient(IBinder deviceToken) {
-            mDeviceToken = deviceToken;
+        BinderDeathRecipient(IBinder sensorToken) {
+            mSensorToken = sensorToken;
         }
 
         @Override
@@ -219,7 +255,7 @@ public class SensorController {
             // quitting, which removes this death recipient. If this is invoked, the remote end
             // died, or they disposed of the object without properly unregistering.
             Slog.e(TAG, "Virtual sensor controller binder died");
-            unregisterSensor(mDeviceToken);
+            unregisterSensor(mSensorToken);
         }
     }
 

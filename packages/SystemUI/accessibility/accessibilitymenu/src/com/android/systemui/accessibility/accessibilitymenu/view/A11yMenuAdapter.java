@@ -27,6 +27,7 @@ import android.widget.TextView;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
 import com.android.systemui.accessibility.accessibilitymenu.R;
+import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
 import com.android.systemui.accessibility.accessibilitymenu.utils.ShortcutDrawableUtils;
 
@@ -124,7 +125,12 @@ public class A11yMenuAdapter extends BaseAdapter {
         ImageButton shortcutIconButton = convertView.findViewById(R.id.shortcutIconBtn);
         TextView shortcutLabel = convertView.findViewById(R.id.shortcutLabel);
 
-        // TODO: Enlarge shortcut icon & label when large button setting is on.
+        if (A11yMenuPreferenceFragment.isLargeButtonsEnabled(mService)) {
+            ViewGroup.LayoutParams params = shortcutIconButton.getLayoutParams();
+            params.width = (int) (params.width * LARGE_BUTTON_SCALE);
+            params.height = (int) (params.height * LARGE_BUTTON_SCALE);
+            shortcutLabel.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, mLargeTextSize);
+        }
 
         if (shortcutItem.getId() == A11yMenuShortcut.ShortcutId.UNSPECIFIED_ID_VALUE.ordinal()) {
             // Sets empty shortcut icon and label when the shortcut is ADD_ITEM.

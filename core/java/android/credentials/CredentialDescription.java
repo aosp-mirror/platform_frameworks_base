@@ -48,7 +48,7 @@ public final class CredentialDescription implements Parcelable {
     private final String mFlattenedRequestString;
 
     /**
-     * The entry to be used in the UI.
+     * The credential entries to be used in the UI.
      */
     @NonNull
     private final List<CredentialEntry> mCredentialEntries;
@@ -128,16 +128,25 @@ public final class CredentialDescription implements Parcelable {
         dest.writeTypedList(mCredentialEntries, flags);
     }
 
+    /**
+     * Returns the type of the Credential described.
+     */
     @NonNull
     public String getType() {
         return mType;
     }
 
+    /**
+     * Returns the flattened JSON string that will be matched with requests.
+     */
     @NonNull
     public String getFlattenedRequestString() {
         return mFlattenedRequestString;
     }
 
+    /**
+     * Returns the credential entries to be used in the UI.
+     */
     @NonNull
     public List<CredentialEntry> getCredentialEntries() {
         return mCredentialEntries;
@@ -151,6 +160,7 @@ public final class CredentialDescription implements Parcelable {
     @Override
     public boolean equals(Object obj) {
         return Objects.equals(mType, ((CredentialDescription) obj).getType())
-                && Objects.equals(mFlattenedRequestString, ((CredentialDescription) obj).getType());
+                && Objects.equals(mFlattenedRequestString, ((CredentialDescription) obj)
+                .getFlattenedRequestString());
     }
 }

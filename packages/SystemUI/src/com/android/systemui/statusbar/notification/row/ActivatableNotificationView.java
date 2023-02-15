@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.IndentingPrintWriter;
 import android.util.MathUtils;
 import android.view.Choreographer;
 import android.view.MotionEvent;
@@ -43,7 +44,9 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.util.DumpUtilsKt;
 
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -651,11 +654,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundNormal.setRadius(topRadius, bottomRadius);
     }
 
-    @Override
-    protected void setBackgroundTop(int backgroundTop) {
-        mBackgroundNormal.setBackgroundTop(backgroundTop);
-    }
-
     protected abstract View getContentView();
 
     public int calculateBgColor() {
@@ -817,6 +815,22 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      */
     public void addOnDetachResetRoundness(SourceType sourceType) {
         mOnDetachResetRoundness.add(sourceType);
+    }
+
+    @Override
+    public void dump(PrintWriter pwOriginal, String[] args) {
+        IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
+        super.dump(pw, args);
+        if (DUMP_VERBOSE) {
+            DumpUtilsKt.withIncreasedIndent(pw, () -> {
+                pw.println("mBackgroundNormal: " + mBackgroundNormal);
+                if (mBackgroundNormal != null) {
+                    DumpUtilsKt.withIncreasedIndent(pw, () -> {
+                        mBackgroundNormal.dump(pw, args);
+                    });
+                }
+            });
+        }
     }
 
     public interface OnActivatedListener {

@@ -225,7 +225,6 @@ public final class DeviceInfo implements Parcelable {
      *
      * @return Returns the battery charge percentage in the range 0 to 100.
      */
-    @NonNull
     @IntRange(from = 0, to = 100)
     public int getBatteryPercentage() {
         return mBatteryPercentage;
@@ -236,7 +235,6 @@ public final class DeviceInfo implements Parcelable {
      *
      * @return Returns the connection strength in range 0 to 3.
      */
-    @NonNull
     @IntRange(from = 0, to = 3)
     public int getConnectionStrength() {
         return mConnectionStrength;
@@ -272,12 +270,22 @@ public final class DeviceInfo implements Parcelable {
         return 0;
     }
 
+    /**
+     * Creates a {@link DeviceInfo} object from a parcel.
+     *
+     * @hide
+     */
+    @NonNull
+    public static DeviceInfo readFromParcel(@NonNull Parcel in) {
+        return new DeviceInfo(in.readInt(), in.readString(), in.readString(), in.readInt(),
+                in.readInt());
+    }
+
     @NonNull
     public static final Creator<DeviceInfo> CREATOR = new Creator<DeviceInfo>() {
         @Override
         public DeviceInfo createFromParcel(Parcel in) {
-            return new DeviceInfo(in.readInt(), in.readString(), in.readString(), in.readInt(),
-                    in.readInt());
+            return readFromParcel(in);
         }
 
         @Override

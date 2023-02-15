@@ -206,6 +206,8 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR = 1;
     private static final boolean DEFAULT_FGS_ALLOW_OPT_OUT = false;
 
+    private static final boolean DEFAULT_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED = true;
+
     /**
      * The extra delays we're putting to service restarts, based on current memory pressure.
      */
@@ -259,6 +261,10 @@ final class ActivityManagerConstants extends ContentObserver {
       * Depends on KEY_PROACTIVE_KILLS_ENABLED
       */
     private static final String KEY_LOW_SWAP_THRESHOLD_PERCENT = "low_swap_threshold_percent";
+
+    /** Default value for mFlagApplicationStartInfoEnabled. Defaults to false. */
+    private static final String KEY_DEFAULT_APPLICATION_START_INFO_ENABLED =
+            "enable_app_start_info";
 
     /**
      * Default value for mFlagBackgroundActivityStartsEnabled if not explicitly set in
@@ -337,6 +343,12 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     private static final String KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT =
             "deferred_fgs_notification_exclusion_time_for_short";
+
+    /**
+     * Default value for mFlagSystemExemptPowerRestrictionEnabled.
+     */
+    private static final String KEY_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED =
+            "system_exempt_power_restrictions_enabled";
 
     /**
      * Default value for mPushMessagingOverQuotaBehavior if not explicitly set in
@@ -550,6 +562,9 @@ final class ActivityManagerConstants extends ContentObserver {
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
     volatile boolean mFlagActivityStartsLoggingEnabled;
 
+    // Indicates whether ApplicationStartInfo is enabled.
+    volatile boolean mFlagApplicationStartInfoEnabled;
+
     // Indicates whether the background activity starts is enabled.
     // Controlled by Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED.
     // If not set explicitly the default is controlled by DeviceConfig.
@@ -609,6 +624,13 @@ final class ActivityManagerConstants extends ContentObserver {
      */
     volatile long mFgsNotificationDeferralExclusionTimeForShort =
             mFgsNotificationDeferralExclusionTime;
+
+    // Indicates whether the system-applied exemption from all power restrictions is enabled.
+    // When the exemption is enabled, any app which has the OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS
+    // app op will be exempt from all power-related restrictions, including app standby
+    // and doze. In addition, the app will be able to start foreground services from the background,
+    // and the user will not be able to stop foreground services run by the app.
+    volatile boolean mFlagSystemExemptPowerRestrictionsEnabled = true;
 
     /**
      * When server pushing message is over the quote, select one of the temp allow list type as
@@ -955,6 +977,20 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION;
 
     /**
+     * If enabled, when starting an application, the system will wait for a
+     * {@link ActivityManagerService#finishAttachApplication} from the app before scheduling
+     * Broadcasts or Services to it.
+     */
+    private static final String KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION =
+            "enable_wait_for_finish_attach_application";
+
+    private static final boolean DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION = false;
+
+    /** @see #KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION */
+    public volatile boolean mEnableWaitForFinishAttachApplication =
+            DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION;
+
+    /**
      * If a "short service" doesn't finish within this after the timeout (
      * {@link #KEY_SHORT_FGS_TIMEOUT_DURATION}), then we'll declare an ANR.
      * i.e. if the timeout is 60 seconds, and this ANR extra duration is 5 seconds, then
@@ -981,6 +1017,9 @@ final class ActivityManagerConstants extends ContentObserver {
                         switch (name) {
                             case KEY_MAX_CACHED_PROCESSES:
                                 updateMaxCachedProcesses();
+                                break;
+                            case KEY_DEFAULT_APPLICATION_START_INFO_ENABLED:
+                                updateApplicationStartInfoEnabled();
                                 break;
                             case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
                                 updateBackgroundActivityStarts();
@@ -1014,6 +1053,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT:
                                 updateFgsNotificationDeferralExclusionTimeForShort();
+                                break;
+                            case KEY_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED:
+                                updateSystemExemptPowerRestrictionsEnabled();
                                 break;
                             case KEY_PUSH_MESSAGING_OVER_QUOTA_BEHAVIOR:
                                 updatePushMessagingOverQuotaBehavior();
@@ -1125,6 +1167,10 @@ final class ActivityManagerConstants extends ContentObserver {
                                 break;
                             case KEY_TOP_TO_FGS_GRACE_DURATION:
                                 updateTopToFgsGraceDuration();
+                                break;
+                            case KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION:
+                                updateEnableWaitForFinishAttachApplication();
+                                break;
                             default:
                                 break;
                         }
@@ -1372,6 +1418,14 @@ final class ActivityManagerConstants extends ContentObserver {
                 Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED, 1) == 1;
     }
 
+    private void updateApplicationStartInfoEnabled() {
+        mFlagApplicationStartInfoEnabled =
+                DeviceConfig.getBoolean(
+                        DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                        KEY_DEFAULT_APPLICATION_START_INFO_ENABLED,
+                        /*defaultValue*/ false);
+    }
+
     private void updateBackgroundActivityStarts() {
         mFlagBackgroundActivityStartsEnabled = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
@@ -1452,6 +1506,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT,
                 /*default value*/ 2 * 60 * 1000L);
+    }
+
+    private void updateSystemExemptPowerRestrictionsEnabled() {
+        mFlagSystemExemptPowerRestrictionsEnabled = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED,
+                DEFAULT_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED);
     }
 
     private void updatePushMessagingOverQuotaBehavior() {
@@ -1840,6 +1901,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_SHORT_FGS_ANR_EXTRA_WAIT_DURATION);
     }
 
+    private void updateEnableWaitForFinishAttachApplication() {
+        mEnableWaitForFinishAttachApplication = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION,
+                DEFAULT_ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION);
+    }
+
     @NeverCompile // Avoid size overhead of debugging code.
     void dump(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER SETTINGS (dumpsys activity settings) "
@@ -1945,6 +2013,10 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(mFgToBgFgsGraceDuration);
         pw.print("  "); pw.print(KEY_FGS_START_FOREGROUND_TIMEOUT); pw.print("=");
         pw.println(mFgsStartForegroundTimeoutMs);
+        pw.print("  ");
+        pw.print(KEY_DEFAULT_APPLICATION_START_INFO_ENABLED);
+        pw.print("=");
+        pw.println(mFlagApplicationStartInfoEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED); pw.print("=");
         pw.println(mFlagBackgroundActivityStartsEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_BACKGROUND_FGS_STARTS_RESTRICTION_ENABLED);
@@ -2010,6 +2082,9 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  "); pw.print(KEY_DEFERRED_FGS_NOTIFICATION_EXCLUSION_TIME_FOR_SHORT);
         pw.print("="); pw.println(mFgsNotificationDeferralExclusionTimeForShort);
 
+        pw.print("  "); pw.print(KEY_SYSTEM_EXEMPT_POWER_RESTRICTIONS_ENABLED);
+        pw.print("="); pw.println(mFlagSystemExemptPowerRestrictionsEnabled);
+
         pw.print("  "); pw.print(KEY_SHORT_FGS_TIMEOUT_DURATION);
         pw.print("="); pw.println(mShortFgsTimeoutDuration);
         pw.print("  "); pw.print(KEY_SHORT_FGS_PROC_STATE_EXTRA_WAIT_DURATION);
@@ -2027,5 +2102,7 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.print("  CUR_TRIM_EMPTY_PROCESSES="); pw.println(CUR_TRIM_EMPTY_PROCESSES);
         pw.print("  CUR_TRIM_CACHED_PROCESSES="); pw.println(CUR_TRIM_CACHED_PROCESSES);
         pw.print("  OOMADJ_UPDATE_QUICK="); pw.println(OOMADJ_UPDATE_QUICK);
+        pw.print("  ENABLE_WAIT_FOR_FINISH_ATTACH_APPLICATION=");
+        pw.println(mEnableWaitForFinishAttachApplication);
     }
 }

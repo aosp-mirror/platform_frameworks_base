@@ -99,7 +99,7 @@ object ItemOperatePageProvider : SettingsPageProvider {
 
         return SettingsEntryBuilder.createInject(
             owner = createSettingsPage(arguments),
-            displayName = "ItemOp_$opParam",
+            label = "ItemOp_$opParam",
         ).setUiLayoutFn {
             // Item name is a runtime parameter, which needs to be read inside UiLayoutFn
             val itemName = parameter.getStringArg(ITEM_NAME_PARAM_NAME, it) ?: "NULL"

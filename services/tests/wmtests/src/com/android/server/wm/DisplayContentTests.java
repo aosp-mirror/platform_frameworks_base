@@ -2020,13 +2020,13 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
 
         // Once transition starts, rotation is applied and transition shows DC rotating.
-        testPlayer.start();
+        testPlayer.startTransition();
         assertNotEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
         assertNotNull(testPlayer.mLastReady);
+        assertTrue(testPlayer.mController.isPlaying());
         WindowContainerToken dcToken = dc.mRemoteToken.toWindowContainerToken();
         assertNotEquals(testPlayer.mLastReady.getChange(dcToken).getEndRotation(),
                 testPlayer.mLastReady.getChange(dcToken).getStartRotation());
-        assertTrue(testPlayer.mLastTransit.applyDisplayChangeIfNeeded());
         testPlayer.finish();
     }
 

@@ -223,7 +223,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (op == null) return;
         if (op.mDrawTransaction != null) {
             // Unblock the window to show its latest content.
-            mDisplayContent.getPendingTransaction().merge(op.mDrawTransaction);
+            windowToken.getSyncTransaction().merge(op.mDrawTransaction);
             op.mDrawTransaction = null;
             if (DEBUG) Slog.d(TAG, "finishOp merge transaction " + windowToken.getTopChild());
         }
@@ -235,7 +235,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         } else if (op.mAction == Operation.ACTION_SEAMLESS && mRotator != null
                 && op.mLeash != null && op.mLeash.isValid()) {
             if (DEBUG) Slog.d(TAG, "finishOp undo seamless " + windowToken.getTopChild());
-            mRotator.setIdentityMatrix(mDisplayContent.getPendingTransaction(), op.mLeash);
+            mRotator.setIdentityMatrix(windowToken.getSyncTransaction(), op.mLeash);
         }
     }
 
@@ -322,7 +322,8 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (mTimeoutRunnable == null) {
             mTimeoutRunnable = () -> {
                 synchronized (mService.mGlobalLock) {
-                    Slog.i(TAG, "Async rotation timeout: " + mTargetWindowTokens);
+                    Slog.i(TAG, "Async rotation timeout: " + (!mIsStartTransactionCommitted
+                            ? " start transaction is not committed" : mTargetWindowTokens));
                     mIsStartTransactionCommitted = true;
                     mDisplayContent.finishAsyncRotationIfPossible();
                     mService.mWindowPlacerLocked.performSurfacePlacement();
@@ -484,12 +485,17 @@ class AsyncRotationController extends FadeAnimationController implements Consume
      * by this controller.
      */
     boolean handleFinishDrawing(WindowState w, SurfaceControl.Transaction postDrawTransaction) {
-        if (mTransitionOp == OP_LEGACY || postDrawTransaction == null || !mIsSyncDrawRequested) {
+        if (mTransitionOp == OP_LEGACY) {
             return false;
         }
         final Operation op = mTargetWindowTokens.get(w.mToken);
-        if (op == null || op.canDrawBeforeStartTransaction()) return false;
+        if (op == null) return false;
         if (DEBUG) Slog.d(TAG, "handleFinishDrawing " + w);
+        if (postDrawTransaction == null || !mIsSyncDrawRequested
+                || op.canDrawBeforeStartTransaction()) {
+            mDisplayContent.finishAsyncRotation(w.mToken);
+            return false;
+        }
         if (op.mDrawTransaction == null) {
             if (w.isClientLocal()) {
                 // Use a new transaction to merge the draw transaction of local window because the

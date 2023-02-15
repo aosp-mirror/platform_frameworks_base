@@ -173,6 +173,7 @@ public final class SurfaceControl implements Parcelable {
             boolean isTrustedOverlay);
     private static native void nativeSetDropInputMode(
             long transactionObj, long nativeObject, int flags);
+    private static native void nativeSurfaceFlushJankData(long nativeSurfaceObject);
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
     private static native boolean nativeClearAnimationFrameStats();
@@ -479,6 +480,14 @@ public final class SurfaceControl implements Parcelable {
 
     private WeakReference<View> mLocalOwnerView;
 
+    // A throwable with the stack filled when this SurfaceControl is released (only if
+    // sDebugUsageAfterRelease) is enabled
+    private Throwable mReleaseStack = null;
+
+    // Triggers the stack to be saved when any SurfaceControl in this process is released, which can
+    // be dumped as additional context
+    private static volatile boolean sDebugUsageAfterRelease = false;
+
     static GlobalTransactionWrapper sGlobalTransaction;
     static long sTransactionNestCount = 0;
 
@@ -733,13 +742,6 @@ public final class SurfaceControl implements Parcelable {
      */
     public static final int POWER_MODE_ON_SUSPEND = 4;
 
-    /**
-     * internal representation of how to interpret pixel value, used only to convert to ColorSpace.
-     */
-    private static final int INTERNAL_DATASPACE_SRGB = 142671872;
-    private static final int INTERNAL_DATASPACE_DISPLAY_P3 = 143261696;
-    private static final int INTERNAL_DATASPACE_SCRGB = 411107328;
-
     private void assignNativeObject(long nativeObject, String callsite) {
         if (mNativeObject != 0) {
             release();
@@ -751,6 +753,11 @@ public final class SurfaceControl implements Parcelable {
         }
         mNativeObject = nativeObject;
         mNativeHandle = mNativeObject != 0 ? nativeGetHandle(nativeObject) : 0;
+        if (sDebugUsageAfterRelease && mNativeObject == 0) {
+            mReleaseStack = new Throwable("Assigned invalid nativeObject");
+        } else {
+            mReleaseStack = null;
+        }
     }
 
     /**
@@ -1246,6 +1253,9 @@ public final class SurfaceControl implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (sDebugUsageAfterRelease) {
+            checkNotReleased();
+        }
         dest.writeString8(mName);
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
@@ -1262,6 +1272,32 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
+     * Enables additional debug logs to track usage-after-release of all SurfaceControls in this
+     * process.
+     * @hide
+     */
+    public static void setDebugUsageAfterRelease(boolean debug) {
+        if (!Build.isDebuggable()) {
+            return;
+        }
+        sDebugUsageAfterRelease = debug;
+    }
+
+    /**
+     * Provides more information to show about the source of this SurfaceControl if it is finalized
+     * without being released. This is primarily intended for callers to update the call site after
+     * receiving a SurfaceControl from another process, which would otherwise get a generic default
+     * call site.
+     * @hide
+     */
+    public void setUnreleasedWarningCallSite(@NonNull String callsite) {
+        if (!isValid()) {
+            return;
+        }
+        mCloseGuard.openWithCallSite("release", callsite);
+    }
+
+    /**
      * Checks whether two {@link SurfaceControl} objects represent the same surface.
      *
      * @param other The other object to check
@@ -1274,27 +1310,36 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * Returns the associated {@link Choreographer} instance with the
-     * current instance of the SurfaceControl.
-     * Must be called from a thread that already has a {@link android.os.Looper}
-     * associated with it.
-     * If there is no {@link Choreographer} associated with the SurfaceControl then a new instance
-     * of the {@link Choreographer} is created.
+     * When called for the first time a new instance of the {@link Choreographer} is created
+     * with a {@link android.os.Looper} of the current thread. Every subsequent call will return
+     * the same instance of the Choreographer.
+     *
+     * @see #getChoreographer(Looper) to create Choreographer with a different
+     * looper than current thread looper.
      *
      * @hide
      */
     @TestApi
     public @NonNull Choreographer getChoreographer() {
-        return getChoreographer(Looper.myLooper());
+        checkNotReleased();
+        synchronized (mChoreographerLock) {
+            if (mChoreographer == null) {
+                return getChoreographer(Looper.myLooper());
+            }
+            return mChoreographer;
+        }
     }
 
     /**
-     * Returns the associated {@link Choreographer} instance with the
-     * current instance of the SurfaceControl.
-     * If there is no {@link Choreographer} associated with the SurfaceControl then a new instance
-     * of the {@link Choreographer} is created.
+     * When called for the first time a new instance of the {@link Choreographer} is created with
+     * the sourced {@link android.os.Looper}. Every subsequent call will return the same
+     * instance of the Choreographer.
      *
-     * @param looper the choreographer is attached on this looper
+     * @see #getChoreographer()
+     *
+     * @throws IllegalStateException when a {@link Choreographer} instance exists with a different
+     * looper than sourced.
+     * @param looper the choreographer is attached on this looper.
      *
      * @hide
      */
@@ -1302,11 +1347,12 @@ public final class SurfaceControl implements Parcelable {
     public @NonNull Choreographer getChoreographer(@NonNull Looper looper) {
         checkNotReleased();
         synchronized (mChoreographerLock) {
-            if (mChoreographer != null) {
-                return mChoreographer;
+            if (mChoreographer == null) {
+                mChoreographer = Choreographer.getInstanceForSurfaceControl(mNativeHandle, looper);
+            } else if (!mChoreographer.isTheLooperSame(looper)) {
+                throw new IllegalStateException(
+                        "Choreographer already exists with a different looper");
             }
-
-            mChoreographer = Choreographer.getInstanceForSurfaceControl(mNativeHandle, looper);
             return mChoreographer;
         }
     }
@@ -1382,6 +1428,9 @@ public final class SurfaceControl implements Parcelable {
             mFreeNativeResources.run();
             mNativeObject = 0;
             mNativeHandle = 0;
+            if (sDebugUsageAfterRelease) {
+                mReleaseStack = new Throwable("Released");
+            }
             mCloseGuard.close();
             synchronized (mChoreographerLock) {
                 if (mChoreographer != null) {
@@ -1403,8 +1452,15 @@ public final class SurfaceControl implements Parcelable {
     }
 
     private void checkNotReleased() {
-        if (mNativeObject == 0) throw new NullPointerException(
-                "Invalid " + this + ", mNativeObject is null. Have you called release() already?");
+        if (mNativeObject == 0) {
+            if (mReleaseStack != null) {
+                throw new IllegalStateException("Invalid usage after release of " + this,
+                        mReleaseStack);
+            } else {
+                throw new NullPointerException("mNativeObject of " + this
+                        + " is null. Have you called release() already?");
+            }
+        }
     }
 
     /**
@@ -2132,18 +2188,9 @@ public final class SurfaceControl implements Parcelable {
         ColorSpace[] colorSpaces = { srgb, srgb };
         if (dataspaces.length == 2) {
             for (int i = 0; i < 2; ++i) {
-                switch(dataspaces[i]) {
-                    case INTERNAL_DATASPACE_DISPLAY_P3:
-                        colorSpaces[i] = ColorSpace.get(ColorSpace.Named.DISPLAY_P3);
-                        break;
-                    case INTERNAL_DATASPACE_SCRGB:
-                        colorSpaces[i] = ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB);
-                        break;
-                    case INTERNAL_DATASPACE_SRGB:
-                    // Other dataspace is not recognized, use SRGB color space instead,
-                    // the default value of the array is already SRGB, thus do nothing.
-                    default:
-                        break;
+                ColorSpace cs = ColorSpace.getFromDataSpace(dataspaces[i]);
+                if (cs != null) {
+                    colorSpaces[i] = cs;
                 }
             }
         }
@@ -2738,7 +2785,7 @@ public final class SurfaceControl implements Parcelable {
          */
         @NonNull
         public Transaction setFrameRateSelectionPriority(@NonNull SurfaceControl sc, int priority) {
-            sc.checkNotReleased();
+            checkPreconditions(sc);
             nativeSetFrameRateSelectionPriority(mNativeObject, sc.mNativeObject, priority);
             return this;
         }
@@ -3789,7 +3836,7 @@ public final class SurfaceControl implements Parcelable {
          * whose dataspace has RANGE_EXTENDED.
          *
          * @param sc The layer whose extended range brightness is being specified
-         * @param currentBufferRatio The current sdr/hdr ratio of the current buffer. For example
+         * @param currentBufferRatio The current hdr/sdr ratio of the current buffer. For example
          *                           if the buffer was rendered with a target SDR whitepoint of
          *                           100 nits and a max display brightness of 200 nits, this should
          *                           be set to 2.0f.
@@ -3801,7 +3848,9 @@ public final class SurfaceControl implements Parcelable {
          *                           communicate extended content brightness information via
          *                           metadata such as CTA861_3 or SMPTE2086.
          *
-         * @param desiredRatio The desired sdr/hdr ratio. This can be used to communicate the max
+         *                           Must be finite && >= 1.0f
+         *
+         * @param desiredRatio The desired hdr/sdr ratio. This can be used to communicate the max
          *                     desired brightness range. This is similar to the "max luminance"
          *                     value in other HDR metadata formats, but represented as a ratio of
          *                     the target SDR whitepoint to the max display brightness. The system
@@ -3813,12 +3862,19 @@ public final class SurfaceControl implements Parcelable {
          *                     voluntarily reducing the requested range can help improve battery
          *                     life as well as can improve quality by ensuring greater bit depth
          *                     is allocated to the luminance range in use.
+         *
+         *                     Must be finite && >= 1.0f
          * @return this
-         * @hide
          **/
         public @NonNull Transaction setExtendedRangeBrightness(@NonNull SurfaceControl sc,
                 float currentBufferRatio, float desiredRatio) {
             checkPreconditions(sc);
+            if (!Float.isFinite(currentBufferRatio) || currentBufferRatio < 1.0f) {
+                throw new IllegalArgumentException("currentBufferRatio must be finite && >= 1.0f");
+            }
+            if (!Float.isFinite(desiredRatio) || desiredRatio < 1.0f) {
+                throw new IllegalArgumentException("desiredRatio must be finite && >= 1.0f");
+            }
             nativeSetExtendedRangeBrightness(mNativeObject, sc.mNativeObject, currentBufferRatio,
                     desiredRatio);
             return this;
@@ -3844,6 +3900,15 @@ public final class SurfaceControl implements Parcelable {
             checkPreconditions(sc);
             nativeSetDropInputMode(mNativeObject, sc.mNativeObject, mode);
             return this;
+        }
+
+        /**
+         * Sends a flush jank data transaction for the given surface.
+         * @hide
+         */
+        public static void sendSurfaceFlushJankData(SurfaceControl sc) {
+            sc.checkNotReleased();
+            nativeSurfaceFlushJankData(sc.mNativeObject);
         }
 
         /**

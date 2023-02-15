@@ -25,6 +25,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.Airplane
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigCoreStartable
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileRepositorySwitcher
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
@@ -82,6 +83,11 @@ abstract class StatusBarPipelineModule {
     @ClassKey(MobileUiAdapter::class)
     abstract fun bindFeature(impl: MobileUiAdapter): CoreStartable
 
+    @Binds
+    @IntoMap
+    @ClassKey(CarrierConfigCoreStartable::class)
+    abstract fun bindCarrierConfigStartable(impl: CarrierConfigCoreStartable): CoreStartable
+
     companion object {
         @Provides
         @SysUISingleton
@@ -111,6 +117,13 @@ abstract class StatusBarPipelineModule {
         @AirplaneTableLog
         fun provideAirplaneTableLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
             return factory.create("AirplaneTableLog", 30)
+        }
+
+        @Provides
+        @SysUISingleton
+        @MobileSummaryLog
+        fun provideMobileSummaryLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
+            return factory.create("MobileSummaryLog", 100)
         }
     }
 }

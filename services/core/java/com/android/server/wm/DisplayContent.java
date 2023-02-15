@@ -59,7 +59,6 @@ import static android.view.WindowInsets.Type.systemGestures;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
-import static android.view.WindowManager.LayoutParams;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -1014,6 +1013,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
                 mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing
                         |= w.mAttrs.preferMinimalPostProcessing;
+
+                mTmpApplySurfaceChangesTransactionState.disableHdrConversion
+                        |= !(w.mAttrs.isHdrConversionEnabled());
 
                 final int preferredModeId = getDisplayPolicy().getRefreshRatePolicy()
                         .getPreferredModeId(w);
@@ -2138,6 +2140,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (!shellTransitions) {
             forAllWindows(w -> {
                 w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
+                if (!rotateSeamlessly && w.mHasSurface) {
+                    ProtoLog.v(WM_DEBUG_ORIENTATION, "Set mOrientationChanging of %s", w);
+                    w.setOrientationChanging(true);
+                }
             }, true /* traverseTopToBottom */);
             mPinnedTaskController.startSeamlessRotationIfNeeded(transaction, oldRotation, rotation);
             if (!mDisplayRotation.hasSeamlessRotatingWindow()) {
@@ -2149,25 +2155,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWmService.mDisplayManagerInternal.performTraversal(transaction);
         scheduleAnimation();
 
-        forAllWindows(w -> {
-            if (!w.mHasSurface) return;
-            if (!rotateSeamlessly) {
-                ProtoLog.v(WM_DEBUG_ORIENTATION, "Set mOrientationChanging of %s", w);
-                w.setOrientationChanging(true);
-            }
-        }, true /* traverseTopToBottom */);
-
-        for (int i = mWmService.mRotationWatchers.size() - 1; i >= 0; i--) {
-            final WindowManagerService.RotationWatcher rotationWatcher
-                    = mWmService.mRotationWatchers.get(i);
-            if (rotationWatcher.mDisplayId == mDisplayId) {
-                try {
-                    rotationWatcher.mWatcher.onRotationChanged(rotation);
-                } catch (RemoteException e) {
-                    // Ignore
-                }
-            }
-        }
+        mWmService.mRotationWatcherController.dispatchDisplayRotationChange(mDisplayId, rotation);
     }
 
     void configureDisplayPolicy() {
@@ -3141,22 +3129,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * Returns true if the input point is within an app window.
-     */
-    boolean pointWithinAppWindow(int x, int y) {
-        final int[] targetWindowType = {-1};
-        forAllWindows(w -> {
-            if (w.isOnScreen() && w.isVisible() && w.getFrame().contains(x, y)) {
-                targetWindowType[0] = w.mAttrs.type;
-                return true;
-            }
-            return false;
-        }, true /* traverseTopToBottom */);
-        return FIRST_APPLICATION_WINDOW <= targetWindowType[0]
-                && targetWindowType[0] <= LAST_APPLICATION_WINDOW;
-    }
-
-    /**
      * Find the task whose outside touch area (for resizing) (x, y) falls within.
      * Returns null if the touch doesn't fall into a resizing area.
      */
@@ -3953,23 +3925,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    // TODO: This should probably be called any time a visual change is made to the hierarchy like
-    // moving containers or resizing them. Need to investigate the best way to have it automatically
-    // happen so we don't run into issues with programmers forgetting to do it.
-    void layoutAndAssignWindowLayersIfNeeded() {
-        mWmService.mWindowsChanged = true;
-        setLayoutNeeded();
-
-        if (!mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
-                false /*updateInputWindows*/)) {
-            assignWindowLayers(false /* setLayoutNeeded */);
-        }
-
-        mInputMonitor.setUpdateInputWindowsNeededLw();
-        mWmService.mWindowPlacerLocked.performSurfacePlacement();
-        mInputMonitor.updateInputWindowsLw(false /*force*/);
-    }
-
     /** Returns true if a leaked surface was destroyed */
     boolean destroyLeakedSurfaces() {
         // Used to indicate that a surface was leaked.
@@ -4321,6 +4276,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return mImeTarget;
         }
 
+        @VisibleForTesting
+        SurfaceControl getImeScreenshotSurface() {
+            return mImeSurface;
+        }
+
         private SurfaceControl createImeSurface(ScreenCapture.ScreenshotHardwareBuffer b,
                 Transaction t) {
             final HardwareBuffer buffer = b.getHardwareBuffer();
@@ -4430,33 +4390,45 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    private void attachAndShowImeScreenshotOnTarget() {
+    private void attachImeScreenshotOnTargetIfNeeded() {
         // No need to attach screenshot if the IME target not exists or screen is off.
         if (!shouldImeAttachedToApp() || !mWmService.mPolicy.isScreenOn()) {
             return;
         }
 
-        final SurfaceControl.Transaction t = getPendingTransaction();
         // Prepare IME screenshot for the target if it allows to attach into.
         if (mInputMethodWindow != null && mInputMethodWindow.isVisible()) {
-            // Remove the obsoleted IME snapshot first in case the new snapshot happens to
-            // override the current one before the transition finish and the surface never be
-            // removed on the task.
-            removeImeSurfaceImmediately();
-            mImeScreenshot = new ImeScreenshot(
-                    mWmService.mSurfaceControlFactory.apply(null), mImeLayeringTarget);
-            mImeScreenshot.attachAndShow(t);
+            attachImeScreenshotOnTarget(mImeLayeringTarget);
         }
     }
 
+    private void attachImeScreenshotOnTarget(WindowState imeTarget) {
+        final SurfaceControl.Transaction t = getPendingTransaction();
+        // Remove the obsoleted IME snapshot first in case the new snapshot happens to
+        // override the current one before the transition finish and the surface never be
+        // removed on the task.
+        removeImeSurfaceImmediately();
+        mImeScreenshot = new ImeScreenshot(
+                mWmService.mSurfaceControlFactory.apply(null), imeTarget);
+        mImeScreenshot.attachAndShow(t);
+    }
+
     /**
-     * Shows the IME screenshot and attach to the IME target window.
+     * Shows the IME screenshot and attach to the IME layering target window.
      *
      * Used when the IME target window with IME visible is transitioning to the next target.
      * e.g. App transitioning or swiping this the task of the IME target window to recents app.
      */
     void showImeScreenshot() {
-        attachAndShowImeScreenshotOnTarget();
+        attachImeScreenshotOnTargetIfNeeded();
+    }
+
+    /**
+     * Shows the IME screenshot and attach it to the given IME target window.
+     */
+    @VisibleForTesting
+    void showImeScreenshot(WindowState imeTarget) {
+        attachImeScreenshotOnTarget(imeTarget);
     }
 
     /**
@@ -4617,24 +4589,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @VisibleForTesting
     SurfaceControl computeImeParent() {
-        if (mImeLayeringTarget != null) {
-            // Ensure changing the IME parent when the layering target that may use IME has
-            // became to the input target for preventing IME flickers.
-            // Note that:
-            // 1) For the imeLayeringTarget that may not use IME but requires IME on top
-            // of it (e.g. an overlay window with NOT_FOCUSABLE|ALT_FOCUSABLE_IM flags), we allow
-            // it to re-parent the IME on top the display to keep the legacy behavior.
-            // 2) Even though the starting window won't use IME, the associated activity
-            // behind the starting window may request the input. If so, then we should still hold
-            // the IME parent change until the activity started the input.
-            boolean imeLayeringTargetMayUseIme =
-                    LayoutParams.mayUseInputMethod(mImeLayeringTarget.mAttrs.flags)
-                    || mImeLayeringTarget.mAttrs.type == TYPE_APPLICATION_STARTING;
-            if (imeLayeringTargetMayUseIme && (mImeInputTarget == null
-                    || mImeLayeringTarget.mActivityRecord != mImeInputTarget.getActivityRecord())) {
-                // Do not change parent if the window hasn't requested IME.
-                return null;
-            }
+        if (!ImeTargetVisibilityPolicy.isReadyToComputeImeParent(mImeLayeringTarget,
+                mImeInputTarget)) {
+            return null;
         }
         // Attach it to app if the target is part of an app and such app is covering the entire
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
@@ -4919,7 +4876,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInsetsStateController.getImeSourceProvider().checkShowImePostLayout();
 
         mLastHasContent = mTmpApplySurfaceChangesTransactionState.displayHasContent;
-        if (!mWmService.mDisplayFrozen && !mDisplayRotation.isRotatingSeamlessly()) {
+        if (!inTransition() && !mDisplayRotation.isRotatingSeamlessly()) {
             mWmService.mDisplayManagerInternal.setDisplayProperties(mDisplayId,
                     mLastHasContent,
                     mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
@@ -4927,6 +4884,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
+                    mTmpApplySurfaceChangesTransactionState.disableHdrConversion,
                     true /* inTraversal, must call performTraversalInTrans... below */);
         }
         // If the display now has content, or no longer has content, update recording.
@@ -5131,6 +5089,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public int preferredModeId;
         public float preferredMinRefreshRate;
         public float preferredMaxRefreshRate;
+        public boolean disableHdrConversion;
 
         void reset() {
             displayHasContent = false;
@@ -5141,6 +5100,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             preferredModeId = 0;
             preferredMinRefreshRate = 0;
             preferredMaxRefreshRate = 0;
+            disableHdrConversion = false;
         }
     }
 
@@ -6849,12 +6809,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public void showInsets(@WindowInsets.Type.InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {
             try {
-                ImeTracker.get().onProgress(statsToken,
+                ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SHOW_INSETS);
                 mRemoteInsetsController.showInsets(types, fromIme, statsToken);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver showInsets", e);
-                ImeTracker.get().onFailed(statsToken,
+                ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_SHOW_INSETS);
             }
         }
@@ -6863,12 +6823,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public void hideInsets(@InsetsType int types, boolean fromIme,
                 @Nullable ImeTracker.Token statsToken) {
             try {
-                ImeTracker.get().onProgress(statsToken,
+                ImeTracker.forLogging().onProgress(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_HIDE_INSETS);
                 mRemoteInsetsController.hideInsets(types, fromIme, statsToken);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver hideInsets", e);
-                ImeTracker.get().onFailed(statsToken,
+                ImeTracker.forLogging().onFailed(statsToken,
                         ImeTracker.PHASE_WM_REMOTE_INSETS_CONTROL_TARGET_HIDE_INSETS);
             }
         }

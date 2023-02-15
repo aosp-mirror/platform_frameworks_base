@@ -55,6 +55,8 @@ public final class DisplayDeviceConfigTest {
     private static final int DEFAULT_REFRESH_RATE = 120;
     private static final int DEFAULT_HIGH_BLOCKING_ZONE_REFRESH_RATE = 55;
     private static final int DEFAULT_LOW_BLOCKING_ZONE_REFRESH_RATE = 95;
+    private static final int DEFAULT_REFRESH_RATE_IN_HBM_HDR = 90;
+    private static final int DEFAULT_REFRESH_RATE_IN_HBM_SUNLIGHT = 100;
     private static final int[] LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{10, 30};
     private static final int[] LOW_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{1, 21};
     private static final int[] HIGH_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE = new int[]{160};
@@ -155,13 +157,13 @@ public final class DisplayDeviceConfigTest {
         assertEquals(90, mDisplayDeviceConfig.getDefaultHighBlockingZoneRefreshRate());
         assertEquals(85, mDisplayDeviceConfig.getDefaultPeakRefreshRate());
         assertEquals(45, mDisplayDeviceConfig.getDefaultRefreshRate());
-
         assertEquals(2, mDisplayDeviceConfig.getRefreshRangeProfiles().size());
         assertEquals(60, mDisplayDeviceConfig.getRefreshRange("test1").min, SMALL_DELTA);
         assertEquals(60, mDisplayDeviceConfig.getRefreshRange("test1").max, SMALL_DELTA);
         assertEquals(80, mDisplayDeviceConfig.getRefreshRange("test2").min, SMALL_DELTA);
         assertEquals(90, mDisplayDeviceConfig.getRefreshRange("test2").max, SMALL_DELTA);
-
+        assertEquals(82, mDisplayDeviceConfig.getDefaultRefreshRateInHbmHdr());
+        assertEquals(83, mDisplayDeviceConfig.getDefaultRefreshRateInHbmSunlight());
         assertArrayEquals(new int[]{45, 55},
                 mDisplayDeviceConfig.getLowDisplayBrightnessThresholds());
         assertArrayEquals(new int[]{50, 60},
@@ -295,9 +297,11 @@ public final class DisplayDeviceConfigTest {
                 DEFAULT_HIGH_BLOCKING_ZONE_REFRESH_RATE);
         assertEquals(mDisplayDeviceConfig.getDefaultPeakRefreshRate(), DEFAULT_PEAK_REFRESH_RATE);
         assertEquals(mDisplayDeviceConfig.getDefaultRefreshRate(), DEFAULT_REFRESH_RATE);
-
         assertEquals(0, mDisplayDeviceConfig.getRefreshRangeProfiles().size());
-
+        assertEquals(mDisplayDeviceConfig.getDefaultRefreshRateInHbmSunlight(),
+                DEFAULT_REFRESH_RATE_IN_HBM_SUNLIGHT);
+        assertEquals(mDisplayDeviceConfig.getDefaultRefreshRateInHbmHdr(),
+                DEFAULT_REFRESH_RATE_IN_HBM_HDR);
         assertArrayEquals(mDisplayDeviceConfig.getLowDisplayBrightnessThresholds(),
                 LOW_BRIGHTNESS_THRESHOLD_OF_PEAK_REFRESH_RATE);
         assertArrayEquals(mDisplayDeviceConfig.getLowAmbientBrightnessThresholds(),
@@ -571,6 +575,8 @@ public final class DisplayDeviceConfigTest {
                 +               "</refreshRateRange>\n"
                 +           "</refreshRateZoneProfile>\n"
                 +       "</refreshRateZoneProfiles>"
+                +       "<defaultRefreshRateInHbmHdr>82</defaultRefreshRateInHbmHdr>\n"
+                +       "<defaultRefreshRateInHbmSunlight>83</defaultRefreshRateInHbmSunlight>\n"
                 +       "<lowerBlockingZoneConfigs>\n"
                 +           "<defaultRefreshRate>75</defaultRefreshRate>\n"
                 +           "<blockingZoneThreshold>\n"
@@ -694,6 +700,12 @@ public final class DisplayDeviceConfigTest {
         when(mResources.getIntArray(
                 R.array.config_highAmbientBrightnessThresholdsOfFixedRefreshRate))
                 .thenReturn(HIGH_AMBIENT_THRESHOLD_OF_PEAK_REFRESH_RATE);
+        when(mResources.getInteger(
+            R.integer.config_defaultRefreshRateInHbmHdr))
+            .thenReturn(DEFAULT_REFRESH_RATE_IN_HBM_HDR);
+        when(mResources.getInteger(
+            R.integer.config_defaultRefreshRateInHbmSunlight))
+            .thenReturn(DEFAULT_REFRESH_RATE_IN_HBM_SUNLIGHT);
 
         mDisplayDeviceConfig = DisplayDeviceConfig.create(mContext, true);
     }

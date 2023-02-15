@@ -49,6 +49,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.pm.verify.domain.DomainVerificationManager;
@@ -149,6 +150,29 @@ public abstract class PackageManager {
      */
     public static final String PROPERTY_MEDIA_CAPABILITIES =
             "android.media.PROPERTY_MEDIA_CAPABILITIES";
+
+    /**
+     * &lt;application&gt; level {@link android.content.pm.PackageManager.Property} tag
+     * specifying the XML resource ID containing the declaration of the self-certified network
+     * capabilities used by the application.
+     *
+     * <p> Starting from Android 14, usage of some network capabilities in
+     * {@link android.net.ConnectivityManager#requestNetwork} require the application to
+     * declare its usage of that particular capability in this resource. Only some capabilities
+     * require a declaration. Please look up the specific capability you want to use in
+     * {@link android.net.NetworkCapabilities} to see if it needs declaration in this property.
+     *
+     * For example:
+     * &lt;application&gt;
+     *   &lt;property android:name="android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES"
+     *     android:resource="@xml/self_certified_network_capabilities"&gt;
+     * &lt;application&gt;
+     *
+     * <p> The detail format of self_certified_network_capabilities.xml is described in
+     * {@link android.net.NetworkRequest}
+     */
+    public static final String PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES =
+            "android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES";
 
     /**
      * Application level property that an app can specify to opt-out from having private data
@@ -717,7 +741,7 @@ public abstract class PackageManager {
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
             MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS,
-            GET_ATTRIBUTIONS,
+            GET_ATTRIBUTIONS_LONG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PackageInfoFlagsBits {}
@@ -1127,8 +1151,9 @@ public abstract class PackageManager {
     public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
     /**
-     * {@link PackageInfo} flag: return all attributions declared in the package manifest
+     * @deprecated Use {@link #GET_ATTRIBUTIONS_LONG} to avoid unintended sign extension.
      */
+    @Deprecated
     public static final int GET_ATTRIBUTIONS = 0x80000000;
 
     /** @hide */
@@ -1151,6 +1176,11 @@ public abstract class PackageManager {
      * for activation at next reboot.
      */
     public static final int MATCH_APEX = 0x40000000;
+
+    /**
+     * {@link PackageInfo} flag: return all attributions declared in the package manifest
+     */
+    public static final long GET_ATTRIBUTIONS_LONG = 0x80000000L;
 
     /**
      * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set: when
@@ -1356,7 +1386,7 @@ public abstract class PackageManager {
             INSTALL_FROM_ADB,
             INSTALL_ALL_USERS,
             INSTALL_REQUEST_DOWNGRADE,
-            INSTALL_GRANT_RUNTIME_PERMISSIONS,
+            INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS,
             INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
             INSTALL_FORCE_VOLUME_UUID,
             INSTALL_FORCE_PERMISSION_PROMPT,
@@ -1433,14 +1463,16 @@ public abstract class PackageManager {
     public static final int INSTALL_REQUEST_DOWNGRADE = 0x00000080;
 
     /**
-     * Flag parameter for {@link #installPackage} to indicate that all runtime
-     * permissions should be granted to the package. If {@link #INSTALL_ALL_USERS}
-     * is set the runtime permissions will be granted to all users, otherwise
-     * only to the owner.
+     * Flag parameter for package install to indicate that all requested permissions should be
+     * granted to the package. If {@link #INSTALL_ALL_USERS} is set the runtime permissions will
+     * be granted to all users, otherwise only to the owner.
+     * <p/>
+     * If this flag is set, {@link SessionParams#setPermissionState(String, int)} should not be
+     * called.
      *
      * @hide
      */
-    public static final int INSTALL_GRANT_RUNTIME_PERMISSIONS = 0x00000100;
+    public static final int INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS = 0x00000100;
 
     /** {@hide} */
     public static final int INSTALL_FORCE_VOLUME_UUID = 0x00000200;
@@ -1569,7 +1601,7 @@ public abstract class PackageManager {
     public static final int INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK = 0x01000000;
 
     /**
-     * Flag parameter for {@link PackageInstaller.SessionParams} to indicate that the
+     * Flag parameter for {@link SessionParams} to indicate that the
      * update ownership enforcement is requested.
      * @hide
      */
@@ -10923,10 +10955,13 @@ public abstract class PackageManager {
 
     /**
      * Attempt to relinquish the update ownership of the given package. Only the current
-     * update owner of the given package can use this API or a SecurityException will be
-     * thrown.
+     * update owner of the given package can use this API.
      *
      * @param targetPackage The installed package whose update owner will be changed.
+     * @throws IllegalArgumentException if the given package is invalid.
+     * @throws SecurityException if you are not the current update owner of the given package.
+     *
+     * @see PackageInstaller.SessionParams#setRequestUpdateOwnership
      */
     public void relinquishUpdateOwnership(@NonNull String targetPackage) {
         throw new UnsupportedOperationException(

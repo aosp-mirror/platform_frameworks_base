@@ -50,21 +50,9 @@ class UserConfigRepo(context: Context) {
     }
 
     companion object {
-        lateinit var repo: UserConfigRepo
-
         const val DEFAULT_PROVIDER = "default_provider"
         // This first use value only applies to passkeys, not related with if generally
         // credential manager is first use or not
         const val IS_PASSKEY_FIRST_USE = "is_passkey_first_use"
-
-        fun setup(
-            context: Context,
-        ) {
-            repo = UserConfigRepo(context)
-        }
-
-        fun getInstance(): UserConfigRepo {
-            return repo
-        }
     }
 }

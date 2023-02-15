@@ -112,12 +112,6 @@ public abstract class SearchUiService extends Service {
         }
 
         @Override
-        public void onRequestEmptyQueryResultUpdate(SearchSessionId sessionId) {
-            mHandler.sendMessage(obtainMessage(SearchUiService::doRequestEmptyQueryResultUpdate,
-                    SearchUiService.this, sessionId));
-        }
-
-        @Override
         public void onUnregisterEmptyQueryResultUpdateCallback(SearchSessionId sessionId,
                 ISearchCallback callback) {
             mHandler.sendMessage(
@@ -219,24 +213,6 @@ public abstract class SearchUiService extends Service {
      */
     @MainThread
     public void onStartUpdateEmptyQueryResult() {}
-
-    private void doRequestEmptyQueryResultUpdate(@NonNull SearchSessionId sessionId) {
-        // Just an optimization, if there are no callbacks, then don't bother notifying the service
-        final ArrayList<CallbackWrapper> callbacks = mSessionEmptyQueryResultCallbacks.get(
-                sessionId);
-        if (callbacks != null && !callbacks.isEmpty()) {
-            onRequestEmptyQueryResultUpdate(sessionId);
-        }
-    }
-
-    /**
-     * Called by a client to request empty query search target result for zero state. This method
-     * is only called if there are one or more empty query result update callbacks registered.
-     *
-     * @see #updateEmptyQueryResult(SearchSessionId, List)
-     */
-    @MainThread
-    public void onRequestEmptyQueryResultUpdate(@NonNull SearchSessionId sessionId) {}
 
     private void doUnregisterEmptyQueryResultUpdateCallback(@NonNull SearchSessionId sessionId,
             @NonNull ISearchCallback callback) {

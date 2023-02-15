@@ -397,6 +397,13 @@ public class PowerExemptionManager {
      */
     public static final int REASON_PACKAGE_INSTALLER = 326;
 
+    /**
+     * {@link android.app.AppOpsManager#OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS}
+     * set to MODE_ALLOWED
+     * @hide
+     */
+    public static final int REASON_SYSTEM_EXEMPT_APP_OP = 327;
+
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
 

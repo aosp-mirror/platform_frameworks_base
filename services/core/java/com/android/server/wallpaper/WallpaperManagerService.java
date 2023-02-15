@@ -1599,14 +1599,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         dm.registerDisplayListener(mDisplayListener, null /* handler */);
         mWallpaperDisplayHelper = new WallpaperDisplayHelper(dm, mWindowManagerInternal);
         mWallpaperCropper = new WallpaperCropper(mWallpaperDisplayHelper);
-        mWallpaperDataParser = new WallpaperDataParser(
-                mContext, mWallpaperDisplayHelper, mWallpaperCropper);
         mActivityManager = mContext.getSystemService(ActivityManager.class);
         mMonitor = new MyPackageMonitor();
         mColorsChangedListeners = new SparseArray<>();
 
         mEnableSeparateLockScreenEngine = mContext.getResources().getBoolean(
                 R.bool.config_independentLockscreenLiveWallpaper);
+        mWallpaperDataParser = new WallpaperDataParser(mContext, mWallpaperDisplayHelper,
+                mWallpaperCropper, mEnableSeparateLockScreenEngine);
         if (DEBUG) {
             Slog.v(TAG, "Separate lock screen engine enabled: " + mEnableSeparateLockScreenEngine);
         }
@@ -3154,8 +3154,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
 
-            final ActivityOptions clientOptions = ActivityOptions.makeBasic();
-            clientOptions.setIgnorePendingIntentCreatorForegroundState(true);
+            final ActivityOptions clientOptions = ActivityOptions.makeBasic()
+                    .setPendingIntentCreatorBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED);
             PendingIntent clientIntent = PendingIntent.getActivityAsUser(
                     mContext, 0, Intent.createChooser(
                             new Intent(Intent.ACTION_SET_WALLPAPER),

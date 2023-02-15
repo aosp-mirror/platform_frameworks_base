@@ -49,6 +49,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ଉପର ଆଡ଼କୁ 50% କରନ୍ତୁ"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ଉପର ଆଡ଼କୁ 30% କରନ୍ତୁ"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"ତଳ ଅଂଶର ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"ଏକ-ହାତ ମୋଡ୍ ବ୍ୟବହାର କରି"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ବାହାରି ଯିବା ପାଇଁ, ସ୍କ୍ରିନର ତଳୁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ କିମ୍ବା ଆପରେ ଯେ କୌଣସି ସ୍ଥାନରେ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ଏକ-ହାତ ମୋଡ୍ ଆରମ୍ଭ କରନ୍ତୁ"</string>
@@ -84,16 +92,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ଏକ ଆପକୁ ରିପୋଜିସନ କରିବା ପାଇଁ ଏହାର ବାହାରେ ଦୁଇଥର-ଟାପ କରନ୍ତୁ"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ବୁଝିଗଲି"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ଅଧିକ ସୂଚନା ପାଇଁ ବିସ୍ତାର କରନ୍ତୁ।"</string>
-    <!-- no translation found for letterbox_restart_dialog_title (8543049527871033505) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_description (6096946078246557848) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_cancel (1342209132692537805) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_restart (8529976234412442973) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_checkbox_title (5252918008140768386) -->
-    <skip />
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"ଏକ ଭଲ ଭ୍ୟୁ ପାଇଁ ରିଷ୍ଟାର୍ଟ କରିବେ?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"ଆପଣ ଆପକୁ ରିଷ୍ଟାର୍ଟ କରିପାରିବେ ଯାହା ଫଳରେ ଏହା ଆପଣଙ୍କ ସ୍କ୍ରିନରେ ଆହୁରି ଭଲ ଦେଖାଯିବ, କିନ୍ତୁ ଆପଣ ଆପଣଙ୍କ ପ୍ରଗତି କିମ୍ବା ସେଭ ହୋଇନଥିବା ଯେ କୌଣସି ପରିବର୍ତ୍ତନ ହରାଇପାରନ୍ତି"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"ବାତିଲ କରନ୍ତୁ"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"ରିଷ୍ଟାର୍ଟ କରନ୍ତୁ"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"ବଡ଼ କରନ୍ତୁ"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ବନ୍ଦ କରନ୍ତୁ"</string>

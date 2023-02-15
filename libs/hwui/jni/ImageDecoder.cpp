@@ -18,11 +18,16 @@
 
 #include <FrontBufferedStream.h>
 #include <HardwareBitmapUploader.h>
+#include <SkAlphaType.h>
 #include <SkAndroidCodec.h>
 #include <SkBitmap.h>
+#include <SkCodec.h>
+#include <SkCodecAnimation.h>
 #include <SkColorSpace.h>
+#include <SkColorType.h>
 #include <SkImageInfo.h>
 #include <SkRect.h>
+#include <SkSize.h>
 #include <SkStream.h>
 #include <SkString.h>
 #include <androidfw/Asset.h>

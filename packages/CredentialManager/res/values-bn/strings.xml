@@ -6,6 +6,10 @@
     <string name="string_continue" msgid="1346732695941131882">"চালিয়ে যান"</string>
     <string name="string_more_options" msgid="7990658711962795124">"আরও বিকল্প"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"আরও জানুন"</string>
+    <!-- no translation found for content_description_show_password (3283502010388521607) -->
+    <skip />
+    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
+    <skip />
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"\'পাসকী\'-এর সাথে সুরক্ষিত"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"\'পাসকী\' ব্যবহার করলে জটিল পাসওয়ার্ড তৈরি করার বা মনে রাখার কোনও প্রয়োজন নেই"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"আপনার ফিঙ্গারপ্রিন্ট, ফেস মডেল বা \'স্ক্রিন লক\' ব্যবহার করে আপনি যে এনক্রিপটেড ডিজিটাল \'কী\' তৈরি করেন সেগুলিই হল \'পাসকী\'"</string>
@@ -55,7 +59,10 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"সাইন-ইন করার বিকল্প"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g>-এর জন্য"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"লক করা Password Manager"</string>
-    <string name="locked_credential_entry_label_subtext" msgid="9213450912991988691">"আনলক করতে ট্যাপ করুন"</string>
+    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
+    <skip />
+    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
+    <skip />
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"সাইন-ইন করার ক্রেডেনশিয়াল ম্যানেজ করুন"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"অন্য ডিভাইস থেকে"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"আলাদা ডিভাইস ব্যবহার করুন"</string>

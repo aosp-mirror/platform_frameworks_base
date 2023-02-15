@@ -500,12 +500,7 @@ public final class DreamManagerService extends SystemService {
         }
 
         synchronized (mLock) {
-            if (mCurrentDream == null) {
-                return;
-            }
-
-            final boolean sameDream = mCurrentDream.token == token;
-            if ((sameDream && mCurrentDream.isDozing) || (!sameDream && !mCurrentDream.isDozing)) {
+            if (mCurrentDream != null && mCurrentDream.token == token && mCurrentDream.isDozing) {
                 mCurrentDream.isDozing = false;
                 mDozeWakeLock.release();
                 mPowerManagerInternal.setDozeOverrideFromDreamManager(
@@ -671,6 +666,10 @@ public final class DreamManagerService extends SystemService {
 
         Slog.i(TAG, "Entering dreamland.");
 
+        if (mCurrentDream != null && mCurrentDream.isDozing) {
+            stopDozingInternal(mCurrentDream.token);
+        }
+
         mCurrentDream = new DreamRecord(name, userId, isPreviewMode, canDoze);
 
         if (!mCurrentDream.name.equals(mAmbientDisplayComponent)) {
@@ -775,11 +774,6 @@ public final class DreamManagerService extends SystemService {
                     cleanupDreamLocked();
                 }
             }
-        }
-
-        @Override
-        public void stopDozing(Binder token) {
-            stopDozingInternal(token);
         }
     };
 

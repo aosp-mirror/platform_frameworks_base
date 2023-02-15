@@ -69,6 +69,8 @@ import org.mockito.quality.Strictness;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 
 @SmallTest
@@ -692,7 +694,10 @@ public class LocalDisplayAdapterTest {
 
         // Verify that committed triggered a new change event and is set correctly.
         verify(mSurfaceControlProxy, never()).setDisplayPowerMode(display.token, Display.STATE_OFF);
-        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+        // We expect at least 1 update for the state change, but
+        // could get a second update for the initial brightness change if a nits mapping
+        // is available
+        assertThat(mListener.changedDisplays.size()).isAnyOf(1, 2);
         assertThat(displayDevice.getDisplayDeviceInfoLocked().state).isEqualTo(Display.STATE_OFF);
         assertThat(displayDevice.getDisplayDeviceInfoLocked().committedState).isEqualTo(
                 Display.STATE_OFF);
@@ -964,6 +969,43 @@ public class LocalDisplayAdapterTest {
                 .isTrue();
     }
 
+    @Test
+    public void testHdrSdrRatio_notifiesOnChange() throws Exception {
+        FakeDisplay display = new FakeDisplay(PORT_A);
+        setUpDisplay(display);
+        updateAvailableDisplays();
+        mAdapter.registerLocked();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        assertThat(mListener.addedDisplays.size()).isEqualTo(1);
+        DisplayDevice displayDevice = mListener.addedDisplays.get(0);
+
+        // Turn on / initialize
+        Runnable changeStateRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 0,
+                0);
+        changeStateRunnable.run();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        mListener.changedDisplays.clear();
+
+        assertEquals(1.0f, displayDevice.getDisplayDeviceInfoLocked().hdrSdrRatio, 0.001f);
+
+        // HDR time!
+        Runnable goHdrRunnable = displayDevice.requestDisplayStateLocked(Display.STATE_ON, 1f,
+                0);
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        // Display state didn't change, no listeners should have happened
+        assertThat(mListener.changedDisplays.size()).isEqualTo(0);
+
+        // Execute hdr change.
+        goHdrRunnable.run();
+        waitForHandlerToComplete(mHandler, HANDLER_WAIT_MS);
+        // Display state didn't change, expect to only get the HDR/SDR ratio change notification
+        assertThat(mListener.changedDisplays.size()).isEqualTo(1);
+
+        final float expectedRatio = DISPLAY_RANGE_NITS[1] / DISPLAY_RANGE_NITS[0];
+        assertEquals(expectedRatio, displayDevice.getDisplayDeviceInfoLocked().hdrSdrRatio,
+                0.001f);
+    }
+
     private void assertDisplayDpi(DisplayDeviceInfo info, int expectedPort,
                                   float expectedXdpi,
                                   float expectedYDpi,
@@ -1107,15 +1149,9 @@ public class LocalDisplayAdapterTest {
 
     private static void waitForHandlerToComplete(Handler handler, long waitTimeMs)
             throws InterruptedException {
-        final Object lock = new Object();
-        synchronized (lock) {
-            handler.post(() -> {
-                synchronized (lock) {
-                    lock.notify();
-                }
-            });
-            lock.wait(waitTimeMs);
-        }
+        final CountDownLatch fence = new CountDownLatch(1);
+        handler.post(fence::countDown);
+        assertTrue(fence.await(waitTimeMs, TimeUnit.MILLISECONDS));
     }
 
     private class HotplugTransmitter {

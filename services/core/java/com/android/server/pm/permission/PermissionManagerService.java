@@ -95,6 +95,7 @@ import java.util.function.BiFunction;
  * Manages all permissions and handles permissions related tasks.
  */
 public class PermissionManagerService extends IPermissionManager.Stub {
+
     private static final String LOG_TAG = PermissionManagerService.class.getSimpleName();
 
     /** Map of IBinder -> Running AttributionSource */

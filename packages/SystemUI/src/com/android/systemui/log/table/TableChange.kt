@@ -27,7 +27,7 @@ data class TableChange(
     var columnName: String = "",
     var type: DataType = DataType.EMPTY,
     var bool: Boolean = false,
-    var int: Int = 0,
+    var int: Int? = null,
     var str: String? = null,
 ) {
     /** Resets to default values so that the object can be recycled. */
@@ -54,7 +54,7 @@ data class TableChange(
     }
 
     /** Sets this to store an int change. */
-    fun set(value: Int) {
+    fun set(value: Int?) {
         type = DataType.INT
         int = value
     }

@@ -45,6 +45,8 @@ import javax.inject.Inject;
 
 public class CameraToggleTile extends SensorPrivacyToggleTile {
 
+    public static final String TILE_SPEC = "cameratoggle";
+
     @Inject
     protected CameraToggleTile(QSHost host,
             @Background Looper backgroundLooper,

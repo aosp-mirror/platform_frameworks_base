@@ -612,6 +612,20 @@ public class TelephonyCallback {
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
     public static final int EVENT_MEDIA_QUALITY_STATUS_CHANGED = 39;
 
+
+    /**
+     * Event for changes to the Emergency callback mode
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
+     *
+     * @see EmergencyCallbackModeListener#onCallbackModeStarted(int)
+     * @see EmergencyCallbackModeListener#onCallbackModeStopped(int, int)
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public static final int EVENT_EMERGENCY_CALLBACK_MODE_CHANGED = 40;
+
     /**
      * @hide
      */
@@ -654,7 +668,8 @@ public class TelephonyCallback {
             EVENT_LEGACY_CALL_STATE_CHANGED,
             EVENT_LINK_CAPACITY_ESTIMATE_CHANGED,
             EVENT_TRIGGER_NOTIFY_ANBR,
-            EVENT_MEDIA_QUALITY_STATUS_CHANGED
+            EVENT_MEDIA_QUALITY_STATUS_CHANGED,
+            EVENT_EMERGENCY_CALLBACK_MODE_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -1568,6 +1583,53 @@ public class TelephonyCallback {
     }
 
     /**
+     * Interface for emergency callback mode listener.
+     *
+     * @hide
+     */
+    public interface EmergencyCallbackModeListener {
+        /**
+         * Indicates that Callback Mode has been started.
+         * <p>
+         * This method will be called when an emergency sms/emergency call is sent
+         * and the callback mode is supported by the carrier.
+         * If an emergency SMS is transmitted during callback mode for SMS, this API will be called
+         * once again with TelephonyManager#EMERGENCY_CALLBACK_MODE_SMS.
+         *
+         * @param type for callback mode entry
+         *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+         * @see TelephonyManager#EMERGENCY_CALLBACK_MODE_CALL
+         * @see TelephonyManager#EMERGENCY_CALLBACK_MODE_SMS
+         */
+        @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+        void onCallBackModeStarted(@TelephonyManager.EmergencyCallbackModeType int type);
+
+        /**
+         * Indicates that Callback Mode has been stopped.
+         * <p>
+         * This method will be called when the callback mode timer expires or when
+         * a normal call/SMS is sent
+         *
+         * @param type for callback mode entry
+         * @see TelephonyManager#EMERGENCY_CALLBACK_MODE_CALL
+         * @see TelephonyManager#EMERGENCY_CALLBACK_MODE_SMS
+         *
+         * @param reason for changing callback mode
+         *
+         * @see TelephonyManager#STOP_REASON_UNKNOWN
+         * @see TelephonyManager#STOP_REASON_OUTGOING_NORMAL_CALL_INITIATED
+         * @see TelephonyManager#STOP_REASON_NORMAL_SMS_SENT
+         * @see TelephonyManager#STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED
+         * @see TelephonyManager#STOP_REASON_EMERGENCY_SMS_SENT
+         * @see TelephonyManager#STOP_REASON_TIMER_EXPIRED
+         * @see TelephonyManager#STOP_REASON_USER_ACTION
+         */
+        @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+        void onCallBackModeStopped(@TelephonyManager.EmergencyCallbackModeType int type,
+                @TelephonyManager.EmergencyCallbackModeStopReason int reason);
+    }
+
+    /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
      * <p>
@@ -1934,6 +1996,28 @@ public class TelephonyCallback {
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(() -> listener.onMediaQualityStatusChanged(
                             mediaQualityStatus)));
+        }
+
+        public void onCallBackModeStarted(@TelephonyManager.EmergencyCallbackModeType int type) {
+            EmergencyCallbackModeListener listener =
+                    (EmergencyCallbackModeListener) mTelephonyCallbackWeakRef.get();
+            Log.d(LOG_TAG, "onCallBackModeStarted:type=" + type + ", listener=" + listener);
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> listener.onCallBackModeStarted(type)));
+        }
+
+        public void onCallBackModeStopped(@TelephonyManager.EmergencyCallbackModeType int type,
+                @TelephonyManager.EmergencyCallbackModeStopReason int reason) {
+            EmergencyCallbackModeListener listener =
+                    (EmergencyCallbackModeListener) mTelephonyCallbackWeakRef.get();
+            Log.d(LOG_TAG, "onCallBackModeStopped:type=" + type
+                    + ", reason=" + reason + ", listener=" + listener);
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> listener.onCallBackModeStopped(type, reason)));
         }
     }
 }

@@ -16,8 +16,6 @@
 
 package android.service.credentials;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -39,6 +37,13 @@ import com.android.internal.util.Preconditions;
  */
 @SuppressLint("ParcelNotFinal")
 public class BeginGetCredentialOption implements Parcelable {
+    private static final String BUNDLE_ID_KEY =
+            "android.service.credentials.BeginGetCredentialOption.BUNDLE_ID_KEY";
+    /**
+     * A unique id associated with this request option.
+     */
+    @NonNull
+    private final String mId;
 
     /**
      * The requested credential type.
@@ -51,6 +56,14 @@ public class BeginGetCredentialOption implements Parcelable {
      */
     @NonNull
     private final Bundle mCandidateQueryData;
+
+    /**
+     * Returns the unique id associated with this request. This is for internal use only.
+     */
+    @NonNull
+    public String getId() {
+        return mId;
+    }
 
     /**
      * Returns the requested credential type.
@@ -80,6 +93,7 @@ public class BeginGetCredentialOption implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mType);
         dest.writeBundle(mCandidateQueryData);
+        dest.writeString8(mId);
     }
 
     @Override
@@ -92,33 +106,43 @@ public class BeginGetCredentialOption implements Parcelable {
         return "GetCredentialOption {"
                 + "type=" + mType
                 + ", candidateQueryData=" + mCandidateQueryData
+                + ", id=" + mId
                 + "}";
     }
 
     /**
      * Constructs a {@link BeginGetCredentialOption}.
      *
-     * @param type the requested credential type
+     * @param id the unique id associated with this option
+     * @param type               the requested credential type
      * @param candidateQueryData the request candidateQueryData
-     *
      * @throws IllegalArgumentException If type is empty.
      */
     public BeginGetCredentialOption(
-            @NonNull String type,
+            @NonNull String id, @NonNull String type,
             @NonNull Bundle candidateQueryData) {
+        mId = id;
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
-        mCandidateQueryData = requireNonNull(
-                candidateQueryData, "candidateQueryData must not be null");
+        Bundle bundle = new Bundle();
+        bundle.putAll(candidateQueryData);
+        mCandidateQueryData = bundle;
+        addIdToBundle();
+    }
+
+    private void addIdToBundle() {
+        mCandidateQueryData.putString(BUNDLE_ID_KEY, mId);
     }
 
     private BeginGetCredentialOption(@NonNull Parcel in) {
         String type = in.readString8();
         Bundle candidateQueryData = in.readBundle();
+        String id = in.readString8();
 
         mType = type;
         AnnotationValidations.validate(NonNull.class, null, mType);
         mCandidateQueryData = candidateQueryData;
         AnnotationValidations.validate(NonNull.class, null, mCandidateQueryData);
+        mId = id;
     }
 
     public static final @NonNull Creator<BeginGetCredentialOption> CREATOR =

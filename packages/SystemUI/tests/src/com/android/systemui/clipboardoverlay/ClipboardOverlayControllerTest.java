@@ -139,29 +139,35 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void test_setClipData_nullData_legacy() {
-        ClipData clipData = null;
-        mOverlayController.setClipDataLegacy(clipData, "");
-
-        verify(mClipboardOverlayView, times(1)).showDefaultTextPreview();
-        verify(mClipboardOverlayView, times(0)).showShareChip();
-        verify(mClipboardOverlayView, times(1)).getEnterAnimation();
-    }
-
-    @Test
     public void test_setClipData_invalidImageData_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
         ClipData clipData = new ClipData("", new String[]{"image/png"},
                 new ClipData.Item(Uri.parse("")));
 
         mOverlayController.setClipDataLegacy(clipData, "");
 
         verify(mClipboardOverlayView, times(1)).showDefaultTextPreview();
-        verify(mClipboardOverlayView, times(0)).showShareChip();
+        verify(mClipboardOverlayView, times(1)).showShareChip();
+        verify(mClipboardOverlayView, times(1)).getEnterAnimation();
+    }
+
+    @Test
+    public void test_setClipData_nonImageUri_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
+        ClipData clipData = new ClipData("", new String[]{"resource/png"},
+                new ClipData.Item(Uri.parse("")));
+
+        mOverlayController.setClipDataLegacy(clipData, "");
+
+        verify(mClipboardOverlayView, times(1)).showDefaultTextPreview();
+        verify(mClipboardOverlayView, times(1)).showShareChip();
         verify(mClipboardOverlayView, times(1)).getEnterAnimation();
     }
 
     @Test
     public void test_setClipData_textData_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
+
         mOverlayController.setClipDataLegacy(mSampleClipData, "");
 
         verify(mClipboardOverlayView, times(1)).showTextPreview("Test Item", false);
@@ -171,6 +177,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_setClipData_sensitiveTextData_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
+
         ClipDescription description = mSampleClipData.getDescription();
         PersistableBundle b = new PersistableBundle();
         b.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
@@ -185,6 +193,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_setClipData_repeatedCalls_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
         when(mAnimator.isRunning()).thenReturn(true);
 
         mOverlayController.setClipDataLegacy(mSampleClipData, "");
@@ -195,6 +204,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_viewCallbacks_onShareTapped_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
         mOverlayController.setClipDataLegacy(mSampleClipData, "");
 
         mCallbacks.onShareButtonTapped();
@@ -205,6 +215,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_viewCallbacks_onDismissTapped_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
         mOverlayController.setClipDataLegacy(mSampleClipData, "");
 
         mCallbacks.onDismissButtonTapped();
@@ -215,6 +226,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_multipleDismissals_dismissesOnce_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
+
         mCallbacks.onSwipeDismissInitiated(mAnimator);
         mCallbacks.onDismissButtonTapped();
         mCallbacks.onSwipeDismissInitiated(mAnimator);
@@ -226,6 +239,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_remoteCopy_withFlagOn_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
         mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
         when(mClipboardUtils.isRemoteCopy(any(), any(), any())).thenReturn(true);
 
@@ -236,6 +250,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_remoteCopy_withFlagOff_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
         when(mClipboardUtils.isRemoteCopy(any(), any(), any())).thenReturn(true);
 
         mOverlayController.setClipDataLegacy(mSampleClipData, "");
@@ -245,6 +260,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_nonRemoteCopy_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
         mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
         when(mClipboardUtils.isRemoteCopy(any(), any(), any())).thenReturn(false);
 
@@ -255,6 +271,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_logsUseLastClipSource_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
+
         mOverlayController.setClipDataLegacy(mSampleClipData, "first.package");
         mCallbacks.onDismissButtonTapped();
         mOverlayController.setClipDataLegacy(mSampleClipData, "second.package");
@@ -267,6 +285,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Test
     public void test_logOnClipboardActionsShown_legacy() {
+        mFeatureFlags.set(CLIPBOARD_MINIMIZED_LAYOUT, false);
         ClipData.Item item = mSampleClipData.getItemAt(0);
         item.setTextLinks(Mockito.mock(TextLinks.class));
         mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
@@ -292,16 +311,6 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     // start of refactored setClipData tests
     @Test
-    public void test_setClipData_nullData() {
-        ClipData clipData = null;
-        mOverlayController.setClipData(clipData, "");
-
-        verify(mClipboardOverlayView, times(1)).showDefaultTextPreview();
-        verify(mClipboardOverlayView, times(0)).showShareChip();
-        verify(mClipboardOverlayView, times(1)).getEnterAnimation();
-    }
-
-    @Test
     public void test_setClipData_invalidImageData() {
         ClipData clipData = new ClipData("", new String[]{"image/png"},
                 new ClipData.Item(Uri.parse("")));
@@ -309,7 +318,19 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mOverlayController.setClipData(clipData, "");
 
         verify(mClipboardOverlayView, times(1)).showDefaultTextPreview();
-        verify(mClipboardOverlayView, times(0)).showShareChip();
+        verify(mClipboardOverlayView, times(1)).showShareChip();
+        verify(mClipboardOverlayView, times(1)).getEnterAnimation();
+    }
+
+    @Test
+    public void test_setClipData_nonImageUri() {
+        ClipData clipData = new ClipData("", new String[]{"resource/png"},
+                new ClipData.Item(Uri.parse("")));
+
+        mOverlayController.setClipData(clipData, "");
+
+        verify(mClipboardOverlayView, times(1)).showDefaultTextPreview();
+        verify(mClipboardOverlayView, times(1)).showShareChip();
         verify(mClipboardOverlayView, times(1)).getEnterAnimation();
     }
 
@@ -425,7 +446,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
         when(mClipboardUtils.isRemoteCopy(any(Context.class), any(ClipData.class), anyString()))
                 .thenReturn(true);
-        when(mClipboardUtils.getAction(any(ClipData.Item.class), anyString()))
+        when(mClipboardUtils.getAction(any(CharSequence.class), any(TextLinks.class), anyString()))
                 .thenReturn(Optional.of(Mockito.mock(RemoteAction.class)));
         when(mClipboardOverlayView.post(any(Runnable.class))).thenAnswer(new Answer<Object>() {
             @Override

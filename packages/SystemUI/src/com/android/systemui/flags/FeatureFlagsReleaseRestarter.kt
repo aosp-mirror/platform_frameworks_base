@@ -36,41 +36,43 @@ constructor(
 ) : Restarter {
     var listenersAdded = false
     var pendingRestart: Runnable? = null
+    private var pendingReason = ""
     var androidRestartRequested = false
 
     val observer =
         object : WakefulnessLifecycle.Observer {
             override fun onFinishedGoingToSleep() {
-                scheduleRestart()
+                scheduleRestart(pendingReason)
             }
         }
 
     val batteryCallback =
         object : BatteryController.BatteryStateChangeCallback {
             override fun onBatteryLevelChanged(level: Int, pluggedIn: Boolean, charging: Boolean) {
-                scheduleRestart()
+                scheduleRestart(pendingReason)
             }
         }
 
-    override fun restartSystemUI() {
+    override fun restartSystemUI(reason: String) {
         Log.d(
             FeatureFlagsDebug.TAG,
             "SystemUI Restart requested. Restarting when plugged in and idle."
         )
-        scheduleRestart()
+        scheduleRestart(reason)
     }
 
-    override fun restartAndroid() {
+    override fun restartAndroid(reason: String) {
         Log.d(
             FeatureFlagsDebug.TAG,
             "Android Restart requested. Restarting when plugged in and idle."
         )
         androidRestartRequested = true
-        scheduleRestart()
+        scheduleRestart(reason)
     }
 
-    private fun scheduleRestart() {
+    private fun scheduleRestart(reason: String) {
         // Don't bother adding listeners twice.
+        pendingReason = reason
         if (!listenersAdded) {
             listenersAdded = true
             wakefulnessLifecycle.addObserver(observer)
@@ -91,9 +93,9 @@ constructor(
     private fun restartNow() {
         Log.d(FeatureFlagsRelease.TAG, "Restarting due to systemui flag change")
         if (androidRestartRequested) {
-            systemExitRestarter.restartAndroid()
+            systemExitRestarter.restartAndroid(pendingReason)
         } else {
-            systemExitRestarter.restartSystemUI()
+            systemExitRestarter.restartSystemUI(pendingReason)
         }
     }
 }

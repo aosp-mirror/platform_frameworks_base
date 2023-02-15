@@ -327,6 +327,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // CentralSurfacesImpl's runtime flag check fails if the flag is absent.
         // This value is unused, because test manifest is opted in.
         mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI, false);
+        // Set default value to avoid IllegalStateException.
+        mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, false);
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,

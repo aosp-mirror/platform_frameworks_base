@@ -23,10 +23,10 @@ import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.os.ParcelUuid
-import android.provider.Settings
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.ActiveDataSubscriptionIdListener
 import android.telephony.TelephonyManager
@@ -39,23 +39,25 @@ import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.tableBufferLogName
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
-import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
@@ -80,20 +82,22 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var carrierMergedFactory: CarrierMergedConnectionRepository.Factory
     private lateinit var fullConnectionFactory: FullMobileConnectionRepository.Factory
     private lateinit var wifiRepository: FakeWifiRepository
+    private lateinit var carrierConfigRepository: CarrierConfigRepository
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var summaryLogger: TableLogBuffer
     @Mock private lateinit var logBufferFactory: TableLogBufferFactory
 
     private val mobileMappings = FakeMobileMappingsProxy()
 
     private val scope = CoroutineScope(IMMEDIATE)
-    private val globalSettings = FakeSettings()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(telephonyManager.simOperatorName).thenReturn("")
 
         // Set up so the individual connection repositories
         whenever(telephonyManager.createForSubscriptionId(anyInt())).thenAnswer { invocation ->
@@ -119,19 +123,29 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         wifiRepository = FakeWifiRepository()
 
+        carrierConfigRepository =
+            CarrierConfigRepository(
+                fakeBroadcastDispatcher,
+                mock(),
+                mock(),
+                logger,
+                scope,
+            )
+
         connectionFactory =
             MobileConnectionRepositoryImpl.Factory(
                 fakeBroadcastDispatcher,
                 context = context,
                 telephonyManager = telephonyManager,
                 bgDispatcher = IMMEDIATE,
-                globalSettings = globalSettings,
                 logger = logger,
                 mobileMappingsProxy = mobileMappings,
                 scope = scope,
+                carrierConfigRepository = carrierConfigRepository,
             )
         carrierMergedFactory =
             CarrierMergedConnectionRepository.Factory(
+                telephonyManager,
                 scope,
                 wifiRepository,
             )
@@ -149,9 +163,9 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 subscriptionManager,
                 telephonyManager,
                 logger,
+                summaryLogger,
                 mobileMappings,
                 fakeBroadcastDispatcher,
-                globalSettings,
                 context,
                 IMMEDIATE,
                 scope,
@@ -245,10 +259,9 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun testActiveDataSubscriptionId_initialValueIsInvalidId() =
+    fun testActiveDataSubscriptionId_initialValueIsNull() =
         runBlocking(IMMEDIATE) {
-            assertThat(underTest.activeMobileDataSubscriptionId.value)
-                .isEqualTo(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
+            assertThat(underTest.activeMobileDataSubscriptionId.value).isEqualTo(null)
         }
 
     @Test
@@ -264,6 +277,140 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(active).isEqualTo(SUB_2_ID)
 
             job.cancel()
+        }
+
+    @Test
+    fun activeSubId_nullIfInvalidSubIdIsReceived() =
+        runBlocking(IMMEDIATE) {
+            var latest: Int? = null
+
+            val job = underTest.activeMobileDataSubscriptionId.onEach { latest = it }.launchIn(this)
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            assertThat(latest).isNotNull()
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(INVALID_SUBSCRIPTION_ID)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
+    fun activeRepo_initiallyNull() {
+        assertThat(underTest.activeMobileDataRepository.value).isNull()
+    }
+
+    @Test
+    fun activeRepo_updatesWithActiveDataId() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileConnectionRepository? = null
+            val job = underTest.activeMobileDataRepository.onEach { latest = it }.launchIn(this)
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            assertThat(latest?.subId).isEqualTo(SUB_2_ID)
+
+            job.cancel()
+        }
+
+    @Test
+    fun activeRepo_nullIfActiveDataSubIdBecomesInvalid() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileConnectionRepository? = null
+            val job = underTest.activeMobileDataRepository.onEach { latest = it }.launchIn(this)
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            assertThat(latest).isNotNull()
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(INVALID_SUBSCRIPTION_ID)
+
+            assertThat(latest).isNull()
+
+            job.cancel()
+        }
+
+    @Test
+    /** Regression test for b/268146648. */
+    fun activeSubIdIsSetBeforeSubscriptionsAreUpdated_doesNotThrow() =
+        runBlocking(IMMEDIATE) {
+            var activeRepo: MobileConnectionRepository? = null
+            var subscriptions: List<SubscriptionModel>? = null
+
+            val activeRepoJob =
+                underTest.activeMobileDataRepository.onEach { activeRepo = it }.launchIn(this)
+            val subscriptionsJob =
+                underTest.subscriptions.onEach { subscriptions = it }.launchIn(this)
+
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            assertThat(subscriptions).isEmpty()
+            assertThat(activeRepo).isNotNull()
+
+            activeRepoJob.cancel()
+            subscriptionsJob.cancel()
+        }
+
+    @Test
+    fun getRepoForSubId_activeDataSubIdIsRequestedBeforeSubscriptionsUpdate() =
+        runBlocking(IMMEDIATE) {
+            var latest: MobileConnectionRepository? = null
+            var subscriptions: List<SubscriptionModel>? = null
+            val activeSubIdJob =
+                underTest.activeMobileDataSubscriptionId
+                    .filterNotNull()
+                    .onEach { latest = underTest.getRepoForSubId(it) }
+                    .launchIn(this)
+            val subscriptionsJob =
+                underTest.subscriptions.onEach { subscriptions = it }.launchIn(this)
+
+            // Active data subscription id is sent, but no subscription change has been posted yet
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            // Subscriptions list is empty
+            assertThat(subscriptions).isEmpty()
+            // getRepoForSubId does not throw
+            assertThat(latest).isNotNull()
+
+            activeSubIdJob.cancel()
+            subscriptionsJob.cancel()
+        }
+
+    @Test
+    fun activeDataSentBeforeSubscriptionList_subscriptionReusesActiveDataRepo() =
+        runBlocking(IMMEDIATE) {
+            var activeRepo: MobileConnectionRepository? = null
+            val job = underTest.activeMobileDataRepository.onEach { activeRepo = it }.launchIn(this)
+            val subscriptionsJob = underTest.subscriptions.launchIn(this)
+
+            // GIVEN active repo is updated before the subscription list updates
+            getTelephonyCallbackForType<ActiveDataSubscriptionIdListener>()
+                .onActiveDataSubscriptionIdChanged(SUB_2_ID)
+
+            assertThat(activeRepo).isNotNull()
+
+            // GIVEN the subscription list is then updated which includes the active data sub id
+            whenever(subscriptionManager.completeActiveSubscriptionInfoList)
+                .thenReturn(listOf(SUB_2))
+            getSubscriptionCallback().onSubscriptionsChanged()
+
+            // WHEN requesting a connection repository for the subscription
+            val newRepo = underTest.getRepoForSubId(SUB_2_ID)
+
+            // THEN the newly request repo has been cached and reused
+            assertThat(activeRepo).isSameInstanceAs(newRepo)
+
+            job.cancel()
+            subscriptionsJob.cancel()
         }
 
     @Test
@@ -466,7 +613,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `connection repository - log buffer contains sub id in its name`() =
+    fun connectionRepository_logBufferContainsSubIdInItsName() =
         runBlocking(IMMEDIATE) {
             val job = underTest.subscriptions.launchIn(this)
 
@@ -544,24 +691,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun globalMobileDataSettingsChangedEvent_producesOnSettingChange() =
-        runBlocking(IMMEDIATE) {
-            var produced = false
-            val job =
-                underTest.globalMobileDataSettingChangedEvent
-                    .onEach { produced = true }
-                    .launchIn(this)
-
-            assertThat(produced).isFalse()
-
-            globalSettings.putInt(Settings.Global.MOBILE_DATA, 0)
-
-            assertThat(produced).isTrue()
-
-            job.cancel()
-        }
-
-    @Test
     fun mobileConnectivity_isConnected_isNotValidated() =
         runBlocking(IMMEDIATE) {
             val caps = createCapabilities(connected = true, validated = false)
@@ -627,9 +756,9 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     subscriptionManager,
                     telephonyManager,
                     logger,
+                    summaryLogger,
                     mobileMappings,
                     fakeBroadcastDispatcher,
-                    globalSettings,
                     context,
                     IMMEDIATE,
                     scope,
@@ -700,7 +829,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `active data change - in same group - emits unit`() =
+    fun activeDataChange_inSameGroup_emitsUnit() =
         runBlocking(IMMEDIATE) {
             var latest: Unit? = null
             val job = underTest.activeSubChangedInGroupEvent.onEach { latest = it }.launchIn(this)
@@ -716,7 +845,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `active data change - not in same group - does not emit`() =
+    fun activeDataChange_notInSameGroup_doesNotEmit() =
         runBlocking(IMMEDIATE) {
             var latest: Unit? = null
             val job = underTest.activeSubChangedInGroupEvent.onEach { latest = it }.launchIn(this)
@@ -767,21 +896,31 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         // Subscription 1
         private const val SUB_1_ID = 1
+        private val GROUP_1 = ParcelUuid(UUID.randomUUID())
         private val SUB_1 =
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_1_ID)
-                whenever(it.groupUuid).thenReturn(ParcelUuid(UUID.randomUUID()))
+                whenever(it.groupUuid).thenReturn(GROUP_1)
             }
-        private val MODEL_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
+        private val MODEL_1 =
+            SubscriptionModel(
+                subscriptionId = SUB_1_ID,
+                groupUuid = GROUP_1,
+            )
 
         // Subscription 2
         private const val SUB_2_ID = 2
+        private val GROUP_2 = ParcelUuid(UUID.randomUUID())
         private val SUB_2 =
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_2_ID)
-                whenever(it.groupUuid).thenReturn(ParcelUuid(UUID.randomUUID()))
+                whenever(it.groupUuid).thenReturn(GROUP_2)
             }
-        private val MODEL_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
+        private val MODEL_2 =
+            SubscriptionModel(
+                subscriptionId = SUB_2_ID,
+                groupUuid = GROUP_2,
+            )
 
         // Subs 3 and 4 are considered to be in the same group ------------------------------------
         private val GROUP_ID_3_4 = ParcelUuid(UUID.randomUUID())

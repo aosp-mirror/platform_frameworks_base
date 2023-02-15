@@ -18,34 +18,47 @@ package android.app.admin;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 
 import java.util.Objects;
 
 /**
  * Class representing the target user of a policy set by an admin
  * (set from {@link DevicePolicyManager}), this is passed in to
- * {@link PolicyUpdatesReceiver#onPolicySetResult} and
- * {@link PolicyUpdatesReceiver#onPolicyChanged}.
+ * {@link PolicyUpdateReceiver#onPolicySetResult} and
+ * {@link PolicyUpdateReceiver#onPolicyChanged}.
  */
 public final class TargetUser {
     /**
+     * Indicates that the policy relates to the user the admin is installed on.
+     *
      * @hide
      */
+    @TestApi
     public static final int LOCAL_USER_ID = -1;
 
     /**
+     * For admins of profiles, this indicates that the policy relates to the parent profile.
+     *
      * @hide
      */
+    @TestApi
     public static final int PARENT_USER_ID = -2;
 
     /**
+     * This indicates the policy is a global policy.
+     *
      * @hide
      */
+    @TestApi
     public static final int GLOBAL_USER_ID = -3;
 
     /**
+     * Indicates that the policy relates to some unknown user on the device.
+     *
      * @hide
      */
+    @TestApi
     public static final int UNKNOWN_USER_ID = -3;
 
     /**

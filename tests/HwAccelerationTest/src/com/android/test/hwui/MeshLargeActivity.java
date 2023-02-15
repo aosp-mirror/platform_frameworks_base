@@ -26,13 +26,12 @@ import android.graphics.MeshSpecification;
 import android.graphics.MeshSpecification.Attribute;
 import android.graphics.MeshSpecification.Varying;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.view.View;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import java.util.ArrayList;
 
 public class MeshLargeActivity extends Activity {
     @Override
@@ -109,9 +108,9 @@ public class MeshLargeActivity extends Activity {
             }
             vertexBuffer.rewind();
             indexBuffer.rewind();
-            Mesh mesh = Mesh.makeIndexed(
+            Mesh mesh = new Mesh(
                     meshSpec, Mesh.TRIANGLES, vertexBuffer, numTriangles + 2, indexBuffer,
-                    new Rect(0, 0, 1000, 1000)
+                    new RectF(0, 0, 1000, 1000)
             );
             mesh.setFloatUniform("test", 1.0f, 2.0f);
             Paint paint = new Paint();
@@ -131,44 +130,37 @@ public class MeshLargeActivity extends Activity {
                     + "      color = vec4(1.0, 0.0, 0.0, 1.0);"
                     + "      return varyings.position;\n"
                     + "}";
-            ArrayList<Attribute> attList = new ArrayList<>();
-            attList.add(new Attribute(MeshSpecification.FLOAT2, 0, "position"));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    8,
-                    "test"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    24,
-                    "test2"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    40,
-                    "test3"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    56,
-                    "test4"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    72,
-                    "test5"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    88,
-                    "test6"
-            ));
-            attList.add(new Attribute(
-                    MeshSpecification.FLOAT4,
-                    104,
-                    "test7"
-            ));
-            ArrayList<Varying> varyList = new ArrayList<>();
+            Attribute[] attList = new Attribute[]{
+                    new Attribute(MeshSpecification.TYPE_FLOAT2, 0, "position"),
+                    new Attribute(MeshSpecification.TYPE_FLOAT4, 8, "test"),
+                    new Attribute(MeshSpecification.TYPE_FLOAT4, 24, "test2"),
+                    new Attribute(
+                            MeshSpecification.TYPE_FLOAT4,
+                            40,
+                            "test3"
+                    ),
+                    new Attribute(
+                            MeshSpecification.TYPE_FLOAT4,
+                            56,
+                            "test4"
+                    ),
+                    new Attribute(
+                            MeshSpecification.TYPE_FLOAT4,
+                            72,
+                            "test5"
+                    ),
+                    new Attribute(
+                            MeshSpecification.TYPE_FLOAT4,
+                            88,
+                            "test6"
+                    ),
+                    new Attribute(
+                            MeshSpecification.TYPE_FLOAT4,
+                            104,
+                            "test7"
+                    )
+            };
+            Varying[] varyList = new Varying[0];
             return MeshSpecification.make(attList, 120, varyList, vs, fs);
         }
     }

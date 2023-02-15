@@ -98,7 +98,6 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.permission.persistence.RuntimePermissionsState;
-import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
@@ -4865,7 +4864,7 @@ public final class Settings implements Watchable, Snappable {
         pw.println();
         if (pkg != null) {
             pw.print(prefix); pw.print("  versionName="); pw.println(pkg.getVersionName());
-            pw.print(prefix); pw.print("  usesNonSdkApi="); pw.println(pkg.isUsesNonSdkApi());
+            pw.print(prefix); pw.print("  usesNonSdkApi="); pw.println(pkg.isNonSdkApiRequested());
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, pkg); pw.println();
             final int apkSigningVersion = pkg.getSigningDetails().getSignatureSchemeVersion();
             pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
@@ -4898,25 +4897,25 @@ public final class Settings implements Watchable, Snappable {
             pw.print(prefix); pw.print("  dataDir="); pw.println(dataDir.getAbsolutePath());
             pw.print(prefix); pw.print("  supportsScreens=[");
             boolean first = true;
-            if (pkg.isSupportsSmallScreens()) {
+            if (pkg.isSmallScreensSupported()) {
                 if (!first)
                     pw.print(", ");
                 first = false;
                 pw.print("small");
             }
-            if (pkg.isSupportsNormalScreens()) {
+            if (pkg.isNormalScreensSupported()) {
                 if (!first)
                     pw.print(", ");
                 first = false;
                 pw.print("medium");
             }
-            if (pkg.isSupportsLargeScreens()) {
+            if (pkg.isLargeScreensSupported()) {
                 if (!first)
                     pw.print(", ");
                 first = false;
                 pw.print("large");
             }
-            if (pkg.isSupportsExtraLargeScreens()) {
+            if (pkg.isExtraLargeScreensSupported()) {
                 if (!first)
                     pw.print(", ");
                 first = false;
@@ -6307,7 +6306,7 @@ public final class Settings implements Watchable, Snappable {
         boolean changed = false;
         while (it.hasNext()) {
             PersistentPreferredActivity ppa = it.next();
-            if (IntentResolver.filterEquals(ppa.getIntentFilter(), filter)) {
+            if (IntentFilter.filterEquals(ppa.getIntentFilter(), filter)) {
                 ppir.removeFilter(ppa);
                 changed = true;
                 break;

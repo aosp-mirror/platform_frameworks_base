@@ -458,14 +458,10 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Kullanımdaki uygulamanın nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörü verilerine erişmesine izin verir."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Arka plandayken nabız gibi vücut sensörü verilerine erişme"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Arka plandaki uygulamanın nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörü verilerine erişmesine izin verir."</string>
-    <!-- no translation found for permlab_bodySensorsWristTemperature (5007987988922337657) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensorsWristTemperature (4978345709781045181) -->
-    <skip />
-    <!-- no translation found for permlab_bodySensors_wristTemperature_background (7692772783509074356) -->
-    <skip />
-    <!-- no translation found for permdesc_bodySensors_wristTemperature_background (3170369705518699219) -->
-    <skip />
+    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Uygulama kullanımdayken bilek ısısı gibi vücut sensörü verilerine erişme."</string>
+    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Kullanımdaki uygulamanın bilek ısısı gibi vücut sensörü verilerine erişmesine izin verir."</string>
+    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Uygulama arka plandayken bilek ısısı gibi vücut sensörü verilerine erişme."</string>
+    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Arka plandaki uygulamanın bilek ısısı gibi vücut sensörü verilerine erişmesine izin verir."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Takvim etkinlikleri ve ayrıntılarını okuma"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu uygulama, tabletinizde kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Bu uygulama, Android TV cihazınızda kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
@@ -1249,10 +1245,8 @@
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"Android başlatılıyor…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"Tablet başlatılıyor…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"Cihaz başlatılıyor…"</string>
-    <string name="android_upgrading_fstrim" msgid="3259087575528515329">"Depolama optimize ediliyor."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"Sistem güncellemesi tamamlanıyor…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"<xliff:g id="APPLICATION">%1$s</xliff:g> yeni sürüme geçiriliyor…"</string>
-    <string name="android_upgrading_apk" msgid="1339564803894466737">"<xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g> uygulama optimize ediliyor."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> hazırlanıyor."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Uygulamalar başlatılıyor"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Açılış tamamlanıyor."</string>
@@ -1364,6 +1358,8 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB üzerinden PTP açık"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB tethering açık"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB üzerinden MIDI açık"</string>
+    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
+    <skip />
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB aksesuarı bağlandı"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Diğer seçenekler için dokunun."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Bağlı cihaz şarj ediliyor. Diğer seçenekler için dokunun."</string>
@@ -1712,7 +1708,8 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Bitti"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Kısayolu Kapat"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Kısayolu Kullan"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"Rengi Ters Çevirme"</string>
+    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
+    <skip />
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Renk düzeltme"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Tek El modu"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Ekstra loş"</string>
@@ -1850,6 +1847,8 @@
     <string name="immersive_cling_title" msgid="2307034298721541791">"Tam ekran olarak görüntüleme"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Çıkmak için yukarıdan aşağıya doğru hızlıca kaydırın."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Anladım"</string>
+    <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Daha iyi bir görünüm elde etmek için ekranı döndürün"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Daha iyi bir görünüm elde etmek için bölünmüş ekrandan çıkın"</string>
     <string name="done_label" msgid="7283767013231718521">"Bitti"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Saat kaydırma çemberi"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Dakika kaydırma çemberi"</string>
@@ -1861,6 +1860,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> (İş)"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"İş için 2. <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"İş için 3. <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="clone_profile_label_badge" msgid="1871997694718793964">"<xliff:g id="LABEL">%1$s</xliff:g> klonu"</string>
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Sabitlemeyi kaldırmadan önce PIN\'i sor"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Sabitlemeyi kaldırmadan önce kilit açma desenini sor"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Sabitlemeyi kaldırmadan önce şifre sor"</string>
@@ -2315,4 +2315,10 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tamamlayıcı uygulamanın arka plandan ön plan hizmetlerini başlatmasına izin verir."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon kullanılabilir"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon engellenmiş"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Çift ekran"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Çift Ekran açık"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, içeriği göstermek için her iki ekranı da kullanıyor"</string>
+    <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Cihaz çok ısındı"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Telefonunuz çok ısındığı için Çift Ekran kullanılamıyor"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Kapat"</string>
 </resources>

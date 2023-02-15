@@ -189,7 +189,7 @@ public class PackageDexOptimizer {
         }
 
         // We do not dexopt a package with no code.
-        if (!pkg.isHasCode()) {
+        if (!pkg.isDeclaredHavingCode()) {
             return false;
         }
 
@@ -287,7 +287,7 @@ public class PackageDexOptimizer {
         // For each code path in the package, this array contains the class loader context that
         // needs to be passed to dexopt in order to ensure correct optimizations.
         boolean[] pathsWithCode = new boolean[paths.size()];
-        pathsWithCode[0] = pkg.isHasCode();
+        pathsWithCode[0] = pkg.isDeclaredHavingCode();
         for (int i = 1; i < paths.size(); i++) {
             pathsWithCode[i] = (pkg.getSplitFlags()[i - 1] & ApplicationInfo.FLAG_HAS_CODE) != 0;
         }

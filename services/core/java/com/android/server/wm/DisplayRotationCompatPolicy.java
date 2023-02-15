@@ -250,10 +250,7 @@ final class DisplayRotationCompatPolicy {
         }
         ActivityRecord topActivity = mDisplayContent.topRunningActivity(
                     /* considerKeyguardState= */ true);
-        if (topActivity == null
-                // Checking windowing mode on activity level because we don't want to
-                // show toast in case of activity embedding.
-                || topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+        if (!isTreatmentEnabledForActivity(topActivity)) {
             return;
         }
         showToast(R.string.display_rotation_camera_compat_toast_after_rotation);
@@ -309,21 +306,28 @@ final class DisplayRotationCompatPolicy {
     }
 
     boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
-        return isTreatmentEnabledForDisplay() && isCameraActiveInFullscreen(activity);
+        return isTreatmentEnabledForDisplay()
+                && isCameraActive(activity, /* mustBeFullscreen */ true);
     }
+
 
     /**
      * Whether camera compat treatment is applicable for the given activity.
      *
      * <p>Conditions that need to be met:
      * <ul>
-     *     <li>{@link #isCameraActiveForPackage} is {@code true} for the activity.
+     *     <li>Camera is active for the package.
      *     <li>The activity is in fullscreen
      *     <li>The activity has fixed orientation but not "locked" or "nosensor" one.
      * </ul>
      */
     boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity) {
-        return activity != null && isCameraActiveInFullscreen(activity)
+        return isTreatmentEnabledForActivity(activity, /* mustBeFullscreen */ true);
+    }
+
+    private boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity,
+            boolean mustBeFullscreen) {
+        return activity != null && isCameraActive(activity, mustBeFullscreen)
                 && activity.getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED
                 // "locked" and "nosensor" values are often used by camera apps that can't
                 // handle dynamic changes so we shouldn't force rotate them.
@@ -331,8 +335,10 @@ final class DisplayRotationCompatPolicy {
                 && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED;
     }
 
-    private boolean isCameraActiveInFullscreen(@NonNull ActivityRecord activity) {
-        return !activity.inMultiWindowMode()
+    private boolean isCameraActive(@NonNull ActivityRecord activity, boolean mustBeFullscreen) {
+        // Checking windowing mode on activity level because we don't want to
+        // apply treatment in case of activity embedding.
+        return (!mustBeFullscreen || !activity.inMultiWindowMode())
                 && mCameraIdPackageBiMap.containsPackageName(activity.packageName)
                 && activity.mLetterboxUiController.shouldForceRotateForCameraCompat();
     }
@@ -385,7 +391,8 @@ final class DisplayRotationCompatPolicy {
         }
         // Checking that the whole app is in multi-window mode as we shouldn't show toast
         // for the activity embedding case.
-        if (topActivity.getTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW) {
+        if (topActivity.getTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
+                && isTreatmentEnabledForActivity(topActivity, /* mustBeFullscreen */ false)) {
             showToast(R.string.display_rotation_camera_compat_toast_in_split_screen);
         }
     }

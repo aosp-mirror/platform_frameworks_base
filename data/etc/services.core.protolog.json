@@ -4417,6 +4417,12 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "2043434284": {
+      "message": "setWallpaperShowWhenLocked: non-existent wallpaper token: %s",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "2045641491": {
       "message": "Checking %d opening apps (frozen=%b timeout=%b)...",
       "level": "VERBOSE",

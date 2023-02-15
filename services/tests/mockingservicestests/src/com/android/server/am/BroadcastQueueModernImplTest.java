@@ -60,11 +60,13 @@ import android.content.pm.ResolveInfo;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.BundleMerger;
+import android.os.DropBoxManager;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.IndentingPrintWriter;
+import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
@@ -221,8 +223,7 @@ public class BroadcastQueueModernImplTest {
 
     private void enqueueOrReplaceBroadcast(BroadcastProcessQueue queue,
             BroadcastRecord record, int recordIndex, long enqueueTime) {
-        queue.enqueueOrReplaceBroadcast(record, recordIndex,
-                null /* replacedBroadcastConsumer */, false);
+        queue.enqueueOrReplaceBroadcast(record, recordIndex, false);
         record.enqueueTime = enqueueTime;
     }
 
@@ -352,8 +353,7 @@ public class BroadcastQueueModernImplTest {
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane,
                 List.of(makeMockRegisteredReceiver()));
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0,
-                null /* replacedBroadcastConsumer */, false);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
 
         queue.setProcessCached(false);
         final long notCachedRunnableAt = queue.getRunnableAt();
@@ -375,14 +375,12 @@ public class BroadcastQueueModernImplTest {
         // enqueue a bg-priority broadcast then a fg-priority one
         final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
         final BroadcastRecord timezoneRecord = makeBroadcastRecord(timezone);
-        queue.enqueueOrReplaceBroadcast(timezoneRecord, 0,
-                null /* replacedBroadcastConsumer */, false);
+        queue.enqueueOrReplaceBroadcast(timezoneRecord, 0, false);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane);
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0,
-                null /* replacedBroadcastConsumer */, false);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
 
         // verify that:
         // (a) the queue is immediately runnable by existence of a fg-priority broadcast
@@ -413,8 +411,7 @@ public class BroadcastQueueModernImplTest {
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, null,
                 List.of(withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 10),
                         withPriority(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN), 0)), true);
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 1,
-                null /* replacedBroadcastConsumer */, false);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 1, false);
 
         assertFalse(queue.isRunnable());
         assertEquals(BroadcastProcessQueue.REASON_BLOCKED, queue.getRunnableAtReason());
@@ -437,8 +434,7 @@ public class BroadcastQueueModernImplTest {
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane,
                 List.of(makeMockRegisteredReceiver()));
-        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0,
-                null /* replacedBroadcastConsumer */, false);
+        queue.enqueueOrReplaceBroadcast(airplaneRecord, 0, false);
 
         mConstants.MAX_PENDING_BROADCASTS = 128;
         queue.invalidateRunnableAt();
@@ -464,13 +460,11 @@ public class BroadcastQueueModernImplTest {
                 new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED),
                 List.of(makeMockRegisteredReceiver()));
 
-        queue.enqueueOrReplaceBroadcast(lazyRecord, 0,
-                null /* replacedBroadcastConsumer */, false);
+        queue.enqueueOrReplaceBroadcast(lazyRecord, 0, false);
         assertThat(queue.getRunnableAt()).isGreaterThan(lazyRecord.enqueueTime);
         assertThat(queue.getRunnableAtReason()).isNotEqualTo(testRunnableAtReason);
 
-        queue.enqueueOrReplaceBroadcast(testRecord, 0,
-                null /* replacedBroadcastConsumer */, false);
+        queue.enqueueOrReplaceBroadcast(testRecord, 0, false);
         assertThat(queue.getRunnableAt()).isAtMost(testRecord.enqueueTime);
         assertThat(queue.getRunnableAtReason()).isEqualTo(testRunnableAtReason);
     }
@@ -532,26 +526,20 @@ public class BroadcastQueueModernImplTest {
 
         queue.enqueueOrReplaceBroadcast(
                 makeBroadcastRecord(new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0,
-                null /* replacedBroadcastConsumer */, false);
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, false);
         queue.enqueueOrReplaceBroadcast(
-                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)), 0,
-                null /* replacedBroadcastConsumer */, false);
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)), 0, false);
         queue.enqueueOrReplaceBroadcast(
                 makeBroadcastRecord(new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0,
-                null /* replacedBroadcastConsumer */, false);
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, false);
         queue.enqueueOrReplaceBroadcast(
                 makeBroadcastRecord(new Intent(Intent.ACTION_ALARM_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0,
-                null /* replacedBroadcastConsumer */, false);
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, false);
         queue.enqueueOrReplaceBroadcast(
-                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0,
-                null /* replacedBroadcastConsumer */, false);
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIME_TICK)), 0, false);
         queue.enqueueOrReplaceBroadcast(
                 makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0,
-                null /* replacedBroadcastConsumer */, false);
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, false);
 
         queue.makeActiveNextPending();
         assertEquals(Intent.ACTION_LOCKED_BOOT_COMPLETED, queue.getActive().intent.getAction());
@@ -975,6 +963,59 @@ public class BroadcastQueueModernImplTest {
         // Verify that the older timeTick has been removed.
         verifyPendingRecords(queue,
                 List.of(musicVolumeChanged, alarmVolumeChanged, timeTick));
+    }
+
+    @Test
+    public void testDeliveryGroupPolicy_merged_matchingFilter() {
+        final long now = SystemClock.elapsedRealtime();
+        final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast1 = createDropboxBroadcast(
+                "TAG_A", now, 2);
+        final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast2 = createDropboxBroadcast(
+                "TAG_B", now + 1000, 4);
+        final Pair<Intent, BroadcastOptions> dropboxEntryBroadcast3 = createDropboxBroadcast(
+                "TAG_A", now + 2000, 7);
+
+        // Halt all processing so that we get a consistent view
+        mHandlerThread.getLooper().getQueue().postSyncBarrier();
+
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast1.first,
+                dropboxEntryBroadcast1.second));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast2.first,
+                dropboxEntryBroadcast2.second));
+        mImpl.enqueueBroadcastLocked(makeBroadcastRecord(dropboxEntryBroadcast3.first,
+                dropboxEntryBroadcast3.second));
+
+        final BroadcastProcessQueue queue = mImpl.getProcessQueue(PACKAGE_GREEN,
+                getUidForPackage(PACKAGE_GREEN));
+        // dropboxEntryBroadcast1 and dropboxEntryBroadcast3 should be merged as they use the same
+        // tag and there shouldn't be a change to dropboxEntryBroadcast2.
+        final Pair<Intent, BroadcastOptions> expectedMergedBroadcast = createDropboxBroadcast(
+                "TAG_A", now + 2000, 10);
+        verifyPendingRecords(queue, List.of(
+                dropboxEntryBroadcast2.first, expectedMergedBroadcast.first));
+    }
+
+    private Pair<Intent, BroadcastOptions> createDropboxBroadcast(String tag, long timestampMs,
+            int droppedCount) {
+        final Intent dropboxEntryAdded = new Intent(DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
+        dropboxEntryAdded.putExtra(DropBoxManager.EXTRA_TAG, tag);
+        dropboxEntryAdded.putExtra(DropBoxManager.EXTRA_TIME, timestampMs);
+        dropboxEntryAdded.putExtra(DropBoxManager.EXTRA_DROPPED_COUNT, droppedCount);
+
+        final BundleMerger extrasMerger = new BundleMerger();
+        extrasMerger.setDefaultMergeStrategy(BundleMerger.STRATEGY_FIRST);
+        extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_TIME,
+                BundleMerger.STRATEGY_COMPARABLE_MAX);
+        extrasMerger.setMergeStrategy(DropBoxManager.EXTRA_DROPPED_COUNT,
+                BundleMerger.STRATEGY_NUMBER_INCREMENT_FIRST_AND_ADD);
+        final IntentFilter matchingFilter = new IntentFilter(
+                DropBoxManager.ACTION_DROPBOX_ENTRY_ADDED);
+        matchingFilter.addExtra(DropBoxManager.EXTRA_TAG, tag);
+        final BroadcastOptions optionsDropboxEntryAdded = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MERGED)
+                .setDeliveryGroupMatchingFilter(matchingFilter)
+                .setDeliveryGroupExtrasMerger(extrasMerger);
+        return Pair.create(dropboxEntryAdded, optionsDropboxEntryAdded);
     }
 
     @Test

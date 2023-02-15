@@ -17,15 +17,21 @@
 package com.android.systemui.screenshot;
 
 import static com.android.systemui.screenshot.AppClipsTrampolineActivity.ACTION_FINISH_FROM_TRAMPOLINE;
+import static com.android.systemui.screenshot.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_NAME;
 import static com.android.systemui.screenshot.AppClipsTrampolineActivity.EXTRA_RESULT_RECEIVER;
 import static com.android.systemui.screenshot.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
 import static com.android.systemui.screenshot.AppClipsTrampolineActivity.PERMISSION_SELF;
+import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_FOR_NOTE_ACCEPTED;
+import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_FOR_NOTE_CANCELLED;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
@@ -33,15 +39,20 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.activity.ComponentActivity;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLogger.UiEventEnum;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.settings.UserTracker;
 
 import javax.inject.Inject;
 
@@ -64,9 +75,15 @@ import javax.inject.Inject;
  *
  * TODO(b/267309532): Polish UI and animations.
  */
-public final class AppClipsActivity extends ComponentActivity {
+public class AppClipsActivity extends ComponentActivity {
+
+    private static final String TAG = AppClipsActivity.class.getSimpleName();
+    private static final ApplicationInfoFlags APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0);
 
     private final AppClipsViewModel.Factory mViewModelFactory;
+    private final PackageManager mPackageManager;
+    private final UserTracker mUserTracker;
+    private final UiEventLogger mUiEventLogger;
     private final BroadcastReceiver mBroadcastReceiver;
     private final IntentFilter mIntentFilter;
 
@@ -80,10 +97,17 @@ public final class AppClipsActivity extends ComponentActivity {
     private AppClipsViewModel mViewModel;
 
     private ResultReceiver mResultReceiver;
+    @Nullable
+    private String mCallingPackageName;
+    private int mCallingPackageUid;
 
     @Inject
-    public AppClipsActivity(AppClipsViewModel.Factory viewModelFactory) {
+    public AppClipsActivity(AppClipsViewModel.Factory viewModelFactory,
+            PackageManager packageManager, UserTracker userTracker, UiEventLogger uiEventLogger) {
         mViewModelFactory = viewModelFactory;
+        mPackageManager = packageManager;
+        mUserTracker = userTracker;
+        mUiEventLogger = uiEventLogger;
 
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -113,6 +137,7 @@ public final class AppClipsActivity extends ComponentActivity {
                 RECEIVER_NOT_EXPORTED);
 
         Intent intent = getIntent();
+        setUpUiLogging(intent);
         mResultReceiver = intent.getParcelableExtra(EXTRA_RESULT_RECEIVER, ResultReceiver.class);
         if (mResultReceiver == null) {
             setErrorThenFinish(Intent.CAPTURE_CONTENT_FOR_NOTE_FAILED);
@@ -166,6 +191,17 @@ public final class AppClipsActivity extends ComponentActivity {
                 && mViewModel.getResultLiveData().getValue() == null) {
             // Set error but don't finish as the activity is already finishing.
             setError(Intent.CAPTURE_CONTENT_FOR_NOTE_FAILED);
+        }
+    }
+
+    private void setUpUiLogging(Intent intent) {
+        mCallingPackageName = intent.getStringExtra(EXTRA_CALLING_PACKAGE_NAME);
+        mCallingPackageUid = 0;
+        try {
+            mCallingPackageUid = mPackageManager.getApplicationInfoAsUser(mCallingPackageName,
+                    APPLICATION_INFO_FLAGS, mUserTracker.getUserId()).uid;
+        } catch (NameNotFoundException e) {
+            Log.d(TAG, "Couldn't find notes app UID " + e);
         }
     }
 
@@ -228,6 +264,7 @@ public final class AppClipsActivity extends ComponentActivity {
         data.putParcelable(EXTRA_SCREENSHOT_URI, uri);
         try {
             mResultReceiver.send(Activity.RESULT_OK, data);
+            logUiEvent(SCREENSHOT_FOR_NOTE_ACCEPTED);
         } catch (Exception e) {
             // Do nothing.
         }
@@ -251,12 +288,19 @@ public final class AppClipsActivity extends ComponentActivity {
         data.putInt(Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE, errorCode);
         try {
             mResultReceiver.send(RESULT_OK, data);
+            if (errorCode == Intent.CAPTURE_CONTENT_FOR_NOTE_USER_CANCELED) {
+                logUiEvent(SCREENSHOT_FOR_NOTE_CANCELLED);
+            }
         } catch (Exception e) {
             // Do nothing.
         }
 
         // Nullify the ResultReceiver to avoid resending the result.
         mResultReceiver = null;
+    }
+
+    private void logUiEvent(UiEventEnum uiEvent) {
+        mUiEventLogger.log(uiEvent, mCallingPackageUid, mCallingPackageName);
     }
 
     private void updateImageDimensions() {

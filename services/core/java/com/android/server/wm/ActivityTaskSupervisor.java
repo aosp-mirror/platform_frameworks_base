@@ -1161,6 +1161,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return false;
         }
 
+        if ((displayContent.mDisplay.getFlags() & Display.FLAG_REAR) != 0) {
+            Slog.w(TAG, "Launch on display check: activity launch is not allowed on rear display");
+            return false;
+        }
+
         // Check if the caller has enough privileges to embed activities and launch to private
         // displays.
         final int startAnyPerm = mService.checkPermission(INTERNAL_SYSTEM_WINDOW, callingPid,
@@ -1662,9 +1667,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         /* action */
                         FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__FINISH_TASK,
                         /* version */
-                        1,
+                        3,
                         /* multi_window */
-                        false
+                        false,
+                        /* bal_code */
+                        -1
                 );
             }
         }
@@ -2053,7 +2060,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // Stop any activities that are scheduled to do so but have been waiting for the transition
         // animation to finish.
         ArrayList<ActivityRecord> readyToStopActivities = null;
-        for (int i = mStoppingActivities.size() - 1; i >= 0; --i) {
+        for (int i = 0; i < mStoppingActivities.size(); i++) {
             final ActivityRecord s = mStoppingActivities.get(i);
             final boolean animating = s.isInTransition();
             ProtoLog.v(WM_DEBUG_STATES, "Stopping %s: nowVisible=%b animating=%b "
@@ -2074,6 +2081,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 readyToStopActivities.add(s);
 
                 mStoppingActivities.remove(i);
+                i--;
             }
         }
 

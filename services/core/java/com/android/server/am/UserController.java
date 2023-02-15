@@ -55,6 +55,7 @@ import static com.android.server.pm.UserManagerInternal.userStartModeToString;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -64,6 +65,7 @@ import android.app.BroadcastOptions;
 import android.app.IStopUserCallback;
 import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageEvents;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.Context;
@@ -1458,23 +1460,31 @@ class UserController implements Handler.Callback {
 
     private boolean shouldStartWithParent(UserInfo user) {
         final UserProperties properties = getUserProperties(user.id);
+        DevicePolicyManagerInternal dpmi =
+                LocalServices.getService(DevicePolicyManagerInternal.class);
         return (properties != null && properties.getStartWithParent())
-                && !user.isQuietModeEnabled();
+                && (!user.isQuietModeEnabled() || dpmi.isKeepProfilesRunningEnabled());
     }
 
     /**
-     * Starts a user only if it's a profile, with a more relaxed permission requirement:
-     * {@link android.Manifest.permission#MANAGE_USERS} or
-     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
-     * To be called from ActivityManagerService.
-     * @param userId the id of the user to start.
-     * @return true if the operation was successful.
+     * Starts a {@link UserManager#isProfile() profile user}.
+     *
+     * <p>To be called from {@link com.android.server.am.ActivityManagerService}.
+     *
+     * @param userId the id of the profile user to start.
+     * @param evenWhenDisabled whether the profile should be started if it's not enabled yet
+     *        (most callers should pass {@code false}, except when starting the profile while it's
+     *        being provisioned).
+     * @param unlockListener listener to be informed when the profile has started and unlocked.
+     *
+     * @return {@code true} if the operation was successful.
+     *
+     * @throws IllegalArgumentException if the user doesn't exist or is not a profile.
      */
-    boolean startProfile(@UserIdInt int userId) {
-        return startProfile(userId, /* unlockListener= */ null);
-    }
-
-    boolean startProfile(@UserIdInt int userId, @Nullable IProgressListener unlockListener) {
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    boolean startProfile(@UserIdInt int userId, boolean evenWhenDisabled,
+            @Nullable IProgressListener unlockListener) {
         if (mInjector.checkCallingPermission(android.Manifest.permission.MANAGE_USERS)
                 == PackageManager.PERMISSION_DENIED && mInjector.checkCallingPermission(
                 android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
@@ -1489,8 +1499,8 @@ class UserController implements Handler.Callback {
             throw new IllegalArgumentException("User " + userId + " is not a profile");
         }
 
-        if (!userInfo.isEnabled()) {
-            Slogf.w(TAG, "Cannot start disabled profile #" + userId);
+        if (!userInfo.isEnabled() && !evenWhenDisabled) {
+            Slogf.w(TAG, "Cannot start disabled profile #%d", userId);
             return false;
         }
 
@@ -1560,16 +1570,18 @@ class UserController implements Handler.Callback {
      *
      * @param userId user to be started
      * @param displayId display where the user will be visible
+     * @param unlockListener Listener to be informed when the user has started and unlocked.
      *
      * @return whether the user was started
      */
-    boolean startUserVisibleOnDisplay(@UserIdInt int userId, int displayId) {
+    boolean startUserVisibleOnDisplay(@UserIdInt int userId, int displayId,
+            @Nullable IProgressListener unlockListener) {
         checkCallingHasOneOfThosePermissions("startUserOnDisplay",
                 MANAGE_USERS, INTERACT_ACROSS_USERS);
 
         try {
             return startUserNoChecks(userId, displayId, USER_START_MODE_BACKGROUND_VISIBLE,
-                    /* unlockListener= */ null);
+                    unlockListener);
         } catch (RuntimeException e) {
             Slogf.e(TAG, "startUserOnSecondaryDisplay(%d, %d) failed: %s", userId, displayId, e);
             return false;
@@ -1982,10 +1994,6 @@ class UserController implements Handler.Callback {
         }
         if (!targetUserInfo.supportsSwitchTo()) {
             Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": not supported");
-            return false;
-        }
-        if (targetUserInfo.isProfile()) {
-            Slogf.w(TAG, "Cannot switch to User #" + targetUserId + ": not a full user");
             return false;
         }
         if (FactoryResetter.isFactoryResetting()) {

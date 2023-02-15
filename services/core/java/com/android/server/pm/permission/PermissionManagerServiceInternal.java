@@ -20,8 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PermissionInfo;
 import android.permission.PermissionManagerInternal;
+import android.util.ArrayMap;
 
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
@@ -329,7 +331,7 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     /**
      * The permission-related parameters passed in for package installation.
      *
-     * @see android.content.pm.PackageInstaller.SessionParams
+     * @see SessionParams
      */
     //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     final class PackageInstalledParams {
@@ -339,28 +341,28 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
         public static final PackageInstalledParams DEFAULT = new Builder().build();
 
         @NonNull
-        private final List<String> mGrantedPermissions;
+        private final ArrayMap<String, Integer> mPermissionStates;
         @NonNull
         private final List<String> mAllowlistedRestrictedPermissions;
         @NonNull
         private final int mAutoRevokePermissionsMode;
 
-        private PackageInstalledParams(@NonNull List<String> grantedPermissions,
+        private PackageInstalledParams(@NonNull ArrayMap<String, Integer> permissionStates,
                 @NonNull List<String> allowlistedRestrictedPermissions,
                 int autoRevokePermissionsMode) {
-            mGrantedPermissions = grantedPermissions;
+            mPermissionStates = permissionStates;
             mAllowlistedRestrictedPermissions = allowlistedRestrictedPermissions;
             mAutoRevokePermissionsMode = autoRevokePermissionsMode;
         }
 
         /**
-         * Get the permissions to be granted.
+         * @return the permissions states requested
          *
-         * @return the permissions to be granted
+         * @see SessionParams#setPermissionState(String, int)
          */
         @NonNull
-        public List<String> getGrantedPermissions() {
-            return mGrantedPermissions;
+        public ArrayMap<String, Integer> getPermissionStates() {
+            return mPermissionStates;
         }
 
         /**
@@ -386,24 +388,23 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
          * Builder class for {@link PackageInstalledParams}.
          */
         public static final class Builder {
-            @NonNull
-            private List<String> mGrantedPermissions = Collections.emptyList();
+            @Nullable
+            private ArrayMap<String, Integer> mPermissionStates = null;
             @NonNull
             private List<String> mAllowlistedRestrictedPermissions = Collections.emptyList();
             @NonNull
             private int mAutoRevokePermissionsMode = AppOpsManager.MODE_DEFAULT;
 
             /**
-             * Set the permissions to be granted.
+             * Set the permissions states requested by the installer.
              *
-             * @param grantedPermissions the permissions to be granted
-             *
-             * @see android.content.pm.PackageInstaller.SessionParams#setGrantedRuntimePermissions(
-             *      java.lang.String[])
+             * @see SessionParams#setPermissionState(String, int)
              */
-            public void setGrantedPermissions(@NonNull List<String> grantedPermissions) {
-                Objects.requireNonNull(grantedPermissions);
-                mGrantedPermissions = new ArrayList<>(grantedPermissions);
+            public Builder setPermissionStates(
+                    @NonNull ArrayMap<String, Integer> permissionStates) {
+                Objects.requireNonNull(permissionStates);
+                mPermissionStates = permissionStates;
+                return this;
             }
 
             /**
@@ -414,11 +415,11 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
              *
              * @param allowlistedRestrictedPermissions the restricted permissions to be allowlisted
              *
-             * @see android.content.pm.PackageInstaller.SessionParams#setWhitelistedRestrictedPermissions(Set)
+             * @see SessionParams#setWhitelistedRestrictedPermissions(Set)
              */
             public void setAllowlistedRestrictedPermissions(
                     @NonNull List<String> allowlistedRestrictedPermissions) {
-                Objects.requireNonNull(mGrantedPermissions);
+                Objects.requireNonNull(allowlistedRestrictedPermissions);
                 mAllowlistedRestrictedPermissions = new ArrayList<>(
                         allowlistedRestrictedPermissions);
             }
@@ -434,8 +435,7 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
              *
              * @param autoRevokePermissionsMode the mode for auto revoking permissions
              *
-             * @see android.content.pm.PackageInstaller.SessionParams#setAutoRevokePermissionsMode(
-             *      boolean)
+             * @see SessionParams#setAutoRevokePermissionsMode(boolean)
              */
             public void setAutoRevokePermissionsMode(int autoRevokePermissionsMode) {
                 mAutoRevokePermissionsMode = autoRevokePermissionsMode;
@@ -448,7 +448,8 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
              */
             @NonNull
             public PackageInstalledParams build() {
-                return new PackageInstalledParams(mGrantedPermissions,
+                return new PackageInstalledParams(
+                        mPermissionStates == null ? new ArrayMap<>() : mPermissionStates,
                         mAllowlistedRestrictedPermissions, mAutoRevokePermissionsMode);
             }
         }

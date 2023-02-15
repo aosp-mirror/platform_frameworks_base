@@ -23,6 +23,7 @@ import android.animation.ValueAnimator
 import android.graphics.Canvas
 import android.graphics.Typeface
 import android.graphics.fonts.Font
+import android.graphics.fonts.FontVariationAxis
 import android.text.Layout
 import android.util.SparseArray
 
@@ -215,13 +216,40 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
             textInterpolator.targetPaint.textSize = textSize
         }
         if (weight >= 0) {
-            // Paint#setFontVariationSettings creates Typeface instance from scratch. To reduce the
-            // memory impact, cache the typeface result.
-            textInterpolator.targetPaint.typeface =
-                typefaceCache.getOrElse(weight) {
-                    textInterpolator.targetPaint.fontVariationSettings = "'$TAG_WGHT' $weight"
-                    textInterpolator.targetPaint.typeface
+            val fontVariationArray =
+                    FontVariationAxis.fromFontVariationSettings(
+                        textInterpolator.targetPaint.fontVariationSettings
+                    )
+            if (fontVariationArray.isNullOrEmpty()) {
+                textInterpolator.targetPaint.typeface =
+                    typefaceCache.getOrElse(weight) {
+                        textInterpolator.targetPaint.fontVariationSettings = "'$TAG_WGHT' $weight"
+                        textInterpolator.targetPaint.typeface
+                    }
+            } else {
+                val idx = fontVariationArray.indexOfFirst { it.tag == "$TAG_WGHT" }
+                if (idx == -1) {
+                    val updatedFontVariation =
+                        textInterpolator.targetPaint.fontVariationSettings + ",'$TAG_WGHT' $weight"
+                    textInterpolator.targetPaint.typeface =
+                        typefaceCache.getOrElse(weight) {
+                            textInterpolator.targetPaint.fontVariationSettings =
+                                    updatedFontVariation
+                            textInterpolator.targetPaint.typeface
+                        }
+                } else {
+                    fontVariationArray[idx] = FontVariationAxis(
+                            "$TAG_WGHT", weight.toFloat())
+                    val updatedFontVariation =
+                            FontVariationAxis.toFontVariationSettings(fontVariationArray)
+                    textInterpolator.targetPaint.typeface =
+                        typefaceCache.getOrElse(weight) {
+                            textInterpolator.targetPaint.fontVariationSettings =
+                                    updatedFontVariation
+                            textInterpolator.targetPaint.typeface
+                        }
                 }
+            }
         }
         if (color != null) {
             textInterpolator.targetPaint.color = color

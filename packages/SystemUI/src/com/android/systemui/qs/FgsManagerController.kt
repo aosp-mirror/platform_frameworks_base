@@ -701,7 +701,8 @@ class FgsManagerControllerImpl @Inject constructor(
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT,
                 PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI,
                 PowerExemptionManager.REASON_ROLE_DIALER,
-                PowerExemptionManager.REASON_SYSTEM_MODULE -> UIControl.HIDE_BUTTON
+                PowerExemptionManager.REASON_SYSTEM_MODULE,
+                PowerExemptionManager.REASON_SYSTEM_EXEMPT_APP_OP -> UIControl.HIDE_BUTTON
 
                 PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE ->
                     if (showStopBtnForUserAllowlistedApps) {

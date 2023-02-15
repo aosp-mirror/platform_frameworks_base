@@ -49,6 +49,7 @@ import android.media.ISpatializerHeadTrackerAvailableCallback;
 import android.media.ISpatializerHeadTrackingModeCallback;
 import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerOutputCallback;
+import android.media.IStreamAliasingDispatcher;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
 import android.media.VolumeInfo;
@@ -256,6 +257,21 @@ interface IAudioService {
     void setRingtonePlayer(IRingtonePlayer player);
     IRingtonePlayer getRingtonePlayer();
     int getUiSoundsStreamType();
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    List getIndependentStreamTypes();
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    int getStreamTypeAlias(int streamType);
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    boolean isVolumeControlUsingVolumeGroups();
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    oneway void registerStreamAliasingDispatcher(IStreamAliasingDispatcher isad, boolean register);
+
+    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    void setNotifAliasRingForTest(boolean alias);
 
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     void setWiredDeviceConnectionState(in AudioDeviceAttributes aa, int state, String caller);
@@ -629,12 +645,13 @@ interface IAudioService {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
     int[] getActiveAssistantServiceUids();
 
-    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING,android.Manifest.permission.BLUETOOTH_PRIVILEGED})")
     void registerDeviceVolumeDispatcherForAbsoluteVolume(boolean register,
             in IAudioDeviceVolumeDispatcher cb,
             in String packageName,
             in AudioDeviceAttributes device, in List<VolumeInfo> volumes,
-            boolean handlesvolumeAdjustment);
+            boolean handlesvolumeAdjustment,
+            int volumeBehavior);
 
     AudioHalVersionInfo getHalVersion();
 

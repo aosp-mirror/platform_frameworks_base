@@ -49,6 +49,7 @@ import com.android.frameworks.servicestests.R;
 import com.android.server.SystemService;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -156,6 +157,7 @@ public class DevicePolicyManagerServiceMigrationTest extends DpmTestBase {
 
     @SmallTest
     @Test
+    @Ignore("b/269249457")
     public void testCompMigrationAffiliated() throws Exception {
         prepareAdmin1AsDo();
         prepareAdmin1AsPo(COPE_PROFILE_USER_ID, Build.VERSION_CODES.R);

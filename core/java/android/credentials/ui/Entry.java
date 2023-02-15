@@ -29,30 +29,12 @@ import android.os.Parcelable;
 import com.android.internal.util.AnnotationValidations;
 
 /**
- * A credential, save, or action entry to be rendered.
+ * A credential, create, or action entry to be rendered.
  *
  * @hide
  */
 @TestApi
 public final class Entry implements Parcelable {
-    /**
-    * The intent extra key for the action chip {@code Entry} list when launching the UX activities.
-    */
-    @NonNull public static final String EXTRA_ENTRY_LIST_ACTION_CHIP =
-            "android.credentials.ui.extra.ENTRY_LIST_ACTION_CHIP";
-    /**
-    * The intent extra key for the credential / save {@code Entry} list when launching the UX
-    * activities.
-    */
-    @NonNull public static final String EXTRA_ENTRY_LIST_CREDENTIAL =
-            "android.credentials.ui.extra.ENTRY_LIST_CREDENTIAL";
-    /**
-    * The intent extra key for the authentication action {@code Entry} when launching the UX
-    * activities.
-    */
-    @NonNull public static final String EXTRA_ENTRY_AUTHENTICATION_ACTION =
-            "android.credentials.ui.extra.ENTRY_AUTHENTICATION_ACTION";
-
     @NonNull private final String mKey;
     @NonNull private final String mSubkey;
     @Nullable private PendingIntent mPendingIntent;

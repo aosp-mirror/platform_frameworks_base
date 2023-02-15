@@ -45,7 +45,7 @@ class FakeMobileIconInteractor(
     private val _iconGroup = MutableStateFlow<SignalIcon.MobileIconGroup>(TelephonyIcons.THREE_G)
     override val networkTypeIconGroup = _iconGroup
 
-    override val networkName = MutableStateFlow(NetworkNameModel.Derived("demo mode"))
+    override val networkName = MutableStateFlow(NetworkNameModel.IntentDerived("demo mode"))
 
     private val _isEmergencyOnly = MutableStateFlow(false)
     override val isEmergencyOnly = _isEmergencyOnly
@@ -70,6 +70,8 @@ class FakeMobileIconInteractor(
 
     private val _numberOfLevels = MutableStateFlow(DEFAULT_NUM_LEVELS)
     override val numberOfLevels = _numberOfLevels
+
+    override val isForceHidden = MutableStateFlow(false)
 
     fun setIconGroup(group: SignalIcon.MobileIconGroup) {
         _iconGroup.value = group

@@ -27,6 +27,7 @@ import android.os.RemoteException
 import android.os.UserHandle
 import android.util.SparseBooleanArray
 import android.util.SparseIntArray
+import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.util.ArrayUtils
 import com.android.internal.util.function.pooled.PooledLambda
 import com.android.server.appop.AppOpsCheckingServiceInterface
@@ -65,6 +66,24 @@ class AppOpService(
             switchedOps.put(switchCode,
                 ArrayUtils.appendInt(switchedOps.get(switchCode), switchedCode))
         }
+    }
+
+    @VisibleForTesting
+    override fun writeState() {
+        // TODO Not yet implemented
+    }
+
+    override fun readState() {
+        // TODO Not yet implemented
+    }
+
+    @VisibleForTesting
+    override fun shutdown() {
+        // TODO Not yet implemented
+    }
+
+    override fun systemReady() {
+        // TODO Not yet implemented
     }
 
     override fun getNonDefaultUidModes(uid: Int): SparseIntArray {

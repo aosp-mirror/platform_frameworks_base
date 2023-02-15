@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffor
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -157,25 +158,29 @@ class CustomizationProviderTest : SysuiTestCase() {
                 dumpManager = mock(),
                 userHandle = UserHandle.SYSTEM,
             )
+        val featureFlags =
+            FakeFeatureFlags().apply {
+                set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
+                set(Flags.LOCKSCREEN_CUSTOM_CLOCKS, true)
+                set(Flags.REVAMPED_WALLPAPER_UI, true)
+                set(Flags.WALLPAPER_FULLSCREEN_PREVIEW, true)
+                set(Flags.FACE_AUTH_REFACTOR, true)
+            }
         underTest.interactor =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor =
                     KeyguardInteractor(
                         repository = FakeKeyguardRepository(),
                         commandQueue = commandQueue,
+                        featureFlags = featureFlags,
+                        bouncerRepository = FakeKeyguardBouncerRepository(),
                     ),
                 registry = mock(),
                 lockPatternUtils = lockPatternUtils,
                 keyguardStateController = keyguardStateController,
                 userTracker = userTracker,
                 activityStarter = activityStarter,
-                featureFlags =
-                    FakeFeatureFlags().apply {
-                        set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
-                        set(Flags.LOCKSCREEN_CUSTOM_CLOCKS, true)
-                        set(Flags.REVAMPED_WALLPAPER_UI, true)
-                        set(Flags.WALLPAPER_FULLSCREEN_PREVIEW, true)
-                    },
+                featureFlags = featureFlags,
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
             )

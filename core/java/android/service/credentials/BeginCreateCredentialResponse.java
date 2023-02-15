@@ -34,6 +34,14 @@ public final class BeginCreateCredentialResponse implements Parcelable {
     private final @NonNull List<CreateEntry> mCreateEntries;
     private final @Nullable CreateEntry mRemoteCreateEntry;
 
+    /**
+     * Creates an empty response instance, to be used when there are no {@link CreateEntry}
+     * to return.
+     */
+    public BeginCreateCredentialResponse() {
+        this(/*createEntries=*/new ArrayList<>(), /*remoteCreateEntry=*/null);
+    }
+
     private BeginCreateCredentialResponse(@NonNull Parcel in) {
         List<CreateEntry> createEntries = new ArrayList<>();
         in.readTypedList(createEntries, CreateEntry.CREATOR);
@@ -137,13 +145,8 @@ public final class BeginCreateCredentialResponse implements Parcelable {
 
         /**
          * Builds a new instance of {@link BeginCreateCredentialResponse}.
-         *
-         * @throws NullPointerException If {@code createEntries} is null.
-         * @throws IllegalArgumentException If {@code createEntries} is empty.
          */
         public @NonNull BeginCreateCredentialResponse build() {
-            Preconditions.checkCollectionNotEmpty(mCreateEntries, "createEntries must "
-                    + "not be null, or empty");
             return new BeginCreateCredentialResponse(mCreateEntries, mRemoteCreateEntry);
         }
     }

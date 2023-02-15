@@ -204,15 +204,6 @@ constructor(
 
     // TODO(b/238425913): We should split this class into mobile-specific and wifi-specific loggers.
 
-    fun logFilteredSubscriptionsChanged(subs: List<SubscriptionModel>) {
-        buffer.log(
-            SB_LOGGING_TAG,
-            LogLevel.INFO,
-            { str1 = subs.toString() },
-            { "Filtered subscriptions updated: $str1" },
-        )
-    }
-
     fun logUiAdapterSubIdsUpdated(subs: List<Int>) {
         buffer.log(
             SB_LOGGING_TAG,
@@ -228,6 +219,27 @@ constructor(
             LogLevel.INFO,
             { str1 = subs.toString() },
             { "Sub IDs in MobileUiAdapter being sent to icon controller: $str1" },
+        )
+    }
+
+    fun logCarrierConfigChanged(subId: Int) {
+        buffer.log(
+            SB_LOGGING_TAG,
+            LogLevel.INFO,
+            { int1 = subId },
+            { "onCarrierConfigChanged: subId=$int1" },
+        )
+    }
+
+    fun logOnDataEnabledChanged(enabled: Boolean, subId: Int) {
+        buffer.log(
+            SB_LOGGING_TAG,
+            LogLevel.INFO,
+            {
+                int1 = subId
+                bool1 = enabled
+            },
+            { "onDataEnabledChanged: subId=$int1 enabled=$bool1" },
         )
     }
 

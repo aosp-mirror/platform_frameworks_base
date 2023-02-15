@@ -138,7 +138,7 @@ class TableLogBuffer(
     }
 
     /** Logs a Int change. */
-    fun logChange(prefix: String, columnName: String, value: Int) {
+    fun logChange(prefix: String, columnName: String, value: Int?) {
         logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
     }
 
@@ -155,7 +155,7 @@ class TableLogBuffer(
         change.set(value)
     }
 
-    private fun logChange(timestamp: Long, prefix: String, columnName: String, value: Int) {
+    private fun logChange(timestamp: Long, prefix: String, columnName: String, value: Int?) {
         val change = obtain(timestamp, prefix, columnName)
         change.set(value)
     }

@@ -311,16 +311,15 @@ constructor(
         }
 
         // media player
-        val controlsTop =
-            calculateWidgetGroupAlphaForSquishiness(
-                controlIds,
-                squishedViewState.measureHeight.toFloat(),
-                squishedViewState,
-                squishFraction
-            )
+        calculateWidgetGroupAlphaForSquishiness(
+            controlIds,
+            squishedViewState.measureHeight.toFloat(),
+            squishedViewState,
+            squishFraction
+        )
         calculateWidgetGroupAlphaForSquishiness(
             detailIds,
-            controlsTop,
+            squishedViewState.measureHeight.toFloat(),
             squishedViewState,
             squishFraction
         )

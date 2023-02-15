@@ -444,6 +444,7 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncTransactionQueue,
             PipTransitionState pipTransitionState,
             PipBoundsState pipBoundsState,
+            PipSizeSpecHandler pipSizeSpecHandler,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PhonePipMenuController menuPhoneController,
             PipAnimationController pipAnimationController,
@@ -455,10 +456,11 @@ public abstract class WMShellModule {
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context,
-                syncTransactionQueue, pipTransitionState, pipBoundsState, pipBoundsAlgorithm,
-                menuPhoneController, pipAnimationController, pipSurfaceTransactionHelper,
-                pipTransitionController, pipParamsChangedForwarder, splitScreenControllerOptional,
-                displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
+                syncTransactionQueue, pipTransitionState, pipBoundsState, pipSizeSpecHandler,
+                pipBoundsAlgorithm, menuPhoneController, pipAnimationController,
+                pipSurfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
+                splitScreenControllerOptional, displayController, pipUiEventLogger,
+                shellTaskOrganizer, mainExecutor);
     }
 
     @WMSingleton
@@ -473,13 +475,14 @@ public abstract class WMShellModule {
     static PipTransitionController providePipTransitionController(Context context,
             ShellInit shellInit, ShellTaskOrganizer shellTaskOrganizer, Transitions transitions,
             PipAnimationController pipAnimationController, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipBoundsState pipBoundsState, PipTransitionState pipTransitionState,
-            PhonePipMenuController pipMenuController,
+            PipBoundsState pipBoundsState, PipSizeSpecHandler pipSizeSpecHandler,
+            PipTransitionState pipTransitionState, PhonePipMenuController pipMenuController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreenController> splitScreenOptional) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
-                pipBoundsState, pipTransitionState, pipMenuController, pipBoundsAlgorithm,
-                pipAnimationController, pipSurfaceTransactionHelper, splitScreenOptional);
+                pipBoundsState, pipSizeSpecHandler, pipTransitionState, pipMenuController,
+                pipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
+                splitScreenOptional);
     }
 
     @WMSingleton

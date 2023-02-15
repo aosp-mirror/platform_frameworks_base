@@ -78,4 +78,6 @@ oneway interface IPhoneStateListener {
     void onAllowedNetworkTypesChanged(in int reason, in long allowedNetworkType);
     void onLinkCapacityEstimateChanged(in List<LinkCapacityEstimate> linkCapacityEstimateList);
     void onMediaQualityStatusChanged(in MediaQualityStatus mediaQualityStatus);
+    void onCallBackModeStarted(int type);
+    void onCallBackModeStopped(int type, int reason);
 }

@@ -563,6 +563,14 @@ public class BiometricService extends SystemService {
                 }
             }
 
+            // Set the default subtitle if necessary.
+            if (promptInfo.isUseDefaultSubtitle()) {
+                if (TextUtils.isEmpty(promptInfo.getSubtitle())) {
+                    promptInfo.setSubtitle(getContext()
+                            .getString(R.string.biometric_dialog_default_subtitle));
+                }
+            }
+
             final long requestId = mRequestCounter.get();
             mHandler.post(() -> handleAuthenticate(
                     token, requestId, operationId, userId, receiver, opPackageName, promptInfo));

@@ -225,32 +225,6 @@ public final class SearchSession implements AutoCloseable {
     }
 
     /**
-     * Requests the search ui service to dispatch a new set of search targets to the pre-registered
-     * callback for zero state. Zero state means when user entered search ui but not issued any
-     * query yet. This method can be used for client to sync up with server data if they think data
-     * might be out of sync, for example, after restart.
-     * Pre-register a callback with
-     * {@link SearchSession#registerEmptyQueryResultUpdateCallback(Executor, Callback)}
-     * is required before calling this method. Otherwise this is no-op.
-     *
-     * @see {@link SearchSession#registerEmptyQueryResultUpdateCallback(Executor, Callback)}
-     * @see {@link SearchSession.Callback#onTargetsAvailable(List)}.
-     */
-    public void requestEmptyQueryResultUpdate() {
-        if (mIsClosed.get()) {
-            throw new IllegalStateException("This client has already been destroyed.");
-        }
-
-        try {
-            mInterface.requestEmptyQueryResultUpdate(mSessionId);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to request empty query result update", e);
-            e.rethrowAsRuntimeException();
-        }
-    }
-
-
-    /**
      * Destroys the client and unregisters the callback. Any method on this class after this call
      * will throw {@link IllegalStateException}.
      *

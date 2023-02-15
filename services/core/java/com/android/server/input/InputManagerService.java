@@ -50,6 +50,7 @@ import android.hardware.input.ITabletModeChangedListener;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputSensorInfo;
+import android.hardware.input.InputSettings;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.TouchCalibration;
 import android.hardware.lights.Light;
@@ -1309,7 +1310,7 @@ public class InputManagerService extends IInputManager.Stub
             throw new SecurityException("Requires SET_POINTER_SPEED permission");
         }
 
-        if (speed < InputManager.MIN_POINTER_SPEED || speed > InputManager.MAX_POINTER_SPEED) {
+        if (speed < InputSettings.MIN_POINTER_SPEED || speed > InputSettings.MAX_POINTER_SPEED) {
             throw new IllegalArgumentException("speed out of range");
         }
 
@@ -1317,8 +1318,8 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private void setPointerSpeedUnchecked(int speed) {
-        speed = Math.min(Math.max(speed, InputManager.MIN_POINTER_SPEED),
-                InputManager.MAX_POINTER_SPEED);
+        speed = Math.min(Math.max(speed, InputSettings.MIN_POINTER_SPEED),
+                InputSettings.MAX_POINTER_SPEED);
         mNative.setPointerSpeed(speed);
     }
 

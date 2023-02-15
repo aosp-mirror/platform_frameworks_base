@@ -38,6 +38,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.shared.clocks.ClockRegistry
+import com.android.systemui.shared.clocks.shared.model.ClockPreviewConstants
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardQuickAffordancePreviewConstants
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import dagger.assisted.Assisted
@@ -69,6 +70,8 @@ constructor(
             KeyguardQuickAffordancePreviewConstants.KEY_HIGHLIGHT_QUICK_AFFORDANCES,
             false,
         )
+    private val shouldHideClock: Boolean =
+        bundle.getBoolean(ClockPreviewConstants.KEY_HIDE_CLOCK, false)
 
     private var host: SurfaceControlViewHost
 
@@ -94,6 +97,7 @@ constructor(
                     context,
                     displayManager.getDisplay(bundle.getInt(KEY_DISPLAY_ID)),
                     hostToken,
+                    "KeyguardPreviewRenderer"
                 )
             disposables.add(DisposableHandle { host.release() })
         }
@@ -104,7 +108,9 @@ constructor(
             val rootView = FrameLayout(context)
 
             setUpBottomArea(rootView)
-            setUpClock(rootView)
+            if (!shouldHideClock) {
+                setUpClock(rootView)
+            }
 
             rootView.measure(
                 View.MeasureSpec.makeMeasureSpec(
@@ -165,7 +171,12 @@ constructor(
     }
 
     private fun setUpClock(parentView: ViewGroup) {
-        val clockChangeListener = ClockRegistry.ClockChangeListener { onClockChanged(parentView) }
+        val clockChangeListener =
+            object : ClockRegistry.ClockChangeListener {
+                override fun onCurrentClockChanged() {
+                    onClockChanged(parentView)
+                }
+            }
         clockRegistry.registerClockChangeListener(clockChangeListener)
         disposables.add(
             DisposableHandle { clockRegistry.unregisterClockChangeListener(clockChangeListener) }

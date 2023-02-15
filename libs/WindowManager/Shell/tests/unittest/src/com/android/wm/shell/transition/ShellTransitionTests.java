@@ -45,6 +45,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
@@ -83,6 +84,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.TransitionInfoBuilder;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -119,8 +121,8 @@ public class ShellTransitionTests extends ShellTestCase {
 
     @Before
     public void setUp() {
-        doAnswer(invocation -> invocation.getArguments()[1])
-                .when(mOrganizer).startTransition(any(), any());
+        doAnswer(invocation -> new Binder())
+                .when(mOrganizer).startNewTransition(anyInt(), any());
     }
 
     @Test
@@ -562,6 +564,32 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     @Test
+    public void testTransitionOrderMatchesCore() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        IBinder transitToken = new Binder();
+        IBinder shellInit = transitions.startTransition(TRANSIT_CLOSE,
+                new WindowContainerTransaction(), null /* handler */);
+        // make sure we are testing the "New" API.
+        verify(mOrganizer, times(1)).startNewTransition(eq(TRANSIT_CLOSE), any());
+        // WMCore may not receive the new transition before requesting its own.
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
+
+        // At this point, WM is working on its transition (the shell-initialized one is still
+        // queued), so continue the transition lifecycle for that.
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
+        // At this point, if things are not working, we'd get an NPE due to attempting to merge
+        // into the shellInit transition which hasn't started yet.
+        assertEquals(1, mDefaultHandler.activeCount());
+    }
+
+    @Test
     public void testShouldRotateSeamlessly() throws Exception {
         final RunningTaskInfo taskInfo =
                 createTaskInfo(1, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
@@ -918,43 +946,6 @@ public class ShellTransitionTests extends ShellTestCase {
         // Merged transition won't receive any lifecycle calls beyond ready
         verify(observer, times(0)).onTransitionStarting(transitToken3);
         verify(observer, times(0)).onTransitionFinished(eq(transitToken3), anyBoolean());
-    }
-
-    class TransitionInfoBuilder {
-        final TransitionInfo mInfo;
-
-        TransitionInfoBuilder(@WindowManager.TransitionType int type) {
-            this(type, 0 /* flags */);
-        }
-
-        TransitionInfoBuilder(@WindowManager.TransitionType int type,
-                @WindowManager.TransitionFlags int flags) {
-            mInfo = new TransitionInfo(type, flags);
-            mInfo.setRootLeash(createMockSurface(true /* valid */), 0, 0);
-        }
-
-        TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
-                RunningTaskInfo taskInfo) {
-            final TransitionInfo.Change change =
-                    new TransitionInfo.Change(null /* token */, createMockSurface(true));
-            change.setMode(mode);
-            change.setTaskInfo(taskInfo);
-            mInfo.addChange(change);
-            return this;
-        }
-
-        TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode) {
-            return addChange(mode, null /* taskInfo */);
-        }
-
-        TransitionInfoBuilder addChange(TransitionInfo.Change change) {
-            mInfo.addChange(change);
-            return this;
-        }
-
-        TransitionInfo build() {
-            return mInfo;
-        }
     }
 
     class ChangeBuilder {

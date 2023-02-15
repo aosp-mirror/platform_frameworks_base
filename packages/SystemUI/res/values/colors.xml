@@ -118,6 +118,7 @@
     <color name="ksh_application_group_color">#fff44336</color>
     <color name="ksh_key_item_color">@color/material_grey_600</color>
     <color name="ksh_key_item_background">@color/material_grey_100</color>
+    <color name="ksh_key_item_new_background">@color/transparent</color>
 
     <color name="instant_apps_color">#ff4d5a64</color>
 
@@ -135,15 +136,6 @@
 
     <!-- SFPS colors -->
     <color name="sfps_chevron_fill">@color/material_dynamic_primary90</color>
-
-    <!-- UDFPS colors -->
-    <color name="udfps_enroll_icon">#699FF3</color>
-    <color name="udfps_moving_target_fill">#C2D7F7</color>
-    <!-- 50% of udfps_moving_target_fill-->
-    <color name="udfps_moving_target_fill_error">#80C2D7F7</color>
-    <color name="udfps_enroll_progress">#699FF3</color>
-    <color name="udfps_enroll_progress_help">#70699FF3</color>
-    <color name="udfps_enroll_progress_help_with_talkback">#FFEE675C</color>
 
     <!-- Floating overlay actions -->
     <color name="overlay_button_ripple">#1f000000</color>

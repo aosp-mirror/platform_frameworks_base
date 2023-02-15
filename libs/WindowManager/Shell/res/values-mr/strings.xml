@@ -49,6 +49,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"शीर्ष 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"शीर्ष 10"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"तळाशी फुल स्क्रीन"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"एकहाती मोड वापरणे"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"बाहेर पडण्यासाठी स्क्रीनच्या खालून वरच्या दिशेने स्वाइप करा किंवा ॲपवर कोठेही टॅप करा"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"एकहाती मोड सुरू करा"</string>
@@ -84,16 +92,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"ॲपची स्थिती पुन्हा बदलण्यासाठी, त्याच्या बाहेर दोनदा टॅप करा"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"समजले"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"अधिक माहितीसाठी विस्तार करा."</string>
-    <!-- no translation found for letterbox_restart_dialog_title (8543049527871033505) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_description (6096946078246557848) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_cancel (1342209132692537805) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_restart (8529976234412442973) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_checkbox_title (5252918008140768386) -->
-    <skip />
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"आणखी चांगल्या प्रकारे दिसावे यासाठी रीस्टार्ट करायचे आहे का?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"तुम्ही अ‍ॅप रीस्टार्ट करू शकता, जेणेकरून ते तुमच्या स्क्रीनवर आणखी चांगल्या प्रकारे दिसेल, पण तुमची प्रगती किंवा कोणतेही सेव्ह न केलेले बदल तुम्ही गमवाल"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"रद्द करा"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"रीस्टार्ट करा"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"पुन्हा दाखवू नका"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"मोठे करा"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"लहान करा"</string>
     <string name="close_button_text" msgid="2913281996024033299">"बंद करा"</string>

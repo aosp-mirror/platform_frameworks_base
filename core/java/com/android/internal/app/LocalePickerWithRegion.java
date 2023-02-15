@@ -277,8 +277,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             inflater.inflate(R.menu.language_selection_list, menu);
 
             final MenuItem searchMenuItem = menu.findItem(R.id.locale_search_menu);
-            if (mLocalePickerCollector.hasSpecificPackageName()
-                    && mOnActionExpandListener != null) {
+            if (mOnActionExpandListener != null) {
                 searchMenuItem.setOnActionExpandListener(mOnActionExpandListener);
             }
 

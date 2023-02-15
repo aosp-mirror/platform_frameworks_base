@@ -465,7 +465,7 @@ public final class SensorPrivacyManager {
             @Override
             public void onSensorPrivacyChanged(SensorPrivacyChangedParams params) {
                 if (params.getSensor() == sensor) {
-                    listener.onSensorPrivacyChanged(params.getSensor(), params.isEnabled());
+                    listener.onSensorPrivacyChanged(params);
                 }
             }
             @Override

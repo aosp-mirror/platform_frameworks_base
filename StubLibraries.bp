@@ -530,11 +530,17 @@ droidstubs {
     extensions_info_file: ":sdk-extensions-info",
 }
 
+// This module can be built with:
+// m out/soong/.intermediates/frameworks/base/api_versions_module_lib/android_common/metalava/api-versions.xml
 droidstubs {
     name: "api_versions_module_lib",
     srcs: [":android_module_stubs_current_with_test_libs{.jar}"],
     generate_stubs: false,
     api_levels_annotations_enabled: true,
+    // this only has the non-updatable portions of the module lib sdk,
+    // which can reference classes from updatable apexes, so remove references to them
+    // from this api_versions file.
+    flags: ["--remove-missing-class-references-in-api-levels"],
     api_levels_annotations_dirs: [
         "sdk-dir",
         "api-versions-jars-dir",
@@ -548,6 +554,10 @@ droidstubs {
     srcs: [":android_system_server_stubs_current_with_test_libs{.jar}"],
     generate_stubs: false,
     api_levels_annotations_enabled: true,
+    // this only has the non-updatable portions of the system server sdk,
+    // which can reference classes from updatable apexes, so remove references to them
+    // from this api_versions file.
+    flags: ["--remove-missing-class-references-in-api-levels"],
     api_levels_annotations_dirs: [
         "sdk-dir",
         "api-versions-jars-dir",

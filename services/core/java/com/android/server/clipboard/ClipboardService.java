@@ -824,7 +824,9 @@ public class ClipboardService extends SystemService {
     @GuardedBy("mLock")
     private void setPrimaryClipInternalLocked(
             @Nullable ClipData clip, int uid, int deviceId, @Nullable String sourcePackage) {
-        mEmulatorClipboardMonitor.accept(clip);
+        if (deviceId == DEVICE_ID_DEFAULT) {
+            mEmulatorClipboardMonitor.accept(clip);
+        }
 
         final int userId = UserHandle.getUserId(uid);
 

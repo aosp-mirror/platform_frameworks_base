@@ -739,6 +739,13 @@ public class MagnificationControllerTest {
     }
 
     @Test
+    public void setPreferenceAlwaysOnMagnificationEnabled_setPrefEnabled_enableOnFullScreen() {
+        mMagnificationController.setAlwaysOnMagnificationEnabled(true);
+
+        verify(mScreenMagnificationController).setAlwaysOnMagnificationEnabled(eq(true));
+    }
+
+    @Test
     public void onRectangleOnScreenRequested_fullScreenIsActivated_fullScreenDispatchEvent() {
         mMagnificationController.onFullScreenMagnificationActivationState(TEST_DISPLAY,
                 true);

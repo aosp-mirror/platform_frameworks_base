@@ -86,7 +86,9 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
                 /* bool is_foreground_service = 23 */
                 NotificationRecordLogger.isForegroundService(p.r),
                 /* optional int64 timeout_millis = 24 */
-                p.r.getSbn().getNotification().getTimeoutAfter()
+                p.r.getSbn().getNotification().getTimeoutAfter(),
+                /* bool is_nondismissible = 25 */
+                NotificationRecordLogger.isNonDismissible(p.r)
         );
     }
 

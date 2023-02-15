@@ -33,6 +33,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.android.systemui.accessibility.accessibilitymenu.AccessibilityMenuService;
 import com.android.systemui.accessibility.accessibilitymenu.R;
+import com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity.A11yMenuPreferenceFragment;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut;
 import com.android.systemui.accessibility.accessibilitymenu.view.A11yMenuFooter.A11yMenuFooterCallBack;
 
@@ -65,9 +66,6 @@ public class A11yMenuViewPager {
         /** The number of columns in the grid view when large button settings is on. */
         public static final int LARGE_GRID_COLUMN_COUNT = 2;
 
-        /** Temporary measure to test both item types. */
-        private static final boolean USE_LARGE_ITEMS = false;
-
         /**
          * Returns the number of items in the grid view.
          *
@@ -75,7 +73,7 @@ public class A11yMenuViewPager {
          * @return Grid item count
          */
         public static int getGridItemCount(Context context) {
-            return USE_LARGE_ITEMS
+            return A11yMenuPreferenceFragment.isLargeButtonsEnabled(context)
                    ? LARGE_GRID_ITEM_COUNT
                    : GRID_ITEM_COUNT;
         }
@@ -87,7 +85,7 @@ public class A11yMenuViewPager {
          * @return Grid column count
          */
         public static int getGridColumnCount(Context context) {
-            return USE_LARGE_ITEMS
+            return A11yMenuPreferenceFragment.isLargeButtonsEnabled(context)
                    ? LARGE_GRID_COLUMN_COUNT
                    : GRID_COLUMN_COUNT;
         }
@@ -99,7 +97,7 @@ public class A11yMenuViewPager {
          * @return Grid row count
          */
         public static int getGridRowCount(Context context) {
-            return USE_LARGE_ITEMS
+            return A11yMenuPreferenceFragment.isLargeButtonsEnabled(context)
                    ? (LARGE_GRID_ITEM_COUNT / LARGE_GRID_COLUMN_COUNT)
                    : (GRID_ITEM_COUNT / GRID_COLUMN_COUNT);
         }

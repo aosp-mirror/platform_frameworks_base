@@ -162,6 +162,7 @@ public final class BatteryService extends SystemService {
     private int mLowBatteryWarningLevel;
     private int mLastLowBatteryWarningLevel;
     private int mLowBatteryCloseWarningLevel;
+    private int mBatteryNearlyFullLevel;
     private int mShutdownBatteryTemperature;
 
     private int mPlugType;
@@ -891,9 +892,9 @@ public final class BatteryService extends SystemService {
         pw.println("Battery service (battery) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  get [-f] [ac|usb|wireless|status|level|temp|present|counter|invalid]");
-        pw.println(
-                "  set [-f] [ac|usb|wireless|status|level|temp|present|counter|invalid] <value>");
+        pw.println("  get [-f] [ac|usb|wireless|dock|status|level|temp|present|counter|invalid]");
+        pw.println("  set [-f] "
+                + "[ac|usb|wireless|dock|status|level|temp|present|counter|invalid] <value>");
         pw.println("    Force a battery property value, freezing battery state.");
         pw.println("    -f: force a battery change broadcast be sent, prints new sequence.");
         pw.println("  unplug [-f]");
@@ -953,6 +954,9 @@ public final class BatteryService extends SystemService {
                     case "wireless":
                         pw.println(mHealthInfo.chargerWirelessOnline);
                         break;
+                    case "dock":
+                        pw.println(mHealthInfo.chargerDockOnline);
+                        break;
                     case "status":
                         pw.println(mHealthInfo.batteryStatus);
                         break;
@@ -1006,6 +1010,9 @@ public final class BatteryService extends SystemService {
                             break;
                         case "wireless":
                             mHealthInfo.chargerWirelessOnline = Integer.parseInt(value) != 0;
+                            break;
+                        case "dock":
+                            mHealthInfo.chargerDockOnline = Integer.parseInt(value) != 0;
                             break;
                         case "status":
                             mHealthInfo.batteryStatus = Integer.parseInt(value);
@@ -1084,6 +1091,7 @@ public final class BatteryService extends SystemService {
         mHealthInfo.chargerAcOnline = false;
         mHealthInfo.chargerUsbOnline = false;
         mHealthInfo.chargerWirelessOnline = false;
+        mHealthInfo.chargerDockOnline = false;
         mUpdatesStopped = true;
         Binder.withCleanCallingIdentity(() -> processValuesLocked(forceUpdate, pw));
     }
@@ -1126,6 +1134,7 @@ public final class BatteryService extends SystemService {
                 pw.println("  AC powered: " + mHealthInfo.chargerAcOnline);
                 pw.println("  USB powered: " + mHealthInfo.chargerUsbOnline);
                 pw.println("  Wireless powered: " + mHealthInfo.chargerWirelessOnline);
+                pw.println("  Dock powered: " + mHealthInfo.chargerDockOnline);
                 pw.println("  Max charging current: " + mHealthInfo.maxChargingCurrentMicroamps);
                 pw.println("  Max charging voltage: " + mHealthInfo.maxChargingVoltageMicrovolts);
                 pw.println("  Charge counter: " + mHealthInfo.batteryChargeCounterUah);
@@ -1212,6 +1221,8 @@ public final class BatteryService extends SystemService {
                     com.android.internal.R.integer.config_notificationsBatteryLedOn);
             mBatteryLedOff = context.getResources().getInteger(
                     com.android.internal.R.integer.config_notificationsBatteryLedOff);
+            mBatteryNearlyFullLevel = context.getResources().getInteger(
+                    com.android.internal.R.integer.config_notificationsBatteryNearlyFullLevel);
         }
 
         /**
@@ -1234,7 +1245,8 @@ public final class BatteryService extends SystemService {
                 }
             } else if (status == BatteryManager.BATTERY_STATUS_CHARGING
                     || status == BatteryManager.BATTERY_STATUS_FULL) {
-                if (status == BatteryManager.BATTERY_STATUS_FULL || level >= 90) {
+                if (status == BatteryManager.BATTERY_STATUS_FULL
+                        || level >= mBatteryNearlyFullLevel) {
                     // Solid green when full or charging and nearly full
                     mBatteryLight.setColor(mBatteryFullARGB);
                 } else {

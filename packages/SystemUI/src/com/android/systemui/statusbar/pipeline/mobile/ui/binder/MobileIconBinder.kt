@@ -91,10 +91,17 @@ object MobileIconBinder {
                     }
                 }
 
+                launch { viewModel.isVisible.collect { isVisible -> view.isVisible = isVisible } }
+
                 // Set the icon for the triangle
                 launch {
-                    viewModel.iconId.distinctUntilChanged().collect { iconId ->
-                        mobileDrawable.level = iconId
+                    viewModel.icon.distinctUntilChanged().collect { icon ->
+                        mobileDrawable.level =
+                            SignalDrawable.getState(
+                                icon.level,
+                                icon.numberOfLevels,
+                                icon.showExclamationMark,
+                            )
                     }
                 }
 
@@ -148,8 +155,7 @@ object MobileIconBinder {
 
         return object : ModernStatusBarViewBinding {
             override fun getShouldIconBeVisible(): Boolean {
-                // If this view model exists, then the icon should be visible.
-                return true
+                return viewModel.isVisible.value
             }
 
             override fun onVisibilityStateChanged(@StatusBarIconView.VisibleState state: Int) {

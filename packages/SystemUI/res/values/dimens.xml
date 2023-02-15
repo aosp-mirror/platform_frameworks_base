@@ -184,6 +184,15 @@
     <!-- Height of a small notification in the status bar-->
     <dimen name="notification_min_height">@*android:dimen/notification_min_height</dimen>
 
+    <!-- Minimum allowed height of notifications -->
+    <dimen name="notification_validation_minimum_allowed_height">10dp</dimen>
+
+    <!-- Minimum height for displaying notification content. -->
+    <dimen name="notification_content_min_height">48dp</dimen>
+
+    <!-- Reference width used when validating notification layouts -->
+    <dimen name="notification_validation_reference_width">320dp</dimen>
+
     <!-- Increased height of a small notification in the status bar -->
     <dimen name="notification_min_height_increased">146dp</dimen>
 
@@ -1174,8 +1183,9 @@
     <dimen name="magnification_setting_image_button_padding_horizontal">24dp</dimen>
     <dimen name="magnification_setting_image_button_open_in_full_padding_vertical">16dp</dimen>
     <dimen name="magnification_setting_image_button_open_in_full_padding_horizontal">28dp</dimen>
-    <dimen name="magnification_setting_seekbar_icon_size">24dp</dimen>
 
+    <!-- Seekbar with icon buttons -->
+    <dimen name="seekbar_icon_size">24dp</dimen>
 
     <!-- How far from the right edge of the screen you need to drag the window before the button
          repositions to the other side. -->

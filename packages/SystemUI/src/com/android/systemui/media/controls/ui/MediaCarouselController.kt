@@ -30,13 +30,20 @@ import android.view.ViewGroup
 import android.view.animation.PathInterpolator
 import android.widget.LinearLayout
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.android.internal.logging.InstanceId
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaViewHolder
 import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
@@ -63,6 +70,10 @@ import java.io.PrintWriter
 import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 private const val TAG = "MediaCarouselController"
 private val settingsIntent = Intent().setAction(ACTION_MEDIA_CONTROLS_SETTINGS)
@@ -91,6 +102,8 @@ constructor(
     private val logger: MediaUiEventLogger,
     private val debugLogger: MediaCarouselControllerLogger,
     private val mediaFlags: MediaFlags,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) : Dumpable {
     /** The current width of the carousel */
     private var currentCarouselWidth: Int = 0
@@ -151,13 +164,13 @@ constructor(
                 mediaCarouselScrollHandler.scrollToStart()
             }
         }
-    private var currentlyExpanded = true
+
+    @VisibleForTesting
+    var currentlyExpanded = true
         set(value) {
             if (field != value) {
                 field = value
-                for (player in MediaPlayerData.players()) {
-                    player.setListening(field)
-                }
+                updateSeekbarListening(mediaCarouselScrollHandler.visibleToUser)
             }
         }
 
@@ -213,6 +226,17 @@ constructor(
             }
         }
 
+    private val keyguardUpdateMonitorCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onStrongAuthStateChanged(userId: Int) {
+                if (keyguardUpdateMonitor.isUserInLockdown(userId)) {
+                    hideMediaCarousel()
+                } else if (keyguardUpdateMonitor.isUserUnlocked(userId)) {
+                    showMediaCarousel()
+                }
+            }
+        }
+
     /**
      * Update MediaCarouselScrollHandler.visibleToUser to reflect media card container visibility.
      * It will be called when the container is out of view.
@@ -235,6 +259,7 @@ constructor(
                 executor,
                 this::onSwipeToDismiss,
                 this::updatePageIndicatorLocation,
+                this::updateSeekbarListening,
                 this::closeGuts,
                 falsingCollector,
                 falsingManager,
@@ -487,6 +512,13 @@ constructor(
                 }
             }
         )
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        mediaCarousel.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // A backup to show media carousel (if available) once the keyguard is gone.
+                listenForAnyStateToGoneKeyguardTransition(this)
+            }
+        }
     }
 
     private fun inflateSettingsButton() {
@@ -516,6 +548,23 @@ constructor(
         return mediaCarousel
     }
 
+    private fun hideMediaCarousel() {
+        mediaCarousel.visibility = View.GONE
+    }
+
+    private fun showMediaCarousel() {
+        mediaCarousel.visibility = View.VISIBLE
+    }
+
+    @VisibleForTesting
+    internal fun listenForAnyStateToGoneKeyguardTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            keyguardTransitionInteractor.anyStateToGoneTransition
+                .filter { it.transitionState == TransitionState.FINISHED }
+                .collect { showMediaCarousel() }
+        }
+    }
+
     private fun reorderAllPlayers(
         previousVisiblePlayerKey: MediaPlayerData.MediaSortKey?,
         key: String? = null
@@ -541,6 +590,17 @@ constructor(
                 }
                     ?: mediaCarouselScrollHandler.scrollToPlayer(destIndex = mediaIndex)
             }
+        }
+        // Check postcondition: mediaContent should have the same number of children as there
+        // are
+        // elements in mediaPlayers.
+        if (MediaPlayerData.players().size != mediaContent.childCount) {
+            Log.e(
+                TAG,
+                "Size of players list and number of views in carousel are out of sync. " +
+                    "Players size is ${MediaPlayerData.players().size}. " +
+                    "View count is ${mediaContent.childCount}."
+            )
         }
     }
 
@@ -570,7 +630,9 @@ constructor(
                     )
                 newPlayer.mediaViewHolder?.player?.setLayoutParams(lp)
                 newPlayer.bindPlayer(data, key)
-                newPlayer.setListening(currentlyExpanded)
+                newPlayer.setListening(
+                    mediaCarouselScrollHandler.visibleToUser && currentlyExpanded
+                )
                 MediaPlayerData.addMediaPlayer(
                     key,
                     data,
@@ -617,17 +679,6 @@ constructor(
             updatePageIndicator()
             mediaCarouselScrollHandler.onPlayersChanged()
             mediaFrame.requiresRemeasuring = true
-            // Check postcondition: mediaContent should have the same number of children as there
-            // are
-            // elements in mediaPlayers.
-            if (MediaPlayerData.players().size != mediaContent.childCount) {
-                Log.e(
-                    TAG,
-                    "Size of players list and number of views in carousel are out of sync. " +
-                        "Players size is ${MediaPlayerData.players().size}. " +
-                        "View count is ${mediaContent.childCount}."
-                )
-            }
             return existingPlayer == null
         }
 
@@ -864,6 +915,13 @@ constructor(
         pageIndicator.translationY =
             (mediaCarousel.measuredHeight - pageIndicator.height - layoutParams.bottomMargin)
                 .toFloat()
+    }
+
+    /** Update listening to seekbar. */
+    private fun updateSeekbarListening(visibleToUser: Boolean) {
+        for (player in MediaPlayerData.players()) {
+            player.setListening(visibleToUser && currentlyExpanded)
+        }
     }
 
     /** Update the dimension of this carousel. */

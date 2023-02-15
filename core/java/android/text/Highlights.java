@@ -90,8 +90,19 @@ public class Highlights {
         /**
          * Add single range highlight.
          *
-         * If the given range has overlaps with the already added ranges, the previous highlights
-         * are overdrawn by this range.
+         * The {@link android.widget.TextView} and underlying {@link Layout} draws highlight in the
+         * order of the {@link #addRange} calls.
+         *
+         * For example, the following code draws (1, 2) with red and (2, 5) with blue.
+         * <code>
+         *     val redPaint = Paint().apply { color = Color.RED }
+         *     val bluePaint = Paint().apply { color = Color.BLUE }
+         *     val highlight = Highlights.Builder()
+         *         .addRange(redPaint, 1, 4)
+         *         .addRange(bluePaint, 2, 5)
+         *         .build()
+         * </code>
+         *
          *
          * @param paint a paint object used for drawing highlight path.
          * @param start an inclusive offset of the text.
@@ -114,8 +125,15 @@ public class Highlights {
         /**
          * Add multiple ranges highlight.
          *
-         * If the given ranges have overlap with the already added ranges, the previous highlights
-         * are overdrawn by this range.
+         * For example, the following code draws (1, 2) with red and (2, 5) with blue.
+         * <code>
+         *     val redPaint = Paint().apply { color = Color.RED }
+         *     val bluePaint = Paint().apply { color = Color.BLUE }
+         *     val highlight = Highlights.Builder()
+         *         .addRange(redPaint, 1, 4)
+         *         .addRange(bluePaint, 2, 5)
+         *         .build()
+         * </code>
          *
          * @param paint a paint object used for drawing highlight path.
          * @param ranges a flatten ranges. The {@code 2 * i}-th element is an inclusive start offset

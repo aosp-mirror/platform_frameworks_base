@@ -81,7 +81,7 @@ public class AssistUtils {
      *             IVoiceInteractionSessionShowCallback, IBinder)} instead
      */
     @Deprecated
-    public boolean showSessionForActiveService(@NonNull Bundle args, int sourceFlags,
+    public boolean showSessionForActiveService(@Nullable Bundle args, int sourceFlags,
             @Nullable IVoiceInteractionSessionShowCallback showCallback,
             @Nullable IBinder activityToken) {
         return showSessionForActiveServiceInternal(args, sourceFlags, /* attributionTag */ null,
@@ -99,7 +99,7 @@ public class AssistUtils {
      * @param showCallback optional callback to be notified when the session was shown
      * @param activityToken optional token of activity that needs to be on top
      */
-    public boolean showSessionForActiveService(@NonNull Bundle args, int sourceFlags,
+    public boolean showSessionForActiveService(@Nullable Bundle args, int sourceFlags,
             @Nullable String attributionTag,
             @Nullable IVoiceInteractionSessionShowCallback showCallback,
             @Nullable IBinder activityToken) {
@@ -107,7 +107,7 @@ public class AssistUtils {
                 activityToken);
     }
 
-    private boolean showSessionForActiveServiceInternal(@NonNull Bundle args, int sourceFlags,
+    private boolean showSessionForActiveServiceInternal(@Nullable Bundle args, int sourceFlags,
             @Nullable String attributionTag,
             @Nullable IVoiceInteractionSessionShowCallback showCallback,
             @Nullable IBinder activityToken) {

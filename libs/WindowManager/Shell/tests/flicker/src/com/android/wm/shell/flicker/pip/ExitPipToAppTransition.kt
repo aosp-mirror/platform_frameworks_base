@@ -18,9 +18,12 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.traces.common.ComponentNameMatcher
+import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Test
+import org.junit.runners.Parameterized
 
 /** Base class for pip expand tests */
 abstract class ExitPipToAppTransition(flicker: FlickerTest) : PipTransition(flicker) {
@@ -80,7 +83,8 @@ abstract class ExitPipToAppTransition(flicker: FlickerTest) : PipTransition(flic
             isVisible(testApp)
                 .isVisible(pipApp.or(ComponentNameMatcher.TRANSITION_SNAPSHOT))
                 .then()
-                .isInvisible(testApp).isVisible(pipApp)
+                .isInvisible(testApp)
+                .isVisible(pipApp)
         }
     }
 
@@ -121,4 +125,20 @@ abstract class ExitPipToAppTransition(flicker: FlickerTest) : PipTransition(flic
 
     /** {@inheritDoc} */
     @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
+
+    companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [FlickerTestFactory.nonRotationTests] for configuring screen orientation and
+         * navigation modes.
+         */
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): List<FlickerTest> {
+            return FlickerTestFactory.nonRotationTests(
+                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+            )
+        }
+    }
 }

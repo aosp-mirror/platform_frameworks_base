@@ -20,6 +20,8 @@ import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
+import static android.hardware.graphics.common.Hdr.DOLBY_VISION;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
@@ -38,6 +40,7 @@ import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 import static android.provider.Settings.Global.NETSTATS_UID_BUCKET_DURATION;
 import static android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID;
 import static android.util.MathUtils.constrain;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_BUTTON;
@@ -245,6 +248,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 /**
@@ -743,6 +747,8 @@ public class StatsPullAtomService extends SystemService {
                         return pullSystemServerPinnerStats(atomTag, data);
                     case FrameworkStatsLog.PENDING_INTENTS_PER_PACKAGE:
                         return pullPendingIntentsPerPackage(atomTag, data);
+                    case FrameworkStatsLog.HDR_CAPABILITIES:
+                        return pullHdrCapabilities(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -943,6 +949,7 @@ public class StatsPullAtomService extends SystemService {
         registerMediaCapabilitiesStats();
         registerPendingIntentsPerPackagePuller();
         registerPinnerServiceStats();
+        registerHdrCapabilitiesPuller();
     }
 
     private void initAndRegisterNetworkStatsPullers() {
@@ -4720,6 +4727,37 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
+    private int pullHdrCapabilities(int atomTag, List<StatsEvent> pulledData) {
+        DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+
+        int hdrConversionMode = displayManager.getHdrConversionMode().getConversionMode();
+        int preferredHdrType = displayManager.getHdrConversionMode().getPreferredHdrOutputType();
+        boolean userDisabledHdrConversion = hdrConversionMode == HDR_CONVERSION_PASSTHROUGH;
+        int forceHdrFormat = preferredHdrType == HDR_TYPE_INVALID ? 0 : preferredHdrType;
+        boolean hasDolbyVisionIssue = hasDolbyVisionIssue(display);
+
+        pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag,
+                new byte[0], userDisabledHdrConversion, forceHdrFormat, hasDolbyVisionIssue));
+
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private boolean hasDolbyVisionIssue(Display display) {
+        AtomicInteger modesSupportingDolbyVision = new AtomicInteger();
+        Arrays.stream(display.getSupportedModes())
+                .map(Display.Mode::getSupportedHdrTypes)
+                .filter(types -> Arrays.stream(types).anyMatch(hdrType -> hdrType == DOLBY_VISION))
+                .forEach(ignored -> modesSupportingDolbyVision.incrementAndGet());
+
+        if (modesSupportingDolbyVision.get() != 0
+                && modesSupportingDolbyVision.get() < display.getSupportedModes().length) {
+            return true;
+        }
+
+        return false;
+    }
+
     private int pullPendingIntentsPerPackage(int atomTag, List<StatsEvent> pulledData) {
         List<PendingIntentStats> pendingIntentStats =
                 LocalServices.getService(ActivityManagerInternal.class).getPendingIntentStats();
@@ -4732,6 +4770,16 @@ public class StatsPullAtomService extends SystemService {
 
     private void registerPinnerServiceStats() {
         int tagId = FrameworkStatsLog.PINNED_FILE_SIZES_PER_PACKAGE;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerHdrCapabilitiesPuller() {
+        int tagId = FrameworkStatsLog.HDR_CAPABILITIES;
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values

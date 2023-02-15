@@ -96,6 +96,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.notifcollection.RankingAppliedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.RankingUpdatedEvent;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
@@ -151,6 +152,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     private final LogBufferEulogizer mEulogizer;
     private final DumpManager mDumpManager;
     private final NotifCollectionInconsistencyTracker mInconsistencyTracker;
+    private final NotificationDismissibilityProvider mDismissibilityProvider;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
@@ -178,7 +180,8 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             @Main Handler mainHandler,
             @Background Executor bgExecutor,
             LogBufferEulogizer logBufferEulogizer,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            NotificationDismissibilityProvider dismissibilityProvider) {
         mStatusBarService = statusBarService;
         mClock = clock;
         mNotifPipelineFlags = notifPipelineFlags;
@@ -188,6 +191,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         mEulogizer = logBufferEulogizer;
         mDumpManager = dumpManager;
         mInconsistencyTracker = new NotifCollectionInconsistencyTracker(mLogger);
+        mDismissibilityProvider = dismissibilityProvider;
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
@@ -552,6 +556,10 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                 .filter(it -> Objects.equals(it.getSbn().getGroupKey(), groupKey))
                 .filter(it -> it.getSbn().getNotification().isGroupSummary())
                 .findFirst().orElse(null);
+    }
+
+    private boolean isDismissable(NotificationEntry entry) {
+        return mDismissibilityProvider.isDismissable(entry);
     }
 
     /**
@@ -1006,6 +1014,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     public class FutureDismissal implements Runnable {
         private final NotificationEntry mEntry;
         private final DismissedByUserStatsCreator mStatsCreator;
+
         @Nullable
         private final NotificationEntry mSummaryToDismiss;
         private final String mLabel;
@@ -1030,7 +1039,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             if (isOnlyChildInGroup(entry)) {
                 String group = entry.getSbn().getGroupKey();
                 NotificationEntry summary = getGroupSummary(group);
-                if (summary != null && summary.isDismissable()) return summary;
+                if (summary != null && isDismissable(summary)) return summary;
             }
             return null;
         }

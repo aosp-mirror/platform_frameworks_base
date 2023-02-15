@@ -180,6 +180,18 @@ void ASurfaceControl_unregisterSurfaceStatsListener(void* context,
             reinterpret_cast<void*>(func));
 }
 
+AChoreographer* ASurfaceControl_getChoreographer(ASurfaceControl* aSurfaceControl) {
+    LOG_ALWAYS_FATAL_IF(aSurfaceControl == nullptr, "aSurfaceControl should not be nullptr");
+    SurfaceControl* surfaceControl =
+            ASurfaceControl_to_SurfaceControl(reinterpret_cast<ASurfaceControl*>(aSurfaceControl));
+    if (!surfaceControl->isValid()) {
+        ALOGE("Attempted to get choreographer from invalid surface control");
+        return nullptr;
+    }
+    SurfaceControl_acquire(surfaceControl);
+    return reinterpret_cast<AChoreographer*>(surfaceControl->getChoreographer().get());
+}
+
 int64_t ASurfaceControlStats_getAcquireTime(ASurfaceControlStats* stats) {
     if (const auto* fence = std::get_if<sp<Fence>>(&stats->acquireTimeOrFence)) {
         // We got a fence instead of the acquire time due to latch unsignaled.
@@ -607,6 +619,30 @@ void ASurfaceTransaction_setHdrMetadata_cta861_3(ASurfaceTransaction* aSurfaceTr
     }
 
     transaction->setHdrMetadata(surfaceControl, hdrMetadata);
+}
+
+void ASurfaceTransaction_setExtendedRangeBrightness(ASurfaceTransaction* aSurfaceTransaction,
+                                                    ASurfaceControl* aSurfaceControl,
+                                                    float currentBufferRatio, float desiredRatio) {
+    CHECK_NOT_NULL(aSurfaceTransaction);
+    CHECK_NOT_NULL(aSurfaceControl);
+
+    if (!isfinite(currentBufferRatio) || currentBufferRatio < 1.0f) {
+        ALOGE("Ignore setExtendedRangeBrightness, currentBufferRatio %f isn't finite or >= 1.0f",
+              currentBufferRatio);
+        return;
+    }
+
+    if (!isfinite(desiredRatio) || desiredRatio < 1.0f) {
+        ALOGE("Ignore setExtendedRangeBrightness, desiredRatio %f isn't finite or >= 1.0f",
+              desiredRatio);
+        return;
+    }
+
+    sp<SurfaceControl> surfaceControl = ASurfaceControl_to_SurfaceControl(aSurfaceControl);
+    Transaction* transaction = ASurfaceTransaction_to_Transaction(aSurfaceTransaction);
+
+    transaction->setExtendedRangeBrightness(surfaceControl, currentBufferRatio, desiredRatio);
 }
 
 void ASurfaceTransaction_setColor(ASurfaceTransaction* aSurfaceTransaction,

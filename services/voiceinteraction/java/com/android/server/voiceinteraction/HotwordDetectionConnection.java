@@ -578,18 +578,19 @@ final class HotwordDetectionConnection {
     public void dump(String prefix, PrintWriter pw) {
         synchronized (mLock) {
             pw.print(prefix); pw.print("mReStartPeriodSeconds="); pw.println(mReStartPeriodSeconds);
-            pw.print(prefix); pw.print("mBound=");
+            pw.print(prefix); pw.print("bound for HotwordDetectionService=");
             pw.println(mRemoteHotwordDetectionService != null
                     && mRemoteHotwordDetectionService.isBound());
+            pw.print(prefix); pw.print("bound for VisualQueryDetectionService=");
             pw.println(mRemoteVisualQueryDetectionService != null
                     && mRemoteHotwordDetectionService != null
                     && mRemoteHotwordDetectionService.isBound());
             pw.print(prefix); pw.print("mRestartCount=");
             pw.println(mRestartCount);
             pw.print(prefix); pw.print("mLastRestartInstant="); pw.println(mLastRestartInstant);
-            pw.print(prefix); pw.print("mDetectorType=");
-            pw.println(HotwordDetector.detectorTypeToString(mDetectorType));
-            pw.print(prefix); pw.println("DetectorSession(s)");
+            pw.print(prefix); pw.println("DetectorSession(s):");
+            pw.print(prefix); pw.print("Num of DetectorSession(s)=");
+            pw.println(mDetectorSessions.size());
             runForEachDetectorSessionLocked((session) -> {
                 session.dumpLocked(prefix, pw);
             });

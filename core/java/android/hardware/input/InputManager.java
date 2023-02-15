@@ -51,11 +51,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -213,30 +211,6 @@ public final class InputManager {
      */
     public static final String META_DATA_KEYBOARD_LAYOUTS =
             "android.hardware.input.metadata.KEYBOARD_LAYOUTS";
-
-    /**
-     * Pointer Speed: The minimum (slowest) pointer speed (-7).
-     * @hide
-     */
-    public static final int MIN_POINTER_SPEED = -7;
-
-    /**
-     * Pointer Speed: The maximum (fastest) pointer speed (7).
-     * @hide
-     */
-    public static final int MAX_POINTER_SPEED = 7;
-
-    /**
-     * Pointer Speed: The default pointer speed (0).
-     * @hide
-     */
-    public static final int DEFAULT_POINTER_SPEED = 0;
-
-    /**
-     * The maximum allowed obscuring opacity by UID to propagate touches (0 <= x <= 1).
-     * @hide
-     */
-    public static final float DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH = .8f;
 
     /**
      * Prevent touches from being consumed by apps if these touches passed through a non-trusted
@@ -1135,58 +1109,18 @@ public final class InputManager {
     }
 
     /**
-     * Gets the mouse pointer speed.
-     * <p>
-     * Only returns the permanent mouse pointer speed.  Ignores any temporary pointer
-     * speed set by {@link #tryPointerSpeed}.
-     * </p>
-     *
-     * @param context The application context.
-     * @return The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
-     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
-     *
-     * @hide
-     */
-    public int getPointerSpeed(Context context) {
-        return Settings.System.getInt(context.getContentResolver(),
-                Settings.System.POINTER_SPEED, DEFAULT_POINTER_SPEED);
-    }
-
-    /**
-     * Sets the mouse pointer speed.
-     * <p>
-     * Requires {@link android.Manifest.permission#WRITE_SETTINGS}.
-     * </p>
-     *
-     * @param context The application context.
-     * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
-     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
-    public void setPointerSpeed(Context context, int speed) {
-        if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
-            throw new IllegalArgumentException("speed out of range");
-        }
-
-        Settings.System.putInt(context.getContentResolver(),
-                Settings.System.POINTER_SPEED, speed);
-    }
-
-    /**
      * Changes the mouse pointer speed temporarily, but does not save the setting.
      * <p>
      * Requires {@link android.Manifest.permission#SET_POINTER_SPEED}.
      * </p>
      *
-     * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
-     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
+     * @param speed The pointer speed as a value between {@link InputSettings#MIN_POINTER_SPEED} and
+     * {@link InputSettings#MAX_POINTER_SPEED}, or the default value {@link InputSettings#DEFAULT_POINTER_SPEED}.
      *
      * @hide
      */
     public void tryPointerSpeed(int speed) {
-        if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
+        if (speed < InputSettings.MIN_POINTER_SPEED || speed > InputSettings.MAX_POINTER_SPEED) {
             throw new IllegalArgumentException("speed out of range");
         }
 
@@ -1211,44 +1145,8 @@ public final class InputManager {
      */
     @FloatRange(from = 0, to = 1)
     public float getMaximumObscuringOpacityForTouch() {
-        return Settings.Global.getFloat(getContext().getContentResolver(),
-                Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH,
-                DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
-    }
-
-    /**
-     * Sets the maximum allowed obscuring opacity by UID to propagate touches.
-     *
-     * <p>For certain window types (eg. SAWs), the decision of honoring {@link LayoutParams
-     * #FLAG_NOT_TOUCHABLE} or not depends on the combined obscuring opacity of the windows
-     * above the touch-consuming window.
-     *
-     * <p>For a certain UID:
-     * <ul>
-     *     <li>If it's the same as the UID of the touch-consuming window, allow it to propagate
-     *     the touch.
-     *     <li>Otherwise take all its windows of eligible window types above the touch-consuming
-     *     window, compute their combined obscuring opacity considering that {@code
-     *     opacity(A, B) = 1 - (1 - opacity(A))*(1 - opacity(B))}. If the computed value is
-     *     lesser than or equal to this setting and there are no other windows preventing the
-     *     touch, allow the UID to propagate the touch.
-     * </ul>
-     *
-     * <p>This value should be between 0 (inclusive) and 1 (inclusive).
-     *
-     * @see #getMaximumObscuringOpacityForTouch()
-     *
-     * @hide
-     */
-    @TestApi
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void setMaximumObscuringOpacityForTouch(@FloatRange(from = 0, to = 1) float opacity) {
-        if (opacity < 0 || opacity > 1) {
-            throw new IllegalArgumentException(
-                    "Maximum obscuring opacity for touch should be >= 0 and <= 1");
-        }
-        Settings.Global.putFloat(getContext().getContentResolver(),
-                Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH, opacity);
+        Context context = ActivityThread.currentApplication();
+        return InputSettings.getMaximumObscuringOpacityForTouch(context);
     }
 
     /**
@@ -2145,226 +2043,12 @@ public final class InputManager {
     }
 
     /**
-     * Whether stylus has ever been used on device (false by default).
-     * @hide
-     */
-    public boolean isStylusEverUsed(@NonNull Context context) {
-        return Settings.Global.getInt(context.getContentResolver(),
-                        Settings.Global.STYLUS_EVER_USED, 0) == 1;
-    }
-
-    /**
-     * Set whether stylus has ever been used on device.
-     * Should only ever be set to true once after stylus first usage.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void setStylusEverUsed(@NonNull Context context, boolean stylusEverUsed) {
-        Settings.Global.putInt(context.getContentResolver(),
-                Settings.Global.STYLUS_EVER_USED, stylusEverUsed ? 1 : 0);
-    }
-
-    /**
      * Whether there is a gesture-compatible touchpad connected to the device.
      * @hide
      */
     public boolean areTouchpadGesturesAvailable(@NonNull Context context) {
         // TODO: implement the right logic
         return true;
-    }
-
-    /**
-     * Gets the touchpad pointer speed.
-     *
-     * The returned value only applies to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @return The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
-     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
-     *
-     * @hide
-     */
-    public int getTouchpadPointerSpeed(@NonNull Context context) {
-        return Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_POINTER_SPEED, DEFAULT_POINTER_SPEED,
-                UserHandle.USER_CURRENT);
-    }
-
-    /**
-     * Sets the touchpad pointer speed, and saves it in the settings.
-     *
-     * The new speed will only apply to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @param speed The pointer speed as a value between {@link #MIN_POINTER_SPEED} and
-     * {@link #MAX_POINTER_SPEED}, or the default value {@link #DEFAULT_POINTER_SPEED}.
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
-    public void setTouchpadPointerSpeed(@NonNull Context context, int speed) {
-        if (speed < MIN_POINTER_SPEED || speed > MAX_POINTER_SPEED) {
-            throw new IllegalArgumentException("speed out of range");
-        }
-
-        Settings.System.putIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_POINTER_SPEED, speed, UserHandle.USER_CURRENT);
-    }
-
-    /**
-     * Returns true if the touchpad should use pointer acceleration.
-     *
-     * The returned value only applies to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @return Whether the touchpad should use pointer acceleration.
-     *
-     * @hide
-     */
-    public boolean useTouchpadPointerAcceleration(@NonNull Context context) {
-        // TODO: obtain the actual behavior from the settings
-        return true;
-    }
-
-    /**
-     * Sets the pointer acceleration behavior for the touchpad.
-     *
-     * The new behavior is only applied to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @param enabled Will enable pointer acceleration if true, disable it if false
-     *
-     * @hide
-     */
-    public void setTouchpadPointerAcceleration(@NonNull Context context, boolean enabled) {
-        // TODO: set the right setting
-    }
-
-    /**
-     * Returns true if moving two fingers upwards on the touchpad should
-     * scroll down, which is known as natural scrolling.
-     *
-     * The returned value only applies to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @return Whether the touchpad should use natural scrolling.
-     *
-     * @hide
-     */
-    public boolean useTouchpadNaturalScrolling(@NonNull Context context) {
-        return Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_NATURAL_SCROLLING, 0, UserHandle.USER_CURRENT) == 1;
-    }
-
-    /**
-     * Sets the natural scroll behavior for the touchpad.
-     *
-     * If natural scrolling is enabled, moving two fingers upwards on the
-     * touchpad will scroll down.
-     *
-     * @param context The application context.
-     * @param enabled Will enable natural scroll if true, disable it if false
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
-    public void setTouchpadNaturalScrolling(@NonNull Context context, boolean enabled) {
-        Settings.System.putIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_NATURAL_SCROLLING, enabled ? 1 : 0,
-                UserHandle.USER_CURRENT);
-    }
-
-    /**
-     * Returns true if the touchpad should use tap to click.
-     *
-     * The returned value only applies to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @return Whether the touchpad should use tap to click.
-     *
-     * @hide
-     */
-    public boolean useTouchpadTapToClick(@NonNull Context context) {
-        return Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_TAP_TO_CLICK, 0, UserHandle.USER_CURRENT) == 1;
-    }
-
-    /**
-     * Sets the tap to click behavior for the touchpad.
-     *
-     * The new behavior is only applied to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @param enabled Will enable tap to click if true, disable it if false
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
-    public void setTouchpadTapToClick(@NonNull Context context, boolean enabled) {
-        Settings.System.putIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_TAP_TO_CLICK, enabled ? 1 : 0,
-                UserHandle.USER_CURRENT);
-    }
-
-    /**
-     * Returns true if the touchpad should use tap dragging.
-     *
-     * The returned value only applies to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @return Whether the touchpad should use tap dragging.
-     *
-     * @hide
-     */
-    public boolean useTouchpadTapDragging(@NonNull Context context) {
-        // TODO: obtain the actual behavior from the settings
-        return true;
-    }
-
-    /**
-     * Sets the tap dragging behavior for the touchpad.
-     *
-     * The new behavior is only applied to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @param enabled Will enable tap dragging if true, disable it if false
-     *
-     * @hide
-     */
-    public void setTouchpadTapDragging(@NonNull Context context, boolean enabled) {
-        // TODO: set the right setting
-    }
-
-    /**
-     * Returns true if the touchpad should use the right click zone.
-     *
-     * The returned value only applies to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @return Whether the touchpad should use the right click zone.
-     *
-     * @hide
-     */
-    public boolean useTouchpadRightClickZone(@NonNull Context context) {
-        return Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, 0, UserHandle.USER_CURRENT) == 1;
-    }
-
-    /**
-     * Sets the right click zone behavior for the touchpad.
-     *
-     * The new behavior is only applied to gesture-compatible touchpads.
-     *
-     * @param context The application context.
-     * @param enabled Will enable the right click zone if true, disable it if false
-     *
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
-    public void setTouchpadRightClickZone(@NonNull Context context, boolean enabled) {
-        Settings.System.putIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, enabled ? 1 : 0,
-                UserHandle.USER_CURRENT);
     }
 
     /**

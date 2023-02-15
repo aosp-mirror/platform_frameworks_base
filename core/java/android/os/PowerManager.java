@@ -35,6 +35,7 @@ import android.content.Context;
 import android.service.dreams.Sandman;
 import android.sysprop.InitProperties;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -44,7 +45,10 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -1502,6 +1506,43 @@ public final class PowerManager {
     }
 
     /**
+     * Forces the {@link com.android.server.display.DisplayGroup} of the provided {@code displayId}
+     * to turn off.
+     *
+     * <p>If the {@link com.android.server.display.DisplayGroup} of the provided {@code displayId}
+     * is turned on it will be turned off. If all displays are off as a result of this action the
+     * device will be put to sleep. If the {@link com.android.server.display.DisplayGroup} of
+     * the provided {@code displayId} is already off then nothing will happen.
+     *
+     * <p>Overrides all the wake locks that are held.
+     * This is what happens when the power key is pressed to turn off the screen.
+     *
+     * <p>Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     *
+     * @param displayId The display ID to turn off. If {@code displayId} is
+     * {@link Display#INVALID_DISPLAY}, then all displays are turned off.
+     * @param time The time when the request to go to sleep was issued, in the
+     * {@link SystemClock#uptimeMillis()} time base. This timestamp is used to correctly
+     * order the go to sleep request with other power management functions.  It should be set
+     * to the timestamp of the input event that caused the request to go to sleep.
+     * @param reason The reason the device is going to sleep.
+     * @param flags Optional flags to apply when going to sleep.
+     *
+     * @see #userActivity
+     * @see #wakeUp
+     *
+     * @hide Requires signature permission.
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void goToSleep(int displayId, long time, @GoToSleepReason int reason, int flags) {
+        try {
+            mService.goToSleepWithDisplayId(displayId, time, reason, flags);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Forces the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group}
      * to turn on.
      *
@@ -2344,6 +2385,93 @@ public final class PowerManager {
     }
 
     /**
+     * Sets the current Low Power Standby policy.
+     *
+     * When the policy changes {@link #ACTION_LOW_POWER_STANDBY_POLICY_CHANGED} is broadcast to
+     * registered receivers.
+     *
+     * @param policy The policy to set. If null, resets to the default policy.
+     * @see #getLowPowerStandbyPolicy
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+            android.Manifest.permission.DEVICE_POWER
+    })
+    public void setLowPowerStandbyPolicy(@Nullable LowPowerStandbyPolicy policy) {
+        try {
+            mService.setLowPowerStandbyPolicy(LowPowerStandbyPolicy.toParcelable(policy));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current Low Power Standby policy.
+     *
+     * When the policy changes {@link #ACTION_LOW_POWER_STANDBY_POLICY_CHANGED} is broadcast to
+     * registered receivers.
+     *
+     * @see #setLowPowerStandbyPolicy
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+            android.Manifest.permission.DEVICE_POWER
+    })
+    public LowPowerStandbyPolicy getLowPowerStandbyPolicy() {
+        try {
+            return LowPowerStandbyPolicy.fromParcelable(mService.getLowPowerStandbyPolicy());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if the calling package is exempt from Low Power Standby restrictions or
+     * Low Power Standby is disabled (so Low Power Standby does not restrict apps),
+     * false otherwise.
+     */
+    public boolean isExemptFromLowPowerStandby() {
+        try {
+            return mService.isExemptFromLowPowerStandby();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if Low Power Standby is disabled (so Low Power Standby does not restrict apps),
+     * or apps may be automatically exempt from Low Power Standby restrictions for the given reason.
+     *
+     * The system may exempt apps from Low Power Standby restrictions when using allowed features.
+     * For example, if {@link #LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION} is allowed,
+     * then apps with active voice interaction sessions are exempt from restrictions.
+     */
+    public boolean isAllowedInLowPowerStandby(@LowPowerStandbyAllowedReason int reason) {
+        try {
+            return mService.isReasonAllowedInLowPowerStandby(reason);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if Low Power Standby is disabled (so Low Power Standby does not restrict apps),
+     * or apps are allowed to use a given feature during Low Power Standby.
+     */
+    public boolean isAllowedInLowPowerStandby(@NonNull String feature) {
+        try {
+            return mService.isFeatureAllowedInLowPowerStandby(feature);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return whether the given application package name is on the device's power allowlist.
      * Apps can be placed on the allowlist through the settings UI invoked by
      * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
@@ -2838,6 +2966,192 @@ public final class PowerManager {
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED =
             "android.os.action.LOW_POWER_STANDBY_ENABLED_CHANGED";
+
+    /**
+     * Intent that is broadcast when Low Power Standby policy is changed.
+     * This broadcast is only sent to registered receivers.
+     *
+     * @see #isExemptFromLowPowerStandby()
+     * @see #isAllowedInLowPowerStandby(int)
+     * @see #isAllowedInLowPowerStandby(String)
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LOW_POWER_STANDBY_POLICY_CHANGED =
+            "android.os.action.LOW_POWER_STANDBY_POLICY_CHANGED";
+
+    /**
+     * Signals that wake-on-lan/wake-on-wlan is allowed in Low Power Standby.
+     *
+     * <p>If Low Power Standby is enabled ({@link #isLowPowerStandbyEnabled()}),
+     * wake-on-lan/wake-on-wlan may not be available while in standby.
+     * Use {@link #isAllowedInLowPowerStandby(String)} to determine whether the device allows this
+     * feature to be used during Low Power Standby with the currently active Low Power Standby
+     * policy.
+     *
+     * @see #isAllowedInLowPowerStandby(String)
+     */
+    public static final String LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN =
+            "com.android.lowpowerstandby.WAKE_ON_LAN";
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "LOW_POWER_STANDBY_ALLOWED_REASON_" }, flag = true, value = {
+            LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION,
+            LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface LowPowerStandbyAllowedReason {
+    }
+
+    /**
+     * Exempts active Voice Interaction Sessions in Low Power Standby.
+     *
+     * @see #isAllowedInLowPowerStandby(int)
+     */
+    public static final int LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION = 1 << 0;
+
+    /**
+     * Exempts apps on the temporary powersave allowlist.
+     *
+     * @see #isAllowedInLowPowerStandby(int)
+     */
+    public static final int LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST = 1 << 1;
+
+    /** @hide */
+    public static String lowPowerStandbyAllowedReasonsToString(
+            @LowPowerStandbyAllowedReason int allowedReasons) {
+        ArrayList<String> allowedStrings = new ArrayList<>();
+        if ((allowedReasons & LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION) != 0) {
+            allowedStrings.add("ALLOWED_REASON_VOICE_INTERACTION");
+            allowedReasons &= ~LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION;
+        }
+        if ((allowedReasons & LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST) != 0) {
+            allowedStrings.add("ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST");
+            allowedReasons &= ~LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
+        }
+        if (allowedReasons != 0) {
+            allowedStrings.add(String.valueOf(allowedReasons));
+        }
+        return String.join(",", allowedStrings);
+    }
+
+    /**
+     * Policy that defines the restrictions enforced by Low Power Standby.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class LowPowerStandbyPolicy {
+        /** Name of the policy, used for debugging & metrics */
+        @NonNull
+        private final String mIdentifier;
+
+        /** Packages that are exempt from Low Power Standby restrictions. */
+        @NonNull
+        private final Set<String> mExemptPackages;
+
+        /**
+         * Reasons that this policy allows apps to be automatically exempted
+         * from Low Power Standby restrictions for.
+         */
+        @LowPowerStandbyAllowedReason
+        private final int mAllowedReasons;
+
+        /** Features that are allowed to be used in Low Power Standby. */
+        @NonNull
+        private final Set<String> mAllowedFeatures;
+
+        public LowPowerStandbyPolicy(@NonNull String identifier,
+                @NonNull Set<String> exemptPackages,
+                @LowPowerStandbyAllowedReason int allowedReasons,
+                @NonNull Set<String> allowedFeatures) {
+            Objects.requireNonNull(identifier);
+            Objects.requireNonNull(exemptPackages);
+            Objects.requireNonNull(allowedFeatures);
+
+            mIdentifier = identifier;
+            mExemptPackages = Collections.unmodifiableSet(exemptPackages);
+            mAllowedReasons = allowedReasons;
+            mAllowedFeatures = Collections.unmodifiableSet(allowedFeatures);
+        }
+
+        @NonNull
+        public String getIdentifier() {
+            return mIdentifier;
+        }
+
+        @NonNull
+        public Set<String> getExemptPackages() {
+            return mExemptPackages;
+        }
+
+        @LowPowerStandbyAllowedReason
+        public int getAllowedReasons() {
+            return mAllowedReasons;
+        }
+
+        @NonNull
+        public Set<String> getAllowedFeatures() {
+            return mAllowedFeatures;
+        }
+
+        @Override
+        public String toString() {
+            return "Policy{"
+                    + "mIdentifier='" + mIdentifier + '\''
+                    + ", mExemptPackages=" + String.join(",", mExemptPackages)
+                    + ", mAllowedReasons=" + lowPowerStandbyAllowedReasonsToString(mAllowedReasons)
+                    + ", mAllowedFeatures=" + String.join(",", mAllowedFeatures)
+                    + '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof LowPowerStandbyPolicy)) return false;
+            LowPowerStandbyPolicy that = (LowPowerStandbyPolicy) o;
+            return mAllowedReasons == that.mAllowedReasons && Objects.equals(mIdentifier,
+                    that.mIdentifier) && Objects.equals(mExemptPackages, that.mExemptPackages)
+                    && Objects.equals(mAllowedFeatures, that.mAllowedFeatures);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mIdentifier, mExemptPackages, mAllowedReasons,
+                    mAllowedFeatures);
+        }
+
+        /** @hide */
+        public static IPowerManager.LowPowerStandbyPolicy toParcelable(
+                LowPowerStandbyPolicy policy) {
+            if (policy == null) {
+                return null;
+            }
+
+            IPowerManager.LowPowerStandbyPolicy parcelablePolicy =
+                    new IPowerManager.LowPowerStandbyPolicy();
+            parcelablePolicy.identifier = policy.mIdentifier;
+            parcelablePolicy.exemptPackages = new ArrayList<>(policy.mExemptPackages);
+            parcelablePolicy.allowedReasons = policy.mAllowedReasons;
+            parcelablePolicy.allowedFeatures = new ArrayList<>(policy.mAllowedFeatures);
+            return parcelablePolicy;
+        }
+
+        /** @hide */
+        public static LowPowerStandbyPolicy fromParcelable(
+                IPowerManager.LowPowerStandbyPolicy parcelablePolicy) {
+            if (parcelablePolicy == null) {
+                return null;
+            }
+
+            return new LowPowerStandbyPolicy(
+                    parcelablePolicy.identifier,
+                    new ArraySet<>(parcelablePolicy.exemptPackages),
+                    parcelablePolicy.allowedReasons,
+                    new ArraySet<>(parcelablePolicy.allowedFeatures));
+        }
+    }
 
     /**
      * Constant for PreIdleTimeout normal mode (default mode, not short nor extend timeout) .

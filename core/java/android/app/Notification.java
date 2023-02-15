@@ -4624,16 +4624,15 @@ public class Notification implements Parcelable
         /**
          * Set whether this is an "ongoing" notification.
          *
-
-         * Ongoing notifications cannot be dismissed by the user, so your application or service
-         * must take care of canceling them.
+         * Ongoing notifications cannot be dismissed by the user on locked devices, or by
+         * notification listeners, and some notifications cannnot be dismissed on unlocked 
+         * devices (system, device management, media), so your application or service must take 
+         * care of canceling them.
          *
-
          * They are typically used to indicate a background task that the user is actively engaged
          * with (e.g., playing music) or is pending in some way and therefore occupying the device
          * (e.g., a file download, sync operation, active network connection).
          *
-
          * @see Notification#FLAG_ONGOING_EVENT
          */
         @NonNull
@@ -6201,10 +6200,8 @@ public class Notification implements Parcelable
         private RemoteViews generateActionButton(Action action, boolean emphasizedMode,
                 StandardTemplateParams p) {
             final boolean tombstone = (action.actionIntent == null);
-            RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
-                    emphasizedMode ? getEmphasizedActionLayoutResource()
-                            : tombstone ? getActionTombstoneLayoutResource()
-                                    : getActionLayoutResource());
+            final RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
+                    getActionButtonLayoutResource(emphasizedMode, tombstone));
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
             }
@@ -6216,6 +6213,12 @@ public class Notification implements Parcelable
                 // change the background bgColor
                 CharSequence title = action.title;
                 int buttonFillColor = getColors(p).getSecondaryAccentColor();
+                if (tombstone) {
+                    buttonFillColor = setAlphaComponentByFloatDimen(mContext,
+                            ContrastColorUtil.resolveSecondaryColor(
+                                    mContext, getColors(p).getBackgroundColor(), mInNightMode),
+                            R.dimen.notification_action_disabled_container_alpha);
+                }
                 if (isLegacy()) {
                     title = ContrastColorUtil.clearColorSpans(title);
                 } else {
@@ -6231,8 +6234,14 @@ public class Notification implements Parcelable
                     title = ensureColorSpanContrast(title, buttonFillColor);
                 }
                 button.setTextViewText(R.id.action0, processTextSpans(title));
-                final int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
+                int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
                         buttonFillColor, mInNightMode);
+                if (tombstone) {
+                    textColor = setAlphaComponentByFloatDimen(mContext,
+                            ContrastColorUtil.resolveSecondaryColor(
+                                    mContext, getColors(p).getBackgroundColor(), mInNightMode),
+                            R.dimen.notification_action_disabled_content_alpha);
+                }
                 button.setTextColor(R.id.action0, textColor);
                 // We only want about 20% alpha for the ripple
                 final int rippleColor = (textColor & 0x00ffffff) | 0x33000000;
@@ -6260,6 +6269,26 @@ public class Notification implements Parcelable
                 button.setIntTag(R.id.action0, R.id.notification_action_index_tag, actionIndex);
             }
             return button;
+        }
+
+        private int getActionButtonLayoutResource(boolean emphasizedMode, boolean tombstone) {
+            if (emphasizedMode) {
+                return tombstone ? getEmphasizedTombstoneActionLayoutResource()
+                        : getEmphasizedActionLayoutResource();
+            } else {
+                return tombstone ? getActionTombstoneLayoutResource()
+                        : getActionLayoutResource();
+            }
+        }
+
+        /**
+         * Set the alpha component of {@code color} to be {@code alphaDimenResId}.
+         */
+        private static int setAlphaComponentByFloatDimen(Context context, @ColorInt int color,
+                @DimenRes int alphaDimenResId) {
+            final TypedValue alphaValue = new TypedValue();
+            context.getResources().getValue(alphaDimenResId, alphaValue, true);
+            return ColorUtils.setAlphaComponent(color, Math.round(alphaValue.getFloat() * 255));
         }
 
         /**
@@ -6739,6 +6768,10 @@ public class Notification implements Parcelable
 
         private int getEmphasizedActionLayoutResource() {
             return R.layout.notification_material_action_emphasized;
+        }
+
+        private int getEmphasizedTombstoneActionLayoutResource() {
+            return R.layout.notification_material_action_emphasized_tombstone;
         }
 
         private int getActionTombstoneLayoutResource() {
@@ -7795,6 +7828,14 @@ public class Notification implements Parcelable
      * notification and its avatars. For conversations involving multiple people, the app should
      * also make sure that it marks the conversation as a group with
      * {@link #setGroupConversation(boolean)}.
+     *
+     * <p>
+     * From Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, messaging style
+     * notifications that are associated with a valid conversation shortcut
+     * (via {@link Notification.Builder#setShortcutId(String)}) are displayed in a dedicated
+     * conversation section in the shade above non-conversation alerting and silence notifications.
+     * To be a valid conversation shortcut, the shortcut must be a
+     * {@link ShortcutInfo#setLongLived()} dynamic or cached sharing shortcut.
      *
      * <p>
      * This class is a "rebuilder": It attaches to a Builder object and modifies its behavior.

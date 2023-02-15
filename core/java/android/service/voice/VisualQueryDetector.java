@@ -223,7 +223,7 @@ public class VisualQueryDetector {
     private class VisualQueryDetectorInitializationDelegate extends AbstractDetector {
 
         VisualQueryDetectorInitializationDelegate() {
-            super(mManagerService, null);
+            super(mManagerService, mExecutor, /* callback= */ null);
         }
 
         @Override

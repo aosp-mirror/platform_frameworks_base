@@ -297,6 +297,8 @@ public class SecureSettingsValidators {
                         Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
                         Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL));
         VALIDATORS.put(Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_BUTTON_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
@@ -362,5 +364,13 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.CUSTOM_BUGREPORT_HANDLER_APP, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Secure.CUSTOM_BUGREPORT_HANDLER_USER, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.LOCK_SCREEN_WEATHER_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.HEARING_AID_RINGTONE_ROUTING,
+                new DiscreteValueValidator(new String[] {"0", "1", "2"}));
+        VALIDATORS.put(Secure.HEARING_AID_CALL_ROUTING,
+                new DiscreteValueValidator(new String[] {"0", "1", "2"}));
+        VALIDATORS.put(Secure.HEARING_AID_MEDIA_ROUTING,
+                new DiscreteValueValidator(new String[] {"0", "1", "2"}));
+        VALIDATORS.put(Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+                new DiscreteValueValidator(new String[] {"0", "1", "2"}));
     }
 }
