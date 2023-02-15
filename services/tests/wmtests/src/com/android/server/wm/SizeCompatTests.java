@@ -1434,6 +1434,65 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testGetLetterboxInnerBounds_noScalingApplied() {
+        // Set up a display in portrait and ignoring orientation request.
+        final int dw = 1400;
+        final int dh = 2800;
+        setUpDisplaySizeWithApp(dw, dh);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        // Rotate display to landscape.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        // Portrait fixed app without max aspect.
+        prepareUnresizable(mActivity, 0, SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Need a window to call adjustBoundsForTaskbar with.
+        addWindowToActivity(mActivity);
+
+        // App should launch in fullscreen.
+        assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(mActivity.inSizeCompatMode());
+
+        // Activity inherits max bounds from TaskDisplayArea.
+        assertMaxBoundsInheritDisplayAreaBounds();
+
+        // Rotate display to portrait.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_0);
+
+        final Rect rotatedDisplayBounds = new Rect(mActivity.mDisplayContent.getBounds());
+        final Rect rotatedActivityBounds = new Rect(mActivity.getBounds());
+        assertTrue(rotatedDisplayBounds.width() < rotatedDisplayBounds.height());
+
+        // App should be in size compat.
+        assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertScaled();
+        assertThat(mActivity.inSizeCompatMode()).isTrue();
+        assertActivityMaxBoundsSandboxed();
+
+
+	final int scale = dh / dw;
+
+        // App bounds should be dh / scale x dw / scale
+        assertEquals(dw, rotatedDisplayBounds.width());
+        assertEquals(dh, rotatedDisplayBounds.height());
+
+        assertEquals(dh / scale, rotatedActivityBounds.width());
+        assertEquals(dw / scale, rotatedActivityBounds.height());
+
+        // Compute the frames of the window and invoke {@link ActivityRecord#layoutLetterbox}.
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        LetterboxDetails letterboxDetails = mActivity.mLetterboxUiController.getLetterboxDetails();
+
+        assertEquals(dh / scale, letterboxDetails.getLetterboxInnerBounds().width());
+        assertEquals(dw / scale, letterboxDetails.getLetterboxInnerBounds().height());
+
+        assertEquals(dw, letterboxDetails.getLetterboxFullBounds().width());
+        assertEquals(dh, letterboxDetails.getLetterboxFullBounds().height());
+    }
+
+    @Test
     public void testLaunchWithFixedRotationTransform() {
         final int dw = 1000;
         final int dh = 2500;
