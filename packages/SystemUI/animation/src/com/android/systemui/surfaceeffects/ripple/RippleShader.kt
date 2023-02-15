@@ -99,7 +99,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
             vec4 main(vec2 p) {
                 float sparkleRing = soften(roundedBoxRing(p-in_center, in_size, in_cornerRadius,
                     in_thickness), in_blur);
-                float inside = soften(sdRoundedBox(p-in_center, in_size * 1.2, in_cornerRadius),
+                float inside = soften(sdRoundedBox(p-in_center, in_size * 1.25, in_cornerRadius),
                     in_blur);
                 float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
                     * (1.-sparkleRing) * in_fadeSparkle;
@@ -192,6 +192,15 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
     }
 
     /**
+     * Blur multipliers for the ripple.
+     *
+     * <p>It interpolates from [blurStart] to [blurEnd] based on the [progress]. Increase number to
+     * add more blur.
+     */
+    var blurStart: Float = 1.25f
+    var blurEnd: Float = 0.5f
+
+    /**
      * Linear progress of the ripple. Float value between [0, 1].
      *
      * <p>Note that the progress here is expected to be linear without any curve applied.
@@ -209,6 +218,8 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
     /** Progress with Standard easing curve applied. */
     private var progress: Float = 0.0f
         set(value) {
+            field = value
+
             currentWidth = maxSize.x * value
             currentHeight = maxSize.y * value
             setFloatUniform("in_size", currentWidth, currentHeight)
@@ -217,7 +228,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
             // radius should not exceed width and height values.
             setFloatUniform("in_cornerRadius", Math.min(maxSize.x, maxSize.y) * value)
 
-            setFloatUniform("in_blur", MathUtils.lerp(1.25f, 0.5f, value))
+            setFloatUniform("in_blur", MathUtils.lerp(blurStart, blurEnd, value))
         }
 
     /** Play time since the start of the effect. */

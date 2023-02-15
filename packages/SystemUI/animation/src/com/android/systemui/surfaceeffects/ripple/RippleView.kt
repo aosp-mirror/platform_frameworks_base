@@ -84,6 +84,16 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         ripplePaint.shader = rippleShader
     }
 
+    /**
+     * Sets blur multiplier at start and end of the progress.
+     *
+     * <p>It interpolates between [start] and [end]. No need to set it if using default blur.
+     */
+    fun setBlur(start: Float, end: Float) {
+        rippleShader.blurStart = start
+        rippleShader.blurEnd = end
+    }
+
     @JvmOverloads
     fun startRipple(onAnimationEnd: Runnable? = null) {
         if (animator.isRunning) {
