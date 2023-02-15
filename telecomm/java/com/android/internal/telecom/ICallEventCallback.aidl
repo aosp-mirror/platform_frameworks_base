@@ -16,6 +16,7 @@
 
 package com.android.internal.telecom;
 
+import android.os.Bundle;
 import android.telecom.CallControl;
 import android.telecom.CallEndpoint;
 import com.android.internal.telecom.ICallControl;
@@ -44,6 +45,8 @@ oneway interface ICallEventCallback {
     void onCallEndpointChanged(String callId, in CallEndpoint endpoint);
     void onAvailableCallEndpointsChanged(String callId, in List<CallEndpoint> endpoint);
     void onMuteStateChanged(String callId, boolean isMuted);
+    // -- Events
+    void onEvent(String callId, String event, in Bundle extras);
     // hidden methods that help with cleanup
     void removeCallFromTransactionalServiceWrapper(String callId);
 }
