@@ -4612,10 +4612,9 @@ public class AppOpsManager {
      * Flag for querying app op history: assemble attribution chains, and attach the last visible
      * node in the chain to the start as a proxy info. This only applies to discrete accesses.
      *
-     * TODO 191512294: Add to @SystemApi
-     *
      * @hide
      */
+    @SystemApi
     public static final int HISTORY_FLAG_GET_ATTRIBUTION_CHAINS = 1 << 2;
 
     /**

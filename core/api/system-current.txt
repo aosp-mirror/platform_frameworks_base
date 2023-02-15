@@ -578,6 +578,7 @@ package android.app {
     field public static final int HISTORY_FLAGS_ALL = 3; // 0x3
     field public static final int HISTORY_FLAG_AGGREGATE = 1; // 0x1
     field public static final int HISTORY_FLAG_DISCRETE = 2; // 0x2
+    field public static final int HISTORY_FLAG_GET_ATTRIBUTION_CHAINS = 4; // 0x4
     field public static final String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
     field public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
     field public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
