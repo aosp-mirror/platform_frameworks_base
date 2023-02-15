@@ -8166,6 +8166,10 @@
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
+        <service android:name="com.android.server.healthconnect.migration.MigrationBroadcastJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
         <service android:name="com.android.server.pm.PackageManagerShellCommandDataLoader"
             android:exported="false">
             <intent-filter>
