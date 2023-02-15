@@ -2632,6 +2632,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
                     "alternateBouncer");
         }
+        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
     }
 
     private boolean shouldTriggerActiveUnlock() {
@@ -2716,7 +2717,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         || shouldListenForFingerprintAssistant
                         || (mKeyguardOccluded && mIsDreaming)
                         || (mKeyguardOccluded && userDoesNotHaveTrust
-                            && (mOccludingAppRequestingFp || isUdfps));
+                            && (mOccludingAppRequestingFp || isUdfps || mAlternateBouncerShowing));
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -2757,6 +2758,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     System.currentTimeMillis(),
                     user,
                     shouldListen,
+                    mAlternateBouncerShowing,
                     biometricEnabledForUser,
                     mPrimaryBouncerIsOrWillBeShowing,
                     userCanSkipBouncer,
