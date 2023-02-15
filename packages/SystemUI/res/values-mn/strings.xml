@@ -257,6 +257,8 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Тодрол"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Өнгө хувиргалт"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Өнгө тохируулга"</string>
+    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
+    <skip />
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Хэрэглэгчдийг удирдах"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Дууссан"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Хаах"</string>
@@ -777,6 +779,12 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"дэлгэцийн бичлэг"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Гарчиггүй"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Зогсолтын горим"</string>
+    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
+    <skip />
+    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
+    <skip />
+    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
+    <skip />
     <string name="magnification_window_title" msgid="4863914360847258333">"Томруулалтын цонх"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Томруулалтын цонхны хяналт"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Томруулах"</string>
@@ -862,10 +870,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Алдаа гарлаа. Дахин оролдоно уу."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Ачаалж байна"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"таблет"</string>
-    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
-    <skip />
-    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
-    <skip />
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Таны медиаг дамжуулж байна"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"<xliff:g id="APP_LABEL">%1$s</xliff:g>-г дамжуулж байна"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Идэвхгүй байна, аппыг шалгана уу"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Олдсонгүй"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Хяналт боломжгүй байна"</string>
@@ -903,6 +909,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Нэвтрүүлэх боломжгүй"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Хадгалах боломжгүй. Дахин оролдоно уу."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Хадгалах боломжгүй."</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Хийцийн дугаар"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Хийцийн дугаарыг түр санах ойд хуулсан."</string>
     <string name="basic_status" msgid="2315371112182658176">"Харилцан яриаг нээх"</string>
@@ -1022,11 +1032,16 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Дор хаяж нэг төхөөрөмж боломжтой"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Товчлолд хүрээд удаан дарна уу"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Цуцлах"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Одоо хөнтрөх"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Илүү сайн селфи хийхийн тулд утсаа дэлгэнэ үү"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Сайн сельфи авахаар урд талын дэлгэц рүү хөнтрөх үү?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Илүү өндөр нягтаршилтай илүү өргөн зураг авахын тулд арын камерыг ашиглана уу."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Энэ дэлгэц унтарна"</b></string>
+    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
+    <skip />
+    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
+    <skip />
+    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
+    <skip />
+    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
+    <skip />
+    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
+    <skip />
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Эвхэгддэг төхөөрөмжийг дэлгэж байна"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Эвхэгддэг төхөөрөмжийг хөнтөрч байна"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> батарей үлдлээ"</string>

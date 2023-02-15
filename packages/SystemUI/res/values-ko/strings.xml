@@ -257,6 +257,8 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"밝기"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"색상 반전"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"색상 보정"</string>
+    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
+    <skip />
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"사용자 관리"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"완료"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"닫기"</string>
@@ -777,6 +779,12 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"화면 녹화"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"제목 없음"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"대기"</string>
+    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
+    <skip />
+    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
+    <skip />
+    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
+    <skip />
     <string name="magnification_window_title" msgid="4863914360847258333">"확대 창"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"확대 창 컨트롤"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"확대"</string>
@@ -901,6 +909,10 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"방송할 수 없음"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"저장할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"저장할 수 없습니다."</string>
+    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
+    <skip />
+    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
+    <skip />
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"빌드 번호"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"빌드 번호가 클립보드에 복사되었습니다."</string>
     <string name="basic_status" msgid="2315371112182658176">"대화 열기"</string>
@@ -1020,11 +1032,16 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 1대 이상의 기기를 사용할 수 있습니다."</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"바로가기를 길게 터치하세요."</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"취소"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"지금 뒤집기"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"휴대전화를 열어서 더 나은 셀카를 찍어보세요"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"전면 디스플레이가 보이도록 뒤집어서 더 나은 셀카를 찍어보세요"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"후면 카메라를 통해 넓은 각도로 해상도가 높은 사진을 찍어보세요."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ 이 화면이 꺼집니다."</b></string>
+    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
+    <skip />
+    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
+    <skip />
+    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
+    <skip />
+    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
+    <skip />
+    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
+    <skip />
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"폴더블 기기를 펼치는 모습"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"폴더블 기기를 뒤집는 모습"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"배터리 <xliff:g id="PERCENTAGE">%s</xliff:g> 남음"</string>
