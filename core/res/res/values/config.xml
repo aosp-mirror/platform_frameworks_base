@@ -2189,6 +2189,8 @@
     <bool name="config_enableDefaultNotesForWorkProfile">false</bool>
     <!-- The name of the package that will hold the system financed device controller role. -->
     <string name="config_systemFinancedDeviceController" translatable="false">com.android.devicelockcontroller</string>
+    <!-- The name of the package that will hold the call streaming role. -->
+    <string name="config_systemCallStreaming" translatable="false"></string>
 
     <!-- The component name of the wear service class that will be started by the system server. -->
     <string name="config_wearServiceComponent" translatable="false"></string>
