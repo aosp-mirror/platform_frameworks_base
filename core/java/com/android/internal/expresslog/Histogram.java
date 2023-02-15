@@ -26,6 +26,12 @@ public final class Histogram {
     private final long mMetricIdHash;
     private final BinOptions mBinOptions;
 
+    /**
+     * Creates Histogram metric logging wrapper
+     * @param metricId to log, logging will be no-op if metricId is not defined in the TeX catalog
+     * @param binOptions to calculate bin index for samples
+     * @hide
+     */
     public Histogram(@NonNull String metricId, @NonNull BinOptions binOptions) {
         mMetricIdHash = Utils.hashString(metricId);
         mBinOptions = binOptions;
@@ -33,7 +39,7 @@ public final class Histogram {
 
     /**
      * Logs increment sample count for automatically calculated bin
-     *
+     * @param sample value
      * @hide
      */
     public void logSample(float sample) {
@@ -46,17 +52,16 @@ public final class Histogram {
     public interface BinOptions {
         /**
          * Returns bins count to be used by a histogram
-         *
          * @return bins count used to initialize Options, including overflow & underflow bins
          * @hide
          */
         int getBinsCount();
 
         /**
-         * @return zero based index
-         * Calculates bin index for the input sample value
+         * Returns bin index for the input sample value
          * index == 0 stands for underflow
          * index == getBinsCount() - 1 stands for overflow
+         * @return zero based index
          * @hide
          */
         int getBinForSample(float sample);
@@ -70,6 +75,17 @@ public final class Histogram {
         private final float mExclusiveMaxValue;
         private final float mBinSize;
 
+        /**
+         * Creates otpions for uniform (linear) sized bins
+         * @param binCount amount of histogram bins. 2 bin indexes will be calculated
+         *                 automatically to represent undeflow & overflow bins
+         * @param minValue is included in the first bin, values less than minValue
+         *                 go to underflow bin
+         * @param exclusiveMaxValue is included in the overflow bucket. For accurate
+                                    measure up to kMax, then exclusiveMaxValue
+         *                          should be set to kMax + 1
+         * @hide
+         */
         public UniformOptions(int binCount, float minValue, float exclusiveMaxValue) {
             if (binCount < 1) {
                 throw new IllegalArgumentException("Bin count should be positive number");
