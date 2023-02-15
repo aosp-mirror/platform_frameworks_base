@@ -1694,9 +1694,13 @@
                <action android:name="android.intent.action.MAIN" />
                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
            </intent-filter>
-       </activity>
+        </activity>
         <activity android:name="android.window.WindowMetricsHelperTest$TestActivity"
                   android:resizeableActivity="true"
+                  android:exported="true">
+        </activity>
+
+        <activity android:name="android.content.res.FontScaleConverterActivityTest$TestActivity"
                   android:exported="true">
         </activity>
 
