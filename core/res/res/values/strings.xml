@@ -6264,6 +6264,12 @@ ul.</string>
     <string name="concurrent_display_notification_thermal_title">Device is too warm</string>
     <!-- Content of concurrent display thermal notification. [CHAR LIMIT=NONE] -->
     <string name="concurrent_display_notification_thermal_content">Dual Screen is unavailable because your phone is getting too warm</string>
+    <!-- Title of concurrent display power saver notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_power_save_title">Dual Screen is unavailable</string>
+    <!-- Content of concurrent display power saver notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_power_save_content">Dual Screen is unavailable because Battery Saver is on. You can turn this off in Settings.</string>
+    <!-- Text of power saver notification settings button. [CHAR LIMIT=NONE] -->
+    <string name="device_state_notification_settings_button">Go to Settings</string>
     <!-- Text of device state notification turn off button. [CHAR LIMIT=NONE] -->
     <string name="device_state_notification_turn_off_button">Turn off</string>
 

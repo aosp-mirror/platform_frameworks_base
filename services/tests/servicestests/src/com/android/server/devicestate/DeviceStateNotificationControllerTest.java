@@ -52,7 +52,7 @@ public class DeviceStateNotificationControllerTest {
 
     private static final int STATE_WITHOUT_NOTIFICATION = 1;
     private static final int STATE_WITH_ACTIVE_NOTIFICATION = 2;
-    private static final int STATE_WITH_ACTIVE_AND_THERMAL_NOTIFICATION = 3;
+    private static final int STATE_WITH_ALL_NOTIFICATION = 3;
 
     private static final int VALID_APP_UID = 1000;
     private static final int INVALID_APP_UID = 2000;
@@ -68,6 +68,8 @@ public class DeviceStateNotificationControllerTest {
     private static final String CONTENT_2 = "content2:%1$s";
     private static final String THERMAL_TITLE_2 = "thermal_title2";
     private static final String THERMAL_CONTENT_2 = "thermal_content2";
+    private static final String POWER_SAVE_TITLE_2 = "power_save_title2";
+    private static final String POWER_SAVE_CONTENT_2 = "power_save_content2";
 
     private DeviceStateNotificationController mController;
 
@@ -88,11 +90,12 @@ public class DeviceStateNotificationControllerTest {
         notificationInfos.put(STATE_WITH_ACTIVE_NOTIFICATION,
                 new DeviceStateNotificationController.NotificationInfo(
                         NAME_1, TITLE_1, CONTENT_1,
-                        "", ""));
-        notificationInfos.put(STATE_WITH_ACTIVE_AND_THERMAL_NOTIFICATION,
+                        "", "", "", ""));
+        notificationInfos.put(STATE_WITH_ALL_NOTIFICATION,
                 new DeviceStateNotificationController.NotificationInfo(
                         NAME_2, TITLE_2, CONTENT_2,
-                        THERMAL_TITLE_2, THERMAL_CONTENT_2));
+                        THERMAL_TITLE_2, THERMAL_CONTENT_2,
+                        POWER_SAVE_TITLE_2, POWER_SAVE_CONTENT_2));
 
         when(packageManager.getNameForUid(VALID_APP_UID)).thenReturn(VALID_APP_NAME);
         when(packageManager.getNameForUid(INVALID_APP_UID)).thenReturn(INVALID_APP_NAME);
@@ -139,10 +142,46 @@ public class DeviceStateNotificationControllerTest {
     }
 
     @Test
+    public void test_powerSaveNotification() {
+        // Verify that the active notification is created.
+        mController.showStateActiveNotificationIfNeeded(
+                STATE_WITH_ALL_NOTIFICATION, VALID_APP_UID);
+        verify(mNotificationManager).notify(
+                eq(DeviceStateNotificationController.NOTIFICATION_TAG),
+                eq(DeviceStateNotificationController.NOTIFICATION_ID),
+                mNotificationCaptor.capture());
+        Notification notification = mNotificationCaptor.getValue();
+        assertEquals(TITLE_2, notification.extras.getString(Notification.EXTRA_TITLE));
+        assertEquals(String.format(CONTENT_2, VALID_APP_LABEL),
+                notification.extras.getString(Notification.EXTRA_TEXT));
+        assertEquals(Notification.FLAG_ONGOING_EVENT,
+                notification.flags & Notification.FLAG_ONGOING_EVENT);
+        Mockito.clearInvocations(mNotificationManager);
+
+        // Verify that the thermal critical notification is created.
+        mController.showPowerSaveNotificationIfNeeded(
+                STATE_WITH_ALL_NOTIFICATION);
+        verify(mNotificationManager).notify(
+                eq(DeviceStateNotificationController.NOTIFICATION_TAG),
+                eq(DeviceStateNotificationController.NOTIFICATION_ID),
+                mNotificationCaptor.capture());
+        notification = mNotificationCaptor.getValue();
+        assertEquals(POWER_SAVE_TITLE_2, notification.extras.getString(Notification.EXTRA_TITLE));
+        assertEquals(POWER_SAVE_CONTENT_2, notification.extras.getString(Notification.EXTRA_TEXT));
+        assertEquals(0, notification.flags & Notification.FLAG_ONGOING_EVENT);
+
+        // Verify that the notification is canceled.
+        mController.cancelNotification(STATE_WITH_ALL_NOTIFICATION);
+        verify(mNotificationManager).cancel(
+                DeviceStateNotificationController.NOTIFICATION_TAG,
+                DeviceStateNotificationController.NOTIFICATION_ID);
+    }
+
+    @Test
     public void test_thermalNotification() {
         // Verify that the active notification is created.
         mController.showStateActiveNotificationIfNeeded(
-                STATE_WITH_ACTIVE_AND_THERMAL_NOTIFICATION, VALID_APP_UID);
+                STATE_WITH_ALL_NOTIFICATION, VALID_APP_UID);
         verify(mNotificationManager).notify(
                 eq(DeviceStateNotificationController.NOTIFICATION_TAG),
                 eq(DeviceStateNotificationController.NOTIFICATION_ID),
@@ -157,7 +196,7 @@ public class DeviceStateNotificationControllerTest {
 
         // Verify that the thermal critical notification is created.
         mController.showThermalCriticalNotificationIfNeeded(
-                STATE_WITH_ACTIVE_AND_THERMAL_NOTIFICATION);
+                STATE_WITH_ALL_NOTIFICATION);
         verify(mNotificationManager).notify(
                 eq(DeviceStateNotificationController.NOTIFICATION_TAG),
                 eq(DeviceStateNotificationController.NOTIFICATION_ID),
@@ -168,7 +207,7 @@ public class DeviceStateNotificationControllerTest {
         assertEquals(0, notification.flags & Notification.FLAG_ONGOING_EVENT);
 
         // Verify that the notification is canceled.
-        mController.cancelNotification(STATE_WITH_ACTIVE_NOTIFICATION);
+        mController.cancelNotification(STATE_WITH_ALL_NOTIFICATION);
         verify(mNotificationManager).cancel(
                 DeviceStateNotificationController.NOTIFICATION_TAG,
                 DeviceStateNotificationController.NOTIFICATION_ID);

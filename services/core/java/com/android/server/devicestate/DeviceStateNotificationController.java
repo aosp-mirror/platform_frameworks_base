@@ -16,6 +16,8 @@
 
 package com.android.server.devicestate;
 
+import static android.provider.Settings.ACTION_BATTERY_SAVER_SETTINGS;
+
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -101,10 +103,16 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         }
         String requesterApplicationLabel = getApplicationLabel(requestingAppUid);
         if (requesterApplicationLabel != null) {
+            final Intent intent = new Intent(INTENT_ACTION_CANCEL_STATE)
+                    .setPackage(mContext.getPackageName());
+            final PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
             showNotification(
                     info.name, info.activeNotificationTitle,
                     String.format(info.activeNotificationContent, requesterApplicationLabel),
-                    true /* ongoing */, R.drawable.ic_dual_screen
+                    true /* ongoing */, R.drawable.ic_dual_screen,
+                    pendingIntent,
+                    mContext.getString(R.string.device_state_notification_turn_off_button)
             );
         } else {
             Slog.e(TAG, "Cannot determine the requesting app name when showing state active "
@@ -126,7 +134,33 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         showNotification(
                 info.name, info.thermalCriticalNotificationTitle,
                 info.thermalCriticalNotificationContent, false /* ongoing */,
-                R.drawable.ic_thermostat
+                R.drawable.ic_thermostat,
+                null /* pendingIntent */,
+                null /* actionText */
+        );
+    }
+
+    /**
+     * Displays the notification indicating that the device state is canceled due to power
+     * save mode being enabled. Does nothing if the state does not have a power save mode
+     * notification.
+     *
+     * @param state the identifier of the device state being canceled.
+     */
+    void showPowerSaveNotificationIfNeeded(int state) {
+        NotificationInfo info = mNotificationInfos.get(state);
+        if (info == null || !info.hasPowerSaveModeNotification()) {
+            return;
+        }
+        final Intent intent = new Intent(ACTION_BATTERY_SAVER_SETTINGS);
+        final PendingIntent pendingIntent = PendingIntent.getActivity(
+                mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
+        showNotification(
+                info.name, info.powerSaveModeNotificationTitle,
+                info.powerSaveModeNotificationContent, false /* ongoing */,
+                R.drawable.ic_thermostat,
+                pendingIntent,
+                mContext.getString(R.string.device_state_notification_settings_button)
         );
     }
 
@@ -161,7 +195,8 @@ class DeviceStateNotificationController extends BroadcastReceiver {
      */
     private void showNotification(
             @NonNull String name, @NonNull String title, @NonNull String content, boolean ongoing,
-            @DrawableRes int iconRes) {
+            @DrawableRes int iconRes,
+            @Nullable PendingIntent pendingIntent, @Nullable String actionText) {
         final NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
         final Notification.Builder builder = new Notification.Builder(mContext, CHANNEL_ID)
@@ -173,14 +208,10 @@ class DeviceStateNotificationController extends BroadcastReceiver {
                 .setOngoing(ongoing)
                 .setCategory(Notification.CATEGORY_SYSTEM);
 
-        if (ongoing) {
-            final Intent intent = new Intent(INTENT_ACTION_CANCEL_STATE)
-                    .setPackage(mContext.getPackageName());
-            final PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                    mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_IMMUTABLE);
+        if (pendingIntent != null && actionText != null) {
             final Notification.Action action = new Notification.Action.Builder(
                     null /* icon */,
-                    mContext.getString(R.string.device_state_notification_turn_off_button),
+                    actionText,
                     pendingIntent)
                     .build();
             builder.addAction(action);
@@ -215,12 +246,21 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         final String[] thermalCriticalNotificationContents =
                 context.getResources().getStringArray(
                         R.array.device_state_notification_thermal_contents);
+        final String[] powerSaveModeNotificationTitles =
+                context.getResources().getStringArray(
+                        R.array.device_state_notification_power_save_titles);
+        final String[] powerSaveModeNotificationContents =
+                context.getResources().getStringArray(
+                        R.array.device_state_notification_power_save_contents);
+
 
         if (stateIdentifiers.length != names.length
                 || stateIdentifiers.length != activeNotificationTitles.length
                 || stateIdentifiers.length != activeNotificationContents.length
                 || stateIdentifiers.length != thermalCriticalNotificationTitles.length
                 || stateIdentifiers.length != thermalCriticalNotificationContents.length
+                || stateIdentifiers.length != powerSaveModeNotificationTitles.length
+                || stateIdentifiers.length != powerSaveModeNotificationContents.length
         ) {
             throw new IllegalStateException(
                     "The length of state identifiers and notification texts must match!");
@@ -237,7 +277,9 @@ class DeviceStateNotificationController extends BroadcastReceiver {
                     new NotificationInfo(
                             names[i], activeNotificationTitles[i], activeNotificationContents[i],
                             thermalCriticalNotificationTitles[i],
-                            thermalCriticalNotificationContents[i])
+                            thermalCriticalNotificationContents[i],
+                            powerSaveModeNotificationTitles[i],
+                            powerSaveModeNotificationContents[i])
             );
         }
 
@@ -272,16 +314,21 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         public final String activeNotificationContent;
         public final String thermalCriticalNotificationTitle;
         public final String thermalCriticalNotificationContent;
+        public final String powerSaveModeNotificationTitle;
+        public final String powerSaveModeNotificationContent;
 
         NotificationInfo(String name, String activeNotificationTitle,
                 String activeNotificationContent, String thermalCriticalNotificationTitle,
-                String thermalCriticalNotificationContent) {
+                String thermalCriticalNotificationContent, String powerSaveModeNotificationTitle,
+                String powerSaveModeNotificationContent) {
 
             this.name = name;
             this.activeNotificationTitle = activeNotificationTitle;
             this.activeNotificationContent = activeNotificationContent;
             this.thermalCriticalNotificationTitle = thermalCriticalNotificationTitle;
             this.thermalCriticalNotificationContent = thermalCriticalNotificationContent;
+            this.powerSaveModeNotificationTitle = powerSaveModeNotificationTitle;
+            this.powerSaveModeNotificationContent = powerSaveModeNotificationContent;
         }
 
         boolean hasActiveNotification() {
@@ -291,6 +338,11 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         boolean hasThermalCriticalNotification() {
             return thermalCriticalNotificationTitle != null
                     && thermalCriticalNotificationTitle.length() > 0;
+        }
+
+        boolean hasPowerSaveModeNotification() {
+            return powerSaveModeNotificationTitle != null
+                    && powerSaveModeNotificationTitle.length() > 0;
         }
     }
 }
