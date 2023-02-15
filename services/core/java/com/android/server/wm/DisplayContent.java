@@ -5658,8 +5658,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Rect df = state.getDisplayFrame();
         final Insets gestureInsets = state.calculateInsets(df, systemGestures(),
                 false /* ignoreVisibility */);
-        mSystemGestureFrameLeft.set(df.left, df.top, gestureInsets.left, df.bottom);
-        mSystemGestureFrameRight.set(gestureInsets.right, df.top, df.right, df.bottom);
+        mSystemGestureFrameLeft.set(df.left, df.top, df.left + gestureInsets.left, df.bottom);
+        mSystemGestureFrameRight.set(df.right - gestureInsets.right, df.top, df.right, df.bottom);
 
         final Region touchableRegion = Region.obtain();
         final Region local = Region.obtain();
