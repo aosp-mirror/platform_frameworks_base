@@ -22,6 +22,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.time.UnixEpochTime;
@@ -60,7 +61,28 @@ public class NetworkTimeUpdateServiceTest {
     }
 
     @Test
-    public void engineImpl_refreshIfRequiredAndReschedule_success() {
+    public void engineImpl_refreshAndRescheduleIfRequired_nullNetwork() {
+        mFakeElapsedRealtimeClock.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
+
+        int normalPollingIntervalMillis = 7777777;
+        int shortPollingIntervalMillis = 3333;
+        int tryAgainTimesMax = 5;
+        NetworkTimeUpdateService.Engine engine = new NetworkTimeUpdateService.EngineImpl(
+                mFakeElapsedRealtimeClock,
+                normalPollingIntervalMillis, shortPollingIntervalMillis, tryAgainTimesMax,
+                mMockNtpTrustedTime);
+
+        RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
+        // Trigger the engine's logic.
+        engine.refreshAndRescheduleIfRequired(null, "Test", mockCallback);
+
+        // Expect nothing to have happened.
+        verifyNoMoreInteractions(mMockNtpTrustedTime);
+        verifyNoMoreInteractions(mockCallback);
+    }
+
+    @Test
+    public void engineImpl_refreshAndRescheduleIfRequired_success() {
         mFakeElapsedRealtimeClock.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
 
         int normalPollingIntervalMillis = 7777777;
@@ -83,7 +105,7 @@ public class NetworkTimeUpdateServiceTest {
 
         RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
         // Trigger the engine's logic.
-        engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+        engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
         // Expect the refresh attempt to have been made.
         verify(mMockNtpTrustedTime).forceRefresh(mDummyNetwork);
@@ -98,7 +120,7 @@ public class NetworkTimeUpdateServiceTest {
     }
 
     @Test
-    public void engineImpl_refreshIfRequiredAndReschedule_failThenFailRepeatedly() {
+    public void engineImpl_refreshAndRescheduleIfRequired_failThenFailRepeatedly() {
         mFakeElapsedRealtimeClock.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
 
         int normalPollingIntervalMillis = 7777777;
@@ -120,7 +142,7 @@ public class NetworkTimeUpdateServiceTest {
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
 
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect a refresh attempt each time: there's no currently cached result.
             verify(mMockNtpTrustedTime).forceRefresh(mDummyNetwork);
@@ -141,7 +163,7 @@ public class NetworkTimeUpdateServiceTest {
     }
 
     @Test
-    public void engineImpl_refreshIfRequiredAndReschedule_successThenFailRepeatedly() {
+    public void engineImpl_refreshAndRescheduleIfRequired_successThenFailRepeatedly() {
         mFakeElapsedRealtimeClock.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
 
         int normalPollingIntervalMillis = 7777777;
@@ -168,7 +190,7 @@ public class NetworkTimeUpdateServiceTest {
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
 
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect the refresh attempt to have been made: there is no cached network time
             // initially.
@@ -182,7 +204,7 @@ public class NetworkTimeUpdateServiceTest {
         }
 
         // Increment the current time by enough so that an attempt to refresh the time should be
-        // made every time refreshIfRequiredAndReschedule() is called.
+        // made every time refreshAndRescheduleIfRequired() is called.
         mFakeElapsedRealtimeClock.incrementMillis(normalPollingIntervalMillis);
 
         // Test multiple follow-up calls.
@@ -195,7 +217,7 @@ public class NetworkTimeUpdateServiceTest {
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
 
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect a refresh attempt each time as the cached network time is too old.
             verify(mMockNtpTrustedTime).forceRefresh(mDummyNetwork);
@@ -221,7 +243,7 @@ public class NetworkTimeUpdateServiceTest {
     }
 
     @Test
-    public void engineImpl_refreshIfRequiredAndReschedule_successThenFail_tryAgainTimesZero() {
+    public void engineImpl_refreshAndRescheduleIfRequired_successThenFail_tryAgainTimesZero() {
         mFakeElapsedRealtimeClock.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
 
         int normalPollingIntervalMillis = 7777777;
@@ -248,7 +270,7 @@ public class NetworkTimeUpdateServiceTest {
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
 
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect the refresh attempt to have been made: there is no cached network time
             // initially.
@@ -262,7 +284,7 @@ public class NetworkTimeUpdateServiceTest {
         }
 
         // Increment the current time by enough so that an attempt to refresh the time should be
-        // made every time refreshIfRequiredAndReschedule() is called.
+        // made every time refreshAndRescheduleIfRequired() is called.
         mFakeElapsedRealtimeClock.incrementMillis(normalPollingIntervalMillis);
 
         // Test multiple follow-up calls.
@@ -275,7 +297,7 @@ public class NetworkTimeUpdateServiceTest {
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
 
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect a refresh attempt each time as the cached network time is too old.
             verify(mMockNtpTrustedTime).forceRefresh(mDummyNetwork);
@@ -297,7 +319,7 @@ public class NetworkTimeUpdateServiceTest {
     }
 
     @Test
-    public void engineImpl_refreshIfRequiredAndReschedule_successThenFail_tryAgainTimesNegative() {
+    public void engineImpl_refreshAndRescheduleIfRequired_successThenFail_tryAgainTimesNegative() {
         mFakeElapsedRealtimeClock.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
 
         int normalPollingIntervalMillis = 7777777;
@@ -324,7 +346,7 @@ public class NetworkTimeUpdateServiceTest {
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
 
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect the refresh attempt to have been made: there is no cached network time
             // initially.
@@ -338,7 +360,7 @@ public class NetworkTimeUpdateServiceTest {
         }
 
         // Increment the current time by enough so that an attempt to refresh the time should be
-        // made every time refreshIfRequiredAndReschedule() is called.
+        // made every time refreshAndRescheduleIfRequired() is called.
         mFakeElapsedRealtimeClock.incrementMillis(normalPollingIntervalMillis);
 
         // Test multiple follow-up calls.
@@ -351,7 +373,7 @@ public class NetworkTimeUpdateServiceTest {
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
 
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect a refresh attempt each time as the cached network time is too old.
             verify(mMockNtpTrustedTime).forceRefresh(mDummyNetwork);
@@ -373,7 +395,7 @@ public class NetworkTimeUpdateServiceTest {
     }
 
     @Test
-    public void engineImpl_refreshIfRequiredAndReschedule_successFailSuccess() {
+    public void engineImpl_refreshAndRescheduleIfRequired_successFailSuccess() {
         mFakeElapsedRealtimeClock.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
 
         int normalPollingIntervalMillis = 7777777;
@@ -398,7 +420,7 @@ public class NetworkTimeUpdateServiceTest {
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
 
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect the refresh attempt to have been made: there is no cached network time
             // initially.
@@ -413,7 +435,7 @@ public class NetworkTimeUpdateServiceTest {
         }
 
         // Increment the current time by enough so that the cached time result is too old and an
-        // attempt to refresh the time should be made every time refreshIfRequiredAndReschedule() is
+        // attempt to refresh the time should be made every time refreshAndRescheduleIfRequired() is
         // called.
         mFakeElapsedRealtimeClock.incrementMillis(normalPollingIntervalMillis);
 
@@ -426,7 +448,7 @@ public class NetworkTimeUpdateServiceTest {
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
 
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect the refresh attempt to have been made: the timeResult is too old.
             verify(mMockNtpTrustedTime).forceRefresh(mDummyNetwork);
@@ -458,7 +480,7 @@ public class NetworkTimeUpdateServiceTest {
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
 
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect the refresh attempt to have been made: the timeResult is too old.
             verify(mMockNtpTrustedTime).forceRefresh(mDummyNetwork);
@@ -473,12 +495,12 @@ public class NetworkTimeUpdateServiceTest {
     }
 
     /**
-     * Confirms that if a refreshIfRequiredAndReschedule() call is made, e.g. for reasons besides
+     * Confirms that if a refreshAndRescheduleIfRequired() call is made, e.g. for reasons besides
      * scheduled alerts, and the latest time is not too old, then an NTP refresh won't be attempted.
      * A suggestion will still be made.
      */
     @Test
-    public void engineImpl_refreshIfRequiredAndReschedule_noRefreshIfLatestIsFresh() {
+    public void engineImpl_refreshAndRescheduleIfRequired_noRefreshIfLatestIsFresh() {
         mFakeElapsedRealtimeClock.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
 
         int normalPollingIntervalMillis = 7777777;
@@ -498,7 +520,7 @@ public class NetworkTimeUpdateServiceTest {
 
         RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
         // Trigger the engine's logic.
-        engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+        engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
         // Expect no refresh attempt to have been made.
         verify(mMockNtpTrustedTime, never()).forceRefresh(any());
@@ -516,11 +538,11 @@ public class NetworkTimeUpdateServiceTest {
     }
 
     /**
-     * Confirms that if a refreshIfRequiredAndReschedule() call is made, e.g. for reasons besides
+     * Confirms that if a refreshAndRescheduleIfRequired() call is made, e.g. for reasons besides
      * scheduled alerts, and the latest time is too old, then an NTP refresh will be attempted.
      */
     @Test
-    public void engineImpl_refreshIfRequiredAndReschedule_failureHandlingAfterLatestIsTooOld() {
+    public void engineImpl_refreshAndRescheduleIfRequired_failureHandlingAfterLatestIsTooOld() {
         mFakeElapsedRealtimeClock.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
 
         int normalPollingIntervalMillis = 7777777;
@@ -541,7 +563,7 @@ public class NetworkTimeUpdateServiceTest {
 
         RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
         // Trigger the engine's logic.
-        engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+        engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
         // Expect a refresh attempt to have been made.
         verify(mMockNtpTrustedTime, times(1)).forceRefresh(mDummyNetwork);
@@ -556,11 +578,11 @@ public class NetworkTimeUpdateServiceTest {
     }
 
     /**
-     * Confirms that if a refreshIfRequiredAndReschedule() call is made and there was a recently
+     * Confirms that if a refreshAndRescheduleIfRequired() call is made and there was a recently
      * failed refresh, then another won't be scheduled too soon.
      */
     @Test
-    public void engineImpl_refreshIfRequiredAndReschedule_minimumRefreshTimeEnforced() {
+    public void engineImpl_refreshAndRescheduleIfRequired_minimumRefreshTimeEnforced() {
         mFakeElapsedRealtimeClock.setElapsedRealtimeMillis(ARBITRARY_ELAPSED_REALTIME_MILLIS);
 
         int normalPollingIntervalMillis = 7777777;
@@ -574,7 +596,7 @@ public class NetworkTimeUpdateServiceTest {
         NtpTrustedTime.TimeResult timeResult = createNtpTimeResult(
                 mFakeElapsedRealtimeClock.getElapsedRealtimeMillis());
 
-        // Simulate an initial call to refreshIfRequiredAndReschedule() prime the "last refresh
+        // Simulate an initial call to refreshAndRescheduleIfRequired() prime the "last refresh
         // attempt" time. A cached time value is available, but it's too old but the refresh
         // attempt will fail.
         long lastRefreshAttemptElapsedMillis;
@@ -586,7 +608,7 @@ public class NetworkTimeUpdateServiceTest {
 
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect a refresh attempt to have been made.
             verify(mMockNtpTrustedTime, times(1)).forceRefresh(mDummyNetwork);
@@ -606,7 +628,7 @@ public class NetworkTimeUpdateServiceTest {
             reset(mMockNtpTrustedTime);
         }
 
-        // Simulate a second call to refreshIfRequiredAndReschedule() very soon after the first, as
+        // Simulate a second call to refreshAndRescheduleIfRequired() very soon after the first, as
         // might happen if there were a network state change.
         // The cached time value is available, but it's still too old. Because the last call was so
         // recent, no refresh should take place and the next scheduled refresh time should be
@@ -619,7 +641,7 @@ public class NetworkTimeUpdateServiceTest {
 
             RefreshCallbacks mockCallback = mock(RefreshCallbacks.class);
             // Trigger the engine's logic.
-            engine.refreshIfRequiredAndReschedule(mDummyNetwork, "Test", mockCallback);
+            engine.refreshAndRescheduleIfRequired(mDummyNetwork, "Test", mockCallback);
 
             // Expect no refresh attempt to have been made: time elapsed isn't enough.
             verify(mMockNtpTrustedTime, never()).forceRefresh(any());
