@@ -24,7 +24,7 @@ import android.hardware.biometrics.BiometricOverlayConstants.REASON_AUTH_SETTING
 import android.hardware.biometrics.BiometricOverlayConstants.ShowReason
 import android.hardware.fingerprint.FingerprintManager
 import android.hardware.fingerprint.IUdfpsOverlayControllerCallback
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -77,7 +77,7 @@ private const val SENSOR_WIDTH = 30
 private const val SENSOR_HEIGHT = 60
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class UdfpsControllerOverlayTest : SysuiTestCase() {
 

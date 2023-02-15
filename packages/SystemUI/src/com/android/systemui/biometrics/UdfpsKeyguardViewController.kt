@@ -254,7 +254,7 @@ constructor(
     }
 
     @VisibleForTesting
-    internal suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
+    suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
         return scope.launch {
             primaryBouncerInteractor.bouncerExpansion.collect { bouncerExpansion: Float ->
                 inputBouncerExpansion = bouncerExpansion
@@ -265,7 +265,7 @@ constructor(
     }
 
     @VisibleForTesting
-    internal suspend fun listenForAlternateBouncerVisibility(scope: CoroutineScope): Job {
+    suspend fun listenForAlternateBouncerVisibility(scope: CoroutineScope): Job {
         return scope.launch {
             alternateBouncerInteractor.isVisible.collect { isVisible: Boolean ->
                 showUdfpsBouncer(isVisible)

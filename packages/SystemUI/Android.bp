@@ -258,6 +258,24 @@ filegroup {
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToDreamingTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToOccludedTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/OccludedToLockscreenTransitionViewModelTest.kt",
+
+        // Biometric
+        "tests/src/com/android/systemui/biometrics/BiometricTestExtensions.kt",
+        "tests/src/com/android/systemui/biometrics/AuthBiometricFingerprintAndFaceViewTest.kt",
+        "tests/src/com/android/systemui/biometrics/AuthBiometricFingerprintViewTest.kt",
+        "tests/src/com/android/systemui/biometrics/AuthControllerTest.java",
+        "tests/src/com/android/systemui/biometrics/BiometricDisplayListenerTest.java",
+        "tests/src/com/android/systemui/biometrics/FaceHelpMessageDeferralTest.kt",
+        "tests/src/com/android/systemui/biometrics/SideFpsControllerTest.kt",
+        "tests/src/com/android/systemui/biometrics/UdfpsControllerOverlayTest.kt",
+        "tests/src/com/android/systemui/biometrics/UdfpsControllerTest.java",
+        "tests/src/com/android/systemui/biometrics/UdfpsDialogMeasureAdapterTest.java",
+        "tests/src/com/android/systemui/biometrics/UdfpsDisplayModeTest.java",
+        "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewControllerBaseTest.java",
+        "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewControllerTest.java",
+        "tests/src/com/android/systemui/biometrics/UdfpsKeyguardViewControllerWithCoroutinesTest.kt",
+        "tests/src/com/android/systemui/biometrics/UdfpsShellTest.kt",
+        "tests/src/com/android/systemui/biometrics/UdfpsViewTest.kt",
     ],
     path: "tests/src",
 }
@@ -402,6 +420,10 @@ android_app {
     privileged: true,
     resource_dirs: [],
     kotlincflags: ["-Xjvm-default=all"],
+    optimize: {
+        shrink_resources: false,
+        proguard_flags_files: ["proguard.flags"],
+    },
 
     plugins: ["dagger2-compiler"],
 }

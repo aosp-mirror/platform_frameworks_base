@@ -26,10 +26,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.shade.ShadeExpansionListener;
@@ -39,7 +39,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewControllerBaseTest {

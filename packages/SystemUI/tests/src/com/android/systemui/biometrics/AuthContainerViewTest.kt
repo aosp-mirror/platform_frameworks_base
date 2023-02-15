@@ -25,7 +25,6 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.os.Handler
 import android.os.IBinder
 import android.os.UserManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
@@ -34,6 +33,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.ScrollView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
@@ -62,7 +62,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class AuthContainerViewTest : SysuiTestCase() {
@@ -489,7 +489,7 @@ class AuthContainerViewTest : SysuiTestCase() {
     private fun AuthContainerView.addToView() {
         ViewUtils.attachView(this)
         waitForIdleSync()
-        assertThat(isAttachedToWindow).isTrue()
+        assertThat(isAttachedToWindow()).isTrue()
     }
 }
 
