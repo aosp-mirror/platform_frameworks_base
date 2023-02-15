@@ -1470,9 +1470,17 @@ public class AppOpsManager {
     public static final int OP_SYSTEM_EXEMPT_FROM_HIBERNATION =
             AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_HIBERNATION;
 
+    /**
+     * Prevent an app from being suspended.
+     *
+     * @hide
+     */
+    public static final int OP_SYSTEM_EXEMPT_FROM_SUSPENSION =
+            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_SUSPENSION;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 135;
+    public static final int _NUM_OP = 136;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -2075,6 +2083,14 @@ public class AppOpsManager {
     public static final String OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION =
             "android:system_exempt_from_hibernation";
 
+    /**
+     *  Prevent an app from being suspended.
+     *
+     * @hide
+     */
+    public static final String OPSTR_SYSTEM_EXEMPT_FROM_SUSPENSION =
+            "android:system_exempt_from_suspension";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2600,7 +2616,11 @@ public class AppOpsManager {
                 .build(),
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_HIBERNATION,
                 OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION,
-                "SYSTEM_EXEMPT_FROM_HIBERNATION").build()
+                "SYSTEM_EXEMPT_FROM_HIBERNATION").build(),
+        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_SUSPENSION,
+                OPSTR_SYSTEM_EXEMPT_FROM_SUSPENSION,
+                "SYSTEM_EXEMPT_FROM_SUSPENSION")
+                .setDisableReset(true).build()
     };
 
     // The number of longs needed to form a full bitmask of app ops
