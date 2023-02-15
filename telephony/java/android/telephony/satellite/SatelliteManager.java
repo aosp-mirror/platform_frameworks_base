@@ -540,10 +540,11 @@ public class SatelliteManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteModemState {}
 
-    /** SOS SMS */
+    /** Datagram type indicating that the datagram to be sent or received is of type SOS SMS. */
     public static final int DATAGRAM_TYPE_SOS_SMS = 0;
 
-    /** Location sharing message */
+    /** Datagram type indicating that the datagram to be sent or received is of type
+     * location sharing. */
     public static final int DATAGRAM_TYPE_LOCATION_SHARING = 3;
 
     @IntDef(
@@ -921,7 +922,7 @@ public class SatelliteManager {
      * Register for listening to satellite modem state changes.
      *
      * @param executor The executor on which the callback will be called.
-     * @param callback The callback to handle the satellite state change event.
+     * @param callback The callback to handle the satellite modem state change event.
      *                 This SatelliteCallback should implement the interface
      *                 {@link SatelliteCallback.SatelliteStateListener}.
      *
@@ -991,9 +992,11 @@ public class SatelliteManager {
     /**
      * Register to receive incoming datagrams over satellite.
      *
-     * @param datagramType Type of datagram.
+     * @param datagramType datagram type indicating whether the datagram is of type
+     *                     SOS_SMS or LOCATION_SHARING.
      * @param executor The executor on which the callback will be called.
      * @param callback The callback to handle incoming datagrams over satellite.
+     *                 This callback with be invoked when a new datagram is received from satellite.
      *                 This SatelliteCallback should implement the interface
      *                 {@link SatelliteCallback.SatelliteDatagramListener}.
      *
@@ -1061,44 +1064,21 @@ public class SatelliteManager {
     /**
      * Poll pending satellite datagrams over satellite.
      *
-     * @return The result of the operation.
-     * @throws SecurityException if the caller doesn't have required permission.
-     * @throws IllegalStateException if the Telephony process is not currently available.
-     */
-    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteError public int pollPendingSatelliteDatagrams() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                return telephony.pollPendingSatelliteDatagrams(mSubId);
-            } else {
-                throw new IllegalStateException("telephony service is null.");
-            }
-        } catch (RemoteException ex) {
-            loge("pollPendingSatelliteDatagrams() RemoteException:" + ex);
-            ex.rethrowFromSystemServer();
-        }
-        return SATELLITE_REQUEST_FAILED;
-    }
-
-    /**
-     * Send datagram over satellite.
+     * This method requests modem to check if there are any pending datagrams to be received over
+     * satellite. If there are any incoming datagrams, they will be received via
+     * {@link SatelliteCallback.SatelliteDatagramListener#onSatelliteDatagrams(SatelliteDatagram[])}
      *
-     * @param datagramType Type of datagram.
-     * @param datagram Datagram to send over satellite.
-     * @param executor The executor on which the error code listener will be called.
-     * @param errorCodeListener Listener for the {@link SatelliteError} result of the operation.
+     * @param executor The executor on which the result listener will be called.
+     * @param resultListener Listener for the {@link SatelliteError} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    public void sendSatelliteDatagram(@DatagramType int datagramType,
-            @NonNull SatelliteDatagram datagram, @NonNull @CallbackExecutor Executor executor,
-            @SatelliteError @NonNull Consumer<Integer> errorCodeListener) {
-        Objects.requireNonNull(datagram);
+    public void pollPendingSatelliteDatagrams(@NonNull @CallbackExecutor Executor executor,
+            @SatelliteError @NonNull Consumer<Integer> resultListener) {
         Objects.requireNonNull(executor);
-        Objects.requireNonNull(errorCodeListener);
+        Objects.requireNonNull(resultListener);
 
         try {
             ITelephony telephony = getITelephony();
@@ -1107,7 +1087,52 @@ public class SatelliteManager {
                     @Override
                     public void accept(int result) {
                         executor.execute(() -> Binder.withCleanCallingIdentity(
-                                () -> errorCodeListener.accept(result)));
+                                () -> resultListener.accept(result)));
+                    }
+                };
+                telephony.pollPendingSatelliteDatagrams(mSubId, internalCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("pollPendingSatelliteDatagrams() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Send datagram over satellite.
+     *
+     * Gateway encodes SOS SMS or location sharing message into a datagram and passes it as input to
+     * this method. Datagram received here will be passed down to modem without any encoding or
+     * encryption.
+     *
+     * @param datagramType datagram type indicating whether the datagram is of type
+     *                     SOS_SMS or LOCATION_SHARING.
+     * @param datagram encoded gateway datagram which is encrypted by the caller.
+     *                 Datagram will be passed down to modem without any encoding or encryption.
+     * @param executor The executor on which the result listener will be called.
+     * @param resultListener Listener for the {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void sendSatelliteDatagram(@DatagramType int datagramType,
+            @NonNull SatelliteDatagram datagram, @NonNull @CallbackExecutor Executor executor,
+            @SatelliteError @NonNull Consumer<Integer> resultListener) {
+        Objects.requireNonNull(datagram);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(resultListener);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IIntegerConsumer internalCallback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> resultListener.accept(result)));
                     }
                 };
                 telephony.sendSatelliteDatagram(mSubId, datagramType, datagram, internalCallback);
