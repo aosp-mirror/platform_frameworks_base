@@ -102,6 +102,8 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
@@ -5581,6 +5583,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                         throw new IllegalArgumentException(
                                 "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
                     }
+                    if (PendingIntent.isNewMutableDisallowedImplicitPendingIntent(flags, intent)) {
+                        boolean isChangeEnabled = CompatChanges.isChangeEnabled(
+                                        PendingIntent.BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT,
+                                        owningUid);
+                        logUnsafeMutableImplicitPi(packageName, resolvedTypes, owningUid, i, intent,
+                                isChangeEnabled);
+                        if (isChangeEnabled) {
+                            String msg = packageName + ": Targeting U+ (version "
+                                    + Build.VERSION_CODES.UPSIDE_DOWN_CAKE + " and above) disallows"
+                                    + " creating or retrieving a PendingIntent with FLAG_MUTABLE,"
+                                    + " an implicit Intent within and without FLAG_NO_CREATE and"
+                                    + " FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT for"
+                                    + " security reasons. To retrieve an already existing"
+                                    + " PendingIntent, use FLAG_NO_CREATE, however, to create a"
+                                    + " new PendingIntent with an implicit Intent use"
+                                    + " FLAG_IMMUTABLE.";
+                            throw new IllegalArgumentException(msg);
+                        }
+                    }
                     intents[i] = new Intent(intent);
                 }
             }
@@ -5631,6 +5652,24 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (RemoteException e) {
             throw new SecurityException(e);
         }
+    }
+
+    private void logUnsafeMutableImplicitPi(String packageName, String[] resolvedTypes,
+            int owningUid, int i, Intent intent, boolean isChangeEnabled) {
+        String[] categories = intent.getCategories() == null ? new String[0]
+                : intent.getCategories().toArray(String[]::new);
+        String resolvedType = resolvedTypes == null || i >= resolvedTypes.length ? null
+                : resolvedTypes[i];
+        FrameworkStatsLog.write(UNSAFE_INTENT_EVENT_REPORTED,
+                UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED,
+                owningUid,
+                null,
+                packageName,
+                intent.getAction(),
+                categories,
+                resolvedType,
+                intent.getScheme(),
+                isChangeEnabled);
     }
 
     @Override
@@ -12909,7 +12948,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     callingUid);
             String[] categories = intent.getCategories() == null ? new String[0]
                     : intent.getCategories().toArray(String[]::new);
-            FrameworkStatsLog.write(FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED,
+            FrameworkStatsLog.write(UNSAFE_INTENT_EVENT_REPORTED,
                     FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
                     callingUid,
                     componentInfo,
