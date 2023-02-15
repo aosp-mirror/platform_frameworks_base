@@ -18038,6 +18038,87 @@ public class TelephonyManager {
     public static final int CELL_BROADCAST_RESULT_FAIL_ACTIVATION = 3;
 
     /**
+     * Callback mode type
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"EMERGENCY_CALLBACK_MODE_"}, value = {
+            EMERGENCY_CALLBACK_MODE_CALL,
+            EMERGENCY_CALLBACK_MODE_SMS})
+    public @interface EmergencyCallbackModeType {}
+
+    /**
+     * The callback mode is due to emergency call.
+     * @hide
+     */
+    public static final int EMERGENCY_CALLBACK_MODE_CALL = 1;
+
+    /**
+     * The callback mode is due to emergency SMS.
+     * @hide
+     */
+    public static final int EMERGENCY_CALLBACK_MODE_SMS = 2;
+
+    /**
+     * The reason for changing callback mode.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"STOP_REASON_"},
+            value = {
+                    STOP_REASON_UNKNOWN,
+                    STOP_REASON_OUTGOING_NORMAL_CALL_INITIATED,
+                    STOP_REASON_NORMAL_SMS_SENT,
+                    STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED,
+                    STOP_REASON_EMERGENCY_SMS_SENT,
+                    STOP_REASON_TIMER_EXPIRED,
+                    STOP_REASON_USER_ACTION,
+            })
+    public @interface EmergencyCallbackModeStopReason {}
+
+    /**
+     * unknown reason.
+     * @hide
+     */
+    public static final int STOP_REASON_UNKNOWN = 0;
+
+    /**
+     * The call back mode is exited due to a new normal call is originated.
+     * @hide
+     */
+    public static final int STOP_REASON_OUTGOING_NORMAL_CALL_INITIATED = 1;
+
+    /**
+     * The call back mode is exited due to a new normal SMS is originated.
+     * @hide
+     */
+    public static final int STOP_REASON_NORMAL_SMS_SENT = 2;
+
+    /**
+     * The call back mode is exited due to a new emergency call is originated.
+     * @hide
+     */
+    public static final int STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED = 3;
+
+    /**
+     * The call back mode is exited due to a new emergency SMS is originated.
+     * @hide
+     */
+    public static final int STOP_REASON_EMERGENCY_SMS_SENT = 4;
+
+    /**
+     * The call back mode is exited due to timer expiry.
+     * @hide
+     */
+    public static final int STOP_REASON_TIMER_EXPIRED = 5;
+
+    /**
+     * The call back mode is exited due to user action.
+     * @hide
+     */
+    public static final int STOP_REASON_USER_ACTION = 6;
+
+    /**
      * Set reception of cell broadcast messages with the list of the given ranges
      *
      * <p>The ranges set previously will be overridden by the new one. Empty list
