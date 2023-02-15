@@ -210,6 +210,13 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     /**
+     * Reinflate the view flipper child view.
+     */
+    public void reinflateViewFlipper() {
+        mKeyguardSecurityContainerController.reinflateViewFlipper();
+    }
+
+    /**
      * Dismisses the keyguard by going to the next screen or making it gone.
      * @param targetUserId a user that needs to be the foreground user at the dismissal completion.
      * @return True if the keyguard is done.
