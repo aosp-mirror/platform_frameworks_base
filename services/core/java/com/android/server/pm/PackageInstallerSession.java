@@ -66,6 +66,8 @@ import android.app.NotificationManager;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -124,6 +126,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
 import android.os.SELinux;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.incremental.IStorageHealthListener;
@@ -146,6 +149,7 @@ import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -154,6 +158,7 @@ import android.util.apk.ApkSignatureVerifier;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.messages.nano.SystemMessageProto;
@@ -297,8 +302,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS = 60000;
 
     /**
+     * If an app being installed targets {@link Build.VERSION_CODES#S API 31} and above, the app
+     * can be installed without user action.
+     * See {@link PackageInstaller.SessionParams#setRequireUserAction} for other conditions required
+     * to be satisfied for a silent install.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.S)
+    private static final long SILENT_INSTALL_ALLOWED = 265131695L;
+
+    /**
      * The default value of {@link #mValidatedTargetSdk} is {@link Integer#MAX_VALUE}. If {@link
-     * #mValidatedTargetSdk} is compared with {@link Build.VERSION_CODES#R} before getting the
+     * #mValidatedTargetSdk} is compared with {@link Build.VERSION_CODES#S} before getting the
      * target sdk version from a validated apk in {@link #validateApkInstallLocked()}, the compared
      * result will not trigger any user action in
      * {@link #checkUserActionRequirement(PackageInstallerSession, IntentSender)}.
@@ -2353,13 +2368,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (!session.isApexSession() && userActionRequirement == USER_ACTION_PENDING_APK_PARSING) {
-            final int validatedTargetSdk;
-            synchronized (session.mLock) {
-                validatedTargetSdk = session.mValidatedTargetSdk;
-            }
-
-            if (validatedTargetSdk != INVALID_TARGET_SDK_VERSION
-                    && validatedTargetSdk < Build.VERSION_CODES.R) {
+            if (!isTargetSdkConditionSatisfied(session)) {
                 session.sendPendingUserActionIntent(target);
                 return true;
             }
@@ -2378,6 +2387,39 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         return false;
+    }
+
+    /**
+     * Checks if the app being installed has a targetSdk more than the minimum required for a
+     * silent install. See {@link SessionParams#setRequireUserAction(int)} for details about the
+     * targetSdk requirement.
+     * @param session Current install session
+     * @return true if the targetSdk of the app being installed is more than the minimum required,
+     *          resulting in a silent install, false otherwise.
+     */
+    private static boolean isTargetSdkConditionSatisfied(PackageInstallerSession session) {
+        final int validatedTargetSdk;
+        final String packageName;
+        synchronized (session.mLock) {
+            validatedTargetSdk = session.mValidatedTargetSdk;
+            packageName = session.mPackageName;
+        }
+
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.packageName = packageName;
+        appInfo.targetSdkVersion = validatedTargetSdk;
+
+        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
+                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
+        try {
+            // Using manually constructed AppInfo to check if a change is enabled may not work
+            // in the future.
+            return validatedTargetSdk != INVALID_TARGET_SDK_VERSION
+                    && platformCompat.isChangeEnabled(SILENT_INSTALL_ALLOWED, appInfo);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
+            return false;
+        }
     }
 
     private static @UserActionReason int userActionRequirementToReason(
