@@ -1222,8 +1222,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Notify recents if we are exiting in a way that breaks the pair, and disable further
             // updates to splits in the recents until we enter split again
             if (shouldBreakPairedTaskInRecents(exitReason) && mShouldUpdateRecents) {
-                recentTasks.removeSplitPair(mMainStage.getTopVisibleChildTaskId());
-                recentTasks.removeSplitPair(mSideStage.getTopVisibleChildTaskId());
+                recentTasks.removeSplitPair(mMainStage.getLastVisibleTaskId());
+                recentTasks.removeSplitPair(mSideStage.getLastVisibleTaskId());
             }
         });
         mShouldUpdateRecents = false;
