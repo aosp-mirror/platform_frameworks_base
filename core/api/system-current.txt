@@ -10055,7 +10055,7 @@ package android.net.wifi.sharedconnectivity.app {
   public class SharedConnectivityManager {
     method public boolean connectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
     method public boolean connectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
-    method public boolean disconnectTetherNetwork();
+    method public boolean disconnectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
     method public boolean forgetKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
     method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivityClientCallback);
     method public boolean unregisterCallback(@NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivityClientCallback);
@@ -10142,7 +10142,7 @@ package android.net.wifi.sharedconnectivity.service {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onConnectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
     method public abstract void onConnectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
-    method public abstract void onDisconnectTetherNetwork();
+    method public abstract void onDisconnectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
     method public abstract void onForgetKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
     method public final void setKnownNetworks(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.KnownNetwork>);
     method public final void setSettingsState(@NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState);

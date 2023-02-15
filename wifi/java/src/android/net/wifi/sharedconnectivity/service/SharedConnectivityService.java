@@ -117,9 +117,9 @@ public abstract class SharedConnectivityService extends Service {
             }
 
             @Override
-            public void disconnectTetherNetwork() {
+            public void disconnectTetherNetwork(TetherNetwork network) {
                 checkPermissions();
-                mHandler.post(() -> onDisconnectTetherNetwork());
+                mHandler.post(() -> onDisconnectTetherNetwork(network));
             }
 
             @Override
@@ -323,8 +323,10 @@ public abstract class SharedConnectivityService extends Service {
      * Implementing application should implement this method.
      *
      * Implementation should initiate a disconnection from the active Tether Network.
+     *
+     * @param network Object identifying the Tether Network the user has requested to disconnect.
      */
-    public abstract void onDisconnectTetherNetwork();
+    public abstract void onDisconnectTetherNetwork(@NonNull TetherNetwork network);
 
     /**
      * Implementing application should implement this method.

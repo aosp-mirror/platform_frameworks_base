@@ -340,16 +340,18 @@ public class SharedConnectivityManager {
      * Send command to the implementation of {@link SharedConnectivityService} requesting
      * disconnection from the active Tether Network.
      *
+     * @param network {@link TetherNetwork} object representing the network the user has requested
+     *                to disconnect from.
      * @return Returns true if the service received the command. Does not guarantee that the
      *         disconnection was successful.
      */
-    public boolean disconnectTetherNetwork() {
+    public boolean disconnectTetherNetwork(@NonNull TetherNetwork network) {
         if (mService == null) {
             return false;
         }
 
         try {
-            mService.disconnectTetherNetwork();
+            mService.disconnectTetherNetwork(network);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception in disconnectTetherNetwork", e);
             return false;

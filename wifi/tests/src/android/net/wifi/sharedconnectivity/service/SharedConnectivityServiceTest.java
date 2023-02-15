@@ -56,7 +56,7 @@ public class SharedConnectivityServiceTest {
             public void onConnectTetherNetwork(TetherNetwork network) {}
 
             @Override
-            public void onDisconnectTetherNetwork() {}
+            public void onDisconnectTetherNetwork(TetherNetwork network) {}
 
             @Override
             public void onConnectKnownNetwork(KnownNetwork network) {}
