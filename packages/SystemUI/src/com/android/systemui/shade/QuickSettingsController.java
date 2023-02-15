@@ -835,6 +835,7 @@ public class QuickSettingsController {
     @VisibleForTesting
     void setExpandImmediate(boolean expandImmediate) {
         if (expandImmediate != mExpandImmediate) {
+            mShadeLog.logQsExpandImmediateChanged(expandImmediate);
             mExpandImmediate = expandImmediate;
             mShadeExpansionStateManager.notifyExpandImmediateChange(expandImmediate);
         }
