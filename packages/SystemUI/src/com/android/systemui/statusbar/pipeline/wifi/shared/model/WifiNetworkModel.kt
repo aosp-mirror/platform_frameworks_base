@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.wifi.data.model
+package com.android.systemui.statusbar.pipeline.wifi.shared.model
 
-import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
+import android.telephony.SubscriptionManager
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.log.table.Diffable
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
+import com.android.systemui.log.table.TableRowLogger
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 
 /** Provides information about the current wifi network. */
 sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
@@ -57,9 +57,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
         }
     }
 
-    /**
-     * A model representing that the wifi information we received was invalid in some way.
-     */
+    /** A model representing that the wifi information we received was invalid in some way. */
     data class Invalid(
         /** A description of why the wifi information was invalid. */
         val invalidReason: String,
@@ -142,21 +140,17 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
          */
         val subscriptionId: Int,
 
-        /**
-         * The signal level, guaranteed to be 0 <= level <= numberOfLevels.
-         */
+        /** The signal level, guaranteed to be 0 <= level <= numberOfLevels. */
         val level: Int,
 
-        /**
-         * The maximum possible level.
-         */
-        val numberOfLevels: Int = DEFAULT_NUM_LEVELS,
+        /** The maximum possible level. */
+        val numberOfLevels: Int = MobileConnectionRepository.DEFAULT_NUM_LEVELS,
     ) : WifiNetworkModel() {
         init {
             require(level in MIN_VALID_LEVEL..numberOfLevels) {
                 "0 <= wifi level <= $numberOfLevels required; level was $level"
             }
-            require(subscriptionId != INVALID_SUBSCRIPTION_ID) {
+            require(subscriptionId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 "subscription ID cannot be invalid"
             }
         }
@@ -208,9 +202,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
         /** See [android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED]. */
         val isValidated: Boolean = false,
 
-        /**
-         * The wifi signal level, guaranteed to be 0 <= level <= 4.
-         */
+        /** The wifi signal level, guaranteed to be 0 <= level <= 4. */
         val level: Int,
 
         /** See [android.net.wifi.WifiInfo.ssid]. */
@@ -255,8 +247,10 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             if (prevVal.isPasspointAccessPoint != isPasspointAccessPoint) {
                 row.logChange(COL_PASSPOINT_ACCESS_POINT, isPasspointAccessPoint)
             }
-            if (prevVal.isOnlineSignUpForPasspointAccessPoint !=
-                isOnlineSignUpForPasspointAccessPoint) {
+            if (
+                prevVal.isOnlineSignUpForPasspointAccessPoint !=
+                    isOnlineSignUpForPasspointAccessPoint
+            ) {
                 row.logChange(COL_ONLINE_SIGN_UP, isOnlineSignUpForPasspointAccessPoint)
             }
             if (prevVal.passpointProviderFriendlyName != passpointProviderFriendlyName) {
@@ -281,29 +275,29 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             // Only include the passpoint-related values in the string if we have them. (Most
             // networks won't have them so they'll be mostly clutter.)
             val passpointString =
-                if (isPasspointAccessPoint ||
-                    isOnlineSignUpForPasspointAccessPoint ||
-                    passpointProviderFriendlyName != null) {
+                if (
+                    isPasspointAccessPoint ||
+                        isOnlineSignUpForPasspointAccessPoint ||
+                        passpointProviderFriendlyName != null
+                ) {
                     ", isPasspointAp=$isPasspointAccessPoint, " +
                         "isOnlineSignUpForPasspointAp=$isOnlineSignUpForPasspointAccessPoint, " +
                         "passpointName=$passpointProviderFriendlyName"
-            } else {
-                ""
-            }
+                } else {
+                    ""
+                }
 
             return "WifiNetworkModel.Active(networkId=$networkId, isValidated=$isValidated, " +
                 "level=$level, ssid=$ssid$passpointString)"
         }
 
         companion object {
-            @VisibleForTesting
-            internal const val MAX_VALID_LEVEL = 4
+            @VisibleForTesting internal const val MAX_VALID_LEVEL = 4
         }
     }
 
     companion object {
-        @VisibleForTesting
-        internal const val MIN_VALID_LEVEL = 0
+        @VisibleForTesting internal const val MIN_VALID_LEVEL = 0
     }
 }
 

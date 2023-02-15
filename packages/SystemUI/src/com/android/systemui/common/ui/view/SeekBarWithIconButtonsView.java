@@ -153,6 +153,13 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
     }
 
     /**
+     * Sets max to the seekbar in the layout.
+     */
+    public void setMax(int max) {
+        mSeekbar.setMax(max);
+    }
+
+    /**
      * Sets progress to the seekbar in the layout.
      * If the progress is smaller than or equals to 0, the IconStart will be disabled. If the
      * progress is larger than or equals to Max, the IconEnd will be disabled. The seekbar progress

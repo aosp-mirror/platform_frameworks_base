@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_VENDOR;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -35,6 +37,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
+import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
@@ -54,6 +57,7 @@ import android.testing.TestableContext;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.R;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
@@ -333,6 +337,21 @@ public class FingerprintAuthenticationClientTest {
     @Test
     public void showHideOverlay_lockoutPerm() throws RemoteException {
         showHideOverlay(c -> c.onLockoutPermanent());
+    }
+
+    @Test
+    public void testPowerPressForwardsErrorMessage() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClient();
+        final int testVendorPowerPressCode = 1;
+        when(mContext.getOrCreateTestableResources().getResources()
+                .getBoolean(R.bool.config_powerPressMapping)).thenReturn(true);
+        when(mContext.getOrCreateTestableResources().getResources()
+                .getInteger(R.integer.config_powerPressCode)).thenReturn(testVendorPowerPressCode);
+
+        client.onError(FINGERPRINT_ERROR_VENDOR, testVendorPowerPressCode);
+
+        verify(mClientMonitorCallbackConverter).onError(anyInt(), anyInt(),
+                eq(BiometricFingerprintConstants.BIOMETRIC_ERROR_POWER_PRESSED), anyInt());
     }
 
     private void showHideOverlay(Consumer<FingerprintAuthenticationClient> block)
