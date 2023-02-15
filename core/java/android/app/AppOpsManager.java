@@ -2075,7 +2075,9 @@ public class AppOpsManager {
     public static final String OPSTR_USE_FULL_SCREEN_INTENT = "android:use_full_screen_intent";
 
     /**
-     *  Prevent an app from being placed into hibernation.
+     * Prevent an app from being placed into hibernation.
+     *
+     * Only to be used by the system.
      *
      * @hide
      */
@@ -2084,7 +2086,9 @@ public class AppOpsManager {
             "android:system_exempt_from_hibernation";
 
     /**
-     *  Prevent an app from being suspended.
+     * Prevent an app from being suspended.
+     *
+     * Only to be used by the system.
      *
      * @hide
      */
@@ -2583,7 +2587,8 @@ public class AppOpsManager {
                 "SYSTEM_EXEMPT_FROM_APP_STANDBY").build(),
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
                 OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
-                "SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS").build(),
+                "SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS")
+                .setDisableReset(true).build(),
         new AppOpInfo.Builder(OP_READ_WRITE_HEALTH_DATA, OPSTR_READ_WRITE_HEALTH_DATA,
                 "READ_WRITE_HEALTH_DATA").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_FOREGROUND_SERVICE_SPECIAL_USE,
@@ -2591,7 +2596,8 @@ public class AppOpsManager {
                 .setPermission(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE).build(),
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS,
                 OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS,
-                "SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS").build(),
+                "SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS")
+                .setDisableReset(true).build(),
         new AppOpInfo.Builder(
                 OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
                 OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
@@ -2599,7 +2605,8 @@ public class AppOpsManager {
                 .build(),
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
                 OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
-                "SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION").build(),
+                "SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION")
+                .setDisableReset(true).build(),
         new AppOpInfo.Builder(
                 OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
                 OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
@@ -2616,7 +2623,8 @@ public class AppOpsManager {
                 .build(),
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_HIBERNATION,
                 OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION,
-                "SYSTEM_EXEMPT_FROM_HIBERNATION").build(),
+                "SYSTEM_EXEMPT_FROM_HIBERNATION")
+                .setDisableReset(true).build(),
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_SUSPENSION,
                 OPSTR_SYSTEM_EXEMPT_FROM_SUSPENSION,
                 "SYSTEM_EXEMPT_FROM_SUSPENSION")
