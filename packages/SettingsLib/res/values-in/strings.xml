@@ -345,7 +345,7 @@
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktifkan aplikasi terminal yang menawarkan akses kerangka lokal"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Pemeriksaan HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Setel perilaku pemeriksaan HDCP"</string>
-    <string name="debug_debugging_category" msgid="535341063709248842">"Debugging"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"Proses debug"</string>
     <string name="debug_app" msgid="8903350241392391766">"Pilih aplikasi debug"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Tidak ada aplikasi debug yang disetel"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Aplikasi debug: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

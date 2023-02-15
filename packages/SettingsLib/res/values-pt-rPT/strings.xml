@@ -335,8 +335,8 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Revogar acesso à depuração USB de todos os computadores anteriormente autorizados?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Permitir definições de programação?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Estas definições destinam-se apenas a programação. Podem fazer com que o seu aparelho e as aplicações nele existentes falhem ou funcionem mal."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Verificar apps por USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Verificar as aplicações instaladas via ADB/ADT para detetar comportamento perigoso"</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Rever apps por USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Rever as aplicações instaladas via ADB/ADT para detetar comportamento perigoso"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"São apresentados os dispositivos Bluetooth sem nomes (apenas endereços MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Desativa a funcionalidade de volume absoluto do Bluetooth caso existam problemas de volume com dispositivos remotos, como um volume insuportavelmente alto ou a ausência de controlo"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Ativa a pilha de funcionalidades Bluetooth Gabeldorche."</string>

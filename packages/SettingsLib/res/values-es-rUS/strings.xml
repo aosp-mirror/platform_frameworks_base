@@ -582,7 +582,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Agregar"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Usuario nuevo"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Perfil nuevo"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Datos de usuario"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Datos del usuario"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Datos del perfil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restringido, debes configurar un bloqueo de pantalla que proteja tus aplicaciones y datos personales."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Configurar bloqueo"</string>
