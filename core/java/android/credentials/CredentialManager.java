@@ -21,6 +21,7 @@ import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -30,6 +31,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.ServiceInfo;
 import android.os.CancellationSignal;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
@@ -37,6 +39,8 @@ import android.os.RemoteException;
 import android.provider.DeviceConfig;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -53,6 +57,39 @@ import java.util.concurrent.Executor;
 @SystemService(Context.CREDENTIAL_SERVICE)
 public final class CredentialManager {
     private static final String TAG = "CredentialManager";
+
+    /** @hide */
+    @IntDef(
+            flag = true,
+            prefix = {"PROVIDER_FILTER_"},
+            value = {
+                PROVIDER_FILTER_ALL_PROVIDERS,
+                PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY,
+                PROVIDER_FILTER_USER_PROVIDERS_ONLY,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ProviderFilter {}
+
+    /**
+     * Returns both system and user credential providers.
+     *
+     * @hide
+     */
+    public static final int PROVIDER_FILTER_ALL_PROVIDERS = 0;
+
+    /**
+     * Returns system credential providers only.
+     *
+     * @hide
+     */
+    public static final int PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY = 1;
+
+    /**
+     * Returns user credential providers only.
+     *
+     * @hide
+     */
+    public static final int PROVIDER_FILTER_USER_PROVIDERS_ONLY = 2;
 
     private final Context mContext;
     private final ICredentialManager mService;
@@ -399,6 +436,42 @@ public final class CredentialManager {
         try {
             return mService.isEnabledCredentialProviderService(
                     componentName, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of ServiceInfo for all discovered credential providers on this device.
+     *
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS)
+    public List<ServiceInfo> getCredentialProviderServicesForTesting(
+            @ProviderFilter int providerFilter) {
+        try {
+            return mService.getCredentialProviderServices(
+                    mContext.getUserId(),
+                    /* disableSystemAppVerificationForTests= */ true,
+                    providerFilter);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of ServiceInfo for all discovered credential providers on this device.
+     *
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS)
+    public List<ServiceInfo> getCredentialProviderServices(
+            int userId, @ProviderFilter int providerFilter) {
+        try {
+            return mService.getCredentialProviderServices(
+                    userId, /* disableSystemAppVerificationForTests= */ false, providerFilter);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
