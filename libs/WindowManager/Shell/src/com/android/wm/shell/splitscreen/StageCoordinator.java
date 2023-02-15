@@ -450,6 +450,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             break;
                         }
                     }
+                } else if (mSideStage.getChildCount() != 0) {
+                    // There are chances the entering app transition got canceled by performing
+                    // rotation transition. Checks if there is any child task existed in split
+                    // screen before fallback to cancel entering flow.
+                    openingToSide = true;
                 }
 
                 if (isEnteringSplit && !openingToSide) {
@@ -466,7 +471,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     }
                 }
 
-                if (!isEnteringSplit && openingToSide) {
+                if (!isEnteringSplit && apps != null) {
                     final WindowContainerTransaction evictWct = new WindowContainerTransaction();
                     prepareEvictNonOpeningChildTasks(position, apps, evictWct);
                     mSyncQueue.queue(evictWct);
@@ -545,6 +550,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             break;
                         }
                     }
+                } else if (mSideStage.getChildCount() != 0) {
+                    // There are chances the entering app transition got canceled by performing
+                    // rotation transition. Checks if there is any child task existed in split
+                    // screen before fallback to cancel entering flow.
+                    openingToSide = true;
                 }
 
                 if (isEnteringSplit && !openingToSide) {
@@ -571,7 +581,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
 
 
-                if (!isEnteringSplit && openingToSide) {
+                if (!isEnteringSplit && apps != null) {
                     final WindowContainerTransaction evictWct = new WindowContainerTransaction();
                     prepareEvictNonOpeningChildTasks(position, apps, evictWct);
                     mSyncQueue.queue(evictWct);
