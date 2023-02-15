@@ -1949,6 +1949,7 @@ package android.net {
 package android.net.wifi.sharedconnectivity.app {
 
   public class SharedConnectivityManager {
+    method @Nullable public android.content.ServiceConnection getServiceConnection();
     method public void setService(@Nullable android.os.IInterface);
   }
 

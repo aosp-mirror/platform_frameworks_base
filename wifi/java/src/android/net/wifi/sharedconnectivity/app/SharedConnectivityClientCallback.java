@@ -64,5 +64,24 @@ public interface SharedConnectivityClientCallback {
      * @param status The new status.
      */
     void onKnownNetworkConnectionStatusChanged(@NonNull KnownNetworkConnectionStatus status);
+
+    /**
+     * This method is being called when the service is ready to be used.
+     */
+    void onServiceConnected();
+
+    /**
+     * This method is being called when the service is no longer available.
+     */
+    void onServiceDisconnected();
+
+    /**
+     * This method is called when the registration of the callback with the shared connectivity
+     * service failed.
+     *
+     * @param exception The exception received from the system when trying to connect to the
+     *                  service.
+     */
+    void onRegisterCallbackFailed(@NonNull Exception exception);
 }
 
