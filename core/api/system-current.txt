@@ -326,6 +326,7 @@ package android {
     field public static final String SET_CLIP_SOURCE = "android.permission.SET_CLIP_SOURCE";
     field public static final String SET_DEFAULT_ACCOUNT_FOR_CONTACTS = "android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS";
     field public static final String SET_HARMFUL_APP_WARNINGS = "android.permission.SET_HARMFUL_APP_WARNINGS";
+    field public static final String SET_LOW_POWER_STANDBY_PORTS = "android.permission.SET_LOW_POWER_STANDBY_PORTS";
     field public static final String SET_MEDIA_KEY_LISTENER = "android.permission.SET_MEDIA_KEY_LISTENER";
     field public static final String SET_ORIENTATION = "android.permission.SET_ORIENTATION";
     field public static final String SET_POINTER_SPEED = "android.permission.SET_POINTER_SPEED";
@@ -10662,6 +10663,7 @@ package android.os {
   public final class PowerManager {
     method @RequiresPermission(allOf={android.Manifest.permission.READ_DREAM_STATE, android.Manifest.permission.WRITE_DREAM_STATE}) public void dream(long);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public boolean forceSuspend();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public java.util.List<android.os.PowerManager.LowPowerStandbyPortDescription> getActiveLowPowerStandbyPorts();
     method @NonNull public android.os.BatterySaverPolicyConfig getFullPowerSavePolicy();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public android.os.PowerManager.LowPowerStandbyPolicy getLowPowerStandbyPolicy();
     method public int getPowerSaveModeTrigger();
@@ -10669,6 +10671,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isAmbientDisplaySuppressed();
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isAmbientDisplaySuppressedForToken(@NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public boolean isLowPowerStandbySupported();
+    method @NonNull @RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS) public android.os.PowerManager.LowPowerStandbyPortsLock newLowPowerStandbyPortsLock(@NonNull java.util.List<android.os.PowerManager.LowPowerStandbyPortDescription>);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setAdaptivePowerSaveEnabled(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setAdaptivePowerSavePolicy(@NonNull android.os.BatterySaverPolicyConfig);
     method @RequiresPermission(anyOf={android.Manifest.permission.BATTERY_PREDICTION, android.Manifest.permission.DEVICE_POWER}) public void setBatteryDischargePrediction(@NonNull java.time.Duration, boolean);
@@ -10680,6 +10683,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setPowerSaveModeEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void suppressAmbientDisplay(@NonNull String, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.USER_ACTIVITY}) public void userActivity(long, int, int);
+    field @RequiresPermission(android.Manifest.permission.MANAGE_LOW_POWER_STANDBY) public static final String ACTION_LOW_POWER_STANDBY_PORTS_CHANGED = "android.os.action.LOW_POWER_STANDBY_PORTS_CHANGED";
     field public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0; // 0x0
     field public static final String REBOOT_USERSPACE = "userspace";
@@ -10700,6 +10704,25 @@ package android.os {
     method public int getAllowedReasons();
     method @NonNull public java.util.Set<java.lang.String> getExemptPackages();
     method @NonNull public String getIdentifier();
+  }
+
+  public static final class PowerManager.LowPowerStandbyPortDescription {
+    ctor public PowerManager.LowPowerStandbyPortDescription(int, int, int);
+    ctor public PowerManager.LowPowerStandbyPortDescription(int, int, int, @Nullable android.net.LinkAddress);
+    method @Nullable public android.net.LinkAddress getBindAddress();
+    method public int getPortMatcher();
+    method public int getPortNumber();
+    method public int getProtocol();
+    field public static final int MATCH_PORT_LOCAL = 1; // 0x1
+    field public static final int MATCH_PORT_REMOTE = 2; // 0x2
+    field public static final int PROTOCOL_TCP = 1; // 0x1
+    field public static final int PROTOCOL_UDP = 2; // 0x2
+  }
+
+  public final class PowerManager.LowPowerStandbyPortsLock {
+    method @RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS) public void acquire();
+    method protected void finalize();
+    method @RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS) public void release();
   }
 
   @Deprecated public class PowerWhitelistManager {

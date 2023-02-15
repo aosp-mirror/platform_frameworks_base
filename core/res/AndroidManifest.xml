@@ -109,6 +109,7 @@
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED_INTERNAL" />
     <protected-broadcast android:name="android.os.action.LOW_POWER_STANDBY_ENABLED_CHANGED" />
     <protected-broadcast android:name="android.os.action.LOW_POWER_STANDBY_POLICY_CHANGED" />
+    <protected-broadcast android:name="android.os.action.LOW_POWER_STANDBY_PORTS_CHANGED" />
     <protected-broadcast android:name="android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED" />
 
     <!-- @deprecated This is rarely used and will be phased out soon. -->
@@ -5957,6 +5958,12 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MANAGE_LOW_POWER_STANDBY"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- @hide @SystemApi Allows an application to request ports to remain open during
+         Low Power Standby.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.SET_LOW_POWER_STANDBY_PORTS"
+        android:protectionLevel="signature|privileged" />
 
    <!-- @hide Allows low-level access to tun tap driver -->
     <permission android:name="android.permission.NET_TUNNELING"
