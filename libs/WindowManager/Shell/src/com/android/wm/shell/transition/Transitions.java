@@ -46,6 +46,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Pair;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.ITransitionPlayer;
@@ -624,13 +625,14 @@ public class Transitions implements RemoteCallable<Transitions> {
      * Gives every handler (in order) a chance to handle request until one consumes the transition.
      * @return the WindowContainerTransaction given by the handler which consumed the transition.
      */
-    public WindowContainerTransaction dispatchRequest(@NonNull IBinder transition,
-            @NonNull TransitionRequestInfo request, @Nullable TransitionHandler skip) {
+    public Pair<TransitionHandler, WindowContainerTransaction> dispatchRequest(
+            @NonNull IBinder transition, @NonNull TransitionRequestInfo request,
+            @Nullable TransitionHandler skip) {
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
             if (mHandlers.get(i) == skip) continue;
             WindowContainerTransaction wct = mHandlers.get(i).handleRequest(transition, request);
             if (wct != null) {
-                return wct;
+                return new Pair<>(mHandlers.get(i), wct);
             }
         }
         return null;
@@ -695,9 +697,9 @@ public class Transitions implements RemoteCallable<Transitions> {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "Transition animation finished (abort=%b), notifying core %s", abort, transition);
         if (active.mStartT != null) {
-            // Applied by now, so close immediately. Do not set to null yet, though, since nullness
-            // is used later to disambiguate malformed transitions.
-            active.mStartT.close();
+            // Applied by now, so clear immediately to remove any references. Do not set to null
+            // yet, though, since nullness is used later to disambiguate malformed transitions.
+            active.mStartT.clear();
         }
         // Merge all relevant transactions together
         SurfaceControl.Transaction fullFinish = active.mFinishT;
