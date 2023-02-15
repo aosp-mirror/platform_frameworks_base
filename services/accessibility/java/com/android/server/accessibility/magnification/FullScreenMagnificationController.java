@@ -38,6 +38,7 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.MathUtils;
@@ -48,6 +49,7 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.accessibility.MagnificationAnimationCallback;
 import android.view.animation.DecelerateInterpolator;
 
@@ -62,6 +64,7 @@ import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.Locale;
+import java.util.function.Supplier;
 
 /**
  * This class is used to control and query the state of display magnification
@@ -104,6 +107,8 @@ public class FullScreenMagnificationController implements
     private boolean mAlwaysOnMagnificationEnabled = false;
     private final DisplayManagerInternal mDisplayManagerInternal;
 
+    @NonNull private final Supplier<MagnificationThumbnail> mThumbnailSupplier;
+
     /**
      * This class implements {@link WindowManagerInternal.MagnificationCallbacks} and holds
      * magnification information per display.
@@ -133,6 +138,8 @@ public class FullScreenMagnificationController implements
 
         private int mIdOfLastServiceToMagnify = INVALID_SERVICE_ID;
         private boolean mMagnificationActivated = false;
+
+        @GuardedBy("mLock") @Nullable private MagnificationThumbnail mMagnificationThumbnail;
 
         DisplayMagnification(int displayId) {
             mDisplayId = displayId;
@@ -166,6 +173,11 @@ public class FullScreenMagnificationController implements
             mControllerCtx.getWindowManager().getMagnificationRegion(
                     mDisplayId, mMagnificationRegion);
             mMagnificationRegion.getBounds(mMagnificationBounds);
+
+            if (mMagnificationThumbnail == null) {
+                mMagnificationThumbnail = mThumbnailSupplier.get();
+            }
+
             return true;
         }
 
@@ -191,6 +203,8 @@ public class FullScreenMagnificationController implements
                 mMagnificationRegion.setEmpty();
                 mRegistered = false;
                 unregisterCallbackLocked(mDisplayId, delete);
+
+                destroyThumbNail();
             }
             mUnregisterPending = false;
         }
@@ -327,6 +341,9 @@ public class FullScreenMagnificationController implements
                 if (!mMagnificationRegion.equals(magnified)) {
                     mMagnificationRegion.set(magnified);
                     mMagnificationRegion.getBounds(mMagnificationBounds);
+
+                    refreshThumbNail(getScale(), getCenterX(), getCenterY());
+
                     // It's possible that our magnification spec is invalid with the new bounds.
                     // Adjust the current spec's offsets if necessary.
                     if (updateCurrentSpecWithOffsetsLocked(
@@ -368,17 +385,24 @@ public class FullScreenMagnificationController implements
         @GuardedBy("mLock")
         void onMagnificationChangedLocked() {
             final float scale = getScale();
-
+            final float centerX = getCenterX();
+            final float centerY = getCenterY();
             final MagnificationConfig config = new MagnificationConfig.Builder()
                     .setMode(MAGNIFICATION_MODE_FULLSCREEN)
                     .setActivated(mMagnificationActivated)
                     .setScale(scale)
-                    .setCenterX(getCenterX())
-                    .setCenterY(getCenterY()).build();
+                    .setCenterX(centerX)
+                    .setCenterY(centerY).build();
             mMagnificationInfoChangedCallback.onFullScreenMagnificationChanged(mDisplayId,
                     mMagnificationRegion, config);
             if (mUnregisterPending && !isActivated()) {
                 unregister(mDeleteAfterUnregister);
+            }
+
+            if (isActivated()) {
+                updateThumbNail(scale, centerX, centerY);
+            } else {
+                hideThumbNail();
             }
         }
 
@@ -506,6 +530,9 @@ public class FullScreenMagnificationController implements
             }
             mIdOfLastServiceToMagnify = INVALID_SERVICE_ID;
             sendSpecToAnimation(spec, animationCallback);
+
+            hideThumbNail();
+
             return changed;
         }
 
@@ -557,6 +584,40 @@ public class FullScreenMagnificationController implements
                         mIdOfLastServiceToMagnify);
             }
             return changed;
+        }
+
+        @GuardedBy("mLock")
+        void updateThumbNail(float scale, float centerX, float centerY) {
+            if (mMagnificationThumbnail != null) {
+                mMagnificationThumbnail.updateThumbNail(scale, centerX, centerY);
+            }
+        }
+
+        @GuardedBy("mLock")
+        void refreshThumbNail(float scale, float centerX, float centerY) {
+            if (mMagnificationThumbnail != null) {
+                mMagnificationThumbnail.setThumbNailBounds(
+                        mMagnificationBounds,
+                        scale,
+                        centerX,
+                        centerY
+                );
+            }
+        }
+
+        @GuardedBy("mLock")
+        void hideThumbNail() {
+            if (mMagnificationThumbnail != null) {
+                mMagnificationThumbnail.hideThumbNail();
+            }
+        }
+
+        @GuardedBy("mLock")
+        void destroyThumbNail() {
+            if (mMagnificationThumbnail != null) {
+                hideThumbNail();
+                mMagnificationThumbnail = null;
+            }
         }
 
         /**
@@ -688,21 +749,40 @@ public class FullScreenMagnificationController implements
             @NonNull AccessibilityTraceManager traceManager, @NonNull Object lock,
             @NonNull MagnificationInfoChangedCallback magnificationInfoChangedCallback,
             @NonNull MagnificationScaleProvider scaleProvider) {
-        this(new ControllerContext(context, traceManager,
-                LocalServices.getService(WindowManagerInternal.class),
-                new Handler(context.getMainLooper()),
-                context.getResources().getInteger(R.integer.config_longAnimTime)), lock,
-                magnificationInfoChangedCallback, scaleProvider);
+        this(
+                new ControllerContext(
+                        context,
+                        traceManager,
+                        LocalServices.getService(WindowManagerInternal.class),
+                        new Handler(context.getMainLooper()),
+                        context.getResources().getInteger(R.integer.config_longAnimTime)),
+                lock,
+                magnificationInfoChangedCallback,
+                scaleProvider,
+                () -> {
+                    if (DeviceConfig.getBoolean(
+                            DeviceConfig.NAMESPACE_ACCESSIBILITY,
+                            "enable_magnifier_thumbnail",
+                            /* defaultValue= */ false)) {
+                        return new MagnificationThumbnail(
+                            context,
+                            context.getSystemService(WindowManager.class),
+                            new Handler(context.getMainLooper())
+                        );
+                    }
+
+                    return null;
+                });
     }
 
-    /**
-     * Constructor for tests
-     */
+    /** Constructor for tests */
     @VisibleForTesting
-    public FullScreenMagnificationController(@NonNull ControllerContext ctx,
+    public FullScreenMagnificationController(
+            @NonNull ControllerContext ctx,
             @NonNull Object lock,
             @NonNull MagnificationInfoChangedCallback magnificationInfoChangedCallback,
-            @NonNull MagnificationScaleProvider scaleProvider) {
+            @NonNull MagnificationScaleProvider scaleProvider,
+            @NonNull Supplier<MagnificationThumbnail> thumbnailSupplier) {
         mControllerCtx = ctx;
         mLock = lock;
         mMainThreadId = mControllerCtx.getContext().getMainLooper().getThread().getId();
@@ -710,6 +790,7 @@ public class FullScreenMagnificationController implements
         mMagnificationInfoChangedCallback = magnificationInfoChangedCallback;
         mScaleProvider = scaleProvider;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+        mThumbnailSupplier = thumbnailSupplier;
     }
 
     /**
