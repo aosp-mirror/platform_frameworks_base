@@ -107,6 +107,7 @@ public class CredentialEntry implements Parcelable {
     }
 
     private CredentialEntry(@NonNull Parcel in) {
+        requireNonNull(in, "parcel must not be null");
         mType = in.readString8();
         mSlice = in.readTypedObject(Slice.CREATOR);
         mBeginGetCredentialOption = in.readTypedObject(BeginGetCredentialOption.CREATOR);
