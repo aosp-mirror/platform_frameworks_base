@@ -19,10 +19,10 @@
 package com.android.server.wm.flicker
 
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import com.android.server.wm.traces.common.component.matchers.IComponentNameMatcher
 import com.android.server.wm.traces.common.service.PlatformConsts
+import com.android.server.wm.traces.common.subjects.region.RegionSubject
 import com.android.server.wm.traces.common.windowmanager.WindowManagerTrace
 
 /**
@@ -257,7 +257,7 @@ fun FlickerTest.snapshotStartingWindowLayerCoversExactlyOnApp(component: ICompon
             if (snapshotLayers.isNotEmpty()) {
                 val visibleAreas =
                     snapshotLayers
-                        .mapNotNull { snapshotLayer -> snapshotLayer.layer?.visibleRegion }
+                        .mapNotNull { snapshotLayer -> snapshotLayer.layer.visibleRegion }
                         .toTypedArray()
                 val snapshotRegion = RegionSubject(visibleAreas, this, timestamp)
                 val appVisibleRegion = it.visibleRegion(component)

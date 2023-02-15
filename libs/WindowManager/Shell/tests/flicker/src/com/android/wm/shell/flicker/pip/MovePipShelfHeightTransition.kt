@@ -20,8 +20,8 @@ import android.platform.test.annotations.Presubmit
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.FixedOrientationAppHelper
-import com.android.server.wm.flicker.traces.region.RegionSubject
 import com.android.server.wm.traces.common.service.PlatformConsts
+import com.android.server.wm.traces.common.subjects.region.RegionSubject
 import com.android.wm.shell.flicker.Direction
 import org.junit.Test
 import org.junit.runners.Parameterized

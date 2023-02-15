@@ -20,11 +20,11 @@ package com.android.wm.shell.flicker
 
 import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.traces.layers.LayerTraceEntrySubject
-import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
 import com.android.server.wm.traces.common.component.matchers.IComponentMatcher
 import com.android.server.wm.traces.common.region.Region
 import com.android.server.wm.traces.common.service.PlatformConsts
+import com.android.server.wm.traces.common.subjects.layers.LayerTraceEntrySubject
+import com.android.server.wm.traces.common.subjects.layers.LayersTraceSubject
 
 fun FlickerTest.appPairsDividerIsVisibleAtEnd() {
     assertLayersEnd { this.isVisible(APP_PAIR_SPLIT_DIVIDER_COMPONENT) }
@@ -262,7 +262,9 @@ fun LayerTraceEntrySubject.splitAppLayerBoundsSnapToDivider(
 ): LayerTraceEntrySubject {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return invoke {
-        val dividerRegion = layer(SPLIT_SCREEN_DIVIDER_COMPONENT).visibleRegion.region
+        val dividerRegion =
+            layer(SPLIT_SCREEN_DIVIDER_COMPONENT)?.visibleRegion?.region
+                ?: error("$SPLIT_SCREEN_DIVIDER_COMPONENT component not found")
         visibleRegion(component)
             .coversAtMost(
                 if (displayBounds.width > displayBounds.height) {
@@ -371,7 +373,9 @@ fun FlickerTest.appPairsPrimaryBoundsIsVisibleAtEnd(
     primaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
-        val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
+        val dividerRegion =
+            layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT)?.visibleRegion?.region
+                ?: error("$APP_PAIR_SPLIT_DIVIDER_COMPONENT component not found")
         visibleRegion(primaryComponent).overlaps(getPrimaryRegion(dividerRegion, rotation))
     }
 }
@@ -381,7 +385,9 @@ fun FlickerTest.dockedStackPrimaryBoundsIsVisibleAtEnd(
     primaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
-        val dividerRegion = layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region
+        val dividerRegion =
+            layer(DOCKED_STACK_DIVIDER_COMPONENT)?.visibleRegion?.region
+                ?: error("$DOCKED_STACK_DIVIDER_COMPONENT component not found")
         visibleRegion(primaryComponent).overlaps(getPrimaryRegion(dividerRegion, rotation))
     }
 }
@@ -391,7 +397,9 @@ fun FlickerTest.appPairsSecondaryBoundsIsVisibleAtEnd(
     secondaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
-        val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
+        val dividerRegion =
+            layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT)?.visibleRegion?.region
+                ?: error("$APP_PAIR_SPLIT_DIVIDER_COMPONENT component not found")
         visibleRegion(secondaryComponent).overlaps(getSecondaryRegion(dividerRegion, rotation))
     }
 }
@@ -401,7 +409,9 @@ fun FlickerTest.dockedStackSecondaryBoundsIsVisibleAtEnd(
     secondaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
-        val dividerRegion = layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region
+        val dividerRegion =
+            layer(DOCKED_STACK_DIVIDER_COMPONENT)?.visibleRegion?.region
+                ?: error("$DOCKED_STACK_DIVIDER_COMPONENT component not found")
         visibleRegion(secondaryComponent).overlaps(getSecondaryRegion(dividerRegion, rotation))
     }
 }
