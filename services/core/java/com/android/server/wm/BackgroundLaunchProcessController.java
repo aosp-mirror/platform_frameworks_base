@@ -23,9 +23,9 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
-import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_BAL_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_FOREGROUND;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_GRACE_PERIOD;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 
@@ -109,7 +109,7 @@ class BackgroundLaunchProcessController {
                         + ")] Activity start allowed: process instrumenting with background "
                         + "activity starts privileges");
             }
-            return BAL_ALLOW_BAL_PERMISSION;
+            return BAL_ALLOW_PERMISSION;
         }
         // Allow if the flag was explicitly set.
         if (isBackgroundStartAllowedByToken(uid, packageName, isCheckingForFgsStart)) {
@@ -117,7 +117,7 @@ class BackgroundLaunchProcessController {
                 Slog.d(TAG, "[Process(" + pid
                         + ")] Activity start allowed: process allowed by token");
             }
-            return BAL_ALLOW_BAL_PERMISSION;
+            return BAL_ALLOW_PERMISSION;
         }
         // Allow if the caller is bound by a UID that's currently foreground.
         if (isBoundByForegroundUid()) {
