@@ -6640,6 +6640,13 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_IRIS = 1 << 8;
 
     /**
+     * Disable all keyguard shortcuts.
+     *
+     * @hide
+     */
+    public static final int KEYGUARD_DISABLE_SHORTCUTS_ALL = 1 << 9;
+
+    /**
      * NOTE: Please remember to update the DevicePolicyManagerTest's testKeyguardDisabledFeatures
      * CTS test when adding to the list above.
      */
@@ -6682,7 +6689,8 @@ public class DevicePolicyManager {
      */
     public static final int ORG_OWNED_PROFILE_KEYGUARD_FEATURES_PARENT_ONLY =
             DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA
-                    | DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
+                    | DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS
+                    | DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL;
 
     /**
      * Keyguard features that when set on a normal or organization-owned managed profile, have
