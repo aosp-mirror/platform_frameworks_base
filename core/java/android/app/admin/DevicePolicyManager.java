@@ -9816,6 +9816,11 @@ public class DevicePolicyManager {
      * of an organization-owned managed profile and the package must be a pre-installed system
      * package. If called on the parent instance, then the default SMS application is set on the
      * personal profile.
+     * <p>
+     * Starting from Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the profile
+     * owner of an organization-owned managed profile can also call this method directly (not on the
+     * parent profile instance) to set the default SMS application in the work profile. This is only
+     * meaningful when work profile telephony is enabled by {@link #setManagedSubscriptionsPolicy}.
      *
      * @param admin       Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package to set as the default SMS application.
@@ -9830,6 +9835,36 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 mService.setDefaultSmsApplication(admin, packageName, mParentInstance);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Must be called by a device owner or a profile owner of an organization-owned managed profile
+     * to set the default dialer application for the calling user.
+     * <p>
+     * When the profile owner of an organization-owned managed profile calls this method, it sets
+     * the default dialer application in the work profile. This is only meaningful when work profile
+     * telephony is enabled by {@link #setManagedSubscriptionsPolicy}.
+     * <p>
+     * If the device does not support telephony ({@link PackageManager#FEATURE_TELEPHONY}), calling
+     * this method will do nothing.
+     *
+     * @param packageName The name of the package to set as the default dialer application.
+     * @throws SecurityException        if {@code admin} is not a device or profile owner or a
+     *                                  profile owner of an organization-owned managed profile.
+     * @throws IllegalArgumentException if the package cannot be set as the default dialer, for
+     *                                  example if the package is not installed or does not expose
+     *                                  the expected activities or services that a dialer app is
+     *                                  required to have.
+     */
+    public void setDefaultDialerApplication(@NonNull String packageName) {
+        throwIfParentInstance("setDefaultDialerApplication");
+        if (mService != null) {
+            try {
+                mService.setDefaultDialerApplication(packageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

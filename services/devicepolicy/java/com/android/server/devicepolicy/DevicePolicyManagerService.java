@@ -341,6 +341,7 @@ import android.net.Uri;
 import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -481,8 +482,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -839,6 +844,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     final UserManagerInternal mUserManagerInternal;
     final UsageStatsManagerInternal mUsageStatsManagerInternal;
     final TelephonyManager mTelephonyManager;
+    final RoleManager mRoleManager;
     private final LockPatternUtils mLockPatternUtils;
     private final LockSettingsInternal mLockSettingsInternal;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
@@ -1626,6 +1632,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return mContext.getSystemService(TelephonyManager.class);
         }
 
+        RoleManager getRoleManager() {
+            return mContext.getSystemService(RoleManager.class);
+        }
+
         TrustManager getTrustManager() {
             return (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
         }
@@ -1968,6 +1978,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mIPackageManager = Objects.requireNonNull(injector.getIPackageManager());
         mIPermissionManager = Objects.requireNonNull(injector.getIPermissionManager());
         mTelephonyManager = Objects.requireNonNull(injector.getTelephonyManager());
+        mRoleManager = Objects.requireNonNull(injector.getRoleManager());
 
         mLocalService = new LocalService();
         mLockPatternUtils = injector.newLockPatternUtils();
@@ -10842,14 +10853,73 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final CallerIdentity caller = getCallerIdentity(admin);
         Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
-                || (parent && isProfileOwnerOfOrganizationOwnedDevice(caller)));
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        final int userId;
         if (parent) {
+            userId = getProfileParentId(mInjector.userHandleGetCallingUserId());
             mInjector.binderWithCleanCallingIdentity(() -> enforcePackageIsSystemPackage(
-                    packageName, getProfileParentId(mInjector.userHandleGetCallingUserId())));
+                    packageName, userId));
+        } else {
+            userId = mInjector.userHandleGetCallingUserId();
         }
 
         mInjector.binderWithCleanCallingIdentity(() ->
-                SmsApplication.setDefaultApplication(packageName, mContext));
+                SmsApplication.setDefaultApplicationAsUser(packageName, mContext, userId));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
+                    getProfileOwnerOrDeviceOwnerLocked(caller.getUserId()), parent);
+            if (!Objects.equals(activeAdmin.mSmsPackage, packageName)) {
+                activeAdmin.mSmsPackage = packageName;
+                saveSettingsLocked(caller.getUserId());
+            }
+        }
+    }
+
+    @Override
+    public void setDefaultDialerApplication(String packageName) {
+        if (!mHasFeature || !mHasTelephonyFeature) {
+            return;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        final int callerUserId = caller.getUserId();
+        Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
+                || isProfileOwnerOfOrganizationOwnedDevice(caller));
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            Consumer<Boolean> callback = successful -> {
+                if (successful) {
+                    future.complete(null);
+                } else {
+                    future.completeExceptionally(new IllegalArgumentException(
+                            packageName +  " cannot be set as the dialer"));
+                }
+            };
+            mRoleManager.addRoleHolderAsUser(
+                    RoleManager.ROLE_DIALER, packageName, 0, UserHandle.of(callerUserId),
+                    AsyncTask.THREAD_POOL_EXECUTOR, callback);
+            try {
+                future.get(5, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                throw new IllegalArgumentException("Timeout when setting the app as the dialer", e);
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof IllegalArgumentException) {
+                    throw (IllegalArgumentException) cause;
+                } else {
+                    throw new IllegalStateException(cause);
+                }
+            }
+        });
+        // Only save the package when the setting the role succeeded without exception.
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(callerUserId);
+            if (!Objects.equals(admin.mDialerPackage, packageName)) {
+                admin.mDialerPackage = packageName;
+                saveSettingsLocked(callerUserId);
+            }
+        }
     }
 
     @Override
