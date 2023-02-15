@@ -681,6 +681,20 @@ public class AudioManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {}
 
+    /** @hide */
+    @IntDef(flag = true, prefix = "FLAG", value = {
+            FLAG_SHOW_UI,
+            FLAG_ALLOW_RINGER_MODES,
+            FLAG_PLAY_SOUND,
+            FLAG_REMOVE_SOUND_AND_VIBRATE,
+            FLAG_VIBRATE,
+            FLAG_BLUETOOTH_ABS_VOLUME,
+            FLAG_HDMI_SYSTEM_AUDIO_VOLUME,
+            FLAG_FROM_KEY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemVolumeFlags {}
+
     // The iterator of TreeMap#entrySet() returns the entries in ascending key order.
     private static final TreeMap<Integer, String> FLAG_NAMES = new TreeMap<>();
 
@@ -1445,7 +1459,7 @@ public class AudioManager {
             android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS,
             android.Manifest.permission.MODIFY_AUDIO_ROUTING
     })
-    public void setVolumeGroupVolumeIndex(int groupId, int index, int flags) {
+    public void setVolumeGroupVolumeIndex(int groupId, int index, @SystemVolumeFlags int flags) {
         final IAudioService service = getService();
         try {
             service.setVolumeGroupVolumeIndex(groupId, index, flags,
@@ -1542,7 +1556,7 @@ public class AudioManager {
      * @throws SecurityException if the adjustment triggers a Do Not Disturb change and the caller
      * is not granted notification policy access.
      */
-    public void adjustVolumeGroupVolume(int groupId, int direction, int flags) {
+    public void adjustVolumeGroupVolume(int groupId, int direction, @SystemVolumeFlags int flags) {
         IAudioService service = getService();
         try {
             service.adjustVolumeGroupVolume(groupId, direction, flags,
@@ -1564,10 +1578,10 @@ public class AudioManager {
     @SystemApi
     @RequiresPermission("android.permission.QUERY_AUDIO_STATE")
     @IntRange(from = 0)
-    public int getLastAudibleVolumeGroupVolume(int groupId) {
+    public int getLastAudibleVolumeForVolumeGroup(int groupId) {
         IAudioService service = getService();
         try {
-            return service.getLastAudibleVolumeGroupVolume(groupId);
+            return service.getLastAudibleVolumeForVolumeGroup(groupId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

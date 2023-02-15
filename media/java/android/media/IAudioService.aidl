@@ -153,7 +153,7 @@ interface IAudioService {
     int getVolumeGroupMinVolumeIndex(int groupId);
 
     @EnforcePermission("QUERY_AUDIO_STATE")
-    int getLastAudibleVolumeGroupVolume(int groupId);
+    int getLastAudibleVolumeForVolumeGroup(int groupId);
 
     boolean isVolumeGroupMuted(int groupId);
 
