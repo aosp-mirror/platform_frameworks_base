@@ -33,6 +33,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.metrics.LogMaker;
 import android.os.UserHandle;
@@ -380,7 +381,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     + "isUnlockingWithFpAllowed=" + isUnlockingWithFpAllowed);
         }
         if (toShow) {
-            mSideFpsController.get().show(SideFpsUiRequestSource.PRIMARY_BOUNCER);
+            mSideFpsController.get().show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
+                    BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
         } else {
             mSideFpsController.get().hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
         }
