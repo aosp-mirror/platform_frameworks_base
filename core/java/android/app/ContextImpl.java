@@ -3068,18 +3068,6 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public boolean isDeviceContext() {
-        if (mIsExplicitDeviceId) {
-            if (mDeviceId == VirtualDeviceManager.DEVICE_ID_DEFAULT) {
-                return true;
-            }
-            VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
-            return vdm.isValidVirtualDeviceId(mDeviceId);
-        }
-        return isAssociatedWithDisplay();
-    }
-
-    @Override
     public void registerDeviceIdChangeListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull IntConsumer listener) {
         Objects.requireNonNull(executor, "executor cannot be null");

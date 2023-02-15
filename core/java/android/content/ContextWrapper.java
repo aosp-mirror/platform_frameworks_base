@@ -1201,11 +1201,6 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    public boolean isDeviceContext() {
-        return mBase.isDeviceContext();
-    }
-
-    @Override
     public void registerDeviceIdChangeListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull IntConsumer listener) {
         mBase.registerDeviceIdChangeListener(executor, listener);
