@@ -962,8 +962,8 @@ final class LetterboxUiController {
                 && (parentConfiguration.orientation == ORIENTATION_LANDSCAPE
                         && mActivityRecord.getOrientationForReachability() == ORIENTATION_PORTRAIT)
                 // Check whether the activity fills the parent vertically.
-                && parentConfiguration.windowConfiguration.getBounds().height()
-                        == mActivityRecord.getBounds().height();
+                && parentConfiguration.windowConfiguration.getAppBounds().height()
+                        <= mActivityRecord.getBounds().height();
     }
 
     @VisibleForTesting
