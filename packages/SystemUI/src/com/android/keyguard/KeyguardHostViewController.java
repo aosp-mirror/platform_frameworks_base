@@ -207,6 +207,13 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     }
 
     /**
+     * Reinflate the view flipper child view.
+     */
+    public void reinflateViewFlipper() {
+        mKeyguardSecurityContainerController.reinflateViewFlipper();
+    }
+
+    /**
      * Dismisses the keyguard by going to the next screen or making it gone.
      * @param targetUserId a user that needs to be the foreground user at the dismissal completion.
      * @return True if the keyguard is done.
@@ -232,23 +239,19 @@ public class KeyguardHostViewController extends ViewController<KeyguardHostView>
     /**
      * Starts the animation when the Keyguard gets shown.
      */
-    public void appear(int statusBarHeight) {
+    public void appear() {
         // We might still be collapsed and the view didn't have time to layout yet or still
         // be small, let's wait on the predraw to do the animation in that case.
-        if (mView.getHeight() != 0 && mView.getHeight() != statusBarHeight) {
-            mKeyguardSecurityContainerController.startAppearAnimation();
-        } else {
-            mView.getViewTreeObserver().addOnPreDrawListener(
-                    new ViewTreeObserver.OnPreDrawListener() {
-                        @Override
-                        public boolean onPreDraw() {
-                            mView.getViewTreeObserver().removeOnPreDrawListener(this);
-                            mKeyguardSecurityContainerController.startAppearAnimation();
-                            return true;
-                        }
-                    });
-            mView.requestLayout();
-        }
+        mView.getViewTreeObserver().addOnPreDrawListener(
+                new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        mView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        mKeyguardSecurityContainerController.startAppearAnimation();
+                        return true;
+                    }
+                });
+        mView.requestLayout();
     }
 
     /**
