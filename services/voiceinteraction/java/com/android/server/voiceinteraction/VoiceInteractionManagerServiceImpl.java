@@ -29,7 +29,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.ApplicationExitInfo;
@@ -376,7 +375,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     @GuardedBy("this")
     public int startAssistantActivityLocked(@Nullable String callingFeatureId, int callingPid,
-            int callingUid, IBinder token, Intent intent, String resolvedType) {
+            int callingUid, IBinder token, Intent intent, String resolvedType,
+            @NonNull Bundle bundle) {
         try {
             if (mActiveSession == null || token != mActiveSession.mToken) {
                 Slog.w(TAG, "startAssistantActivity does not match active session");
@@ -388,10 +388,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             }
             intent = new Intent(intent);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            final ActivityOptions options = ActivityOptions.makeBasic();
-            options.setLaunchActivityType(ACTIVITY_TYPE_ASSISTANT);
+            // TODO: make the key public hidden
+            bundle.putInt("android.activity.activityType", ACTIVITY_TYPE_ASSISTANT);
             return mAtm.startAssistantActivity(mComponent.getPackageName(), callingFeatureId,
-                    callingPid, callingUid, intent, resolvedType, options.toBundle(), mUser);
+                    callingPid, callingUid, intent, resolvedType, bundle, mUser);
         } catch (RemoteException e) {
             throw new IllegalStateException("Unexpected remote error", e);
         }
