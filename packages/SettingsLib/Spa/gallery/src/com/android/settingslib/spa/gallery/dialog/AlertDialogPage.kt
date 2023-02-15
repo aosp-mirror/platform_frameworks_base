@@ -28,14 +28,14 @@ import com.android.settingslib.spa.widget.dialog.rememberAlertDialogPresenter
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 
-private const val TITLE = "AlterDialogPage"
+private const val TITLE = "AlertDialogPage"
 
-object AlterDialogPageProvider : SettingsPageProvider {
-    override val name = "AlterDialogPage"
+object AlertDialogPageProvider : SettingsPageProvider {
+    override val name = "AlertDialogPage"
     private val owner = createSettingsPage()
 
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> = listOf(
-        SettingsEntryBuilder.create("AlterDialog", owner).setUiLayoutFn {
+        SettingsEntryBuilder.create("AlertDialog", owner).setUiLayoutFn {
             val alertDialogPresenter = rememberAlertDialogPresenter(
                 confirmButton = AlertDialogButton("Ok"),
                 dismissButton = AlertDialogButton("Cancel"),
@@ -43,7 +43,7 @@ object AlterDialogPageProvider : SettingsPageProvider {
                 text = { Text("Text") },
             )
             Preference(object : PreferenceModel {
-                override val title = "Show AlterDialog"
+                override val title = "Show AlertDialog"
                 override val onClick = alertDialogPresenter::open
             })
         }.build(),
