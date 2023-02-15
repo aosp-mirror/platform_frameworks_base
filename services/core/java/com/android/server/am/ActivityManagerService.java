@@ -14703,9 +14703,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     sendPackageBroadcastLocked(cmd,
                                             new String[] {ssp}, userId);
                                     if (fullUninstall) {
-                                        mAppOpsService.packageRemoved(
-                                                intent.getIntExtra(Intent.EXTRA_UID, -1), ssp);
-
                                         // Remove all permissions granted from/to this package
                                         mUgmInternal.removeUriPermissionsForPackage(ssp, userId,
                                                 true, false);

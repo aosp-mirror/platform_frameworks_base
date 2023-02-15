@@ -1041,16 +1041,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         mAppOpsCheckingService.systemReady();
         initializeUidStates();
 
-        getUserManagerInternal().addUserLifecycleListener(
-                new UserManagerInternal.UserLifecycleListener() {
-                    @Override
-                    public void onUserCreated(UserInfo user, Object token) {
-                        initializeUserUidStates(user.id);
-                    }
-
-                    // onUserRemoved handled by #removeUser
-                });
-
         mConstants.startMonitoring(mContext.getContentResolver());
         mHistoricalRegistry.systemReady(mContext.getContentResolver());
 
@@ -1099,6 +1089,42 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
+        getUserManagerInternal().addUserLifecycleListener(
+                new UserManagerInternal.UserLifecycleListener() {
+                    @Override
+                    public void onUserCreated(UserInfo user, Object token) {
+                        initializeUserUidStates(user.id);
+                    }
+
+                    // onUserRemoved handled by #removeUser
+                });
+
+        getPackageManagerInternal().getPackageList(
+                new PackageManagerInternal.PackageListObserver() {
+                    @Override
+                    public void onPackageAdded(String packageName, int appId) {
+                        PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
+                                PackageManager.GET_PERMISSIONS, Process.myUid(),
+                                mContext.getUserId());
+                        if (isSamplingTarget(pi)) {
+                            synchronized (AppOpsService.this) {
+                                mRarelyUsedPackages.add(packageName);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onPackageRemoved(String packageName, int appId) {
+                        int[] userIds = getUserManagerInternal().getUserIds();
+                        synchronized (AppOpsService.this) {
+                            for (int i = 0; i < userIds.length; i++) {
+                                int uid = UserHandle.getUid(userIds[i], appId);
+                                packageRemovedLocked(uid, packageName);
+                            }
+                        }
+                    }
+                });
+
         final IntentFilter packageSuspendFilter = new IntentFilter();
         packageSuspendFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
         packageSuspendFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
@@ -1127,25 +1153,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }, UserHandle.ALL, packageSuspendFilter, null, null);
-
-        final IntentFilter packageAddedFilter = new IntentFilter();
-        packageAddedFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        packageAddedFilter.addDataScheme("package");
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final Uri data = intent.getData();
-
-                final String packageName = data.getSchemeSpecificPart();
-                PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
-                        PackageManager.GET_PERMISSIONS, Process.myUid(), mContext.getUserId());
-                if (isSamplingTarget(pi)) {
-                    synchronized (AppOpsService.this) {
-                        mRarelyUsedPackages.add(packageName);
-                    }
-                }
-            }
-        }, packageAddedFilter);
 
         mHandler.postDelayed(new Runnable() {
             @Override
@@ -1231,46 +1238,52 @@ public class AppOpsService extends IAppOpsService.Stub {
         mCheckOpsDelegateDispatcher = new CheckOpsDelegateDispatcher(policy, delegate);
     }
 
-    public void packageRemoved(int uid, String packageName) {
+    @VisibleForTesting
+    void packageRemoved(int uid, String packageName) {
         synchronized (this) {
-            UidState uidState = mUidStates.get(uid);
-            if (uidState == null) {
-                return;
-            }
+            packageRemovedLocked(uid, packageName);
+        }
+    }
 
-            Ops removedOps = null;
+    @GuardedBy("this")
+    private void packageRemovedLocked(int uid, String packageName) {
+        UidState uidState = mUidStates.get(uid);
+        if (uidState == null) {
+            return;
+        }
 
-            // Remove any package state if such.
-            if (uidState.pkgOps != null) {
-                removedOps = uidState.pkgOps.remove(packageName);
-                mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
-            }
+        Ops removedOps = null;
 
-            // If we just nuked the last package state check if the UID is valid.
-            if (removedOps != null && uidState.pkgOps.isEmpty()
-                    && getPackagesForUid(uid).length <= 0) {
-                uidState.clear();
-                mUidStates.remove(uid);
-            }
+        // Remove any package state if such.
+        if (uidState.pkgOps != null) {
+            removedOps = uidState.pkgOps.remove(packageName);
+            mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
+        }
 
-            if (removedOps != null) {
-                scheduleFastWriteLocked();
+        // If we just nuked the last package state check if the UID is valid.
+        if (removedOps != null && uidState.pkgOps.isEmpty()
+                && getPackagesForUid(uid).length <= 0) {
+            uidState.clear();
+            mUidStates.remove(uid);
+        }
 
-                final int numOps = removedOps.size();
-                for (int opNum = 0; opNum < numOps; opNum++) {
-                    final Op op = removedOps.valueAt(opNum);
+        if (removedOps != null) {
+            scheduleFastWriteLocked();
 
-                    final int numAttributions = op.mAttributions.size();
-                    for (int attributionNum = 0; attributionNum < numAttributions;
-                            attributionNum++) {
-                        AttributedOp attributedOp = op.mAttributions.valueAt(attributionNum);
+            final int numOps = removedOps.size();
+            for (int opNum = 0; opNum < numOps; opNum++) {
+                final Op op = removedOps.valueAt(opNum);
 
-                        while (attributedOp.isRunning()) {
-                            attributedOp.finished(attributedOp.mInProgressEvents.keyAt(0));
-                        }
-                        while (attributedOp.isPaused()) {
-                            attributedOp.finished(attributedOp.mPausedInProgressEvents.keyAt(0));
-                        }
+                final int numAttributions = op.mAttributions.size();
+                for (int attributionNum = 0; attributionNum < numAttributions;
+                        attributionNum++) {
+                    AttributedOp attributedOp = op.mAttributions.valueAt(attributionNum);
+
+                    while (attributedOp.isRunning()) {
+                        attributedOp.finished(attributedOp.mInProgressEvents.keyAt(0));
+                    }
+                    while (attributedOp.isPaused()) {
+                        attributedOp.finished(attributedOp.mPausedInProgressEvents.keyAt(0));
                     }
                 }
             }
