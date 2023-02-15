@@ -405,6 +405,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             @NonNull List<ShortcutInfo> changedShortcuts) {
         Preconditions.checkArgument(newShortcut.isEnabled(),
                 "pushDynamicShortcuts() cannot publish disabled shortcuts");
+        ensureShortcutCountBeforePush();
 
         newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
 
@@ -412,7 +413,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         final ShortcutInfo oldShortcut = findShortcutById(newShortcut.getId());
         boolean deleted = false;
 
-        if (oldShortcut == null) {
+        if (oldShortcut == null || !oldShortcut.isDynamic()) {
             final ShortcutService service = mShortcutUser.mService;
             final int maxShortcuts = service.getMaxActivityShortcuts();
 
@@ -422,7 +423,6 @@ class ShortcutPackage extends ShortcutPackageItem {
 
             if (activityShortcuts != null && activityShortcuts.size() == maxShortcuts) {
                 // Max has reached. Delete the shortcut with lowest rank.
-
                 // Sort by isManifestShortcut() and getRank().
                 Collections.sort(activityShortcuts, mShortcutTypeAndRankComparator);
 
@@ -437,7 +437,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                 changedShortcuts.add(shortcut);
                 deleted = deleteDynamicWithId(shortcut.getId(), /*ignoreInvisible=*/ true) != null;
             }
-        } else {
+        }
+        if (oldShortcut != null) {
             // It's an update case.
             // Make sure the target is updatable. (i.e. should be mutable.)
             oldShortcut.ensureUpdatableWith(newShortcut, /*isUpdating=*/ false);
@@ -461,6 +462,32 @@ class ShortcutPackage extends ShortcutPackageItem {
                     }));
         }
         return deleted;
+    }
+
+    private void ensureShortcutCountBeforePush() {
+        final ShortcutService service = mShortcutUser.mService;
+        // Ensure the total number of shortcuts doesn't exceed the hard limit per app.
+        final int maxShortcutPerApp = service.getMaxAppShortcuts();
+        synchronized (mLock) {
+            final List<ShortcutInfo> appShortcuts = mShortcuts.values().stream().filter(si ->
+                    !si.isPinned()).collect(Collectors.toList());
+            if (appShortcuts.size() >= maxShortcutPerApp) {
+                // Max has reached. Removes shortcuts until they fall within the hard cap.
+                // Sort by isManifestShortcut(), isDynamic() and getLastChangedTimestamp().
+                Collections.sort(appShortcuts, mShortcutTypeRankAndTimeComparator);
+
+                while (appShortcuts.size() >= maxShortcutPerApp) {
+                    final ShortcutInfo shortcut = appShortcuts.remove(appShortcuts.size() - 1);
+                    if (shortcut.isDeclaredInManifest()) {
+                        // All shortcuts are manifest shortcuts and cannot be removed.
+                        throw new IllegalArgumentException(getPackageName() + " has published "
+                                + appShortcuts.size() + " manifest shortcuts across different"
+                                + " activities.");
+                    }
+                    forceDeleteShortcutInner(shortcut.getId());
+                }
+            }
+        }
     }
 
     /**
@@ -1366,6 +1393,61 @@ class ShortcutPackage extends ShortcutPackageItem {
             return 1;
         }
         return Integer.compare(a.getRank(), b.getRank());
+    };
+
+    /**
+     * To sort by isManifestShortcut(), isDynamic(), getRank() and
+     * getLastChangedTimestamp(). i.e. manifest shortcuts come before non-manifest shortcuts,
+     * dynamic shortcuts come before floating shortcuts, then sort by last changed timestamp.
+     *
+     * This is used to decide which shortcuts to remove when the total number of shortcuts retained
+     * for the app exceeds the limit defined in {@link ShortcutService#getMaxAppShortcuts()}.
+     *
+     * (Note the number of manifest shortcuts is always <= the max number, because if there are
+     * more, ShortcutParser would ignore the rest.)
+     */
+    final Comparator<ShortcutInfo> mShortcutTypeRankAndTimeComparator = (ShortcutInfo a,
+            ShortcutInfo b) -> {
+        if (a.isDeclaredInManifest() && !b.isDeclaredInManifest()) {
+            return -1;
+        }
+        if (!a.isDeclaredInManifest() && b.isDeclaredInManifest()) {
+            return 1;
+        }
+        if (a.isDynamic() && b.isDynamic()) {
+            return Integer.compare(a.getRank(), b.getRank());
+        }
+        if (a.isDynamic()) {
+            return -1;
+        }
+        if (b.isDynamic()) {
+            return 1;
+        }
+        if (a.isCached() && b.isCached()) {
+            // if both shortcuts are cached, prioritize shortcuts cached by people tile,
+            if (a.hasFlags(ShortcutInfo.FLAG_CACHED_PEOPLE_TILE)
+                    && !b.hasFlags(ShortcutInfo.FLAG_CACHED_PEOPLE_TILE)) {
+                return -1;
+            } else if (!a.hasFlags(ShortcutInfo.FLAG_CACHED_PEOPLE_TILE)
+                    && b.hasFlags(ShortcutInfo.FLAG_CACHED_PEOPLE_TILE)) {
+                return 1;
+            }
+            // followed by bubbles.
+            if (a.hasFlags(ShortcutInfo.FLAG_CACHED_BUBBLES)
+                    && !b.hasFlags(ShortcutInfo.FLAG_CACHED_BUBBLES)) {
+                return -1;
+            } else if (!a.hasFlags(ShortcutInfo.FLAG_CACHED_BUBBLES)
+                    && b.hasFlags(ShortcutInfo.FLAG_CACHED_BUBBLES)) {
+                return 1;
+            }
+        }
+        if (a.isCached()) {
+            return -1;
+        }
+        if (b.isCached()) {
+            return 1;
+        }
+        return Long.compare(b.getLastChangedTimestamp(), a.getLastChangedTimestamp());
     };
 
     /**
