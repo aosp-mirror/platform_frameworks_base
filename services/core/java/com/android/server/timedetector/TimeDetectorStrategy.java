@@ -29,6 +29,7 @@ import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.timezonedetector.Dumpable;
+import com.android.server.timezonedetector.StateChangeListener;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -104,9 +105,17 @@ public interface TimeDetectorStrategy extends Dumpable {
     /**
      * Processes the suggested network time. The suggestion may not be used to set the device's time
      * depending on device configuration and user settings, but can replace previous network
-     * suggestions received.
+     * suggestions received. See also
+     * {@link #addNetworkTimeUpdateListener(StateChangeListener)} and
+     * {@link #getLatestNetworkSuggestion()}.
      */
     void suggestNetworkTime(@NonNull NetworkTimeSuggestion suggestion);
+
+    /**
+     * Adds a listener that will be notified when a new network time is available. See {@link
+     * #getLatestNetworkSuggestion()}.
+     */
+    void addNetworkTimeUpdateListener(@NonNull StateChangeListener networkSuggestionUpdateListener);
 
     /**
      * Returns the latest (accepted) network time suggestion. Returns {@code null} if there isn't

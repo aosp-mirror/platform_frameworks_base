@@ -193,6 +193,7 @@ import android.hardware.configstore.V1_1.ISurfaceFlingerConfigs;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputSettings;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -744,7 +745,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private final DisplayHashController mDisplayHashController;
 
     volatile float mMaximumObscuringOpacityForTouch =
-            InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
+            InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
 
     @VisibleForTesting
     final WindowContextListenerController mWindowContextListenerController =
@@ -886,11 +887,11 @@ public class WindowManagerService extends IWindowManager.Stub
             ContentResolver resolver = mContext.getContentResolver();
             mMaximumObscuringOpacityForTouch = Settings.Global.getFloat(resolver,
                     Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH,
-                    InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
+                    InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
             if (mMaximumObscuringOpacityForTouch < 0.0f
                     || mMaximumObscuringOpacityForTouch > 1.0f) {
                 mMaximumObscuringOpacityForTouch =
-                        InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
+                        InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
             }
         }
 

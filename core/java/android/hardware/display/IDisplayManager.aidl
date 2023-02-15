@@ -180,6 +180,7 @@ interface IDisplayManager {
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
                 + ".permission.MODIFY_HDR_CONVERSION_MODE)")
     void setHdrConversionMode(in HdrConversionMode hdrConversionMode);
+    HdrConversionMode getHdrConversionModeSetting();
     HdrConversionMode getHdrConversionMode();
     int[] getSupportedHdrOutputTypes();
 

@@ -66,8 +66,7 @@ public abstract class ProviderSession<T, R>
      * on the credMan UI.
      */
     public static boolean isUiInvokingStatus(Status status) {
-        return status == Status.CREDENTIALS_RECEIVED || status == Status.SAVE_ENTRIES_RECEIVED
-                || status == Status.REQUIRES_AUTHENTICATION;
+        return status == Status.CREDENTIALS_RECEIVED || status == Status.SAVE_ENTRIES_RECEIVED;
     }
 
     /**
@@ -206,11 +205,6 @@ public abstract class ProviderSession<T, R>
         } else if (isCompletionStatus(status)) {
             mCandidateProviderMetric.setProviderQueryStatus(METRICS_PROVIDER_STATUS_QUERY_SUCCESS);
         }
-    }
-
-    protected void onRemoteEntrySelected(
-            ProviderPendingIntentResponse providerPendingIntentResponse) {
-        //TODO: Implement
     }
 
     /** Get the request to be sent to the provider. */

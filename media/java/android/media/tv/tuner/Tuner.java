@@ -805,6 +805,7 @@ public class Tuner implements AutoCloseable  {
         acquireTRMSLock("close()");
         try {
             releaseAll();
+            mTunerResourceManager.unregisterClientProfile(mClientId);
             TunerUtils.throwExceptionForResult(nativeClose(), "failed to close tuner");
         } finally {
             releaseTRMSLock();
@@ -968,7 +969,6 @@ public class Tuner implements AutoCloseable  {
         releaseDescramblers();
         releaseFilters();
         releaseDemux();
-        mTunerResourceManager.unregisterClientProfile(mClientId);
     }
 
     /**

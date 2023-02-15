@@ -144,6 +144,21 @@ public class SatelliteManager {
     public static final String KEY_SATELLITE_PROVISIONED = "satellite_provisioned";
 
     /**
+     * Bundle key to get the response from
+     * {@link #requestIsSatelliteCommunicationAllowedForCurrentLocation(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_SATELLITE_COMMUNICATION_ALLOWED =
+            "satellite_communication_allowed";
+
+    /**
+     * Bundle key to get the response from
+     * {@link #requestTimeForNextSatelliteVisibility(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_SATELLITE_NEXT_VISIBILITY = "satellite_next_visibility";
+
+    /**
      * The request was successfully processed.
      */
     public static final int SATELLITE_ERROR_NONE = 0;
@@ -294,7 +309,7 @@ public class SatelliteManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "setSatelliteEnabled RemoteException: ", ex);
+            Rlog.e(TAG, "setSatelliteEnabled() RemoteException: ", ex);
             ex.rethrowFromSystemServer();
         }
     }
@@ -460,35 +475,85 @@ public class SatelliteManager {
     }
 
     /**
-     * Message transfer is waiting to acquire.
+     * The default state indicating that message transfer is idle.
+     * This should be sent immediately after either
+     * {@link #SATELLITE_MESSAGE_TRANSFER_STATE_SUCCESS} or
+     * {@link #SATELLITE_MESSAGE_TRANSFER_STATE_FAILED}.
      */
-    public static final int SATELLITE_MESSAGE_TRANSFER_STATE_WAITING_TO_ACQUIRE = 0;
+    public static final int SATELLITE_MESSAGE_TRANSFER_STATE_IDLE = 0;
     /**
-     * Message is being sent.
+     * A transition state indicating that a message is being sent.
      */
     public static final int SATELLITE_MESSAGE_TRANSFER_STATE_SENDING = 1;
     /**
-     * Message is being received.
+     * A transition state indicating that a message is being received.
      */
     public static final int SATELLITE_MESSAGE_TRANSFER_STATE_RECEIVING = 2;
     /**
-     * Message transfer is being retried.
+     * A transition state indicating that message transfer is being retried.
      */
     public static final int SATELLITE_MESSAGE_TRANSFER_STATE_RETRYING = 3;
     /**
-     * Message transfer is complete.
+     * An end state indicating that message transfer completed successfully.
+     * After message transfer completes, {@link #SATELLITE_MESSAGE_TRANSFER_STATE_IDLE}
+     * must be sent before reporting any additional message transfer state changes.
      */
-    public static final int SATELLITE_MESSAGE_TRANSFER_STATE_COMPLETE = 4;
+    public static final int SATELLITE_MESSAGE_TRANSFER_STATE_SUCCESS = 4;
+    /**
+     * An end state indicating that message transfer completed with a failure.
+     * After message transfer completes, {@link #SATELLITE_MESSAGE_TRANSFER_STATE_IDLE}
+     * must be sent before reporting any additional message transfer state changes.
+     */
+    public static final int SATELLITE_MESSAGE_TRANSFER_STATE_FAILED = 5;
 
     /** @hide */
     @IntDef(prefix = {"SATELLITE_MESSAGE_TRANSFER_STATE_"}, value = {
-            SATELLITE_MESSAGE_TRANSFER_STATE_WAITING_TO_ACQUIRE,
+            SATELLITE_MESSAGE_TRANSFER_STATE_IDLE,
             SATELLITE_MESSAGE_TRANSFER_STATE_SENDING,
             SATELLITE_MESSAGE_TRANSFER_STATE_RECEIVING,
             SATELLITE_MESSAGE_TRANSFER_STATE_RETRYING,
-            SATELLITE_MESSAGE_TRANSFER_STATE_COMPLETE
+            SATELLITE_MESSAGE_TRANSFER_STATE_SUCCESS,
+            SATELLITE_MESSAGE_TRANSFER_STATE_FAILED
     })
     public @interface SatelliteMessageTransferState {}
+
+    /* Satellite modem is in idle state. */
+    public static final int SATELLITE_MODEM_STATE_IDLE = 0;
+
+    /* Satellite modem is listening for incoming messages. */
+    public static final int SATELLITE_MODEM_STATE_LISTENING = 1;
+
+    /* Satellite modem is sending and/or receiving messages. */
+    public static final int SATELLITE_MODEM_STATE_MESSAGE_TRANSFERRING = 2;
+
+    /* Satellite modem is powered off */
+    public static final int SATELLITE_MODEM_STATE_OFF = 3;
+
+    /** @hide */
+    @IntDef(prefix = {"SATELLITE_STATE_"},
+            value = {
+                    SATELLITE_MODEM_STATE_IDLE,
+                    SATELLITE_MODEM_STATE_LISTENING,
+                    SATELLITE_MODEM_STATE_MESSAGE_TRANSFERRING,
+                    SATELLITE_MODEM_STATE_OFF
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SatelliteModemState {}
+
+    /** SOS SMS */
+    public static final int DATAGRAM_TYPE_SOS_SMS = 0;
+
+    /** Location sharing message */
+    public static final int DATAGRAM_TYPE_LOCATION_SHARING = 3;
+
+    @IntDef(
+            prefix = "DATAGRAM_TYPE_",
+            value = {
+                    DATAGRAM_TYPE_SOS_SMS,
+                    DATAGRAM_TYPE_LOCATION_SHARING,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DatagramType {}
 
     /**
      * Start receiving satellite position updates.
@@ -496,6 +561,11 @@ public class SatelliteManager {
      * Modem should continue to report the pointing input as the device or satellite moves.
      * Satellite position updates are started only on {@link #SATELLITE_ERROR_NONE}.
      * All other results indicate that this operation failed.
+     * Once satellite position updates begin, message transfer state updates will be sent
+     * through {@link SatelliteCallback.SatellitePositionUpdateListener}.
+     * Modem should report any changes in message transfer state and indicate success or failure
+     * by reporting {@link #SATELLITE_MESSAGE_TRANSFER_STATE_SUCCESS} or
+     * {@link #SATELLITE_MESSAGE_TRANSFER_STATE_FAILED}.
      *
      * @param executor The executor on which the callback and error code listener will be called.
      * @param errorCodeListener Listener for the {@link SatelliteError} result of the operation.
@@ -530,7 +600,7 @@ public class SatelliteManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("startSatellitePositionUpdates RemoteException: " + ex);
+            loge("startSatellitePositionUpdates() RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
     }
@@ -538,8 +608,8 @@ public class SatelliteManager {
     /**
      * Stop receiving satellite position updates.
      * This can be called by the pointing UI when the user stops pointing to the satellite.
-     * Satellite position updates are stopped only on {@link #SATELLITE_ERROR_NONE}.
-     * All other results indicate that this operation failed.
+     * Satellite position updates are stopped and the callback is unregistered only on
+     * {@link #SATELLITE_ERROR_NONE}. All other results that this operation failed.
      *
      * @param callback The callback that was passed to
      *       {@link #startSatellitePositionUpdates(Executor, Consumer, SatelliteCallback)}.
@@ -547,7 +617,6 @@ public class SatelliteManager {
      * @param errorCodeListener Listener for the {@link SatelliteError} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
-     * @throws IllegalArgumentException if the callback is invalid.
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
@@ -575,7 +644,7 @@ public class SatelliteManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("stopSatellitePositionUpdates RemoteException: " + ex);
+            loge("stopSatellitePositionUpdates() RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
     }
@@ -633,12 +702,12 @@ public class SatelliteManager {
         }
     }
 
-
     /**
      * Provision the device with a satellite provider.
      * This is needed if the provider allows dynamic registration.
      *
-     * @param token The security token of the device/subscription to be provisioned.
+     * @param token The token to be used as a unique identifier for provisioning with satellite
+     *              gateway.
      * @param cancellationSignal The optional signal used by the caller to cancel the provision
      *                           request. Even when the cancellation is signaled, Telephony will
      *                           still trigger the callback to return the result of this request.
@@ -673,7 +742,7 @@ public class SatelliteManager {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("provisionSatelliteService RemoteException=" + ex);
+            loge("provisionSatelliteService() RemoteException=" + ex);
             ex.rethrowFromSystemServer();
         }
         if (cancellationSignal != null) {
@@ -682,92 +751,116 @@ public class SatelliteManager {
     }
 
     /**
-     * Register for the satellite provision state change.
+     * Deprovision the device with the satellite provider.
+     * This is needed if the provider allows dynamic registration. Once deprovisioned,
+     * {@link SatelliteCallback.SatelliteProvisionStateListener#onSatelliteProvisionStateChanged}
+     * should report as deprovisioned.
+     * For provisioning satellite service, refer to
+     * {@link #provisionSatelliteService(String, CancellationSignal, Executor, Consumer)}.
      *
-     * @param executor The executor on which the callback and error code listener will be called.
+     * @param token The token of the device/subscription to be deprovisioned.
      * @param errorCodeListener Listener for the {@link SatelliteError} result of the operation.
-     * @param callback The callback to handle the satellite provision state changed event. This
-     *                 SatelliteCallback should implement the interface
-     *                 {@link SatelliteCallback.SatelliteProvisionStateListener}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    public void registerForSatelliteProvisionStateChanged(
+    public void deprovisionSatelliteService(@NonNull String token,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<Integer> errorCodeListener, @NonNull SatelliteCallback callback) {
+            @SatelliteError @NonNull Consumer<Integer> errorCodeListener) {
+        Objects.requireNonNull(token);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(errorCodeListener);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IIntegerConsumer errorCallback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> errorCodeListener.accept(result)));
+                    }
+                };
+                telephony.deprovisionSatelliteService(mSubId, token, errorCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("deprovisionSatelliteService() RemoteException=" + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register for the satellite provision state change.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle the satellite provision state changed event.
+     *                 This SatelliteCallback should implement the interface
+     *                 {@link SatelliteCallback.SatelliteProvisionStateListener}.
+     *
+     * @return The {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteError public int registerForSatelliteProvisionStateChanged(
+            @NonNull @CallbackExecutor Executor executor, @NonNull SatelliteCallback callback) {
+        Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 callback.init(executor);
-                IIntegerConsumer errorCallback = new IIntegerConsumer.Stub() {
-                    @Override
-                    public void accept(int result) {
-                        executor.execute(() -> Binder.withCleanCallingIdentity(
-                                () -> errorCodeListener.accept(result)));
-                    }
-                };
-                telephony.registerForSatelliteProvisionStateChanged(
-                        mSubId, errorCallback, callback.getCallbackStub());
+                return telephony.registerForSatelliteProvisionStateChanged(
+                        mSubId, callback.getCallbackStub());
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("registerForSatelliteProvisionStateChanged RemoteException: " + ex);
+            loge("registerForSatelliteProvisionStateChanged() RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
+        return SATELLITE_REQUEST_FAILED;
     }
 
     /**
      * Unregister for the satellite provision state change.
      *
-     * @param callback The callback that was passed to
-     * {@link #registerForSatelliteProvisionStateChanged(Executor, Consumer, SatelliteCallback)}.
-     * @param executor The executor on which the error code listener will be called.
-     * @param errorCodeListener Listener for the {@link SatelliteError} result of the operation.
+     * @param callback The callback that was passed to {@link
+     *                 #registerForSatelliteProvisionStateChanged(Executor, SatelliteCallback)}.
+     *
+     * @return The {@link SatelliteError} result of the operation.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    public void unregisterForSatelliteProvisionStateChanged(@NonNull SatelliteCallback callback,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<Integer> errorCodeListener) {
+    @SatelliteError public int unregisterForSatelliteProvisionStateChanged(
+            @NonNull SatelliteCallback callback) {
         Objects.requireNonNull(callback);
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(errorCodeListener);
 
         if (callback.getCallbackStub() == null) {
             loge("unregisterForSatelliteProvisionStateChanged: callbackStub is null");
-            executor.execute(() -> Binder.withCleanCallingIdentity(
-                    () -> errorCodeListener.accept(SATELLITE_INVALID_ARGUMENTS)));
-            return;
+            return SATELLITE_INVALID_ARGUMENTS;
         }
 
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                IIntegerConsumer errorCallback = new IIntegerConsumer.Stub() {
-                    @Override
-                    public void accept(int result) {
-                        executor.execute(() -> Binder.withCleanCallingIdentity(
-                                () -> errorCodeListener.accept(result)));
-                    }
-                };
-                telephony.unregisterForSatelliteProvisionStateChanged(mSubId, errorCallback,
+                return telephony.unregisterForSatelliteProvisionStateChanged(mSubId,
                         callback.getCallbackStub());
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("unregisterForSatelliteProvisionStateChanged RemoteException: " + ex);
+            loge("unregisterForSatelliteProvisionStateChanged() RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
+        return SATELLITE_REQUEST_FAILED;
     }
 
     /**
@@ -820,6 +913,322 @@ public class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("requestIsSatelliteProvisioned() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register for listening to satellite modem state changes.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle the satellite state change event.
+     *                 This SatelliteCallback should implement the interface
+     *                 {@link SatelliteCallback.SatelliteStateListener}.
+     *
+     * @return The {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteError public int registerForSatelliteModemStateChange(
+            @NonNull @CallbackExecutor Executor executor, @NonNull SatelliteCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                callback.init(executor);
+                return telephony.registerForSatelliteModemStateChange(mSubId,
+                        callback.getCallbackStub());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("registerForSatelliteModemStateChange() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_REQUEST_FAILED;
+    }
+
+    /**
+     * Unregister to stop listening to satellite modem state changes.
+     *
+     * @param callback The callback that was passed to
+     *                 {@link #registerForSatelliteModemStateChange(Executor, SatelliteCallback)}.
+     *
+     * @return The {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteError
+    public int unregisterForSatelliteModemStateChange(@NonNull SatelliteCallback callback) {
+        Objects.requireNonNull(callback);
+
+        if (callback.getCallbackStub() == null) {
+            loge("unregisterForSatelliteModemStateChange: callbackStub is null");
+            return SATELLITE_INVALID_ARGUMENTS;
+        }
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.unregisterForSatelliteModemStateChange(mSubId,
+                        callback.getCallbackStub());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("unregisterForSatelliteModemStateChange() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_REQUEST_FAILED;
+    }
+
+    /**
+     * Register to receive incoming datagrams over satellite.
+     *
+     * @param datagramType Type of datagram.
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback to handle incoming datagrams over satellite.
+     *                 This SatelliteCallback should implement the interface
+     *                 {@link SatelliteCallback.SatelliteDatagramListener}.
+     *
+     * @return The {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteError public int registerForSatelliteDatagram(@DatagramType int datagramType,
+            @NonNull @CallbackExecutor Executor executor, @NonNull SatelliteCallback callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                callback.init(executor);
+                return telephony.registerForSatelliteDatagram(mSubId, datagramType,
+                            callback.getCallbackStub());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("registerForSatelliteDatagram() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_REQUEST_FAILED;
+    }
+
+    /**
+     * Unregister to stop receiving incoming datagrams over satellite.
+     *
+     * @param callback The callback that was passed to
+     *                 {@link #registerForSatelliteDatagram(int, Executor, SatelliteCallback)}.
+     *
+     * @return The {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteError public int unregisterForSatelliteDatagram(@NonNull SatelliteCallback callback) {
+        Objects.requireNonNull(callback);
+
+        if (callback.getCallbackStub() == null) {
+            loge("unregisterForSatelliteDatagram: callbackStub is null");
+            return SATELLITE_INVALID_ARGUMENTS;
+        }
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.unregisterForSatelliteDatagram(mSubId, callback.getCallbackStub());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("unregisterForSatelliteDatagram() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_REQUEST_FAILED;
+    }
+
+    /**
+     * Poll pending satellite datagrams over satellite.
+     *
+     * @return The result of the operation.
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @SatelliteError public int pollPendingSatelliteDatagrams() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.pollPendingSatelliteDatagrams(mSubId);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("pollPendingSatelliteDatagrams() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+        return SATELLITE_REQUEST_FAILED;
+    }
+
+    /**
+     * Send datagram over satellite.
+     *
+     * @param datagramType Type of datagram.
+     * @param datagram Datagram to send over satellite.
+     * @param executor The executor on which the error code listener will be called.
+     * @param errorCodeListener Listener for the {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void sendSatelliteDatagram(@DatagramType int datagramType,
+            @NonNull SatelliteDatagram datagram, @NonNull @CallbackExecutor Executor executor,
+            @SatelliteError @NonNull Consumer<Integer> errorCodeListener) {
+        Objects.requireNonNull(datagram);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(errorCodeListener);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IIntegerConsumer internalCallback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> errorCodeListener.accept(result)));
+                    }
+                };
+                telephony.sendSatelliteDatagram(mSubId, datagramType, datagram, internalCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("sendSatelliteDatagram() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to get whether satellite communication is allowed for the current location.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return a {@code boolean} with value {@code true} if satellite
+     *                 communication is allowed for the current location and
+     *                 {@code false} otherwise.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteError}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void requestIsSatelliteCommunicationAllowedForCurrentLocation(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_ERROR_NONE) {
+                            if (resultData.containsKey(KEY_SATELLITE_COMMUNICATION_ALLOWED)) {
+                                boolean isSatelliteCommunicationAllowed =
+                                        resultData.getBoolean(KEY_SATELLITE_COMMUNICATION_ALLOWED);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(isSatelliteCommunicationAllowed)));
+                            } else {
+                                loge("KEY_SATELLITE_COMMUNICATION_ALLOWED does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(
+                                                new SatelliteException(SATELLITE_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestIsSatelliteCommunicationAllowedForCurrentLocation(mSubId,
+                        receiver);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("requestIsSatelliteCommunicationAllowedForCurrentLocation() RemoteException: "
+                    + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to get the time after which the satellite will next be visible. This is an
+     * {@code int} representing the duration in seconds after which the satellite will be visible.
+     * This will return {@code 0} if the satellite is currently visible.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return the time after which the satellite will next be visible.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteError}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void requestTimeForNextSatelliteVisibility(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Integer, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_ERROR_NONE) {
+                            if (resultData.containsKey(KEY_SATELLITE_NEXT_VISIBILITY)) {
+                                int nextVisibilityDuration =
+                                        resultData.getInt(KEY_SATELLITE_NEXT_VISIBILITY);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(nextVisibilityDuration)));
+                            } else {
+                                loge("KEY_SATELLITE_NEXT_VISIBILITY does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(
+                                                new SatelliteException(SATELLITE_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestTimeForNextSatelliteVisibility(mSubId, receiver);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("requestTimeForNextSatelliteVisibility() RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
     }

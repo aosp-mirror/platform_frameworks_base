@@ -146,14 +146,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
             }
         });
         mCallback.onBiometricAction(BiometricStateListener.ACTION_SENSOR_TOUCH);
-        if (acquiredInfo == BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR
-                && vendorCode == BiometricFingerprintConstants.BIOMETRIC_ERROR_POWER_PRESSED
-                && mSensorOverlays.isSfps()) {
-            super.onAcquired(BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED,
-                    0 /* vendorCode */);
-        } else {
-            super.onAcquired(acquiredInfo, vendorCode);
-        }
+        super.onAcquired(acquiredInfo, vendorCode);
     }
 
     @Override
@@ -281,5 +274,8 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     }
 
     @Override
-    public void onPowerPressed() { }
+    public void onPowerPressed() {
+        onAcquired(BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED,
+                0 /* vendorCode */);
+    }
 }

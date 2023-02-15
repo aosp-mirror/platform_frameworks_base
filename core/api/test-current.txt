@@ -5,6 +5,7 @@ package android {
     field public static final String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String ADJUST_RUNTIME_PERMISSIONS_POLICY = "android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY";
+    field public static final String ALLOWLISTED_WRITE_DEVICE_CONFIG = "android.permission.ALLOWLISTED_WRITE_DEVICE_CONFIG";
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
     field public static final String BACKGROUND_CAMERA = "android.permission.BACKGROUND_CAMERA";
     field public static final String BIND_CELL_BROADCAST_SERVICE = "android.permission.BIND_CELL_BROADCAST_SERVICE";
@@ -39,6 +40,7 @@ package android {
     field public static final String QUERY_AUDIO_STATE = "android.permission.QUERY_AUDIO_STATE";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
+    field public static final String READ_WRITE_SYNC_DISABLED_MODE_CONFIG = "android.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG";
     field public static final String RECORD_BACKGROUND_AUDIO = "android.permission.RECORD_BACKGROUND_AUDIO";
     field public static final String REMAP_MODIFIER_KEYS = "android.permission.REMAP_MODIFIER_KEYS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
@@ -349,9 +351,7 @@ package android.app {
   }
 
   public class NotificationManager {
-    method public void allowAssistantAdjustment(String);
     method public void cleanUpCallersAfter(long);
-    method public void disallowAssistantAdjustment(String);
     method public android.content.ComponentName getEffectsSuppressor();
     method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
@@ -514,6 +514,10 @@ package android.app {
 
 package android.app.admin {
 
+  public final class DeviceAdminAuthority extends android.app.admin.Authority {
+    field @NonNull public static final android.app.admin.DeviceAdminAuthority DEVICE_ADMIN_AUTHORITY;
+  }
+
   public class DevicePolicyManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void acknowledgeNewUserDisclaimer();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void clearOrganizationId();
@@ -544,6 +548,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwnerOnly(@NonNull android.content.ComponentName, int);
     method public void setDeviceOwnerType(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public void setNextOperationSafety(int, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setOverrideKeepProfilesRunning(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}, conditional=true) public void setProfileOwnerOnOrganizationOwnedDevice(@NonNull android.content.ComponentName, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean triggerDevicePolicyEngineMigration(boolean);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
@@ -594,21 +599,28 @@ package android.app.admin {
     field @Deprecated public static final int STATUS_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
   }
 
+  public final class DpcAuthority extends android.app.admin.Authority {
+    field @NonNull public static final android.app.admin.DpcAuthority DPC_AUTHORITY;
+  }
+
   public final class FlagUnion extends android.app.admin.ResolutionMechanism<java.lang.Integer> {
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.FlagUnion> CREATOR;
+    field @NonNull public static final android.app.admin.FlagUnion FLAG_UNION;
   }
 
   public final class MostRecent<V> extends android.app.admin.ResolutionMechanism<V> {
     ctor public MostRecent();
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.MostRecent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.MostRecent<?>> CREATOR;
+    field @NonNull public static final android.app.admin.MostRecent<?> MOST_RECENT;
   }
 
   public final class MostRestrictive<V> extends android.app.admin.ResolutionMechanism<V> {
     method public int describeContents();
+    method @NonNull public java.util.List<V> getMostToLeastRestrictiveValues();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.MostRestrictive<?>> CREATOR;
   }
@@ -629,12 +641,18 @@ package android.app.admin {
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.StringSetUnion> CREATOR;
+    field @NonNull public static final android.app.admin.StringSetUnion STRING_SET_UNION;
   }
 
   public final class TopPriority<V> extends android.app.admin.ResolutionMechanism<V> {
     method public int describeContents();
+    method @NonNull public java.util.List<android.app.admin.Authority> getHighestToLowestPriorityAuthorities();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.TopPriority<?>> CREATOR;
+  }
+
+  public final class UnknownAuthority extends android.app.admin.Authority {
+    field @NonNull public static final android.app.admin.UnknownAuthority UNKNOWN_AUTHORITY;
   }
 
   public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {
@@ -1402,6 +1420,7 @@ package android.hardware.display {
     method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearGlobalUserPreferredDisplayMode();
     method @Nullable public android.view.Display.Mode getGlobalUserPreferredDisplayMode();
     method @NonNull public android.hardware.display.HdrConversionMode getHdrConversionMode();
+    method @NonNull public android.hardware.display.HdrConversionMode getHdrConversionModeSetting();
     method @NonNull public int[] getSupportedHdrOutputTypes();
     method @NonNull public int[] getUserDisabledHdrTypes();
     method public boolean isMinimalPostProcessingRequested(int);
@@ -1481,8 +1500,11 @@ package android.hardware.input {
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void removeKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
     method public void removeUniqueIdAssociation(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void setCurrentKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setMaximumObscuringOpacityForTouch(@FloatRange(from=0, to=1) float);
     field public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L; // 0x96aec7eL
+  }
+
+  public class InputSettings {
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, @FloatRange(from=0, to=1) float);
   }
 
 }

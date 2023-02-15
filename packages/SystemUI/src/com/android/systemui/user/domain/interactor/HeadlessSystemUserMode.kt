@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.notification;
+package com.android.systemui.user.domain.interactor
 
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
+import android.os.UserManager
+import com.android.systemui.dagger.SysUISingleton
+import javax.inject.Inject
 
-import java.util.HashMap;
-import java.util.Map;
+interface HeadlessSystemUserMode {
 
-public class TestFlagResolver implements SystemUiSystemPropertiesFlags.FlagResolver {
-    private Map<SystemUiSystemPropertiesFlags.Flag, Boolean> mOverrides = new HashMap<>();
+    fun isHeadlessSystemUserMode(): Boolean
+}
 
-    @Override
-    public boolean isEnabled(SystemUiSystemPropertiesFlags.Flag flag) {
-        return mOverrides.getOrDefault(flag, flag.mDefaultValue);
-    }
-
-    public void setFlagOverride(SystemUiSystemPropertiesFlags.Flag flag, boolean isEnabled) {
-        mOverrides.put(flag, isEnabled);
+@SysUISingleton
+class HeadlessSystemUserModeImpl @Inject constructor() : HeadlessSystemUserMode {
+    override fun isHeadlessSystemUserMode(): Boolean {
+        return UserManager.isHeadlessSystemUserMode()
     }
 }

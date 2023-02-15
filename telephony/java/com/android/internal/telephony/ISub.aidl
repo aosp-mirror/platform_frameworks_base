@@ -363,4 +363,20 @@ interface ISub {
         */
        //TODO: Removed before U AOSP public release.
        boolean isSubscriptionManagerServiceEnabled();
+
+      /**
+       * Called during setup wizard restore flow to attempt to restore the backed up sim-specific
+       * configs to device for all existing SIMs in the subscription database
+       * {@link Telephony.SimInfo}. Internally, it will store the backup data in an internal file.
+       * This file will persist on device for device's lifetime and will be used later on when a SIM
+       * is inserted to restore that specific SIM's settings. End result is subscription database is
+       * modified to match any backed up configs for the appropriate inserted SIMs.
+       *
+       * <p>
+       * The {@link Uri} {@link #SIM_INFO_BACKUP_AND_RESTORE_CONTENT_URI} is notified if any
+       * {@link Telephony.SimInfo} entry is updated as the result of this method call.
+       *
+       * @param data with the sim specific configs to be backed up.
+       */
+       void restoreAllSimSpecificSettingsFromBackup(in byte[] data);
 }

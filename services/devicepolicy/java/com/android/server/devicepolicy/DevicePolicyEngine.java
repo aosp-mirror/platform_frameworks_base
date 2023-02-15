@@ -33,6 +33,7 @@ import android.app.admin.PolicyKey;
 import android.app.admin.PolicyUpdatesReceiver;
 import android.app.admin.PolicyValue;
 import android.app.admin.TargetUser;
+import android.app.admin.UserRestrictionPolicyKey;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -612,6 +613,47 @@ final class DevicePolicyEngine {
             }
             return keys;
         }
+    }
+
+    /**
+     * Returns all user restriction policies set by the given admin.
+     *
+     * <p>Pass in {@link UserHandle#USER_ALL} for {@code userId} to get global restrictions set by
+     * the admin
+     */
+    @NonNull
+    Set<UserRestrictionPolicyKey> getUserRestrictionPolicyKeysForAdmin(
+            @NonNull EnforcingAdmin admin,
+            int userId) {
+        Objects.requireNonNull(admin);
+        synchronized (mLock) {
+            if (userId == UserHandle.USER_ALL) {
+                return getUserRestrictionPolicyKeysForAdminLocked(mGlobalPolicies, admin);
+            }
+            if (!mLocalPolicies.contains(userId)) {
+                return Set.of();
+            }
+            return getUserRestrictionPolicyKeysForAdminLocked(mLocalPolicies.get(userId), admin);
+        }
+    }
+
+    private Set<UserRestrictionPolicyKey> getUserRestrictionPolicyKeysForAdminLocked(
+            Map<PolicyKey, PolicyState<?>> policies,
+            EnforcingAdmin admin) {
+        Set<UserRestrictionPolicyKey> keys = new HashSet<>();
+        for (PolicyKey key : policies.keySet()) {
+            if (!policies.get(key).getPolicyDefinition().isUserRestrictionPolicy()) {
+                continue;
+            }
+            // User restriction policies are always boolean
+            PolicyValue<Boolean> value = (PolicyValue<Boolean>) policies.get(key)
+                    .getPoliciesSetByAdmins().get(admin);
+            if (value == null || !value.getValue()) {
+                continue;
+            }
+            keys.add((UserRestrictionPolicyKey) key);
+        }
+        return keys;
     }
 
     private <V> boolean hasLocalPolicyLocked(PolicyDefinition<V> policyDefinition, int userId) {

@@ -85,8 +85,12 @@ import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbPort;
+import android.hardware.usb.UsbPortStatus;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -117,6 +121,7 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
 import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
+import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
@@ -238,9 +243,16 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private UiEventLogger mUiEventLogger;
     @Mock
     private GlobalSettings mGlobalSettings;
-    private FaceWakeUpTriggersConfig mFaceWakeUpTriggersConfig;
     @Mock
     private FingerprintInteractiveToAuthProvider mInteractiveToAuthProvider;
+    @Mock
+    private UsbPort mUsbPort;
+    @Mock
+    private UsbManager mUsbManager;
+    @Mock
+    private UsbPortStatus mUsbPortStatus;
+    @Mock
+    private Uri mURI;
 
     private List<FingerprintSensorPropertiesInternal> mFingerprintSensorProperties;
     private final int mCurrentUserId = 100;
@@ -252,9 +264,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<FaceManager.AuthenticationCallback> mAuthenticationCallbackCaptor;
 
-    @Mock
-    private Uri mURI;
-
     // Direct executor
     private final Executor mBackgroundExecutor = Runnable::run;
     private final Executor mMainExecutor = Runnable::run;
@@ -264,6 +273,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private MockitoSession mMockitoSession;
     private StatusBarStateController.StateListener mStatusBarStateListener;
     private IBiometricEnabledOnKeyguardCallback mBiometricEnabledOnKeyguardCallback;
+    private FaceWakeUpTriggersConfig mFaceWakeUpTriggersConfig;
     private final InstanceId mKeyguardInstanceId = InstanceId.fakeInstanceId(999);
 
     @Before
@@ -2373,6 +2383,55 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
     }
 
+    @Test
+    public void testBatteryChangedIntent_refreshBatteryInfo() {
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(mContext, getBatteryIntent());
+
+        BatteryStatus status = verifyRefreshBatteryInfo();
+        assertThat(status.incompatibleCharger.get()).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mIncompatibleCharger).isFalse();
+    }
+
+    @Test
+    public void testUsbComplianceIntent_refreshBatteryInfo() {
+        Context contextSpy = getSpyContext();
+        when(contextSpy.registerReceiver(eq(null), any(IntentFilter.class)))
+                .thenReturn(getBatteryIntent());
+
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(
+                contextSpy, new Intent(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED));
+
+        mTestableLooper.processAllMessages();
+        assertThat(mKeyguardUpdateMonitor.mIncompatibleCharger).isFalse();
+    }
+
+    @Test
+    public void testUsbComplianceIntent_refreshBatteryInfoWithIncompatibleCharger() {
+        Context contextSpy = getSpyContext();
+        setupIncompatibleCharging();
+        when(contextSpy.registerReceiver(eq(null), any(IntentFilter.class)))
+                .thenReturn(getBatteryIntent());
+
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(
+                contextSpy, new Intent(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED));
+
+        mTestableLooper.processAllMessages();
+        assertThat(mKeyguardUpdateMonitor.mIncompatibleCharger).isTrue();
+    }
+
+    @Test
+    public void testBatteryChangedIntent_unplugDevice_resetIncompatibleCharger() {
+        mKeyguardUpdateMonitor.mIncompatibleCharger = true;
+        Intent batteryChangedIntent =
+                getBatteryIntent().putExtra(BatteryManager.EXTRA_PLUGGED, -1);
+
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(mContext, batteryChangedIntent);
+
+        BatteryStatus status = verifyRefreshBatteryInfo();
+        assertThat(status.incompatibleCharger.get()).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mIncompatibleCharger).isFalse();
+    }
+
     private void userDeviceLockDown() {
         when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
         when(mStrongAuthTracker.getStrongAuthForUser(mCurrentUserId))
@@ -2590,6 +2649,37 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subscription);
         intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 0);
         return intent;
+    }
+
+    private BatteryStatus verifyRefreshBatteryInfo() {
+        mTestableLooper.processAllMessages();
+        ArgumentCaptor<BatteryStatus> captor = ArgumentCaptor.forClass(BatteryStatus.class);
+        verify(mTestCallback, atLeastOnce()).onRefreshBatteryInfo(captor.capture());
+        List<BatteryStatus> batteryStatusList = captor.getAllValues();
+        return batteryStatusList.get(batteryStatusList.size() - 1);
+    }
+
+    private void setupIncompatibleCharging() {
+        final List<UsbPort> usbPorts = new ArrayList<>();
+        usbPorts.add(mUsbPort);
+        when(mUsbManager.getPorts()).thenReturn(usbPorts);
+        when(mUsbPort.getStatus()).thenReturn(mUsbPortStatus);
+        when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
+        when(mUsbPortStatus.isConnected()).thenReturn(true);
+        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[]{1});
+    }
+
+    private Context getSpyContext() {
+        Context contextSpy = spy(mContext);
+        when(contextSpy.getSystemService(UsbManager.class)).thenReturn(mUsbManager);
+        when(contextSpy.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED)))
+                .thenReturn(new Intent(Intent.ACTION_BATTERY_CHANGED));
+        return contextSpy;
+    }
+
+    private Intent getBatteryIntent() {
+        return new Intent(Intent.ACTION_BATTERY_CHANGED).putExtra(
+                BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_OVERHEAT);
     }
 
     private class TestableKeyguardUpdateMonitor extends KeyguardUpdateMonitor {

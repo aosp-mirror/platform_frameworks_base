@@ -22,8 +22,6 @@ import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Objects;
-
 /**
  * Class to identify a union resolution mechanism for flag policies, it's used to resolve the
  * enforced policy when being set by multiple admins (see
@@ -35,8 +33,10 @@ import java.util.Objects;
 public final class FlagUnion extends ResolutionMechanism<Integer> {
 
     /**
-     * @hide
+     * Union resolution for policies represented as int flags which resolves as the union of all
+     * flags.
      */
+    @NonNull
     public static final FlagUnion FLAG_UNION = new FlagUnion();
 
     private FlagUnion(){};
@@ -49,7 +49,7 @@ public final class FlagUnion extends ResolutionMechanism<Integer> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this);
+        return 0;
     }
 
     @Override
@@ -70,7 +70,7 @@ public final class FlagUnion extends ResolutionMechanism<Integer> {
             new Parcelable.Creator<FlagUnion>() {
                 @Override
                 public FlagUnion createFromParcel(Parcel source) {
-                    return new FlagUnion();
+                    return FLAG_UNION;
                 }
 
                 @Override

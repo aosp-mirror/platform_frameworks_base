@@ -25,6 +25,7 @@ import android.app.admin.LockTaskPolicy;
 import android.app.admin.PackagePermissionPolicyKey;
 import android.app.admin.PackagePolicyKey;
 import android.app.admin.PolicyKey;
+import android.app.admin.UserRestrictionPolicyKey;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -40,6 +41,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
 
 import java.util.Collections;
@@ -199,6 +201,24 @@ final class PolicyEnforcerCallbacks {
                     packageName,
                     uninstallBlocked != null && uninstallBlocked,
                     userId);
+            return true;
+        }));
+    }
+
+    static boolean setUserRestriction(
+            @Nullable Boolean enabled, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        return Boolean.TRUE.equals(Binder.withCleanCallingIdentity(() -> {
+            if (!(policyKey instanceof UserRestrictionPolicyKey)) {
+                throw new IllegalArgumentException("policyKey is not of type "
+                        + "UserRestrictionPolicyKey");
+            }
+            UserRestrictionPolicyKey parsedKey =
+                    (UserRestrictionPolicyKey) policyKey;
+            // TODO: call into new UserManager API when merged
+            UserManagerInternal userManager = LocalServices.getService(UserManagerInternal.class);
+//            userManager.setUserRestriction(
+//                    userId, parsedKey.getRestriction(), enabled != null && enabled);
             return true;
         }));
     }

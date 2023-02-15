@@ -176,7 +176,8 @@ class ActiveAdmin {
     private static final String ATTR_PACKAGE_POLICY_MODE = "package-policy-type";
     private static final String TAG_CREDENTIAL_MANAGER_POLICY = "credential-manager-policy";
 
-
+    // If the ActiveAdmin is a permission-based admin, then info will be null because the
+    // permission-based admin is not mapped to a device administrator component.
     DeviceAdminInfo info;
 
     static final int DEF_PASSWORD_HISTORY_LENGTH = 0;
@@ -378,9 +379,11 @@ class ActiveAdmin {
 
     void writeToXml(TypedXmlSerializer out)
             throws IllegalArgumentException, IllegalStateException, IOException {
-        out.startTag(null, TAG_POLICIES);
-        info.writePoliciesToXml(out);
-        out.endTag(null, TAG_POLICIES);
+        if (info != null) {
+            out.startTag(null, TAG_POLICIES);
+            info.writePoliciesToXml(out);
+            out.endTag(null, TAG_POLICIES);
+        }
         if (mPasswordPolicy.quality != PASSWORD_QUALITY_UNSPECIFIED) {
             writeAttributeValueToXml(
                     out, TAG_PASSWORD_QUALITY, mPasswordPolicy.quality);
@@ -1188,14 +1191,16 @@ class ActiveAdmin {
         pw.print("testOnlyAdmin=");
         pw.println(testOnlyAdmin);
 
-        pw.println("policies:");
-        ArrayList<DeviceAdminInfo.PolicyInfo> pols = info.getUsedPolicies();
-        if (pols != null) {
-            pw.increaseIndent();
-            for (int i = 0; i < pols.size(); i++) {
-                pw.println(pols.get(i).tag);
+        if (info != null) {
+            pw.println("policies:");
+            ArrayList<DeviceAdminInfo.PolicyInfo> pols = info.getUsedPolicies();
+            if (pols != null) {
+                pw.increaseIndent();
+                for (int i = 0; i < pols.size(); i++) {
+                    pw.println(pols.get(i).tag);
+                }
+                pw.decreaseIndent();
             }
-            pw.decreaseIndent();
         }
 
         pw.print("passwordQuality=0x");

@@ -1836,6 +1836,27 @@ public final class DevicePolicyResources {
              */
             public static final String WORK_PROFILE_BADGED_LABEL =
                     PREFIX + "WORK_PROFILE_BADGED_LABEL";
+
+            /**
+             * Notification title. This notification lets the user know that they will be unable to
+             * receive phone calls or texts until the work profile is turned on.
+             */
+            public static final String WORK_PROFILE_TELEPHONY_PAUSED_TITLE =
+                    PREFIX + "WORK_PROFILE_TELEPHONY_UNAVAILABLE_TITLE";
+
+            /**
+             * Notification text. This notification lets the user know that they will be unable to
+             * receive phone calls or texts until the work profile is turned on.
+             */
+            public static final String WORK_PROFILE_TELEPHONY_PAUSED_BODY =
+                    PREFIX + "WORK_PROFILE_TELEPHONY_UNAVAILABLE_BODY";
+
+            /**
+             * Label for notification button. This button lets the user turn the work profile on.
+             */
+            public static final String WORK_PROFILE_TELEPHONY_PAUSED_TURN_ON_BUTTON =
+                    PREFIX + "TURN_ON_WORK_PROFILE_BUTTON_TEXT";
+
         }
 
         /**

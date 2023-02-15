@@ -163,7 +163,7 @@ private fun TitleWithData(
             Text(
                 text = data,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
             )
         }
         subTitle()

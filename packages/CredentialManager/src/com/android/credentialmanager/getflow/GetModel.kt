@@ -34,6 +34,12 @@ data class GetCredentialUiState(
     val isNoAccount: Boolean = false,
 )
 
+internal fun hasContentToDisplay(state: GetCredentialUiState): Boolean {
+    return state.providerDisplayInfo.sortedUserNameToCredentialEntryList.isNotEmpty() ||
+        state.providerDisplayInfo.authenticationEntryList.isNotEmpty() ||
+        state.providerDisplayInfo.remoteEntry != null
+}
+
 data class ProviderInfo(
     /**
      * Unique id (component name) of this provider.

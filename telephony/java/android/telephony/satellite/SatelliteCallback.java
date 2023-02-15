@@ -18,7 +18,6 @@ package android.telephony.satellite;
 
 import android.annotation.NonNull;
 import android.os.Binder;
-import android.telephony.satellite.stub.SatelliteImplBase;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
@@ -63,16 +62,14 @@ public class SatelliteCallback {
         /**
          * Called when satellite provision state changes.
          *
-         * @param features The list of provisioned features.
          * @param provisioned The new provision state. {@code true} means satellite is provisioned
          *                    {@code false} means satellite is not provisioned.
          */
-        void onSatelliteProvisionStateChanged(
-                @SatelliteImplBase.Feature int[] features, boolean provisioned);
+        void onSatelliteProvisionStateChanged(boolean provisioned);
     }
 
     /**
-     * Interface for position update change listener.
+     * Interface for position update and message transfer state change listener.
      */
     public interface SatellitePositionUpdateListener {
         /**
@@ -86,9 +83,41 @@ public class SatelliteCallback {
          * Called when satellite message transfer state changes.
          *
          * @param state The new message transfer state.
+         * @param sendPendingCount The number of messages that are currently being sent.
+         * @param receivePendingCount The number of messages that are currently being received.
+         * @param errorCode If message transfer failed, the reason for failure.
          */
         void onMessageTransferStateUpdate(
-                @SatelliteManager.SatelliteMessageTransferState int state);
+                @SatelliteManager.SatelliteMessageTransferState int state, int sendPendingCount,
+                int receivePendingCount, @SatelliteManager.SatelliteError int errorCode);
+    }
+
+    /**
+     * Interface for satellite state change listener.
+     */
+    public interface SatelliteStateListener {
+        /**
+         * Called when satellite state changes.
+         * @param state The new satellite state.
+         */
+        void onSatelliteModemStateChange(@SatelliteManager.SatelliteModemState int state);
+
+        /**
+         * Called when there are pending messages to be received from satellite.
+         * @param count Pending message count.
+         */
+        void onPendingMessageCount(int count);
+    }
+
+    /**
+     * Interface for satellite datagram listener.
+     */
+    public interface SatelliteDatagramListener {
+        /**
+         * Called when there are incoming datagrams to be received.
+         * @param datagrams Datagrams to be received over satellite.
+         */
+        void onSatelliteDatagrams(SatelliteDatagram[] datagrams);
     }
 
     private static class ISatelliteStateListenerStub extends ISatelliteStateListener.Stub {
@@ -100,14 +129,13 @@ public class SatelliteCallback {
             mExecutor = executor;
         }
 
-        public void onSatelliteProvisionStateChanged(
-                @SatelliteImplBase.Feature int[] features, boolean provisioned) {
+        public void onSatelliteProvisionStateChanged(boolean provisioned) {
             SatelliteProvisionStateListener listener =
                     (SatelliteProvisionStateListener) mSatelliteCallbackWeakRef.get();
             if (listener == null) return;
 
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> listener.onSatelliteProvisionStateChanged(features, provisioned)));
+                    () -> listener.onSatelliteProvisionStateChanged(provisioned)));
         }
 
         public void onSatellitePositionUpdate(@NonNull PointingInfo pointingInfo) {
@@ -120,13 +148,46 @@ public class SatelliteCallback {
         }
 
         public void onMessageTransferStateUpdate(
-                @SatelliteManager.SatelliteMessageTransferState int state) {
+                @SatelliteManager.SatelliteMessageTransferState int state, int sendPendingCount,
+                int receivePendingCount, @SatelliteManager.SatelliteError int errorCode) {
             SatellitePositionUpdateListener listener =
                     (SatellitePositionUpdateListener) mSatelliteCallbackWeakRef.get();
             if (listener == null) return;
 
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> listener.onMessageTransferStateUpdate(state)));
+                    () -> listener.onMessageTransferStateUpdate(
+                            state, sendPendingCount, receivePendingCount, errorCode)));
+        }
+
+
+        @Override
+        public void onSatelliteModemStateChange(@SatelliteManager.SatelliteModemState int state) {
+            SatelliteStateListener listener =
+                    (SatelliteStateListener) mSatelliteCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onSatelliteModemStateChange(state)));
+        }
+
+        @Override
+        public void onPendingMessageCount(int count) {
+            SatelliteStateListener listener =
+                    (SatelliteStateListener) mSatelliteCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onPendingMessageCount(count)));
+        }
+
+        @Override
+        public void onSatelliteDatagrams(SatelliteDatagram[] datagrams) {
+            SatelliteDatagramListener listener =
+                    (SatelliteDatagramListener) mSatelliteCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onSatelliteDatagrams(datagrams)));
         }
     }
 }

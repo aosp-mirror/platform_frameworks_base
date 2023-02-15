@@ -17,13 +17,18 @@
 package android.telephony.satellite;
 
 import android.telephony.satellite.PointingInfo;
+import android.telephony.satellite.SatelliteDatagram;
 
 /**
  * Interface for satellite state listener.
  * @hide
  */
 oneway interface ISatelliteStateListener {
-    void onSatelliteProvisionStateChanged(in int[] features, in boolean provisioned);
+    void onSatelliteProvisionStateChanged(in boolean provisioned);
     void onSatellitePositionUpdate(in PointingInfo pointingInfo);
-    void onMessageTransferStateUpdate(in int state);
+    void onMessageTransferStateUpdate(in int state, in int sendPendingCount,
+            in int receivePendingCount, in int errorCode);
+    void onSatelliteModemStateChange(in int state);
+    void onPendingMessageCount(in int count);
+    void onSatelliteDatagrams(in SatelliteDatagram[] datagrams);
 }

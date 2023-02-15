@@ -21,14 +21,14 @@ import android.os.Bundle
 import androidx.compose.runtime.remember
 import com.android.settingslib.spa.framework.util.genEntryId
 
-private const val INJECT_ENTRY_NAME = "INJECT"
-private const val ROOT_ENTRY_NAME = "ROOT"
+private const val INJECT_ENTRY_LABEL = "INJECT"
+private const val ROOT_ENTRY_LABEL = "ROOT"
 
 /**
  * The helper to build a Settings Entry instance.
  */
 class SettingsEntryBuilder(private val name: String, private val owner: SettingsPage) {
-    private var displayName = name
+    private var label = name
     private var fromPage: SettingsPage? = null
     private var toPage: SettingsPage? = null
 
@@ -51,7 +51,7 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             id = genEntryId(name, owner, fromPage, toPage),
             name = name,
             owner = owner,
-            displayName = displayName,
+            label = label,
 
             // linking data
             fromPage = fromPage,
@@ -72,8 +72,8 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
         )
     }
 
-    fun setDisplayName(displayName: String): SettingsEntryBuilder {
-        this.displayName = displayName
+    fun setLabel(label: String): SettingsEntryBuilder {
+        this.label = label
         return this
     }
 
@@ -147,19 +147,19 @@ class SettingsEntryBuilder(private val name: String, private val owner: Settings
             return create(entryName, owner).setLink(toPage = owner)
         }
 
-        fun create(owner: SettingsPage, entryName: String, displayName: String? = null):
+        fun create(owner: SettingsPage, entryName: String, label: String? = null):
             SettingsEntryBuilder {
-            return SettingsEntryBuilder(entryName, owner).setDisplayName(displayName ?: entryName)
+            return SettingsEntryBuilder(entryName, owner).setLabel(label ?: entryName)
         }
 
-        fun createInject(owner: SettingsPage, displayName: String? = null): SettingsEntryBuilder {
-            val name = displayName ?: "${INJECT_ENTRY_NAME}_${owner.displayName}"
-            return createLinkTo(INJECT_ENTRY_NAME, owner).setDisplayName(name)
+        fun createInject(owner: SettingsPage, label: String? = null): SettingsEntryBuilder {
+            val label = label ?: "${INJECT_ENTRY_LABEL}_${owner.displayName}"
+            return createLinkTo(INJECT_ENTRY_LABEL, owner).setLabel(label)
         }
 
-        fun createRoot(owner: SettingsPage, displayName: String? = null): SettingsEntryBuilder {
-            val name = displayName ?: "${ROOT_ENTRY_NAME}_${owner.displayName}"
-            return createLinkTo(ROOT_ENTRY_NAME, owner).setDisplayName(name)
+        fun createRoot(owner: SettingsPage, label: String? = null): SettingsEntryBuilder {
+            val label = label ?: "${ROOT_ENTRY_LABEL}_${owner.displayName}"
+            return createLinkTo(ROOT_ENTRY_LABEL, owner).setLabel(label)
         }
     }
 }

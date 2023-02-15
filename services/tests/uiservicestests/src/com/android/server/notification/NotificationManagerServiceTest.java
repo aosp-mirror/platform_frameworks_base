@@ -203,7 +203,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
+import com.android.internal.config.sysui.TestableFlagResolver;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
 import com.android.internal.messages.nano.SystemMessageProto;
@@ -377,7 +377,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     TestableNotificationManagerService.StrongAuthTrackerFake mStrongAuthTracker;
 
-    TestFlagResolver mTestFlagResolver = new TestFlagResolver();
+    TestableFlagResolver mTestFlagResolver = new TestableFlagResolver();
 
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
@@ -401,7 +401,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Shell permisssions will override permissions of our app, so add all necessary permissions
         // for this test here:
         InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
-                "android.permission.WRITE_DEVICE_CONFIG",
+                "android.permission.ALLOWLISTED_WRITE_DEVICE_CONFIG",
                 "android.permission.READ_DEVICE_CONFIG",
                 "android.permission.READ_CONTACTS");
 
@@ -7619,17 +7619,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testGetAllowedAssistantAdjustments() throws Exception {
-        List<String> capabilities = mBinderService.getAllowedAssistantAdjustments(null);
-        assertNotNull(capabilities);
-
-        for (int i = capabilities.size() - 1; i >= 0; i--) {
-            String capability = capabilities.get(i);
-            mBinderService.disallowAssistantAdjustment(capability);
-            assertEquals(i + 1, mBinderService.getAllowedAssistantAdjustments(null).size());
-            List<String> currentCapabilities = mBinderService.getAllowedAssistantAdjustments(null);
-            assertNotNull(currentCapabilities);
-            assertFalse(currentCapabilities.contains(capability));
-        }
+        List<String> adjustments = mBinderService.getAllowedAssistantAdjustments(null);
+        assertNotNull(adjustments);
     }
 
     @Test

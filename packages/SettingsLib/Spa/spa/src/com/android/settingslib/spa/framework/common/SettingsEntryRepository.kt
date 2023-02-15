@@ -111,9 +111,9 @@ class SettingsEntryRepository(sppRepository: SettingsPageProviderRepository) {
         return entryPath
     }
 
-    fun getEntryPathWithDisplayName(entryId: String): List<String> {
+    fun getEntryPathWithLabel(entryId: String): List<String> {
         val entryPath = getEntryPath(entryId)
-        return entryPath.map { it.displayName }
+        return entryPath.map { it.label }
     }
 
     fun getEntryPathWithTitle(entryId: String, defaultTitle: String): List<String> {

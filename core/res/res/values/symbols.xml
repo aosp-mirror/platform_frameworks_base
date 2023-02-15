@@ -1190,6 +1190,9 @@
   <java-symbol type="string" name="personal_apps_suspension_soon_text" />
   <java-symbol type="string" name="personal_apps_suspension_text" />
   <java-symbol type="string" name="personal_apps_suspended_turn_profile_on" />
+  <java-symbol type="string" name="work_profile_telephony_paused_title" />
+  <java-symbol type="string" name="work_profile_telephony_paused_text" />
+  <java-symbol type="string" name="work_profile_telephony_paused_turn_on_button" />
   <java-symbol type="string" name="notification_work_profile_content_description" />
   <java-symbol type="string" name="factory_reset_warning" />
   <java-symbol type="string" name="factory_reset_message" />
@@ -1410,6 +1413,7 @@
 
   <java-symbol type="drawable" name="btn_borderless_rect" />
   <java-symbol type="drawable" name="ic_phone" />
+  <java-symbol type="drawable" name="ic_phone_disabled" />
   <java-symbol type="drawable" name="ic_bt_headphones_a2dp" />
   <java-symbol type="drawable" name="ic_bt_headset_hfp" />
   <java-symbol type="drawable" name="ic_bt_hearing_aid" />

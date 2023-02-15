@@ -650,7 +650,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         mPipUiEventLoggerLogger.setTaskInfo(mTaskInfo);
-        mPipUiEventLoggerLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER);
 
         // If the displayId of the task is different than what PipBoundsHandler has, then update
         // it. This is possible if we entered PiP on an external display.
@@ -658,6 +657,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 && mOnDisplayIdChangeCallback != null) {
             mOnDisplayIdChangeCallback.accept(info.displayId);
         }
+
+        // UiEvent logging.
+        final PipUiEventLogger.PipUiEventEnum uiEventEnum;
+        if (isLaunchIntoPipTask()) {
+            uiEventEnum = PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER_CONTENT_PIP;
+        } else if (mPipTransitionState.getInSwipePipToHomeTransition()) {
+            uiEventEnum = PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_AUTO_ENTER;
+        } else {
+            uiEventEnum = PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER;
+        }
+        mPipUiEventLoggerLogger.log(uiEventEnum);
 
         if (mPipTransitionState.getInSwipePipToHomeTransition()) {
             if (!mWaitForFixedRotation) {

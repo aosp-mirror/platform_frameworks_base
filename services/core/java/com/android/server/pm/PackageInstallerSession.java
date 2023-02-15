@@ -4878,7 +4878,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private static void writePermissionsLocked(@NonNull TypedXmlSerializer out,
             @NonNull SessionParams params) throws IOException {
-        params.writePermissionStateXml(out, TAG_GRANT_PERMISSION, TAG_DENY_PERMISSION, ATTR_NAME);
+        var permissionStates = params.getPermissionStates();
+        for (int index = 0; index < permissionStates.size(); index++) {
+            var permissionName = permissionStates.keyAt(index);
+            var state = permissionStates.valueAt(index);
+            String tag = state == SessionParams.PERMISSION_STATE_GRANTED ? TAG_GRANT_PERMISSION
+                    : TAG_DENY_PERMISSION;
+            out.startTag(null, tag);
+            writeStringAttribute(out, ATTR_NAME, permissionName);
+            out.endTag(null, tag);
+        }
     }
 
     private static void writeWhitelistedRestrictedPermissionsLocked(@NonNull TypedXmlSerializer out,

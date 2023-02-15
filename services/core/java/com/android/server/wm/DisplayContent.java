@@ -1014,6 +1014,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing
                         |= w.mAttrs.preferMinimalPostProcessing;
 
+                mTmpApplySurfaceChangesTransactionState.disableHdrConversion
+                        |= !(w.mAttrs.isHdrConversionEnabled());
+
                 final int preferredModeId = getDisplayPolicy().getRefreshRatePolicy()
                         .getPreferredModeId(w);
 
@@ -4891,6 +4894,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
+                    mTmpApplySurfaceChangesTransactionState.disableHdrConversion,
                     true /* inTraversal, must call performTraversalInTrans... below */);
         }
         // If the display now has content, or no longer has content, update recording.
@@ -5095,6 +5099,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public int preferredModeId;
         public float preferredMinRefreshRate;
         public float preferredMaxRefreshRate;
+        public boolean disableHdrConversion;
 
         void reset() {
             displayHasContent = false;
@@ -5105,6 +5110,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             preferredModeId = 0;
             preferredMinRefreshRate = 0;
             preferredMaxRefreshRate = 0;
+            disableHdrConversion = false;
         }
     }
 

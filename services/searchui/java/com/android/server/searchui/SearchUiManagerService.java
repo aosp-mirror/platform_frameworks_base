@@ -140,12 +140,6 @@ public class SearchUiManagerService extends
         }
 
         @Override
-        public void requestEmptyQueryResultUpdate(@NonNull SearchSessionId sessionId) {
-            runForUserLocked("requestEmptyQueryResultUpdate", sessionId,
-                    (service) -> service.requestEmptyQueryResultUpdateLocked(sessionId));
-        }
-
-        @Override
         public void destroySearchSession(@NonNull SearchSessionId sessionId) {
             runForUserLocked("destroySearchSession", sessionId,
                     (service) -> service.onDestroyLocked(sessionId));

@@ -73,7 +73,7 @@ class CredentialManagerRepo(
         requestInfo = intent.extras?.getParcelable(
             RequestInfo.EXTRA_REQUEST_INFO,
             RequestInfo::class.java
-        ) ?: testGetRequestInfo()
+        ) ?: testCreatePasskeyRequestInfo()
 
         providerEnabledList = when (requestInfo.type) {
             RequestInfo.TYPE_CREATE ->
@@ -115,8 +115,10 @@ class CredentialManagerRepo(
                         providerDisableListUiState,
                         defaultProviderId,
                         requestDisplayInfoUiState,
-                        /** isOnPasskeyIntroStateAlready = */ false,
-                        isPasskeyFirstUse)!!,
+                        /** isOnPasskeyIntroStateAlready = */
+                        false,
+                        isPasskeyFirstUse
+                    )!!,
                     getCredentialUiState = null,
                 )
             }
@@ -224,12 +226,14 @@ class CredentialManagerRepo(
                 .Builder("io.enpass.app")
                 .setSaveEntries(
                     listOf<Entry>(
-                        CreateTestUtils.newCreateEntry(context,
+                        CreateTestUtils.newCreateEntry(
+                            context,
                             "key1", "subkey-1", "elisa.beckett@gmail.com",
                             20, 7, 27, Instant.ofEpochSecond(10L),
                             "Legal note"
                         ),
-                        CreateTestUtils.newCreateEntry(context,
+                        CreateTestUtils.newCreateEntry(
+                            context,
                             "key1", "subkey-2", "elisa.work@google.com",
                             20, 7, 27, Instant.ofEpochSecond(12L),
                             null
@@ -244,12 +248,14 @@ class CredentialManagerRepo(
                 .Builder("com.dashlane")
                 .setSaveEntries(
                     listOf<Entry>(
-                        CreateTestUtils.newCreateEntry(context,
+                        CreateTestUtils.newCreateEntry(
+                            context,
                             "key1", "subkey-3", "elisa.beckett@dashlane.com",
                             20, 7, 27, Instant.ofEpochSecond(11L),
                             null
                         ),
-                        CreateTestUtils.newCreateEntry(context,
+                        CreateTestUtils.newCreateEntry(
+                            context,
                             "key1", "subkey-4", "elisa.work@dashlane.com",
                             20, 7, 27, Instant.ofEpochSecond(14L),
                             null
@@ -343,7 +349,6 @@ class CredentialManagerRepo(
     }
 
 
-
     private fun newRemoteEntry(
         key: String,
         subkey: String,
@@ -402,7 +407,8 @@ class CredentialManagerRepo(
                 "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL",
                 credentialData,
                 /*candidateQueryData=*/ Bundle(),
-                /*isSystemProviderRequired=*/ false
+                /*isSystemProviderRequired=*/ false,
+                /*alwaysSendAppInfoToProvider=*/ true
             ),
             "com.google.android.youtube"
         )
@@ -416,7 +422,8 @@ class CredentialManagerRepo(
                 TYPE_PASSWORD_CREDENTIAL,
                 request.credentialData,
                 request.candidateQueryData,
-                /*isSystemProviderRequired=*/ false
+                /*isSystemProviderRequired=*/ false,
+                /*alwaysSendAppInfoToProvider=*/ true
             ),
             "com.google.android.youtube"
         )
@@ -427,14 +434,16 @@ class CredentialManagerRepo(
         val displayInfo = DisplayInfo("my-username00", "Joe")
         data.putBundle(
             "androidx.credentials.BUNDLE_KEY_REQUEST_DISPLAY_INFO",
-            displayInfo.toBundle())
+            displayInfo.toBundle()
+        )
         return RequestInfo.newCreateRequestInfo(
             Binder(),
             CreateCredentialRequest(
                 "other-sign-ins",
                 data,
                 /*candidateQueryData=*/ Bundle(),
-                /*isSystemProviderRequired=*/ false
+                /*isSystemProviderRequired=*/ false,
+                /*alwaysSendAppInfoToProvider=*/ true
             ),
             "com.google.android.youtube"
         )
@@ -445,15 +454,14 @@ class CredentialManagerRepo(
             Binder(),
             GetCredentialRequest.Builder(
                 Bundle()
-            )
-                .addCredentialOption(
-                    CredentialOption(
-                        "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL",
-                        Bundle(),
-                        Bundle(), /*isSystemProviderRequired=*/
-                        false
-                    )
+            ).addCredentialOption(
+                CredentialOption(
+                    "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL",
+                    Bundle(),
+                    Bundle(), /*isSystemProviderRequired=*/
+                    false
                 )
+            )
                 .build(),
             "com.google.android.youtube"
         )

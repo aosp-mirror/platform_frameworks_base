@@ -19,6 +19,7 @@ package android.app.admin;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_PACKAGE_NAME;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_PERMISSION_NAME;
 import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_BUNDLE_KEY;
+import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_KEY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -119,7 +120,7 @@ public final class PackagePermissionPolicyKey extends PolicyKey {
      */
     @Override
     public void writeToBundle(Bundle bundle) {
-        super.writeToBundle(bundle);
+        bundle.putString(EXTRA_POLICY_KEY, getIdentifier());
         Bundle extraPolicyParams = new Bundle();
         extraPolicyParams.putString(EXTRA_PACKAGE_NAME, mPackageName);
         extraPolicyParams.putString(EXTRA_PERMISSION_NAME, mPermissionName);

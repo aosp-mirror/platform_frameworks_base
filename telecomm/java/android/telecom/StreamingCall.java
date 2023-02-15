@@ -18,6 +18,7 @@ package android.telecom;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,7 +31,10 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Represents a voip call requested to stream to another device that the general streaming sender
  * app should present to the receiver.
+ *
+ * @hide
  */
+@SystemApi
 public final class StreamingCall implements Parcelable {
     /**
      * The state of a {@code StreamingCall} when newly created. General streaming sender should
@@ -50,9 +54,12 @@ public final class StreamingCall implements Parcelable {
      */
     public static final int STATE_DISCONNECTED = 3;
 
+    /**
+     * @hide
+     */
     private StreamingCall(@NonNull Parcel in) {
         mComponentName = in.readParcelable(ComponentName.class.getClassLoader());
-        mDisplayName = in.readString16NoHelper();
+        mDisplayName = in.readCharSequence();
         mAddress = in.readParcelable(Uri.class.getClassLoader());
         mExtras = in.readBundle();
         mState = in.readInt();
@@ -79,7 +86,7 @@ public final class StreamingCall implements Parcelable {
     @Override
     public void writeToParcel(@androidx.annotation.NonNull Parcel dest, int flags) {
         dest.writeParcelable(mComponentName, flags);
-        dest.writeString16NoHelper(mDisplayName);
+        dest.writeCharSequence(mDisplayName);
         dest.writeParcelable(mAddress, flags);
         dest.writeBundle(mExtras);
         dest.writeInt(mState);
@@ -98,14 +105,14 @@ public final class StreamingCall implements Parcelable {
     public @interface StreamingCallState {}
 
     private final ComponentName mComponentName;
-    private final String mDisplayName;
+    private final CharSequence mDisplayName;
     private final Uri mAddress;
     private final Bundle mExtras;
     @StreamingCallState
     private int mState;
     private StreamingCallAdapter mAdapter = null;
 
-    public StreamingCall(@NonNull ComponentName componentName, @NonNull String displayName,
+    public StreamingCall(@NonNull ComponentName componentName, @NonNull CharSequence displayName,
             @NonNull Uri address, @NonNull Bundle extras) {
         mComponentName = componentName;
         mDisplayName = displayName;
@@ -137,7 +144,7 @@ public final class StreamingCall implements Parcelable {
      * {@code StreamingCall} to the receiver side.
      */
     @NonNull
-    public String getDisplayName() {
+    public CharSequence getDisplayName() {
         return mDisplayName;
     }
 

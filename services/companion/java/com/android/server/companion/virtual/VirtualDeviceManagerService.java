@@ -34,6 +34,7 @@ import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
+import android.companion.virtual.sensor.VirtualSensor;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManagerInternal;
@@ -467,6 +468,17 @@ public class VirtualDeviceManagerService extends SystemService {
                 VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
                 return virtualDevice != null ? virtualDevice.getOwnerUid() : Process.INVALID_UID;
             }
+        }
+
+        @Override
+        public @Nullable VirtualSensor getVirtualSensor(int deviceId, int handle) {
+            synchronized (mVirtualDeviceManagerLock) {
+                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
+                if (virtualDevice != null) {
+                    return virtualDevice.getVirtualSensorByHandle(handle);
+                }
+            }
+            return null;
         }
 
         @Override

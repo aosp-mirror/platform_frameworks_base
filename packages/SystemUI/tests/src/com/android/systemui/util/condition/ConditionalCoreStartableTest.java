@@ -60,6 +60,11 @@ public class ConditionalCoreStartableTest extends SysuiTestCase {
             mCallback = callback;
         }
 
+        public FakeConditionalCoreStartable(Monitor monitor, Callback callback) {
+            super(monitor);
+            mCallback = callback;
+        }
+
         @Override
         protected void onStart() {
             mCallback.onStart();
@@ -113,6 +118,31 @@ public class ConditionalCoreStartableTest extends SysuiTestCase {
         final Monitor.Subscription subscription = subscriptionCaptor.getValue();
 
         assertThat(subscription.getConditions()).containsExactly(mCondition);
+
+        verify(mCallback, never()).onStart();
+
+        subscription.getCallback().onConditionsChanged(true);
+
+        verify(mCallback).onStart();
+        verify(mMonitor).removeSubscription(mSubscriptionToken);
+    }
+
+    @Test
+    public void testOnStartCallbackWithNoConditions() {
+        final CoreStartable coreStartable =
+                new FakeConditionalCoreStartable(mMonitor,
+                        mCallback);
+
+        when(mMonitor.addSubscription(any())).thenReturn(mSubscriptionToken);
+        coreStartable.start();
+
+        final ArgumentCaptor<Monitor.Subscription> subscriptionCaptor = ArgumentCaptor.forClass(
+                Monitor.Subscription.class);
+        verify(mMonitor).addSubscription(subscriptionCaptor.capture());
+
+        final Monitor.Subscription subscription = subscriptionCaptor.getValue();
+
+        assertThat(subscription.getConditions()).isEmpty();
 
         verify(mCallback, never()).onStart();
 

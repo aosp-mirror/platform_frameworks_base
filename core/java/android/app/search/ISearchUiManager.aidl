@@ -38,8 +38,6 @@ interface ISearchUiManager {
 
     void registerEmptyQueryResultUpdateCallback(in SearchSessionId sessionId, in ISearchCallback callback);
 
-    void requestEmptyQueryResultUpdate(in SearchSessionId sessionId);
-
     void unregisterEmptyQueryResultUpdateCallback(in SearchSessionId sessionId, in ISearchCallback callback);
 
     void destroySearchSession(in SearchSessionId sessionId);

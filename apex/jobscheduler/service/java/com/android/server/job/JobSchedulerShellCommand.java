@@ -19,6 +19,7 @@ package com.android.server.job;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.job.JobParameters;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -83,6 +84,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return resetExecutionQuota(pw);
                 case "reset-schedule-quota":
                     return resetScheduleQuota(pw);
+                case "stop":
+                    return stop(pw);
                 case "trigger-dock-state":
                     return triggerDockState(pw);
                 default:
@@ -255,8 +258,9 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mInternal.executeTimeoutCommand(pw, pkgName, userId, namespace,
-                    jobIdStr != null, jobId);
+            return mInternal.executeStopCommand(pw, pkgName, userId, namespace,
+                    jobIdStr != null, jobId,
+                    JobParameters.STOP_REASON_TIMEOUT, JobParameters.INTERNAL_STOP_REASON_TIMEOUT);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -542,6 +546,60 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         return 0;
     }
 
+    private int stop(PrintWriter pw) throws Exception {
+        checkPermission("stop jobs");
+
+        int userId = UserHandle.USER_ALL;
+        String namespace = null;
+        int stopReason = JobParameters.STOP_REASON_USER;
+        int internalStopReason = JobParameters.INTERNAL_STOP_REASON_UNKNOWN;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-u":
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+
+                case "-n":
+                case "--namespace":
+                    namespace = getNextArgRequired();
+                    break;
+
+                case "-s":
+                case "--stop-reason":
+                    stopReason = Integer.parseInt(getNextArgRequired());
+                    break;
+
+                case "-i":
+                case "--internal-stop-reason":
+                    internalStopReason = Integer.parseInt(getNextArgRequired());
+                    break;
+
+                default:
+                    pw.println("Error: unknown option '" + opt + "'");
+                    return -1;
+            }
+        }
+
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = ActivityManager.getCurrentUser();
+        }
+
+        final String pkgName = getNextArg();
+        final String jobIdStr = getNextArg();
+        final int jobId = jobIdStr != null ? Integer.parseInt(jobIdStr) : -1;
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            return mInternal.executeStopCommand(pw, pkgName, userId, namespace,
+                    jobIdStr != null, jobId, stopReason, internalStopReason);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     private int triggerDockState(PrintWriter pw) throws Exception {
         checkPermission("trigger wireless charging dock state");
 
@@ -589,9 +647,28 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("         if both are given.");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
+        pw.println("  stop [-u | --user USER_ID] [-n | --namespace NAMESPACE]"
+                + " [-s | --stop-reason STOP_REASON] [-i | --internal-stop-reason STOP_REASON]"
+                + " [PACKAGE] [JOB_ID]");
+        pw.println("    Trigger immediate stop of currently executing jobs using the specified");
+        pw.println("    stop reasons.");
+        pw.println("    Options:");
+        pw.println("      -u or --user: specify which user's job is to be run; the default is");
+        pw.println("         all users");
+        pw.println("      -n or --namespace: specify the namespace this job sits in; the default");
+        pw.println("         is null (no namespace).");
+        pw.println("      -s or --stop-reason: specify the stop reason given to the job.");
+        pw.println("         Valid values are those that can be returned from");
+        pw.println("         JobParameters.getStopReason().");
+        pw.println("          The default value is STOP_REASON_USER.");
+        pw.println("      -i or --internal-stop-reason: specify the internal stop reason.");
+        pw.println("         JobScheduler will use for internal processing.");
+        pw.println("         Valid values are those that can be returned from");
+        pw.println("         JobParameters.getInternalStopReason().");
+        pw.println("          The default value is INTERNAL_STOP_REASON_UNDEFINED.");
         pw.println("  timeout [-u | --user USER_ID] [-n | --namespace NAMESPACE]"
                 + " [PACKAGE] [JOB_ID]");
-        pw.println("    Trigger immediate timeout of currently executing jobs, as if their.");
+        pw.println("    Trigger immediate timeout of currently executing jobs, as if their");
         pw.println("    execution timeout had expired.");
         pw.println("    Options:");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");

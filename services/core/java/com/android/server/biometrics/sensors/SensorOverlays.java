@@ -150,13 +150,6 @@ public final class SensorOverlays {
     }
 
     /**
-     * Returns if the sensor is side fps.
-     */
-    public boolean isSfps() {
-        return mSidefpsController.isPresent();
-    }
-
-    /**
      * Consumer for a biometric overlay controller.
      *
      * This behaves like a normal {@link Consumer} except that it will trap and log

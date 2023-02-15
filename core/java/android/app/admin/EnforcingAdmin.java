@@ -38,7 +38,7 @@ public final class EnforcingAdmin implements Parcelable {
     private final UserHandle mUserHandle;
 
     /**
-     * @hide
+     * Creates an enforcing admin with the given params.
      */
     public EnforcingAdmin(
             @NonNull String packageName, @NonNull Authority authority,
