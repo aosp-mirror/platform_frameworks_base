@@ -84,9 +84,6 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     private val _isUdfpsSupported = MutableStateFlow(false)
 
-    private val _isBouncerShowing = MutableStateFlow(false)
-    override val isBouncerShowing: Flow<Boolean> = _isBouncerShowing
-
     private val _isKeyguardGoingAway = MutableStateFlow(false)
     override val isKeyguardGoingAway: Flow<Boolean> = _isKeyguardGoingAway
 
@@ -151,10 +148,6 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     fun setWakefulnessModel(model: WakefulnessModel) {
         _wakefulnessModel.value = model
-    }
-
-    fun setBouncerShowing(isShowing: Boolean) {
-        _isBouncerShowing.value = isShowing
     }
 
     fun setBiometricUnlockState(state: BiometricUnlockModel) {
