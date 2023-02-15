@@ -535,6 +535,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         RemoteAnimationAdapter wrappedAdapter = new RemoteAnimationAdapter(wrapper,
                 0 /* duration */, 0 /* statusBarTransitionDelay */);
         ActivityOptions activityOptions = ActivityOptions.fromBundle(options);
+        // Flag this as a no-user-action launch to prevent sending user leaving event to the current
+        // top activity since it's going to be put into another side of the split. This prevents the
+        // current top activity from going into pip mode due to user leaving event.
+        activityOptions.setApplyNoUserActionFlagForShortcut(true);
         activityOptions.update(ActivityOptions.makeRemoteAnimation(wrappedAdapter));
         try {
             LauncherApps launcherApps = mContext.getSystemService(LauncherApps.class);
