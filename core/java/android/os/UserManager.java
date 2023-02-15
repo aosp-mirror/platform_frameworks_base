@@ -3052,6 +3052,19 @@ public class UserManager {
     }
 
     /**
+     * See {@link com.android.server.pm.UserManagerInternal#getDisplayAssignedToUser(int)}.
+     *
+     * @hide
+     */
+    public int getDisplayIdAssignedToUser() {
+        try {
+            return mService.getDisplayIdAssignedToUser();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return whether the context user is running in an "unlocked" state.
      * <p>
      * On devices with direct boot, a user is unlocked only after they've
