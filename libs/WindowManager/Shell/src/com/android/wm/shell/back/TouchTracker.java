@@ -42,11 +42,13 @@ class TouchTracker {
      */
     private float mInitTouchX;
     private float mInitTouchY;
+    private float mLatestVelocityX;
+    private float mLatestVelocityY;
     private float mStartThresholdX;
     private int mSwipeEdge;
     private boolean mCancelled;
 
-    void update(float touchX, float touchY) {
+    void update(float touchX, float touchY, float velocityX, float velocityY) {
         /**
          * If back was previously cancelled but the user has started swiping in the forward
          * direction again, restart back.
@@ -58,6 +60,8 @@ class TouchTracker {
         }
         mLatestTouchX = touchX;
         mLatestTouchY = touchY;
+        mLatestVelocityX = velocityX;
+        mLatestVelocityY = velocityY;
     }
 
     void setTriggerBack(boolean triggerBack) {
@@ -84,7 +88,14 @@ class TouchTracker {
     }
 
     BackMotionEvent createStartEvent(RemoteAnimationTarget target) {
-        return new BackMotionEvent(mInitTouchX, mInitTouchY, 0, mSwipeEdge, target);
+        return new BackMotionEvent(
+                /* touchX = */ mInitTouchX,
+                /* touchY = */ mInitTouchY,
+                /* progress = */ 0,
+                /* velocityX = */ 0,
+                /* velocityY = */ 0,
+                /* swipeEdge = */ mSwipeEdge,
+                /* departingAnimationTarget = */ target);
     }
 
     BackMotionEvent createProgressEvent() {
@@ -111,7 +122,14 @@ class TouchTracker {
     }
 
     BackMotionEvent createProgressEvent(float progress) {
-        return new BackMotionEvent(mLatestTouchX, mLatestTouchY, progress, mSwipeEdge, null);
+        return new BackMotionEvent(
+                /* touchX = */ mLatestTouchX,
+                /* touchY = */ mLatestTouchY,
+                /* progress = */ progress,
+                /* velocityX = */ mLatestVelocityX,
+                /* velocityY = */ mLatestVelocityY,
+                /* swipeEdge = */ mSwipeEdge,
+                /* departingAnimationTarget = */ null);
     }
 
     public void setProgressThreshold(float progressThreshold) {

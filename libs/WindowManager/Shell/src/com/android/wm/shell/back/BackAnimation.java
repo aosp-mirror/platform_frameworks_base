@@ -33,12 +33,19 @@ public interface BackAnimation {
      *
      * @param touchX the X touch position of the {@link MotionEvent}.
      * @param touchY the Y touch position of the {@link MotionEvent}.
+     * @param velocityX the X velocity computed from the {@link MotionEvent}.
+     * @param velocityY the Y velocity computed from the {@link MotionEvent}.
      * @param keyAction the original {@link KeyEvent#getAction()} when the event was dispatched to
      *               the process. This is forwarded separately because the input pipeline may mutate
      *               the {#event} action state later.
      * @param swipeEdge the edge from which the swipe begins.
      */
-    void onBackMotion(float touchX, float touchY, int keyAction,
+    void onBackMotion(
+            float touchX,
+            float touchY,
+            float velocityX,
+            float velocityY,
+            int keyAction,
             @BackEvent.SwipeEdge int swipeEdge);
 
     /**
