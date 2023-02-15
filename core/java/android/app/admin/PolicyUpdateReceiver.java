@@ -19,6 +19,7 @@ package android.app.admin;
 import android.annotation.BroadcastBehavior;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
+import android.annotation.TestApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -112,31 +113,37 @@ public abstract class PolicyUpdateReceiver extends BroadcastReceiver {
             "android.app.admin.extra.ACCOUNT_TYPE";
 
     /**
+     * String extra containing the policy identifier.
+     *
      * @hide
      */
-    public static final String EXTRA_POLICY_CHANGED_KEY =
-            "android.app.admin.extra.POLICY_CHANGED_KEY";
-
-    /**
-     * @hide
-     */
+    @TestApi
     public static final String EXTRA_POLICY_KEY = "android.app.admin.extra.POLICY_KEY";
 
     /**
+     * Bundle extra containing additional information related to a policy.
+     *
      * @hide
      */
+    @TestApi
     public static final String EXTRA_POLICY_BUNDLE_KEY =
             "android.app.admin.extra.POLICY_BUNDLE_KEY";
 
     /**
+     * Int extra containing the {@link PolicyUpdateResult} code.
+     *
      * @hide
      */
+    @TestApi
     public static final String EXTRA_POLICY_UPDATE_RESULT_KEY =
             "android.app.admin.extra.POLICY_UPDATE_RESULT_KEY";
 
     /**
+     * Int extra containing the target user this policy update applies to.
+     *
      * @hide
      */
+    @TestApi
     public static final String EXTRA_POLICY_TARGET_USER_ID =
             "android.app.admin.extra.POLICY_TARGET_USER_ID";
 

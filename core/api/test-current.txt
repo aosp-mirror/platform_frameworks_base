@@ -627,6 +627,13 @@ package android.app.admin {
     method @NonNull public android.app.admin.ResolutionMechanism<V> getResolutionMechanism();
   }
 
+  public abstract class PolicyUpdateReceiver extends android.content.BroadcastReceiver {
+    field public static final String EXTRA_POLICY_BUNDLE_KEY = "android.app.admin.extra.POLICY_BUNDLE_KEY";
+    field public static final String EXTRA_POLICY_KEY = "android.app.admin.extra.POLICY_KEY";
+    field public static final String EXTRA_POLICY_TARGET_USER_ID = "android.app.admin.extra.POLICY_TARGET_USER_ID";
+    field public static final String EXTRA_POLICY_UPDATE_RESULT_KEY = "android.app.admin.extra.POLICY_UPDATE_RESULT_KEY";
+  }
+
   public abstract class ResolutionMechanism<V> implements android.os.Parcelable {
   }
 
@@ -640,6 +647,13 @@ package android.app.admin {
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.StringSetUnion> CREATOR;
     field @NonNull public static final android.app.admin.StringSetUnion STRING_SET_UNION;
+  }
+
+  public final class TargetUser {
+    field public static final int GLOBAL_USER_ID = -3; // 0xfffffffd
+    field public static final int LOCAL_USER_ID = -1; // 0xffffffff
+    field public static final int PARENT_USER_ID = -2; // 0xfffffffe
+    field public static final int UNKNOWN_USER_ID = -3; // 0xfffffffd
   }
 
   public final class TopPriority<V> extends android.app.admin.ResolutionMechanism<V> {
