@@ -33,6 +33,10 @@ public interface NotificationInterruptStateProvider {
         /**
          * Full screen intents are disabled.
          */
+        NO_FSI_SHOW_STICKY_HUN(false),
+        /**
+         * Full screen intents are disabled.
+         */
         NO_FSI_DISABLED(false),
         /**
          * No full screen intent included, so there is nothing to show.

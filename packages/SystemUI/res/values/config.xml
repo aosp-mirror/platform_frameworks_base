@@ -120,6 +120,9 @@
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
 
+    <!-- Display time for a sticky heads up notification, in milliseconds. -->
+    <integer name="sticky_heads_up_notification_time">60000</integer>
+
     <!-- Whether to hide the notification header when the HUN is expanded. -->
     <bool name="heads_up_notification_hides_header">false</bool>
 
