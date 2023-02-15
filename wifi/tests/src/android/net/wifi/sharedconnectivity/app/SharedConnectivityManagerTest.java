@@ -285,25 +285,28 @@ public class SharedConnectivityManagerTest {
      */
     @Test
     public void disconnectTetherNetwork_serviceNotConnected_shouldFail() {
+        TetherNetwork network = buildTetherNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
-        assertFalse(manager.disconnectTetherNetwork());
+        assertFalse(manager.disconnectTetherNetwork(network));
     }
 
     @Test
     public void disconnectTetherNetwork() throws RemoteException {
+        TetherNetwork network = buildTetherNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
-        manager.disconnectTetherNetwork();
-        verify(mService).disconnectTetherNetwork();
+        manager.disconnectTetherNetwork(network);
+        verify(mService).disconnectTetherNetwork(network);
     }
 
     @Test
     public void disconnectTetherNetwork_remoteException_shouldFail() throws RemoteException {
+        TetherNetwork network = buildTetherNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
-        doThrow(new RemoteException()).when(mService).disconnectTetherNetwork();
-        assertFalse(manager.disconnectTetherNetwork());
+        doThrow(new RemoteException()).when(mService).disconnectTetherNetwork(any());
+        assertFalse(manager.disconnectTetherNetwork(network));
     }
 
     /**
