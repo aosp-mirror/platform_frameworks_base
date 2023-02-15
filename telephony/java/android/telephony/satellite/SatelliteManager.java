@@ -321,7 +321,7 @@ public class SatelliteManager {
      * @param callback The callback object to which the result will be delivered.
      *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
      *                 will return a {@code boolean} with value {@code true} if the satellite modem
-     *                 is powered on and {@code false} otherwise.
+     *                 is enabled and {@code false} otherwise.
      *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
      *                 will return a {@link SatelliteException} with the {@link SatelliteError}.
      *
@@ -526,7 +526,7 @@ public class SatelliteManager {
     /* Satellite modem is sending and/or receiving messages. */
     public static final int SATELLITE_MODEM_STATE_MESSAGE_TRANSFERRING = 2;
 
-    /* Satellite modem is powered off */
+    /* Satellite modem is powered off. */
     public static final int SATELLITE_MODEM_STATE_OFF = 3;
 
     /** @hide */
@@ -1204,14 +1204,14 @@ public class SatelliteManager {
     }
 
     /**
-     * Request to get the time after which the satellite will next be visible. This is an
+     * Request to get the time after which the satellite will be visible. This is an
      * {@code int} representing the duration in seconds after which the satellite will be visible.
      * This will return {@code 0} if the satellite is currently visible.
      *
      * @param executor The executor on which the callback will be called.
      * @param callback The callback object to which the result will be delivered.
      *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
-     *                 will return the time after which the satellite will next be visible.
+     *                 will return the time after which the satellite will be visible.
      *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
      *                 will return a {@link SatelliteException} with the {@link SatelliteError}.
      *
