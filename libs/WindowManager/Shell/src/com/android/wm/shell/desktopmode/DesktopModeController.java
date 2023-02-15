@@ -41,6 +41,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.DisplayAreaInfo;
@@ -363,10 +364,10 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
         }
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "handle shell transition request: %s", request);
 
-        WindowContainerTransaction wct = mTransitions.dispatchRequest(transition, request, this);
-        if (wct == null) {
-            wct = new WindowContainerTransaction();
-        }
+        Pair<Transitions.TransitionHandler, WindowContainerTransaction> subHandler =
+                mTransitions.dispatchRequest(transition, request, this);
+        WindowContainerTransaction wct = subHandler != null
+                ? subHandler.second : new WindowContainerTransaction();
         bringDesktopAppsToFront(wct);
         wct.reorder(request.getTriggerTask().token, true /* onTop */);
 
