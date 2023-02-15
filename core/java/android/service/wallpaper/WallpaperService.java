@@ -170,6 +170,7 @@ public abstract class WallpaperService extends Service {
             Float.NEGATIVE_INFINITY);
 
     private static final int NOTIFY_COLORS_RATE_LIMIT_MS = 1000;
+    private static final int PROCESS_LOCAL_COLORS_INTERVAL_MS = 1000;
 
     private static final boolean ENABLE_WALLPAPER_DIMMING =
             SystemProperties.getBoolean("persist.debug.enable_wallpaper_dimming", true);
@@ -274,9 +275,13 @@ public abstract class WallpaperService extends Service {
         MotionEvent mPendingMove;
         boolean mIsInAmbientMode;
 
-        // Needed for throttling onComputeColors.
+        // used to throttle onComputeColors
         private long mLastColorInvalidation;
         private final Runnable mNotifyColorsChanged = this::notifyColorsChanged;
+
+        // used to throttle processLocalColors
+        private long mLastProcessLocalColorsTimestamp;
+        private AtomicBoolean mProcessLocalColorsPending = new AtomicBoolean(false);
         private final Supplier<Long> mClockFunction;
         private final Handler mHandler;
 
@@ -1618,7 +1623,26 @@ public abstract class WallpaperService extends Service {
             processLocalColors(xOffset, xOffsetStep);
         }
 
+        /**
+         * Thread-safe util to call {@link #processLocalColorsInternal} with a minimum interval of
+         * {@link #PROCESS_LOCAL_COLORS_INTERVAL_MS} between two calls.
+         */
         private void processLocalColors(float xOffset, float xOffsetStep) {
+            if (mProcessLocalColorsPending.compareAndSet(false, true)) {
+                final long now = mClockFunction.get();
+                final long timeSinceLastColorProcess = now - mLastProcessLocalColorsTimestamp;
+                final long timeToWait = Math.max(0,
+                        PROCESS_LOCAL_COLORS_INTERVAL_MS - timeSinceLastColorProcess);
+
+                mHandler.postDelayed(() -> {
+                    mLastProcessLocalColorsTimestamp = now + timeToWait;
+                    mProcessLocalColorsPending.set(false);
+                    processLocalColorsInternal(xOffset, xOffsetStep);
+                }, timeToWait);
+            }
+        }
+
+        private void processLocalColorsInternal(float xOffset, float xOffsetStep) {
             // implemented by the wallpaper
             if (supportsLocalColorExtraction()) return;
             if (DEBUG) {
@@ -1652,40 +1676,39 @@ public abstract class WallpaperService extends Service {
 
             float finalXOffsetStep = xOffsetStep;
             float finalXOffset = xOffset;
-            mHandler.post(() -> {
-                Trace.beginSection("WallpaperService#processLocalColors");
-                resetWindowPages();
-                int xPage = xCurrentPage;
-                EngineWindowPage current;
-                if (mWindowPages.length == 0 || (mWindowPages.length != xPages)) {
-                    mWindowPages = new EngineWindowPage[xPages];
-                    initWindowPages(mWindowPages, finalXOffsetStep);
+
+            Trace.beginSection("WallpaperService#processLocalColors");
+            resetWindowPages();
+            int xPage = xCurrentPage;
+            EngineWindowPage current;
+            if (mWindowPages.length == 0 || (mWindowPages.length != xPages)) {
+                mWindowPages = new EngineWindowPage[xPages];
+                initWindowPages(mWindowPages, finalXOffsetStep);
+            }
+            if (mLocalColorsToAdd.size() != 0) {
+                for (RectF colorArea : mLocalColorsToAdd) {
+                    if (!isValid(colorArea)) continue;
+                    mLocalColorAreas.add(colorArea);
+                    int colorPage = getRectFPage(colorArea, finalXOffsetStep);
+                    EngineWindowPage currentPage = mWindowPages[colorPage];
+                    currentPage.setLastUpdateTime(0);
+                    currentPage.removeColor(colorArea);
                 }
-                if (mLocalColorsToAdd.size() != 0) {
-                    for (RectF colorArea : mLocalColorsToAdd) {
-                        if (!isValid(colorArea)) continue;
-                        mLocalColorAreas.add(colorArea);
-                        int colorPage = getRectFPage(colorArea, finalXOffsetStep);
-                        EngineWindowPage currentPage = mWindowPages[colorPage];
-                        currentPage.setLastUpdateTime(0);
-                        currentPage.removeColor(colorArea);
-                    }
-                    mLocalColorsToAdd.clear();
+                mLocalColorsToAdd.clear();
+            }
+            if (xPage >= mWindowPages.length) {
+                if (DEBUG) {
+                    Log.e(TAG, "error xPage >= mWindowPages.length page: " + xPage);
+                    Log.e(TAG, "error on page " + xPage + " out of " + xPages);
+                    Log.e(TAG,
+                            "error on xOffsetStep " + finalXOffsetStep
+                                    + " xOffset " + finalXOffset);
                 }
-                if (xPage >= mWindowPages.length) {
-                    if (DEBUG) {
-                        Log.e(TAG, "error xPage >= mWindowPages.length page: " + xPage);
-                        Log.e(TAG, "error on page " + xPage + " out of " + xPages);
-                        Log.e(TAG,
-                                "error on xOffsetStep " + finalXOffsetStep
-                                        + " xOffset " + finalXOffset);
-                    }
-                    xPage = mWindowPages.length - 1;
-                }
-                current = mWindowPages[xPage];
-                updatePage(current, xPage, xPages, finalXOffsetStep);
-                Trace.endSection();
-            });
+                xPage = mWindowPages.length - 1;
+            }
+            current = mWindowPages[xPage];
+            updatePage(current, xPage, xPages, finalXOffsetStep);
+            Trace.endSection();
         }
 
         private void initWindowPages(EngineWindowPage[] windowPages, float step) {
