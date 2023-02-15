@@ -540,17 +540,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ይህ ስልክ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ይህ ጡባዊ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ይህ ስልክ"</string>
-    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
-    <skip />
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"በዚህ መሣሪያ ላይ ማጫወት አልተቻለም"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ለመቀየር መለያ ያልቁ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ውርዶችን እዚህ ማጫወት አይቻልም"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ከማስታወቂያው በኋላ እንደገና ይሞክሩ"</string>
-    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
-    <skip />
-    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
-    <skip />
-    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
-    <skip />
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"እዚህ ጋር ለመጫወት መሣሪያን ያንቁ"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"መሣሪያ ለማጫወት አልጸደቀም"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ይህን ሚዲያ እዚህ ጋር ማጫወት አይቻልም"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"መገናኘት ላይ ችግር። መሳሪያውን ያጥፉት እና እንደገና ያብሩት"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ባለገመድ የኦዲዮ መሣሪያ"</string>
     <string name="help_label" msgid="3528360748637781274">"እገዛ እና ግብረመልስ"</string>
