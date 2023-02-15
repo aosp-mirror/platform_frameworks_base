@@ -5703,6 +5703,9 @@ public abstract class Context {
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.companion.virtual.VirtualDeviceManager} for managing virtual devices.
      *
+     * On devices without {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP}
+     * system feature the {@link #getSystemService(String)} will return {@code null}.
+     *
      * @see #getSystemService(String)
      * @see android.companion.virtual.VirtualDeviceManager
      */
