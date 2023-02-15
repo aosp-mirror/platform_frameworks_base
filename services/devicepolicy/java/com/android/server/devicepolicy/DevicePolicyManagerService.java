@@ -48,11 +48,10 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION;
-import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY;
 import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS;
-import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION;
 import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION;
 import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS;
+import static android.app.AppOpsManager.OPSTR_SYSTEM_EXEMPT_FROM_SUSPENSION;
 import static android.app.admin.DeviceAdminInfo.HEADLESS_DEVICE_OWNER_MODE_AFFILIATED;
 import static android.app.admin.DeviceAdminReceiver.ACTION_COMPLIANCE_ACKNOWLEDGEMENT_REQUIRED;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
@@ -79,11 +78,10 @@ import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER;
 import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION;
-import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_APP_STANDBY;
 import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS;
-import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION;
 import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_HIBERNATION;
 import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_POWER_RESTRICTIONS;
+import static android.app.admin.DevicePolicyManager.EXEMPT_FROM_SUSPENSION;
 import static android.app.admin.DevicePolicyManager.EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_IDS;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
@@ -749,7 +747,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             new ArrayMap<>();
     static {
         APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.put(
-                EXEMPT_FROM_APP_STANDBY, OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY);
+                EXEMPT_FROM_SUSPENSION, OPSTR_SYSTEM_EXEMPT_FROM_SUSPENSION);
         APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.put(
                 EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
                 OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS);
@@ -758,9 +756,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION);
         APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.put(
                 EXEMPT_FROM_HIBERNATION, OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION);
-        APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.put(
-                EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
-                OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION);
         APPLICATION_EXEMPTION_CONSTANTS_TO_APP_OPS.put(
                 EXEMPT_FROM_POWER_RESTRICTIONS, OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS);
     }

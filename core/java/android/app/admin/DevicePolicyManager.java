@@ -3886,18 +3886,17 @@ public class DevicePolicyManager {
     public static final int OPERATION_SAFETY_REASON_DRIVING_DISTRACTION = 1;
 
     /**
-     * Prevent an app from being placed into app standby buckets, such that it will not be subject
-     * to device resources restrictions as a result of app standby buckets.
+     * Prevent an app from being suspended.
      *
      * @hide
      */
     @SystemApi
-    public static final int EXEMPT_FROM_APP_STANDBY =  0;
+    public static final int EXEMPT_FROM_SUSPENSION =  0;
 
     /**
      * Prevent an app from dismissible notifications. Starting from Android U, notifications with
      * the ongoing parameter can be dismissed by a user on an unlocked device. An app with
-     * this exemption can create non-dismissable notifications.
+     * this exemption can create non-dismissible notifications.
      *
      * @hide
      */
@@ -3921,15 +3920,6 @@ public class DevicePolicyManager {
     public static final int EXEMPT_FROM_HIBERNATION =  3;
 
     /**
-     * Exempt an app from the start foreground service from background with while in user permission
-     * restriction.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION =  4;
-
-    /**
      * Exempt an app from all power-related restrictions, including app standby and doze.
      * In addition, the app will be able to start foreground services from the background,
      * and the user will not be able to stop foreground services run by the app.
@@ -3937,7 +3927,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public static final int EXEMPT_FROM_POWER_RESTRICTIONS =  5;
+    public static final int EXEMPT_FROM_POWER_RESTRICTIONS =  4;
 
     /**
      * Exemptions to platform restrictions, given to an application through
@@ -3946,11 +3936,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @IntDef(prefix = { "EXEMPT_FROM_"}, value = {
-            EXEMPT_FROM_APP_STANDBY,
+            EXEMPT_FROM_SUSPENSION,
             EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
             EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
             EXEMPT_FROM_HIBERNATION,
-            EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
             EXEMPT_FROM_POWER_RESTRICTIONS
     })
     @Retention(RetentionPolicy.SOURCE)

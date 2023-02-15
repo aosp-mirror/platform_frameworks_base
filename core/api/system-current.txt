@@ -1299,11 +1299,10 @@ package android.app.admin {
     field @Deprecated public static final String ACTION_STATE_USER_SETUP_COMPLETE = "android.app.action.STATE_USER_SETUP_COMPLETE";
     field @RequiresPermission(android.Manifest.permission.LAUNCH_DEVICE_MANAGER_SETUP) public static final String ACTION_UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER = "android.app.action.UPDATE_DEVICE_POLICY_MANAGEMENT_ROLE_HOLDER";
     field public static final int EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION = 2; // 0x2
-    field public static final int EXEMPT_FROM_APP_STANDBY = 0; // 0x0
     field public static final int EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS = 1; // 0x1
-    field public static final int EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION = 4; // 0x4
     field public static final int EXEMPT_FROM_HIBERNATION = 3; // 0x3
-    field public static final int EXEMPT_FROM_POWER_RESTRICTIONS = 5; // 0x5
+    field public static final int EXEMPT_FROM_POWER_RESTRICTIONS = 4; // 0x4
+    field public static final int EXEMPT_FROM_SUSPENSION = 0; // 0x0
     field public static final String EXTRA_FORCE_UPDATE_ROLE_HOLDER = "android.app.extra.FORCE_UPDATE_ROLE_HOLDER";
     field public static final String EXTRA_LOST_MODE_LOCATION = "android.app.extra.LOST_MODE_LOCATION";
     field public static final String EXTRA_PROFILE_OWNER_NAME = "android.app.extra.PROFILE_OWNER_NAME";
