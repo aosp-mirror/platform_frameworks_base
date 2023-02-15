@@ -68,8 +68,8 @@ interface KeyguardBouncerRepository {
     val resourceUpdateRequests: StateFlow<Boolean>
     val bouncerPromptReason: Int
     val bouncerErrorMessage: CharSequence?
-    val isAlternateBouncerVisible: StateFlow<Boolean>
-    val isAlternateBouncerUIAvailable: StateFlow<Boolean>
+    val alternateBouncerVisible: StateFlow<Boolean>
+    val alternateBouncerUIAvailable: StateFlow<Boolean>
     var lastAlternateBouncerVisibleTime: Long
 
     fun setPrimaryScrimmed(isScrimmed: Boolean)
@@ -159,12 +159,12 @@ constructor(
         get() = viewMediatorCallback.consumeCustomMessage()
 
     /** Values associated with the AlternateBouncer */
-    private val _isAlternateBouncerVisible = MutableStateFlow(false)
-    override val isAlternateBouncerVisible = _isAlternateBouncerVisible.asStateFlow()
+    private val _alternateBouncerVisible = MutableStateFlow(false)
+    override val alternateBouncerVisible = _alternateBouncerVisible.asStateFlow()
     override var lastAlternateBouncerVisibleTime: Long = NOT_VISIBLE
-    private val _isAlternateBouncerUIAvailable = MutableStateFlow(false)
-    override val isAlternateBouncerUIAvailable: StateFlow<Boolean> =
-        _isAlternateBouncerUIAvailable.asStateFlow()
+    private val _alternateBouncerUIAvailable = MutableStateFlow(false)
+    override val alternateBouncerUIAvailable: StateFlow<Boolean> =
+        _alternateBouncerUIAvailable.asStateFlow()
 
     init {
         setUpLogging()
@@ -179,16 +179,16 @@ constructor(
     }
 
     override fun setAlternateVisible(isVisible: Boolean) {
-        if (isVisible && !_isAlternateBouncerVisible.value) {
+        if (isVisible && !_alternateBouncerVisible.value) {
             lastAlternateBouncerVisibleTime = clock.uptimeMillis()
         } else if (!isVisible) {
             lastAlternateBouncerVisibleTime = NOT_VISIBLE
         }
-        _isAlternateBouncerVisible.value = isVisible
+        _alternateBouncerVisible.value = isVisible
     }
 
     override fun setAlternateBouncerUIAvailable(isAvailable: Boolean) {
-        _isAlternateBouncerUIAvailable.value = isAvailable
+        _alternateBouncerUIAvailable.value = isAvailable
     }
 
     override fun setPrimaryShow(keyguardBouncerModel: KeyguardBouncerModel?) {
@@ -290,7 +290,7 @@ constructor(
         resourceUpdateRequests
             .logDiffsForTable(buffer, "", "ResourceUpdateRequests", false)
             .launchIn(applicationScope)
-        isAlternateBouncerUIAvailable
+        alternateBouncerUIAvailable
             .logDiffsForTable(buffer, "", "IsAlternateBouncerUIAvailable", false)
             .launchIn(applicationScope)
     }

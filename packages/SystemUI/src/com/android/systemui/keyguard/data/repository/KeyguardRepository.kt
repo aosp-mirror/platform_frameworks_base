@@ -86,9 +86,6 @@ interface KeyguardRepository {
     /** Observable for the signal that keyguard is about to go away. */
     val isKeyguardGoingAway: Flow<Boolean>
 
-    /** Observable for whether the bouncer is showing. */
-    val isBouncerShowing: Flow<Boolean>
-
     /** Is the always-on display available to be used? */
     val isAodAvailable: Flow<Boolean>
 
@@ -299,29 +296,6 @@ constructor(
             keyguardStateController.isKeyguardGoingAway,
             TAG,
             "initial isKeyguardGoingAway"
-        )
-
-        awaitClose { keyguardStateController.removeCallback(callback) }
-    }
-
-    override val isBouncerShowing: Flow<Boolean> = conflatedCallbackFlow {
-        val callback =
-            object : KeyguardStateController.Callback {
-                override fun onBouncerShowingChanged() {
-                    trySendWithFailureLogging(
-                        keyguardStateController.isBouncerShowing,
-                        TAG,
-                        "updated isBouncerShowing"
-                    )
-                }
-            }
-
-        keyguardStateController.addCallback(callback)
-        // Adding the callback does not send an initial update.
-        trySendWithFailureLogging(
-            keyguardStateController.isBouncerShowing,
-            TAG,
-            "initial isBouncerShowing"
         )
 
         awaitClose { keyguardStateController.removeCallback(callback) }

@@ -130,7 +130,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         givenCanShowAlternateBouncer()
 
         assertTrue(underTest.show())
-        assertTrue(bouncerRepository.isAlternateBouncerVisible.value)
+        assertTrue(bouncerRepository.alternateBouncerVisible.value)
     }
 
     @Test
@@ -138,7 +138,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         givenCannotShowAlternateBouncer()
 
         assertFalse(underTest.show())
-        assertFalse(bouncerRepository.isAlternateBouncerVisible.value)
+        assertFalse(bouncerRepository.alternateBouncerVisible.value)
     }
 
     @Test
@@ -146,7 +146,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         bouncerRepository.setAlternateVisible(true)
 
         assertTrue(underTest.hide())
-        assertFalse(bouncerRepository.isAlternateBouncerVisible.value)
+        assertFalse(bouncerRepository.alternateBouncerVisible.value)
     }
 
     @Test
@@ -154,7 +154,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         bouncerRepository.setAlternateVisible(false)
 
         assertFalse(underTest.hide())
-        assertFalse(bouncerRepository.isAlternateBouncerVisible.value)
+        assertFalse(bouncerRepository.alternateBouncerVisible.value)
     }
 
     private fun givenCanShowAlternateBouncer() {
