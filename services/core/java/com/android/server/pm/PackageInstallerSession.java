@@ -22,6 +22,7 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_UPDAT
 import static android.content.pm.DataLoaderType.INCREMENTAL;
 import static android.content.pm.DataLoaderType.STREAMING;
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
+import static android.content.pm.PackageItemInfo.MAX_SAFE_LABEL_LENGTH;
 import static android.content.pm.PackageManager.INSTALL_FAILED_ABORTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_BAD_SIGNATURE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
@@ -3589,19 +3590,34 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     mPreapprovalDetails + " inconsistent with " + mPackageName);
         }
 
+        final PackageManager packageManager = mContext.getPackageManager();
+        // The given info isn't null only when params.appPackageName is set.
+        final PackageInfo existingPackageInfo =
+                info != null ? info : mPm.snapshotComputer().getPackageInfo(mPackageName,
+                        0 /* flags */, userId);
+        // If the app label in PreapprovalDetails matches the existing one, we treat it as valid.
+        final CharSequence appLabel = mPreapprovalDetails.getLabel();
+        if (existingPackageInfo != null) {
+            final ApplicationInfo existingAppInfo = existingPackageInfo.applicationInfo;
+            final CharSequence existingAppLabel = packageManager.getApplicationLabel(
+                    existingAppInfo);
+            if (TextUtils.equals(appLabel, existingAppLabel)) {
+                return;
+            }
+        }
+
+        final PackageInfo packageInfoFromApk = packageManager.getPackageArchiveInfo(
+                        packageLite.getPath(), PackageInfoFlags.of(0));
+        if (packageInfoFromApk == null) {
+            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                    "Failure to obtain package info from APK files.");
+        }
+
         // In case the app label in PreapprovalDetails from different locale in split APK,
         // we check all APK files to find the app label.
-        final PackageInfo packageInfo =
-                info != null ? info : mContext.getPackageManager().getPackageArchiveInfo(
-                        packageLite.getPath(), PackageInfoFlags.of(0));
-        if (packageInfo == null) {
-            throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
-                    "Failure to obtain package info.");
-        }
         final List<String> filePaths = packageLite.getAllApkPaths();
-        final CharSequence appLabel = mPreapprovalDetails.getLabel();
         final ULocale appLocale = mPreapprovalDetails.getLocale();
-        final ApplicationInfo appInfo = packageInfo.applicationInfo;
+        final ApplicationInfo appInfo = packageInfoFromApk.applicationInfo;
         boolean appLabelMatched = false;
         for (int i = filePaths.size() - 1; i >= 0 && !appLabelMatched; i--) {
             appLabelMatched |= TextUtils.equals(getAppLabel(filePaths.get(i), appLocale, appInfo),
@@ -3628,7 +3644,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         assetManager.setApkAssets(new ApkAssets[]{apkAssets}, false /* invalidateCaches */);
         config.setLocale(locale.toLocale());
         final Resources res = new Resources(assetManager, pRes.getDisplayMetrics(), config);
-        return tryLoadingAppLabel(res, appInfo);
+        return TextUtils.trimToSize(tryLoadingAppLabel(res, appInfo), MAX_SAFE_LABEL_LENGTH);
     }
 
     private CharSequence tryLoadingAppLabel(@NonNull Resources res, @NonNull ApplicationInfo info) {
@@ -3637,7 +3653,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // specified any label, just use the package name.
         if (info.labelRes != 0) {
             try {
-                label = res.getText(info.labelRes);
+                label = res.getText(info.labelRes).toString().trim();
             } catch (Resources.NotFoundException ignore) {
             }
         }
