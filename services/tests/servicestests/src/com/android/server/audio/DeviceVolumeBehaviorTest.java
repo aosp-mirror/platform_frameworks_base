@@ -18,6 +18,7 @@ package com.android.server.audio;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+
 import static org.mockito.Mockito.mock;
 
 import android.annotation.NonNull;
@@ -27,6 +28,7 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.IDeviceVolumeBehaviorDispatcher;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -36,6 +38,7 @@ import org.junit.Test;
 /**
  * Tests for AudioService's tracking and reporting of device volume behaviors.
  */
+@Presubmit
 public class DeviceVolumeBehaviorTest {
     private static final String TAG = "DeviceVolumeBehaviorTest";
 
