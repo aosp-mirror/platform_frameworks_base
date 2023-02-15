@@ -156,7 +156,7 @@ constructor(
         } else {
             DejankUtils.postAfterTraversal(showRunnable)
         }
-        keyguardStateController.notifyBouncerShowing(true)
+        keyguardStateController.notifyPrimaryBouncerShowing(true)
         primaryBouncerCallbackInteractor.dispatchStartingToShow()
         Trace.endSection()
     }
@@ -173,7 +173,7 @@ constructor(
         }
 
         falsingCollector.onBouncerHidden()
-        keyguardStateController.notifyBouncerShowing(false /* showing */)
+        keyguardStateController.notifyPrimaryBouncerShowing(false /* showing */)
         cancelShowRunnable()
         repository.setPrimaryShowingSoon(false)
         repository.setPrimaryVisible(false)

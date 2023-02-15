@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.settings.DisplayTracker
@@ -38,7 +39,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -50,6 +50,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
 
     private lateinit var underTest: KeyguardInteractor
     private lateinit var repository: FakeKeyguardRepository
+    private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
 
     @Before
     fun setUp() {
@@ -58,7 +59,14 @@ class KeyguardInteractorTest : SysuiTestCase() {
         commandQueue = FakeCommandQueue(mock(Context::class.java), mock(DisplayTracker::class.java))
         testScope = TestScope()
         repository = FakeKeyguardRepository()
-        underTest = KeyguardInteractor(repository, commandQueue, featureFlags)
+        bouncerRepository = FakeKeyguardBouncerRepository()
+        underTest =
+            KeyguardInteractor(
+                repository,
+                commandQueue,
+                featureFlags,
+                bouncerRepository,
+            )
     }
 
     @Test
@@ -137,7 +145,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             repository.setKeyguardOccluded(true)
             assertThat(secureCameraActive()).isTrue()
 
-            repository.setBouncerShowing(true)
+            bouncerRepository.setPrimaryVisible(true)
             assertThat(secureCameraActive()).isFalse()
         }
 

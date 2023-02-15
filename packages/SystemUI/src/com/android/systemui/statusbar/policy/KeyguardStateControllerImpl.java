@@ -65,7 +65,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     private boolean mCanDismissLockScreen;
     private boolean mShowing;
-    private boolean mBouncerShowing;
+    private boolean mPrimaryBouncerShowing;
     private boolean mSecure;
     private boolean mOccluded;
 
@@ -157,8 +157,8 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
-    public boolean isBouncerShowing() {
-        return mBouncerShowing;
+    public boolean isPrimaryBouncerShowing() {
+        return mPrimaryBouncerShowing;
     }
 
     @Override
@@ -339,11 +339,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
-    public void notifyBouncerShowing(boolean showing) {
-        if (mBouncerShowing != showing) {
-            mBouncerShowing = showing;
+    public void notifyPrimaryBouncerShowing(boolean showing) {
+        if (mPrimaryBouncerShowing != showing) {
+            mPrimaryBouncerShowing = showing;
 
-            new ArrayList<>(mCallbacks).forEach(Callback::onBouncerShowingChanged);
+            new ArrayList<>(mCallbacks).forEach(Callback::onPrimaryBouncerShowingChanged);
         }
     }
 
