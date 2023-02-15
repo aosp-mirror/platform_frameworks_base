@@ -14298,6 +14298,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Ensure all internal loopers are registered for idle checks
         BroadcastLoopers.addMyLooper();
 
+        if (Process.isSdkSandboxUid(realCallingUid)) {
+            final SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
+                    SdkSandboxManagerLocal.class);
+            if (sdkSandboxManagerLocal == null) {
+                throw new IllegalStateException("SdkSandboxManagerLocal not found when sending"
+                        + " a broadcast from an SDK sandbox uid.");
+            }
+            if (!sdkSandboxManagerLocal.canSendBroadcast(intent)) {
+                throw new SecurityException(
+                        "Intent " + intent.getAction() + " may not be broadcast from an SDK sandbox"
+                        + " uid. Given caller package " + callerPackage + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ")");
+            }
+        }
+
         if ((resultTo != null) && (resultToApp == null)) {
             if (resultTo.asBinder() instanceof BinderProxy) {
                 // Warn when requesting results without a way to deliver them
@@ -14500,16 +14515,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     intent.setPackage(callerPackage);
                 }
             }
-        }
-
-        if (Process.isSdkSandboxUid(realCallingUid)) {
-            SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
-                    SdkSandboxManagerLocal.class);
-            if (sdkSandboxManagerLocal == null) {
-                throw new IllegalStateException("SdkSandboxManagerLocal not found when sending"
-                    + " a broadcast from an SDK sandbox uid.");
-            }
-            sdkSandboxManagerLocal.enforceAllowedToSendBroadcast(intent);
         }
 
         boolean timeoutExempt = false;
