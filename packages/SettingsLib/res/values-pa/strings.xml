@@ -540,17 +540,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ਇਹ ਫ਼ੋਨ"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"ਇਹ ਟੈਬਲੈੱਟ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ਇਹ ਫ਼ੋਨ"</string>
-    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
-    <skip />
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ਇਸ ਡੀਵਾਈਸ \'ਤੇ ਨਹੀਂ ਚਲਾਇਆ ਜਾ ਸਕਦਾ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ਸਵਿੱਚ ਕਰਨ ਲਈ ਖਾਤੇ ਨੂੰ ਅੱਪਗ੍ਰੇਡ ਕਰੋ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ਡਾਊਨਲੋਡਾਂ ਨੂੰ ਇੱਥੇ ਨਹੀਂ ਚਲਾਇਆ ਜਾ ਸਕਦਾ"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"ਵਿਗਿਆਪਨ ਤੋਂ ਬਾਅਦ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
-    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
-    <skip />
-    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
-    <skip />
-    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
-    <skip />
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ਇੱਥੇ ਮੀਡੀਆ ਚਲਾਉਣ ਲਈ ਡੀਵਾਈਸ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ਡੀਵਾਈਸ ਨੂੰ ਮੀਡੀਆ ਚਲਾਉਣ ਦੀ ਮਨਜ਼ੂਰੀ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਹੈ"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ਇਸ ਮੀਡੀਆ ਨੂੰ ਇੱਥੇ ਨਹੀਂ ਚਲਾਇਆ ਜਾ ਸਕਦਾ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ਕਨੈਕਟ ਕਰਨ ਵਿੱਚ ਸਮੱਸਿਆ ਆਈ। ਡੀਵਾਈਸ ਨੂੰ ਬੰਦ ਕਰਕੇ ਵਾਪਸ ਚਾਲੂ ਕਰੋ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ਤਾਰ ਵਾਲਾ ਆਡੀਓ ਡੀਵਾਈਸ"</string>
     <string name="help_label" msgid="3528360748637781274">"ਮਦਦ ਅਤੇ ਵਿਚਾਰ"</string>

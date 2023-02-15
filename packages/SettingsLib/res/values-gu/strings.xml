@@ -540,17 +540,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"આ ફોન"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"આ ટૅબ્લેટ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"આ ફોન"</string>
-    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
-    <skip />
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"આ ડિવાઇસ પર ચલાવી શકતા નથી"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"સ્વિચ કરવા માટે એકાઉન્ટ અપગ્રેડ કરો"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ડાઉનલોડ કરેલું કન્ટેન્ટ અહીં ચલાવી શકતા નથી"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"જાહેરાત પછી ફરીથી પ્રયાસ કરો"</string>
-    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
-    <skip />
-    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
-    <skip />
-    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
-    <skip />
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"અહીં ચલાવવા માટે ડિવાઇસને સક્રિય કરો"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ડિવાઇસ દ્વારા ચલાવવાની મંજૂરી આપવામાં આવી નથી"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"અહીં આ મીડિયા ચલાવી શકતા નથી"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"કનેક્ટ કરવામાં સમસ્યા આવી રહી છે. ડિવાઇસને બંધ કરીને ફરી ચાલુ કરો"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"વાયરવાળો ઑડિયો ડિવાઇસ"</string>
     <string name="help_label" msgid="3528360748637781274">"સહાય અને પ્રતિસાદ"</string>

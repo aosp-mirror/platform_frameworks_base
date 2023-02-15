@@ -50,8 +50,8 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="2377230797542526134">"Nunca verificar"</item>
-    <item msgid="3919638466823112484">"Verificar apenas conteúdo DRM"</item>
-    <item msgid="9048424957228926377">"Verificar sempre"</item>
+    <item msgid="3919638466823112484">"Rever apenas conteúdo DRM"</item>
+    <item msgid="9048424957228926377">"Rever sempre"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"Nunca utilizar a verificação HDCP"</item>
@@ -62,6 +62,17 @@
     <item msgid="695678520785580527">"Desativado"</item>
     <item msgid="6336372935919715515">"Filtrado ativado"</item>
     <item msgid="2779123106632690576">"Ativado"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_filters_entries">
+    <item msgid="5118179698172834473">"Cabeçalhos filtrados"</item>
+    <item msgid="4818549483446395865">"Pacotes de multimédia A2DP filtrados"</item>
+    <item msgid="8207123990453243311">"Canal RFCOMM filtrado"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_profile_filter_entries">
+    <item msgid="6348114316510677939">"Desativado"</item>
+    <item msgid="5884245882825346396">"Magia"</item>
+    <item msgid="6569400572915342949">"Cabeçalho"</item>
+    <item msgid="1239386221416967664">"Filtro completo"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (predefinição)"</item>

@@ -540,17 +540,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"이 휴대전화"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"태블릿"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"이 휴대전화"</string>
-    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
-    <skip />
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"이 기기에서 재생할 수 없음"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"전환하려면 계정을 업그레이드하세요."</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"여기서 다운로드한 콘텐츠를 재생할 수 없습니다."</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"광고 후에 다시 시도해 주세요."</string>
-    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
-    <skip />
-    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
-    <skip />
-    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
-    <skip />
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"기기 절전 모드 해제 후 여기에서 재생"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"기기에서 재생을 승인하지 않음"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"여기에서 이 미디어를 재생할 수 없음"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"연결 중에 문제가 발생했습니다. 기기를 껐다가 다시 켜 보세요."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"유선 오디오 기기"</string>
     <string name="help_label" msgid="3528360748637781274">"고객센터"</string>
