@@ -262,6 +262,11 @@ object Flags {
     val QS_SECONDARY_DATA_SUB_INFO =
         unreleasedFlag(508, "qs_secondary_data_sub_info", teamfood = true)
 
+    /** Enables Font Scaling Quick Settings tile */
+    // TODO(b/269341316): Tracking Bug
+    @JvmField
+    val ENABLE_FONT_SCALING_TILE = unreleasedFlag(509, "enable_font_scaling_tile", teamfood = false)
+
     // 600- status bar
 
     // TODO(b/256614753): Tracking Bug
@@ -471,8 +476,7 @@ object Flags {
         sysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", default = false)
 
     // TODO(b/254512728): Tracking Bug
-    @JvmField
-    val NEW_BACK_AFFORDANCE = unreleasedFlag(1203, "new_back_affordance", teamfood = true)
+    @JvmField val NEW_BACK_AFFORDANCE = unreleasedFlag(1203, "new_back_affordance", teamfood = true)
 
     // TODO(b/255854141): Tracking Bug
     @JvmField
