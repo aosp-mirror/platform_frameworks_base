@@ -5928,11 +5928,21 @@ public class UserManagerService extends IUserManager.Stub {
                 /* receiverPermission= */null);
     }
 
+    /**
+     * @deprecated Use {@link
+     * android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
+     */
+    @Deprecated
     @Override
     public Bundle getApplicationRestrictions(String packageName) {
         return getApplicationRestrictionsForUser(packageName, UserHandle.getCallingUserId());
     }
 
+    /**
+     * @deprecated Use {@link
+     * android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
+     */
+    @Deprecated
     @Override
     public Bundle getApplicationRestrictionsForUser(String packageName, @UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId

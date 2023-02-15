@@ -11209,6 +11209,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 ? null : policies.entrySet().stream().findAny().get().getValue().getValue();
     }
 
+    private int getUidForPackage(String packageName, int userId) {
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            try {
+                return mContext.getPackageManager().getApplicationInfoAsUser(
+                        packageName, /* flags= */ 0, userId).uid;
+            } catch (NameNotFoundException exception) {
+                return -1;
+            }
+        });
+    }
+
     @Override
     public void setTrustAgentConfiguration(
             ComponentName admin, String callerPackageName, ComponentName agent,
@@ -15413,33 +15424,38 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         @Override
-        public Map<String, Bundle> getApplicationRestrictionsPerAdmin(
-                String packageName, int userId) {
+        public List<Bundle> getApplicationRestrictionsPerAdminForUser(
+                String packageName, @UserIdInt int userId) {
+            if (UserHandle.getCallingUserId() != userId
+                    || !UserHandle.isSameApp(
+                    Binder.getCallingUid(), getUidForPackage(packageName, userId))) {
+                final int uid = Binder.getCallingUid();
+                if (!UserHandle.isSameApp(uid, Process.SYSTEM_UID) && uid != Process.ROOT_UID) {
+                    throw new SecurityException("Only system may: get application restrictions for "
+                            + "other user/app " + packageName);
+                }
+            }
             LinkedHashMap<EnforcingAdmin, PolicyValue<Bundle>> policies =
                     mDevicePolicyEngine.getLocalPoliciesSetByAdmins(
                             PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
                             userId);
-            Map<String, Bundle> restrictions = new HashMap<>();
+            List<Bundle> restrictions = new ArrayList<>();
             for (EnforcingAdmin admin : policies.keySet()) {
-                restrictions.put(admin.getPackageName(), policies.get(admin).getValue());
+                restrictions.add(policies.get(admin).getValue());
             }
             if (!restrictions.isEmpty()) {
                 return restrictions;
             }
 
             return mInjector.binderWithCleanCallingIdentity(() -> {
-                // Could be a device that hasn't migrated yet, so just return any restrictions saved
-                // in userManager.
+                // Could be a device that has a DPC that hasn't migrated yet, so just return any
+                // restrictions saved in userManager.
                 Bundle bundle = mUserManager.getApplicationRestrictions(
                         packageName, UserHandle.of(userId));
                 if (bundle == null || bundle.isEmpty()) {
-                    return new HashMap<>();
+                    return new ArrayList<>();
                 }
-                ActiveAdmin admin = getMostProbableDPCAdminForLocalPolicy(userId);
-                if (admin == null) {
-                    return new HashMap<>();
-                }
-                return Map.of(admin.info.getPackageName(), bundle);
+                return List.of(bundle);
             });
         }
     }

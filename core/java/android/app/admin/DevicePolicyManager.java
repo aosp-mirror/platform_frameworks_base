@@ -10067,6 +10067,11 @@ public class DevicePolicyManager {
      * owner, and the application restrictions managing package via
      * {@link #getApplicationRestrictions}.
      *
+     * <p>Starting from Android Version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * multiple admins can set app restrictions for the same application, the target application can
+     * get the list of app restrictions set by each admin via
+     * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin}.
+     *
      * <p>NOTE: The method performs disk I/O and shouldn't be called on the main thread
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or

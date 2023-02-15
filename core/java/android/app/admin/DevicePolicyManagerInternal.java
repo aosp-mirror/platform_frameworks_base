@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.os.UserHandle;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -322,8 +321,9 @@ public abstract class DevicePolicyManagerInternal {
     public abstract boolean isApplicationExemptionsFlagEnabled();
 
     /**
-    * Returns the application restrictions set by each admin for the given {@code packageName}.
+     * Returns a map of admin to {@link Bundle} map of restrictions set by the admins for the
+     * provided {@code packageName} in the provided {@code userId}
      */
-    public abstract Map<String, Bundle> getApplicationRestrictionsPerAdmin(
-            String packageName, int userId);
+    public abstract List<Bundle> getApplicationRestrictionsPerAdminForUser(
+            String packageName, @UserIdInt int userId);
 }
