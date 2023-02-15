@@ -5758,7 +5758,10 @@ public class Notification implements Parcelable
             List<Notification.Action> nonContextualActions = getNonContextualActions();
 
             int numActions = Math.min(nonContextualActions.size(), MAX_ACTION_BUTTONS);
-            boolean emphazisedMode = mN.fullScreenIntent != null || p.mCallStyleActions;
+            boolean emphazisedMode = mN.fullScreenIntent != null
+                    || p.mCallStyleActions
+                    || ((mN.flags & FLAG_FSI_REQUESTED_BUT_DENIED) != 0);
+
             if (p.mCallStyleActions) {
                 // Clear view padding to allow buttons to start on the left edge.
                 // This must be done before 'setEmphasizedMode' which sets top/bottom margins.
