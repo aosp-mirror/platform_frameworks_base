@@ -309,14 +309,14 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                 if ((mFeatureFlags.isEnabled(CLIPBOARD_REMOTE_BEHAVIOR) && model.isRemote())
                         || DeviceConfig.getBoolean(
                         DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_SHOW_ACTIONS, false)) {
-                    if (model.getItem().getTextLinks() != null) {
+                    if (model.getTextLinks() != null) {
                         classifyText(model);
                     }
                 }
                 if (model.isSensitive()) {
                     mView.showTextPreview(mContext.getString(R.string.clipboard_asterisks), true);
                 } else {
-                    mView.showTextPreview(model.getItem().getText(), false);
+                    mView.showTextPreview(model.getText(), false);
                 }
                 mView.setEditAccessibilityAction(true);
                 mOnPreviewTapped = this::editText;
@@ -326,12 +326,13 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                     mView.showImagePreview(
                             model.isSensitive() ? null : model.loadThumbnail(mContext));
                     mView.setEditAccessibilityAction(true);
-                    mOnPreviewTapped = () -> editImage(model.getItem().getUri());
+                    mOnPreviewTapped = () -> editImage(model.getUri());
                 } else {
                     // image loading failed
                     mView.showDefaultTextPreview();
                 }
                 break;
+            case URI:
             case OTHER:
                 mView.showDefaultTextPreview();
                 break;
@@ -371,8 +372,8 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
 
     private void classifyText(ClipboardModel model) {
         mBgExecutor.execute(() -> {
-            Optional<RemoteAction> remoteAction =
-                    mClipboardUtils.getAction(model.getItem(), model.getSource());
+            Optional<RemoteAction> remoteAction = mClipboardUtils.getAction(
+                            model.getText(), model.getTextLinks(), model.getSource());
             if (model.equals(mClipboardModel)) {
                 remoteAction.ifPresent(action -> {
                     mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_ACTION_SHOWN);
@@ -419,10 +420,10 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
             accessibilityAnnouncement = mContext.getString(R.string.clipboard_text_copied);
         } else if (clipData.getItemAt(0).getUri() != null) {
             if (tryShowEditableImage(clipData.getItemAt(0).getUri(), isSensitive)) {
-                mOnShareTapped = () -> shareContent(clipData);
-                mView.showShareChip();
                 accessibilityAnnouncement = mContext.getString(R.string.clipboard_image_copied);
             }
+            mOnShareTapped = () -> shareContent(clipData);
+            mView.showShareChip();
         } else {
             mView.showDefaultTextPreview();
         }
