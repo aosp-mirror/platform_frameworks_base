@@ -45,12 +45,8 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
 
     var duration: Long = 1750
 
-    private var maxWidth: Float = 0.0f
-    private var maxHeight: Float = 0.0f
     fun setMaxSize(maxWidth: Float, maxHeight: Float) {
-        this.maxWidth = maxWidth
-        this.maxHeight = maxHeight
-        rippleShader.setMaxSize(maxWidth, maxHeight)
+        rippleShader.rippleSize.setMaxSize(maxWidth, maxHeight)
     }
 
     private var centerX: Float = 0.0f
@@ -92,6 +88,15 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
     fun setBlur(start: Float, end: Float) {
         rippleShader.blurStart = start
         rippleShader.blurEnd = end
+    }
+
+    /**
+     * Sets the list of [RippleShader.SizeAtProgress].
+     *
+     * <p>Note that this clears the list before it sets with the new data.
+     */
+    fun setSizeAtProgresses(vararg targetSizes: RippleShader.SizeAtProgress) {
+        rippleShader.rippleSize.setSizeAtProgresses(*targetSizes)
     }
 
     @JvmOverloads
@@ -145,11 +150,11 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         // active effect area. Values here should be kept in sync with the animation implementation
         // in the ripple shader. (Twice bigger)
         if (rippleShape == RippleShape.CIRCLE) {
-            val maskRadius = rippleShader.currentWidth
+            val maskRadius = rippleShader.rippleSize.currentWidth
             canvas.drawCircle(centerX, centerY, maskRadius, ripplePaint)
         } else {
-            val maskWidth = rippleShader.currentWidth * 2
-            val maskHeight = rippleShader.currentHeight * 2
+            val maskWidth = rippleShader.rippleSize.currentWidth * 2
+            val maskHeight = rippleShader.rippleSize.currentHeight * 2
             canvas.drawRect(
                 /* left= */ centerX - maskWidth,
                 /* top= */ centerY - maskHeight,
