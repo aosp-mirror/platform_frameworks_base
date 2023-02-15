@@ -25,7 +25,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrierConfigTest.Companion.createTestConfig
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,7 +53,7 @@ class CarrierConfigRepositoryTest : SysuiTestCase() {
     private lateinit var mockitoSession: MockitoSession
     private lateinit var carrierConfigCoreStartable: CarrierConfigCoreStartable
 
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var logger: MobileInputLogger
     @Mock private lateinit var carrierConfigManager: CarrierConfigManager
     @Mock private lateinit var dumpManager: DumpManager
 
