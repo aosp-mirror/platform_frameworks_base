@@ -20,6 +20,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -504,7 +505,9 @@ public class Transitions implements RemoteCallable<Transitions> {
             mObservers.get(i).onTransitionReady(transitionToken, info, t, finishT);
         }
 
-        if (!info.getRootLeash().isValid()) {
+        // Allow to notify keyguard un-occluding state to KeyguardService, which can happen while
+        // screen-off, so there might no visibility change involved.
+        if (!info.getRootLeash().isValid() && info.getType() != TRANSIT_KEYGUARD_UNOCCLUDE) {
             // Invalid root-leash implies that the transition is empty/no-op, so just do
             // housekeeping and return.
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Invalid root leash (%s): %s",
