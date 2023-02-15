@@ -21,10 +21,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * A cache for inline images of image messages.
@@ -57,12 +59,13 @@ public class NotificationInlineImageCache implements NotificationInlineImageReso
     }
 
     @Override
-    public Drawable get(Uri uri) {
+    public Drawable get(Uri uri, long timeoutMs) {
         Drawable result = null;
         try {
-            result = mCache.get(uri).get();
-        } catch (InterruptedException | ExecutionException ex) {
-            Log.d(TAG, "get: Failed get image from " + uri);
+            result = mCache.get(uri).get(timeoutMs, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException
+                | TimeoutException | CancellationException ex) {
+            Log.d(TAG, "get: Failed get image from " + uri + " " + ex);
         }
         return result;
     }
@@ -71,6 +74,15 @@ public class NotificationInlineImageCache implements NotificationInlineImageReso
     public void purge() {
         Set<Uri> wantedSet = mResolver.getWantedUriSet();
         mCache.entrySet().removeIf(entry -> !wantedSet.contains(entry.getKey()));
+    }
+
+    @Override
+    public void cancelRunningTasks() {
+        mCache.forEach((key, value) -> {
+            if (value.getStatus() != AsyncTask.Status.FINISHED) {
+                value.cancel(true);
+            }
+        });
     }
 
     private static class PreloadImageTask extends AsyncTask<Uri, Void, Drawable> {
@@ -87,7 +99,7 @@ public class NotificationInlineImageCache implements NotificationInlineImageReso
 
             try {
                 drawable = mResolver.resolveImage(target);
-            } catch (IOException | SecurityException ex) {
+            } catch (Exception ex) {
                 Log.d(TAG, "PreloadImageTask: Resolve failed from " + target, ex);
             }
 
