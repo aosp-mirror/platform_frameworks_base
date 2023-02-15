@@ -317,6 +317,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** Default byte size limit for app metadata */
     private static final long DEFAULT_APP_METADATA_BYTE_SIZE_LIMIT = 32000;
 
+    private static final int APP_METADATA_FILE_ACCESS_MODE = 0640;
+
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
 
@@ -1663,9 +1665,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 Binder.restoreCallingIdentity(identity);
             }
 
+            // If file is app metadata then set permission to 0640 to deny user read access since it
+            // might contain sensitive information.
+            int mode = name.equals(APP_METADATA_FILE_NAME) ? APP_METADATA_FILE_ACCESS_MODE : 0644;
             ParcelFileDescriptor targetPfd = openTargetInternal(target.getAbsolutePath(),
-                    O_CREAT | O_WRONLY, 0644);
-            Os.chmod(target.getAbsolutePath(), 0644);
+                    O_CREAT | O_WRONLY, mode);
+            Os.chmod(target.getAbsolutePath(), mode);
 
             // If caller specified a total length, allocate it for them. Free up
             // cache space to grow, if needed.
@@ -3148,7 +3153,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         getIncrementalFileStorages();
                 try {
                     incrementalFileStorages.makeFile(APP_METADATA_FILE_NAME,
-                            Files.readAllBytes(appMetadataFile.toPath()));
+                            Files.readAllBytes(appMetadataFile.toPath()),
+                            APP_METADATA_FILE_ACCESS_MODE);
                 } catch (IOException e) {
                     Slog.e(TAG, "Failed to write app metadata to incremental storage", e);
                 } finally {
@@ -3416,7 +3422,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (!isIncrementalInstallation() || incrementalFileStorages == null) {
             FileUtils.bytesToFile(absolutePath, bytes);
         } else {
-            incrementalFileStorages.makeFile(localPath, bytes);
+            incrementalFileStorages.makeFile(localPath, bytes, 0777);
         }
     }
 
