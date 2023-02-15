@@ -303,8 +303,7 @@ class LocationTimeZoneProviderController implements Dumpable {
     private void reportSuggestionEvent(
             @NonNull GeolocationTimeZoneSuggestion suggestion, @NonNull String reason) {
         LocationTimeZoneAlgorithmStatus algorithmStatus = generateCurrentAlgorithmStatus();
-        LocationAlgorithmEvent event = new LocationAlgorithmEvent(
-                algorithmStatus, suggestion);
+        LocationAlgorithmEvent event = new LocationAlgorithmEvent(algorithmStatus, suggestion);
         event.addDebugInfo(reason);
         reportEvent(event);
     }
@@ -728,20 +727,35 @@ class LocationTimeZoneProviderController implements Dumpable {
         // Start the uncertainty timeout if needed to ensure the controller will eventually make an
         // uncertain suggestion if no success event arrives in time to counteract it.
         if (!mUncertaintyTimeoutQueue.hasQueued()) {
-            debugLog("Starting uncertainty timeout: reason=" + reason);
+            if (STATE_UNCERTAIN.equals(mState.get())) {
+                // If the controller is already uncertain, there's no reason to start a timeout;
+                // just forward the suggestion immediately to make it obvious in the logs what has
+                // happened. Making a new suggestion potentially captures new LTZP status info.
+                GeolocationTimeZoneSuggestion suggestion =
+                        GeolocationTimeZoneSuggestion.createUncertainSuggestion(
+                                uncertaintyStartedElapsedMillis);
+                String debugInfo = "Uncertainty received from " + provider.getName() + ":"
+                        + " primary=" + mPrimaryProvider
+                        + ", secondary=" + mSecondaryProvider
+                        + ", uncertaintyStarted="
+                        + Duration.ofMillis(uncertaintyStartedElapsedMillis);
+                reportSuggestionEvent(suggestion, debugInfo);
+            } else {
+                debugLog("Starting uncertainty timeout: reason=" + reason);
 
-            Duration uncertaintyDelay = mEnvironment.getUncertaintyDelay();
-            mUncertaintyTimeoutQueue.runDelayed(
-                    () -> onProviderUncertaintyTimeout(
-                            provider, uncertaintyStartedElapsedMillis, uncertaintyDelay),
-                    uncertaintyDelay.toMillis());
+                Duration uncertaintyDelay = mEnvironment.getUncertaintyDelay();
+                mUncertaintyTimeoutQueue.runDelayed(
+                        () -> onProviderUncertaintyTimeout(
+                                provider, uncertaintyStartedElapsedMillis, uncertaintyDelay),
+                        uncertaintyDelay.toMillis());
+            }
         }
 
         if (provider == mPrimaryProvider) {
             // (Try to) start the secondary. It could already be started, or enabling might not
             // succeed if the provider has previously reported it is perm failed. The uncertainty
-            // timeout (set above) is used to ensure that an uncertain suggestion will be made if
-            // the secondary cannot generate a success event in time.
+            // timeout (may be set above) is used to ensure that an uncertain suggestion will be
+            // made if the secondary cannot generate a success event in time.
             tryStartProvider(mSecondaryProvider, mCurrentUserConfiguration);
         }
     }
