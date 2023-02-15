@@ -3676,6 +3676,10 @@
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MTE"
                 android:protectionLevel="internal|role" />
 
+    <!-- Allows an application to manage policy related to device identifiers. -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_DEVICE_IDENTIFIERS"
+                android:protectionLevel="internal|role" />
+
     <!-- Allows an application to set device policies outside the current user
         that are critical for securing data within the current user.
         <p>Holding this permission allows the use of other held MANAGE_DEVICE_POLICY_*
