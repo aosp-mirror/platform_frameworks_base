@@ -133,9 +133,9 @@ class DevicePolicyData {
 
     // Create or get the permission-based admin. The permission-based admin will not have a
     // DeviceAdminInfo or ComponentName.
-    ActiveAdmin createOrGetPermissionBasedAdmin() {
+    ActiveAdmin createOrGetPermissionBasedAdmin(int userId) {
         if (mPermissionBasedAdmin == null) {
-            mPermissionBasedAdmin = new ActiveAdmin(/* info= */ null, /* parent= */ false);
+            mPermissionBasedAdmin = new ActiveAdmin(userId, /* permissionBased= */ true);
         }
         return mPermissionBasedAdmin;
     }
@@ -509,7 +509,7 @@ class DevicePolicyData {
                         Slogf.w(TAG, e, "Failed loading admin %s", name);
                     }
                 } else if ("permission-based-admin".equals(tag)) {
-                    ActiveAdmin ap = new ActiveAdmin(/* info= */ null, /* parent= */ false);
+                    ActiveAdmin ap = new ActiveAdmin(policy.mUserId, /* permissionBased= */ true);
                     ap.readFromXml(parser, /* overwritePolicies= */ false);
                     policy.mPermissionBasedAdmin = ap;
                 } else if ("delegation".equals(tag)) {
