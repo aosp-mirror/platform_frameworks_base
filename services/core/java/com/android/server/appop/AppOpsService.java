@@ -491,7 +491,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     final class UidState {
         public final int uid;
 
-        public ArrayMap<String, Ops> pkgOps;
+        @NonNull
+        public final ArrayMap<String, Ops> pkgOps = new ArrayMap<>();
 
         // true indicates there is an interested observer, false there isn't but it has such an op
         //TODO: Move foregroundOps and hasForegroundWatchers into the AppOpsServiceInterface.
@@ -504,12 +505,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         public void clear() {
             mAppOpsCheckingService.removeUid(uid);
-            if (pkgOps != null) {
-                for (String packageName : pkgOps.keySet()) {
-                    mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
-                }
+            for (int i = 0; i < pkgOps.size(); i++) {
+                String packageName = pkgOps.keyAt(i);
+                mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
             }
-            pkgOps = null;
         }
 
         // Functions for uid mode access and manipulation.
@@ -533,12 +532,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void evalForegroundOps() {
             foregroundOps = null;
             foregroundOps = mAppOpsCheckingService.evalForegroundUidOps(uid, foregroundOps);
-            if (pkgOps != null) {
-                for (int i = pkgOps.size() - 1; i >= 0; i--) {
-                    foregroundOps = mAppOpsCheckingService
-                            .evalForegroundPackageOps(pkgOps.valueAt(i).packageName, foregroundOps,
-                                    UserHandle.getUserId(uid));
-                }
+            for (int i = pkgOps.size() - 1; i >= 0; i--) {
+                foregroundOps = mAppOpsCheckingService
+                        .evalForegroundPackageOps(pkgOps.valueAt(i).packageName, foregroundOps,
+                                UserHandle.getUserId(uid));
             }
             hasForegroundWatchers = false;
             if (foregroundOps != null) {
@@ -993,7 +990,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 synchronized (AppOpsService.this) {
                     UidState uidState = mUidStates.get(uid);
-                    if (uidState == null || uidState.pkgOps == null) {
+                    if (uidState == null) {
                         return;
                     }
 
@@ -1065,9 +1062,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
 
                 ArrayMap<String, Ops> pkgs = uidState.pkgOps;
-                if (pkgs == null) {
-                    continue;
-                }
 
                 int numPkgs = pkgs.size();
                 for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
@@ -1106,9 +1100,19 @@ public class AppOpsService extends IAppOpsService.Stub {
                         PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
                                 PackageManager.GET_PERMISSIONS, Process.myUid(),
                                 mContext.getUserId());
-                        if (isSamplingTarget(pi)) {
-                            synchronized (AppOpsService.this) {
+                        boolean isSamplingTarget = isSamplingTarget(pi);
+                        int[] userIds = getUserManagerInternal().getUserIds();
+                        synchronized (AppOpsService.this) {
+                            if (isSamplingTarget) {
                                 mRarelyUsedPackages.add(packageName);
+                            }
+                            for (int i = 0; i < userIds.length; i++) {
+                                int uid = UserHandle.getUid(userIds[i], appId);
+                                UidState uidState = getUidStateLocked(uid, true);
+                                if (!uidState.pkgOps.containsKey(packageName)) {
+                                    uidState.pkgOps.put(packageName,
+                                            new Ops(packageName, uidState));
+                                }
                             }
                         }
                     }
@@ -1209,9 +1213,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             PackageStateInternal packageState = packageStates.valueAt(j);
             int uid = UserHandle.getUid(userId, packageState.getAppId());
             UidState uidState = getUidStateLocked(uid, true);
-            if (uidState.pkgOps == null) {
-                uidState.pkgOps = new ArrayMap<>();
-            }
             String packageName = packageStates.keyAt(j);
             Ops ops = new Ops(packageName, uidState);
             uidState.pkgOps.put(packageName, ops);
@@ -1255,17 +1256,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         Ops removedOps = null;
 
         // Remove any package state if such.
-        if (uidState.pkgOps != null) {
-            removedOps = uidState.pkgOps.remove(packageName);
-            mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
-        }
-
-        // If we just nuked the last package state check if the UID is valid.
-        if (removedOps != null && uidState.pkgOps.isEmpty()
-                && getPackagesForUid(uid).length <= 0) {
-            uidState.clear();
-            mUidStates.remove(uid);
-        }
+        removedOps = uidState.pkgOps.remove(packageName);
+        mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
 
         if (removedOps != null) {
             scheduleFastWriteLocked();
@@ -1320,7 +1312,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         mHandler.sendMessage(PooledLambda.obtainMessage(
                                 AppOpsService::notifyOpChangedForAllPkgsInUid,
                                 this, code, uidState.uid, true, null));
-                    } else if (uidState.pkgOps != null) {
+                    } else if (!uidState.pkgOps.isEmpty()) {
                         final ArraySet<OnOpModeChangedListener> listenerSet =
                                 mAppOpsCheckingService.getOpModeChangedListeners(code);
                         if (listenerSet != null) {
@@ -1349,7 +1341,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
 
-            if (uidState != null && uidState.pkgOps != null) {
+            if (uidState != null) {
                 int numPkgs = uidState.pkgOps.size();
                 for (int pkgNum = 0; pkgNum < numPkgs; pkgNum++) {
                     Ops ops = uidState.pkgOps.valueAt(pkgNum);
@@ -1479,7 +1471,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             final int uidStateCount = mUidStates.size();
             for (int i = 0; i < uidStateCount; i++) {
                 UidState uidState = mUidStates.valueAt(i);
-                if (uidState.pkgOps == null || uidState.pkgOps.isEmpty()) {
+                if (uidState.pkgOps.isEmpty()) {
                     continue;
                 }
                 ArrayMap<String, Ops> packages = uidState.pkgOps;
@@ -2120,7 +2112,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
 
-                if (uidState.pkgOps == null) {
+                if (uidState.pkgOps.isEmpty()) {
                     continue;
                 }
 
@@ -3704,7 +3696,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         // Do not check if uid/packageName/attributionTag is already known.
         synchronized (this) {
             UidState uidState = mUidStates.get(uid);
-            if (uidState != null && uidState.pkgOps != null) {
+            if (uidState != null && !uidState.pkgOps.isEmpty()) {
                 Ops ops = uidState.pkgOps.get(packageName);
 
                 if (ops != null && (attributionTag == null || ops.knownAttributionTags.contains(
@@ -3838,13 +3830,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         UidState uidState = getUidStateLocked(uid, edit);
         if (uidState == null) {
             return null;
-        }
-
-        if (uidState.pkgOps == null) {
-            if (!edit) {
-                return null;
-            }
-            uidState.pkgOps = new ArrayMap<>();
         }
 
         Ops ops = uidState.pkgOps.get(packageName);
@@ -4157,9 +4142,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        if (uidState.pkgOps == null) {
-            uidState.pkgOps = new ArrayMap<>();
-        }
         Ops ops = uidState.pkgOps.get(pkgName);
         if (ops == null) {
             ops = new Ops(pkgName, uidState);
@@ -5474,7 +5456,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private void updateStartedOpModeForUidLocked(int code, boolean restricted, int uid) {
         UidState uidState = mUidStates.get(uid);
-        if (uidState == null || uidState.pkgOps == null) {
+        if (uidState == null) {
             return;
         }
 
@@ -5598,7 +5580,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return;
             }
             UidState uidState = mUidStates.get(uid);
-            if (uidState == null || uidState.pkgOps == null) {
+            if (uidState == null) {
                 return;
             }
             Ops removedOps = uidState.pkgOps.remove(packageName);
