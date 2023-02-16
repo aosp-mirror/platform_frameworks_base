@@ -26,8 +26,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioDeviceVolumeManager;
@@ -37,8 +39,9 @@ import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.VolumeInfo;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.Presubmit;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 
 import libcore.junit.util.compat.CoreCompatChangeRule;
 
@@ -50,6 +53,7 @@ import org.junit.rules.TestRule;
 import java.util.Collections;
 import java.util.List;
 
+@Presubmit
 public class AbsoluteVolumeBehaviorTest {
     @Rule
     public TestRule compatChangeRule = new CoreCompatChangeRule();
@@ -60,6 +64,7 @@ public class AbsoluteVolumeBehaviorTest {
             AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, "");
 
     private Context mContext;
+    private Resources mResources;
     private String mPackageName;
     private AudioSystemAdapter mSpyAudioSystem;
     private SystemServerAdapter mSystemServer;
@@ -76,12 +81,19 @@ public class AbsoluteVolumeBehaviorTest {
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
-        mContext = InstrumentationRegistry.getTargetContext();
-        mPackageName = mContext.getOpPackageName();
-        mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
 
+        mContext = spy(ApplicationProvider.getApplicationContext());
+        mResources = spy(mContext.getResources());
+        mPackageName = mContext.getOpPackageName();
+
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mResources.getBoolean(com.android.internal.R.bool.config_useFixedVolume))
+                .thenReturn(false);
+
+        mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSystemServer = new NoOpSystemServerAdapter();
         mSettingsAdapter = new NoOpSettingsAdapter();
+
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSystemServer,
                 mSettingsAdapter, mMockAudioPolicy, mTestLooper.getLooper()) {
             @Override
@@ -134,8 +146,8 @@ public class AbsoluteVolumeBehaviorTest {
         List<VolumeInfo> volumes = Collections.singletonList(
                 new VolumeInfo.Builder(AudioManager.STREAM_MUSIC)
                         .setMinVolumeIndex(0)
-                        .setMaxVolumeIndex(250) // Max index is 10 times that of STREAM_MUSIC
-                        .setVolumeIndex(50)
+                        .setMaxVolumeIndex(250)
+                        .setVolumeIndex(250)
                         .build());
 
         mAudioService.registerDeviceVolumeDispatcherForAbsoluteVolume(true,
@@ -144,7 +156,7 @@ public class AbsoluteVolumeBehaviorTest {
         mTestLooper.dispatchAll();
 
         assertThat(mAudioService.getStreamVolume(AudioManager.STREAM_MUSIC))
-                .isEqualTo(5);
+                .isEqualTo(mAudioService.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
     }
 
     @Test
@@ -167,7 +179,9 @@ public class AbsoluteVolumeBehaviorTest {
         assertThat(mAudioService.getDeviceVolumeBehavior(DEVICE_SPEAKER_OUT))
                 .isEqualTo(AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE);
 
-        mAudioService.setStreamVolume(AudioManager.STREAM_MUSIC, 15, 0, mPackageName);
+        mAudioService.setStreamVolume(AudioManager.STREAM_MUSIC,
+                /*index*/ mAudioService.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                /*flags*/ 0, mPackageName);
         mTestLooper.dispatchAll();
 
         verify(mMockDispatcher, never()).dispatchDeviceVolumeChanged(
@@ -188,7 +202,9 @@ public class AbsoluteVolumeBehaviorTest {
                 AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL, mPackageName);
         mTestLooper.dispatchAll();
 
-        mAudioService.setStreamVolume(AudioManager.STREAM_MUSIC, 15, 0, mPackageName);
+        mAudioService.setStreamVolume(AudioManager.STREAM_MUSIC,
+                /*index*/ mAudioService.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                /*flags*/ 0, mPackageName);
         mTestLooper.dispatchAll();
 
         verify(mMockDispatcher, never()).dispatchDeviceVolumeChanged(
@@ -199,8 +215,8 @@ public class AbsoluteVolumeBehaviorTest {
     public void setStreamVolume_noAbsVolFlag_dispatchesVolumeChanged() throws RemoteException {
         VolumeInfo volumeInfo = new VolumeInfo.Builder(AudioManager.STREAM_MUSIC)
                 .setMinVolumeIndex(0)
-                .setMaxVolumeIndex(250) // Max index is 10 times that of STREAM_MUSIC
-                .setVolumeIndex(50)
+                .setMaxVolumeIndex(250)
+                .setVolumeIndex(0)
                 .build();
 
         mAudioService.registerDeviceVolumeDispatcherForAbsoluteVolume(true,
@@ -210,12 +226,14 @@ public class AbsoluteVolumeBehaviorTest {
         mTestLooper.dispatchAll();
 
         // Set stream volume without FLAG_ABSOLUTE_VOLUME
-        mAudioService.setStreamVolume(AudioManager.STREAM_MUSIC, 15, 0, mPackageName);
+        mAudioService.setStreamVolume(AudioManager.STREAM_MUSIC,
+                /*index*/ mAudioService.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                /*flags*/ 0, mPackageName);
         mTestLooper.dispatchAll();
 
         // Dispatched volume index is scaled to the range in the initial VolumeInfo
         verify(mMockDispatcher).dispatchDeviceVolumeChanged(DEVICE_SPEAKER_OUT,
-                new VolumeInfo.Builder(volumeInfo).setVolumeIndex(150).build());
+                new VolumeInfo.Builder(volumeInfo).setVolumeIndex(250).build());
     }
 
     @Test
@@ -224,7 +242,7 @@ public class AbsoluteVolumeBehaviorTest {
         VolumeInfo volumeInfo = new VolumeInfo.Builder(AudioManager.STREAM_MUSIC)
                 .setMinVolumeIndex(0)
                 .setMaxVolumeIndex(250)
-                .setVolumeIndex(50)
+                .setVolumeIndex(0)
                 .build();
 
         mAudioService.registerDeviceVolumeDispatcherForAbsoluteVolume(true,
@@ -234,8 +252,9 @@ public class AbsoluteVolumeBehaviorTest {
         mTestLooper.dispatchAll();
 
         // Set stream volume with FLAG_ABSOLUTE_VOLUME
-        mAudioService.setStreamVolume(AudioManager.STREAM_MUSIC, 15,
-                AudioManager.FLAG_ABSOLUTE_VOLUME, mPackageName);
+        mAudioService.setStreamVolume(AudioManager.STREAM_MUSIC,
+                /*index*/ mAudioService.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                /*flags*/ AudioManager.FLAG_ABSOLUTE_VOLUME, mPackageName);
         mTestLooper.dispatchAll();
 
         verify(mMockDispatcher, never()).dispatchDeviceVolumeChanged(eq(DEVICE_SPEAKER_OUT),
@@ -353,13 +372,15 @@ public class AbsoluteVolumeBehaviorTest {
         mTestLooper.dispatchAll();
 
         // Set stream volume without FLAG_ABSOLUTE_VOLUME
-        mAudioService.setStreamVolume(AudioManager.STREAM_MUSIC, 15, 0, mPackageName);
+        mAudioService.setStreamVolume(AudioManager.STREAM_MUSIC,
+                /*index*/ mAudioService.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                /*flags*/ 0, mPackageName);
         mTestLooper.dispatchAll();
 
         // Volume change not dispatched for absolute volume listener
         verify(mMockDispatcher, never()).dispatchDeviceVolumeChanged(eq(DEVICE_SPEAKER_OUT), any());
         // Volume changed dispatched for adjust-only absolute volume listener
         verify(mMockAdjustOnlyAbsoluteVolumeDispatcher).dispatchDeviceVolumeChanged(
-                DEVICE_SPEAKER_OUT, new VolumeInfo.Builder(volumeInfo).setVolumeIndex(150).build());
+                DEVICE_SPEAKER_OUT, new VolumeInfo.Builder(volumeInfo).setVolumeIndex(250).build());
     }
 }

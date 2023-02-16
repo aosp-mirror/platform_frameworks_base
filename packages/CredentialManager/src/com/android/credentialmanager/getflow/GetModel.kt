@@ -28,8 +28,8 @@ import java.time.Instant
 data class GetCredentialUiState(
     val providerInfoList: List<ProviderInfo>,
     val requestDisplayInfo: RequestDisplayInfo,
-    val currentScreenState: GetScreenState = toGetScreenState(providerInfoList),
     val providerDisplayInfo: ProviderDisplayInfo = toProviderDisplayInfo(providerInfoList),
+    val currentScreenState: GetScreenState = toGetScreenState(providerDisplayInfo),
     val activeEntry: BaseEntry? = toActiveEntry(providerDisplayInfo),
     val isNoAccount: Boolean = false,
 )
@@ -167,6 +167,9 @@ enum class GetScreenState {
 
     /** The snackbar only page when there's no account but only a remoteEntry. */
     REMOTE_ONLY,
+
+    /** The snackbar when there are only auth entries and all of them turn out to be empty. */
+    UNLOCKED_AUTH_ENTRIES_ONLY,
 }
 
 // IMPORTANT: new invocation should be mindful that this method will throw if more than 1 remote
@@ -174,7 +177,6 @@ enum class GetScreenState {
 private fun toProviderDisplayInfo(
     providerInfoList: List<ProviderInfo>
 ): ProviderDisplayInfo {
-
     val userNameToCredentialEntryMap = mutableMapOf<String, MutableList<CredentialEntryInfo>>()
     val authenticationEntryList = mutableListOf<AuthenticationEntryInfo>()
     val remoteEntryList = mutableListOf<RemoteEntryInfo>()
@@ -241,22 +243,18 @@ private fun toActiveEntry(
 }
 
 private fun toGetScreenState(
-    providerInfoList: List<ProviderInfo>
+    providerDisplayInfo: ProviderDisplayInfo
 ): GetScreenState {
-    var noLocalAccount = true
-    var remoteInfo: RemoteEntryInfo? = null
-    providerInfoList.forEach { providerInfo ->
-        if (providerInfo.credentialEntryList.isNotEmpty() ||
-            providerInfo.authenticationEntryList.isNotEmpty()) {
-            noLocalAccount = false
-        }
-        if (providerInfo.remoteEntry != null) {
-            remoteInfo = providerInfo.remoteEntry
-        }
-    }
 
-    return if (noLocalAccount && remoteInfo != null)
-        GetScreenState.REMOTE_ONLY else GetScreenState.PRIMARY_SELECTION
+    return if (providerDisplayInfo.sortedUserNameToCredentialEntryList.isEmpty() &&
+        providerDisplayInfo.remoteEntry == null &&
+        providerDisplayInfo.authenticationEntryList.all { it.isUnlockedAndEmpty })
+        GetScreenState.UNLOCKED_AUTH_ENTRIES_ONLY
+    else if (providerDisplayInfo.sortedUserNameToCredentialEntryList.isEmpty() &&
+        providerDisplayInfo.authenticationEntryList.isEmpty() &&
+        providerDisplayInfo.remoteEntry != null)
+        GetScreenState.REMOTE_ONLY
+    else GetScreenState.PRIMARY_SELECTION
 }
 
 internal class CredentialEntryInfoComparatorByTypeThenTimestamp : Comparator<CredentialEntryInfo> {

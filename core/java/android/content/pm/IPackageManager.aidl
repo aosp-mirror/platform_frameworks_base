@@ -159,7 +159,8 @@ interface IPackageManager {
      */
     ParceledListSlice getInstalledPackages(long flags, in int userId);
 
-    String getAppMetadataPath(String packageName, int userId);
+    @nullable ParcelFileDescriptor getAppMetadataFd(String packageName,
+                int userId);
 
     /**
      * This implements getPackagesHoldingPermissions via a "last returned row"

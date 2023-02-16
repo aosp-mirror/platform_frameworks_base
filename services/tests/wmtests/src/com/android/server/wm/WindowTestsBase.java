@@ -1583,10 +1583,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         @Override
-        public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
+        public void addStartingWindow(StartingWindowInfo info) {
             synchronized (mWMService.mGlobalLock) {
                 final ActivityRecord activity = mWMService.mRoot.getActivityRecord(
-                        appToken);
+                        info.appToken);
                 IWindow iWindow = mock(IWindow.class);
                 doReturn(mock(IBinder.class)).when(iWindow).asBinder();
                 final WindowState window = WindowTestsBase.createWindow(null,
@@ -1596,8 +1596,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
                         iWindow,
                         mPowerManagerWrapper);
                 activity.mStartingWindow = window;
-                mAppWindowMap.put(appToken, window);
-                mTaskAppMap.put(info.taskInfo.taskId, appToken);
+                mAppWindowMap.put(info.appToken, window);
+                mTaskAppMap.put(info.taskInfo.taskId, info.appToken);
             }
             if (mRunnableWhenAddingSplashScreen != null) {
                 mRunnableWhenAddingSplashScreen.run();

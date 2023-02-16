@@ -174,9 +174,9 @@ public class DisplayManagerServiceTest {
        }
 
         @Override
-        void setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
+        int setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
                 int[] autoHdrTypes) {
-            return;
+            return Display.HdrCapabilities.HDR_TYPE_INVALID;
         }
 
         @Override

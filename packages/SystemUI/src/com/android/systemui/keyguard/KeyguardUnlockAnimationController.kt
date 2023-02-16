@@ -928,7 +928,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         // The smartspace is not visible if the bouncer is showing, so don't shared element it.
-        if (keyguardStateController.isBouncerShowing) {
+        if (keyguardStateController.isPrimaryBouncerShowing) {
             return false
         }
 

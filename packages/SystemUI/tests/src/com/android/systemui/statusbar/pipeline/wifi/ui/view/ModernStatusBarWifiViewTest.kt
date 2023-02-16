@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.Airpla
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
@@ -63,7 +62,6 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
     private lateinit var testableLooper: TestableLooper
 
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
@@ -92,7 +90,7 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
                     airplaneModeRepository,
                     connectivityRepository,
                 ),
-                logger,
+                tableLogBuffer,
                 scope,
             )
         viewModel =
@@ -100,7 +98,6 @@ class ModernStatusBarWifiViewTest : SysuiTestCase() {
                     airplaneModeViewModel,
                     connectivityConstants,
                     context,
-                    logger,
                     tableLogBuffer,
                     interactor,
                     scope,

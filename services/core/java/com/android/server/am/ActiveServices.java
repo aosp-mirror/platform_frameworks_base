@@ -67,6 +67,7 @@ import static android.os.PowerExemptionManager.REASON_SERVICE_LAUNCH;
 import static android.os.PowerExemptionManager.REASON_START_ACTIVITY_FLAG;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_EXEMPT_APP_OP;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
 import static android.os.PowerExemptionManager.REASON_TEMP_ALLOWED_WHILE_IN_USE;
@@ -2464,6 +2465,7 @@ public final class ActiveServices {
                 case REASON_ROLE_EMERGENCY:
                 case REASON_ALLOWLISTED_PACKAGE:
                 case REASON_PACKAGE_INSTALLER:
+                case REASON_SYSTEM_EXEMPT_APP_OP:
                     return PERMISSION_GRANTED;
                 default:
                     return PERMISSION_DENIED;
@@ -7562,6 +7564,16 @@ public final class ActiveServices {
             final boolean isProfileOwner = mAm.mInternal.isProfileOwner(callingUid);
             if (isProfileOwner) {
                 ret = REASON_PROFILE_OWNER;
+            }
+        }
+
+        if (ret == REASON_DENIED) {
+            final AppOpsManager appOpsManager = mAm.getAppOpsManager();
+            if (mAm.mConstants.mFlagSystemExemptPowerRestrictionsEnabled
+                    && appOpsManager.checkOpNoThrow(
+                    AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS, callingUid,
+                    callingPackage) == AppOpsManager.MODE_ALLOWED) {
+                ret = REASON_SYSTEM_EXEMPT_APP_OP;
             }
         }
 

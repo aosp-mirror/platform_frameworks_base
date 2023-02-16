@@ -33,7 +33,6 @@ import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -53,9 +52,10 @@ constructor(
         listenForLockscreenToOccluded()
         listenForLockscreenToCamera()
         listenForLockscreenToAodOrDozing()
-        listenForLockscreenToBouncer()
+        listenForLockscreenToPrimaryBouncer()
         listenForLockscreenToDreaming()
-        listenForLockscreenToBouncerDragging()
+        listenForLockscreenToPrimaryBouncerDragging()
+        listenForLockscreenToAlternateBouncer()
     }
 
     private fun listenForLockscreenToDreaming() {
@@ -78,9 +78,9 @@ constructor(
         }
     }
 
-    private fun listenForLockscreenToBouncer() {
+    private fun listenForLockscreenToPrimaryBouncer() {
         scope.launch {
-            keyguardInteractor.isBouncerShowing
+            keyguardInteractor.primaryBouncerShowing
                 .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
                     val (isBouncerShowing, lastStartedTransitionStep) = pair
@@ -91,7 +91,30 @@ constructor(
                             TransitionInfo(
                                 ownerName = name,
                                 from = KeyguardState.LOCKSCREEN,
-                                to = KeyguardState.BOUNCER,
+                                to = KeyguardState.PRIMARY_BOUNCER,
+                                animator = getAnimator(),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForLockscreenToAlternateBouncer() {
+        scope.launch {
+            keyguardInteractor.alternateBouncerShowing
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { pair ->
+                    val (isAlternateBouncerShowing, lastStartedTransitionStep) = pair
+                    if (
+                        isAlternateBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.LOCKSCREEN
+                    ) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                ownerName = name,
+                                from = KeyguardState.LOCKSCREEN,
+                                to = KeyguardState.ALTERNATE_BOUNCER,
                                 animator = getAnimator(),
                             )
                         )
@@ -101,7 +124,7 @@ constructor(
     }
 
     /* Starts transitions when manually dragging up the bouncer from the lockscreen. */
-    private fun listenForLockscreenToBouncerDragging() {
+    private fun listenForLockscreenToPrimaryBouncerDragging() {
         var transitionId: UUID? = null
         scope.launch {
             shadeRepository.shadeModel
@@ -144,7 +167,7 @@ constructor(
                             keyguardTransitionRepository.startTransition(
                                 TransitionInfo(
                                     ownerName = name,
-                                    from = KeyguardState.BOUNCER,
+                                    from = KeyguardState.PRIMARY_BOUNCER,
                                     to = KeyguardState.LOCKSCREEN,
                                     animator = getAnimator(0.milliseconds)
                                 )
@@ -163,7 +186,7 @@ constructor(
                                     TransitionInfo(
                                         ownerName = name,
                                         from = KeyguardState.LOCKSCREEN,
-                                        to = KeyguardState.BOUNCER,
+                                        to = KeyguardState.PRIMARY_BOUNCER,
                                         animator = null,
                                     )
                                 )

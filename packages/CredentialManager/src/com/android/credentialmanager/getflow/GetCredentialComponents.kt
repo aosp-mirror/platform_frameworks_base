@@ -79,7 +79,20 @@ fun GetCredentialScreen(
     getCredentialUiState: GetCredentialUiState,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
-    if (getCredentialUiState.currentScreenState != GetScreenState.REMOTE_ONLY) {
+    if (getCredentialUiState.currentScreenState == GetScreenState.REMOTE_ONLY) {
+        RemoteCredentialSnackBarScreen(
+            onClick = viewModel::getFlowOnMoreOptionOnSnackBarSelected,
+            onCancel = viewModel::onCancel,
+        )
+    } else if (getCredentialUiState.currentScreenState
+        == GetScreenState.UNLOCKED_AUTH_ENTRIES_ONLY) {
+        EmptyAuthEntrySnackBarScreen(
+            authenticationEntryList =
+            getCredentialUiState.providerDisplayInfo.authenticationEntryList,
+            onCancel = viewModel::onCancel,
+            onLastLokcedAuthEntryNotFound = viewModel::onLastLockedAuthEntryNotFoundError,
+        )
+    } else {
         ModalBottomSheet(
             sheetContent = {
                 // Hide the sheet content as opposed to the whole bottom sheet to maintain the scrim
@@ -123,11 +136,6 @@ fun GetCredentialScreen(
                 }
             },
             onDismiss = viewModel::onCancel,
-        )
-    } else {
-        SnackBarScreen(
-            onClick = viewModel::getFlowOnMoreOptionOnSnackBarSelected,
-            onCancel = viewModel::onCancel,
         )
     }
 }
@@ -622,7 +630,7 @@ fun ActionEntryRow(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SnackBarScreen(
+fun RemoteCredentialSnackBarScreen(
     onClick: (Boolean) -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -652,5 +660,38 @@ fun SnackBarScreen(
         },
     ) {
         Text(text = stringResource(R.string.get_dialog_use_saved_passkey_for))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EmptyAuthEntrySnackBarScreen(
+    authenticationEntryList: List<AuthenticationEntryInfo>,
+    onCancel: () -> Unit,
+    onLastLokcedAuthEntryNotFound: () -> Unit,
+) {
+    val lastLocked = authenticationEntryList.firstOrNull({it.isLastUnlocked})
+    if (lastLocked == null) {
+        onLastLokcedAuthEntryNotFound()
+        return
+    }
+
+    // TODO: Change the height, width and position according to the design
+    Snackbar(
+        modifier = Modifier.padding(horizontal = 40.dp).padding(top = 700.dp),
+        shape = EntryShape.FullMediumRoundedCorner,
+        containerColor = LocalAndroidColorScheme.current.colorBackground,
+        contentColor = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+        dismissAction = {
+            IconButton(onClick = onCancel) {
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.accessibility_close_button),
+                    tint = LocalAndroidColorScheme.current.colorAccentTertiary
+                )
+            }
+        },
+    ) {
+        Text(text = stringResource(R.string.no_sign_in_info_in, lastLocked.title))
     }
 }

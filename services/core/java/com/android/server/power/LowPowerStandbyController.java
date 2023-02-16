@@ -19,6 +19,7 @@ package com.android.server.power;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
 import static android.os.PowerManager.lowPowerStandbyAllowedReasonsToString;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
@@ -33,12 +34,15 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.LowPowerStandbyAllowedReason;
 import android.os.PowerManager.LowPowerStandbyPolicy;
+import android.os.PowerManager.LowPowerStandbyPortDescription;
 import android.os.PowerManagerInternal;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -111,6 +115,7 @@ public class LowPowerStandbyController {
     private static final int MSG_NOTIFY_ACTIVE_CHANGED = 1;
     private static final int MSG_NOTIFY_ALLOWLIST_CHANGED = 2;
     private static final int MSG_NOTIFY_POLICY_CHANGED = 3;
+    private static final int MSG_NOTIFY_STANDBY_PORTS_CHANGED = 4;
 
     private static final String TAG_ROOT = "low-power-standby-policy";
     private static final String TAG_IDENTIFIER = "identifier";
@@ -131,9 +136,11 @@ public class LowPowerStandbyController {
             this::onStandbyTimeoutExpired;
     private final LowPowerStandbyControllerInternal mLocalService = new LocalService();
     private final SparseIntArray mUidAllowedReasons = new SparseIntArray();
+    private final List<StandbyPortsLock> mStandbyPortLocks = new ArrayList<>();
 
     @GuardedBy("mLock")
     private boolean mEnableCustomPolicy;
+    private boolean mEnableStandbyPorts;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -188,6 +195,49 @@ public class LowPowerStandbyController {
             }
         }
     };
+
+    private final class StandbyPortsLock implements IBinder.DeathRecipient {
+        private final IBinder mToken;
+        private final int mUid;
+        private final List<LowPowerStandbyPortDescription> mPorts;
+
+        StandbyPortsLock(IBinder token, int uid, List<LowPowerStandbyPortDescription> ports) {
+            mToken = token;
+            mUid = uid;
+            mPorts = ports;
+        }
+
+        public boolean linkToDeath() {
+            try {
+                mToken.linkToDeath(this, 0);
+                return true;
+            } catch (RemoteException e) {
+                Slog.i(TAG, "StandbyPorts token already died");
+                return false;
+            }
+        }
+
+        public void unlinkToDeath() {
+            mToken.unlinkToDeath(this, 0);
+        }
+
+        public IBinder getToken() {
+            return mToken;
+        }
+
+        public int getUid() {
+            return mUid;
+        }
+
+        public List<LowPowerStandbyPortDescription> getPorts() {
+            return mPorts;
+        }
+
+        @Override
+        public void binderDied() {
+            releaseStandbyPorts(mToken);
+        }
+    }
 
     @GuardedBy("mLock")
     private AlarmManager mAlarmManager;
@@ -311,6 +361,7 @@ public class LowPowerStandbyController {
             mDeviceConfig.registerPropertyUpdateListener(mContext.getMainExecutor(),
                     properties -> onDeviceConfigFlagsChanged());
             mEnableCustomPolicy = mDeviceConfig.enableCustomPolicy();
+            mEnableStandbyPorts = mDeviceConfig.enableStandbyPorts();
 
             if (mEnableCustomPolicy) {
                 mPolicy = loadPolicy();
@@ -336,6 +387,8 @@ public class LowPowerStandbyController {
                 enqueueNotifyAllowlistChangedLocked();
                 mEnableCustomPolicy = enableCustomPolicy;
             }
+
+            mEnableStandbyPorts = mDeviceConfig.enableStandbyPorts();
         }
     }
 
@@ -861,6 +914,78 @@ public class LowPowerStandbyController {
         }
     }
 
+    private int findIndexOfStandbyPorts(@NonNull IBinder token) {
+        for (int i = 0; i < mStandbyPortLocks.size(); i++) {
+            if (mStandbyPortLocks.get(i).getToken() == token) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    void acquireStandbyPorts(@NonNull IBinder token, int uid,
+            @NonNull List<LowPowerStandbyPortDescription> ports) {
+        validatePorts(ports);
+
+        StandbyPortsLock standbyPortsLock = new StandbyPortsLock(token, uid, ports);
+        synchronized (mLock) {
+            if (findIndexOfStandbyPorts(token) != -1) {
+                return;
+            }
+
+            if (standbyPortsLock.linkToDeath()) {
+                mStandbyPortLocks.add(standbyPortsLock);
+                if (mEnableStandbyPorts && isEnabled() && isPackageExempt(uid)) {
+                    enqueueNotifyStandbyPortsChangedLocked();
+                }
+            }
+        }
+    }
+
+    void validatePorts(@NonNull List<LowPowerStandbyPortDescription> ports) {
+        for (LowPowerStandbyPortDescription portDescription : ports) {
+            int port = portDescription.getPortNumber();
+            if (port < 0 || port > 0xFFFF) {
+                throw new IllegalArgumentException("port out of range:" + port);
+            }
+        }
+    }
+
+    void releaseStandbyPorts(@NonNull IBinder token) {
+        synchronized (mLock) {
+            int index = findIndexOfStandbyPorts(token);
+            if (index == -1) {
+                return;
+            }
+
+            StandbyPortsLock standbyPortsLock = mStandbyPortLocks.remove(index);
+            standbyPortsLock.unlinkToDeath();
+            if (mEnableStandbyPorts && isEnabled() && isPackageExempt(standbyPortsLock.getUid())) {
+                enqueueNotifyStandbyPortsChangedLocked();
+            }
+        }
+    }
+
+    @NonNull
+    List<LowPowerStandbyPortDescription> getActiveStandbyPorts() {
+        List<LowPowerStandbyPortDescription> activeStandbyPorts = new ArrayList<>();
+        synchronized (mLock) {
+            if (!isEnabled() || !mEnableStandbyPorts) {
+                return activeStandbyPorts;
+            }
+
+            List<Integer> exemptPackageAppIds = getExemptPackageAppIdsLocked();
+            for (StandbyPortsLock standbyPortsLock : mStandbyPortLocks) {
+                int standbyPortsAppid = UserHandle.getAppId(standbyPortsLock.getUid());
+                if (exemptPackageAppIds.contains(standbyPortsAppid)) {
+                    activeStandbyPorts.addAll(standbyPortsLock.getPorts());
+                }
+            }
+
+            return activeStandbyPorts;
+        }
+    }
+
     private boolean policyChangeAffectsAllowlistLocked(
             @Nullable LowPowerStandbyPolicy oldPolicy, @Nullable LowPowerStandbyPolicy newPolicy) {
         final LowPowerStandbyPolicy policyA = policyOrDefault(oldPolicy);
@@ -941,6 +1066,17 @@ public class LowPowerStandbyController {
                 }
             }
             ipw.decreaseIndent();
+
+            final List<LowPowerStandbyPortDescription> activeStandbyPorts = getActiveStandbyPorts();
+            if (!activeStandbyPorts.isEmpty()) {
+                ipw.println();
+                ipw.println("Active standby ports locks:");
+                ipw.increaseIndent();
+                for (LowPowerStandbyPortDescription portDescription : activeStandbyPorts) {
+                    ipw.print(portDescription.toString());
+                }
+                ipw.decreaseIndent();
+            }
         }
         ipw.decreaseIndent();
     }
@@ -1005,6 +1141,9 @@ public class LowPowerStandbyController {
                     break;
                 case MSG_NOTIFY_POLICY_CHANGED:
                     notifyPolicyChanged((LowPowerStandbyPolicy) msg.obj);
+                    break;
+                case MSG_NOTIFY_STANDBY_PORTS_CHANGED:
+                    notifyStandbyPortsChanged();
                     break;
             }
         }
@@ -1172,6 +1311,29 @@ public class LowPowerStandbyController {
         npmi.setLowPowerStandbyAllowlist(allowlistUids);
     }
 
+    @GuardedBy("mLock")
+    private void enqueueNotifyStandbyPortsChangedLocked() {
+        final long now = mClock.elapsedRealtime();
+
+        if (DEBUG) {
+            Slog.d(TAG, "enqueueNotifyStandbyPortsChangedLocked");
+        }
+
+        final Message msg = mHandler.obtainMessage(MSG_NOTIFY_STANDBY_PORTS_CHANGED);
+        mHandler.sendMessageAtTime(msg, now);
+    }
+
+    private void notifyStandbyPortsChanged() {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyStandbyPortsChanged");
+        }
+
+        final Intent intent = new Intent(PowerManager.ACTION_LOW_POWER_STANDBY_PORTS_CHANGED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                Manifest.permission.MANAGE_LOW_POWER_STANDBY);
+    }
+
     /**
      * Class that is used to read device config for low power standby configuration.
      */
@@ -1179,6 +1341,7 @@ public class LowPowerStandbyController {
     public static class DeviceConfigWrapper {
         public static final String NAMESPACE = "low_power_standby";
         public static final String FEATURE_FLAG_ENABLE_POLICY = "enable_policy";
+        public static final String FEATURE_FLAG_ENABLE_STANDBY_PORTS = "enable_standby_ports";
 
         /**
          * Returns true if custom policies are enabled.
@@ -1186,6 +1349,14 @@ public class LowPowerStandbyController {
          */
         public boolean enableCustomPolicy() {
             return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_POLICY, false);
+        }
+
+        /**
+         * Returns true if standby ports are enabled.
+         * Otherwise, returns false, and {@link #getActiveStandbyPorts()} will always be empty.
+         */
+        public boolean enableStandbyPorts() {
+            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_STANDBY_PORTS, false);
         }
 
         /**

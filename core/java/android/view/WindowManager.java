@@ -129,6 +129,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * The interface that apps use to talk to the window manager.
@@ -1355,6 +1356,38 @@ public interface WindowManager extends ViewManager {
      * @see #addCrossWindowBlurEnabledListener
      */
     default void removeCrossWindowBlurEnabledListener(@NonNull Consumer<Boolean> listener) {
+    }
+
+    /**
+     * Adds a listener to start monitoring the proposed rotation of the current associated context.
+     * It reports the current recommendation for the rotation that takes various factors (e.g.
+     * sensor, context, device state, etc) into account. The proposed rotation might not be applied
+     * by the system automatically due to the application's active preference to lock the
+     * orientation (e.g. with {@link android.app.Activity#setRequestedOrientation(int)}). This
+     * listener gives application an opportunity to selectively react to device orientation changes.
+     * The newly added listener will be called with current proposed rotation. Note that the context
+     * of this window manager instance must be a {@link android.annotation.UiContext}.
+     *
+     * @param executor The executor on which callback method will be invoked.
+     * @param listener Called when the proposed rotation for the context is being delivered.
+     *                 The reported rotation can be {@link Surface#ROTATION_0},
+     *                 {@link Surface#ROTATION_90}, {@link Surface#ROTATION_180} and
+     *                 {@link Surface#ROTATION_270}.
+     * @throws UnsupportedOperationException if this method is called on an instance that is not
+     *         associated with a {@link android.annotation.UiContext}.
+     */
+    default void addProposedRotationListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull IntConsumer listener) {
+    }
+
+    /**
+     * Removes a listener, previously added with {@link #addProposedRotationListener}. It is
+     * recommended to call when the associated context no longer has visible components. No-op if
+     * the provided listener is not registered.
+     *
+     * @param listener The listener to be removed.
+     */
+    default void removeProposedRotationListener(@NonNull IntConsumer listener) {
     }
 
     /**

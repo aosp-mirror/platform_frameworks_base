@@ -29,7 +29,7 @@ import java.io.PrintWriter
 import java.util.stream.Collectors
 import javax.inject.Inject
 
-/** Determines which device wake-ups should trigger face authentication. */
+/** Determines which device wake-ups should trigger passive authentication. */
 @SysUISingleton
 class FaceWakeUpTriggersConfig
 @Inject

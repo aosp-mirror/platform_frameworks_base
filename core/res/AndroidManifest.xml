@@ -109,6 +109,7 @@
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED_INTERNAL" />
     <protected-broadcast android:name="android.os.action.LOW_POWER_STANDBY_ENABLED_CHANGED" />
     <protected-broadcast android:name="android.os.action.LOW_POWER_STANDBY_POLICY_CHANGED" />
+    <protected-broadcast android:name="android.os.action.LOW_POWER_STANDBY_PORTS_CHANGED" />
     <protected-broadcast android:name="android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED" />
 
     <!-- @deprecated This is rarely used and will be phased out soon. -->
@@ -2930,6 +2931,15 @@
     <permission android:name="android.permission.BIND_IMS_SERVICE"
         android:protectionLevel="signature|privileged|vendorPrivileged" />
 
+    <!-- Must be required by a SatelliteService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature|privileged|vendorPrivileged
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_SATELLITE_SERVICE"
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
+
     <!-- Must be required by a telephony data service to ensure that only the
          system can bind to it.
          <p>Protection level: signature
@@ -3665,6 +3675,10 @@
     <!-- Allows an application to manage policy related to the Memory Tagging Extension (MTE).
     -->
     <permission android:name="android.permission.MANAGE_DEVICE_POLICY_MTE"
+                android:protectionLevel="internal|role" />
+
+    <!-- Allows an application to manage policy related to device identifiers. -->
+    <permission android:name="android.permission.MANAGE_DEVICE_POLICY_DEVICE_IDENTIFIERS"
                 android:protectionLevel="internal|role" />
 
     <!-- Allows an application to set device policies outside the current user
@@ -4458,6 +4472,11 @@
         <p>Protection level: normal -->
     <permission android:name="android.permission.CREDENTIAL_MANAGER_SET_ORIGIN"
         android:protectionLevel="normal" />
+
+    <!-- Allows permission to use Credential Manager UI for providing and saving credentials
+         @hide -->
+    <permission android:name="android.permission.LAUNCH_CREDENTIAL_SELECTOR"
+        android:protectionLevel="signature" />
 
     <!-- Allows an application to be able to store and retrieve credentials from a remote
          device.
@@ -5838,7 +5857,7 @@
          <p>Not for use by third-party applications.</p>
          @hide -->
     <permission android:name="android.permission.CALL_AUDIO_INTERCEPTION"
-                android:protectionLevel="signature|privileged" />
+                android:protectionLevel="signature|privileged|role" />
 
     <!-- @TestApi Allows an application to query audio related state.
          @hide -->
@@ -5939,6 +5958,12 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MANAGE_LOW_POWER_STANDBY"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- @hide @SystemApi Allows an application to request ports to remain open during
+         Low Power Standby.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.SET_LOW_POWER_STANDBY_PORTS"
+        android:protectionLevel="signature|privileged" />
 
    <!-- @hide Allows low-level access to tun tap driver -->
     <permission android:name="android.permission.NET_TUNNELING"

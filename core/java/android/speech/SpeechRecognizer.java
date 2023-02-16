@@ -80,7 +80,7 @@ public class SpeechRecognizer {
      * recognition results, where the first element is the most likely candidate.
      */
     public static final String RESULTS_RECOGNITION = "results_recognition";
-    
+
     /**
      * Key used to retrieve a float array from the {@link Bundle} passed to the
      * {@link RecognitionListener#onResults(Bundle)} and
@@ -124,6 +124,101 @@ public class SpeechRecognizer {
     public static final String RECOGNITION_PARTS = "recognition_parts";
 
     /**
+     * Key used to retrieve a {@link String} representation of the IETF language tag (as defined by
+     * BCP 47, e.g., "en-US", "de-DE") of the detected language of the most recent audio chunk.
+     *
+     * <p> This info is returned to the client in the {@link Bundle} passed to
+     * {@link RecognitionListener#onLanguageDetection(Bundle)} only if
+     * {@link RecognizerIntent#EXTRA_ENABLE_LANGUAGE_DETECTION} is set. Additionally, if
+     * {@link RecognizerIntent#EXTRA_LANGUAGE_DETECTION_ALLOWED_LANGUAGES} are listed,
+     * the detected language is constrained to be one from the list.
+     */
+    public static final String DETECTED_LANGUAGE = "detected_language";
+
+    /**
+     * Key used to retrieve the level of confidence of the detected language
+     * of the most recent audio chunk,
+     * represented by an {@code int} value prefixed by {@code LANGUAGE_DETECTION_CONFIDENCE_LEVEL_}.
+     *
+     * <p> This info is returned to the client in the {@link Bundle} passed to
+     * {@link RecognitionListener#onLanguageDetection(Bundle)} only if
+     * {@link RecognizerIntent#EXTRA_ENABLE_LANGUAGE_DETECTION} is set.
+     */
+    public static final String LANGUAGE_DETECTION_CONFIDENCE_LEVEL =
+            "language_detection_confidence_level";
+
+    /**
+     * The level of language detection confidence.
+     *
+     * @hide
+     */
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"LANGUAGE_DETECTION_CONFIDENCE_LEVEL_"}, value = {
+            LANGUAGE_DETECTION_CONFIDENCE_LEVEL_UNKNOWN,
+            LANGUAGE_DETECTION_CONFIDENCE_LEVEL_NOT_CONFIDENT,
+            LANGUAGE_DETECTION_CONFIDENCE_LEVEL_CONFIDENT,
+            LANGUAGE_DETECTION_CONFIDENCE_LEVEL_HIGHLY_CONFIDENT
+    })
+    public @interface LanguageDetectionConfidenceLevel {}
+
+    public static final int LANGUAGE_DETECTION_CONFIDENCE_LEVEL_UNKNOWN = 0;
+    public static final int LANGUAGE_DETECTION_CONFIDENCE_LEVEL_NOT_CONFIDENT = 1;
+    public static final int LANGUAGE_DETECTION_CONFIDENCE_LEVEL_CONFIDENT = 2;
+    public static final int LANGUAGE_DETECTION_CONFIDENCE_LEVEL_HIGHLY_CONFIDENT = 3;
+
+    /**
+     * Key used to retrieve an ArrayList&lt;{@link String}&gt; containing representations of the
+     * IETF language tags (as defined by BCP 47, e.g., "en-US", "en-UK") denoting the alternative
+     * locales for the same language retrieved by the key {@link #DETECTED_LANGUAGE}.
+     *
+     * This info is returned to the client in the {@link Bundle} passed to
+     * {@link RecognitionListener#onLanguageDetection(Bundle)} only if
+     * {@link RecognizerIntent#EXTRA_ENABLE_LANGUAGE_DETECTION} is set.
+     */
+    public static final String TOP_LOCALE_ALTERNATIVES = "top_locale_alternatives";
+
+    /**
+     * Key used to retrieve the result of the language switch of the most recent audio chunk,
+     * represented by an {@code int} value prefixed by {@code LANGUAGE_SWITCH_}.
+     *
+     * <p> This info is returned to the client in the {@link Bundle} passed to the
+     * {@link RecognitionListener#onLanguageDetection(Bundle)} only if
+     * {@link RecognizerIntent#EXTRA_ENABLE_LANGUAGE_SWITCH} is set.
+     */
+    public static final String LANGUAGE_SWITCH_RESULT = "language_switch_result";
+
+    /**
+     * The result of the language switch.
+     *
+     * @hide
+     */
+    @Documented
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"LANGUAGE_SWITCH_RESULT_"}, value = {
+            LANGUAGE_SWITCH_RESULT_NOT_ATTEMPTED,
+            LANGUAGE_SWITCH_RESULT_SUCCEEDED,
+            LANGUAGE_SWITCH_RESULT_FAILED,
+            LANGUAGE_SWITCH_RESULT_SKIPPED_NO_MODEL
+    })
+    public @interface LanguageSwitchResult {}
+
+    /** Switch not attempted. */
+    public static final int LANGUAGE_SWITCH_RESULT_NOT_ATTEMPTED = 0;
+
+    /** Switch attempted and succeeded. */
+    public static final int LANGUAGE_SWITCH_RESULT_SUCCEEDED = 1;
+
+    /** Switch attempted and failed. */
+    public static final int LANGUAGE_SWITCH_RESULT_FAILED = 2;
+
+    /**
+     * Switch skipped because the language model is missing
+     * or the language is not allowlisted for auto switch.
+     */
+    public static final int LANGUAGE_SWITCH_RESULT_SKIPPED_NO_MODEL = 3;
+
+    /**
      * The reason speech recognition failed.
      *
      * @hide
@@ -145,6 +240,7 @@ public class SpeechRecognizer {
             ERROR_LANGUAGE_NOT_SUPPORTED,
             ERROR_LANGUAGE_UNAVAILABLE,
             ERROR_CANNOT_CHECK_SUPPORT,
+            ERROR_CANNOT_LISTEN_TO_DOWNLOAD_EVENTS,
     })
     public @interface RecognitionError {}
 
@@ -190,6 +286,9 @@ public class SpeechRecognizer {
     /** The service does not allow to check for support. */
     public static final int ERROR_CANNOT_CHECK_SUPPORT = 14;
 
+    /** The service does not support listening to model downloads events. */
+    public static final int ERROR_CANNOT_LISTEN_TO_DOWNLOAD_EVENTS = 15;
+
     /** action codes */
     private static final int MSG_START = 1;
     private static final int MSG_STOP = 2;
@@ -198,6 +297,8 @@ public class SpeechRecognizer {
     private static final int MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT = 5;
     private static final int MSG_CHECK_RECOGNITION_SUPPORT = 6;
     private static final int MSG_TRIGGER_MODEL_DOWNLOAD = 7;
+    private static final int MSG_SET_MODEL_DOWNLOAD_LISTENER = 8;
+    private static final int MSG_CLEAR_MODEL_DOWNLOAD_LISTENER = 9;
 
     /** The actual RecognitionService endpoint */
     private IRecognitionService mService;
@@ -241,6 +342,17 @@ public class SpeechRecognizer {
                     break;
                 case MSG_TRIGGER_MODEL_DOWNLOAD:
                     handleTriggerModelDownload((Intent) msg.obj);
+                    break;
+                case MSG_SET_MODEL_DOWNLOAD_LISTENER:
+                    ModelDownloadListenerArgs modelDownloadListenerArgs =
+                            (ModelDownloadListenerArgs) msg.obj;
+                    handleSetModelDownloadListener(
+                            modelDownloadListenerArgs.mIntent,
+                            modelDownloadListenerArgs.mExecutor,
+                            modelDownloadListenerArgs.mModelDownloadListener);
+                    break;
+                case MSG_CLEAR_MODEL_DOWNLOAD_LISTENER:
+                    handleClearModelDownloadListener((Intent) msg.obj);
                     break;
             }
         }
@@ -545,6 +657,10 @@ public class SpeechRecognizer {
      * user interaction to approve the download. Callers can verify the status of the request via
      * {@link #checkRecognitionSupport(Intent, Executor, RecognitionSupportCallback)}.
      *
+     * <p>Listeners set via
+     * {@link #setModelDownloadListener(Intent, Executor, ModelDownloadListener)} will receive
+     * updates about this download request.</p>
+     *
      * @param recognizerIntent contains parameters for the recognition to be performed. The intent
      *        may also contain optional extras, see {@link RecognizerIntent}.
      */
@@ -561,6 +677,54 @@ public class SpeechRecognizer {
             connectToSystemService();
         }
         putMessage(Message.obtain(mHandler, MSG_TRIGGER_MODEL_DOWNLOAD, recognizerIntent));
+    }
+
+    /**
+     * Sets a listener to model download updates. Clients will have to call this method before
+     * {@link #triggerModelDownload(Intent)}.
+     *
+     * @param recognizerIntent the request to monitor support for.
+     * @param listener on which to receive updates about the model download request.
+     */
+    public void setModelDownloadListener(
+            @NonNull Intent recognizerIntent,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ModelDownloadListener listener) {
+        Objects.requireNonNull(recognizerIntent, "intent must not be null");
+        if (DBG) {
+            Slog.i(TAG, "#setModelDownloadListener called");
+            if (mService == null) {
+                Slog.i(TAG, "Connection is not established yet");
+            }
+        }
+        if (mService == null) {
+            // First time connection: first establish a connection, then dispatch.
+            connectToSystemService();
+        }
+        putMessage(Message.obtain(
+                mHandler, MSG_SET_MODEL_DOWNLOAD_LISTENER,
+                new ModelDownloadListenerArgs(recognizerIntent, executor, listener)));
+    }
+
+    /**
+     * Clears the listener for model download updates if any.
+     *
+     * @param recognizerIntent the request to monitor support for.
+     */
+    public void clearModelDownloadListener(@NonNull Intent recognizerIntent) {
+        Objects.requireNonNull(recognizerIntent, "intent must not be null");
+        if (DBG) {
+            Slog.i(TAG, "#clearModelDownloadListener called");
+            if (mService == null) {
+                Slog.i(TAG, "Connection is not established yet");
+            }
+        }
+        if (mService == null) {
+            // First time connection: first establish a connection, then dispatch.
+            connectToSystemService();
+        }
+        putMessage(Message.obtain(
+                mHandler, MSG_CLEAR_MODEL_DOWNLOAD_LISTENER, recognizerIntent));
     }
 
     /**
@@ -681,6 +845,42 @@ public class SpeechRecognizer {
         } catch (final RemoteException e) {
             Log.e(TAG, "downloadModel() failed", e);
             mListener.onError(ERROR_CLIENT);
+        }
+    }
+
+    private void handleSetModelDownloadListener(
+            Intent recognizerIntent,
+            Executor callbackExecutor,
+            @Nullable ModelDownloadListener modelDownloadListener) {
+        if (!maybeInitializeManagerService()) {
+            return;
+        }
+        try {
+            InternalModelDownloadListener listener =
+                    modelDownloadListener == null
+                            ? null
+                            : new InternalModelDownloadListener(
+                                    callbackExecutor,
+                                    modelDownloadListener);
+            mService.setModelDownloadListener(
+                    recognizerIntent, mContext.getAttributionSource(), listener);
+            if (DBG) Log.d(TAG, "setModelDownloadListener()");
+        } catch (final RemoteException e) {
+            Log.e(TAG, "setModelDownloadListener() failed", e);
+            callbackExecutor.execute(() -> modelDownloadListener.onError(ERROR_CLIENT));
+        }
+    }
+
+    private void handleClearModelDownloadListener(Intent recognizerIntent) {
+        if (!maybeInitializeManagerService()) {
+            return;
+        }
+        try {
+            mService.clearModelDownloadListener(
+                    recognizerIntent, mContext.getAttributionSource());
+            if (DBG) Log.d(TAG, "clearModelDownloadListener()");
+        } catch (final RemoteException e) {
+            Log.e(TAG, "clearModelDownloadListener() failed", e);
         }
     }
 
@@ -827,6 +1027,19 @@ public class SpeechRecognizer {
         }
     }
 
+    private static class ModelDownloadListenerArgs {
+        final Intent mIntent;
+        final Executor mExecutor;
+        final ModelDownloadListener mModelDownloadListener;
+
+        private ModelDownloadListenerArgs(Intent intent, Executor executor,
+                ModelDownloadListener modelDownloadListener) {
+            mIntent = intent;
+            mExecutor = executor;
+            mModelDownloadListener = modelDownloadListener;
+        }
+    }
+
     /**
      * Internal wrapper of IRecognitionListener which will propagate the results to
      * RecognitionListener
@@ -845,6 +1058,7 @@ public class SpeechRecognizer {
         private static final int MSG_ON_EVENT = 9;
         private static final int MSG_SEGMENT_RESULTS = 10;
         private static final int MSG_SEGMENT_END_SESSION = 11;
+        private static final int MSG_LANGUAGE_DETECTION = 12;
 
         private final Handler mInternalHandler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -885,6 +1099,9 @@ public class SpeechRecognizer {
                         break;
                     case MSG_SEGMENT_END_SESSION:
                         mInternalListener.onEndOfSegmentedSession();
+                        break;
+                    case MSG_LANGUAGE_DETECTION:
+                        mInternalListener.onLanguageDetection((Bundle) msg.obj);
                         break;
                 }
             }
@@ -930,6 +1147,10 @@ public class SpeechRecognizer {
             Message.obtain(mInternalHandler, MSG_SEGMENT_END_SESSION).sendToTarget();
         }
 
+        public void onLanguageDetection(final Bundle results) {
+            Message.obtain(mInternalHandler, MSG_LANGUAGE_DETECTION, results).sendToTarget();
+        }
+
         public void onEvent(final int eventType, final Bundle params) {
             Message.obtain(mInternalHandler, MSG_ON_EVENT, eventType, eventType, params)
                     .sendToTarget();
@@ -953,6 +1174,38 @@ public class SpeechRecognizer {
         @Override
         public void onError(int errorCode) throws RemoteException {
             mExecutor.execute(() -> mCallback.onError(errorCode));
+        }
+    }
+
+    private static class InternalModelDownloadListener extends IModelDownloadListener.Stub {
+        private final Executor mExecutor;
+        private final ModelDownloadListener mModelDownloadListener;
+
+        private InternalModelDownloadListener(
+                Executor executor,
+                @NonNull ModelDownloadListener modelDownloadListener) {
+            mExecutor = executor;
+            mModelDownloadListener = modelDownloadListener;
+        }
+
+        @Override
+        public void onProgress(int completedPercent) throws RemoteException {
+            mExecutor.execute(() -> mModelDownloadListener.onProgress(completedPercent));
+        }
+
+        @Override
+        public void onSuccess() throws RemoteException {
+            mExecutor.execute(() -> mModelDownloadListener.onSuccess());
+        }
+
+        @Override
+        public void onScheduled() throws RemoteException {
+            mExecutor.execute(() -> mModelDownloadListener.onScheduled());
+        }
+
+        @Override
+        public void onError(int error) throws RemoteException {
+            mExecutor.execute(() -> mModelDownloadListener.onError(error));
         }
     }
 }

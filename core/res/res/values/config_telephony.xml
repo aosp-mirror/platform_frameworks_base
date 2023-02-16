@@ -106,6 +106,10 @@
     <string name="config_qualified_networks_service_class" translatable="false"></string>
     <java-symbol type="string" name="config_qualified_networks_service_class" />
 
+    <!-- Telephony satellite service package name to bind to by default. -->
+    <string name="config_satellite_service_package" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_service_package" />
+
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
          will not perform handover if the target transport is out of service, or VoPS not
          supported. The network will be torn down on the source transport, and will be

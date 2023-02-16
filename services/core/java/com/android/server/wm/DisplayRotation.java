@@ -1494,6 +1494,15 @@ public class DisplayRotation {
         }
     }
 
+    void dispatchProposedRotation(@Surface.Rotation int rotation) {
+        if (mService.mRotationWatcherController.hasProposedRotationListeners()) {
+            synchronized (mLock) {
+                mService.mRotationWatcherController.dispatchProposedRotation(
+                        mDisplayContent, rotation);
+            }
+        }
+    }
+
     private static String allowAllRotationsToString(int allowAll) {
         switch (allowAll) {
             case -1:
@@ -1799,6 +1808,7 @@ public class DisplayRotation {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "onProposedRotationChanged, rotation=%d", rotation);
             // Send interaction power boost to improve redraw performance.
             mService.mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
+            dispatchProposedRotation(rotation);
             if (isRotationChoiceAllowed(rotation)) {
                 final boolean isValid = isValidRotationChoice(rotation);
                 sendProposedRotationChangeToStatusBarInternal(rotation, isValid);

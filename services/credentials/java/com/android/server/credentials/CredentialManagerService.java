@@ -28,10 +28,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
 import android.credentials.CredentialDescription;
+import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
@@ -110,9 +112,12 @@ public final class CredentialManagerService
     private List<CredentialManagerServiceImpl> constructSystemServiceListLocked(
             int resolvedUserId) {
         List<CredentialManagerServiceImpl> services = new ArrayList<>();
-        List<CredentialProviderInfo> credentialProviderInfos =
-                CredentialProviderInfo.getAvailableSystemServices(mContext, resolvedUserId);
-        credentialProviderInfos.forEach(
+        List<CredentialProviderInfo> serviceInfos =
+                CredentialProviderInfo.getAvailableSystemServices(
+                        mContext,
+                        resolvedUserId,
+                        /* disableSystemAppVerificationForTests= */ false);
+        serviceInfos.forEach(
                 info -> {
                     services.add(
                             new CredentialManagerServiceImpl(this, mLock, resolvedUserId, info));
@@ -209,11 +214,20 @@ public final class CredentialManagerService
     }
 
     private boolean hasWriteSecureSettingsPermission() {
-        final String permission = android.Manifest.permission.WRITE_SECURE_SETTINGS;
+        return hasPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS);
+    }
+
+    private void verifyPermission(String permission) throws SecurityException {
+        if (!hasPermission(permission)) {
+            throw new SecurityException("Caller is missing permission: " + permission);
+        }
+    }
+
+    private boolean hasPermission(String permission) {
         final boolean result =
                 mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED;
         if (!result) {
-            Slog.e(TAG, "Caller does not have WRITE_SECURE_SETTINGS permission.");
+            Slog.e(TAG, "Caller does not have permission: " + permission);
         }
         return result;
     }
@@ -224,7 +238,7 @@ public final class CredentialManagerService
         try {
             synchronized (mLock) {
                 final List<CredentialManagerServiceImpl> services =
-                        getAllCredentialProviderServicesLocked(userId);
+                        getCredentialProviderServicesLocked(userId);
                 for (CredentialManagerServiceImpl s : services) {
                     c.accept(s);
                 }
@@ -235,7 +249,7 @@ public final class CredentialManagerService
     }
 
     @GuardedBy("mLock")
-    private List<CredentialManagerServiceImpl> getAllCredentialProviderServicesLocked(int userId) {
+    private List<CredentialManagerServiceImpl> getCredentialProviderServicesLocked(int userId) {
         List<CredentialManagerServiceImpl> concatenatedServices = new ArrayList<>();
         List<CredentialManagerServiceImpl> userConfigurableServices =
                 getServiceListForUserLocked(userId);
@@ -694,6 +708,23 @@ public final class CredentialManagerService
         }
 
         @Override
+        public List<ServiceInfo> getCredentialProviderServices(
+                int userId, boolean disableSystemAppVerificationForTests, int providerFilter) {
+            Log.i(TAG, "getCredentialProviderServices");
+            verifyPermission(android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS);
+
+            List<ServiceInfo> services = new ArrayList<>();
+            List<CredentialProviderInfo> providers =
+                    CredentialProviderInfo.getCredentialProviderServices(
+                            mContext, userId, disableSystemAppVerificationForTests, providerFilter);
+            for (CredentialProviderInfo p : providers) {
+                services.add(p.getServiceInfo());
+            }
+
+            return services;
+        }
+
+        @Override
         public ICancellationSignal clearCredentialState(
                 ClearCredentialStateRequest request,
                 IClearCredentialStateCallback callback,
@@ -748,8 +779,7 @@ public final class CredentialManagerService
             enforceCallingPackage(callingPackage, Binder.getCallingUid());
 
             List<CredentialProviderInfo> services =
-                    CredentialProviderInfo.getAvailableServices(
-                            mContext, UserHandle.getCallingUserId());
+                getServicesForCredentialDescription(UserHandle.getCallingUserId());
 
             List<String> providers =
                     services.stream()
@@ -801,8 +831,7 @@ public final class CredentialManagerService
             enforceCallingPackage(callingPackage, Binder.getCallingUid());
 
             List<CredentialProviderInfo> services =
-                    CredentialProviderInfo.getAvailableServices(
-                            mContext, UserHandle.getCallingUserId());
+                getServicesForCredentialDescription(UserHandle.getCallingUserId());
 
             List<String> providers =
                     services.stream()
@@ -819,6 +848,14 @@ public final class CredentialManagerService
                     CredentialDescriptionRegistry.forUser(UserHandle.getCallingUserId());
 
             session.executeUnregisterRequest(request, callingPackage);
+        }
+
+        private List<CredentialProviderInfo> getServicesForCredentialDescription(int userId) {
+            return CredentialProviderInfo.getCredentialProviderServices(
+                    mContext,
+                    userId,
+                    /* disableSystemAppVerificationForTests= */ false,
+                    CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS);
         }
     }
 

@@ -44,7 +44,7 @@ final class FakeEArcNativeWrapper implements HdmiEarcController.EArcNativeWrappe
 
     @Override
     public byte nativeGetState(int portId) {
-        return IEArcStatus.STATUS_IDLE;
+        return IEArcStatus.IDLE;
     }
 
     @Override

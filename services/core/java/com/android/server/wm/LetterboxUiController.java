@@ -648,10 +648,9 @@ final class LetterboxUiController {
         if (mLetterbox != null) {
             outBounds.set(mLetterbox.getInnerFrame());
             final WindowState w = mActivityRecord.findMainWindow();
-            if (w == null) {
-                return;
+            if (w != null) {
+                adjustBoundsForTaskbar(w, outBounds);
             }
-            adjustBoundsIfNeeded(w, outBounds);
         } else {
             outBounds.setEmpty();
         }
@@ -1001,7 +1000,7 @@ final class LetterboxUiController {
 
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        return isSurfaceReadyAndVisible(mainWindow) && mainWindow.areAppWindowBoundsLetterboxed()
+        return isSurfaceVisible(mainWindow) && mainWindow.areAppWindowBoundsLetterboxed()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
                 // activity is using blurred wallpaper for letterbox background.
@@ -1009,11 +1008,8 @@ final class LetterboxUiController {
     }
 
     @VisibleForTesting
-    boolean isSurfaceReadyAndVisible(WindowState mainWindow) {
-        boolean surfaceReady = mainWindow.isDrawn() // Regular case
-                // Waiting for relayoutWindow to call preserveSurface
-                || mainWindow.isDragResizeChanged();
-        return surfaceReady && (mActivityRecord.isVisible()
+    boolean isSurfaceVisible(WindowState mainWindow) {
+        return mainWindow.isOnScreen() && (mActivityRecord.isVisible()
                 || mActivityRecord.isVisibleRequested());
     }
 
@@ -1086,7 +1082,12 @@ final class LetterboxUiController {
         // It is important to call {@link #adjustBoundsIfNeeded} before {@link cropBounds.offsetTo}
         // because taskbar bounds used in {@link #adjustBoundsIfNeeded}
         // are in screen coordinates
-        adjustBoundsIfNeeded(mainWindow, cropBounds);
+        adjustBoundsForTaskbar(mainWindow, cropBounds);
+
+        final float scale = mainWindow.mInvGlobalScale;
+        if (scale != 1f && scale > 0f) {
+            cropBounds.scale(scale);
+        }
 
         // ActivityRecord bounds are in screen coordinates while (0,0) for activity's surface
         // control is in the top left corner of an app window so offsetting bounds
@@ -1139,7 +1140,7 @@ final class LetterboxUiController {
         return null;
     }
 
-    private void adjustBoundsIfNeeded(final WindowState mainWindow, final Rect bounds) {
+    private void adjustBoundsForTaskbar(final WindowState mainWindow, final Rect bounds) {
         // Rounded corners should be displayed above the taskbar. When taskbar is hidden,
         // an insets frame is equal to a navigation bar which shouldn't affect position of
         // rounded corners since apps are expected to handle navigation bar inset.
@@ -1152,11 +1153,6 @@ final class LetterboxUiController {
         if (expandedTaskbarOrNull != null) {
             // Rounded corners should be displayed above the expanded taskbar.
             bounds.bottom = Math.min(bounds.bottom, expandedTaskbarOrNull.getFrame().top);
-        }
-
-        final float scale = mainWindow.mInvGlobalScale;
-        if (scale != 1f && scale > 0f) {
-            bounds.scale(scale);
         }
     }
 

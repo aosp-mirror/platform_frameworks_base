@@ -2898,13 +2898,12 @@ interface ITelephony {
    /**
     * Poll pending satellite datagrams over satellite.
     *
-    * @param subId The subId of the subscription to poll pending satellite datagrams for.
-    *
-    * @return The {@link SatelliteError} result of the operation.
+    * @param subId The subId of the subscription used for receiving datagrams.
+    * @param callback The callback to get the error code of the request.
     */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
-            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int pollPendingSatelliteDatagrams(int subId);
+                + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void pollPendingSatelliteDatagrams(int subId, IIntegerConsumer callback);
 
    /**
     * Send datagram over satellite.
@@ -2933,11 +2932,11 @@ interface ITelephony {
             in ResultReceiver receiver);
 
     /**
-     * Request to get the time after which the satellite will next be visible.
+     * Request to get the time after which the satellite will be visible.
      *
-     * @param subId The subId to get the time after which the satellite will next be visible for.
+     * @param subId The subId to get the time after which the satellite will be visible for.
      * @param receiver Result receiver to get the error code of the request and the requested
-     *                 time after which the satellite will next be visible.
+     *                 time after which the satellite will be visible.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")

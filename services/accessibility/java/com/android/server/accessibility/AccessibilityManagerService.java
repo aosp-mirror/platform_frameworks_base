@@ -3819,20 +3819,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     + "proxy-ed");
         }
 
-        mProxyManager.registerProxy(client, displayId, mContext,
-                sIdCounter++, mMainHandler, mSecurityPolicy, this, getTraceManager(),
-                mWindowManagerService, mA11yWindowManager);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mProxyManager.registerProxy(client, displayId, mContext,
+                    sIdCounter++, mMainHandler, mSecurityPolicy, this, getTraceManager(),
+                    mWindowManagerService, mA11yWindowManager);
 
-        synchronized (mLock) {
-            notifyClearAccessibilityCacheLocked();
+            synchronized (mLock) {
+                notifyClearAccessibilityCacheLocked();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
         return true;
     }
 
     @Override
-    public boolean unregisterProxyForDisplay(int displayId) throws RemoteException {
+    public boolean unregisterProxyForDisplay(int displayId) {
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
-        return mProxyManager.unregisterProxy(displayId);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mProxyManager.unregisterProxy(displayId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     boolean isDisplayProxyed(int displayId) {

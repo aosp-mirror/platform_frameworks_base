@@ -52,7 +52,10 @@ public class MeshSpecification {
      *
      * @hide
      */
-    @IntDef({ALPHA_TYPE_UNKNOWN, ALPHA_TYPE_OPAQUE, ALPHA_TYPE_PREMUL, ALPHA_TYPE_PREMULT})
+    @IntDef(
+        prefix = {"ALPHA_TYPE_"},
+        value = {ALPHA_TYPE_UNKNOWN, ALPHA_TYPE_OPAQUE, ALPHA_TYPE_PREMUL, ALPHA_TYPE_PREMULT}
+    )
     @Retention(RetentionPolicy.SOURCE)
     private @interface AlphaType {}
 
@@ -81,7 +84,10 @@ public class MeshSpecification {
      *
      * @hide
      */
-    @IntDef({TYPE_FLOAT, TYPE_FLOAT2, TYPE_FLOAT3, TYPE_FLOAT4, TYPE_UBYTE4})
+    @IntDef(
+        prefix = {"TYPE_"},
+        value = {TYPE_FLOAT, TYPE_FLOAT2, TYPE_FLOAT3, TYPE_FLOAT4, TYPE_UBYTE4}
+    )
     @Retention(RetentionPolicy.SOURCE)
     private @interface Type {}
 

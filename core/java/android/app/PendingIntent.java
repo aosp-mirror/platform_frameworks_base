@@ -428,30 +428,18 @@ public final class PendingIntent implements Parcelable {
                 throw new IllegalArgumentException(msg);
         }
 
-        // Whenever creation or retrieval of a mutable implicit PendingIntent occurs:
-        // - For apps with target SDK >= U, throw an IllegalArgumentException for
-        //   security reasons.
-        // - Otherwise, warn that it will be blocked from target SDK U onwards.
-        if (isNewMutableDisallowedImplicitPendingIntent(flags, intent)) {
-            if (Compatibility.isChangeEnabled(BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT)) {
-                String msg = packageName + ": Targeting U+ (version "
-                        + Build.VERSION_CODES.UPSIDE_DOWN_CAKE + " and above) disallows"
-                        + " creating or retrieving a PendingIntent with FLAG_MUTABLE,"
-                        + " an implicit Intent within and without FLAG_NO_CREATE and"
-                        + " FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT for"
-                        + " security reasons. To retrieve an already existing"
-                        + " PendingIntent, use FLAG_NO_CREATE, however, to create a"
-                        + " new PendingIntent with an implicit Intent use"
-                        + " FLAG_IMMUTABLE.";
-                throw new IllegalArgumentException(msg);
-            } else {
-                String msg = "New mutable implicit PendingIntent: pkg=" + packageName
-                        + ", action=" + intent.getAction()
-                        + ", featureId=" + context.getAttributionTag()
-                        + ". This will be blocked once the app targets U+"
-                        + " for security reasons.";
-                Log.w(TAG, new RuntimeException(msg));
-            }
+        // For apps with target SDK < U, warn that creation or retrieval of a mutable
+        // implicit PendingIntent will be blocked from target SDK U onwards for security
+        // reasons. The block itself happens on the server side, but this warning has to
+        // stay here to preserve the client side stack trace for app developers.
+        if (isNewMutableDisallowedImplicitPendingIntent(flags, intent)
+                && !Compatibility.isChangeEnabled(BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT)) {
+            String msg = "New mutable implicit PendingIntent: pkg=" + packageName
+                    + ", action=" + intent.getAction()
+                    + ", featureId=" + context.getAttributionTag()
+                    + ". This will be blocked once the app targets U+"
+                    + " for security reasons.";
+            Log.w(TAG, new StackTrace(msg));
         }
     }
 

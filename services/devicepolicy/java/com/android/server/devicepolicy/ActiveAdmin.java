@@ -175,6 +175,8 @@ class ActiveAdmin {
     private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
     private static final String ATTR_PACKAGE_POLICY_MODE = "package-policy-type";
     private static final String TAG_CREDENTIAL_MANAGER_POLICY = "credential-manager-policy";
+    private static final String TAG_DIALER_PACKAGE = "dialer_package";
+    private static final String TAG_SMS_PACKAGE = "sms_package";
 
     // If the ActiveAdmin is a permission-based admin, then info will be null because the
     // permission-based admin is not mapped to a device administrator component.
@@ -350,6 +352,8 @@ class ActiveAdmin {
     boolean mUsbDataSignalingEnabled = USB_DATA_SIGNALING_ENABLED_DEFAULT;
 
     int mWifiMinimumSecurityLevel = DevicePolicyManager.WIFI_SECURITY_OPEN;
+    String mDialerPackage;
+    String mSmsPackage;
 
     ActiveAdmin(DeviceAdminInfo info, boolean isParent) {
         this.info = info;
@@ -661,6 +665,12 @@ class ActiveAdmin {
             mManagedSubscriptionsPolicy.saveToXml(out);
             out.endTag(null, TAG_MANAGED_SUBSCRIPTIONS_POLICY);
         }
+        if (!TextUtils.isEmpty(mDialerPackage)) {
+            writeAttributeValueToXml(out, TAG_DIALER_PACKAGE, mDialerPackage);
+        }
+        if (!TextUtils.isEmpty(mSmsPackage)) {
+            writeAttributeValueToXml(out, TAG_SMS_PACKAGE, mSmsPackage);
+        }
     }
 
     private void writePackagePolicy(TypedXmlSerializer out, String tag,
@@ -969,6 +979,10 @@ class ActiveAdmin {
                 mManagedSubscriptionsPolicy = ManagedSubscriptionsPolicy.readFromXml(parser);
             } else if (TAG_CREDENTIAL_MANAGER_POLICY.equals(tag)) {
                 mCredentialManagerPolicy = readPackagePolicy(parser);
+            } else if (TAG_DIALER_PACKAGE.equals(tag)) {
+                mDialerPackage = parser.getAttributeValue(null, ATTR_VALUE);
+            } else if (TAG_SMS_PACKAGE.equals(tag)) {
+                mSmsPackage = parser.getAttributeValue(null, ATTR_VALUE);
             } else {
                 Slogf.w(LOG_TAG, "Unknown admin tag: %s", tag);
                 XmlUtils.skipCurrentTag(parser);
@@ -1449,5 +1463,10 @@ class ActiveAdmin {
             pw.println(mManagedSubscriptionsPolicy);
             pw.decreaseIndent();
         }
+
+        pw.print("mDialerPackage=");
+        pw.println(mDialerPackage);
+        pw.print("mSmsPackage=");
+        pw.println(mSmsPackage);
     }
 }

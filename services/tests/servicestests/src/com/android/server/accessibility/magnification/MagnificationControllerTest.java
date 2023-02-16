@@ -194,8 +194,12 @@ public class MagnificationControllerTest {
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternal);
 
         mScreenMagnificationController = spy(new FullScreenMagnificationController(
-                mControllerCtx, new Object(),
-                mScreenMagnificationInfoChangedCallbackDelegate, mScaleProvider));
+                mControllerCtx,
+                new Object(),
+                mScreenMagnificationInfoChangedCallbackDelegate,
+                mScaleProvider,
+                () -> null
+        ));
         mScreenMagnificationController.register(TEST_DISPLAY);
 
         mWindowMagnificationManager = spy(new WindowMagnificationManager(mContext, globalLock,

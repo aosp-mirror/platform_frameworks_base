@@ -122,7 +122,7 @@ final class PackageMetrics {
                 originalUsers /* original_user_ids */,
                 userManagerInternal.getUserTypesForStatsd(originalUsers) /* original_user_types */,
                 mInstallRequest.getReturnCode() /* public_return_code */,
-                0 /* internal_error_code */,
+                mInstallRequest.getInternalErrorCode() /* internal_error_code */,
                 apksSize /* apks_size_bytes */,
                 versionCode /* version_code */,
                 stepDurations.first /* install_steps */,

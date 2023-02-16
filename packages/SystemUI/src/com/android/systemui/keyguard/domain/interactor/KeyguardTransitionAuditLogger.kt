@@ -22,7 +22,6 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.log.LogLevel.VERBOSE
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 private val TAG = KeyguardTransitionAuditLogger::class.simpleName!!
@@ -46,8 +45,14 @@ constructor(
         }
 
         scope.launch {
-            keyguardInteractor.isBouncerShowing.collect {
-                logger.log(TAG, VERBOSE, "Bouncer showing", it)
+            keyguardInteractor.primaryBouncerShowing.collect {
+                logger.log(TAG, VERBOSE, "Primary bouncer showing", it)
+            }
+        }
+
+        scope.launch {
+            keyguardInteractor.alternateBouncerShowing.collect {
+                logger.log(TAG, VERBOSE, "Alternate bouncer showing", it)
             }
         }
 

@@ -2775,8 +2775,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Can't set message for admin in another uid.
         {
             mContext.binder.callingUid = DpmMockContext.CALLER_UID + 1;
-            assertExpectException(SecurityException.class,
-                    /* messageRegex= */ "is not owned by uid",
+            assertThrows(SecurityException.class,
                     () -> dpm.setShortSupportMessage(admin1, "Some text"));
             mContext.binder.callingUid = DpmMockContext.CALLER_UID;
         }

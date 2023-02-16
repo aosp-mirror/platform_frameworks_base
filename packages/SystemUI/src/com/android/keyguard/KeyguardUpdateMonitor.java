@@ -1942,11 +1942,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             FACE_AUTH_UPDATED_STARTED_WAKING_UP.setExtraInfo(pmWakeReason);
             updateFaceListeningState(BIOMETRIC_ACTION_UPDATE,
                     FACE_AUTH_UPDATED_STARTED_WAKING_UP);
-            requestActiveUnlock(
+
+            final ActiveUnlockConfig.ActiveUnlockRequestOrigin requestOrigin =
                     mActiveUnlockConfig.isWakeupConsideredUnlockIntent(pmWakeReason)
                             ? ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT
-                            : ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE,
-                    "wakingUp - " + PowerManager.wakeReasonToString(pmWakeReason));
+                            : ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE;
+            final String reason = "wakingUp - " + PowerManager.wakeReasonToString(pmWakeReason);
+            if (mActiveUnlockConfig.shouldWakeupForceDismissKeyguard(pmWakeReason)) {
+                requestActiveUnlockDismissKeyguard(
+                        requestOrigin,
+                        reason
+                );
+            } else {
+                requestActiveUnlock(
+                        requestOrigin,
+                        reason
+                );
+            }
         } else {
             mLogger.logSkipUpdateFaceListeningOnWakeup(pmWakeReason);
         }
@@ -2606,6 +2618,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
+
     /**
      * Attempts to trigger active unlock from trust agent.
      * Only dismisses the keyguard under certain conditions.
@@ -2648,6 +2661,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
                     "alternateBouncer");
         }
+        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
     }
 
     private boolean shouldTriggerActiveUnlock() {
@@ -2732,7 +2746,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         || shouldListenForFingerprintAssistant
                         || (mKeyguardOccluded && mIsDreaming)
                         || (mKeyguardOccluded && userDoesNotHaveTrust
-                            && (mOccludingAppRequestingFp || isUdfps));
+                            && (mOccludingAppRequestingFp || isUdfps || mAlternateBouncerShowing));
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -2773,6 +2787,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     System.currentTimeMillis(),
                     user,
                     shouldListen,
+                    mAlternateBouncerShowing,
                     biometricEnabledForUser,
                     mPrimaryBouncerIsOrWillBeShowing,
                     userCanSkipBouncer,
@@ -3803,7 +3818,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     // TODO: use these callbacks elsewhere in place of the existing notifyScreen*()
-    // (KeyguardViewMediator, KeyguardHostView)
+    // (KeyguardViewMediator, KeyguardSecurityContainer)
     /**
      * Dispatch wakeup events to:
      *  - update biometric listening states
