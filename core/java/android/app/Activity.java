@@ -9193,6 +9193,24 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Specifies whether the activities below this one in the task can also start other activities
+     * or finish the task.
+     * <p>
+     * Starting from Target SDK Level {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, apps
+     * are blocked from starting new activities or finishing their task unless the top activity of
+     * such task belong to the same UID for security reasons.
+     * <p>
+     * Setting this flag to {@code true} will allow the launching app to ignore the restriction if
+     * this activity is on top. Apps matching the UID of this activity are always exempt.
+     *
+     * @param allowed {@code true} to disable the UID restrictions; {@code false} to revert back to
+     *                            the default behaviour
+     */
+    public void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
+        ActivityClient.getInstance().setAllowCrossUidActivitySwitchFromBelow(mToken, allowed);
+    }
+
+    /**
      * Registers remote animations per transition type for this activity.
      *
      * @param definition The remote animation definition that defines which transition whould run

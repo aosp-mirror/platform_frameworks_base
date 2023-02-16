@@ -125,6 +125,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
 import android.widget.Toast;
@@ -1908,35 +1909,20 @@ class ActivityStarter {
      * Log activity starts which violate one of the following rules of the
      * activity security model (ASM):
      * See go/activity-security for rationale behind the rules.
-     * We don't currently block, but these checks may later become blocks
      * 1. Within a task, only an activity matching a top UID of the task can start activities
      * 2. Only activities within a foreground task, which match a top UID of the task, can
      * create a new task or bring an existing one into the foreground
      */
     private boolean checkActivitySecurityModel(ActivityRecord r, boolean newTask, Task targetTask) {
+        // BAL Exception allowed in all cases
+        if (mBalCode == BAL_ALLOW_ALLOWLISTED_UID) {
+            return true;
+        }
+
         // Intents with FLAG_ACTIVITY_NEW_TASK will always be considered as creating a new task
         // even if the intent is delivered to an existing task.
         boolean taskToFront = newTask
                 || (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) == FLAG_ACTIVITY_NEW_TASK;
-
-        if (mSourceRecord != null) {
-            boolean passesAsmChecks = true;
-            Task sourceTask = mSourceRecord.getTask();
-
-            // Don't allow launches into a new task if the current task is not foreground.
-            if (taskToFront) {
-                passesAsmChecks = sourceTask != null && sourceTask.isVisible();
-            }
-
-            Task taskToCheck = taskToFront ? sourceTask : targetTask;
-            passesAsmChecks = passesAsmChecks && ActivityTaskSupervisor
-                    .doesTopActivityMatchingUidExistForAsm(taskToCheck, mSourceRecord.getUid(),
-                            mSourceRecord);
-
-            if (passesAsmChecks) {
-                return true;
-            }
-        }
 
         // BAL exception only allowed for new tasks
         if (taskToFront) {
@@ -1949,9 +1935,34 @@ class ActivityStarter {
             }
         }
 
-        // BAL Exception allowed in all cases
-        if (mBalCode == BAL_ALLOW_ALLOWLISTED_UID) {
-            return true;
+        boolean shouldBlockActivityStart = true;
+        // Used for logging/toasts. Would we block the start if target sdk was U and feature was
+        // enabled?
+        boolean wouldBlockActivityStartIgnoringFlags = true;
+
+        if (mSourceRecord != null) {
+            boolean passesAsmChecks = true;
+            Task sourceTask = mSourceRecord.getTask();
+
+            // Don't allow launches into a new task if the current task is not foreground.
+            if (taskToFront) {
+                passesAsmChecks = sourceTask != null && sourceTask.isVisible();
+            }
+
+            if (passesAsmChecks) {
+                Task taskToCheck = taskToFront ? sourceTask : targetTask;
+                // first == false means Should Block
+                // second == false means Would Block disregarding flags
+                Pair<Boolean, Boolean> pair = ActivityTaskSupervisor
+                        .doesTopActivityMatchingUidExistForAsm(taskToCheck, mSourceRecord.getUid(),
+                                mSourceRecord);
+                shouldBlockActivityStart = !pair.first;
+                wouldBlockActivityStartIgnoringFlags = !pair.second;
+            }
+
+            if (!wouldBlockActivityStartIgnoringFlags) {
+                return true;
+            }
         }
 
         // ASM rules have failed. Log why
@@ -1996,19 +2007,20 @@ class ActivityStarter {
                 mBalCode
         );
 
-        boolean shouldBlockActivityStart =
-                ActivitySecurityModelFeatureFlags.shouldRestrictActivitySwitch(mCallingUid);
+        boolean blockActivityStartAndFeatureEnabled = ActivitySecurityModelFeatureFlags
+                    .shouldRestrictActivitySwitch(mCallingUid)
+                && shouldBlockActivityStart;
 
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(mCallingUid)) {
             UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
                     "Activity start from " + r.launchedFromPackage
-                            + (shouldBlockActivityStart ? " " : " would be ")
+                            + (blockActivityStartAndFeatureEnabled ? " " : " would be ")
                             + "blocked by " + ActivitySecurityModelFeatureFlags.DOC_LINK,
                     Toast.LENGTH_SHORT).show());
         }
 
 
-        if (shouldBlockActivityStart) {
+        if (blockActivityStartAndFeatureEnabled) {
             Slog.e(TAG, "Abort Launching r: " + r
                     + " as source: "
                     + (mSourceRecord != null ? mSourceRecord : r.launchedFromPackage)
