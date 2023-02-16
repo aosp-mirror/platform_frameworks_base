@@ -3009,7 +3009,9 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void handleBrightnessChange(LogicalDisplay display) {
-        sendDisplayEventLocked(display, DisplayManagerGlobal.EVENT_DISPLAY_BRIGHTNESS_CHANGED);
+        synchronized (mSyncRoot) {
+            sendDisplayEventLocked(display, DisplayManagerGlobal.EVENT_DISPLAY_BRIGHTNESS_CHANGED);
+        }
     }
 
     private DisplayDevice getDeviceForDisplayLocked(int displayId) {
