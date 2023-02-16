@@ -21,6 +21,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import android.annotation.NonNull;
+import android.app.AlarmManager;
 import android.app.StatsManager;
 import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -395,6 +396,18 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not register INetworkManagement event observer " + e);
         }
+
+        final AlarmManager am = mContext.getSystemService(AlarmManager.class);
+        mHandler.post(() -> {
+            synchronized (mStats) {
+                mStats.setLongPlugInAlarmInterface(new AlarmInterface(am, () -> {
+                    synchronized (mStats) {
+                        if (mStats.isOnBattery()) return;
+                        mStats.maybeResetWhilePluggedInLocked();
+                    }
+                }));
+            }
+        });
 
         synchronized (mPowerStatsLock) {
             mPowerStatsInternal = LocalServices.getService(PowerStatsInternal.class);
@@ -2269,6 +2282,32 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    final class AlarmInterface implements BatteryStatsImpl.AlarmInterface,
+            AlarmManager.OnAlarmListener {
+        private AlarmManager mAm;
+        private Runnable mOnAlarm;
+
+        AlarmInterface(AlarmManager am, Runnable onAlarm) {
+            mAm = am;
+            mOnAlarm = onAlarm;
+        }
+
+        @Override
+        public void schedule(long rtcTimeMs, long windowLengthMs) {
+            mAm.setWindow(AlarmManager.RTC, rtcTimeMs, windowLengthMs, TAG, this, mHandler);
+        }
+
+        @Override
+        public void cancel() {
+            mAm.cancel(this);
+        }
+
+        @Override
+        public void onAlarm() {
+            mOnAlarm.run();
+        }
+    }
+
     private static native int nativeWaitWakeup(ByteBuffer outBuffer);
 
     private void dumpHelp(PrintWriter pw) {
@@ -2455,7 +2494,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 } else if ("--reset-all".equals(arg)) {
                     awaitCompletion();
                     synchronized (mStats) {
-                        mStats.resetAllStatsCmdLocked();
+                        mStats.resetAllStatsAndHistoryLocked(
+                                BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
                         mBatteryUsageStatsStore.removeAllSnapshots();
                         pw.println("Battery stats and history reset.");
                         noOutput = true;
@@ -2463,7 +2503,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 } else if ("--reset".equals(arg)) {
                     awaitCompletion();
                     synchronized (mStats) {
-                        mStats.resetAllStatsCmdLocked();
+                        mStats.resetAllStatsAndHistoryLocked(
+                                BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
                         pw.println("Battery stats reset.");
                         noOutput = true;
                     }

@@ -342,7 +342,7 @@ public class BatteryUsageStatsProviderTest {
         Context context = InstrumentationRegistry.getContext();
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
         mStatsRule.setCurrentTime(5 * MINUTE_IN_MS);
-        batteryStats.resetAllStatsCmdLocked();
+        batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
 
         BatteryUsageStatsStore batteryUsageStatsStore = new BatteryUsageStatsStore(context,
                 batteryStats, new File(context.getCacheDir(), "BatteryUsageStatsProviderTest"),
@@ -357,14 +357,14 @@ public class BatteryUsageStatsProviderTest {
         batteryStats.noteFlashlightOffLocked(APP_UID,
                 20 * MINUTE_IN_MS, 20 * MINUTE_IN_MS);
         mStatsRule.setCurrentTime(25 * MINUTE_IN_MS);
-        batteryStats.resetAllStatsCmdLocked();
+        batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
 
         batteryStats.noteFlashlightOnLocked(APP_UID,
                 30 * MINUTE_IN_MS, 30 * MINUTE_IN_MS);
         batteryStats.noteFlashlightOffLocked(APP_UID,
                 50 * MINUTE_IN_MS, 50 * MINUTE_IN_MS);
         mStatsRule.setCurrentTime(55 * MINUTE_IN_MS);
-        batteryStats.resetAllStatsCmdLocked();
+        batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
 
         // This section should be ignored because the timestamp is out or range
         batteryStats.noteFlashlightOnLocked(APP_UID,
@@ -372,7 +372,7 @@ public class BatteryUsageStatsProviderTest {
         batteryStats.noteFlashlightOffLocked(APP_UID,
                 70 * MINUTE_IN_MS, 70 * MINUTE_IN_MS);
         mStatsRule.setCurrentTime(75 * MINUTE_IN_MS);
-        batteryStats.resetAllStatsCmdLocked();
+        batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
 
         // This section should be ignored because it represents the current stats session
         batteryStats.noteFlashlightOnLocked(APP_UID,
