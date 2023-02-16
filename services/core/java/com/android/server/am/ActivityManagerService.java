@@ -169,6 +169,7 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityClient;
 import android.app.ActivityManager;
+import android.app.ActivityManager.ForegroundServiceApiType;
 import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityManager.RestrictionLevel;
@@ -13126,6 +13127,36 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public void logFgsApiBegin(@ForegroundServiceApiType int apiType,
+            int uid, int pid) {
+        enforceCallingPermission(android.Manifest.permission.LOG_PROCESS_ACTIVITIES,
+                "logFgsApiStart");
+        synchronized (this) {
+            mServices.logFgsApiBeginLocked(apiType, uid, pid);
+        }
+    }
+
+    @Override
+    public void logFgsApiEnd(@ForegroundServiceApiType int apiType,
+            int uid, int pid) {
+        enforceCallingPermission(android.Manifest.permission.LOG_PROCESS_ACTIVITIES,
+                "logFgsApiStart");
+        synchronized (this) {
+            mServices.logFgsApiEndLocked(apiType, uid, pid);
+        }
+    }
+
+    @Override
+    public void logFgsApiStateChanged(@ForegroundServiceApiType int apiType,
+            int state, int uid, int pid) {
+        enforceCallingPermission(android.Manifest.permission.LOG_PROCESS_ACTIVITIES,
+                "logFgsApiStart");
+        synchronized (this) {
+            mServices.logFgsApiStateChangedLocked(apiType, uid, pid, state);
+        }
+    }
+
+    @Override
     public ComponentName startService(IApplicationThread caller, Intent service,
             String resolvedType, boolean requireForeground, String callingPackage,
             String callingFeatureId, int userId)
@@ -18647,6 +18678,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean startProfileEvenWhenDisabled(@UserIdInt int userId) {
             return mUserController.startProfile(userId, /* evenWhenDisabled= */ true,
                     /* unlockListener= */ null);
+        }
+
+        @Override
+        public void logFgsApiBegin(@ForegroundServiceApiType int apiType,
+                int uid, int pid) {
+            ActivityManagerService.this.logFgsApiBegin(apiType, uid, pid);
+        }
+
+        @Override
+        public void logFgsApiEnd(@ForegroundServiceApiType int apiType,
+                int uid, int pid) {
+            ActivityManagerService.this.logFgsApiEnd(apiType, uid, pid);
         }
     }
 
