@@ -1847,6 +1847,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         starter.startActivityInner(target, source, null /* voiceSession */,
                 null /* voiceInteractor */, 0 /* startFlags */,
                 options, inTask, inTaskFragment,
-                BackgroundActivityStartController.BAL_ALLOW_DEFAULT, null /* intentGrants */);
+                BackgroundActivityStartController.BAL_ALLOW_DEFAULT, null /* intentGrants */,
+                -1 /* realCallingUid */);
     }
 }
