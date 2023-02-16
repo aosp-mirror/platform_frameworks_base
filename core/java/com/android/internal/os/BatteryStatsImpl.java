@@ -387,6 +387,81 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    /** Provide BatteryStatsImpl configuration choices */
+    public static class BatteryStatsConfig {
+        static final int RESET_ON_UNPLUG_HIGH_BATTERY_LEVEL_FLAG = 1 << 0;
+        static final int RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG = 1 << 1;
+
+        private final int mFlags;
+
+        private BatteryStatsConfig(Builder builder) {
+            int flags = 0;
+            if (builder.mResetOnUnplugHighBatteryLevel) {
+                flags |= RESET_ON_UNPLUG_HIGH_BATTERY_LEVEL_FLAG;
+            }
+            if (builder.mResetOnUnplugAfterSignificantCharge) {
+                flags |= RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG;
+            }
+            mFlags = flags;
+        }
+
+        /**
+         * Returns whether a BatteryStats reset should occur on unplug when the battery level is
+         * high.
+         */
+        boolean shouldResetOnUnplugHighBatteryLevel() {
+            return (mFlags & RESET_ON_UNPLUG_HIGH_BATTERY_LEVEL_FLAG)
+                    == RESET_ON_UNPLUG_HIGH_BATTERY_LEVEL_FLAG;
+        }
+
+        /**
+         * Returns whether a BatteryStats reset should occur on unplug if the battery charge a
+         * significant amount since it has been plugged in.
+         */
+        boolean shouldResetOnUnplugAfterSignificantCharge() {
+            return (mFlags & RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG)
+                    == RESET_ON_UNPLUG_AFTER_SIGNIFICANT_CHARGE_FLAG;
+        }
+
+        /**
+         * Builder for BatteryStatsConfig
+         */
+        public static class Builder {
+            private boolean mResetOnUnplugHighBatteryLevel;
+            private boolean mResetOnUnplugAfterSignificantCharge;
+            public Builder() {
+                mResetOnUnplugHighBatteryLevel = true;
+                mResetOnUnplugAfterSignificantCharge = true;
+            }
+
+            /**
+             * Build the BatteryStatsConfig.
+             */
+            public BatteryStatsConfig build() {
+                return new BatteryStatsConfig(this);
+            }
+
+            /**
+             * Set whether a BatteryStats reset should occur on unplug when the battery level is
+             * high.
+             */
+            public Builder setResetOnUnplugHighBatteryLevel(boolean reset) {
+                mResetOnUnplugHighBatteryLevel = reset;
+                return this;
+            }
+
+            /**
+             * Set whether a BatteryStats reset should occur on unplug if the battery charge a
+             * significant amount since it has been plugged in.
+             */
+            public Builder setResetOnUnplugAfterSignificantCharge(boolean reset) {
+                mResetOnUnplugAfterSignificantCharge = reset;
+                return this;
+            }
+        }
+
+    }
+
     private final PlatformIdleStateCallback mPlatformIdleStateCallback;
 
     private final Runnable mDeferSetCharging = new Runnable() {
@@ -1459,6 +1534,10 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     protected final Constants mConstants;
 
+    @VisibleForTesting
+    @GuardedBy("this")
+    protected BatteryStatsConfig mBatteryStatsConfig = new BatteryStatsConfig.Builder().build();
+
     /*
      * Holds a SamplingTimer associated with each Resource Power Manager state and voter,
      * recording their times when on-battery (regardless of screen state).
@@ -1625,12 +1704,13 @@ public class BatteryStatsImpl extends BatteryStats {
     public BatteryStatsImpl(Clock clock, File historyDirectory) {
         init(clock);
         mStartClockTimeMs = clock.currentTimeMillis();
-        mCheckinFile = null;
         mDailyFile = null;
         if (historyDirectory == null) {
+            mCheckinFile = null;
             mStatsFile = null;
             mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer);
         } else {
+            mCheckinFile = new AtomicFile(new File(historyDirectory, "batterystats-checkin.bin"));
             mStatsFile = new AtomicFile(new File(historyDirectory, "batterystats.bin"));
             mBatteryStatsHistory = new BatteryStatsHistory(this, historyDirectory, mHistoryBuffer);
         }
@@ -12548,6 +12628,15 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /**
+     * Injects BatteryStatsConfig
+     */
+    public void setBatteryStatsConfig(BatteryStatsConfig config) {
+        synchronized (this) {
+            mBatteryStatsConfig = config;
+        }
+    }
+
+    /**
      * Starts tracking CPU time-in-state for threads of the system server process,
      * keeping a separate account of threads receiving incoming binder calls.
      */
@@ -15505,6 +15594,32 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @GuardedBy("this")
+    private boolean shouldResetOnUnplugLocked(int batteryStatus, int batteryLevel) {
+        if (mNoAutoReset) return false;
+        if (!mSystemReady) return false;
+        if (mBatteryStatsConfig.shouldResetOnUnplugHighBatteryLevel()) {
+            // Allow resetting due to currently being at high battery level
+            if (batteryStatus == BatteryManager.BATTERY_STATUS_FULL) return true;
+            if (batteryLevel >= 90) return true;
+        }
+        if (mBatteryStatsConfig.shouldResetOnUnplugAfterSignificantCharge()) {
+            // Allow resetting after a significant charge (from a very low level to a now very
+            // high level).
+            if (mDischargePlugLevel < 20 && batteryLevel >= 80) return true;
+        }
+        if (getHighDischargeAmountSinceCharge() >= 200) {
+            // Reset the stats if battery got partially charged and discharged repeatedly without
+            // ever reaching the full charge.
+            // This reset is done in order to prevent stats sessions from going on forever.
+            // Exceedingly long battery sessions would lead to an overflow of
+            // data structures such as mWakeupReasonStats.
+            return true;
+        }
+
+        return false;
+    }
+
+    @GuardedBy("this")
     protected void setOnBatteryLocked(final long mSecRealtime, final long mSecUptime,
             final boolean onBattery, final int oldStatus, final int level, final int chargeUah) {
         boolean doWrite = false;
@@ -15516,23 +15631,10 @@ public class BatteryStatsImpl extends BatteryStats {
         final long realtimeUs = mSecRealtime * 1000;
         final int screenState = mScreenState;
         if (onBattery) {
-            // We will reset our status if we are unplugging after the
-            // battery was last full, or the level is at 100, or
-            // we have gone through a significant charge (from a very low
-            // level to a now very high level).
-            // Also, we will reset the stats if battery got partially charged
-            // and discharged repeatedly without ever reaching the full charge.
-            // This reset is done in order to prevent stats sessions from going on forever.
-            // Exceedingly long battery sessions would lead to an overflow of
-            // data structures such as mWakeupReasonStats.
             boolean reset = false;
-            if (!mNoAutoReset && mSystemReady
-                    && (oldStatus == BatteryManager.BATTERY_STATUS_FULL
-                    || level >= 90
-                    || (mDischargeCurrentLevel < 20 && level >= 80)
-                    || getHighDischargeAmountSinceCharge() >= 200)) {
+            if (shouldResetOnUnplugLocked(oldStatus, level)) {
                 Slog.i(TAG, "Resetting battery stats: level=" + level + " status=" + oldStatus
-                        + " dischargeLevel=" + mDischargeCurrentLevel
+                        + " dischargeLevel=" + mDischargePlugLevel
                         + " lowAmount=" + getLowDischargeAmountSinceCharge()
                         + " highAmount=" + getHighDischargeAmountSinceCharge());
                 // Before we write, collect a snapshot of the final aggregated
