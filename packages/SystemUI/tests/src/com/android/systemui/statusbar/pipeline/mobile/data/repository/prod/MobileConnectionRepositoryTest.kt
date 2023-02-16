@@ -65,8 +65,8 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrier
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
+import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.util.mockito.any
@@ -94,7 +94,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var connectionsRepo: FakeMobileConnectionsRepository
 
     @Mock private lateinit var telephonyManager: TelephonyManager
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var logger: MobileInputLogger
     @Mock private lateinit var tableLogger: TableLogBuffer
 
     private val scope = CoroutineScope(IMMEDIATE)

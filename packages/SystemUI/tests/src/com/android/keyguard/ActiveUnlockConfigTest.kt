@@ -31,6 +31,7 @@ import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_WAKE
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS
+import android.provider.Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -51,6 +52,7 @@ import java.io.PrintWriter
 
 @SmallTest
 class ActiveUnlockConfigTest : SysuiTestCase() {
+
     private lateinit var secureSettings: FakeSettings
     @Mock
     private lateinit var contentResolver: ContentResolver
@@ -71,7 +73,6 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
         currentUser = KeyguardUpdateMonitor.getCurrentUser()
         secureSettings = FakeSettings()
         activeUnlockConfig = ActiveUnlockConfig(
@@ -313,10 +314,6 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
                 assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(wakeReason))
             }
         }
-        assertTrue(activeUnlockConfig.isWakeupConsideredUnlockIntent(PowerManager.WAKE_REASON_LIFT))
-        assertTrue(activeUnlockConfig.isWakeupConsideredUnlockIntent(PowerManager.WAKE_REASON_TAP))
-        assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(
-            PowerManager.WAKE_REASON_UNFOLD_DEVICE))
     }
 
     @Test
@@ -330,11 +327,70 @@ class ActiveUnlockConfigTest : SysuiTestCase() {
         for (wakeReason in 0..WAKE_REASON_BIOMETRIC) {
             assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(wakeReason))
         }
-        assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(
-            PowerManager.WAKE_REASON_LIFT))
-        assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(PowerManager.WAKE_REASON_TAP))
-        assertFalse(activeUnlockConfig.isWakeupConsideredUnlockIntent(
-            PowerManager.WAKE_REASON_UNFOLD_DEVICE))
+    }
+
+    @Test
+    fun isWakeupForceDismissKeyguard_singleValue() {
+        verifyRegisterSettingObserver()
+
+        // GIVEN lift is considered an unlock intent
+        secureSettings.putStringForUser(ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD,
+            PowerManager.WAKE_REASON_LIFT.toString(), currentUser)
+        updateSetting(secureSettings.getUriFor(
+            ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD
+        ))
+
+        // THEN only WAKE_REASON_LIFT is considered an unlock intent
+        for (wakeReason in 0..WAKE_REASON_BIOMETRIC) {
+            if (wakeReason == PowerManager.WAKE_REASON_LIFT) {
+                assertTrue(activeUnlockConfig.shouldWakeupForceDismissKeyguard(wakeReason))
+            } else {
+                assertFalse(activeUnlockConfig.shouldWakeupForceDismissKeyguard(wakeReason))
+            }
+        }
+    }
+
+    @Test
+    fun isWakeupForceDismissKeyguard_emptyValues() {
+        verifyRegisterSettingObserver()
+
+        // GIVEN lift and tap are considered an unlock intent
+        secureSettings.putStringForUser(ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD,
+            " ", currentUser)
+        updateSetting(secureSettings.getUriFor(
+            ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD
+        ))
+
+        // THEN no wake up gestures are considered an unlock intent
+        for (wakeReason in 0..WAKE_REASON_BIOMETRIC) {
+            assertFalse(activeUnlockConfig.shouldWakeupForceDismissKeyguard(wakeReason))
+        }
+    }
+
+    @Test
+    fun isWakeupForceDismissKeyguard_multiValue() {
+        verifyRegisterSettingObserver()
+
+        // GIVEN lift and tap are considered an unlock intent
+        secureSettings.putStringForUser(ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD,
+            PowerManager.WAKE_REASON_LIFT.toString() +
+                    "|" +
+                    PowerManager.WAKE_REASON_TAP.toString(),
+            currentUser
+        )
+        updateSetting(secureSettings.getUriFor(
+            ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD
+        ))
+
+        // THEN WAKE_REASON_LIFT and WAKE_REASON TAP are considered an unlock intent
+        for (wakeReason in 0..WAKE_REASON_BIOMETRIC) {
+            if (wakeReason == PowerManager.WAKE_REASON_LIFT ||
+                wakeReason == PowerManager.WAKE_REASON_TAP) {
+                assertTrue(activeUnlockConfig.shouldWakeupForceDismissKeyguard(wakeReason))
+            } else {
+                assertFalse(activeUnlockConfig.shouldWakeupForceDismissKeyguard(wakeReason))
+            }
+        }
     }
 
     @Test

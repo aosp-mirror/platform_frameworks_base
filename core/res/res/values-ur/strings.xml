@@ -342,6 +342,8 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"آلہ کے فنگر پرنٹ سینسر پر کیے گئے اشاروں کو کیپچر کر سکتا ہے۔"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"اسکرین شاٹ لیں"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ڈسپلے کا اسکرین شاٹ لیا جا سکتا ہے۔"</string>
+    <!-- no translation found for dream_preview_title (5570751491996100804) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"بطور اسٹیٹس بار کام لیں"</string>

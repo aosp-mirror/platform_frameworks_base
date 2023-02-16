@@ -34,8 +34,6 @@ import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.dagger.WifiTableLog
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
@@ -69,7 +67,6 @@ constructor(
     airplaneModeViewModel: AirplaneModeViewModel,
     connectivityConstants: ConnectivityConstants,
     private val context: Context,
-    logger: ConnectivityPipelineLogger,
     @WifiTableLog wifiTableLogBuffer: TableLogBuffer,
     interactor: WifiInteractor,
     @Application private val scope: CoroutineScope,
@@ -143,29 +140,35 @@ constructor(
             )
 
     /** The wifi activity status. Null if we shouldn't display the activity status. */
-    private val activity: Flow<DataActivityModel?> =
+    private val activity: Flow<DataActivityModel> = run {
+        val default = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
         if (!connectivityConstants.shouldShowActivityConfig) {
-                flowOf(null)
+                flowOf(default)
             } else {
                 combine(interactor.activity, interactor.ssid) { activity, ssid ->
                     when (ssid) {
-                        null -> null
+                        null -> default
                         else -> activity
                     }
                 }
             }
             .distinctUntilChanged()
-            .logOutputChange(logger, "activity")
-            .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = null)
+            .logDiffsForTable(
+                wifiTableLogBuffer,
+                columnPrefix = "VM.activity",
+                initialValue = default,
+            )
+            .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = default)
+    }
 
     private val isActivityInViewVisible: Flow<Boolean> =
         activity
-            .map { it?.hasActivityIn == true }
+            .map { it.hasActivityIn }
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
     private val isActivityOutViewVisible: Flow<Boolean> =
         activity
-            .map { it?.hasActivityOut == true }
+            .map { it.hasActivityOut }
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
     private val isActivityContainerVisible: Flow<Boolean> =

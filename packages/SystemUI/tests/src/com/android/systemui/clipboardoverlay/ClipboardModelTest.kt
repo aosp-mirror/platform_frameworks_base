@@ -53,25 +53,15 @@ class ClipboardModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun test_nullClipData() {
-        val model = ClipboardModel.fromClipData(mContext, mClipboardUtils, null, "test source")
-        assertNull(model.clipData)
-        assertEquals("test source", model.source)
-        assertEquals(ClipboardModel.Type.OTHER, model.type)
-        assertNull(model.item)
-        assertFalse(model.isSensitive)
-        assertFalse(model.isRemote)
-        assertNull(model.loadThumbnail(mContext))
-    }
-
-    @Test
     fun test_textClipData() {
         val source = "test source"
         val model = ClipboardModel.fromClipData(mContext, mClipboardUtils, mSampleClipData, source)
         assertEquals(mSampleClipData, model.clipData)
         assertEquals(source, model.source)
         assertEquals(ClipboardModel.Type.TEXT, model.type)
-        assertEquals(mSampleClipData.getItemAt(0), model.item)
+        assertEquals(mSampleClipData.getItemAt(0).text, model.text)
+        assertEquals(mSampleClipData.getItemAt(0).textLinks, model.textLinks)
+        assertEquals(mSampleClipData.getItemAt(0).uri, model.uri)
         assertFalse(model.isSensitive)
         assertFalse(model.isRemote)
         assertNull(model.loadThumbnail(mContext))
@@ -84,7 +74,7 @@ class ClipboardModelTest : SysuiTestCase() {
         b.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true)
         description.extras = b
         val data = ClipData(description, mSampleClipData.getItemAt(0))
-        val (_, _, _, _, sensitive) =
+        val (_, _, _, _, _, _, sensitive) =
             ClipboardModel.fromClipData(mContext, mClipboardUtils, data, "")
         assertTrue(sensitive)
     }

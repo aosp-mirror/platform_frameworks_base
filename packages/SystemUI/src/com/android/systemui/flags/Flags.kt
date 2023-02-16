@@ -100,7 +100,7 @@ object Flags {
     // TODO(b/260335638): Tracking Bug
     @JvmField
     val NOTIFICATION_INLINE_REPLY_ANIMATION =
-        unreleasedFlag(174148361, "notification_inline_reply_animation", teamfood = true)
+        releasedFlag(174148361, "notification_inline_reply_animation")
 
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
         releasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
@@ -261,6 +261,11 @@ object Flags {
     @JvmField
     val QS_SECONDARY_DATA_SUB_INFO =
         unreleasedFlag(508, "qs_secondary_data_sub_info", teamfood = true)
+
+    /** Enables Font Scaling Quick Settings tile */
+    // TODO(b/269341316): Tracking Bug
+    @JvmField
+    val ENABLE_FONT_SCALING_TILE = unreleasedFlag(509, "enable_font_scaling_tile", teamfood = false)
 
     // 600- status bar
 
@@ -471,8 +476,7 @@ object Flags {
         sysPropBooleanFlag(1202, "persist.wm.debug.predictive_back_always_enforce", default = false)
 
     // TODO(b/254512728): Tracking Bug
-    @JvmField
-    val NEW_BACK_AFFORDANCE = unreleasedFlag(1203, "new_back_affordance", teamfood = true)
+    @JvmField val NEW_BACK_AFFORDANCE = unreleasedFlag(1203, "new_back_affordance", teamfood = true)
 
     // TODO(b/255854141): Tracking Bug
     @JvmField
@@ -556,7 +560,8 @@ object Flags {
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
     // TODO(b/267162944): Tracking bug
-    @JvmField val CLIPBOARD_MINIMIZED_LAYOUT = unreleasedFlag(1702, "clipboard_data_model")
+    @JvmField
+    val CLIPBOARD_MINIMIZED_LAYOUT = unreleasedFlag(1702, "clipboard_data_model", teamfood = true)
 
     // 1800 - shade container
     @JvmField
@@ -619,7 +624,7 @@ object Flags {
     // TODO(b/20911786): Tracking Bug
     @JvmField
     val OUTPUT_SWITCHER_SHOW_API_ENABLED =
-        unreleasedFlag(2503, "output_switcher_show_api_enabled", teamfood = true)
+        releasedFlag(2503, "output_switcher_show_api_enabled", teamfood = true)
 
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug

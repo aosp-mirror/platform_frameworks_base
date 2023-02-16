@@ -29,8 +29,9 @@ import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ACQUIRE_INFO
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_FACE_ERRORS
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED
-import android.provider.Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS
 import android.provider.Settings.Secure.ACTIVE_UNLOCK_ON_WAKE
+import android.provider.Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS
+import android.provider.Settings.Secure.ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD
 import android.util.Log
 import com.android.keyguard.KeyguardUpdateMonitor.getCurrentUser
 import com.android.systemui.Dumpable
@@ -60,9 +61,27 @@ class ActiveUnlockConfig @Inject constructor(
      * Indicates the origin for an active unlock request.
      */
     enum class ActiveUnlockRequestOrigin {
+        /**
+         * Trigger ActiveUnlock on wake ups that'd trigger FaceAuth, see [FaceWakeUpTriggersConfig]
+         */
         WAKE,
+
+        /**
+         * Trigger ActiveUnlock on unlock intents. This includes the bouncer showing or tapping on
+         * a notification. May also include wakeups: [wakeupsConsideredUnlockIntents].
+         */
         UNLOCK_INTENT,
+
+        /**
+         * Trigger ActiveUnlock on biometric failures. This may include soft errors depending on
+         * the other settings. See: [faceErrorsToTriggerBiometricFailOn],
+         * [faceAcquireInfoToTriggerBiometricFailOn].
+         */
         BIOMETRIC_FAIL,
+
+        /**
+         * Trigger ActiveUnlock when the assistant is triggered.
+         */
         ASSISTANT,
     }
 
@@ -85,6 +104,7 @@ class ActiveUnlockConfig @Inject constructor(
     private var faceAcquireInfoToTriggerBiometricFailOn = mutableSetOf<Int>()
     private var onUnlockIntentWhenBiometricEnrolled = mutableSetOf<Int>()
     private var wakeupsConsideredUnlockIntents = mutableSetOf<Int>()
+    private var wakeupsToForceDismissKeyguard = mutableSetOf<Int>()
 
     private val settingsObserver = object : ContentObserver(handler) {
         private val wakeUri = secureSettings.getUriFor(ACTIVE_UNLOCK_ON_WAKE)
@@ -97,6 +117,8 @@ class ActiveUnlockConfig @Inject constructor(
                 secureSettings.getUriFor(ACTIVE_UNLOCK_ON_UNLOCK_INTENT_WHEN_BIOMETRIC_ENROLLED)
         private val wakeupsConsideredUnlockIntentsUri =
             secureSettings.getUriFor(ACTIVE_UNLOCK_WAKEUPS_CONSIDERED_UNLOCK_INTENTS)
+        private val wakeupsToForceDismissKeyguardUri =
+            secureSettings.getUriFor(ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD)
 
         fun register() {
             registerUri(
@@ -108,6 +130,7 @@ class ActiveUnlockConfig @Inject constructor(
                         faceAcquireInfoUri,
                         unlockIntentWhenBiometricEnrolledUri,
                         wakeupsConsideredUnlockIntentsUri,
+                        wakeupsToForceDismissKeyguardUri,
                     )
             )
 
@@ -182,6 +205,15 @@ class ActiveUnlockConfig @Inject constructor(
                     wakeupsConsideredUnlockIntents,
                     setOf(WAKE_REASON_UNFOLD_DEVICE))
             }
+
+            if (selfChange || uris.contains(wakeupsToForceDismissKeyguardUri)) {
+                processStringArray(
+                    secureSettings.getStringForUser(
+                        ACTIVE_UNLOCK_WAKEUPS_TO_FORCE_DISMISS_KEYGUARD,
+                        getCurrentUser()),
+                    wakeupsToForceDismissKeyguard,
+                    setOf(WAKE_REASON_UNFOLD_DEVICE))
+            }
         }
 
         /**
@@ -246,6 +278,14 @@ class ActiveUnlockConfig @Inject constructor(
      */
     fun isWakeupConsideredUnlockIntent(pmWakeReason: Int): Boolean {
         return wakeupsConsideredUnlockIntents.contains(pmWakeReason)
+    }
+
+    /**
+     * Whether the PowerManager wake reason should force dismiss the keyguard if active
+     * unlock is successful.
+     */
+    fun shouldWakeupForceDismissKeyguard(pmWakeReason: Int): Boolean {
+        return wakeupsToForceDismissKeyguard.contains(pmWakeReason)
     }
 
     /**
@@ -320,6 +360,9 @@ class ActiveUnlockConfig @Inject constructor(
                 "$faceAcquireInfoToTriggerBiometricFailOn")
         pw.println("   activeUnlockWakeupsConsideredUnlockIntents=${
             wakeupsConsideredUnlockIntents.map { PowerManager.wakeReasonToString(it) }
+        }")
+        pw.println("   activeUnlockFromWakeupsToAlwaysDismissKeyguard=${
+            wakeupsToForceDismissKeyguard.map { PowerManager.wakeReasonToString(it) }
         }")
 
         pw.println("Current state:")

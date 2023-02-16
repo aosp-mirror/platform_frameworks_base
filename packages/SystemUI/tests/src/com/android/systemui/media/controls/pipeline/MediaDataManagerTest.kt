@@ -1897,6 +1897,20 @@ class MediaDataManagerTest : SysuiTestCase() {
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
 
+    @Test
+    fun testSessionDestroyed_noNotificationKey_stillRemoved() {
+        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+
+        // When a notiifcation is added and then removed before it is fully processed
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        backgroundExecutor.runAllReady()
+        mediaDataManager.onNotificationRemoved(KEY)
+
+        // We still make sure to remove it
+        verify(listener).onMediaDataRemoved(eq(KEY))
+    }
+
     /** Helper function to add a media notification and capture the resulting MediaData */
     private fun addNotificationAndLoad() {
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)

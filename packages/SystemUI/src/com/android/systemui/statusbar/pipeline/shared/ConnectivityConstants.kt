@@ -22,7 +22,6 @@ import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.SB_LOGGING_TAG
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -40,7 +39,7 @@ constructor(
     telephonyManager: TelephonyManager,
 ) : Dumpable {
     init {
-        dumpManager.registerNormalDumpable("${SB_LOGGING_TAG}Constants", this)
+        dumpManager.registerNormalDumpable("ConnectivityConstants", this)
     }
 
     /** True if this device has the capability for data connections and false otherwise. */

@@ -250,25 +250,30 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
         @Override
         public boolean onTouch(View v, MotionEvent e) {
-            boolean isDrag = false;
             final int id = v.getId();
             if (id != R.id.caption_handle && id != R.id.desktop_mode_caption) {
                 return false;
             }
-            if (id == R.id.caption_handle) {
-                isDrag = mDragDetector.onMotionEvent(e);
+            switch (e.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mDragDetector.onMotionEvent(e);
+                    final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
+                    if (taskInfo.isFocused) {
+                        return mDragDetector.isDragEvent();
+                    }
+                    final WindowContainerTransaction wct = new WindowContainerTransaction();
+                    wct.reorder(mTaskToken, true /* onTop */);
+                    mSyncQueue.queue(wct);
+                    return false;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    boolean res = mDragDetector.isDragEvent();
+                    mDragDetector.onMotionEvent(e);
+                    return res;
+                default:
+                    mDragDetector.onMotionEvent(e);
+                    return mDragDetector.isDragEvent();
             }
-            if (e.getAction() != MotionEvent.ACTION_DOWN) {
-                return isDrag;
-            }
-            final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
-            if (taskInfo.isFocused) {
-                return isDrag;
-            }
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.reorder(mTaskToken, true /* onTop */);
-            mSyncQueue.queue(wct);
-            return true;
         }
 
         /**

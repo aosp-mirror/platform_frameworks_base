@@ -19,19 +19,23 @@ import android.content.ClipData
 import android.content.ClipDescription.EXTRA_IS_SENSITIVE
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
 import android.util.Size
+import android.view.textclassifier.TextLinks
 import com.android.systemui.R
 import java.io.IOException
 
 data class ClipboardModel(
-    val clipData: ClipData?,
+    val clipData: ClipData,
     val source: String,
-    val type: Type = Type.OTHER,
-    val item: ClipData.Item? = null,
-    val isSensitive: Boolean = false,
-    val isRemote: Boolean = false,
+    val type: Type,
+    val text: CharSequence?,
+    val textLinks: TextLinks?,
+    val uri: Uri?,
+    val isSensitive: Boolean,
+    val isRemote: Boolean,
 ) {
     private var _bitmap: Bitmap? = null
 
@@ -41,17 +45,16 @@ data class ClipboardModel(
         }
         return source == other.source &&
             type == other.type &&
-            item?.text == other.item?.text &&
-            item?.uri == other.item?.uri &&
+            text == other.text &&
+            uri == other.uri &&
             isSensitive == other.isSensitive
     }
 
     fun loadThumbnail(context: Context): Bitmap? {
-        if (_bitmap == null && type == Type.IMAGE && item?.uri != null) {
+        if (_bitmap == null && type == Type.IMAGE && uri != null) {
             try {
                 val size = context.resources.getDimensionPixelSize(R.dimen.overlay_x_scale)
-                _bitmap =
-                    context.contentResolver.loadThumbnail(item.uri, Size(size, size * 4), null)
+                _bitmap = context.contentResolver.loadThumbnail(uri, Size(size, size * 4), null)
             } catch (e: IOException) {
                 Log.e(TAG, "Thumbnail loading failed!", e)
             }
@@ -66,27 +69,34 @@ data class ClipboardModel(
         fun fromClipData(
             context: Context,
             utils: ClipboardOverlayUtils,
-            clipData: ClipData?,
+            clipData: ClipData,
             source: String
         ): ClipboardModel {
-            if (clipData == null || clipData.itemCount == 0) {
-                return ClipboardModel(clipData, source)
-            }
             val sensitive = clipData.description?.extras?.getBoolean(EXTRA_IS_SENSITIVE) ?: false
             val item = clipData.getItemAt(0)!!
             val type = getType(context, item)
             val remote = utils.isRemoteCopy(context, clipData, source)
-            return ClipboardModel(clipData, source, type, item, sensitive, remote)
+            return ClipboardModel(
+                clipData,
+                source,
+                type,
+                item.text,
+                item.textLinks,
+                item.uri,
+                sensitive,
+                remote
+            )
         }
 
         private fun getType(context: Context, item: ClipData.Item): Type {
             return if (!TextUtils.isEmpty(item.text)) {
                 Type.TEXT
-            } else if (
-                item.uri != null &&
-                    context.contentResolver.getType(item.uri)?.startsWith("image") == true
-            ) {
-                Type.IMAGE
+            } else if (item.uri != null) {
+                if (context.contentResolver.getType(item.uri)?.startsWith("image") == true) {
+                    Type.IMAGE
+                } else {
+                    Type.URI
+                }
             } else {
                 Type.OTHER
             }
@@ -96,6 +106,7 @@ data class ClipboardModel(
     enum class Type {
         TEXT,
         IMAGE,
+        URI,
         OTHER
     }
 }

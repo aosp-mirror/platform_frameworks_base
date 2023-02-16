@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.statusbar.notification.collection.coordinator
 
 import android.os.UserHandle
@@ -39,14 +41,20 @@ import com.android.systemui.statusbar.policy.headsUpEvents
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -93,12 +101,37 @@ constructor(
     private suspend fun trackUnseenNotificationsWhileUnlocked() {
         // Use collectLatest so that trackUnseenNotifications() is cancelled when the keyguard is
         // showing again
+        var clearUnseenOnUnlock = false
         keyguardRepository.isKeyguardShowing.collectLatest { isKeyguardShowing ->
-            if (!isKeyguardShowing) {
+            if (isKeyguardShowing) {
+                // Wait for the user to spend enough time on the lock screen before clearing unseen
+                // set when unlocked
+                awaitTimeSpentNotDozing(SEEN_TIMEOUT)
+                clearUnseenOnUnlock = true
+            } else {
                 unseenNotifFilter.invalidateList("keyguard no longer showing")
+                if (clearUnseenOnUnlock) {
+                    clearUnseenOnUnlock = false
+                    unseenNotifications.clear()
+                }
                 trackUnseenNotifications()
             }
         }
+    }
+
+    private suspend fun awaitTimeSpentNotDozing(duration: Duration) {
+        keyguardRepository.isDozing
+            // Use transformLatest so that the timeout delay is cancelled if the device enters doze,
+            // and is restarted when doze ends.
+            .transformLatest { isDozing ->
+                if (!isDozing) {
+                    delay(duration)
+                    // Signal timeout has completed
+                    emit(Unit)
+                }
+            }
+            // Suspend until the first emission
+            .first()
     }
 
     private suspend fun trackUnseenNotifications() {
@@ -240,5 +273,6 @@ constructor(
 
     companion object {
         private const val TAG = "KeyguardCoordinator"
+        private val SEEN_TIMEOUT = 5.seconds
     }
 }

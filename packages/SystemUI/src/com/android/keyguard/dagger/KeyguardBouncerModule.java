@@ -23,7 +23,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.KeyguardSecurityContainer;
 import com.android.keyguard.KeyguardSecurityViewFlipper;
 import com.android.systemui.R;
@@ -47,19 +46,13 @@ public interface KeyguardBouncerModule {
     /** */
     @Provides
     @KeyguardBouncerScope
-    static KeyguardHostView providesKeyguardHostView(@RootView ViewGroup rootView,
+    static KeyguardSecurityContainer providesKeyguardSecurityContainer(@RootView ViewGroup rootView,
             LayoutInflater layoutInflater) {
-        KeyguardHostView hostView = (KeyguardHostView) layoutInflater.inflate(
-                R.layout.keyguard_host_view, rootView, false);
-        rootView.addView(hostView);
-        return hostView;
-    }
-
-    /** */
-    @Provides
-    @KeyguardBouncerScope
-    static KeyguardSecurityContainer providesKeyguardSecurityContainer(KeyguardHostView hostView) {
-        return hostView.findViewById(R.id.keyguard_security_container);
+        KeyguardSecurityContainer securityContainer =
+                (KeyguardSecurityContainer) layoutInflater.inflate(
+                        R.layout.keyguard_security_container_view, rootView, false);
+        rootView.addView(securityContainer);
+        return securityContainer;
     }
 
     /** */

@@ -49,9 +49,8 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectiv
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logInputChange
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.util.kotlin.pairwise
@@ -84,7 +83,7 @@ constructor(
     private val connectivityManager: ConnectivityManager,
     private val subscriptionManager: SubscriptionManager,
     private val telephonyManager: TelephonyManager,
-    private val logger: ConnectivityPipelineLogger,
+    private val logger: MobileInputLogger,
     @MobileSummaryLog private val tableLogger: TableLogBuffer,
     mobileMappingsProxy: MobileMappingsProxy,
     broadcastDispatcher: BroadcastDispatcher,
@@ -222,13 +221,13 @@ constructor(
     private val carrierConfigChangedEvent =
         broadcastDispatcher
             .broadcastFlow(IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED))
-            .logInputChange(logger, "ACTION_CARRIER_CONFIG_CHANGED")
+            .onEach { logger.logActionCarrierConfigChanged() }
 
     override val defaultDataSubRatConfig: StateFlow<Config> =
         merge(defaultDataSubIdChangeEvent, carrierConfigChangedEvent)
             .mapLatest { Config.readConfig(context) }
             .distinctUntilChanged()
-            .logInputChange(logger, "defaultDataSubRatConfig")
+            .onEach { logger.logDefaultDataSubRatConfig(it) }
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
@@ -239,13 +238,13 @@ constructor(
         defaultDataSubRatConfig
             .map { mobileMappingsProxy.mapIconSets(it) }
             .distinctUntilChanged()
-            .logInputChange(logger, "defaultMobileIconMapping")
+            .onEach { logger.logDefaultMobileIconMapping(it) }
 
     override val defaultMobileIconGroup: Flow<MobileIconGroup> =
         defaultDataSubRatConfig
             .map { mobileMappingsProxy.getDefaultIcons(it) }
             .distinctUntilChanged()
-            .logInputChange(logger, "defaultMobileIconGroup")
+            .onEach { logger.logDefaultMobileIconGroup(it) }
 
     override fun getRepoForSubId(subId: Int): FullMobileConnectionRepository {
         if (!isValidSubId(subId)) {

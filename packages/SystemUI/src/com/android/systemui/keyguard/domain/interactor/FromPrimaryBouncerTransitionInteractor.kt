@@ -24,62 +24,63 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.WakefulnessState
-import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.util.kotlin.sample
-import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @SysUISingleton
-class FromBouncerTransitionInteractor
+class FromPrimaryBouncerTransitionInteractor
 @Inject
 constructor(
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
-    private val shadeRepository: ShadeRepository,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor
-) : TransitionInteractor(FromBouncerTransitionInteractor::class.simpleName!!) {
-
-    private var transitionId: UUID? = null
+) : TransitionInteractor(FromPrimaryBouncerTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
-        listenForBouncerToGone()
-        listenForBouncerToLockscreenOrAod()
+        listenForPrimaryBouncerToGone()
+        listenForPrimaryBouncerToLockscreenAodOrDozing()
     }
 
-    private fun listenForBouncerToLockscreenOrAod() {
+    private fun listenForPrimaryBouncerToLockscreenAodOrDozing() {
         scope.launch {
-            keyguardInteractor.isBouncerShowing
+            keyguardInteractor.primaryBouncerShowing
                 .sample(
                     combine(
                         keyguardInteractor.wakefulnessModel,
                         keyguardTransitionInteractor.startedKeyguardTransitionStep,
-                        ::Pair
+                        keyguardInteractor.isAodAvailable,
+                        ::toTriple
                     ),
-                    ::toTriple
+                    ::toQuad
                 )
-                .collect { triple ->
-                    val (isBouncerShowing, wakefulnessState, lastStartedTransitionStep) = triple
+                .collect {
+                    (isBouncerShowing, wakefulnessState, lastStartedTransitionStep, isAodAvailable)
+                    ->
                     if (
-                        !isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.BOUNCER
+                        !isBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
                     ) {
                         val to =
                             if (
                                 wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP ||
                                     wakefulnessState.state == WakefulnessState.ASLEEP
                             ) {
-                                KeyguardState.AOD
+                                if (isAodAvailable) {
+                                    KeyguardState.AOD
+                                } else {
+                                    KeyguardState.DOZING
+                                }
                             } else {
                                 KeyguardState.LOCKSCREEN
                             }
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 ownerName = name,
-                                from = KeyguardState.BOUNCER,
+                                from = KeyguardState.PRIMARY_BOUNCER,
                                 to = to,
                                 animator = getAnimator(),
                             )
@@ -89,17 +90,17 @@ constructor(
         }
     }
 
-    private fun listenForBouncerToGone() {
+    private fun listenForPrimaryBouncerToGone() {
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
-                .sample(keyguardTransitionInteractor.finishedKeyguardState, { a, b -> Pair(a, b) })
+                .sample(keyguardTransitionInteractor.finishedKeyguardState) { a, b -> Pair(a, b) }
                 .collect { pair ->
                     val (isKeyguardGoingAway, keyguardState) = pair
-                    if (isKeyguardGoingAway && keyguardState == KeyguardState.BOUNCER) {
+                    if (isKeyguardGoingAway && keyguardState == KeyguardState.PRIMARY_BOUNCER) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 ownerName = name,
-                                from = KeyguardState.BOUNCER,
+                                from = KeyguardState.PRIMARY_BOUNCER,
                                 to = KeyguardState.GONE,
                                 animator = getAnimator(),
                             )

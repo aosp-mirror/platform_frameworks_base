@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.qs.tiles.dialog
+package com.android.systemui.qs.tiles
 
 import android.os.Handler
 import android.testing.AndroidTestingRunner
@@ -27,7 +27,6 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSTileHost
 import com.android.systemui.qs.logging.QSLogger
-import com.android.systemui.qs.tiles.FontScalingTile
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before

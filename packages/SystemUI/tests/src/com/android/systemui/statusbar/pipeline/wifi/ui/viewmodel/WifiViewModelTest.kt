@@ -25,7 +25,6 @@ import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.Airpla
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
@@ -59,7 +58,6 @@ class WifiViewModelTest : SysuiTestCase() {
     private lateinit var underTest: WifiViewModel
 
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
     @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
@@ -85,7 +83,7 @@ class WifiViewModelTest : SysuiTestCase() {
                     airplaneModeRepository,
                     connectivityRepository,
                 ),
-                logger,
+                tableLogBuffer,
                 scope,
             )
 
@@ -478,7 +476,6 @@ class WifiViewModelTest : SysuiTestCase() {
                 airplaneModeViewModel,
                 connectivityConstants,
                 context,
-                logger,
                 tableLogBuffer,
                 interactor,
                 scope,

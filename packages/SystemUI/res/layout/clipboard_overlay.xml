@@ -61,8 +61,6 @@
                      android:id="@+id/share_chip"/>
             <include layout="@layout/overlay_action_chip"
                      android:id="@+id/remote_copy_chip"/>
-            <include layout="@layout/overlay_action_chip"
-                     android:id="@+id/edit_chip"/>
         </LinearLayout>
     </HorizontalScrollView>
     <View

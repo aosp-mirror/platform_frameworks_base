@@ -343,6 +343,8 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pot capturar els gestos fets en el sensor d\'empremtes digitals del dispositiu."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fer una captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pot fer una captura de la pantalla."</string>
+    <!-- no translation found for dream_preview_title (5570751491996100804) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"aparèixer a la barra d\'estat"</string>

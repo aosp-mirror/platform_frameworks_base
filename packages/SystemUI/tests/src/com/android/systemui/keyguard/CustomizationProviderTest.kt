@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffor
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -172,6 +173,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                         repository = FakeKeyguardRepository(),
                         commandQueue = commandQueue,
                         featureFlags = featureFlags,
+                        bouncerRepository = FakeKeyguardBouncerRepository(),
                     ),
                 registry = mock(),
                 lockPatternUtils = lockPatternUtils,

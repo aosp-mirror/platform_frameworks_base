@@ -900,6 +900,25 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void noFpListeningWhenKeyguardIsOccluded_unlessAlternateBouncerShowing() {
+        // GIVEN device is awake but occluded
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mKeyguardUpdateMonitor.setKeyguardShowing(false, true);
+
+        // THEN fingerprint shouldn't listen
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isFalse();
+        verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
+                anyInt(), anyInt());
+
+        // WHEN alternate bouncer is shown
+        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
+
+        // THEN make sure FP listening begins
+        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
+                anyInt());
+    }
+
+    @Test
     public void testTriesToAuthenticate_whenTrustOnAgentKeyguard_ifBypass() {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
@@ -2372,6 +2391,56 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         // Whether device in any posture state, always listen for face
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
+    }
+
+    @Test
+    public void unfoldWakeup_requestActiveUnlock_forceDismissKeyguard()
+            throws RemoteException {
+        // GIVEN shouldTriggerActiveUnlock
+        keyguardIsVisible();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // GIVEN active unlock triggers on wakeup
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE))
+                .thenReturn(true);
+
+        // GIVEN an unfold should force dismiss the keyguard
+        when(mActiveUnlockConfig.shouldWakeupForceDismissKeyguard(
+                PowerManager.WAKE_REASON_UNFOLD_DEVICE)).thenReturn(true);
+
+        // WHEN device wakes up from an unfold
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNFOLD_DEVICE);
+        mTestableLooper.processAllMessages();
+
+        // THEN request unlock with a keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(true));
+    }
+
+    @Test
+    public void unfoldWakeup_requestActiveUnlock_noDismissKeyguard()
+            throws RemoteException {
+        // GIVEN shouldTriggerActiveUnlock on wake from UNFOLD_DEVICE
+        keyguardIsVisible();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // GIVEN active unlock triggers on wakeup
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE))
+                .thenReturn(true);
+
+        // GIVEN an unfold should NOT force dismiss the keyguard
+        when(mActiveUnlockConfig.shouldWakeupForceDismissKeyguard(
+                PowerManager.WAKE_REASON_UNFOLD_DEVICE)).thenReturn(false);
+
+        // WHEN device wakes up from an unfold
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNFOLD_DEVICE);
+        mTestableLooper.processAllMessages();
+
+        // THEN request unlock WITHOUT a keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(false));
     }
 
     private void userDeviceLockDown() {

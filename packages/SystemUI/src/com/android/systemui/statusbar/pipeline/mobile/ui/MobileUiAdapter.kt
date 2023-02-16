@@ -22,8 +22,8 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
+import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -55,7 +55,7 @@ constructor(
     interactor: MobileIconsInteractor,
     private val iconController: StatusBarIconController,
     private val iconsViewModelFactory: MobileIconsViewModel.Factory,
-    private val logger: ConnectivityPipelineLogger,
+    private val logger: MobileInputLogger,
     @Application private val scope: CoroutineScope,
     private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) : CoreStartable {

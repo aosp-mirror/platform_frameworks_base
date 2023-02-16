@@ -51,9 +51,12 @@ open class ClockRegistry(
     defaultClockProvider: ClockProvider,
     val fallbackClockId: ClockId = DEFAULT_CLOCK_ID,
 ) {
-    // Usually this would be a typealias, but a SAM provides better java interop
-    fun interface ClockChangeListener {
-        fun onClockChanged()
+    interface ClockChangeListener {
+        // Called when the active clock changes
+        fun onCurrentClockChanged() {}
+
+        // Called when the list of available clocks changes
+        fun onAvailableClocksChanged() {}
     }
 
     private val availableClocks = mutableMapOf<ClockId, ClockInfo>()
@@ -92,7 +95,7 @@ open class ClockRegistry(
         protected set(value) {
             if (field != value) {
                 field = value
-                scope.launch(mainDispatcher) { onClockChanged() }
+                scope.launch(mainDispatcher) { onClockChanged { it.onCurrentClockChanged() } }
             }
         }
 
@@ -164,9 +167,9 @@ open class ClockRegistry(
         Assert.isNotMainThread()
     }
 
-    private fun onClockChanged() {
+    private fun onClockChanged(func: (ClockChangeListener) -> Unit) {
         assertMainThread()
-        clockChangeListeners.forEach { it.onClockChanged() }
+        clockChangeListeners.forEach(func)
     }
 
     private fun mutateSetting(mutator: (ClockSettings) -> ClockSettings) {
@@ -241,6 +244,7 @@ open class ClockRegistry(
     }
 
     private fun connectClocks(provider: ClockProvider) {
+        var isAvailableChanged = false
         val currentId = currentClockId
         for (clock in provider.getClocks()) {
             val id = clock.clockId
@@ -251,10 +255,11 @@ open class ClockRegistry(
                     "Clock Id conflict: $id is registered by both " +
                         "${provider::class.simpleName} and ${current.provider::class.simpleName}"
                 )
-                return
+                continue
             }
 
             availableClocks[id] = ClockInfo(clock, provider)
+            isAvailableChanged = true
             if (DEBUG) {
                 Log.i(TAG, "Added ${clock.clockId}")
             }
@@ -263,23 +268,34 @@ open class ClockRegistry(
                 if (DEBUG) {
                     Log.i(TAG, "Current clock ($currentId) was connected")
                 }
-                onClockChanged()
+                onClockChanged { it.onCurrentClockChanged() }
             }
+        }
+
+        if (isAvailableChanged) {
+            onClockChanged { it.onAvailableClocksChanged() }
         }
     }
 
     private fun disconnectClocks(provider: ClockProvider) {
+        var isAvailableChanged = false
         val currentId = currentClockId
         for (clock in provider.getClocks()) {
             availableClocks.remove(clock.clockId)
+            isAvailableChanged = true
+
             if (DEBUG) {
                 Log.i(TAG, "Removed ${clock.clockId}")
             }
 
             if (currentId == clock.clockId) {
                 Log.w(TAG, "Current clock ($currentId) was disconnected")
-                onClockChanged()
+                onClockChanged { it.onCurrentClockChanged() }
             }
+        }
+
+        if (isAvailableChanged) {
+            onClockChanged { it.onAvailableClocksChanged() }
         }
     }
 

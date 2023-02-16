@@ -44,7 +44,7 @@ constructor(
     var legacyAlternateBouncer: LegacyAlternateBouncer? = null
     var legacyAlternateBouncerVisibleTime: Long = NOT_VISIBLE
 
-    val isVisible: Flow<Boolean> = bouncerRepository.isAlternateBouncerVisible
+    val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
 
     /**
      * Sets the correct bouncer states to show the alternate bouncer if it can show.
@@ -86,7 +86,7 @@ constructor(
 
     fun isVisibleState(): Boolean {
         return if (isModernAlternateBouncerEnabled) {
-            bouncerRepository.isAlternateBouncerVisible.value
+            bouncerRepository.alternateBouncerVisible.value
         } else {
             legacyAlternateBouncer?.isShowingAlternateBouncer ?: false
         }
@@ -98,7 +98,7 @@ constructor(
 
     fun canShowAlternateBouncerForFingerprint(): Boolean {
         return if (isModernAlternateBouncerEnabled) {
-            bouncerRepository.isAlternateBouncerUIAvailable.value &&
+            bouncerRepository.alternateBouncerUIAvailable.value &&
                 biometricSettingsRepository.isFingerprintEnrolled.value &&
                 biometricSettingsRepository.isStrongBiometricAllowed.value &&
                 biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&

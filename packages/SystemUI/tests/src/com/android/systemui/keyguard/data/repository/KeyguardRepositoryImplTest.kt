@@ -324,29 +324,6 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun isBouncerShowing() =
-        runTest(UnconfinedTestDispatcher()) {
-            whenever(keyguardStateController.isBouncerShowing).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isBouncerShowing.onEach { latest = it }.launchIn(this)
-
-            assertThat(latest).isFalse()
-
-            val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
-
-            whenever(keyguardStateController.isBouncerShowing).thenReturn(true)
-            captor.value.onBouncerShowingChanged()
-            assertThat(latest).isTrue()
-
-            whenever(keyguardStateController.isBouncerShowing).thenReturn(false)
-            captor.value.onBouncerShowingChanged()
-            assertThat(latest).isFalse()
-
-            job.cancel()
-        }
-
-    @Test
     fun isKeyguardGoingAway() =
         runTest(UnconfinedTestDispatcher()) {
             whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(false)
