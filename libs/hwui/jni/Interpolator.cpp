@@ -24,12 +24,8 @@ static void Interpolator_setKeyFrame(JNIEnv* env, jobject clazz, jlong interpHan
 
     AutoJavaFloatArray autoValues(env, valueArray);
     AutoJavaFloatArray autoBlend(env, blendArray, 4);
-#ifdef SK_SCALAR_IS_FLOAT
     SkScalar* scalars = autoValues.ptr();
     SkScalar* blend = autoBlend.ptr();
-#else
-    #error Need to convert float array to SkScalar array before calling the following function.
-#endif
 
     interp->setKeyFrame(index, msec, scalars, blend);
 }
