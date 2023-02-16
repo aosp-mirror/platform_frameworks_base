@@ -275,10 +275,11 @@ public class AudioSystem
     /** @hide */
     @IntDef(flag = false, prefix = "DEVICE_", value = {
             DEVICE_OUT_BLUETOOTH_A2DP,
-            DEVICE_OUT_BLE_HEADSET}
+            DEVICE_OUT_BLE_HEADSET,
+            DEVICE_OUT_BLE_BROADCAST}
     )
     @Retention(RetentionPolicy.SOURCE)
-    public @interface DeviceType {}
+    public @interface BtOffloadDeviceType {}
 
     /**
      * @hide
@@ -1972,7 +1973,7 @@ public class AudioSystem
      * Returns a list of audio formats (codec) supported on the A2DP and LE audio offload path.
      */
     public static native int getHwOffloadFormatsSupportedForBluetoothMedia(
-            @DeviceType int deviceType, ArrayList<Integer> formatList);
+            @BtOffloadDeviceType int deviceType, ArrayList<Integer> formatList);
 
     /** @hide */
     public static native int setSurroundFormatEnabled(int audioFormat, boolean enabled);
