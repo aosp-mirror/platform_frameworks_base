@@ -73,7 +73,6 @@ cc_defaults {
     target: {
         android: {
             include_dirs: [
-                "external/skia/src/effects",
                 "external/skia/src/image",
                 "external/skia/src/utils",
                 "external/skia/src/gpu",
@@ -386,7 +385,6 @@ cc_defaults {
         "external/skia/include/private",
         "external/skia/src/codec",
         "external/skia/src/core",
-        "external/skia/src/effects",
         "external/skia/src/image",
         "external/skia/src/images",
     ],
