@@ -297,8 +297,8 @@ public class AccessibilityMenuService extends AccessibilityService
 
     private void startActivityIfIntentIsSafe(Intent intent, int flag) {
         PackageManager packageManager = getPackageManager();
-        List<ResolveInfo> activities =
-                packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+                PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_DEFAULT_ONLY));
         if (!activities.isEmpty()) {
             intent.setFlags(flag);
             startActivity(intent);
