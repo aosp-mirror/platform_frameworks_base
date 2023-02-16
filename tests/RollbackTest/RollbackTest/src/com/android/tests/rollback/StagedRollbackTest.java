@@ -70,7 +70,7 @@ public class StagedRollbackTest {
                 Manifest.permission.DELETE_PACKAGES,
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 Manifest.permission.FORCE_STOP_PACKAGES,
-                Manifest.permission.ALLOWLISTED_WRITE_DEVICE_CONFIG);
+                Manifest.permission.WRITE_DEVICE_CONFIG);
     }
 
     /**

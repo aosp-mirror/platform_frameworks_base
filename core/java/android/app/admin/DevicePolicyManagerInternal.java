@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.os.UserHandle;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -279,11 +278,13 @@ public abstract class DevicePolicyManagerInternal {
      * The given permission will be checked along with its associated cross-user permission, if it
      * exists and the target user is different to the calling user.
      *
+     * @param callerPackage the package of the calling application.
      * @param permission The name of the permission being checked.
      * @param targetUserId The userId of the user which the caller needs permission to act on.
      * @throws SecurityException If the calling process has not been granted the permission.
      */
-    public abstract void enforcePermission(String permission, int targetUserId);
+    public abstract void enforcePermission(String callerPackage, String permission,
+            int targetUserId);
 
     /**
      * Return whether the calling process has been granted permission to apply a device policy on
@@ -292,10 +293,12 @@ public abstract class DevicePolicyManagerInternal {
      * The given permission will be checked along with its associated cross-user
      * permission, if it exists and the target user is different to the calling user.
      *
+     * @param callerPackage the package of the calling application.
      * @param permission The name of the permission being checked.
      * @param targetUserId The userId of the user which the caller needs permission to act on.
      */
-    public abstract boolean hasPermission(String permission, int targetUserId);
+    public abstract boolean hasPermission(String callerPackage, String permission,
+            int targetUserId);
 
     /**
      * Returns whether new "turn off work" behavior is enabled via feature flag.
@@ -318,8 +321,9 @@ public abstract class DevicePolicyManagerInternal {
     public abstract boolean isApplicationExemptionsFlagEnabled();
 
     /**
-    * Returns the application restrictions set by each admin for the given {@code packageName}.
+     * Returns a map of admin to {@link Bundle} map of restrictions set by the admins for the
+     * provided {@code packageName} in the provided {@code userId}
      */
-    public abstract Map<String, Bundle> getApplicationRestrictionsPerAdmin(
-            String packageName, int userId);
+    public abstract List<Bundle> getApplicationRestrictionsPerAdminForUser(
+            String packageName, @UserIdInt int userId);
 }

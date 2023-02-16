@@ -92,8 +92,8 @@
   <string name="close_sheet">"Close sheet"</string>
   <!-- Spoken content description of the back arrow button. -->
   <string name="accessibility_back_arrow_button">"Go back to the previous page"</string>
-  <!-- Spoken content description of the close button. -->
-  <string name="accessibility_close_button">"Close the Credential Manager action suggestion appearing at the bottom of the screen"</string>
+  <!-- Spoken content description of the close "X" icon button. -->
+  <string name="accessibility_close_button">Close</string>
 
   <!-- Strings for the get flow. -->
   <!-- This appears as the title of the modal bottom sheet asking for user confirmation to use the single previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->
@@ -120,6 +120,8 @@
   <string name="locked_credential_entry_label_subtext_tap_to_unlock">Tap to unlock</string>
   <!-- Explanatory label for a disabled button explaining that this option isn't viable because it does not contain any available credential (e.g. password, passkey, etc.) for the user. [CHAR LIMIT=120] -->
   <string name="locked_credential_entry_label_subtext_no_sign_in">No sign-in info</string>
+  <!-- Label displayed when a selected option does not contain any viable credentials that can be used to log into the app. [CHAR LIMIT=80] -->
+  <string name="no_sign_in_info_in">No sign-in info in <xliff:g id="source" example="becket@gmail.com">%1$s</xliff:g></string>
   <!-- Column heading for displaying action chips for managing sign-ins from each credential provider. [CHAR LIMIT=80] -->
   <string name="get_dialog_heading_manage_sign_ins">Manage sign-ins</string>
   <!-- Column heading for displaying option to use sign-ins saved on a different device. [CHAR LIMIT=80] -->

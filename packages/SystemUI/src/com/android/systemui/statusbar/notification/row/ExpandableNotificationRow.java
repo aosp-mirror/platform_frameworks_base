@@ -1198,6 +1198,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return getShowingLayout().getVisibleWrapper();
     }
 
+    /**
+     * @return whether the notification row is long clickable or not.
+     */
+    public boolean isNotificationRowLongClickable() {
+        if (mLongPressListener == null) {
+            return false;
+        }
+
+        if (!areGutsExposed()) { // guts is not opened
+            return true;
+        }
+
+        // if it is leave behind, it shouldn't be long clickable.
+        return !isGutsLeaveBehind();
+    }
+
     public void setLongPressListener(LongPressListener longPressListener) {
         mLongPressListener = longPressListener;
     }
@@ -2954,6 +2970,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return (mGuts != null && mGuts.isExposed());
     }
 
+    private boolean isGutsLeaveBehind() {
+        return (mGuts != null && mGuts.isLeavebehind());
+    }
+
     @Override
     public boolean isContentExpandable() {
         if (mIsSummaryWithChildren && !shouldShowPublic()) {
@@ -3401,7 +3421,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
+        final boolean isLongClickable = isNotificationRowLongClickable();
+        if (isLongClickable) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
+        }
+        info.setLongClickable(isLongClickable);
+
         if (canViewBeDismissed() && !mIsSnoozed) {
             info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_DISMISS);
         }

@@ -7384,7 +7384,6 @@ public abstract class Context {
      * @throws IllegalArgumentException if the given device ID is not a valid ID of the default
      *         device or a virtual device.
      *
-     * @see #isDeviceContext()
      * @see #createDeviceContext(int)
      * @hide
      */
@@ -7408,26 +7407,8 @@ public abstract class Context {
      * </p>
      *
      * <p>
-     * This method will only return a reliable value for this instance if
-     * {@link Context#isDeviceContext()} is {@code true}. The system can assign an arbitrary device
-     * id value for Contexts not logically associated with a device.
-     * </p>
-     *
-     * @return the ID of the device this context is associated with.
-     * @see #isDeviceContext()
-     * @see #createDeviceContext(int)
-     * @see #registerDeviceIdChangeListener(Executor, IntConsumer)
-     */
-    public int getDeviceId() {
-        throw new RuntimeException("Not implemented. Must override in a subclass.");
-    }
-
-    /**
-     * Indicates whether the value of {@link Context#getDeviceId()} can be relied upon for
-     * this instance. It will return {@code true} for Contexts created by
-     * {@link Context#createDeviceContext(int)} which reference a valid device ID, as well as for
-     * UI and Display Contexts.
-     * <p>
+     * This method will only return a reliable value for this instance if it was created with
+     * {@link Context#createDeviceContext(int)}, or if this instance is a UI or Display Context.
      * Contexts created with {@link Context#createDeviceContext(int)} will have an explicit
      * device association, which will never change, even if the underlying device is closed or is
      * removed. UI Contexts and Display Contexts are
@@ -7437,15 +7418,12 @@ public abstract class Context {
      * logically associated with a device.
      * </p>
      *
-     * @return {@code true} if {@link Context#getDeviceId()} is reliable, {@code false} otherwise.
-     *
+     * @return the ID of the device this context is associated with.
      * @see #createDeviceContext(int)
-     * @see #getDeviceId()}
-     * @see #createDisplayContext(Display)
+     * @see #registerDeviceIdChangeListener(Executor, IntConsumer)
      * @see #isUiContext()
      */
-
-    public boolean isDeviceContext() {
+    public int getDeviceId() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -7464,7 +7442,6 @@ public abstract class Context {
      * @param listener The listener {@code IntConsumer} to call which will receive the updated
      *                 device ID.
      *
-     * @see Context#isDeviceContext()
      * @see Context#getDeviceId()
      * @see Context#createDeviceContext(int)
      */

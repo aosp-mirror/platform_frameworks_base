@@ -152,10 +152,10 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      </thermalThrottling>
  *
  *      <refreshRate>
+ *        <defaultRefreshRateInHbmHdr>75</defaultRefreshRateInHbmHdr>
+ *        <defaultRefreshRateInHbmSunlight>75</defaultRefreshRateInHbmSunlight>
  *        <lowerBlockingZoneConfigs>
  *          <defaultRefreshRate>75</defaultRefreshRate>
- *          <defaultRefreshRateInHbmHdr>75</defaultRefreshRateInHbmHdr>
- *          <defaultRefreshRateInHbmSunlight>75</defaultRefreshRateInHbmSunlight>
  *          <blockingZoneThreshold>
  *            <displayBrightnessPoint>
  *              <lux>50</lux>

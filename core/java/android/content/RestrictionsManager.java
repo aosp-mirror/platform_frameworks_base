@@ -18,7 +18,10 @@ package android.content;
 
 import static android.content.Intent.LOCAL_FLAG_FROM_SYSTEM;
 
+import android.annotation.NonNull;
 import android.annotation.SystemService;
+import android.annotation.UserHandleAware;
+import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -31,6 +34,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.UserManager;
 import android.service.restrictions.RestrictionsReceiver;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -422,11 +426,59 @@ public class RestrictionsManager {
      * to this application.
      * @return the application restrictions as a Bundle. Returns null if there
      * are no restrictions.
+     *
+     * @deprecated Use {@link #getApplicationRestrictionsPerAdmin} instead.
+     * Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, it is
+     * possible for there to be multiple managing agents on the device with the ability to set
+     * restrictions. This API will only to return the restrictions set by device policy controllers
+     * (DPCs)
+     *
+     * @see DevicePolicyManager
      */
     public Bundle getApplicationRestrictions() {
         try {
             if (mService != null) {
                 return mService.getApplicationRestrictions(mContext.getPackageName());
+            }
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+        return null;
+    }
+
+    /**
+     * Returns a {@link List} containing a {@link Bundle} for each managing agent that has set
+     * restrictions for the current application, the bundle contains any application restrictions
+     * set for the current package. The order of the items in the list is not guaranteed to remain
+     * stable between multiple calls.
+     *
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it is possible for there to be multiple managing agents on the device with the ability to set
+     * restrictions, e.g. an Enterprise DPC and a Supervision admin.
+     *
+     * <p>Each {@link Bundle} consists of key-value pairs, as defined by the application,
+     * where the types of values may be:
+     * <ul>
+     * <li>{@code boolean}
+     * <li>{@code int}
+     * <li>{@code String} or {@code String[]}
+     * <li>From {@link android.os.Build.VERSION_CODES#M}, {@code Bundle} or {@code Bundle[]}
+     * </ul>
+     *
+     * <p>NOTE: The method performs disk I/O and shouldn't be called on the main thread
+     *
+     * @return a {@link List} of {@link Bundle} containing the restrictions set by admins for that
+     * package. Returns an empty {@link List} if there are no saved restrictions.
+     *
+     * @see UserManager#KEY_RESTRICTIONS_PENDING
+     */
+    @WorkerThread
+    @UserHandleAware
+    public @NonNull List<Bundle> getApplicationRestrictionsPerAdmin() {
+        try {
+            if (mService != null) {
+                return mService.getApplicationRestrictionsPerAdminForUser(
+                        mContext.getUserId(), mContext.getPackageName());
             }
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();

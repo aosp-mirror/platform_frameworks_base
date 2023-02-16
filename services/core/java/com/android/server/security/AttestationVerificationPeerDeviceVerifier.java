@@ -96,6 +96,21 @@ class AttestationVerificationPeerDeviceVerifier {
     private static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.VERBOSE);
     private static final int MAX_PATCH_AGE_MONTHS = 12;
 
+    /**
+     * Optional requirements bundle parameter key for {@code TYPE_PUBLIC_KEY} and
+     * {@code TYPE_CHALLENGE}.
+     *
+     * <p>
+     * This is NOT a part of the AVF API surface (neither public SDK nor internal to the
+     * system_server) and should really only be used by the CompanionDeviceManagerService (which
+     * duplicates the value rather than referencing it directly here).
+     */
+    private static final String PARAM_OWNED_BY_SYSTEM = "android.key_owned_by_system";
+
+    private static final String ANDROID_SYSTEM_PACKAGE_NAME = "AndroidSystem";
+    private static final Set<String> ANDROID_SYSTEM_PACKAGE_NAME_SET =
+            Collections.singleton(ANDROID_SYSTEM_PACKAGE_NAME);
+
     private final Context mContext;
     private final Set<TrustAnchor> mTrustAnchors;
     private final boolean mRevocationEnabled;
@@ -170,7 +185,7 @@ class AttestationVerificationPeerDeviceVerifier {
             final var leafCertificate = certificateChain.get(0);
             final var attestationExtension = fromCertificate(leafCertificate);
 
-            // Second: verify if the attestation satisfies the "peer device" porfile.
+            // Second: verify if the attestation satisfies the "peer device" profile.
             if (!checkAttestationForPeerDeviceProfile(attestationExtension)) {
                 return RESULT_FAILURE;
             }
@@ -220,8 +235,8 @@ class AttestationVerificationPeerDeviceVerifier {
             return false;
         }
 
-        if (requirements.size() != 1) {
-            debugVerboseLog("Requirements does not contain exactly 1 key.");
+        if (requirements.size() < 1) {
+            debugVerboseLog("At least 1 requirement is required.");
             return false;
         }
 
@@ -293,6 +308,7 @@ class AttestationVerificationPeerDeviceVerifier {
             @NonNull AndroidKeystoreAttestationVerificationAttributes attestationAttributes,
             @LocalBindingType int localBindingType,
             @NonNull Bundle requirements) {
+        // First: check non-optional (for the given local binding type) requirements.
         switch (localBindingType) {
             case TYPE_PUBLIC_KEY:
                 // Verify leaf public key matches provided public key.
@@ -319,6 +335,24 @@ class AttestationVerificationPeerDeviceVerifier {
             default:
                 throw new IllegalArgumentException("Unsupported local binding type "
                         + localBindingTypeToString(localBindingType));
+        }
+
+        // Second: check specified optional requirements.
+        if (requirements.containsKey(PARAM_OWNED_BY_SYSTEM)) {
+            if (requirements.getBoolean(PARAM_OWNED_BY_SYSTEM)) {
+                // Verify key is owned by the system.
+                final boolean ownedBySystem = checkOwnedBySystem(
+                        leafCertificate, attestationAttributes);
+                if (!ownedBySystem) {
+                    debugVerboseLog("Certificate public key is not owned by the AndroidSystem.");
+                    return false;
+                }
+            } else {
+                throw new IllegalArgumentException("The value of the requirement key "
+                        + PARAM_OWNED_BY_SYSTEM
+                        + " cannot be false. You can remove the key if you don't want to verify "
+                        + "it.");
+            }
         }
 
         return true;
@@ -405,6 +439,18 @@ class AttestationVerificationPeerDeviceVerifier {
             @NonNull byte[] expectedChallenge) {
         final byte[] challenge = attestationAttributes.getAttestationChallenge().toByteArray();
         return Arrays.equals(challenge, expectedChallenge);
+    }
+
+    private boolean checkOwnedBySystem(@NonNull X509Certificate certificate,
+            @NonNull AndroidKeystoreAttestationVerificationAttributes attestationAttributes) {
+        final Set<String> ownerPackages =
+                attestationAttributes.getApplicationPackageNameVersion().keySet();
+        if (!ANDROID_SYSTEM_PACKAGE_NAME_SET.equals(ownerPackages)) {
+            debugVerboseLog("Owner is not system, packages=" + ownerPackages);
+            return false;
+        }
+
+        return true;
     }
 
     /**

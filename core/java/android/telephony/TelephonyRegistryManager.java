@@ -1113,6 +1113,11 @@ public class TelephonyRegistryManager {
             eventList.add(TelephonyCallback.EVENT_MEDIA_QUALITY_STATUS_CHANGED);
         }
 
+        if (telephonyCallback instanceof TelephonyCallback.EmergencyCallbackModeListener) {
+            eventList.add(TelephonyCallback.EVENT_EMERGENCY_CALLBACK_MODE_CHANGED);
+        }
+
+
         return eventList;
     }
 
@@ -1537,6 +1542,45 @@ public class TelephonyRegistryManager {
             sRegistry.notifyCarrierConfigChanged(slotIndex, subId, carrierId, specificCarrierId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify Callback Mode has been started.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param type for callback mode entry.
+     *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     */
+    public void notifyCallBackModeStarted(int phoneId, int subId,
+            @TelephonyManager.EmergencyCallbackModeType int type) {
+        try {
+            Log.d(TAG, "notifyCallBackModeStarted:type=" + type);
+            sRegistry.notifyCallbackModeStarted(phoneId, subId, type);
+        } catch (RemoteException ex) {
+            // system process is dead
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify Callback Mode has been stopped.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param type for callback mode entry.
+     *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     * @param reason for changing callback mode.
+     *             See {@link TelephonyManager.EmergencyCallbackModeStopReason}.
+     */
+    public void notifyCallbackModeStopped(int phoneId, int subId,
+            @TelephonyManager.EmergencyCallbackModeType int type,
+            @TelephonyManager.EmergencyCallbackModeStopReason int reason) {
+        try {
+            Log.d(TAG, "notifyCallbackModeStopped:type=" + type + ", reason=" + reason);
+            sRegistry.notifyCallbackModeStopped(phoneId, subId, type, reason);
+        } catch (RemoteException ex) {
+            // system process is dead
+            throw ex.rethrowFromSystemServer();
         }
     }
 }

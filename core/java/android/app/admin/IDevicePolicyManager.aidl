@@ -91,7 +91,7 @@ interface IDevicePolicyManager {
     void setPasswordHistoryLength(in ComponentName who, int length, boolean parent);
     int getPasswordHistoryLength(in ComponentName who, int userHandle, boolean parent);
 
-    void setPasswordExpirationTimeout(in ComponentName who, long expiration, boolean parent);
+    void setPasswordExpirationTimeout(in ComponentName who, String callerPackageName, long expiration, boolean parent);
     long getPasswordExpirationTimeout(in ComponentName who, int userHandle, boolean parent);
 
     long getPasswordExpiration(in ComponentName who, int userHandle, boolean parent);
@@ -100,22 +100,23 @@ interface IDevicePolicyManager {
     boolean isActivePasswordSufficientForDeviceRequirement();
     boolean isPasswordSufficientAfterProfileUnification(int userHandle, int profileUser);
     int getPasswordComplexity(boolean parent);
-    void setRequiredPasswordComplexity(int passwordComplexity, boolean parent);
+    void setRequiredPasswordComplexity(String callerPackageName, int passwordComplexity, boolean parent);
     int getRequiredPasswordComplexity(boolean parent);
     int getAggregatedPasswordComplexityForUser(int userId, boolean deviceWideOnly);
     boolean isUsingUnifiedPassword(in ComponentName admin);
     int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);
 
-    void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num, boolean parent);
+    void setMaximumFailedPasswordsForWipe(
+        in ComponentName admin, String callerPackageName, int num, boolean parent);
     int getMaximumFailedPasswordsForWipe(in ComponentName admin, int userHandle, boolean parent);
 
     boolean resetPassword(String password, int flags);
 
-    void setMaximumTimeToLock(in ComponentName who, long timeMs, boolean parent);
+    void setMaximumTimeToLock(in ComponentName who, String callerPackageName, long timeMs, boolean parent);
     long getMaximumTimeToLock(in ComponentName who, int userHandle, boolean parent);
 
-    void setRequiredStrongAuthTimeout(in ComponentName who, long timeMs, boolean parent);
+    void setRequiredStrongAuthTimeout(in ComponentName who, String callerPackageName, long timeMs, boolean parent);
     long getRequiredStrongAuthTimeout(in ComponentName who, int userId, boolean parent);
 
     void lockNow(int flags, boolean parent);
@@ -123,9 +124,9 @@ interface IDevicePolicyManager {
     /**
     * @param factoryReset only applicable when `targetSdk >= U`, either tries to factoryReset/fail or removeUser/fail otherwise
     **/
-    void wipeDataWithReason(int flags, String wipeReasonForUser, boolean parent, boolean factoryReset);
+    void wipeDataWithReason(String callerPackageName, int flags, String wipeReasonForUser, boolean parent, boolean factoryReset);
 
-    void setFactoryResetProtectionPolicy(in ComponentName who, in FactoryResetProtectionPolicy policy);
+    void setFactoryResetProtectionPolicy(in ComponentName who, String callerPackageName, in FactoryResetProtectionPolicy policy);
     FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(in ComponentName who);
     boolean isFactoryResetProtectionPolicySupported();
 
@@ -142,9 +143,10 @@ interface IDevicePolicyManager {
     boolean requestBugreport(in ComponentName who);
 
     void setCameraDisabled(in ComponentName who, String callerPackageName, boolean disabled, boolean parent);
-    boolean getCameraDisabled(in ComponentName who, int userHandle, boolean parent);
+    boolean getCameraDisabled(in ComponentName who, String callerPackageName, int userHandle, boolean parent);
 
-    void setScreenCaptureDisabled(in ComponentName who, boolean disabled, boolean parent);
+    void setScreenCaptureDisabled(
+        in ComponentName who, String callerPackageName, boolean disabled, boolean parent);
     boolean getScreenCaptureDisabled(in ComponentName who, int userHandle, boolean parent);
 
     void setNearbyNotificationStreamingPolicy(int policy);
@@ -153,7 +155,7 @@ interface IDevicePolicyManager {
     void setNearbyAppStreamingPolicy(int policy);
     int getNearbyAppStreamingPolicy(int userId);
 
-    void setKeyguardDisabledFeatures(in ComponentName who, int which, boolean parent);
+    void setKeyguardDisabledFeatures(in ComponentName who, String callerPackageName, int which, boolean parent);
     int getKeyguardDisabledFeatures(in ComponentName who, int userHandle, boolean parent);
 
     void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing, int userHandle);
@@ -233,10 +235,11 @@ interface IDevicePolicyManager {
     boolean isAlwaysOnVpnLockdownEnabledForUser(int userHandle);
     List<String> getAlwaysOnVpnLockdownAllowlist(in ComponentName who);
 
-    void addPersistentPreferredActivity(in ComponentName admin, in IntentFilter filter, in ComponentName activity);
-    void clearPackagePersistentPreferredActivities(in ComponentName admin, String packageName);
+    void addPersistentPreferredActivity(in ComponentName admin, String callerPackageName, in IntentFilter filter, in ComponentName activity);
+    void clearPackagePersistentPreferredActivities(in ComponentName admin, String callerPackageName, String packageName);
 
-    void setDefaultSmsApplication(in ComponentName admin, String packageName, boolean parent);
+    void setDefaultSmsApplication(in ComponentName admin, String callerPackageName, String packageName, boolean parent);
+    void setDefaultDialerApplication(String packageName);
 
     void setApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName, in Bundle settings);
     Bundle getApplicationRestrictions(in ComponentName who, in String callerPackage, in String packageName);
@@ -252,16 +255,16 @@ interface IDevicePolicyManager {
     Bundle getUserRestrictions(in ComponentName who, in String callerPackage, boolean parent);
     Bundle getUserRestrictionsGlobally(in String callerPackage);
 
-    void addCrossProfileIntentFilter(in ComponentName admin, in IntentFilter filter, int flags);
-    void clearCrossProfileIntentFilters(in ComponentName admin);
+    void addCrossProfileIntentFilter(in ComponentName admin, String callerPackageName, in IntentFilter filter, int flags);
+    void clearCrossProfileIntentFilters(in ComponentName admin, String callerPackageName);
 
     boolean setPermittedAccessibilityServices(in ComponentName admin,in List<String> packageList);
     List<String> getPermittedAccessibilityServices(in ComponentName admin);
     List<String> getPermittedAccessibilityServicesForUser(int userId);
     boolean isAccessibilityServicePermittedByAdmin(in ComponentName admin, String packageName, int userId);
 
-    boolean setPermittedInputMethods(in ComponentName admin,in List<String> packageList, boolean parent);
-    List<String> getPermittedInputMethods(in ComponentName admin, boolean parent);
+    boolean setPermittedInputMethods(in ComponentName admin, String callerPackageName, in List<String> packageList, boolean parent);
+    List<String> getPermittedInputMethods(in ComponentName admin, String callerPackageName, boolean parent);
     List<String> getPermittedInputMethodsAsUser(int userId);
     boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId, boolean parent);
 
@@ -290,9 +293,9 @@ interface IDevicePolicyManager {
     int enableSystemAppWithIntent(in ComponentName admin, in String callerPackage, in Intent intent);
     boolean installExistingPackage(in ComponentName admin, in String callerPackage, in String packageName);
 
-    void setAccountManagementDisabled(in ComponentName who, in String accountType, in boolean disabled, in boolean parent);
-    String[] getAccountTypesWithManagementDisabled();
-    String[] getAccountTypesWithManagementDisabledAsUser(int userId, in boolean parent);
+    void setAccountManagementDisabled(in ComponentName who, String callerPackageName, in String accountType, in boolean disabled, in boolean parent);
+    String[] getAccountTypesWithManagementDisabled(String callerPackageName);
+    String[] getAccountTypesWithManagementDisabledAsUser(int userId, String callerPackageName, in boolean parent);
 
     void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled);
     boolean isSecondaryLockscreenEnabled(in UserHandle userHandle);
@@ -301,24 +304,24 @@ interface IDevicePolicyManager {
             in List<PreferentialNetworkServiceConfig> preferentialNetworkServiceConfigs);
     List<PreferentialNetworkServiceConfig> getPreferentialNetworkServiceConfigs();
 
-    void setLockTaskPackages(in ComponentName who, in String[] packages);
-    String[] getLockTaskPackages(in ComponentName who);
+    void setLockTaskPackages(in ComponentName who, String callerPackageName, in String[] packages);
+    String[] getLockTaskPackages(in ComponentName who, String callerPackageName);
     boolean isLockTaskPermitted(in String pkg);
 
-    void setLockTaskFeatures(in ComponentName who, int flags);
-    int getLockTaskFeatures(in ComponentName who);
+    void setLockTaskFeatures(in ComponentName who, String callerPackageName, int flags);
+    int getLockTaskFeatures(in ComponentName who, String callerPackageName);
 
     void setGlobalSetting(in ComponentName who, in String setting, in String value);
     void setSystemSetting(in ComponentName who, in String setting, in String value);
     void setSecureSetting(in ComponentName who, in String setting, in String value);
 
-    void setConfiguredNetworksLockdownState(in ComponentName who, boolean lockdown);
+    void setConfiguredNetworksLockdownState(in ComponentName who, String callerPackageName, boolean lockdown);
     boolean hasLockdownAdminConfiguredNetworks(in ComponentName who);
 
     void setLocationEnabled(in ComponentName who, boolean locationEnabled);
 
-    boolean setTime(in ComponentName who, long millis);
-    boolean setTimeZone(in ComponentName who, String timeZone);
+    boolean setTime(in ComponentName who, String callerPackageName, long millis);
+    boolean setTimeZone(in ComponentName who, String callerPackageName, String timeZone);
 
     void setMasterVolumeMuted(in ComponentName admin, boolean on);
     boolean isMasterVolumeMuted(in ComponentName admin);
@@ -326,7 +329,7 @@ interface IDevicePolicyManager {
     void notifyLockTaskModeChanged(boolean isEnabled, String pkg, int userId);
 
     void setUninstallBlocked(in ComponentName admin, in String callerPackage, in String packageName, boolean uninstallBlocked);
-    boolean isUninstallBlocked(in ComponentName admin, in String packageName);
+    boolean isUninstallBlocked(in String packageName);
 
     void setCrossProfileCallerIdDisabled(in ComponentName who, boolean disabled);
     boolean getCrossProfileCallerIdDisabled(in ComponentName who);
@@ -351,23 +354,23 @@ interface IDevicePolicyManager {
     boolean getBluetoothContactSharingDisabled(in ComponentName who);
     boolean getBluetoothContactSharingDisabledForUser(int userId);
 
-    void setTrustAgentConfiguration(in ComponentName admin, in ComponentName agent,
-            in PersistableBundle args, boolean parent);
+    void setTrustAgentConfiguration(in ComponentName admin, String callerPackageName,
+            in ComponentName agent, in PersistableBundle args, boolean parent);
     List<PersistableBundle> getTrustAgentConfiguration(in ComponentName admin,
             in ComponentName agent, int userId, boolean parent);
 
-    boolean addCrossProfileWidgetProvider(in ComponentName admin, String packageName);
-    boolean removeCrossProfileWidgetProvider(in ComponentName admin, String packageName);
-    List<String> getCrossProfileWidgetProviders(in ComponentName admin);
+    boolean addCrossProfileWidgetProvider(in ComponentName admin, String callerPackageName, String packageName);
+    boolean removeCrossProfileWidgetProvider(in ComponentName admin, String callerPackageName, String packageName);
+    List<String> getCrossProfileWidgetProviders(in ComponentName admin, String callerPackageName);
 
     void setAutoTimeRequired(in ComponentName who, boolean required);
     boolean getAutoTimeRequired();
 
-    void setAutoTimeEnabled(in ComponentName who, boolean enabled);
-    boolean getAutoTimeEnabled(in ComponentName who);
+    void setAutoTimeEnabled(in ComponentName who, String callerPackageName, boolean enabled);
+    boolean getAutoTimeEnabled(in ComponentName who, String callerPackageName);
 
-    void setAutoTimeZoneEnabled(in ComponentName who, boolean enabled);
-    boolean getAutoTimeZoneEnabled(in ComponentName who);
+    void setAutoTimeZoneEnabled(in ComponentName who, String callerPackageName, boolean enabled);
+    boolean getAutoTimeZoneEnabled(in ComponentName who, String callerPackageName);
 
     void setForceEphemeralUsers(in ComponentName who, boolean forceEpehemeralUsers);
     boolean getForceEphemeralUsers(in ComponentName who);
@@ -376,12 +379,12 @@ interface IDevicePolicyManager {
 
     void setUserIcon(in ComponentName admin, in Bitmap icon);
 
-    void setSystemUpdatePolicy(in ComponentName who, in SystemUpdatePolicy policy);
+    void setSystemUpdatePolicy(in ComponentName who, String callerPackageName, in SystemUpdatePolicy policy);
     SystemUpdatePolicy getSystemUpdatePolicy();
     void clearSystemUpdatePolicyFreezePeriodRecord();
 
     boolean setKeyguardDisabled(in ComponentName admin, boolean disabled);
-    boolean setStatusBarDisabled(in ComponentName who, boolean disabled);
+    boolean setStatusBarDisabled(in ComponentName who, String callerPackageName, boolean disabled);
     boolean isStatusBarDisabled(in String callerPackage);
     boolean getDoNotAskCredentialsOnBoot();
 
@@ -398,11 +401,11 @@ interface IDevicePolicyManager {
     void setKeepUninstalledPackages(in ComponentName admin, in String callerPackage, in List<String> packageList);
     List<String> getKeepUninstalledPackages(in ComponentName admin, in String callerPackage);
     boolean isManagedProfile(in ComponentName admin);
-    String getWifiMacAddress(in ComponentName admin);
+    String getWifiMacAddress(in ComponentName admin, String callerPackageName);
     void reboot(in ComponentName admin);
 
-    void setShortSupportMessage(in ComponentName admin, in CharSequence message);
-    CharSequence getShortSupportMessage(in ComponentName admin);
+    void setShortSupportMessage(in ComponentName admin, String callerPackageName, in CharSequence message);
+    CharSequence getShortSupportMessage(in ComponentName admin, String callerPackageName);
     void setLongSupportMessage(in ComponentName admin, in CharSequence message);
     CharSequence getLongSupportMessage(in ComponentName admin);
 
@@ -415,8 +418,8 @@ interface IDevicePolicyManager {
     int getOrganizationColor(in ComponentName admin);
     int getOrganizationColorForUser(int userHandle);
 
-    void setOrganizationName(in ComponentName admin, in CharSequence title);
-    CharSequence getOrganizationName(in ComponentName admin);
+    void setOrganizationName(in ComponentName admin, String callerPackageName, in CharSequence title);
+    CharSequence getOrganizationName(in ComponentName admin, String callerPackageName);
     CharSequence getDeviceOwnerOrganizationName();
     CharSequence getOrganizationNameForUser(int userHandle);
 
@@ -461,10 +464,10 @@ interface IDevicePolicyManager {
     long getLastBugReportRequestTime();
     long getLastNetworkLogRetrievalTime();
 
-    boolean setResetPasswordToken(in ComponentName admin, in byte[] token);
-    boolean clearResetPasswordToken(in ComponentName admin);
-    boolean isResetPasswordTokenActive(in ComponentName admin);
-    boolean resetPasswordWithToken(in ComponentName admin, String password, in byte[] token, int flags);
+    boolean setResetPasswordToken(in ComponentName admin, String callerPackageName, in byte[] token);
+    boolean clearResetPasswordToken(in ComponentName admin, String callerPackageName);
+    boolean isResetPasswordTokenActive(in ComponentName admin, String callerPackageName);
+    boolean resetPasswordWithToken(in ComponentName admin, String callerPackageName, String password, in byte[] token, int flags);
 
     boolean isCurrentInputMethodSetByOwner();
     StringParceledListSlice getOwnerInstalledCaCerts(in UserHandle user);
@@ -502,7 +505,7 @@ interface IDevicePolicyManager {
 
     void setProfileOwnerOnOrganizationOwnedDevice(in ComponentName who, int userId, boolean isProfileOwnerOnOrganizationOwnedDevice);
 
-    void installUpdateFromFile(in ComponentName admin, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
+    void installUpdateFromFile(in ComponentName admin, String callerPackageName, in ParcelFileDescriptor updateFileDescriptor, in StartInstallingUpdateCallback listener);
 
     void setCrossProfileCalendarPackages(in ComponentName admin, in List<String> packageNames);
     List<String> getCrossProfileCalendarPackages(in ComponentName admin);
@@ -525,11 +528,11 @@ interface IDevicePolicyManager {
     boolean setKeyGrantToWifiAuth(String callerPackage, String alias, boolean hasGrant);
     boolean isKeyPairGrantedToWifiAuth(String callerPackage, String alias);
 
-    void setUserControlDisabledPackages(in ComponentName admin, in List<String> packages);
+    void setUserControlDisabledPackages(in ComponentName admin, String callerPackageName, in List<String> packages);
 
-    List<String> getUserControlDisabledPackages(in ComponentName admin);
+    List<String> getUserControlDisabledPackages(in ComponentName admin, String callerPackageName);
 
-    void setCommonCriteriaModeEnabled(in ComponentName admin, boolean enabled);
+    void setCommonCriteriaModeEnabled(in ComponentName admin, String callerPackageName, boolean enabled);
     boolean isCommonCriteriaModeEnabled(in ComponentName admin);
 
     int getPersonalAppsSuspendedReasons(in ComponentName admin);
@@ -565,10 +568,10 @@ interface IDevicePolicyManager {
     boolean isUsbDataSignalingEnabledForUser(int userId);
     boolean canUsbDataSignalingBeDisabled();
 
-    void setMinimumRequiredWifiSecurityLevel(int level);
+    void setMinimumRequiredWifiSecurityLevel(String callerPackageName, int level);
     int getMinimumRequiredWifiSecurityLevel();
 
-    void setWifiSsidPolicy(in WifiSsidPolicy policy);
+    void setWifiSsidPolicy(String callerPackageName, in WifiSsidPolicy policy);
     WifiSsidPolicy getWifiSsidPolicy();
 
     List<UserHandle> listForegroundAffiliatedUsers();
@@ -591,8 +594,8 @@ interface IDevicePolicyManager {
     void setApplicationExemptions(String packageName, in int[]exemptions);
     int[] getApplicationExemptions(String packageName);
 
-    void setMtePolicy(int flag);
-    int getMtePolicy();
+    void setMtePolicy(int flag, String callerPackageName);
+    int getMtePolicy(String callerPackageName);
 
     void setManagedSubscriptionsPolicy(in ManagedSubscriptionsPolicy policy);
     ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy();

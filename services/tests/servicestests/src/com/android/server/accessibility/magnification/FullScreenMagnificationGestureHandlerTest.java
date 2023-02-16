@@ -163,9 +163,13 @@ public class FullScreenMagnificationGestureHandlerTest {
         when(mockController.newValueAnimator()).thenReturn(new ValueAnimator());
         when(mockController.getAnimationDuration()).thenReturn(1000L);
         when(mockWindowManager.setMagnificationCallbacks(eq(DISPLAY_0), any())).thenReturn(true);
-        mFullScreenMagnificationController = new FullScreenMagnificationController(mockController,
-                new Object(), mMagnificationInfoChangedCallback,
-                new MagnificationScaleProvider(mContext)) {
+        mFullScreenMagnificationController = new FullScreenMagnificationController(
+                mockController,
+                new Object(),
+                mMagnificationInfoChangedCallback,
+                new MagnificationScaleProvider(mContext),
+                () -> null
+        ) {
             @Override
             public boolean magnificationRegionContains(int displayId, float x, float y) {
                 return true;

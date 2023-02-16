@@ -34,7 +34,7 @@ public class DisplayControl {
     private static native void nativeOverrideHdrTypes(IBinder displayToken, int[] modes);
     private static native long[] nativeGetPhysicalDisplayIds();
     private static native IBinder nativeGetPhysicalDisplayToken(long physicalDisplayId);
-    private static native void nativeSetHdrConversionMode(int conversionMode,
+    private static native int nativeSetHdrConversionMode(int conversionMode,
             int preferredHdrOutputType, int[] autoHdrTypes, int autoHdrTypesLength);
     private static native int[] nativeGetSupportedHdrOutputTypes();
     private static native boolean nativeGetHdrOutputConversionSupport();
@@ -105,15 +105,22 @@ public class DisplayControl {
     }
 
     /**
+     * Sets the HDR conversion mode for the device.
+     *
+     * Returns the system preferred Hdr output type nn case when HDR conversion mode is
+     * {@link android.hardware.display.HdrConversionMode#HDR_CONVERSION_SYSTEM}.
+     * Returns Hdr::INVALID in other cases.
      * @hide
      */
-    public static void setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
+    public static int setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
             int[] autoHdrTypes) {
         int length = autoHdrTypes != null ? autoHdrTypes.length : 0;
-        nativeSetHdrConversionMode(conversionMode, preferredHdrOutputType, autoHdrTypes, length);
+        return nativeSetHdrConversionMode(
+                conversionMode, preferredHdrOutputType, autoHdrTypes, length);
     }
 
     /**
+     * Returns the HDR output types supported by the device.
      * @hide
      */
     public static @Display.HdrCapabilities.HdrType int[] getSupportedHdrOutputTypes() {
@@ -121,6 +128,7 @@ public class DisplayControl {
     }
 
     /**
+     * Returns whether the HDR output conversion is supported by the device.
      * @hide
      */
     public static boolean getHdrOutputConversionSupport() {

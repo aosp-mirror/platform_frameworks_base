@@ -23,6 +23,8 @@ import android.os.Parcelable;
 
 import com.android.internal.util.AnnotationValidations;
 
+import java.util.Objects;
+
 /**
  * Request for getting user's credential from a given credential provider.
  *
@@ -43,8 +45,10 @@ public final class GetCredentialRequest implements Parcelable {
 
     public GetCredentialRequest(@NonNull CallingAppInfo callingAppInfo,
             @NonNull CredentialOption credentialOption) {
-        this.mCallingAppInfo = callingAppInfo;
-        this.mCredentialOption = credentialOption;
+        this.mCallingAppInfo = Objects.requireNonNull(callingAppInfo,
+                "callingAppInfo must not be null");
+        this.mCredentialOption = Objects.requireNonNull(credentialOption,
+                "credentialOption must not be null");
     }
 
     private GetCredentialRequest(@NonNull Parcel in) {

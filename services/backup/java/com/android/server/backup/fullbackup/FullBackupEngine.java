@@ -228,6 +228,9 @@ public class FullBackupEngine {
             if (MORE_DEBUG) {
                 Slog.v(TAG, "preflight returned " + result);
             }
+
+            // Clear any logs generated during preflight
+            mAgent.clearBackupRestoreEventLogger();
             return result;
         } else {
             Slog.w(TAG, "Unable to bind to full agent for " + mPkg.packageName);

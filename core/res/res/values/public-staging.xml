@@ -148,6 +148,8 @@
     <public name="config_defaultNotes" />
     <!-- @hide @SystemApi -->
     <public name="config_systemFinancedDeviceController" />
+    <!-- @hide @SystemApi -->
+    <public name="config_systemCallStreaming" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01ca0000">
@@ -187,15 +189,15 @@
     <public name="system_error_container_light" />
     <public name="system_on_error_container_light" />
     <public name="system_primary_fixed_light" />
-    <public name="system_primary_fixed_darker_light" />
+    <public name="system_primary_fixed_dim_light" />
     <public name="system_on_primary_fixed_light" />
     <public name="system_on_primary_fixed_variant_light" />
     <public name="system_secondary_fixed_light" />
-    <public name="system_secondary_fixed_darker_light" />
+    <public name="system_secondary_fixed_dim_light" />
     <public name="system_on_secondary_fixed_light" />
     <public name="system_on_secondary_fixed_variant_light" />
     <public name="system_tertiary_fixed_light" />
-    <public name="system_tertiary_fixed_darker_light" />
+    <public name="system_tertiary_fixed_dim_light" />
     <public name="system_on_tertiary_fixed_light" />
     <public name="system_on_tertiary_fixed_variant_light" />
     <public name="system_control_activated_light" />
@@ -242,15 +244,15 @@
     <public name="system_error_container_dark"/>
     <public name="system_on_error_container_dark"/>
     <public name="system_primary_fixed_dark"/>
-    <public name="system_primary_fixed_darker_dark"/>
+    <public name="system_primary_fixed_dim_dark"/>
     <public name="system_on_primary_fixed_dark"/>
     <public name="system_on_primary_fixed_variant_dark"/>
     <public name="system_secondary_fixed_dark"/>
-    <public name="system_secondary_fixed_darker_dark"/>
+    <public name="system_secondary_fixed_dim_dark"/>
     <public name="system_on_secondary_fixed_dark"/>
     <public name="system_on_secondary_fixed_variant_dark"/>
     <public name="system_tertiary_fixed_dark"/>
-    <public name="system_tertiary_fixed_darker_dark"/>
+    <public name="system_tertiary_fixed_dim_dark"/>
     <public name="system_on_tertiary_fixed_dark"/>
     <public name="system_on_tertiary_fixed_variant_dark"/>
     <public name="system_control_activated_dark"/>

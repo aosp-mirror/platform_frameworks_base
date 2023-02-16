@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -85,6 +86,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var transitionRepository: KeyguardTransitionRepository
     @Mock private lateinit var commandQueue: CommandQueue
     private lateinit var repository: FakeKeyguardRepository
+    private lateinit var bouncerRepository: FakeKeyguardBouncerRepository
     @Mock private lateinit var smallLogBuffer: LogBuffer
     @Mock private lateinit var largeLogBuffer: LogBuffer
     private lateinit var underTest: ClockEventController
@@ -103,11 +105,15 @@ class ClockEventControllerTest : SysuiTestCase() {
         whenever(largeClockEvents.tickRate).thenReturn(ClockTickRate.PER_MINUTE)
 
         repository = FakeKeyguardRepository()
+        bouncerRepository = FakeKeyguardBouncerRepository()
 
         underTest = ClockEventController(
-            KeyguardInteractor(repository = repository,
-                    commandQueue = commandQueue,
-                    featureFlags = featureFlags),
+            KeyguardInteractor(
+                repository = repository,
+                commandQueue = commandQueue,
+                featureFlags = featureFlags,
+                bouncerRepository = bouncerRepository,
+            ),
             KeyguardTransitionInteractor(repository = transitionRepository),
             broadcastDispatcher,
             batteryController,

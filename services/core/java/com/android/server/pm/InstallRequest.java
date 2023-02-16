@@ -93,6 +93,7 @@ final class InstallRequest {
     @Nullable
     private AndroidPackage mPkg;
     private int mReturnCode;
+    private int mInternalErrorCode;
     @Nullable
     private String mReturnMsg;
     // The set of packages consuming this shared library or null if no consumers exist.
@@ -225,6 +226,10 @@ final class InstallRequest {
 
     public int getReturnCode() {
         return mReturnCode;
+    }
+
+    public int getInternalErrorCode() {
+        return mInternalErrorCode;
     }
 
     @Nullable
@@ -635,7 +640,12 @@ final class InstallRequest {
         }
     }
 
+    public void setError(PackageManagerException e) {
+        setError(null, e);
+    }
+
     public void setError(String msg, PackageManagerException e) {
+        mInternalErrorCode = e.internalErrorCode;
         mReturnCode = e.error;
         setReturnMessage(ExceptionUtils.getCompleteMessage(msg, e));
         Slog.w(TAG, msg, e);

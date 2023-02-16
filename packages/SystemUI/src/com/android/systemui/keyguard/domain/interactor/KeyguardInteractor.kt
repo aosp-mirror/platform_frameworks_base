@@ -24,6 +24,7 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
@@ -56,6 +57,7 @@ constructor(
     private val repository: KeyguardRepository,
     private val commandQueue: CommandQueue,
     featureFlags: FeatureFlags,
+    bouncerRepository: KeyguardBouncerRepository,
 ) {
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
@@ -121,8 +123,10 @@ constructor(
     val isKeyguardOccluded: Flow<Boolean> = repository.isKeyguardOccluded
     /** Whether the keyguard is going away. */
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
-    /** Whether the bouncer is showing or not. */
-    val isBouncerShowing: Flow<Boolean> = repository.isBouncerShowing
+    /** Whether the primary bouncer is showing or not. */
+    val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerVisible
+    /** Whether the alternate bouncer is showing or not. */
+    val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
     /** The device wake/sleep state */
     val wakefulnessModel: Flow<WakefulnessModel> = repository.wakefulness
     /** Observable for the [StatusBarState] */
@@ -142,12 +146,12 @@ constructor(
         if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
             combine(
                     isKeyguardVisible,
-                    repository.isBouncerShowing,
+                    bouncerRepository.primaryBouncerVisible,
                     onCameraLaunchDetected,
-                ) { isKeyguardVisible, isBouncerShowing, cameraLaunchEvent ->
+                ) { isKeyguardVisible, isPrimaryBouncerShowing, cameraLaunchEvent ->
                     when {
                         isKeyguardVisible -> false
-                        isBouncerShowing -> false
+                        isPrimaryBouncerShowing -> false
                         else -> cameraLaunchEvent == CameraLaunchSourceModel.POWER_DOUBLE_TAP
                     }
                 }

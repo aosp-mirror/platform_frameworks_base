@@ -1346,9 +1346,9 @@ class MediaDataManager(
         if (keyguardUpdateMonitor.isUserInLockdown(removed.userId)) {
             logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
         } else if (useMediaResumption && removed.resumeAction != null && removed.isLocalSession()) {
-            convertToResumePlayer(removed)
+            convertToResumePlayer(key, removed)
         } else if (mediaFlags.isRetainingPlayersEnabled()) {
-            handlePossibleRemoval(removed, notificationRemoved = true)
+            handlePossibleRemoval(key, removed, notificationRemoved = true)
         } else {
             notifyMediaDataRemoved(key)
             logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
@@ -1362,7 +1362,7 @@ class MediaDataManager(
         val entry = mediaEntries.remove(key) ?: return
         // Clear token since the session is no longer valid
         val updated = entry.copy(token = null)
-        handlePossibleRemoval(updated)
+        handlePossibleRemoval(key, updated)
     }
 
     /**
@@ -1371,8 +1371,11 @@ class MediaDataManager(
      * if it was removed before becoming inactive. (Assumes that [removed] was removed from
      * [mediaEntries] before this function was called)
      */
-    private fun handlePossibleRemoval(removed: MediaData, notificationRemoved: Boolean = false) {
-        val key = removed.notificationKey!!
+    private fun handlePossibleRemoval(
+        key: String,
+        removed: MediaData,
+        notificationRemoved: Boolean = false
+    ) {
         val hasSession = removed.token != null
         if (hasSession && removed.semanticActions != null) {
             // The app was using session actions, and the session is still valid: keep player
@@ -1398,13 +1401,12 @@ class MediaDataManager(
                         "($hasSession) gone for inactive player $key"
                 )
             }
-            convertToResumePlayer(removed)
+            convertToResumePlayer(key, removed)
         }
     }
 
     /** Set the given [MediaData] as a resume state player and notify listeners */
-    private fun convertToResumePlayer(data: MediaData) {
-        val key = data.notificationKey!!
+    private fun convertToResumePlayer(key: String, data: MediaData) {
         if (DEBUG) Log.d(TAG, "Converting $key to resume")
         // Move to resume key (aka package name) if that key doesn't already exist.
         val resumeAction = data.resumeAction?.let { getResumeMediaAction(it) }

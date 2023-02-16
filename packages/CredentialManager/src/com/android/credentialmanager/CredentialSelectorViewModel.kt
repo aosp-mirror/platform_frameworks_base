@@ -115,6 +115,11 @@ class CredentialSelectorViewModel(
         }
     }
 
+    fun onLastLockedAuthEntryNotFoundError() {
+        Log.d(Constants.LOG_TAG, "Unable to find the last unlocked entry")
+        onInternalError()
+    }
+
     private fun onInternalError() {
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
         credManRepo.onParsingFailureCancel()

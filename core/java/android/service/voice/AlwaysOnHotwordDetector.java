@@ -46,7 +46,9 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
@@ -71,6 +73,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * A class that lets a VoiceInteractionService implementation interact with
@@ -290,6 +293,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     private IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
     private final SoundTriggerListener mInternalCallback;
     private final Callback mExternalCallback;
+    private final Executor mExternalExecutor;
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
     private final int mTargetSdkVersion;
@@ -761,17 +765,19 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
      *
      * @hide
      */
-    public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
+    public AlwaysOnHotwordDetector(String text, Locale locale, Executor executor, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
             boolean supportSandboxedDetectionService) {
-        super(modelManagementService, callback);
+        super(modelManagementService, executor, callback);
 
-        mHandler = new MyHandler();
+        mHandler = new MyHandler(Looper.getMainLooper());
         mText = text;
         mLocale = locale;
         mKeyphraseEnrollmentInfo = keyphraseEnrollmentInfo;
         mExternalCallback = callback;
+        mExternalExecutor = executor != null ? executor : new HandlerExecutor(
+                new Handler(Looper.myLooper()));
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
         mTargetSdkVersion = targetSdkVersion;
@@ -1673,6 +1679,10 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     }
 
     class MyHandler extends Handler {
+        MyHandler(@NonNull Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             synchronized (mLock) {
@@ -1681,35 +1691,39 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                     return;
                 }
             }
-
-            switch (msg.what) {
-                case MSG_AVAILABILITY_CHANGED:
-                    mExternalCallback.onAvailabilityChanged(msg.arg1);
-                    break;
-                case MSG_HOTWORD_DETECTED:
-                    mExternalCallback.onDetected((EventPayload) msg.obj);
-                    break;
-                case MSG_DETECTION_ERROR:
-                    mExternalCallback.onError();
-                    break;
-                case MSG_DETECTION_PAUSE:
-                    mExternalCallback.onRecognitionPaused();
-                    break;
-                case MSG_DETECTION_RESUME:
-                    mExternalCallback.onRecognitionResumed();
-                    break;
-                case MSG_HOTWORD_REJECTED:
-                    mExternalCallback.onRejected((HotwordRejectedResult) msg.obj);
-                    break;
-                case MSG_HOTWORD_STATUS_REPORTED:
-                    mExternalCallback.onHotwordDetectionServiceInitialized(msg.arg1);
-                    break;
-                case MSG_PROCESS_RESTARTED:
-                    mExternalCallback.onHotwordDetectionServiceRestarted();
-                    break;
-                default:
-                    super.handleMessage(msg);
-            }
+            final Message message = Message.obtain(msg);
+            Binder.withCleanCallingIdentity(() -> mExternalExecutor.execute(() -> {
+                Slog.i(TAG, "handle message " + message.what);
+                switch (message.what) {
+                    case MSG_AVAILABILITY_CHANGED:
+                        mExternalCallback.onAvailabilityChanged(message.arg1);
+                        break;
+                    case MSG_HOTWORD_DETECTED:
+                        mExternalCallback.onDetected((EventPayload) message.obj);
+                        break;
+                    case MSG_DETECTION_ERROR:
+                        mExternalCallback.onError();
+                        break;
+                    case MSG_DETECTION_PAUSE:
+                        mExternalCallback.onRecognitionPaused();
+                        break;
+                    case MSG_DETECTION_RESUME:
+                        mExternalCallback.onRecognitionResumed();
+                        break;
+                    case MSG_HOTWORD_REJECTED:
+                        mExternalCallback.onRejected((HotwordRejectedResult) message.obj);
+                        break;
+                    case MSG_HOTWORD_STATUS_REPORTED:
+                        mExternalCallback.onHotwordDetectionServiceInitialized(message.arg1);
+                        break;
+                    case MSG_PROCESS_RESTARTED:
+                        mExternalCallback.onHotwordDetectionServiceRestarted();
+                        break;
+                    default:
+                        super.handleMessage(message);
+                }
+                message.recycle();
+            }));
         }
     }
 

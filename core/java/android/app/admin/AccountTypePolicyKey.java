@@ -16,9 +16,9 @@
 
 package android.app.admin;
 
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_ACCOUNT_TYPE;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_BUNDLE_KEY;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_KEY;
+import static android.app.admin.PolicyUpdateReceiver.EXTRA_ACCOUNT_TYPE;
+import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_BUNDLE_KEY;
+import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_KEY;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

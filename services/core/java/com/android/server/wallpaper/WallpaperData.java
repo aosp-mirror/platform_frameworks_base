@@ -166,7 +166,9 @@ class WallpaperData {
         this.primaryColors = source.primaryColors;
         this.mWallpaperDimAmount = source.mWallpaperDimAmount;
         this.connection = source.connection;
-        this.connection.mWallpaper = this;
+        if (this.connection != null) {
+            this.connection.mWallpaper = this;
+        }
     }
 
     @Override

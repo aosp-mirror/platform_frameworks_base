@@ -18,10 +18,10 @@ package com.android.test.silkfx.common
 
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.hardware.display.DisplayManager
 import android.util.AttributeSet
 import android.util.Log
 import android.view.Display
+import android.view.View
 import android.view.Window
 import android.widget.Button
 import android.widget.LinearLayout
@@ -31,22 +31,11 @@ import com.android.test.silkfx.app.WindowObserver
 import java.util.function.Consumer
 
 class ColorModeControls : LinearLayout, WindowObserver {
-    private val COLOR_MODE_HDR10 = 3
-    private val SDR_WHITE_POINTS = floatArrayOf(200f, 250f, 300f, 350f, 400f, 100f, 150f)
-
     constructor(context: Context) : this(context, null)
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        displayManager = context.getSystemService(DisplayManager::class.java)!!
-        displayId = context.getDisplayId()
-    }
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
     private var window: Window? = null
     private var currentModeDisplay: TextView? = null
-    private val displayManager: DisplayManager
-    private var targetSdrWhitePointIndex = 0
-    private var displayId: Int
-
-    private val whitePoint get() = SDR_WHITE_POINTS[targetSdrWhitePointIndex]
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -65,88 +54,53 @@ class ColorModeControls : LinearLayout, WindowObserver {
             setColorMode(ActivityInfo.COLOR_MODE_HDR)
         }
         findViewById<Button>(R.id.mode_hdr10)!!.setOnClickListener {
-            setColorMode(COLOR_MODE_HDR10)
+            setColorMode(ActivityInfo.COLOR_MODE_HDR10)
         }
     }
 
-    private val hdrsdrListener = Consumer<Display> { display ->
+    private val hdrSdrListener = Consumer<Display> { display ->
         Log.d("SilkFX", "HDR/SDR changed ${display.hdrSdrRatio}")
-    }
-
-    private val displayChangedListener = object : DisplayManager.DisplayListener {
-        override fun onDisplayAdded(displayId: Int) {
-            Log.d("SilkFX", "onDisplayAdded")
-        }
-
-        override fun onDisplayRemoved(displayId: Int) {
-            Log.d("SilkFX", "onDisplayRemoved")
-        }
-
-        override fun onDisplayChanged(displayId: Int) {
-            Log.d("SilkFX", "onDisplayChanged")
+        post {
+            updateModeInfoDisplay()
         }
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        Log.d("SilkFX", "is hdr/sdr available: ${display.isHdrSdrRatioAvailable}; " +
-                "current ration = ${display.hdrSdrRatio}")
-        display.registerHdrSdrRatioChangedListener({ it.run() }, hdrsdrListener)
-        displayManager.registerDisplayListener(displayChangedListener, handler)
+        val hdrVis = if (display.isHdrSdrRatioAvailable) {
+            display.registerHdrSdrRatioChangedListener({ it.run() }, hdrSdrListener)
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        findViewById<Button>(R.id.mode_hdr)!!.visibility = hdrVis
+        findViewById<Button>(R.id.mode_hdr10)!!.visibility = hdrVis
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        display.unregisterHdrSdrRatioChangedListener(hdrsdrListener)
-        displayManager.unregisterDisplayListener(displayChangedListener)
+        display.unregisterHdrSdrRatioChangedListener(hdrSdrListener)
     }
 
     private fun setColorMode(newMode: Int) {
-        val window = window!!
-        var sdrWhitepointChanged = false
-        // Need to do this before setting the colorMode, as setting the colorMode will
-        // trigger the attribute change listener
-        if (newMode == ActivityInfo.COLOR_MODE_HDR ||
-                newMode == COLOR_MODE_HDR10) {
-            if (window.colorMode == newMode) {
-                targetSdrWhitePointIndex = (targetSdrWhitePointIndex + 1) % SDR_WHITE_POINTS.size
-                sdrWhitepointChanged = true
-            }
-            setBrightness(1.0f)
-        } else {
-            setBrightness(.4f)
-        }
-        window.colorMode = newMode
-        if (sdrWhitepointChanged) {
-            threadedRenderer?.setColorMode(newMode, whitePoint)
-        }
-        val whitePoint = whitePoint.toInt()
-        currentModeDisplay?.run {
-            text = "Current Mode: " + when (newMode) {
-                ActivityInfo.COLOR_MODE_DEFAULT -> "Default/SRGB"
-                ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT -> "Wide Gamut"
-                ActivityInfo.COLOR_MODE_HDR -> "HDR (sdr white point $whitePoint)"
-                COLOR_MODE_HDR10 -> "HDR10 (sdr white point $whitePoint)"
-                else -> "Unknown"
-            }
-        }
+        window!!.colorMode = newMode
+        updateModeInfoDisplay()
     }
 
     override fun setWindow(window: Window) {
         this.window = window
     }
 
-    private fun setBrightness(level: Float) {
-        // To keep window state in sync
-        window?.attributes?.screenBrightness = level
-        invalidate()
-        // To force an 'immediate' snap to what we want
-        // Imperfect, but close enough, synchronization by waiting for frame commit to set the value
-        viewTreeObserver.registerFrameCommitCallback {
-            try {
-                displayManager.setTemporaryBrightness(displayId, level)
-            } catch (ex: Exception) {
-                // Ignore a permission denied rejection - it doesn't meaningfully change much
+    private fun updateModeInfoDisplay() {
+        val sdrHdrRatio = display?.hdrSdrRatio ?: 1.0f
+        val colormode = window!!.colorMode
+        currentModeDisplay?.run {
+            text = "Current Mode: " + when (colormode) {
+                ActivityInfo.COLOR_MODE_DEFAULT -> "Default/SRGB"
+                ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT -> "Wide Gamut"
+                ActivityInfo.COLOR_MODE_HDR -> "HDR (sdr/hdr ratio $sdrHdrRatio)"
+                ActivityInfo.COLOR_MODE_HDR10 -> "HDR10 (sdr/hdr ratio $sdrHdrRatio)"
+                else -> "Unknown"
             }
         }
     }

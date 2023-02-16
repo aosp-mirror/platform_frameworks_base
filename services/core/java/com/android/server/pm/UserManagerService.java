@@ -1962,6 +1962,14 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public int getDisplayIdAssignedToUser() {
+        // Not checking for any permission as it returns info about calling user
+        int userId = UserHandle.getUserId(Binder.getCallingUid());
+        int displayId = mUserVisibilityMediator.getDisplayAssignedToUser(userId);
+        return displayId;
+    }
+
+    @Override
     public @NonNull String getUserName() {
         final int callingUid = Binder.getCallingUid();
         if (!hasQueryOrCreateUsersPermission()
@@ -5920,11 +5928,21 @@ public class UserManagerService extends IUserManager.Stub {
                 /* receiverPermission= */null);
     }
 
+    /**
+     * @deprecated Use {@link
+     * android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
+     */
+    @Deprecated
     @Override
     public Bundle getApplicationRestrictions(String packageName) {
         return getApplicationRestrictionsForUser(packageName, UserHandle.getCallingUserId());
     }
 
+    /**
+     * @deprecated Use {@link
+     * android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
+     */
+    @Deprecated
     @Override
     public Bundle getApplicationRestrictionsForUser(String packageName, @UserIdInt int userId) {
         if (UserHandle.getCallingUserId() != userId

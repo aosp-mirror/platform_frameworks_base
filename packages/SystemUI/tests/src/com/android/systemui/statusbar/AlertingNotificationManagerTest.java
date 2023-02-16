@@ -17,6 +17,8 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
+
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED;
 
 import static junit.framework.Assert.assertFalse;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.spy;
 
 import android.app.ActivityManager;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -42,6 +45,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 
 import org.junit.After;
@@ -64,6 +68,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     private static final int TEST_UID = 0;
 
     protected static final int TEST_MINIMUM_DISPLAY_TIME = 200;
+    protected static final int TEST_STICKY_DISPLAY_TIME = 1000;
     protected static final int TEST_AUTO_DISMISS_TIME = 500;
     // Number of notifications to use in tests requiring multiple notifications
     private static final int TEST_NUM_NOTIFICATIONS = 4;
@@ -85,6 +90,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         private TestableAlertingNotificationManager(Handler handler) {
             super(mock(HeadsUpManagerLogger.class), handler);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
+            mStickyDisplayTime = TEST_STICKY_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }
 
@@ -110,6 +116,20 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         return new TestableAlertingNotificationManager(handler);
     }
 
+    protected StatusBarNotification createNewSbn(int id, Notification n) {
+        return new StatusBarNotification(
+                TEST_PACKAGE_NAME /* pkg */,
+                TEST_PACKAGE_NAME,
+                id,
+                null /* tag */,
+                TEST_UID,
+                0 /* initialPid */,
+                n,
+                new UserHandle(ActivityManager.getCurrentUser()),
+                null /* overrideGroupKey */,
+                0 /* postTime */);
+    }
+
     protected StatusBarNotification createNewSbn(int id, Notification.Builder n) {
         return new StatusBarNotification(
                 TEST_PACKAGE_NAME /* pkg */,
@@ -130,6 +150,15 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
                 .setContentTitle("Title")
                 .setContentText("Text");
         return createNewSbn(id, n);
+    }
+
+    protected StatusBarNotification createStickySbn(int id) {
+        Notification stickyHun = new Notification.Builder(mContext, "")
+                .setSmallIcon(R.drawable.ic_person)
+                .setFullScreenIntent(mock(PendingIntent.class), /* highPriority */ true)
+                .build();
+        stickyHun.flags |= FLAG_FSI_REQUESTED_BUT_DENIED;
+        return createNewSbn(id, stickyHun);
     }
 
     @Before
@@ -168,6 +197,20 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
 
         assertFalse("Test timed out", mTimedOut);
         assertFalse(mAlertingNotificationManager.isAlerting(mEntry.getKey()));
+    }
+
+    @Test
+    public void testShowNotification_stickyHun_earliestRemovalTime() {
+        NotificationEntry notifEntry = new NotificationEntryBuilder()
+                .setSbn(createStickySbn(/* id= */ 0))
+                .build();
+        notifEntry.setCreationElapsedRealTime(0);
+
+        mAlertingNotificationManager.showNotification(notifEntry);
+
+        final long earliestRemovalTime = mAlertingNotificationManager
+                .getCalculatedEarliestRemovalTime(notifEntry.getKey());
+        assertEquals(TEST_STICKY_DISPLAY_TIME, earliestRemovalTime);
     }
 
     @Test

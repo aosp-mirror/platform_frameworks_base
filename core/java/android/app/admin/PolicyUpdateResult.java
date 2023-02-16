@@ -24,8 +24,8 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Class containing the reason for the policy (set from {@link DevicePolicyManager}) update (e.g.
  * success, failure reasons, etc.). This is passed in to
- * {@link PolicyUpdatesReceiver#onPolicySetResult}) and
- * {@link PolicyUpdatesReceiver#onPolicyChanged}).
+ * {@link PolicyUpdateReceiver#onPolicySetResult}) and
+ * {@link PolicyUpdateReceiver#onPolicyChanged}).
  */
 public final class PolicyUpdateResult {
 
@@ -80,7 +80,7 @@ public final class PolicyUpdateResult {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "RESULT_" }, value = {
+    @IntDef(prefix = { "RESULT_" }, value = {
             RESULT_FAILURE_UNKNOWN,
             RESULT_SUCCESS,
             RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
@@ -93,7 +93,7 @@ public final class PolicyUpdateResult {
     private final int mResultCode;
 
     /**
-     * Constructor for {@code PolicyUpdateReason} that takes in a result code describing why the
+     * Constructor for {@code PolicyUpdateResult} that takes in a result code describing why the
      * policy has changed.
      *
      * @param resultCode Describes why the policy has changed.

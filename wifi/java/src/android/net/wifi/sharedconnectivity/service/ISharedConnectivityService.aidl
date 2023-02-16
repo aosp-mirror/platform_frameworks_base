@@ -27,7 +27,7 @@ interface ISharedConnectivityService {
     void registerCallback(in ISharedConnectivityCallback callback);
     void unregisterCallback(in ISharedConnectivityCallback callback);
     void connectTetherNetwork(in TetherNetwork network);
-    void disconnectTetherNetwork();
+    void disconnectTetherNetwork(in TetherNetwork network);
     void connectKnownNetwork(in KnownNetwork network);
     void forgetKnownNetwork(in KnownNetwork network);
 }

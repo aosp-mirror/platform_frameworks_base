@@ -1150,12 +1150,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
             new KeyguardStateController.Callback() {
         @Override
-        public void onBouncerShowingChanged() {
+        public void onPrimaryBouncerShowingChanged() {
             synchronized (KeyguardViewMediator.this) {
-                if (mKeyguardStateController.isBouncerShowing()) {
+                if (mKeyguardStateController.isPrimaryBouncerShowing()) {
                     mPendingPinLock = false;
                 }
-                adjustStatusBarLocked(mKeyguardStateController.isBouncerShowing(), false);
+                adjustStatusBarLocked(mKeyguardStateController.isPrimaryBouncerShowing(), false);
             }
         }
     };

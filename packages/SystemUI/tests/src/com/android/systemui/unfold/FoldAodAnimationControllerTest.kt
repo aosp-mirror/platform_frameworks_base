@@ -28,6 +28,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.shade.NotificationPanelViewController
@@ -112,7 +113,8 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
             KeyguardInteractor(
                 repository = keyguardRepository,
                 commandQueue = commandQueue,
-                featureFlags = featureFlags
+                featureFlags = featureFlags,
+                bouncerRepository = FakeKeyguardBouncerRepository(),
             )
 
         // Needs to be run on the main thread
