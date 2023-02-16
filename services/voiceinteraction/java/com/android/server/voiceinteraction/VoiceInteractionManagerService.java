@@ -378,7 +378,7 @@ public class VoiceInteractionManagerService extends SystemService {
         @Override
         public @NonNull IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
                 @NonNull Identity originatorIdentity, IBinder client,
-                @NonNull ModuleProperties moduleProperties) {
+                ModuleProperties moduleProperties) {
             Objects.requireNonNull(originatorIdentity);
             boolean forHotwordDetectionService;
             synchronized (VoiceInteractionManagerServiceStub.this) {
