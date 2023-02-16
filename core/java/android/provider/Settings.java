@@ -40,7 +40,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
-import android.app.tare.EconomyManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -14720,35 +14719,13 @@ public final class Settings {
                 = "forced_app_standby_for_small_battery_enabled";
 
         /**
-         * Whether to enable the TARE subsystem as a whole or not.
-         * 1 means enable, 0 means disable.
+         * Whether to enable the TARE subsystem or not.
+         * Valid values are
+         * {@link android.app.tare.EconomyManager#ENABLE_TARE_ON EconomyManager.ENABLE_TARE_*}.
          *
          * @hide
          */
         public static final String ENABLE_TARE = "enable_tare";
-
-        /**
-         * Default value for {@link #ENABLE_TARE}.
-         *
-         * @hide
-         */
-        public static final int DEFAULT_ENABLE_TARE = EconomyManager.DEFAULT_ENABLE_TARE_MODE;
-
-        /**
-         * Whether to enable the TARE AlarmManager economic policy or not.
-         * 1 means enable, 0 means disable.
-         *
-         * @hide
-         */
-        public static final String ENABLE_TARE_ALARM_MANAGER = "enable_tare_alarm_manager";
-
-        /**
-         * Default value for {@link #ENABLE_TARE_ALARM_MANAGER}.
-         *
-         * @hide
-         */
-        public static final int DEFAULT_ENABLE_TARE_ALARM_MANAGER =
-                        EconomyManager.DEFAULT_ENABLE_POLICY_ALARM ? 1 : 0;
 
         /**
          * Settings for AlarmManager's TARE EconomicPolicy (list of its economic factors).
@@ -14758,22 +14735,6 @@ public final class Settings {
          * @hide
          */
         public static final String TARE_ALARM_MANAGER_CONSTANTS = "tare_alarm_manager_constants";
-
-        /**
-         * Whether to enable the TARE JobScheduler economic policy or not.
-         * 1 means enable, 0 means disable.
-         *
-         * @hide
-         */
-        public static final String ENABLE_TARE_JOB_SCHEDULER = "enable_tare_job_scheduler";
-
-        /**
-         * Default value for {@link #ENABLE_TARE_JOB_SCHEDULER}.
-         *
-         * @hide
-         */
-        public static final int DEFAULT_ENABLE_TARE_JOB_SCHEDULER =
-                EconomyManager.DEFAULT_ENABLE_POLICY_JOB_SCHEDULER ? 1 : 0;
 
         /**
          * Settings for JobScheduler's TARE EconomicPolicy (list of its economic factors).
