@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
 
 class FakeBiometricSettingsRepository : BiometricSettingsRepository {
 
@@ -41,6 +42,9 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
     private val _isFingerprintEnabledByDevicePolicy = MutableStateFlow(false)
     override val isFingerprintEnabledByDevicePolicy =
         _isFingerprintEnabledByDevicePolicy.asStateFlow()
+
+    override val isFaceAuthSupportedInCurrentPosture: Flow<Boolean>
+        get() = flowOf(true)
 
     fun setFingerprintEnrolled(isFingerprintEnrolled: Boolean) {
         _isFingerprintEnrolled.value = isFingerprintEnrolled
