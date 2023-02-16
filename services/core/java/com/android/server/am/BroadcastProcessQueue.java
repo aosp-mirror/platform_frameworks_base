@@ -155,6 +155,12 @@ class BroadcastProcessQueue {
     private boolean mActiveViaColdStart;
 
     /**
+     * Flag indicating that the currently active broadcast is being dispatched
+     * to a package that was in the stopped state.
+     */
+    private boolean mActiveWasStopped;
+
+    /**
      * Number of consecutive urgent broadcasts that have been dispatched
      * since the last non-urgent dispatch.
      */
@@ -461,8 +467,16 @@ class BroadcastProcessQueue {
         mActiveViaColdStart = activeViaColdStart;
     }
 
+    public void setActiveWasStopped(boolean activeWasStopped) {
+        mActiveWasStopped = activeWasStopped;
+    }
+
     public boolean getActiveViaColdStart() {
         return mActiveViaColdStart;
+    }
+
+    public boolean getActiveWasStopped() {
+        return mActiveWasStopped;
     }
 
     /**
@@ -484,6 +498,7 @@ class BroadcastProcessQueue {
         final boolean wouldBeSkipped = (next.argi2 == 1);
         mActiveCountSinceIdle++;
         mActiveViaColdStart = false;
+        mActiveWasStopped = false;
         next.recycle();
         onBroadcastDequeued(mActive, mActiveIndex, wouldBeSkipped);
     }

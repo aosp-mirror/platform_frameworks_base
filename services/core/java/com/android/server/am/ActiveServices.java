@@ -88,6 +88,8 @@ import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STA
 import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER;
 import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
@@ -1276,6 +1278,10 @@ public final class ActiveServices {
             return new ComponentName("!!", error);
         }
 
+        final boolean wasStopped = (r.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+        final int packageState = wasStopped
+                ? SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
+                : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
         FrameworkStatsLog.write(SERVICE_REQUEST_EVENT_REPORTED, uid, callingUid,
                 service.getAction(),
                 SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__START, false,
@@ -1285,7 +1291,8 @@ public final class ActiveServices {
                 ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT
                 : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM),
                 getShortProcessNameForStats(callingUid, callingProcessName),
-                getShortServiceNameForStats(r));
+                getShortServiceNameForStats(r),
+                packageState);
 
         if (r.startRequested && addToStarting) {
             boolean first = smap.mStartingBackground.size() == 0;
@@ -3439,6 +3446,7 @@ public final class ActiveServices {
                 mAm.requireAllowedAssociationsLocked(s.appInfo.packageName);
             }
 
+            final boolean wasStopped = (s.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
             final boolean wasStartRequested = s.startRequested;
             final boolean hadConnections = !s.getConnections().isEmpty();
             mAm.startAssociationLocked(callerApp.uid, callerApp.processName,
@@ -3525,6 +3533,9 @@ public final class ActiveServices {
                 mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE);
             }
 
+            final int packageState = wasStopped
+                    ? SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
+                    : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
             FrameworkStatsLog.write(SERVICE_REQUEST_EVENT_REPORTED, s.appInfo.uid, callingUid,
                     ActivityManagerService.getShortAction(service.getAction()),
                     SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__BIND, false,
@@ -3534,7 +3545,8 @@ public final class ActiveServices {
                     ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT
                     : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM),
                     getShortProcessNameForStats(callingUid, callerApp.processName),
-                    getShortServiceNameForStats(s));
+                    getShortServiceNameForStats(s),
+                    packageState);
 
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bind " + s + " with " + b
                     + ": received=" + b.intent.received

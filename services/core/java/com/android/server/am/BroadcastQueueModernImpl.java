@@ -25,6 +25,8 @@ import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVE
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
 import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.BroadcastProcessQueue.insertIntoRunnableList;
 import static com.android.server.am.BroadcastProcessQueue.reasonToString;
@@ -773,6 +775,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final ApplicationInfo info = ((ResolveInfo) receiver).activityInfo.applicationInfo;
         final ComponentName component = ((ResolveInfo) receiver).activityInfo.getComponentName();
 
+        if ((info.flags & ApplicationInfo.FLAG_STOPPED) != 0) {
+            queue.setActiveWasStopped(true);
+        }
         final int intentFlags = r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND;
         final HostingRecord hostingRecord = new HostingRecord(HostingRecord.HOSTING_TYPE_BROADCAST,
                 component, r.intent.getAction(), r.getHostingRecordTriggerType());
@@ -1786,8 +1791,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final long dispatchDelay = r.scheduledTime[index] - r.enqueueTime;
         final long receiveDelay = 0;
         final long finishDelay = r.terminalTime[index] - r.scheduledTime[index];
-        FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, uid, senderUid, actionName,
-                receiverType, type, dispatchDelay, receiveDelay, finishDelay);
+        if (queue != null) {
+            final int packageState = queue.getActiveWasStopped()
+                    ? SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
+                    : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+            FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, uid, senderUid, actionName,
+                    receiverType, type, dispatchDelay, receiveDelay, finishDelay, packageState);
+        }
 
         final boolean recordFinished = (r.terminalCount == r.receivers.size());
         if (recordFinished) {
