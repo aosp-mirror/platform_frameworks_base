@@ -2769,6 +2769,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_singleLine
      */
     public final void setTransformationMethod(TransformationMethod method) {
+        if (mEditor != null) {
+            mEditor.setTransformationMethod(method);
+        } else {
+            setTransformationMethodInternal(method);
+        }
+    }
+
+    void setTransformationMethodInternal(@Nullable TransformationMethod method) {
         if (method == mTransformation) {
             // Avoid the setText() below if the transformation is
             // the same.
