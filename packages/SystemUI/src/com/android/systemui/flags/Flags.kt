@@ -423,7 +423,9 @@ object Flags {
         )
 
     // TODO(b/256873975): Tracking Bug
-    @JvmField @Keep val WM_BUBBLE_BAR = unreleasedFlag(1111, "wm_bubble_bar")
+    @JvmField
+    @Keep
+    val WM_BUBBLE_BAR = sysPropBooleanFlag(1111, "persist.wm.debug.bubble_bar", default = false)
 
     // TODO(b/260271148): Tracking bug
     @Keep
