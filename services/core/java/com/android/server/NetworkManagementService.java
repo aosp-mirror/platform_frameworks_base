@@ -1483,6 +1483,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     public void setFirewallUidRules(int chain, int[] uids, int[] rules) {
         enforceSystemUid();
         synchronized (mQuotaLock) {
+            final int[] applicableUidsForChain;
             synchronized (mRulesLock) {
                 SparseIntArray uidFirewallRules = getUidFirewallRulesLR(chain);
                 SparseIntArray newRules = new SparseIntArray();
@@ -1506,10 +1507,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     int uid = rulesToRemove.keyAt(index);
                     updateFirewallUidRuleLocked(chain, uid, FIREWALL_RULE_DEFAULT);
                 }
+                // Copy the keys for the firewall rules chain, which is guaranteed not to include
+                // default rules. We must not include default rules in the UIDs we send to
+                // ConnectivityManager#replaceFirewallChain, as this would have the opposite effect
+                // intended, leading such UIDs to be blocked or allowed erroneously.
+                applicableUidsForChain = uidFirewallRules.copyKeys();
             }
             final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
-                cm.replaceFirewallChain(chain, uids);
+                cm.replaceFirewallChain(chain, applicableUidsForChain);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Error flushing firewall chain " + chain, e);
             }
