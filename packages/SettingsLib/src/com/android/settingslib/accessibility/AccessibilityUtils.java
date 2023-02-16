@@ -183,7 +183,7 @@ public class AccessibilityUtils {
         final String currentShortcutServiceId = Settings.Secure.getStringForUser(
                 context.getContentResolver(), Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
                 userId);
-        if (!TextUtils.isEmpty(currentShortcutServiceId)) {
+        if (currentShortcutServiceId != null) {
             return currentShortcutServiceId;
         }
         return context.getString(R.string.config_defaultAccessibilityService);
