@@ -13456,12 +13456,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return null;
         }
+        CallerIdentity caller;
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
-        final CallerIdentity caller = getCallerIdentity(callerPackageName);
-        if (!hasPermission(MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT, caller.getPackageName(), userId)
-                && !hasFullCrossUsersPermission(caller, userId)) {
-            throw new SecurityException("Caller does not have permission to call this on user: "
-                    + userId);
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(callerPackageName);
+            if (!hasPermission(MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT,
+                    caller.getPackageName(), userId)
+                    && !hasFullCrossUsersPermission(caller, userId)) {
+                throw new SecurityException("Caller does not have permission to call this on user: "
+                        + userId);
+            }
+        } else {
+            caller = getCallerIdentity();
+            Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
         }
 
         synchronized (getLockObject()) {
