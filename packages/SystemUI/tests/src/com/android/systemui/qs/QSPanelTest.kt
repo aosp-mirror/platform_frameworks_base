@@ -37,6 +37,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -194,6 +195,16 @@ class QSPanelTest : SysuiTestCase() {
         qsPanel.addView(qsPanel.mTileLayout as View, 0)
         qsPanel.addView(FrameLayout(context))
         qsPanel.setSquishinessFraction(0.5f)
+    }
+
+    @Test
+    fun testSplitShade_CollapseAccessibilityActionNotAnnounced() {
+        qsPanel.setCanCollapse(false)
+        val accessibilityInfo = mock(AccessibilityNodeInfo::class.java)
+        qsPanel.onInitializeAccessibilityNodeInfo(accessibilityInfo)
+
+        val actionCollapse = AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE
+        verify(accessibilityInfo, never()).addAction(actionCollapse)
     }
 
     private infix fun View.isLeftOf(other: View): Boolean {

@@ -148,9 +148,10 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     }
 
     @Override
-    protected void onSplitShadeChanged() {
+    protected void onSplitShadeChanged(boolean shouldUseSplitNotificationShade) {
         ((PagedTileLayout) mView.getOrCreateTileLayout())
                 .forceTilesRedistribution("Split shade state changed");
+        mView.setCanCollapse(!shouldUseSplitNotificationShade);
     }
 
     /** */
