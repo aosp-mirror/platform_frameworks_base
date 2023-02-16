@@ -401,7 +401,7 @@ public class DefaultCrossProfileIntentFiltersUtils {
     /*
      Allowing view action from clone to parent profile to open any app-links or web links
      */
-    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_VIEW_ACTION =
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_WEB_VIEW_ACTION =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
                     /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
@@ -415,7 +415,7 @@ public class DefaultCrossProfileIntentFiltersUtils {
     /*
      Allowing view action from parent to clone profile to open any app-links or web links
      */
-    private static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_VIEW_ACTION =
+    private static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_WEB_VIEW_ACTION =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
                     /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
@@ -425,6 +425,21 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addDataScheme("https")
                     .addDataScheme("http")
                     .build();
+
+    /*
+     Allowing view action from clone to parent profile to any data type e.g. pdf, including custom
+     content providers.
+     */
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_VIEW_ACTION =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                    // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addDataType("*/*")
+                    .build();
+
 
     /*
      Allowing pick,insert and edit action from clone to parent profile to open picker or contacts
@@ -441,7 +456,10 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addAction(Intent.ACTION_EDIT)
                     .addAction(Intent.ACTION_INSERT)
                     .addAction(Intent.ACTION_INSERT_OR_EDIT)
+                    .addAction(Intent.ACTION_OPEN_DOCUMENT)
                     .addDataType("*/*")
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_OPENABLE)
                     .build();
 
     /*
@@ -458,19 +476,71 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addAction(Intent.ACTION_EDIT)
                     .addAction(Intent.ACTION_INSERT)
                     .addAction(Intent.ACTION_INSERT_OR_EDIT)
+                    .addAction(Intent.ACTION_OPEN_DOCUMENT)
                     .addDataType("*/*")
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_OPENABLE)
+                    .build();
+
+    private static final DefaultCrossProfileIntentFilter PARENT_TO_CLONE_DIAL_DATA =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                    // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_DIAL)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addDataScheme("tel")
+                    .addDataScheme("sip")
+                    .addDataScheme("voicemail")
+                    .build();
+
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_DIAL_DATA =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                    // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_DIAL)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addDataScheme("tel")
+                    .addDataScheme("sip")
+                    .addDataScheme("voicemail")
+                    .build();
+
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_SMS_MMS =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                    // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(Intent.ACTION_VIEW)
+                    .addAction(Intent.ACTION_SENDTO)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addDataScheme("sms")
+                    .addDataScheme("smsto")
+                    .addDataScheme("mms")
+                    .addDataScheme("mmsto")
                     .build();
 
     public static List<DefaultCrossProfileIntentFilter> getDefaultCloneProfileFilters() {
         return Arrays.asList(
                 PARENT_TO_CLONE_SEND_ACTION,
-                PARENT_TO_CLONE_VIEW_ACTION,
+                PARENT_TO_CLONE_WEB_VIEW_ACTION,
                 PARENT_TO_CLONE_PICK_INSERT_ACTION,
+                PARENT_TO_CLONE_DIAL_DATA,
                 CLONE_TO_PARENT_MEDIA_CAPTURE,
                 CLONE_TO_PARENT_SEND_ACTION,
+                CLONE_TO_PARENT_WEB_VIEW_ACTION,
                 CLONE_TO_PARENT_VIEW_ACTION,
-                CLONE_TO_PARENT_PICK_INSERT_ACTION
-
+                CLONE_TO_PARENT_PICK_INSERT_ACTION,
+                CLONE_TO_PARENT_DIAL_DATA,
+                CLONE_TO_PARENT_SMS_MMS
         );
     }
 }
