@@ -190,7 +190,9 @@ public class ITvInteractiveAppSessionWrapper
                 break;
             }
             case DO_SEND_TIME_SHIFT_MODE: {
-                mSessionImpl.sendTimeShiftMode((Integer) msg.obj);
+                SomeArgs args = (SomeArgs) msg.obj;
+                mSessionImpl.sendTimeShiftMode(args.argi1);
+                args.recycle();
                 break;
             }
             case DO_SEND_AVAILABLE_SPEEDS: {
@@ -445,8 +447,7 @@ public class ITvInteractiveAppSessionWrapper
 
     @Override
     public void sendTimeShiftMode(int mode) {
-        mCaller.executeOrSendMessage(
-                mCaller.obtainMessageI(DO_SEND_TIME_SHIFT_MODE, mode));
+        mCaller.executeOrSendMessage(mCaller.obtainMessageI(DO_SEND_TIME_SHIFT_MODE, mode));
     }
 
     @Override
