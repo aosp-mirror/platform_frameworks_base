@@ -434,6 +434,11 @@ public class QuickSettingsController {
         updateExpansionEnabledAmbient();
     }
 
+    @VisibleForTesting
+    void setStatusBarMinHeight(int height) {
+        mStatusBarMinHeight = height;
+    }
+
     int getHeaderHeight() {
         return mQs.getHeader().getHeight();
     }
@@ -483,7 +488,8 @@ public class QuickSettingsController {
     }
 
     /** Returns whether or not event should open QS */
-    private boolean isOpenQsEvent(MotionEvent event) {
+    @VisibleForTesting
+    boolean isOpenQsEvent(MotionEvent event) {
         final int pointerCount = event.getPointerCount();
         final int action = event.getActionMasked();
 
@@ -842,6 +848,11 @@ public class QuickSettingsController {
 
     void setTwoFingerExpandPossible(boolean expandPossible) {
         mTwoFingerExpandPossible = expandPossible;
+    }
+
+    @VisibleForTesting
+    boolean isTwoFingerExpandPossible() {
+        return mTwoFingerExpandPossible;
     }
 
     /** Called when Qs starts expanding */
@@ -1360,7 +1371,8 @@ public class QuickSettingsController {
         return mTouchAboveFalsingThreshold;
     }
 
-    private void onHeightChanged() {
+    @VisibleForTesting
+    void onHeightChanged() {
         mMaxExpansionHeight = isQsFragmentCreated() ? mQs.getDesiredHeight() : 0;
         if (mExpanded && mFullyExpanded) {
             mExpansionHeight = mMaxExpansionHeight;
@@ -1662,7 +1674,8 @@ public class QuickSettingsController {
         return false;
     }
 
-    private void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
+    @VisibleForTesting
+    void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
         mShadeExpandedFraction = event.getFraction();
     }
 
