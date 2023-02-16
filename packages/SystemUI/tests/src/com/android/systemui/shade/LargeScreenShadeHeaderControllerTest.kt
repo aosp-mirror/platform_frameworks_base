@@ -76,6 +76,7 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var mockedContext: Context
     @Mock private lateinit var demoModeController: DemoModeController
+    @Mock private lateinit var qsBatteryModeController: QsBatteryModeController
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
@@ -130,8 +131,9 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
                 featureFlags,
                 qsCarrierGroupControllerBuilder,
                 combinedShadeHeadersConstraintManager,
-                demoModeController
-                )
+                demoModeController,
+                qsBatteryModeController,
+        )
         whenever(view.isAttachedToWindow).thenReturn(true)
         mLargeScreenShadeHeaderController.init()
         carrierIconSlots = listOf(
