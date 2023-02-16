@@ -19,7 +19,6 @@ package com.android.settingslib.spaprivileged.model.app
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Drawable
-import android.os.UserManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
@@ -28,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import com.android.settingslib.Utils
 import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spaprivileged.R
+import com.android.settingslib.spaprivileged.framework.common.userManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -42,23 +42,25 @@ interface AppRepository {
         val context = LocalContext.current
         return produceState(initialValue = stringResource(R.string.summary_placeholder), app) {
             withContext(Dispatchers.IO) {
-                if (isClonedAppPage || isCloneApp(context, app)) {
-                    value = context.getString(R.string.cloned_app_info_label, loadLabel(app))
+                value = if (isClonedAppPage || isCloneApp(context, app)) {
+                    context.getString(R.string.cloned_app_info_label, loadLabel(app))
                 } else {
-                    value = loadLabel(app)
+                    loadLabel(app)
                 }
             }
         }
     }
 
     private fun isCloneApp(context: Context, app: ApplicationInfo): Boolean {
-        val userManager = context.getSystemService(UserManager::class.java)!!
-        val userInfo = userManager.getUserInfo(app.userId)
+        val userInfo = context.userManager.getUserInfo(app.userId)
         return userInfo != null && userInfo.isCloneProfile
     }
 
     @Composable
     fun produceIcon(app: ApplicationInfo): State<Drawable?>
+
+    @Composable
+    fun produceIconContentDescription(app: ApplicationInfo): State<String?>
 }
 
 internal class AppRepositoryImpl(private val context: Context) : AppRepository {
@@ -69,8 +71,22 @@ internal class AppRepositoryImpl(private val context: Context) : AppRepository {
     @Composable
     override fun produceIcon(app: ApplicationInfo) =
         produceState<Drawable?>(initialValue = null, app) {
-            withContext(Dispatchers.Default) {
+            withContext(Dispatchers.IO) {
                 value = Utils.getBadgedIcon(context, app)
+            }
+        }
+
+    @Composable
+    override fun produceIconContentDescription(app: ApplicationInfo) =
+        produceState<String?>(initialValue = null, app) {
+            withContext(Dispatchers.IO) {
+                value = when {
+                    context.userManager.isManagedProfile(app.userId) -> {
+                        context.getString(R.string.category_work)
+                    }
+
+                    else -> null
+                }
             }
         }
 }

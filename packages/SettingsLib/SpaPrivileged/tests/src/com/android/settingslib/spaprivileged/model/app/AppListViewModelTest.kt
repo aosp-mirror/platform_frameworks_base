@@ -103,6 +103,9 @@ class AppListViewModelTest {
 
         @Composable
         override fun produceIcon(app: ApplicationInfo) = stateOf(null)
+
+        @Composable
+        override fun produceIconContentDescription(app: ApplicationInfo) = stateOf(null)
     }
 
     private companion object {
