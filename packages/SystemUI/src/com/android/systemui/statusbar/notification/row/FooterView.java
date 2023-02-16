@@ -88,6 +88,7 @@ public class FooterView extends StackScrollerDecorView {
         mSeenNotifsFooterTextView = findViewById(R.id.unlock_prompt_footer);
         updateResources();
         updateText();
+        updateColors();
     }
 
     public void setFooterLabelTextAndIcon(@StringRes int text, @DrawableRes int icon) {
