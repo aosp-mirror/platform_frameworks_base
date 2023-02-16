@@ -32,7 +32,6 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
@@ -150,6 +149,10 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_CONTENT_TYPE = "content_type";
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_USER_LOCKED = "locked";
+    /**
+     * This attribute represents both foreground services and user initiated jobs in U+.
+     * It was not renamed in U on purpose, in order to avoid creating an unnecessary migration path.
+     */
     private static final String ATT_FG_SERVICE_SHOWN = "fgservice";
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
@@ -249,7 +252,7 @@ public final class NotificationChannel implements Parcelable {
     // Bitwise representation of fields that have been changed by the user, preventing the app from
     // making changes to these fields.
     private int mUserLockedFields;
-    private boolean mFgServiceShown;
+    private boolean mUserVisibleTaskShown;
     private boolean mVibrationEnabled;
     private boolean mShowBadge = DEFAULT_SHOW_BADGE;
     private boolean mDeleted = DEFAULT_DELETED;
@@ -317,7 +320,7 @@ public final class NotificationChannel implements Parcelable {
             mVibration = Arrays.copyOf(mVibration, MAX_VIBRATION_LENGTH);
         }
         mUserLockedFields = in.readInt();
-        mFgServiceShown = in.readByte() != 0;
+        mUserVisibleTaskShown = in.readByte() != 0;
         mVibrationEnabled = in.readByte() != 0;
         mShowBadge = in.readByte() != 0;
         mDeleted = in.readByte() != 0;
@@ -371,7 +374,7 @@ public final class NotificationChannel implements Parcelable {
         dest.writeByte(mLights ? (byte) 1 : (byte) 0);
         dest.writeLongArray(mVibration);
         dest.writeInt(mUserLockedFields);
-        dest.writeByte(mFgServiceShown ? (byte) 1 : (byte) 0);
+        dest.writeByte(mUserVisibleTaskShown ? (byte) 1 : (byte) 0);
         dest.writeByte(mVibrationEnabled ? (byte) 1 : (byte) 0);
         dest.writeByte(mShowBadge ? (byte) 1 : (byte) 0);
         dest.writeByte(mDeleted ? (byte) 1 : (byte) 0);
@@ -418,8 +421,8 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setFgServiceShown(boolean shown) {
-        mFgServiceShown = shown;
+    public void setUserVisibleTaskShown(boolean shown) {
+        mUserVisibleTaskShown = shown;
     }
 
     /**
@@ -845,8 +848,8 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
-    public boolean isFgServiceShown() {
-        return mFgServiceShown;
+    public boolean isUserVisibleTaskShown() {
+        return mUserVisibleTaskShown;
     }
 
     /**
@@ -965,7 +968,7 @@ public final class NotificationChannel implements Parcelable {
                 parser, ATT_DELETED_TIME_MS, DEFAULT_DELETION_TIME_MS));
         setGroup(parser.getAttributeValue(null, ATT_GROUP));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
-        setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
+        setUserVisibleTaskShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
         setBlockable(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
         setAllowBubbles(safeInt(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
         setOriginalImportance(safeInt(parser, ATT_ORIG_IMP, DEFAULT_IMPORTANCE));
@@ -1072,8 +1075,8 @@ public final class NotificationChannel implements Parcelable {
         if (getUserLockedFields() != 0) {
             out.attributeInt(null, ATT_USER_LOCKED, getUserLockedFields());
         }
-        if (isFgServiceShown()) {
-            out.attributeBoolean(null, ATT_FG_SERVICE_SHOWN, isFgServiceShown());
+        if (isUserVisibleTaskShown()) {
+            out.attributeBoolean(null, ATT_FG_SERVICE_SHOWN, isUserVisibleTaskShown());
         }
         if (canShowBadge()) {
             out.attributeBoolean(null, ATT_SHOW_BADGE, canShowBadge());
@@ -1147,7 +1150,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_LIGHT_COLOR, Integer.toString(getLightColor()));
         record.put(ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
-        record.put(ATT_FG_SERVICE_SHOWN, Boolean.toString(isFgServiceShown()));
+        record.put(ATT_FG_SERVICE_SHOWN, Boolean.toString(isUserVisibleTaskShown()));
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
@@ -1239,7 +1242,7 @@ public final class NotificationChannel implements Parcelable {
                 && mLights == that.mLights
                 && getLightColor() == that.getLightColor()
                 && getUserLockedFields() == that.getUserLockedFields()
-                && isFgServiceShown() == that.isFgServiceShown()
+                && isUserVisibleTaskShown() == that.isUserVisibleTaskShown()
                 && mVibrationEnabled == that.mVibrationEnabled
                 && mShowBadge == that.mShowBadge
                 && isDeleted() == that.isDeleted()
@@ -1265,8 +1268,8 @@ public final class NotificationChannel implements Parcelable {
     public int hashCode() {
         int result = Objects.hash(getId(), getName(), mDesc, getImportance(), mBypassDnd,
                 getLockscreenVisibility(), getSound(), mLights, getLightColor(),
-                getUserLockedFields(),
-                isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getDeletedTimeMs(),
+                getUserLockedFields(), isUserVisibleTaskShown(),
+                mVibrationEnabled, mShowBadge, isDeleted(), getDeletedTimeMs(),
                 getGroup(), getAudioAttributes(), isBlockable(), mAllowBubbles,
                 mImportanceLockedDefaultApp, mOriginalImportance,
                 mParentId, mConversationId, mDemoted, mImportantConvo);
@@ -1304,7 +1307,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mLightColor=" + mLightColor
                 + ", mVibration=" + Arrays.toString(mVibration)
                 + ", mUserLockedFields=" + Integer.toHexString(mUserLockedFields)
-                + ", mFgServiceShown=" + mFgServiceShown
+                + ", mUserVisibleTaskShown=" + mUserVisibleTaskShown
                 + ", mVibrationEnabled=" + mVibrationEnabled
                 + ", mShowBadge=" + mShowBadge
                 + ", mDeleted=" + mDeleted
@@ -1342,7 +1345,7 @@ public final class NotificationChannel implements Parcelable {
             }
         }
         proto.write(NotificationChannelProto.USER_LOCKED_FIELDS, mUserLockedFields);
-        proto.write(NotificationChannelProto.FG_SERVICE_SHOWN, mFgServiceShown);
+        proto.write(NotificationChannelProto.USER_VISIBLE_TASK_SHOWN, mUserVisibleTaskShown);
         proto.write(NotificationChannelProto.IS_VIBRATION_ENABLED, mVibrationEnabled);
         proto.write(NotificationChannelProto.SHOW_BADGE, mShowBadge);
         proto.write(NotificationChannelProto.IS_DELETED, mDeleted);
