@@ -505,7 +505,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private void createInputChannel(int displayId) {
-        final InputManager inputManager = InputManager.getInstance();
+        final InputManager inputManager = mContext.getSystemService(InputManager.class);
         final InputMonitor inputMonitor =
                 mInputMonitorFactory.create(inputManager, mContext);
         final EventReceiver eventReceiver = new EventReceiver(inputMonitor,

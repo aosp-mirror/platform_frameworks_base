@@ -7357,7 +7357,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 ProtoLog.w(WM_ERROR, "unable to restore pointer icon");
             }
         } else {
-            InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_DEFAULT);
+            mContext.getSystemService(InputManager.class)
+                    .setPointerIconType(PointerIcon.TYPE_DEFAULT);
         }
     }
 
