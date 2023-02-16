@@ -1737,29 +1737,29 @@ package android.media {
 
   public class AudioManager {
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public void forceComputeCsdOnAllDevices(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public void forceUseFrameworkMel(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void forceComputeCsdOnAllDevices(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void forceUseFrameworkMel(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioRecord getCallDownlinkExtractionAudioRecord(@NonNull android.media.AudioFormat);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioTrack getCallUplinkInjectionAudioTrack(@NonNull android.media.AudioFormat);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public float getCsd();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public float getCsd();
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
     method @Nullable public static android.media.AudioHalVersionInfo getHalVersion();
     method public static final int[] getPublicStreamTypes();
     method @NonNull public java.util.List<java.lang.Integer> getReportedSurroundFormats();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public float getRs2Value();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public float getRs2Value();
     method public int getStreamMinVolumeInt(int);
     method @NonNull public java.util.Map<java.lang.Integer,java.lang.Boolean> getSurroundFormats();
     method public boolean hasRegisteredDynamicPolicy();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public boolean isCsdEnabled();
-    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE, android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS}) public boolean isFullVolumeDevice();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public boolean isCsdEnabled();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE, android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED}) public boolean isFullVolumeDevice();
     method @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public boolean isPstnCallAudioInterceptable();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public boolean isVolumeControlUsingVolumeGroups();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public boolean isVolumeControlUsingVolumeGroups();
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int requestAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String, int, int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public void setCsd(float);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public void setNotifAliasRingForTest(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setCsd(float);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setNotifAliasRingForTest(boolean);
     method public void setRampingRingerEnabled(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public void setRs2Value(float);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setRs2Value(float);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setTestDeviceConnectionState(@NonNull android.media.AudioDeviceAttributes, boolean);
   }
 
