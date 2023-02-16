@@ -2600,7 +2600,7 @@ public class MockingOomAdjusterTests {
     }
 
     private ServiceRecord bindService(ProcessRecord service, ProcessRecord client,
-            ServiceRecord record, int bindFlags, IBinder binder) {
+            ServiceRecord record, long bindFlags, IBinder binder) {
         if (record == null) {
             record = makeServiceRecord(service);
         }

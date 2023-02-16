@@ -17574,7 +17574,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean bindDeviceAdminServiceAsUser(
             @NonNull ComponentName admin, @NonNull IApplicationThread caller,
             @Nullable IBinder activtiyToken, @NonNull Intent serviceIntent,
-            @NonNull IServiceConnection connection, int flags, @UserIdInt int targetUserId) {
+            @NonNull IServiceConnection connection, long flags, @UserIdInt int targetUserId) {
         if (!mHasFeature) {
             return false;
         }

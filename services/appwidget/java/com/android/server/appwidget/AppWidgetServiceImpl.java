@@ -1212,7 +1212,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     @Override
     public boolean bindRemoteViewsService(String callingPackage, int appWidgetId, Intent intent,
             IApplicationThread caller, IBinder activtiyToken, IServiceConnection connection,
-            int flags) {
+            long flags) {
         final int userId = UserHandle.getCallingUserId();
         if (DEBUG) {
             Slog.i(TAG, "bindRemoteViewsService() " + userId);
