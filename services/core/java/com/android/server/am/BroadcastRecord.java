@@ -632,6 +632,18 @@ final class BroadcastRecord extends Binder {
         return delivery[index];
     }
 
+    boolean wasDeliveryAttempted(int index) {
+        final int deliveryState = getDeliveryState(index);
+        switch (deliveryState) {
+            case DELIVERY_DELIVERED:
+            case DELIVERY_TIMEOUT:
+            case DELIVERY_FAILURE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     void copyEnqueueTimeFrom(@NonNull BroadcastRecord replacedBroadcast) {
         originalEnqueueClockTime = enqueueClockTime;
         enqueueTime = replacedBroadcast.enqueueTime;

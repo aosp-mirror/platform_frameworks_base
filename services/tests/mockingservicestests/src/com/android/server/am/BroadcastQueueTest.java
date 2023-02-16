@@ -346,16 +346,18 @@ public class BroadcastQueueTest {
      * Helper that leverages try-with-resources to pause dispatch of
      * {@link #mHandlerThread} until released.
      */
-    private class SyncBarrier implements AutoCloseable {
+    static class SyncBarrier implements AutoCloseable {
         private final int mToken;
+        private HandlerThread mThread;
 
-        public SyncBarrier() {
-            mToken = mHandlerThread.getLooper().getQueue().postSyncBarrier();
+        SyncBarrier(HandlerThread thread) {
+            mThread = thread;
+            mToken = mThread.getLooper().getQueue().postSyncBarrier();
         }
 
         @Override
         public void close() throws Exception {
-            mHandlerThread.getLooper().getQueue().removeSyncBarrier(mToken);
+            mThread.getLooper().getQueue().removeSyncBarrier(mToken);
         }
     }
 
@@ -1120,7 +1122,7 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
                     List.of(makeRegisteredReceiver(receiverApp),
                             makeManifestReceiver(PACKAGE_GREEN, CLASS_RED),
@@ -1164,7 +1166,7 @@ public class BroadcastQueueTest {
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final Intent timeZone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, USER_GUEST, new ArrayList<>(
                     List.of(makeRegisteredReceiver(callerApp),
                             makeManifestReceiver(PACKAGE_GREEN, CLASS_RED, USER_GUEST),
@@ -1204,7 +1206,7 @@ public class BroadcastQueueTest {
         final ProcessRecord oldApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
                     List.of(makeRegisteredReceiver(oldApp),
                             makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)))));
@@ -1585,7 +1587,7 @@ public class BroadcastQueueTest {
         final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
                     List.of(makeRegisteredReceiver(receiverBlueApp, 10),
                             makeRegisteredReceiver(receiverGreenApp, 10),
@@ -1638,7 +1640,7 @@ public class BroadcastQueueTest {
         final IIntentReceiver resultToFirst = mock(IIntentReceiver.class);
         final IIntentReceiver resultToSecond = mock(IIntentReceiver.class);
 
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeOrderedBroadcastRecord(timezoneFirst, callerApp,
                     List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
                             makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)),
@@ -1729,7 +1731,7 @@ public class BroadcastQueueTest {
         timeTickFirst.putExtra(Intent.EXTRA_INDEX, "third");
         timeTickThird.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
 
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeBroadcastRecord(timeTickFirst, callerApp,
                     List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
             enqueueBroadcast(makeBroadcastRecord(timeTickSecond, callerApp,
@@ -1771,7 +1773,7 @@ public class BroadcastQueueTest {
         assertTrue(mQueue.isIdleLocked());
         assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
 
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
             enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
                     List.of(makeRegisteredReceiver(receiverApp))));
@@ -1865,7 +1867,7 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             final Object greenReceiver = makeRegisteredReceiver(receiverGreenApp);
             final Object blueReceiver = makeRegisteredReceiver(receiverBlueApp);
             final Object yellowReceiver = makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW);
