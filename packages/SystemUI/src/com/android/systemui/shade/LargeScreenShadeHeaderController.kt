@@ -17,6 +17,7 @@
 package com.android.systemui.shade
 
 import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.annotation.IdRes
 import android.app.StatusBarManager
 import android.content.res.Configuration
@@ -145,6 +146,14 @@ class LargeScreenShadeHeaderController @Inject constructor(
             updateListeners()
         }
 
+    private var customizing = false
+        set(value) {
+            if (field != value) {
+                field = value
+                updateVisibility()
+            }
+        }
+
     /**
      * Whether the QQS/QS part of the shade is visible. This is particularly important in
      * Lockscreen, as the shade is visible but QS is not.
@@ -176,14 +185,9 @@ class LargeScreenShadeHeaderController @Inject constructor(
      */
     var shadeExpandedFraction = -1f
         set(value) {
-            if (field != value) {
-                val oldAlpha = header.alpha
+            if (qsVisible && field != value) {
                 header.alpha = ShadeInterpolation.getContentAlpha(value)
                 field = value
-                if ((oldAlpha == 0f && header.alpha > 0f) ||
-                        (oldAlpha > 0f && header.alpha == 0f)) {
-                    updateVisibility()
-                }
             }
         }
 
@@ -318,6 +322,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
         dumpManager.registerDumpable(this)
         configurationController.addCallback(configurationControllerListener)
         demoModeController.addCallback(demoModeReceiver)
+        statusBarIconController.addIconGroup(iconManager)
     }
 
     override fun onViewDetached() {
@@ -325,6 +330,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
         dumpManager.unregisterDumpable(this::class.java.simpleName)
         configurationController.removeCallback(configurationControllerListener)
         demoModeController.removeCallback(demoModeReceiver)
+        statusBarIconController.removeIconGroup(iconManager)
     }
 
     fun disable(state1: Int, state2: Int, animate: Boolean) {
@@ -339,29 +345,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
                 .setDuration(duration)
                 .alpha(if (show) 0f else 1f)
                 .setInterpolator(if (show) Interpolators.ALPHA_OUT else Interpolators.ALPHA_IN)
-                .setUpdateListener {
-                    updateVisibility()
-                }
-                .setListener(endAnimationListener)
+                .setListener(CustomizerAnimationListener(show))
                 .start()
-    }
-
-    private val endAnimationListener = object : Animator.AnimatorListener {
-        override fun onAnimationCancel(animation: Animator?) {
-            clearListeners()
-        }
-
-        override fun onAnimationEnd(animation: Animator?) {
-            clearListeners()
-        }
-
-        override fun onAnimationRepeat(animation: Animator?) {}
-
-        override fun onAnimationStart(animation: Animator?) {}
-
-        private fun clearListeners() {
-            header.animate().setListener(null).setUpdateListener(null)
-        }
     }
 
     private fun loadConstraints() {
@@ -453,7 +438,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private fun updateVisibility() {
         val visibility = if (!largeScreenActive && !combinedHeaders || qsDisabled) {
             View.GONE
-        } else if (qsVisible && header.alpha > 0f) {
+        } else if (qsVisible && !customizing) {
             View.VISIBLE
         } else {
             View.INVISIBLE
@@ -502,10 +487,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
         if (visible) {
             updateSingleCarrier(qsCarrierGroupController.isSingleCarrier)
             qsCarrierGroupController.setOnSingleCarrierChangedListener { updateSingleCarrier(it) }
-            statusBarIconController.addIconGroup(iconManager)
         } else {
             qsCarrierGroupController.setOnSingleCarrierChangedListener(null)
-            statusBarIconController.removeIconGroup(iconManager)
         }
     }
 
@@ -578,4 +561,23 @@ class LargeScreenShadeHeaderController @Inject constructor(
 
     @VisibleForTesting
     internal fun simulateViewDetached() = this.onViewDetached()
+
+    inner class CustomizerAnimationListener(
+            private val enteringCustomizing: Boolean,
+    ) : AnimatorListenerAdapter() {
+        override fun onAnimationEnd(animation: Animator?) {
+            super.onAnimationEnd(animation)
+            header.animate().setListener(null)
+            if (enteringCustomizing) {
+                customizing = true
+            }
+        }
+
+        override fun onAnimationStart(animation: Animator?) {
+            super.onAnimationStart(animation)
+            if (!enteringCustomizing) {
+                customizing = false
+            }
+        }
+    }
 }
