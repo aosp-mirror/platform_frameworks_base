@@ -3268,7 +3268,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         if (Objects.equals(packageName, PLATFORM_PACKAGE_NAME)) {
             return true;
         }
-        if (!pkg.isPrivileged()) {
+        if (!(pkg.isSystem() && pkg.isPrivileged())) {
             return true;
         }
         if (!mPrivilegedPermissionAllowlistSourcePackageNames
