@@ -405,7 +405,8 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                         originatorIdentity)) {
-                    session = new SoundTriggerSession(mSoundTriggerInternal.attach(client));
+                    session = new SoundTriggerSession(mSoundTriggerInternal.attach(client,
+                                getDefaultModuleProperties(originatorIdentity)));
                 }
             }
             return new SoundTriggerSessionBinderProxy(session);
@@ -419,9 +420,21 @@ public class VoiceInteractionManagerService extends SystemService {
             identity.packageName = ActivityThread.currentOpPackageName();
             return Binder.withCleanCallingIdentity(() -> {
                 try (SafeCloseable ignored = IdentityContext.create(identity)) {
-                    return new SoundTriggerSession(mSoundTriggerInternal.attach(client));
+                    return new SoundTriggerSession(
+                            mSoundTriggerInternal.attach(client,
+                                getDefaultModuleProperties(identity)));
                 }
             });
+        }
+
+        private ModuleProperties getDefaultModuleProperties(Identity originatorIdentity) {
+            List<ModuleProperties> modulePropList = mSoundTriggerInternal
+                    .listModuleProperties(originatorIdentity);
+            if (modulePropList.isEmpty()) {
+                return null;
+            } else {
+                return modulePropList.get(0);
+            }
         }
 
         // TODO: VI Make sure the caller is the current user or profile

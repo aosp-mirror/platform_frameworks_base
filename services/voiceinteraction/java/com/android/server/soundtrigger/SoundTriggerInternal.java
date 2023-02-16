@@ -26,12 +26,14 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
+import android.media.permission.Identity;
 import android.os.IBinder;
 
 import com.android.server.voiceinteraction.VoiceInteractionManagerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Provides a local service for managing voice-related recoginition models. This is primarily used
@@ -46,7 +48,11 @@ public interface SoundTriggerInternal {
     int STATUS_ERROR = SoundTrigger.STATUS_ERROR;
     int STATUS_OK = SoundTrigger.STATUS_OK;
 
-    Session attach(@NonNull IBinder client);
+    // Attach to a specific underlying STModule
+    Session attach(@NonNull IBinder client, ModuleProperties underlyingModule);
+
+    // Enumerate possible STModules to attach to
+    List<ModuleProperties> listModuleProperties(Identity originatorIdentity);
 
     /**
      * Dumps service-wide information.
