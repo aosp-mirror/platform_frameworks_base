@@ -60,8 +60,6 @@ import static android.app.AppOpsManager.opAllowSystemBypassRestriction;
 import static android.app.AppOpsManager.opRestrictsRead;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.opToPublicName;
-import static android.content.Intent.ACTION_PACKAGE_REMOVED;
-import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
@@ -960,7 +958,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         LocalManagerRegistry.addManager(AppOpsManagerLocal.class, new AppOpsManagerLocalImpl());
     }
 
-    /** Handler for work when packages are removed or updated */
+    /** Handler for work when packages are updated */
     private BroadcastReceiver mOnPackageUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -968,19 +966,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             String pkgName = intent.getData().getEncodedSchemeSpecificPart();
             int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
 
-            if (action.equals(ACTION_PACKAGE_REMOVED) && !intent.hasExtra(EXTRA_REPLACING)) {
-                synchronized (AppOpsService.this) {
-                    UidState uidState = mUidStates.get(uid);
-                    if (uidState == null || uidState.pkgOps == null) {
-                        return;
-                    }
-                    mAppOpsCheckingService.removePackage(pkgName, UserHandle.getUserId(uid));
-                    Ops removedOps = uidState.pkgOps.remove(pkgName);
-                    if (removedOps != null) {
-                        scheduleFastWriteLocked();
-                    }
-                }
-            } else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
+            if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
                 AndroidPackage pkg = getPackageManagerInternal().getPackage(pkgName);
                 if (pkg == null) {
                     return;
@@ -1069,7 +1055,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         mHistoricalRegistry.systemReady(mContext.getContentResolver());
 
         IntentFilter packageUpdateFilter = new IntentFilter();
-        packageUpdateFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packageUpdateFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         packageUpdateFilter.addDataScheme("package");
 
