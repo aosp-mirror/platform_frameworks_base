@@ -26608,6 +26608,8 @@ package android.net {
     method @Nullable public java.security.cert.X509Certificate getUserCert();
     method @NonNull public String getUserIdentity();
     method @Nullable public String getUsername();
+    method public boolean isAutomaticIpVersionSelectionEnabled();
+    method public boolean isAutomaticNattKeepaliveTimerEnabled();
     method public boolean isBypassable();
     method public boolean isMetered();
   }
@@ -26620,6 +26622,8 @@ package android.net {
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.PrivateKey, @Nullable java.security.cert.X509Certificate);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthPsk(@NonNull byte[]);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthUsernamePassword(@NonNull String, @NonNull String, @Nullable java.security.cert.X509Certificate);
+    method @NonNull public android.net.Ikev2VpnProfile.Builder setAutomaticIpVersionSelectionEnabled(boolean);
+    method @NonNull public android.net.Ikev2VpnProfile.Builder setAutomaticNattKeepaliveTimerEnabled(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setBypassable(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setLocalRoutesExcluded(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setMaxMtu(int);
