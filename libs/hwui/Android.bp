@@ -385,7 +385,6 @@ cc_defaults {
         "external/skia/include/private",
         "external/skia/src/codec",
         "external/skia/src/core",
-        "external/skia/src/images",
     ],
 
     shared_libs: [

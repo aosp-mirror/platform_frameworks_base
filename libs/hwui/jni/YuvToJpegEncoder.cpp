@@ -2,9 +2,7 @@
 #define LOG_TAG "YuvToJpegEncoder"
 
 #include "CreateJavaOutputStreamAdaptor.h"
-#include "SkJPEGWriteUtility.h"
 #include "SkStream.h"
-#include "SkTypes.h"
 #include "YuvToJpegEncoder.h"
 #include <ui/PixelFormat.h>
 #include <hardware/hardware.h>
@@ -12,6 +10,15 @@
 #include "graphics_jni_helpers.h"
 
 #include <csetjmp>
+
+extern "C" {
+    // We need to include stdio.h before jpeg because jpeg does not include it, but uses FILE
+    // See https://github.com/libjpeg-turbo/libjpeg-turbo/issues/17
+    #include <stdio.h>
+    #include "jpeglib.h"
+    #include "jerror.h"
+    #include "jmorecfg.h"
+}
 
 YuvToJpegEncoder* YuvToJpegEncoder::create(int format, int* strides) {
     // Only ImageFormat.NV21 and ImageFormat.YUY2 are supported
@@ -39,11 +46,64 @@ void error_exit(j_common_ptr cinfo) {
     longjmp(err->jmp, 1);
 }
 
+/*
+ * Destination struct for directing decompressed pixels to a SkStream.
+ */
+static constexpr size_t kMgrBufferSize = 1024;
+struct skstream_destination_mgr : jpeg_destination_mgr {
+    skstream_destination_mgr(SkWStream* stream);
+
+    SkWStream* const fStream;
+
+    uint8_t fBuffer[kMgrBufferSize];
+};
+
+static void sk_init_destination(j_compress_ptr cinfo) {
+    skstream_destination_mgr* dest = (skstream_destination_mgr*)cinfo->dest;
+
+    dest->next_output_byte = dest->fBuffer;
+    dest->free_in_buffer = kMgrBufferSize;
+}
+
+static boolean sk_empty_output_buffer(j_compress_ptr cinfo) {
+    skstream_destination_mgr* dest = (skstream_destination_mgr*)cinfo->dest;
+
+    if (!dest->fStream->write(dest->fBuffer, kMgrBufferSize)) {
+        ERREXIT(cinfo, JERR_FILE_WRITE);
+        return FALSE;
+    }
+
+    dest->next_output_byte = dest->fBuffer;
+    dest->free_in_buffer = kMgrBufferSize;
+    return TRUE;
+}
+
+static void sk_term_destination(j_compress_ptr cinfo) {
+    skstream_destination_mgr* dest = (skstream_destination_mgr*)cinfo->dest;
+
+    size_t size = kMgrBufferSize - dest->free_in_buffer;
+    if (size > 0) {
+        if (!dest->fStream->write(dest->fBuffer, size)) {
+            ERREXIT(cinfo, JERR_FILE_WRITE);
+            return;
+        }
+    }
+
+    dest->fStream->flush();
+}
+
+skstream_destination_mgr::skstream_destination_mgr(SkWStream* stream)
+        : fStream(stream) {
+    this->init_destination = sk_init_destination;
+    this->empty_output_buffer = sk_empty_output_buffer;
+    this->term_destination = sk_term_destination;
+}
+
 bool YuvToJpegEncoder::encode(SkWStream* stream, void* inYuv, int width,
         int height, int* offsets, int jpegQuality) {
-    jpeg_compress_struct    cinfo;
-    ErrorMgr                err;
-    skjpeg_destination_mgr  sk_wstream(stream);
+    jpeg_compress_struct      cinfo;
+    ErrorMgr                  err;
+    skstream_destination_mgr  sk_wstream(stream);
 
     cinfo.err = jpeg_std_error(&err.pub);
     err.pub.error_exit = error_exit;
