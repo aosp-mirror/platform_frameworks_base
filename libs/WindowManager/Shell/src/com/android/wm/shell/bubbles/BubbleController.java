@@ -682,7 +682,7 @@ public class BubbleController implements ConfigurationChangeListener,
         return mBubblePositioner;
     }
 
-    Bubbles.SysuiProxy getSysuiProxy() {
+    public Bubbles.SysuiProxy getSysuiProxy() {
         return mSysuiProxy;
     }
 
