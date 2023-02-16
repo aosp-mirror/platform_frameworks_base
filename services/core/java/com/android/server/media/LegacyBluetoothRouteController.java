@@ -27,7 +27,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothLeAudio;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -50,10 +49,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
-class BluetoothRouteProvider {
+class LegacyBluetoothRouteController implements BluetoothRouteController {
     private static final String TAG = "BTRouteProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -69,7 +67,7 @@ class BluetoothRouteProvider {
 
     private final Context mContext;
     private final BluetoothAdapter mBluetoothAdapter;
-    private final BluetoothRoutesUpdatedListener mListener;
+    private final BluetoothRouteController.BluetoothRoutesUpdatedListener mListener;
     private final AudioManager mAudioManager;
     private final BluetoothProfileListener mProfileListener = new BluetoothProfileListener();
 
@@ -82,27 +80,8 @@ class BluetoothRouteProvider {
     private BluetoothHearingAid mHearingAidProfile;
     private BluetoothLeAudio mLeAudioProfile;
 
-    /**
-     * Create an instance of {@link BluetoothRouteProvider}.
-     * It may return {@code null} if Bluetooth is not supported on this hardware platform.
-     */
-    @Nullable
-    static BluetoothRouteProvider createInstance(@NonNull Context context,
-            @NonNull BluetoothRoutesUpdatedListener listener) {
-        Objects.requireNonNull(context);
-        Objects.requireNonNull(listener);
-
-        BluetoothManager bluetoothManager = (BluetoothManager)
-                context.getSystemService(Context.BLUETOOTH_SERVICE);
-        BluetoothAdapter btAdapter = bluetoothManager.getAdapter();
-        if (btAdapter == null) {
-            return null;
-        }
-        return new BluetoothRouteProvider(context, btAdapter, listener);
-    }
-
-    private BluetoothRouteProvider(Context context, BluetoothAdapter btAdapter,
-            BluetoothRoutesUpdatedListener listener) {
+    LegacyBluetoothRouteController(Context context, BluetoothAdapter btAdapter,
+            BluetoothRouteController.BluetoothRoutesUpdatedListener listener) {
         mContext = context;
         mBluetoothAdapter = btAdapter;
         mListener = listener;
@@ -119,7 +98,8 @@ class BluetoothRouteProvider {
      *
      * @param user {@code UserHandle} as which receiver is registered
      */
-    void start(UserHandle user) {
+    @Override
+    public void start(UserHandle user) {
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.A2DP);
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.HEARING_AID);
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.LE_AUDIO);
@@ -146,7 +126,8 @@ class BluetoothRouteProvider {
                 deviceStateChangedIntentFilter, null, null);
     }
 
-    void stop() {
+    @Override
+    public void stop() {
         mContext.unregisterReceiver(mAdapterStateChangedReceiver);
         mContext.unregisterReceiver(mDeviceStateChangedReceiver);
     }
@@ -158,7 +139,8 @@ class BluetoothRouteProvider {
      * @param routeId the id of the Bluetooth device. {@code null} denotes to clear the use of
      *               BT routes.
      */
-    void transferTo(@Nullable String routeId) {
+    @Override
+    public void transferTo(@Nullable String routeId) {
         if (routeId == null) {
             clearActiveDevices();
             return;
@@ -213,14 +195,16 @@ class BluetoothRouteProvider {
     }
 
     @Nullable
-    MediaRoute2Info getSelectedRoute() {
+    @Override
+    public MediaRoute2Info getSelectedRoute() {
         // For now, active routes can be multiple only when a pair of hearing aid devices is active.
         // Let the first active device represent them.
         return (mActiveRoutes.isEmpty() ? null : mActiveRoutes.get(0).mRoute);
     }
 
     @NonNull
-    List<MediaRoute2Info> getTransferableRoutes() {
+    @Override
+    public List<MediaRoute2Info> getTransferableRoutes() {
         List<MediaRoute2Info> routes = getAllBluetoothRoutes();
         for (BluetoothRouteInfo btRoute : mActiveRoutes) {
             routes.remove(btRoute.mRoute);
@@ -229,7 +213,8 @@ class BluetoothRouteProvider {
     }
 
     @NonNull
-    List<MediaRoute2Info> getAllBluetoothRoutes() {
+    @Override
+    public List<MediaRoute2Info> getAllBluetoothRoutes() {
         List<MediaRoute2Info> routes = new ArrayList<>();
         List<String> routeIds = new ArrayList<>();
 
@@ -255,7 +240,8 @@ class BluetoothRouteProvider {
      *
      * @return true if devices can be handled by the provider.
      */
-    boolean updateVolumeForDevices(int devices, int volume) {
+    @Override
+    public boolean updateVolumeForDevices(int devices, int volume) {
         int routeType;
         if ((devices & (AudioSystem.DEVICE_OUT_HEARING_AID)) != 0) {
             routeType = MediaRoute2Info.TYPE_HEARING_AID;
@@ -413,10 +399,6 @@ class BluetoothRouteProvider {
                 addActiveRoute(btRoute);
             }
         }
-    }
-
-    interface BluetoothRoutesUpdatedListener {
-        void onBluetoothRoutesUpdated(@NonNull List<MediaRoute2Info> routes);
     }
 
     private static class BluetoothRouteInfo {
