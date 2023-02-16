@@ -784,8 +784,13 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         mSupportSandboxedDetectionService = supportSandboxedDetectionService;
     }
 
+    // Do nothing. This method should not be abstract.
+    // TODO (b/269355519) un-subclass AOHD.
     @Override
-    void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
+    void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {}
+
+    void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory,
+            @Nullable SoundTrigger.ModuleProperties moduleProperties) {
         if (mSupportSandboxedDetectionService) {
             initAndVerifyDetector(options, sharedMemory, mInternalCallback,
                     DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
@@ -793,9 +798,18 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         try {
             Identity identity = new Identity();
             identity.packageName = ActivityThread.currentOpPackageName();
+            if (moduleProperties == null) {
+                List<SoundTrigger.ModuleProperties> modulePropList =
+                        mModelManagementService.listModuleProperties(identity);
+                if (modulePropList.size() > 0) {
+                    moduleProperties = modulePropList.get(0);
+                }
+                // (@atneya) intentionally let a null moduleProperties through until
+                // all CTS tests are fixed
+            }
             mSoundTriggerSession =
                     mModelManagementService.createSoundTriggerSessionAsOriginator(
-                            identity, mBinder);
+                            identity, mBinder, moduleProperties);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

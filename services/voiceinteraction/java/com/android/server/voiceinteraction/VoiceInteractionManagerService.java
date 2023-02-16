@@ -377,7 +377,8 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public @NonNull IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
-                @NonNull Identity originatorIdentity, IBinder client) {
+                @NonNull Identity originatorIdentity, IBinder client,
+                @NonNull ModuleProperties moduleProperties) {
             Objects.requireNonNull(originatorIdentity);
             boolean forHotwordDetectionService;
             synchronized (VoiceInteractionManagerServiceStub.this) {
@@ -396,7 +397,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 originatorIdentity.uid = Binder.getCallingUid();
                 originatorIdentity.pid = Binder.getCallingPid();
                 session = new SoundTriggerSessionPermissionsDecorator(
-                        createSoundTriggerSessionForSelfIdentity(client),
+                        createSoundTriggerSessionForSelfIdentity(client, moduleProperties),
                         mContext,
                         originatorIdentity);
             } else {
@@ -406,14 +407,14 @@ public class VoiceInteractionManagerService extends SystemService {
                 try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                         originatorIdentity)) {
                     session = new SoundTriggerSession(mSoundTriggerInternal.attach(client,
-                                getDefaultModuleProperties(originatorIdentity)));
+                                moduleProperties));
                 }
             }
             return new SoundTriggerSessionBinderProxy(session);
         }
 
         private IVoiceInteractionSoundTriggerSession createSoundTriggerSessionForSelfIdentity(
-                IBinder client) {
+                IBinder client, ModuleProperties moduleProperties) {
             Identity identity = new Identity();
             identity.uid = Process.myUid();
             identity.pid = Process.myPid();
@@ -421,20 +422,17 @@ public class VoiceInteractionManagerService extends SystemService {
             return Binder.withCleanCallingIdentity(() -> {
                 try (SafeCloseable ignored = IdentityContext.create(identity)) {
                     return new SoundTriggerSession(
-                            mSoundTriggerInternal.attach(client,
-                                getDefaultModuleProperties(identity)));
+                            mSoundTriggerInternal.attach(client, moduleProperties));
                 }
             });
         }
 
-        private ModuleProperties getDefaultModuleProperties(Identity originatorIdentity) {
-            List<ModuleProperties> modulePropList = mSoundTriggerInternal
-                    .listModuleProperties(originatorIdentity);
-            if (modulePropList.isEmpty()) {
-                return null;
-            } else {
-                return modulePropList.get(0);
+        @Override
+        public List<ModuleProperties> listModuleProperties(Identity originatorIdentity) {
+            synchronized (VoiceInteractionManagerServiceStub.this) {
+                enforceIsCurrentVoiceInteractionService();
             }
+            return mSoundTriggerInternal.listModuleProperties(originatorIdentity);
         }
 
         // TODO: VI Make sure the caller is the current user or profile

@@ -24,6 +24,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.app.Service;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
@@ -33,7 +35,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
+import android.hardware.soundtrigger.SoundTrigger;
 import android.media.voice.KeyphraseModelManager;
+import android.media.permission.Identity;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -386,6 +390,22 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
+     * List available ST modules to attach to for test purposes.
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public final List<SoundTrigger.ModuleProperties> listModuleProperties() {
+        Identity identity = new Identity();
+        identity.packageName = ActivityThread.currentOpPackageName();
+        try {
+            return mSystemService.listModuleProperties(identity);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates an {@link AlwaysOnHotwordDetector} for the given keyphrase and locale.
      * This instance must be retained and used by the client.
      * Calling this a second time invalidates the previously created hotword detector
@@ -422,7 +442,8 @@ public class VoiceInteractionService extends Service {
             @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
                 /* supportHotwordDetectionService= */ false, /* options= */ null,
-                /* sharedMemory= */ null, /* executor= */ null, callback);
+                /* sharedMemory= */ null, /* moduleProperties */ null,
+                /* executor= */ null, callback);
     }
 
     /**
@@ -461,8 +482,35 @@ public class VoiceInteractionService extends Service {
         Objects.requireNonNull(callback);
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
                 /* supportHotwordDetectionService= */ false, /* options= */ null,
-                /* sharedMemory= */ null, executor, callback);
+                /* sharedMemory= */ null, /* moduleProperties */ null, executor, callback);
     }
+
+    /**
+     * Same as {@link createAlwaysOnHotwordDetector(String, Locale, Executor,
+     * AlwaysOnHotwordDetector.Callback)}, but allow explicit selection of the underlying ST
+     * module to attach to.
+     * Use {@link listModuleProperties} to get available modules to attach to.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION)
+    @NonNull
+    public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorForTest(
+            @NonNull String keyphrase, @SuppressLint("UseIcu") @NonNull Locale locale,
+            @NonNull SoundTrigger.ModuleProperties moduleProperties,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AlwaysOnHotwordDetector.Callback callback) {
+
+        Objects.requireNonNull(keyphrase);
+        Objects.requireNonNull(locale);
+        Objects.requireNonNull(moduleProperties);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
+                /* supportHotwordDetectionService= */ false, /* options= */ null,
+                /* sharedMemory= */ null, moduleProperties, executor, callback);
+    }
+
 
     /**
      * Create an {@link AlwaysOnHotwordDetector} and trigger a {@link HotwordDetectionService}
@@ -515,7 +563,7 @@ public class VoiceInteractionService extends Service {
             @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
                 /* supportHotwordDetectionService= */ true, options, sharedMemory,
-                /* executor= */ null, callback);
+                /* modulProperties */ null, /* executor= */ null, callback);
     }
 
     /**
@@ -566,9 +614,38 @@ public class VoiceInteractionService extends Service {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
-                /* supportHotwordDetectionService= */ true, options, sharedMemory, executor,
-                callback);
+                /* supportHotwordDetectionService= */ true, options, sharedMemory,
+                /* moduleProperties */ null, executor, callback);
     }
+
+    /**
+     * Same as {@link createAlwaysOnHotwordDetector(String, Locale,
+     * PersistableBundle, SharedMemory, Executor, AlwaysOnHotwordDetector.Callback)},
+     * but allow explicit selection of the underlying ST module to attach to.
+     * Use {@link listModuleProperties} to get available modules to attach to.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION)
+    @NonNull
+    public final AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorForTest(
+            @NonNull String keyphrase, @SuppressLint("UseIcu") @NonNull Locale locale,
+            @Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory,
+            @NonNull SoundTrigger.ModuleProperties moduleProperties,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull AlwaysOnHotwordDetector.Callback callback) {
+
+        Objects.requireNonNull(keyphrase);
+        Objects.requireNonNull(locale);
+        Objects.requireNonNull(moduleProperties);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
+                /* supportHotwordDetectionService= */ true, options, sharedMemory,
+                moduleProperties, executor, callback);
+    }
+
+
 
     private AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorInternal(
             @SuppressLint("MissingNullability") String keyphrase,  // TODO: nullability properly
@@ -576,6 +653,7 @@ public class VoiceInteractionService extends Service {
             boolean supportHotwordDetectionService,
             @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
+            @Nullable SoundTrigger.ModuleProperties moduleProperties,
             @Nullable @CallbackExecutor Executor executor,
             @SuppressLint("MissingNullability") AlwaysOnHotwordDetector.Callback callback) {
 
@@ -609,7 +687,8 @@ public class VoiceInteractionService extends Service {
 
             try {
                 dspDetector.registerOnDestroyListener(this::onHotwordDetectorDestroyed);
-                dspDetector.initialize(options, sharedMemory);
+                // If moduleProperties is null, the default STModule is used.
+                dspDetector.initialize(options, sharedMemory, moduleProperties);
             } catch (Exception e) {
                 mActiveDetectors.remove(dspDetector);
                 dspDetector.destroy();
