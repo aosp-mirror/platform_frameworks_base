@@ -47,6 +47,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
+import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.common.bubbles.BubbleInfo;
 
 import java.io.PrintWriter;
@@ -87,8 +88,18 @@ public class Bubble implements BubbleViewProvider {
     private String mAppName;
     private ShortcutInfo mShortcutInfo;
     private String mMetadataShortcutId;
+
+    /**
+     * If {@link BubbleController#isShowingAsBubbleBar()} is true, the only view that will be
+     * populated will be {@link #mBubbleBarExpandedView}. If it is false, {@link #mIconView}
+     * and {@link #mExpandedView} will be populated.
+     */
+    @Nullable
     private BadgedImageView mIconView;
+    @Nullable
     private BubbleExpandedView mExpandedView;
+    @Nullable
+    private BubbleBarExpandedView mBubbleBarExpandedView;
 
     private BubbleViewInfoTask mInflationTask;
     private boolean mInflateSynchronously;
@@ -327,10 +338,16 @@ public class Bubble implements BubbleViewProvider {
         return mIconView;
     }
 
-    @Override
     @Nullable
+    @Override
     public BubbleExpandedView getExpandedView() {
         return mExpandedView;
+    }
+
+    @Nullable
+    @Override
+    public BubbleBarExpandedView getBubbleBarExpandedView() {
+        return mBubbleBarExpandedView;
     }
 
     @Nullable
@@ -363,6 +380,9 @@ public class Bubble implements BubbleViewProvider {
         if (mExpandedView != null) {
             mExpandedView.cleanUpExpandedState();
             mExpandedView = null;
+        }
+        if (mBubbleBarExpandedView != null) {
+            mBubbleBarExpandedView.cleanUpExpandedState();
         }
         if (mIntent != null) {
             mIntent.unregisterCancelListener(mIntentCancelListener);
@@ -445,7 +465,7 @@ public class Bubble implements BubbleViewProvider {
     }
 
     boolean isInflated() {
-        return mIconView != null && mExpandedView != null;
+        return (mIconView != null && mExpandedView != null) || mBubbleBarExpandedView != null;
     }
 
     void stopInflation() {
@@ -477,6 +497,9 @@ public class Bubble implements BubbleViewProvider {
 
         if (mExpandedView != null) {
             mExpandedView.update(this /* bubble */);
+        }
+        if (mBubbleBarExpandedView != null) {
+            mBubbleBarExpandedView.update(this /* bubble */);
         }
         if (mIconView != null) {
             mIconView.setRenderedBubble(this /* bubble */);
@@ -607,6 +630,9 @@ public class Bubble implements BubbleViewProvider {
      */
     @Override
     public int getTaskId() {
+        if (mBubbleBarExpandedView != null) {
+            return mBubbleBarExpandedView.getTaskId();
+        }
         return mExpandedView != null ? mExpandedView.getTaskId() : mTaskId;
     }
 

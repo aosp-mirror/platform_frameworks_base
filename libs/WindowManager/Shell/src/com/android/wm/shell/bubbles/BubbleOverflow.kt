@@ -29,6 +29,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import com.android.wm.shell.R
+import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView
 
 class BubbleOverflow(
     private val context: Context,
@@ -134,6 +135,10 @@ class BubbleOverflow(
 
     override fun getExpandedView(): BubbleExpandedView? {
         return expandedView
+    }
+
+    override fun getBubbleBarExpandedView(): BubbleBarExpandedView? {
+        return null
     }
 
     override fun getDotColor(): Int {
