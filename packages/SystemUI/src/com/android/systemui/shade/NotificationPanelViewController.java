@@ -4636,11 +4636,6 @@ public final class NotificationPanelViewController implements Dumpable {
 
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
-                    if (mTracking) {
-                        // TODO(b/247126247) fix underlying issue. Should be ACTION_POINTER_DOWN.
-                        mShadeLog.d("Don't intercept down event while already tracking");
-                        return false;
-                    }
                     mCentralSurfaces.userActivity();
                     mAnimatingOnDown = mHeightAnimator != null && !mIsSpringBackAnimation;
                     mMinExpandHeight = 0.0f;
@@ -4726,11 +4721,6 @@ public final class NotificationPanelViewController implements Dumpable {
                     // see b/193350347
                     mShadeLog.logMotionEvent(event,
                             "onTouch: duplicate down event detected... ignoring");
-                    return true;
-                }
-                if (mTracking) {
-                    // TODO(b/247126247) fix underlying issue. Should be ACTION_POINTER_DOWN.
-                    mShadeLog.d("Don't handle down event while already tracking");
                     return true;
                 }
                 mLastTouchDownTime = event.getDownTime();
