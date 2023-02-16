@@ -478,8 +478,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                         case Constants.KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS:
                         case Constants.KEY_RUNTIME_MIN_GUARANTEE_MS:
                         case Constants.KEY_RUNTIME_MIN_EJ_GUARANTEE_MS:
-                        case Constants.KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS:
-                        case Constants.KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS:
                         case Constants.KEY_RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS:
                         case Constants.KEY_RUNTIME_USER_INITIATED_LIMIT_MS:
                         case Constants.KEY_RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR:
@@ -574,10 +572,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 "runtime_free_quota_max_limit_ms";
         private static final String KEY_RUNTIME_MIN_GUARANTEE_MS = "runtime_min_guarantee_ms";
         private static final String KEY_RUNTIME_MIN_EJ_GUARANTEE_MS = "runtime_min_ej_guarantee_ms";
-        private static final String KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS =
-                "runtime_min_data_transfer_guarantee_ms";
-        private static final String KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS =
-                "runtime_data_transfer_limit_ms";
         private static final String KEY_RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS =
                 "runtime_min_user_initiated_guarantee_ms";
         private static final String KEY_RUNTIME_USER_INITIATED_LIMIT_MS =
@@ -616,10 +610,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         public static final long DEFAULT_RUNTIME_MIN_GUARANTEE_MS = 10 * MINUTE_IN_MILLIS;
         @VisibleForTesting
         public static final long DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS = 3 * MINUTE_IN_MILLIS;
-        public static final long DEFAULT_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS =
-                DEFAULT_RUNTIME_MIN_GUARANTEE_MS;
-        public static final long DEFAULT_RUNTIME_DATA_TRANSFER_LIMIT_MS =
-                DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
         public static final long DEFAULT_RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS =
                 Math.max(10 * MINUTE_IN_MILLIS, DEFAULT_RUNTIME_MIN_GUARANTEE_MS);
         public static final long DEFAULT_RUNTIME_USER_INITIATED_LIMIT_MS =
@@ -737,18 +727,6 @@ public class JobSchedulerService extends com.android.server.SystemService
          * The minimum amount of time we try to guarantee EJs will run for.
          */
         public long RUNTIME_MIN_EJ_GUARANTEE_MS = DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS;
-
-        /**
-         * The minimum amount of time we try to guarantee normal data transfer jobs will run for.
-         */
-        public long RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS =
-                DEFAULT_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS;
-
-        /**
-         * The maximum amount of time we will let a normal data transfer job run for. This will only
-         * apply if there are no other limits that apply to the specific data transfer job.
-         */
-        public long RUNTIME_DATA_TRANSFER_LIMIT_MS = DEFAULT_RUNTIME_DATA_TRANSFER_LIMIT_MS;
 
         /**
          * The minimum amount of time we try to guarantee normal user-initiated jobs will run for.
@@ -885,8 +863,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                     KEY_RUNTIME_MIN_GUARANTEE_MS, KEY_RUNTIME_MIN_EJ_GUARANTEE_MS,
                     KEY_RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR,
-                    KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
-                    KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS,
                     KEY_RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS,
                     KEY_RUNTIME_USER_INITIATED_LIMIT_MS,
                     KEY_RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS,
@@ -903,17 +879,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             RUNTIME_FREE_QUOTA_MAX_LIMIT_MS = Math.max(RUNTIME_MIN_GUARANTEE_MS,
                     properties.getLong(KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                             DEFAULT_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS));
-            // Make sure min runtime is at least as long as regular jobs.
-            RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS = Math.max(RUNTIME_MIN_GUARANTEE_MS,
-                    properties.getLong(
-                            KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
-                            DEFAULT_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS));
-            // Max limit should be at least the min guarantee AND the free quota.
-            RUNTIME_DATA_TRANSFER_LIMIT_MS = Math.max(RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
-                    Math.max(RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
-                            properties.getLong(
-                                    KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS,
-                                    DEFAULT_RUNTIME_DATA_TRANSFER_LIMIT_MS)));
             // Make sure min runtime is at least as long as regular jobs.
             RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS = Math.max(RUNTIME_MIN_GUARANTEE_MS,
                     properties.getLong(
@@ -993,10 +958,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(KEY_RUNTIME_MIN_EJ_GUARANTEE_MS, RUNTIME_MIN_EJ_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS, RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                     .println();
-            pw.print(KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
-                    RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS).println();
-            pw.print(KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS,
-                    RUNTIME_DATA_TRANSFER_LIMIT_MS).println();
             pw.print(KEY_RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS,
                     RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_USER_INITIATED_LIMIT_MS,
@@ -3289,7 +3250,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (job.shouldTreatAsUserInitiatedJob()
                     && checkRunUserInitiatedJobsPermission(
                             job.getSourceUid(), job.getSourcePackageName())) {
-                if (job.getJob().isDataTransfer()) {
+                if (job.getJob().getRequiredNetwork() != null) { // UI+DT
                     final long estimatedTransferTimeMs =
                             mConnectivityController.getEstimatedTransferTimeMs(job);
                     if (estimatedTransferTimeMs == ConnectivityController.UNKNOWN_TIME) {
@@ -3306,9 +3267,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                             ));
                 }
                 return mConstants.RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS;
-            } else if (job.getJob().isDataTransfer()) {
-                // For now, don't increase a bg data transfer's minimum guarantee.
-                return mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS;
             } else if (job.shouldTreatAsExpeditedJob()) {
                 // Don't guarantee RESTRICTED jobs more than 5 minutes.
                 return job.getEffectiveStandbyBucket() != RESTRICTED_INDEX
@@ -3326,7 +3284,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             final boolean allowLongerJob = job.shouldTreatAsUserInitiatedJob()
                     && checkRunUserInitiatedJobsPermission(
                             job.getSourceUid(), job.getSourcePackageName());
-            if (job.getJob().isDataTransfer() && allowLongerJob) { // UI+DT
+            if (job.getJob().getRequiredNetwork() != null && allowLongerJob) { // UI+DT
                 return mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS;
             }
             if (allowLongerJob) { // UI with LRJ permission
@@ -3334,9 +3292,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             if (job.shouldTreatAsUserInitiatedJob()) {
                 return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
-            }
-            if (job.getJob().isDataTransfer()) {
-                return mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS;
             }
             return Math.min(mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                     mConstants.USE_TARE_POLICY

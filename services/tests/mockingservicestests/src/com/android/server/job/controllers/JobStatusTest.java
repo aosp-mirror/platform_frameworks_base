@@ -170,6 +170,7 @@ public class JobStatusTest {
         final JobInfo jobInfo =
                 new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                         .setUserInitiated(true)
+                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                         .build();
         JobStatus job = createJobStatus(jobInfo);
         assertTrue(job.canRunInBatterySaver());
@@ -216,6 +217,7 @@ public class JobStatusTest {
         final JobInfo jobInfo =
                 new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                         .setUserInitiated(true)
+                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                         .build();
         JobStatus job = createJobStatus(jobInfo);
         assertTrue(job.canRunInDoze());
@@ -236,6 +238,7 @@ public class JobStatusTest {
         // User-initiated jobs are always user-visible unless they've been demoted.
         jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                 .setUserInitiated(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
         job = createJobStatus(jobInfo);
 
@@ -507,6 +510,7 @@ public class JobStatusTest {
 
         jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                 .setUserInitiated(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
         job = createJobStatus(jobInfo);
 

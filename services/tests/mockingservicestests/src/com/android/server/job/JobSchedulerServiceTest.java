@@ -234,15 +234,9 @@ public class JobSchedulerServiceTest {
                 createJobInfo(5).setPriority(JobInfo.PRIORITY_HIGH));
         JobStatus jobDef = createJobStatus("testGetMinJobExecutionGuaranteeMs",
                 createJobInfo(6));
-        JobStatus jobDT = createJobStatus("testGetMinJobExecutionGuaranteeMs",
-                createJobInfo(7)
-                        .setDataTransfer(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
-        JobStatus jobUI = createJobStatus("testGetMinJobExecutionGuaranteeMs",
-                createJobInfo(8)); // TODO(255371817): add setUserInitiated(true)
         JobStatus jobUIDT = createJobStatus("testGetMinJobExecutionGuaranteeMs",
-                // TODO(255371817): add setUserInitiated(true)
                 createJobInfo(9)
-                        .setDataTransfer(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
+                        .setUserInitiated(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
 
         spyOn(ejMax);
         spyOn(ejHigh);
@@ -250,8 +244,6 @@ public class JobSchedulerServiceTest {
         spyOn(ejHighDowngraded);
         spyOn(jobHigh);
         spyOn(jobDef);
-        spyOn(jobDT);
-        spyOn(jobUI);
         spyOn(jobUIDT);
 
         when(ejMax.shouldTreatAsExpeditedJob()).thenReturn(true);
@@ -260,14 +252,11 @@ public class JobSchedulerServiceTest {
         when(ejHighDowngraded.shouldTreatAsExpeditedJob()).thenReturn(false);
         when(jobHigh.shouldTreatAsExpeditedJob()).thenReturn(false);
         when(jobDef.shouldTreatAsExpeditedJob()).thenReturn(false);
-        when(jobUI.shouldTreatAsUserInitiatedJob()).thenReturn(true);
         when(jobUIDT.shouldTreatAsUserInitiatedJob()).thenReturn(true);
 
         ConnectivityController connectivityController = mService.getConnectivityController();
         spyOn(connectivityController);
         mService.mConstants.RUNTIME_MIN_GUARANTEE_MS = 10 * MINUTE_IN_MILLIS;
-        mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS = 15 * MINUTE_IN_MILLIS;
-        mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS = 60 * MINUTE_IN_MILLIS;
         mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR = 1.5f;
         mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS = HOUR_IN_MILLIS;
         mService.mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS = 6 * HOUR_IN_MILLIS;
@@ -284,37 +273,14 @@ public class JobSchedulerServiceTest {
                 mService.getMinJobExecutionGuaranteeMs(jobHigh));
         assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
                 mService.getMinJobExecutionGuaranteeMs(jobDef));
-        grantRunUserInitiatedJobsPermission(false); // Without permission
-        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
-                mService.getMinJobExecutionGuaranteeMs(jobDT));
-        grantRunUserInitiatedJobsPermission(true); // With permission
-        doReturn(ConnectivityController.UNKNOWN_TIME)
-                .when(connectivityController).getEstimatedTransferTimeMs(any());
-        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
-                mService.getMinJobExecutionGuaranteeMs(jobDT));
-        doReturn(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS / 2)
-                .when(connectivityController).getEstimatedTransferTimeMs(any());
-        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
-                mService.getMinJobExecutionGuaranteeMs(jobDT));
-        doReturn(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS * 2)
-                .when(connectivityController).getEstimatedTransferTimeMs(any());
-        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
-                mService.getMinJobExecutionGuaranteeMs(jobDT));
-        doReturn(mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS * 2)
-                .when(connectivityController).getEstimatedTransferTimeMs(any());
-        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
-                mService.getMinJobExecutionGuaranteeMs(jobDT));
         // UserInitiated
         grantRunUserInitiatedJobsPermission(false);
-        // Permission isn't granted, so it should just be treated as a regular data transfer job.
-        assertEquals(mService.mConstants.RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
-                mService.getMinJobExecutionGuaranteeMs(jobUIDT));
         // Permission isn't granted, so it should just be treated as a regular job.
         assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
-                mService.getMinJobExecutionGuaranteeMs(jobUI));
+                mService.getMinJobExecutionGuaranteeMs(jobUIDT));
         grantRunUserInitiatedJobsPermission(true); // With permission
-        assertEquals(mService.mConstants.RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS,
-                mService.getMinJobExecutionGuaranteeMs(jobUI));
+        assertEquals(mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobUIDT));
         doReturn(ConnectivityController.UNKNOWN_TIME)
                 .when(connectivityController).getEstimatedTransferTimeMs(any());
         assertEquals(mService.mConstants.RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_MS,
@@ -338,21 +304,10 @@ public class JobSchedulerServiceTest {
 
     @Test
     public void testGetMaxJobExecutionTimeMs() {
-        JobStatus jobDT = createJobStatus("testGetMaxJobExecutionTimeMs",
-                createJobInfo(7)
-                        .setDataTransfer(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
-        JobStatus jobUI = createJobStatus("testGetMaxJobExecutionTimeMs",
-                createJobInfo(9)); // TODO(255371817): add setUserInitiated(true)
         JobStatus jobUIDT = createJobStatus("testGetMaxJobExecutionTimeMs",
-                // TODO(255371817): add setUserInitiated(true)
                 createJobInfo(10)
-                        .setDataTransfer(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
-
-        spyOn(jobDT);
-        spyOn(jobUI);
+                        .setUserInitiated(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
         spyOn(jobUIDT);
-
-        when(jobUI.shouldTreatAsUserInitiatedJob()).thenReturn(true);
         when(jobUIDT.shouldTreatAsUserInitiatedJob()).thenReturn(true);
 
         QuotaController quotaController = mService.getQuotaController();
@@ -365,17 +320,9 @@ public class JobSchedulerServiceTest {
                 .when(quotaController).getMaxJobExecutionTimeMsLocked(any());
 
         grantRunUserInitiatedJobsPermission(true);
-        assertEquals(mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS,
-                mService.getMaxJobExecutionTimeMs(jobDT));
-        assertEquals(mService.mConstants.RUNTIME_USER_INITIATED_LIMIT_MS,
-                mService.getMaxJobExecutionTimeMs(jobUI));
         assertEquals(mService.mConstants.RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUIDT));
         grantRunUserInitiatedJobsPermission(false);
-        assertEquals(mService.mConstants.RUNTIME_DATA_TRANSFER_LIMIT_MS,
-                mService.getMaxJobExecutionTimeMs(jobDT));
-        assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
-                mService.getMaxJobExecutionTimeMs(jobUI));
         assertEquals(mService.mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                 mService.getMaxJobExecutionTimeMs(jobUIDT));
     }
@@ -478,7 +425,8 @@ public class JobSchedulerServiceTest {
     @Test
     public void testGetRescheduleJobForFailure_userStopped() {
         JobStatus uiJob = createJobStatus("testGetRescheduleJobForFailure",
-                createJobInfo().setUserInitiated(true));
+                createJobInfo().setUserInitiated(true)
+                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY));
         JobStatus uvJob = createJobStatus("testGetRescheduleJobForFailure", createJobInfo());
         spyOn(uvJob);
         doReturn(true).when(uvJob).isUserVisibleJob();

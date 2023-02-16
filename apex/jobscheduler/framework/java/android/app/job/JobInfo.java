@@ -397,18 +397,11 @@ public class JobInfo implements Parcelable {
     public static final int FLAG_EXPEDITED = 1 << 4;
 
     /**
-     * Whether it's a data transfer job or not.
-     *
-     * @hide
-     */
-    public static final int FLAG_DATA_TRANSFER = 1 << 5;
-
-    /**
      * Whether it's a user initiated job or not.
      *
      * @hide
      */
-    public static final int FLAG_USER_INITIATED = 1 << 6;
+    public static final int FLAG_USER_INITIATED = 1 << 5;
 
     /**
      * @hide
@@ -735,13 +728,6 @@ public class JobInfo implements Parcelable {
      */
     public boolean isExpedited() {
         return (flags & FLAG_EXPEDITED) != 0;
-    }
-
-    /**
-     * @see JobInfo.Builder#setDataTransfer(boolean)
-     */
-    public boolean isDataTransfer() {
-        return (flags & FLAG_DATA_TRANSFER) != 0;
     }
 
     /**
@@ -1850,39 +1836,6 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Indicates that this job will be used to transfer data to or from a remote server. The
-         * system could attempt to run a data transfer job longer than a regular job if the data
-         * being transferred is potentially very large and can take a long time to complete.
-         *
-         * <p>
-         * You must provide an estimate of the payload size via
-         * {@link #setEstimatedNetworkBytes(long, long)} when scheduling the job or use
-         * {@link JobService#updateEstimatedNetworkBytes(JobParameters, long, long)} or
-         * {@link JobService#updateEstimatedNetworkBytes(JobParameters, JobWorkItem, long, long)}
-         * shortly after the job starts.
-         *
-         * <p>
-         * For user-initiated transfers that must be started immediately, call
-         * {@link #setUserInitiated(boolean) setUserInitiated(true)}. Otherwise, the system may
-         * defer the job to a more opportune time.
-         *
-         * <p>
-         * If you want to perform more than one data transfer job, consider enqueuing multiple
-         * {@link JobWorkItem JobWorkItems} along with {@link #setDataTransfer(boolean)}.
-         *
-         * @see JobInfo#isDataTransfer()
-         */
-        @NonNull
-        public Builder setDataTransfer(boolean dataTransfer) {
-            if (dataTransfer) {
-                mFlags |= FLAG_DATA_TRANSFER;
-            } else {
-                mFlags &= (~FLAG_DATA_TRANSFER);
-            }
-            return this;
-        }
-
-        /**
          * Indicates that this job is being scheduled to fulfill an explicit user request.
          * As such, user-initiated jobs can only be scheduled when the app is in the foreground
          * or in a state where launching an activity is allowed, as defined
@@ -1907,6 +1860,11 @@ public class JobInfo implements Parcelable {
          * If the app doesn't hold the {@link android.Manifest.permission#RUN_USER_INITIATED_JOBS}
          * permission when scheduling a user-initiated job, JobScheduler will throw a
          * {@link SecurityException}.
+         *
+         * <p>
+         * In {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, user-initiated jobs can only
+         * be used for network data transfers. As such, they must specify a required network via
+         * {@link #setRequiredNetwork(NetworkRequest)} or {@link #setRequiredNetworkType(int)}.
          *
          * <p>
          * These jobs will not be subject to quotas and will be started immediately once scheduled
@@ -2179,10 +2137,6 @@ public class JobInfo implements Parcelable {
             if (isPeriodic) {
                 throw new IllegalArgumentException("An expedited job cannot be periodic");
             }
-            if ((flags & FLAG_DATA_TRANSFER) != 0) {
-                throw new IllegalArgumentException(
-                        "An expedited job cannot also be a data transfer job");
-            }
             if (isUserInitiated) {
                 throw new IllegalArgumentException("An expedited job cannot be user-initiated");
             }
@@ -2199,24 +2153,6 @@ public class JobInfo implements Parcelable {
             if (triggerContentUris != null && triggerContentUris.length > 0) {
                 throw new IllegalArgumentException(
                         "Can't call addTriggerContentUri() on an expedited job");
-            }
-        }
-
-        if ((flags & FLAG_DATA_TRANSFER) != 0) {
-            if (backoffPolicy == BACKOFF_POLICY_LINEAR) {
-                throw new IllegalArgumentException(
-                        "A data transfer job cannot have a linear backoff policy.");
-            }
-            if (hasLateConstraint) {
-                throw new IllegalArgumentException("A data transfer job cannot have a deadline");
-            }
-            if ((flags & FLAG_PREFETCH) != 0) {
-                throw new IllegalArgumentException(
-                        "A data transfer job cannot also be a prefetch job");
-            }
-            if (networkRequest == null) {
-                throw new IllegalArgumentException(
-                        "A data transfer job must specify a valid network type");
             }
         }
 
@@ -2244,6 +2180,15 @@ public class JobInfo implements Parcelable {
             if (triggerContentUris != null && triggerContentUris.length > 0) {
                 throw new IllegalArgumentException(
                         "Can't call addTriggerContentUri() on a user-initiated job");
+            }
+            // UIDTs
+            if (networkRequest == null) {
+                throw new IllegalArgumentException(
+                        "A user-initaited data transfer job must specify a valid network type");
+            }
+            if (backoffPolicy == BACKOFF_POLICY_LINEAR) {
+                throw new IllegalArgumentException(
+                        "A user-initiated data transfer job cannot have a linear backoff policy.");
             }
         }
     }
