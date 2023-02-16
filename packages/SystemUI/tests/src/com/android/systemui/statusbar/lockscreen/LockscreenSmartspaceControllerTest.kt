@@ -780,9 +780,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun setPrimaryTextColor(color: Int) {
             }
 
-            override fun setIsDreaming(isDreaming: Boolean) {
-            }
-
             override fun setUiSurface(uiSurface: String) {
             }
 
@@ -811,9 +808,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             override fun setPrimaryTextColor(color: Int) {
             }
 
-            override fun setIsDreaming(isDreaming: Boolean) {
-            }
-
             override fun setUiSurface(uiSurface: String) {
             }
 
@@ -836,9 +830,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             }
 
             override fun setPrimaryTextColor(color: Int) {
-            }
-
-            override fun setIsDreaming(isDreaming: Boolean) {
             }
 
             override fun setUiSurface(uiSurface: String) {
