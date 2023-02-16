@@ -82,15 +82,15 @@ fun GetCredentialScreen(
     if (getCredentialUiState.currentScreenState == GetScreenState.REMOTE_ONLY) {
         RemoteCredentialSnackBarScreen(
             onClick = viewModel::getFlowOnMoreOptionOnSnackBarSelected,
-            onCancel = viewModel::onCancel,
+            onCancel = viewModel::onUserCancel,
         )
     } else if (getCredentialUiState.currentScreenState
         == GetScreenState.UNLOCKED_AUTH_ENTRIES_ONLY) {
         EmptyAuthEntrySnackBarScreen(
             authenticationEntryList =
             getCredentialUiState.providerDisplayInfo.authenticationEntryList,
-            onCancel = viewModel::onCancel,
-            onLastLokcedAuthEntryNotFound = viewModel::onLastLockedAuthEntryNotFoundError,
+            onCancel = viewModel::silentlyFinishActivity,
+            onLastLockedAuthEntryNotFound = viewModel::onLastLockedAuthEntryNotFoundError,
         )
     } else {
         ModalBottomSheet(
@@ -118,7 +118,7 @@ fun GetCredentialScreen(
                                 onEntrySelected = viewModel::getFlowOnEntrySelected,
                                 onBackButtonClicked =
                                 viewModel::getFlowOnBackToPrimarySelectionScreen,
-                                onCancel = viewModel::onCancel,
+                                onCancel = viewModel::onUserCancel,
                                 isNoAccount = getCredentialUiState.isNoAccount,
                             )
                         }
@@ -135,7 +135,7 @@ fun GetCredentialScreen(
                     }
                 }
             },
-            onDismiss = viewModel::onCancel,
+            onDismiss = viewModel::onUserCancel,
         )
     }
 }
@@ -668,11 +668,11 @@ fun RemoteCredentialSnackBarScreen(
 fun EmptyAuthEntrySnackBarScreen(
     authenticationEntryList: List<AuthenticationEntryInfo>,
     onCancel: () -> Unit,
-    onLastLokcedAuthEntryNotFound: () -> Unit,
+    onLastLockedAuthEntryNotFound: () -> Unit,
 ) {
     val lastLocked = authenticationEntryList.firstOrNull({it.isLastUnlocked})
     if (lastLocked == null) {
-        onLastLokcedAuthEntryNotFound()
+        onLastLockedAuthEntryNotFound()
         return
     }
 
