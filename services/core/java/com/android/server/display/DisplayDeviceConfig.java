@@ -1260,7 +1260,7 @@ public class DisplayDeviceConfig {
         return mAmbientDarkeningPercentagesIdle;
     }
 
-    SensorData getAmbientLightSensor() {
+    public SensorData getAmbientLightSensor() {
         return mAmbientLightSensor;
     }
 
@@ -2821,7 +2821,7 @@ public class DisplayDeviceConfig {
     /**
      * Uniquely identifies a Sensor, with the combination of Type and Name.
      */
-    static class SensorData {
+    public static class SensorData {
         public String type;
         public String name;
         public float minRefreshRate = 0.0f;
