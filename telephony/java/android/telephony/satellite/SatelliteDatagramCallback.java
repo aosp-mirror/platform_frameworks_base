@@ -38,10 +38,12 @@ public class SatelliteDatagramCallback {
         }
 
         @Override
-        public void onSatelliteDatagrams(SatelliteDatagram[] datagrams) {
+        public void onSatelliteDatagramReceived(long datagramId, SatelliteDatagram datagram,
+                int pendingCount, ISatelliteDatagramReceiverAck callback) {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                mExecutor.execute(() -> mLocalCallback.onSatelliteDatagrams(datagrams));
+                mExecutor.execute(() -> mLocalCallback.onSatelliteDatagramReceived(datagramId,
+                        datagram, pendingCount, callback));
             } finally {
                 restoreCallingIdentity(callingIdentity);
             }
@@ -54,9 +56,14 @@ public class SatelliteDatagramCallback {
 
     /**
      * Called when there are incoming datagrams to be received.
-     * @param datagrams Datagrams to be received over satellite.
+     * @param datagramId An id that uniquely identifies incoming datagram.
+     * @param datagram datagram to be received over satellite.
+     * @param pendingCount Number of datagrams yet to be received by the app.
+     * @param callback This callback will be used by datagram receiver app to send ack back to
+     *                 Telephony.
      */
-    public void onSatelliteDatagrams(SatelliteDatagram[] datagrams) {
+    public void onSatelliteDatagramReceived(long datagramId, SatelliteDatagram datagram,
+            int pendingCount, ISatelliteDatagramReceiverAck callback) {
         // Base Implementation
     }
 
