@@ -76,7 +76,6 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -189,14 +188,6 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             }
         }
     }
-
-    /**
-     * This single object allows the queue to dispatch receivers using scheduleReceiverList
-     * without constantly allocating new ReceiverInfo objects or ArrayLists.  This queue
-     * implementation is known to have a maximum size of one entry.
-     */
-    @VisibleForTesting
-    final BroadcastReceiverBatch mReceiverBatch = new BroadcastReceiverBatch(1);
 
     BroadcastQueueImpl(ActivityManagerService service, Handler handler,
             String name, BroadcastConstants constants, boolean allowDelayBehindServices,
@@ -402,13 +393,13 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             mService.notifyPackageUse(r.intent.getComponent().getPackageName(),
                                       PackageManager.NOTIFY_PACKAGE_USE_BROADCAST_RECEIVER);
             final boolean assumeDelivered = false;
-            thread.scheduleReceiverList(mReceiverBatch.manifestReceiver(
+            thread.scheduleReceiver(
                     prepareReceiverIntent(r.intent, r.curFilteredExtras),
                     r.curReceiver, null /* compatInfo (unused but need to keep method signature) */,
                     r.resultCode, r.resultData, r.resultExtras, r.ordered, assumeDelivered,
                     r.userId, r.shareIdentity ? r.callingUid : Process.INVALID_UID,
-                    r.shareIdentity ? r.callerPackage : null,
-                    app.mState.getReportedProcState()));
+                    app.mState.getReportedProcState(),
+                    r.shareIdentity ? r.callerPackage : null);
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);
             started = true;
@@ -756,12 +747,12 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                 // correctly ordered with other one-way calls.
                 try {
                     final boolean assumeDelivered = !ordered;
-                    thread.scheduleReceiverList(mReceiverBatch.registeredReceiver(
+                    thread.scheduleRegisteredReceiver(
                             receiver, intent, resultCode,
                             data, extras, ordered, sticky, assumeDelivered, sendingUser,
+                            app.mState.getReportedProcState(),
                             shareIdentity ? callingUid : Process.INVALID_UID,
-                            shareIdentity ? callingPackage : null,
-                            app.mState.getReportedProcState()));
+                            shareIdentity ? callingPackage : null);
                 } catch (RemoteException ex) {
                     // Failed to call into the process. It's either dying or wedged. Kill it gently.
                     synchronized (mService) {
