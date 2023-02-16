@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
 import android.util.Pair
+import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowInsets
 import android.widget.TextView
@@ -91,7 +92,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private val featureFlags: FeatureFlags,
     private val qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder,
     private val combinedShadeHeadersConstraintManager: CombinedShadeHeadersConstraintManager,
-    private val demoModeController: DemoModeController
+    private val demoModeController: DemoModeController,
+    private val qsBatteryModeController: QsBatteryModeController,
 ) : ViewController<View>(header), Dumpable {
 
     companion object {
@@ -129,9 +131,8 @@ class LargeScreenShadeHeaderController @Inject constructor(
     private val iconContainer: StatusIconContainer = header.findViewById(R.id.statusIcons)
     private val qsCarrierGroup: QSCarrierGroup = header.findViewById(R.id.carrier_group)
 
-    private var cutoutLeft = 0
-    private var cutoutRight = 0
     private var roundedCorners = 0
+    private var cutout: DisplayCutout? = null
     private var lastInsets: WindowInsets? = null
 
     private var qsDisabled = false
@@ -273,7 +274,6 @@ class LargeScreenShadeHeaderController @Inject constructor(
 
         // battery settings same as in QS icons
         batteryMeterViewController.ignoreTunerUpdates()
-        batteryIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
 
         iconManager = tintedIconManagerFactory.create(iconContainer, StatusBarLocation.QS)
         iconManager.setTint(
@@ -305,6 +305,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
 
         if (header is MotionLayout) {
             header.setOnApplyWindowInsetsListener(insetListener)
+
             clock.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
                 val newPivot = if (v.isLayoutRtl) v.width.toFloat() else 0f
                 v.pivotX = newPivot
@@ -376,11 +377,13 @@ class LargeScreenShadeHeaderController @Inject constructor(
     }
 
     private fun updateConstraintsForInsets(view: MotionLayout, insets: WindowInsets) {
-        val cutout = insets.displayCutout
+        val cutout = insets.displayCutout.also {
+            this.cutout = it
+        }
 
         val sbInsets: Pair<Int, Int> = insetsProvider.getStatusBarContentInsetsForCurrentRotation()
-        cutoutLeft = sbInsets.first
-        cutoutRight = sbInsets.second
+        val cutoutLeft = sbInsets.first
+        val cutoutRight = sbInsets.second
         val hasCornerCutout: Boolean = insetsProvider.currentRotationHasCornerCutout()
         updateQQSPaddings()
         // Set these guides as the left/right limits for content that lives in the top row, using
@@ -408,6 +411,13 @@ class LargeScreenShadeHeaderController @Inject constructor(
         }
 
         view.updateAllConstraints(changes)
+        updateBatteryMode()
+    }
+
+    private fun updateBatteryMode() {
+        qsBatteryModeController.getBatteryMode(cutout, qsExpandedFraction)?.let {
+            batteryIcon.setPercentShowMode(it)
+        }
     }
 
     private fun updateScrollY() {
@@ -475,6 +485,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
         if (header is MotionLayout && !largeScreenActive && visible) {
             logInstantEvent("updatePosition: $qsExpandedFraction")
             header.progress = qsExpandedFraction
+            updateBatteryMode()
         }
     }
 
@@ -511,6 +522,7 @@ class LargeScreenShadeHeaderController @Inject constructor(
         val padding = resources.getDimensionPixelSize(R.dimen.qs_panel_padding)
         header.setPadding(padding, header.paddingTop, padding, header.paddingBottom)
         updateQQSPaddings()
+        qsBatteryModeController.updateResources()
     }
 
     private fun updateQQSPaddings() {
