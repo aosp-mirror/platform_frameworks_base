@@ -371,7 +371,7 @@ public class BatteryUsageStatsProviderTest {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
         mStatsRule.setCurrentTime(5 * MINUTE_IN_MS);
         synchronized (batteryStats) {
-            batteryStats.resetAllStatsCmdLocked();
+            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
         }
         BatteryUsageStatsStore batteryUsageStatsStore = new BatteryUsageStatsStore(context,
                 batteryStats, new File(context.getCacheDir(), "BatteryUsageStatsProviderTest"),
@@ -391,7 +391,7 @@ public class BatteryUsageStatsProviderTest {
         }
         mStatsRule.setCurrentTime(25 * MINUTE_IN_MS);
         synchronized (batteryStats) {
-            batteryStats.resetAllStatsCmdLocked();
+            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
         }
 
         synchronized (batteryStats) {
@@ -404,7 +404,7 @@ public class BatteryUsageStatsProviderTest {
         }
         mStatsRule.setCurrentTime(55 * MINUTE_IN_MS);
         synchronized (batteryStats) {
-            batteryStats.resetAllStatsCmdLocked();
+            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
         }
 
         // This section should be ignored because the timestamp is out or range
@@ -418,7 +418,7 @@ public class BatteryUsageStatsProviderTest {
         }
         mStatsRule.setCurrentTime(75 * MINUTE_IN_MS);
         synchronized (batteryStats) {
-            batteryStats.resetAllStatsCmdLocked();
+            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
         }
 
         // This section should be ignored because it represents the current stats session

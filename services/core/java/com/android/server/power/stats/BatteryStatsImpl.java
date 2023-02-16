@@ -82,6 +82,7 @@ import android.telephony.ServiceState.RegState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -212,6 +213,7 @@ public class BatteryStatsImpl extends BatteryStats {
     public static final int RESET_REASON_ADB_COMMAND = 2;
     public static final int RESET_REASON_FULL_CHARGE = 3;
     public static final int RESET_REASON_ENERGY_CONSUMER_BUCKETS_CHANGE = 4;
+    public static final int RESET_REASON_PLUGGED_IN_FOR_LONG_DURATION = 5;
 
     protected Clock mClock;
 
@@ -496,6 +498,14 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+    }
+
+    /** Handles calls to AlarmManager */
+    public interface AlarmInterface {
+        /** Schedule an RTC alarm */
+        void schedule(long rtcTimeMs, long windowLengthMs);
+        /** Cancel the previously scheduled alarm */
+        void cancel();
     }
 
     private final PlatformIdleStateCallback mPlatformIdleStateCallback;
@@ -848,6 +858,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     private boolean mHaveBatteryLevel = false;
     private boolean mBatteryPluggedIn;
+    private long mBatteryPluggedInRealTimeMs = 0;
     private int mBatteryStatus;
     private int mBatteryLevel;
     private int mBatteryPlugType;
@@ -1557,6 +1568,9 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     @GuardedBy("this")
     protected BatteryStatsConfig mBatteryStatsConfig = new BatteryStatsConfig.Builder().build();
+
+    @VisibleForTesting
+    protected AlarmInterface mLongPlugInAlarmInterface = null;
 
     /*
      * Holds a SamplingTimer associated with each Resource Power Manager state and voter,
@@ -11043,6 +11057,18 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /**
+     * Injects an AlarmInterface for the long plug in alarm.
+     */
+    public void setLongPlugInAlarmInterface(AlarmInterface longPlugInAlarmInterface) {
+        synchronized (this) {
+            mLongPlugInAlarmInterface = longPlugInAlarmInterface;
+            if (mBatteryPluggedIn) {
+                scheduleNextResetWhilePluggedInCheck();
+            }
+        }
+    }
+
+    /**
      * Starts tracking CPU time-in-state for threads of the system server process,
      * keeping a separate account of threads receiving incoming binder calls.
      */
@@ -11475,12 +11501,12 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @GuardedBy("this")
-    public void resetAllStatsCmdLocked() {
+    public void resetAllStatsAndHistoryLocked(int reason) {
         final long mSecUptime = mClock.uptimeMillis();
         long uptimeUs = mSecUptime * 1000;
         long mSecRealtime = mClock.elapsedRealtime();
         long realtimeUs = mSecRealtime * 1000;
-        resetAllStatsLocked(mSecUptime, mSecRealtime, RESET_REASON_ADB_COMMAND);
+        resetAllStatsLocked(mSecUptime, mSecRealtime, reason);
         pullPendingStateUpdatesLocked();
         mHistory.writeHistoryItem(mSecRealtime, mSecUptime);
         mDischargeCurrentLevel = mDischargeUnplugLevel = mDischargePlugLevel = mBatteryLevel;
@@ -14140,6 +14166,73 @@ public class BatteryStatsImpl extends BatteryStats {
         mRecordAllHistory = true;
     }
 
+    /**
+     * Might reset battery stats if conditions are met. Assumed the device is currently plugged in.
+     */
+    @GuardedBy("this")
+    public void maybeResetWhilePluggedInLocked() {
+        final long elapsedRealtimeMs = mClock.elapsedRealtime();
+        if (shouldResetWhilePluggedInLocked(elapsedRealtimeMs)) {
+            Slog.i(TAG,
+                    "Resetting due to long plug in duration. elapsed time = " + elapsedRealtimeMs
+                            + " ms, last plug in time = " + mBatteryPluggedInRealTimeMs
+                            + " ms, last reset time = " + mRealtimeStartUs / 1000);
+            resetAllStatsAndHistoryLocked(RESET_REASON_PLUGGED_IN_FOR_LONG_DURATION);
+        }
+
+        scheduleNextResetWhilePluggedInCheck();
+    }
+
+    @GuardedBy("this")
+    private void scheduleNextResetWhilePluggedInCheck() {
+        if (mLongPlugInAlarmInterface != null) {
+            final long timeoutMs = mClock.currentTimeMillis()
+                    + mConstants.RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS
+                    * DateUtils.HOUR_IN_MILLIS;
+            Calendar nextAlarm = Calendar.getInstance();
+            nextAlarm.setTimeInMillis(timeoutMs);
+
+            // Find the 2 AM the same day as the end of the minimum duration.
+            // This logic does not handle a Daylight Savings transition, or a timezone change
+            // while the alarm has been set. The need to reset after a long period while plugged
+            // in is not strict enough to warrant a well architected out solution.
+            nextAlarm.set(Calendar.MILLISECOND, 0);
+            nextAlarm.set(Calendar.SECOND, 0);
+            nextAlarm.set(Calendar.MINUTE, 0);
+            nextAlarm.set(Calendar.HOUR_OF_DAY, 2);
+            long nextTimeMs = nextAlarm.getTimeInMillis();
+            if (nextTimeMs < timeoutMs) {
+                // The 2AM on the day of the timeout, move on the next day.
+                nextTimeMs += DateUtils.DAY_IN_MILLIS;
+            }
+            mLongPlugInAlarmInterface.schedule(nextTimeMs, DateUtils.HOUR_IN_MILLIS);
+        }
+    }
+
+
+    @GuardedBy("this")
+    private boolean shouldResetWhilePluggedInLocked(long elapsedRealtimeMs) {
+        if (mNoAutoReset) return false;
+        if (!mSystemReady) return false;
+        if (!mHistory.isResetEnabled()) return false;
+
+        final long pluggedInThresholdMs = mBatteryPluggedInRealTimeMs
+                + mConstants.RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS
+                * DateUtils.HOUR_IN_MILLIS;
+        if (elapsedRealtimeMs >= pluggedInThresholdMs) {
+            // The device has been plugged in for a long time.
+            final long resetThresholdMs = mRealtimeStartUs / 1000
+                    + mConstants.RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS
+                    * DateUtils.HOUR_IN_MILLIS;
+            if (elapsedRealtimeMs >= resetThresholdMs) {
+                // And it has been a long time since the last reset.
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @GuardedBy("this")
     private boolean shouldResetOnUnplugLocked(int batteryStatus, int batteryLevel) {
         if (mNoAutoReset) return false;
@@ -14242,6 +14335,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 initActiveHistoryEventsLocked(mSecRealtime, mSecUptime);
             }
             mBatteryPluggedIn = false;
+            if (mLongPlugInAlarmInterface != null) {
+                mLongPlugInAlarmInterface.cancel();
+            }
             mHistory.recordBatteryState(mSecRealtime, mSecUptime, level, mBatteryPluggedIn);
             mDischargeCurrentLevel = mDischargeUnplugLevel = level;
             if (Display.isOnState(screenState)) {
@@ -14265,6 +14361,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mOnBattery = mOnBatteryInternal = false;
             pullPendingStateUpdatesLocked();
             mBatteryPluggedIn = true;
+            mBatteryPluggedInRealTimeMs = mSecRealtime;
             mHistory.recordBatteryState(mSecRealtime, mSecUptime, level, mBatteryPluggedIn);
             mDischargeCurrentLevel = mDischargePlugLevel = level;
             if (level < mDischargeUnplugLevel) {
@@ -14278,6 +14375,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mMaxChargeStepLevel = level;
             mInitStepMode = mCurStepMode;
             mModStepMode = 0;
+            scheduleNextResetWhilePluggedInCheck();
         }
         if (doWrite || (mLastWriteTimeMs + (60 * 1000)) < mSecRealtime) {
             if (mStatsFile != null && !mHistory.isReadOnly()) {
@@ -15184,6 +15282,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 "per_uid_modem_power_model";
         public static final String KEY_PHONE_ON_EXTERNAL_STATS_COLLECTION =
                 "phone_on_external_stats_collection";
+        public static final String KEY_RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS =
+                "reset_while_plugged_in_minimum_duration_hours";
 
         public static final String PER_UID_MODEM_POWER_MODEL_MOBILE_RADIO_ACTIVE_TIME_NAME =
                 "mobile_radio_active_time";
@@ -15233,6 +15333,8 @@ public class BatteryStatsImpl extends BatteryStats {
         private static final int DEFAULT_PER_UID_MODEM_MODEL =
                 PER_UID_MODEM_POWER_MODEL_MODEM_ACTIVITY_INFO_RX_TX;
         private static final boolean DEFAULT_PHONE_ON_EXTERNAL_STATS_COLLECTION = true;
+        // Little less than 2 days
+        private static final int DEFAULT_RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS = 47;
 
         public boolean TRACK_CPU_ACTIVE_CLUSTER_TIME = DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME;
         /* Do not set default value for KERNEL_UID_READERS_THROTTLE_TIME. Need to trigger an
@@ -15252,6 +15354,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public int PER_UID_MODEM_MODEL = DEFAULT_PER_UID_MODEM_MODEL;
         public boolean PHONE_ON_EXTERNAL_STATS_COLLECTION =
                 DEFAULT_PHONE_ON_EXTERNAL_STATS_COLLECTION;
+        public int RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS =
+                DEFAULT_RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -15337,6 +15441,10 @@ public class BatteryStatsImpl extends BatteryStats {
                         KEY_PHONE_ON_EXTERNAL_STATS_COLLECTION,
                         DEFAULT_PHONE_ON_EXTERNAL_STATS_COLLECTION);
 
+                RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS = mParser.getInt(
+                        KEY_RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS,
+                        DEFAULT_RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS);
+
                 updateBatteryChargedDelayMsLocked();
 
                 onChange();
@@ -15408,6 +15516,8 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.println(getPerUidModemModelName(PER_UID_MODEM_MODEL));
             pw.print(KEY_PHONE_ON_EXTERNAL_STATS_COLLECTION); pw.print("=");
             pw.println(PHONE_ON_EXTERNAL_STATS_COLLECTION);
+            pw.print(KEY_RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS); pw.print("=");
+            pw.println(RESET_WHILE_PLUGGED_IN_MINIMUM_DURATION_HOURS);
         }
     }
 
