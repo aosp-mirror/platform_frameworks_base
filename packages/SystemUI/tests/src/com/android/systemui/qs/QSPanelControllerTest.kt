@@ -70,7 +70,7 @@ class QSPanelControllerTest : SysuiTestCase() {
 
         whenever(brightnessSliderFactory.create(any(), any())).thenReturn(brightnessSlider)
         whenever(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
-        testableResources.addOverride(R.bool.config_use_split_notification_shade, false)
+        setShouldUseSplitShade(false)
         whenever(qsPanel.resources).thenReturn(testableResources.resources)
         whenever(qsPanel.getOrCreateTileLayout()).thenReturn(pagedTileLayout)
         whenever(statusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false)
@@ -133,12 +133,31 @@ class QSPanelControllerTest : SysuiTestCase() {
 
     @Test
     fun configurationChange_onlySplitShadeConfigChanges_tileAreRedistributed() {
-        testableResources.addOverride(R.bool.config_use_split_notification_shade, false)
+        setShouldUseSplitShade(false)
         controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
         verify(pagedTileLayout, never()).forceTilesRedistribution(any())
 
-        testableResources.addOverride(R.bool.config_use_split_notification_shade, true)
+        setShouldUseSplitShade(true)
         controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
         verify(pagedTileLayout).forceTilesRedistribution("Split shade state changed")
+    }
+
+    @Test
+    fun configurationChange_onlySplitShadeConfigChanges_qsPanelCanBeCollapsed() {
+        setShouldUseSplitShade(false)
+        controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
+        verify(qsPanel, never()).setCanCollapse(anyBoolean())
+
+        setShouldUseSplitShade(true)
+        controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
+        verify(qsPanel).setCanCollapse(false)
+
+        setShouldUseSplitShade(false)
+        controller.mOnConfigurationChangedListener.onConfigurationChange(configuration)
+        verify(qsPanel).setCanCollapse(true)
+    }
+
+    private fun setShouldUseSplitShade(shouldUse: Boolean) {
+        testableResources.addOverride(R.bool.config_use_split_notification_shade, shouldUse)
     }
 }
