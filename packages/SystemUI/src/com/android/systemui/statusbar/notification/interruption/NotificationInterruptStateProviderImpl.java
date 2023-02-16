@@ -29,7 +29,6 @@ import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
@@ -247,11 +246,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         if (mFlags.disableFsi()) {
             return FullScreenIntentDecision.NO_FSI_DISABLED;
         }
-
         if (entry.getSbn().getNotification().fullScreenIntent == null) {
-            if (entry.isStickyAndNotDemoted()) {
-                return FullScreenIntentDecision.NO_FSI_SHOW_STICKY_HUN;
-            }
             return FullScreenIntentDecision.NO_FULL_SCREEN_INTENT;
         }
 
@@ -340,9 +335,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         final int uid = entry.getSbn().getUid();
         final String packageName = entry.getSbn().getPackageName();
         switch (decision) {
-            case NO_FSI_SHOW_STICKY_HUN:
-                mLogger.logNoFullscreen(entry, "Permission denied, show sticky HUN");
-                return;
             case NO_FSI_DISABLED:
                 mLogger.logNoFullscreen(entry, "Disabled");
                 return;
