@@ -2155,17 +2155,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWmService.mDisplayManagerInternal.performTraversal(transaction);
         scheduleAnimation();
 
-        for (int i = mWmService.mRotationWatchers.size() - 1; i >= 0; i--) {
-            final WindowManagerService.RotationWatcher rotationWatcher
-                    = mWmService.mRotationWatchers.get(i);
-            if (rotationWatcher.mDisplayId == mDisplayId) {
-                try {
-                    rotationWatcher.mWatcher.onRotationChanged(rotation);
-                } catch (RemoteException e) {
-                    // Ignore
-                }
-            }
-        }
+        mWmService.mRotationWatcherController.dispatchDisplayRotationChange(mDisplayId, rotation);
     }
 
     void configureDisplayPolicy() {
@@ -5668,8 +5658,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Rect df = state.getDisplayFrame();
         final Insets gestureInsets = state.calculateInsets(df, systemGestures(),
                 false /* ignoreVisibility */);
-        mSystemGestureFrameLeft.set(df.left, df.top, gestureInsets.left, df.bottom);
-        mSystemGestureFrameRight.set(gestureInsets.right, df.top, df.right, df.bottom);
+        mSystemGestureFrameLeft.set(df.left, df.top, df.left + gestureInsets.left, df.bottom);
+        mSystemGestureFrameRight.set(df.right - gestureInsets.right, df.top, df.right, df.bottom);
 
         final Region touchableRegion = Region.obtain();
         final Region local = Region.obtain();

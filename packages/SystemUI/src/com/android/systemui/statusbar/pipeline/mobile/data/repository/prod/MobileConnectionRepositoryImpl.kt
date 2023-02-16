@@ -47,8 +47,8 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameMo
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
+import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -85,7 +85,7 @@ class MobileConnectionRepositoryImpl(
     broadcastDispatcher: BroadcastDispatcher,
     private val mobileMappingsProxy: MobileMappingsProxy,
     bgDispatcher: CoroutineDispatcher,
-    logger: ConnectivityPipelineLogger,
+    logger: MobileInputLogger,
     override val tableLogBuffer: TableLogBuffer,
     scope: CoroutineScope,
 ) : MobileConnectionRepository {
@@ -291,7 +291,7 @@ class MobileConnectionRepositoryImpl(
         private val broadcastDispatcher: BroadcastDispatcher,
         private val context: Context,
         private val telephonyManager: TelephonyManager,
-        private val logger: ConnectivityPipelineLogger,
+        private val logger: MobileInputLogger,
         private val carrierConfigRepository: CarrierConfigRepository,
         private val mobileMappingsProxy: MobileMappingsProxy,
         @Background private val bgDispatcher: CoroutineDispatcher,

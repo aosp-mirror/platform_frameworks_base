@@ -19,8 +19,8 @@ package com.android.server.devicepolicy;
 import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
 import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_CLEARED;
 import static android.app.admin.PolicyUpdateResult.RESULT_SUCCESS;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_TARGET_USER_ID;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
+import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_TARGET_USER_ID;
+import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
 import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT;
 import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
 
@@ -30,7 +30,7 @@ import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyState;
 import android.app.admin.PolicyKey;
-import android.app.admin.PolicyUpdatesReceiver;
+import android.app.admin.PolicyUpdateReceiver;
 import android.app.admin.PolicyValue;
 import android.app.admin.TargetUser;
 import android.app.admin.UserRestrictionPolicyKey;
@@ -751,7 +751,7 @@ final class DevicePolicyEngine {
 
     private <V> void sendPolicyResultToAdmin(
             EnforcingAdmin admin, PolicyDefinition<V> policyDefinition, int result, int userId) {
-        Intent intent = new Intent(PolicyUpdatesReceiver.ACTION_DEVICE_POLICY_SET_RESULT);
+        Intent intent = new Intent(PolicyUpdateReceiver.ACTION_DEVICE_POLICY_SET_RESULT);
         intent.setPackage(admin.getPackageName());
 
         List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(
@@ -801,7 +801,7 @@ final class DevicePolicyEngine {
     private <V> void maybeSendOnPolicyChanged(
             EnforcingAdmin admin, PolicyDefinition<V> policyDefinition, int reason,
             int userId) {
-        Intent intent = new Intent(PolicyUpdatesReceiver.ACTION_DEVICE_POLICY_CHANGED);
+        Intent intent = new Intent(PolicyUpdateReceiver.ACTION_DEVICE_POLICY_CHANGED);
         intent.setPackage(admin.getPackageName());
 
         List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(

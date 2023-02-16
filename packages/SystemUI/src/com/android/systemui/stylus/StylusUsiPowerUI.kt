@@ -33,6 +33,8 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.logging.InstanceId
+import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
@@ -62,6 +64,9 @@ constructor(
     private var batteryCapacity = 1.0f
     private var suppressed = false
     private var inputDeviceId: Int? = null
+    private var instanceId: InstanceId? = null
+
+    @VisibleForTesting var instanceIdSequence = InstanceIdSequence(1 shl 13)
 
     fun init() {
         val filter =
@@ -126,6 +131,7 @@ constructor(
     }
 
     private fun hideNotification() {
+        instanceId = null
         notificationManager.cancel(USI_NOTIFICATION_ID)
     }
 
@@ -204,13 +210,26 @@ constructor(
             }
         }
 
+    /**
+     * Logs a stylus USI battery event with instance ID and battery level. The instance ID
+     * represents the notification instance, and is reset when a notification is cancelled.
+     */
     private fun logUiEvent(metricId: StylusUiEvent) {
-        uiEventLogger.logWithPosition(
+        uiEventLogger.logWithInstanceIdAndPosition(
             metricId,
             ActivityManager.getCurrentUser(),
             context.packageName,
+            getInstanceId(),
             (batteryCapacity * 100.0).toInt()
         )
+    }
+
+    @VisibleForTesting
+    fun getInstanceId(): InstanceId? {
+        if (instanceId == null) {
+            instanceId = instanceId ?: instanceIdSequence.newInstanceId()
+        }
+        return instanceId
     }
 
     companion object {

@@ -29,6 +29,6 @@ oneway interface ISatelliteStateListener {
     void onMessageTransferStateUpdate(in int state, in int sendPendingCount,
             in int receivePendingCount, in int errorCode);
     void onSatelliteModemStateChange(in int state);
-    void onPendingMessageCount(in int count);
+    void onPendingDatagramCount(in int count);
     void onSatelliteDatagrams(in SatelliteDatagram[] datagrams);
 }

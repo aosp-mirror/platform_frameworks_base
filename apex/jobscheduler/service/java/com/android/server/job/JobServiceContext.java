@@ -107,6 +107,8 @@ public final class JobServiceContext implements ServiceConnection {
     private static final long OP_BIND_TIMEOUT_MILLIS = 18 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
     /** Amount of time the JobScheduler will wait for a response from an app for a message. */
     private static final long OP_TIMEOUT_MILLIS = 8 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+    /** Amount of time the JobScheduler will wait for a job to provide a required notification. */
+    private static final long NOTIFICATION_TIMEOUT_MILLIS = 10_000L * Build.HW_TIMEOUT_MULTIPLIER;
 
     private static final String[] VERB_STRINGS = {
             "VERB_BINDING", "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_FINISHED"
@@ -190,6 +192,8 @@ public final class JobServiceContext implements ServiceConnection {
     private long mMinExecutionGuaranteeMillis;
     /** The absolute maximum amount of time the job can run */
     private long mMaxExecutionTimeMillis;
+    /** Whether this job is required to provide a notification and we're still waiting for it. */
+    private boolean mAwaitingNotification;
 
     private long mEstimatedDownloadBytes;
     private long mEstimatedUploadBytes;
@@ -348,6 +352,7 @@ public final class JobServiceContext implements ServiceConnection {
             mEstimatedDownloadBytes = job.getEstimatedNetworkDownloadBytes();
             mEstimatedUploadBytes = job.getEstimatedNetworkUploadBytes();
             mTransferredDownloadBytes = mTransferredUploadBytes = 0;
+            mAwaitingNotification = job.isUserVisibleJob();
 
             final long whenDeferred = job.getWhenStandbyDeferred();
             if (whenDeferred > 0) {
@@ -771,6 +776,12 @@ public final class JobServiceContext implements ServiceConnection {
                 mNotificationCoordinator.enqueueNotification(this, callingPkgName,
                         callingPid, callingUid, notificationId,
                         notification, jobEndNotificationPolicy);
+                if (mAwaitingNotification) {
+                    mAwaitingNotification = false;
+                    if (mVerb == VERB_EXECUTING) {
+                        scheduleOpTimeOutLocked();
+                    }
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1183,6 +1194,8 @@ public final class JobServiceContext implements ServiceConnection {
                 }
                 final long latestStopTimeElapsed =
                         mExecutionStartTimeElapsed + mMaxExecutionTimeMillis;
+                final long earliestStopTimeElapsed =
+                        mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
                 final long nowElapsed = sElapsedRealtimeClock.millis();
                 if (nowElapsed >= latestStopTimeElapsed) {
                     // Not an error - client ran out of time.
@@ -1191,7 +1204,7 @@ public final class JobServiceContext implements ServiceConnection {
                     mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
                             JobParameters.INTERNAL_STOP_REASON_TIMEOUT, "client timed out");
                     sendStopMessageLocked("timeout while executing");
-                } else {
+                } else if (nowElapsed >= earliestStopTimeElapsed) {
                     // We've given the app the minimum execution time. See if we should stop it or
                     // let it continue running
                     final String reason = mJobConcurrencyManager.shouldStopRunningJobLocked(this);
@@ -1209,6 +1222,14 @@ public final class JobServiceContext implements ServiceConnection {
                                 + " continue to run past min execution time");
                         scheduleOpTimeOutLocked();
                     }
+                } else if (mAwaitingNotification) {
+                    onSlowAppResponseLocked(/* reschedule */ true, /* updateStopReasons */ true,
+                            /* debugReason */ "timed out while stopping",
+                            /* anrMessage */ "required notification not provided",
+                            /* triggerAnr */ true);
+                } else {
+                    Slog.e(TAG, "Unexpected op timeout while EXECUTING");
+                    scheduleOpTimeOutLocked();
                 }
                 break;
             default:
@@ -1402,20 +1423,24 @@ public final class JobServiceContext implements ServiceConnection {
     private void scheduleOpTimeOutLocked() {
         removeOpTimeOutLocked();
 
-        // TODO(260848384): enforce setNotification timeout for user-initiated jobs
         final long timeoutMillis;
         switch (mVerb) {
             case VERB_EXECUTING:
+                long minTimeout;
                 final long earliestStopTimeElapsed =
                         mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
                 final long latestStopTimeElapsed =
                         mExecutionStartTimeElapsed + mMaxExecutionTimeMillis;
                 final long nowElapsed = sElapsedRealtimeClock.millis();
                 if (nowElapsed < earliestStopTimeElapsed) {
-                    timeoutMillis = earliestStopTimeElapsed - nowElapsed;
+                    minTimeout = earliestStopTimeElapsed - nowElapsed;
                 } else {
-                    timeoutMillis = latestStopTimeElapsed - nowElapsed;
+                    minTimeout = latestStopTimeElapsed - nowElapsed;
                 }
+                if (mAwaitingNotification) {
+                    minTimeout = Math.min(minTimeout, NOTIFICATION_TIMEOUT_MILLIS);
+                }
+                timeoutMillis = minTimeout;
                 break;
 
             case VERB_BINDING:

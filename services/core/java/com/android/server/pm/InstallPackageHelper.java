@@ -24,7 +24,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_DEPRECATED_SDK_VE
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION_GROUP;
-import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
@@ -1490,8 +1489,9 @@ final class InstallPackageHelper {
             synchronized (mPm.mLock) {
                 final PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
                 if (ps == null) {
-                    request.setError(INSTALL_FAILED_INTERNAL_ERROR,
-                            "Missing settings for moved package " + pkgName);
+                    request.setError(PackageManagerException.ofInternalError(
+                            "Missing settings for moved package " + pkgName,
+                            PackageManagerException.INTERNAL_ERROR_MISSING_SETTING_FOR_MOVE));
                 }
 
                 // We moved the entire application as-is, so bring over the
@@ -1523,8 +1523,9 @@ final class InstallPackageHelper {
                 derivedAbi.second.applyTo(parsedPackage);
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
-                throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Error deriving application ABI: " + pme.getMessage());
+                throw PrepareFailure.ofInternalError(
+                        "Error deriving application ABI: " + pme.getMessage(),
+                        PackageManagerException.INTERNAL_ERROR_DERIVING_ABI);
             }
         }
 
@@ -1535,8 +1536,9 @@ final class InstallPackageHelper {
                 setUpFsVerity(parsedPackage);
             } catch (Installer.InstallerException | IOException | DigestException
                     | NoSuchAlgorithmException e) {
-                throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Failed to set up verity: " + e);
+                throw PrepareFailure.ofInternalError(
+                        "Failed to set up verity: " + e,
+                        PackageManagerException.INTERNAL_ERROR_VERITY_SETUP);
             }
         } else {
             // Use the path returned by apexd
@@ -3215,8 +3217,9 @@ final class InstallPackageHelper {
         // uncompress the binary to its eventual destination on /data
         final File scanFile = decompressPackage(stubPkg.getPackageName(), stubPkg.getPath());
         if (scanFile == null) {
-            throw new PackageManagerException(
-                    "Unable to decompress stub at " + stubPkg.getPath());
+            throw PackageManagerException.ofInternalError(
+                    "Unable to decompress stub at " + stubPkg.getPath(),
+                    PackageManagerException.INTERNAL_ERROR_DECOMPRESS_STUB);
         }
         synchronized (mPm.mLock) {
             mPm.mSettings.disableSystemPackageLPw(stubPkg.getPackageName(), true /*replaced*/);
@@ -4174,10 +4177,12 @@ final class InstallPackageHelper {
             // This is relevant for cases where the disabled system package is used for flags or
             // other metadata.
             parsedPackage.hideAsFinal();
-            throw new PackageManagerException(Log.WARN, "Package " + parsedPackage.getPackageName()
+            throw PackageManagerException.ofInternalError(
+                    "Package " + parsedPackage.getPackageName()
                     + " at " + parsedPackage.getPath() + " ignored: updated version "
                     + (pkgAlreadyExists ? String.valueOf(pkgSetting.getVersionCode()) : "unknown")
-                    + " better than this " + parsedPackage.getLongVersionCode());
+                    + " better than this " + parsedPackage.getLongVersionCode(),
+                    PackageManagerException.INTERNAL_ERROR_UPDATED_VERSION_BETTER_THAN_SYSTEM);
         }
 
         // Verify certificates against what was last scanned. Force re-collecting certificate in two
@@ -4449,8 +4454,9 @@ final class InstallPackageHelper {
                 // but we still want the base name to be unique.
                 if ((scanFlags & SCAN_NEW_INSTALL) == 0
                         && mPm.mPackages.containsKey(pkg.getManifestPackageName())) {
-                    throw new PackageManagerException(
-                            "Duplicate static shared lib provider package");
+                    throw PackageManagerException.ofInternalError(
+                            "Duplicate static shared lib provider package",
+                            PackageManagerException.INTERNAL_ERROR_DUP_STATIC_SHARED_LIB_PROVIDER);
                 }
                 ScanPackageUtils.assertStaticSharedLibraryIsValid(pkg, scanFlags);
                 assertStaticSharedLibraryVersionCodeIsValid(pkg);
@@ -4543,8 +4549,9 @@ final class InstallPackageHelper {
         }
         if (pkg.getLongVersionCode() < minVersionCode
                 || pkg.getLongVersionCode() > maxVersionCode) {
-            throw new PackageManagerException("Static shared"
-                    + " lib version codes must be ordered as lib versions");
+            throw PackageManagerException.ofInternalError("Static shared"
+                    + " lib version codes must be ordered as lib versions",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_VERSION_CODES_ORDER);
         }
     }
 
@@ -4559,9 +4566,10 @@ final class InstallPackageHelper {
                 // This must be an update to a system overlay. Immutable overlays cannot be
                 // upgraded.
                 if (!mPm.isOverlayMutable(pkg.getPackageName())) {
-                    throw new PackageManagerException("Overlay "
+                    throw PackageManagerException.ofInternalError("Overlay "
                             + pkg.getPackageName()
-                            + " is static and cannot be upgraded.");
+                            + " is static and cannot be upgraded.",
+                            PackageManagerException.INTERNAL_ERROR_SYSTEM_OVERLAY_STATIC);
                 }
             } else {
                 if ((scanFlags & SCAN_AS_VENDOR) != 0) {
@@ -4591,10 +4599,11 @@ final class InstallPackageHelper {
                 }
                 if (!comparePackageSignatures(platformPkgSetting,
                         pkg.getSigningDetails().getSignatures())) {
-                    throw new PackageManagerException("Overlay "
+                    throw PackageManagerException.ofInternalError("Overlay "
                             + pkg.getPackageName()
                             + " must target Q or later, "
-                            + "or be signed with the platform certificate");
+                            + "or be signed with the platform certificate",
+                            PackageManagerException.INTERNAL_ERROR_OVERLAY_LOW_TARGET_SDK);
                 }
             }
 
@@ -4615,11 +4624,12 @@ final class InstallPackageHelper {
                             pkg.getSigningDetails().getSignatures())) {
                         // check reference signature
                         if (mPm.mOverlayConfigSignaturePackage == null) {
-                            throw new PackageManagerException("Overlay "
+                            throw PackageManagerException.ofInternalError("Overlay "
                                     + pkg.getPackageName() + " and target "
                                     + pkg.getOverlayTarget() + " signed with"
                                     + " different certificates, and the overlay lacks"
-                                    + " <overlay android:targetName>");
+                                    + " <overlay android:targetName>",
+                                    PackageManagerException.INTERNAL_ERROR_OVERLAY_SIGNATURE1);
                         }
                         final PackageSetting refPkgSetting;
                         synchronized (mPm.mLock) {
@@ -4628,11 +4638,12 @@ final class InstallPackageHelper {
                         }
                         if (!comparePackageSignatures(refPkgSetting,
                                 pkg.getSigningDetails().getSignatures())) {
-                            throw new PackageManagerException("Overlay "
+                            throw PackageManagerException.ofInternalError("Overlay "
                                     + pkg.getPackageName() + " signed with a different "
                                     + "certificate than both the reference package and "
                                     + "target " + pkg.getOverlayTarget() + ", and the "
-                                    + "overlay lacks <overlay android:targetName>");
+                                    + "overlay lacks <overlay android:targetName>",
+                                    PackageManagerException.INTERNAL_ERROR_OVERLAY_SIGNATURE2);
                         }
                     }
                 }
@@ -4659,10 +4670,11 @@ final class InstallPackageHelper {
                 }
                 if (!comparePackageSignatures(platformPkgSetting,
                         pkg.getSigningDetails().getSignatures())) {
-                    throw new PackageManagerException("Apps that share a user with a "
+                    throw PackageManagerException.ofInternalError("Apps that share a user with a "
                             + "privileged app must themselves be marked as privileged. "
                             + pkg.getPackageName() + " shares privileged user "
-                            + pkg.getSharedUserId() + ".");
+                            + pkg.getSharedUserId() + ".",
+                            PackageManagerException.INTERNAL_ERROR_NOT_PRIV_SHARED_USER);
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log.dagger;
-
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import com.android.systemui.plugins.log.LogBuffer;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-
-import javax.inject.Qualifier;
+package android.media;
 
 /**
- * A {@link LogBuffer} for status bar connectivity events.
+ * AIDL for AudioService to signal stream aliasing update.
+ *
+ * {@hide}
  */
-@Qualifier
-@Documented
-@Retention(RUNTIME)
-public @interface StatusBarConnectivityLog {
+oneway interface IStreamAliasingDispatcher {
+
+    void dispatchStreamAliasingChanged();
 }

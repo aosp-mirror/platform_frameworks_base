@@ -36,6 +36,7 @@ import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
@@ -324,6 +325,7 @@ public final class BackgroundRestrictionTest {
                     OP_FINE_LOCATION,
                     OP_CAMERA,
                     OP_RECORD_AUDIO,
+                    OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS,
                 };
                 for (int op : ops) {
                     setAppOpState(packageName, uid, op, false);

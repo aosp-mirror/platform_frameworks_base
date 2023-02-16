@@ -21,6 +21,8 @@ import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
 import static android.hardware.display.DisplayManager.EventsMask;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
@@ -43,7 +45,10 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.compat.CompatChanges;
 import android.companion.virtual.IVirtualDevice;
@@ -234,6 +239,9 @@ public final class DisplayManagerService extends SystemService {
     private final DisplayModeDirector mDisplayModeDirector;
     private WindowManagerInternal mWindowManagerInternal;
     private InputManagerInternal mInputManagerInternal;
+    private ActivityManagerInternal mActivityManagerInternal;
+    private ActivityManager mActivityManager;
+    private UidImportanceListener mUidImportanceListener = new UidImportanceListener();
     private IMediaProjectionManager mProjectionService;
     private DeviceStateManagerInternal mDeviceStateManager;
     @GuardedBy("mSyncRoot")
@@ -249,6 +257,9 @@ public final class DisplayManagerService extends SystemService {
     private HdrConversionMode mHdrConversionMode = null;
     // Actual HDR conversion mode, which takes app overrides into account.
     private HdrConversionMode mOverrideHdrConversionMode = null;
+    @GuardedBy("mSyncRoot")
+    private int mSystemPreferredHdrOutputType = Display.HdrCapabilities.HDR_TYPE_INVALID;
+
 
     // The synchronization root for the display manager.
     // This lock guards most of the display manager's state.
@@ -414,6 +425,11 @@ public final class DisplayManagerService extends SystemService {
     // Temporary callback list, used when sending display events to applications.
     // May be used outside of the lock but only on the handler thread.
     private final ArrayList<CallbackRecord> mTempCallbacks = new ArrayList<CallbackRecord>();
+
+    // Pending callback records indexed by calling process uid.
+    // Must be used outside of the lock mSyncRoot and should be selflocked.
+    @GuardedBy("mPendingCallbackSelfLocked")
+    public final SparseArray<PendingCallback> mPendingCallbackSelfLocked = new SparseArray<>();
 
     // Temporary viewports, used when sending new viewport information to the
     // input system.  May be used outside of the lock but only on the handler thread.
@@ -622,11 +638,18 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    // TODO: Use dependencies or a boot phase
+    /**
+     * The 2nd stage initialization
+     * TODO: Use dependencies or a boot phase
+     */
+    @SuppressLint("AndroidFrameworkRequiresPermission")
     public void windowManagerAndInputReady() {
         synchronized (mSyncRoot) {
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
+            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+            mActivityManager = mContext.getSystemService(ActivityManager.class);
+            mActivityManager.addOnUidImportanceListener(mUidImportanceListener, IMPORTANCE_CACHED);
 
             mDeviceStateManager = LocalServices.getService(DeviceStateManagerInternal.class);
             mContext.getSystemService(DeviceStateManager.class).registerCallback(
@@ -825,6 +848,36 @@ public final class DisplayManagerService extends SystemService {
         // threads for a long time.
         if (runnable != null) {
             runnable.run();
+        }
+    }
+
+    private class UidImportanceListener implements ActivityManager.OnUidImportanceListener {
+        @Override
+        public void onUidImportance(int uid, int importance) {
+            synchronized (mPendingCallbackSelfLocked) {
+                if (importance >= IMPORTANCE_GONE) {
+                    // Clean up as the app is already gone
+                    Slog.d(TAG, "Drop pending events for gone uid " + uid);
+                    mPendingCallbackSelfLocked.delete(uid);
+                    return;
+                } else if (importance >= IMPORTANCE_CACHED) {
+                    // Nothing to do as the app is still in cached mode
+                    return;
+                }
+
+                // Do we care about this uid?
+                PendingCallback pendingCallback = mPendingCallbackSelfLocked.get(uid);
+                if (pendingCallback == null) {
+                    return;
+                }
+
+                // Send the pending events out when a certain uid becomes non-cached
+                if (DEBUG) {
+                    Slog.d(TAG, "Uid " + uid + " becomes " + importance);
+                }
+                pendingCallback.sendPendingDisplayEvent();
+                mPendingCallbackSelfLocked.delete(uid);
+            }
         }
     }
 
@@ -2021,8 +2074,17 @@ public final class DisplayManagerService extends SystemService {
 
     // TODO (b/264979880) - Add unit test for HDR output control methods.
     private void setHdrConversionModeInternal(HdrConversionMode hdrConversionMode) {
+        if (!mInjector.getHdrOutputConversionSupport()) {
+            return;
+        }
         int[] autoHdrOutputTypes = null;
         synchronized (mSyncRoot) {
+            if (hdrConversionMode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM
+                    && hdrConversionMode.getPreferredHdrOutputType()
+                    != Display.HdrCapabilities.HDR_TYPE_INVALID) {
+                throw new IllegalArgumentException("preferredHdrOutputType must not be set if"
+                        + " the conversion mode is HDR_CONVERSION_SYSTEM");
+            }
             mHdrConversionMode = hdrConversionMode;
             storeHdrConversionModeLocked(mHdrConversionMode);
 
@@ -2032,13 +2094,11 @@ public final class DisplayManagerService extends SystemService {
                 autoHdrOutputTypes = getEnabledAutoHdrTypesLocked();
             }
 
-            if (!mInjector.getHdrOutputConversionSupport()) {
-                return;
-            }
             // If the HDR conversion is disabled by an app through WindowManager.LayoutParams, then
             // set HDR conversion mode to HDR_CONVERSION_PASSTHROUGH.
             if (mOverrideHdrConversionMode == null) {
-                mInjector.setHdrConversionMode(hdrConversionMode.getConversionMode(),
+                mSystemPreferredHdrOutputType =
+                        mInjector.setHdrConversionMode(hdrConversionMode.getConversionMode(),
                         hdrConversionMode.getPreferredHdrOutputType(), autoHdrOutputTypes);
             } else {
                 mInjector.setHdrConversionMode(mOverrideHdrConversionMode.getConversionMode(),
@@ -2048,6 +2108,9 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private HdrConversionMode getHdrConversionModeSettingInternal() {
+        if (!mInjector.getHdrOutputConversionSupport()) {
+            return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_UNSUPPORTED);
+        }
         synchronized (mSyncRoot) {
             if (mHdrConversionMode != null) {
                 return mHdrConversionMode;
@@ -2057,13 +2120,21 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private HdrConversionMode getHdrConversionModeInternal() {
+        if (!mInjector.getHdrOutputConversionSupport()) {
+            return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_UNSUPPORTED);
+        }
         HdrConversionMode mode;
         synchronized (mSyncRoot) {
             mode = mOverrideHdrConversionMode != null
                     ? mOverrideHdrConversionMode
                     : mHdrConversionMode;
+            if (mode == null
+                    || mode.getConversionMode() == HdrConversionMode.HDR_CONVERSION_SYSTEM) {
+                return new HdrConversionMode(
+                        HdrConversionMode.HDR_CONVERSION_SYSTEM, mSystemPreferredHdrOutputType);
+            }
         }
-        return mode != null ? mode : new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM);
+        return mode;
     }
 
     private @Display.HdrCapabilities.HdrType int[] getSupportedHdrOutputTypesInternal() {
@@ -2609,6 +2680,16 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    // Check if the target app is in cached mode
+    private boolean isUidCached(int uid) {
+        if (mActivityManagerInternal == null) {
+            return false;
+        }
+        int procState = mActivityManagerInternal.getUidProcessState(uid);
+        int importance = ActivityManager.RunningAppProcessInfo.procStateToImportance(procState);
+        return importance >= IMPORTANCE_CACHED;
+    }
+
     // Runs on Handler thread.
     // Delivers display event notifications to callbacks.
     private void deliverDisplayEvent(int displayId, ArraySet<Integer> uids,
@@ -2632,7 +2713,22 @@ public final class DisplayManagerService extends SystemService {
 
         // After releasing the lock, send the notifications out.
         for (int i = 0; i < mTempCallbacks.size(); i++) {
-            mTempCallbacks.get(i).notifyDisplayEventAsync(displayId, event);
+            CallbackRecord callbackRecord = mTempCallbacks.get(i);
+            final int uid = callbackRecord.mUid;
+            if (isUidCached(uid)) {
+                // For cached apps, save the pending event until it becomes non-cached
+                synchronized (mPendingCallbackSelfLocked) {
+                    PendingCallback pendingCallback = mPendingCallbackSelfLocked.get(uid);
+                    if (pendingCallback == null) {
+                        mPendingCallbackSelfLocked.put(uid,
+                                new PendingCallback(callbackRecord, displayId, event));
+                    } else {
+                        pendingCallback.addDisplayEvent(displayId, event);
+                    }
+                }
+            } else {
+                callbackRecord.notifyDisplayEventAsync(displayId, event);
+            }
         }
         mTempCallbacks.clear();
     }
@@ -2815,9 +2911,9 @@ public final class DisplayManagerService extends SystemService {
             return WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT;
         }
 
-        void setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
+        int setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
                 int[] autoHdrTypes) {
-            DisplayControl.setHdrConversionMode(conversionMode, preferredHdrOutputType,
+            return DisplayControl.setHdrConversionMode(conversionMode, preferredHdrOutputType,
                     autoHdrTypes);
         }
 
@@ -3076,17 +3172,22 @@ public final class DisplayManagerService extends SystemService {
             onCallbackDied(this);
         }
 
-        public void notifyDisplayEventAsync(int displayId, @DisplayEvent int event) {
+        /**
+         * @return {@code false} if RemoteException happens; otherwise {@code true} for success.
+         */
+        public boolean notifyDisplayEventAsync(int displayId, @DisplayEvent int event) {
             if (!shouldSendEvent(event)) {
-                return;
+                return true;
             }
 
             try {
                 mCallback.onDisplayEvent(displayId, event);
+                return true;
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify process "
                         + mPid + " that displays changed, assuming it died.", ex);
                 binderDied();
+                return false;
             }
         }
 
@@ -3108,6 +3209,47 @@ public final class DisplayManagerService extends SystemService {
                     Slog.e(TAG, "Unknown display event " + event);
                     return true;
             }
+        }
+    }
+
+    private static final class PendingCallback {
+        private final CallbackRecord mCallbackRecord;
+        private final ArrayList<Pair<Integer, Integer>> mDisplayEvents;
+
+        PendingCallback(CallbackRecord cr, int displayId, int event) {
+            mCallbackRecord = cr;
+            mDisplayEvents = new ArrayList<>();
+            mDisplayEvents.add(new Pair<>(displayId, event));
+        }
+
+        public void addDisplayEvent(int displayId, int event) {
+            // Ignore redundant events. Further optimization is possible by merging adjacent events.
+            Pair<Integer, Integer> last = mDisplayEvents.get(mDisplayEvents.size() - 1);
+            if (last.first == displayId && last.second == event) {
+                Slog.d(TAG,
+                        "Ignore redundant display event " + displayId + "/" + event + " to "
+                                + mCallbackRecord.mUid + "/" + mCallbackRecord.mPid);
+                return;
+            }
+
+            mDisplayEvents.add(new Pair<>(displayId, event));
+        }
+
+        public void sendPendingDisplayEvent() {
+            for (int i = 0; i < mDisplayEvents.size(); i++) {
+                Pair<Integer, Integer> displayEvent = mDisplayEvents.get(i);
+                if (DEBUG) {
+                    Slog.d(TAG, "Send pending display event #" + i + " " + displayEvent.first + "/"
+                            + displayEvent.second + " to " + mCallbackRecord.mUid + "/"
+                            + mCallbackRecord.mPid);
+                }
+                if (!mCallbackRecord.notifyDisplayEventAsync(displayEvent.first,
+                        displayEvent.second)) {
+                    Slog.d(TAG, "Drop pending events for dead process " + mCallbackRecord.mPid);
+                    break;
+                }
+            }
+            mDisplayEvents.clear();
         }
     }
 

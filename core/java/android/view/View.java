@@ -10199,6 +10199,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             setNotifiedContentCaptureAppeared();
 
             if (ai != null) {
+                makeParentImportantAndNotifyAppearedEventIfNeed();
                 ai.delayNotifyContentCaptureEvent(session, this, appeared);
             } else {
                 if (DEBUG_CONTENT_CAPTURE) {
@@ -10223,6 +10224,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (!isTemporarilyDetached()) {
                 clearTranslationState();
             }
+        }
+    }
+
+    private void makeParentImportantAndNotifyAppearedEventIfNeed() {
+        // If view sent the appeared event to Content Capture, Content Capture also
+        // would like to receive its parents' appeared events. So checks its parents
+        // whether the appeared event is sent or not. If not, send the appeared event.
+        final ViewParent parent = getParent();
+        if (parent instanceof View) {
+            View p = ((View) parent);
+            if (p.getNotifiedContentCaptureAppeared()) {
+                return;
+            }
+            // Set important for content capture in the cache.
+            p.mPrivateFlags4 |= PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK;
+            p.notifyAppearedOrDisappearedForContentCaptureIfNeeded(/* appeared */ true);
         }
     }
 
@@ -17201,8 +17218,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * This is similar to {@link View#requestUnbufferedDispatch(MotionEvent)}, but does not
      * automatically terminate, and allows the specification of arbitrary input source classes.
      *
-     * <p>Prior to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, this method will fail
-     * when this View is not attached to a window.
+     * <p>Prior to {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, calling this method
+     * will not result in any behavioral changes when this View is not attached to a window.
      *
      * @param source The combined input source class to request unbuffered dispatch for. All
      *               events coming from these source classes will not be buffered. Set to

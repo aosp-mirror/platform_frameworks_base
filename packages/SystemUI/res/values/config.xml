@@ -120,6 +120,9 @@
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
 
+    <!-- Display time for a sticky heads up notification, in milliseconds. -->
+    <integer name="sticky_heads_up_notification_time">60000</integer>
+
     <!-- Whether to hide the notification header when the HUN is expanded. -->
     <bool name="heads_up_notification_hides_header">false</bool>
 
@@ -460,7 +463,7 @@
     <integer name="watch_heap_limit">256000</integer>
 
     <!-- SystemUI Plugins that can be loaded on user builds. -->
-    <string-array name="config_pluginWhitelist" translatable="false">
+    <string-array name="config_pluginAllowlist" translatable="false">
         <item>com.android.systemui</item>
     </string-array>
 
@@ -834,7 +837,7 @@
     <string name="config_wallpaperPickerPackage" translatable="false">
         com.android.wallpaper
     </string>
-    
+
     <!-- Whether the floating rotation button should be on the left/right in the device's natural
          orientation -->
     <bool name="floating_rotation_button_position_left">true</bool>
