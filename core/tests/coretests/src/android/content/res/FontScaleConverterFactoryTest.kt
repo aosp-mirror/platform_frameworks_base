@@ -43,14 +43,56 @@ class FontScaleConverterFactoryTest {
         assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
     }
 
-    @SmallTest
-    fun missingLookupTableReturnsNull() {
-        assertThat(FontScaleConverterFactory.forScale(3F)).isNull()
+    @LargeTest
+    @Test
+    fun missingLookupTablePastEnd_returnsLinear() {
+        val table = FontScaleConverterFactory.forScale(3F)!!
+        generateSequenceOfFractions(-10000f..10000f, step = 0.01f)
+            .map {
+                assertThat(table.convertSpToDp(it)).isWithin(CONVERSION_TOLERANCE).of(it * 3f)
+            }
+        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(3f)
+        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(24f)
+        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(30f)
+        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(15f)
+        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+        assertThat(table.convertSpToDp(50F)).isWithin(CONVERSION_TOLERANCE).of(150f)
+        assertThat(table.convertSpToDp(100F)).isWithin(CONVERSION_TOLERANCE).of(300f)
     }
 
     @SmallTest
-    fun missingLookupTable105ReturnsNull() {
-        assertThat(FontScaleConverterFactory.forScale(1.05F)).isNull()
+    fun missingLookupTable110_returnsInterpolated() {
+        val table = FontScaleConverterFactory.forScale(1.1F)!!
+
+        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(1.1f)
+        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(8f * 1.1f)
+        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(11f)
+        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(5f * 1.1f)
+        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+        assertThat(table.convertSpToDp(50F)).isLessThan(50f * 1.1f)
+        assertThat(table.convertSpToDp(100F)).isLessThan(100f * 1.1f)
+    }
+
+    @Test
+    fun missingLookupTable199_returnsInterpolated() {
+        val table = FontScaleConverterFactory.forScale(1.9999F)!!
+        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(2f)
+        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(16f)
+        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(20f)
+        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(10f)
+        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
+    }
+
+    @Test
+    fun missingLookupTable160_returnsInterpolated() {
+        val table = FontScaleConverterFactory.forScale(1.6F)!!
+        assertThat(table.convertSpToDp(1F)).isWithin(CONVERSION_TOLERANCE).of(1f * 1.6F)
+        assertThat(table.convertSpToDp(8F)).isWithin(CONVERSION_TOLERANCE).of(8f * 1.6F)
+        assertThat(table.convertSpToDp(10F)).isWithin(CONVERSION_TOLERANCE).of(10f * 1.6F)
+        assertThat(table.convertSpToDp(20F)).isLessThan(20f * 1.6F)
+        assertThat(table.convertSpToDp(100F)).isLessThan(100f * 1.6F)
+        assertThat(table.convertSpToDp(5F)).isWithin(CONVERSION_TOLERANCE).of(5f * 1.6F)
+        assertThat(table.convertSpToDp(0F)).isWithin(CONVERSION_TOLERANCE).of(0f)
     }
 
     @SmallTest
@@ -83,7 +125,7 @@ class FontScaleConverterFactoryTest {
     @Test
     fun allFeasibleScalesAndConversionsDoNotCrash() {
         generateSequenceOfFractions(-10f..10f, step = 0.01f)
-            .mapNotNull{ FontScaleConverterFactory.forScale(it) }
+            .mapNotNull{ FontScaleConverterFactory.forScale(it) }!!
             .flatMap{ table ->
                 generateSequenceOfFractions(-2000f..2000f, step = 0.01f)
                     .map{ Pair(table, it) }
