@@ -136,9 +136,7 @@ public class Installer extends SystemService {
     }
 
     /**
-     * @param isolated indicates if this object should <em>not</em> connect to
-     *            the real {@code installd}. All remote calls will be ignored
-     *            unless you extend this class and intercept them.
+     * @param isolated Make the installer isolated. See {@link isIsolated}.
      */
     public Installer(Context context, boolean isolated) {
         super(context);
@@ -151,6 +149,15 @@ public class Installer extends SystemService {
      */
     public void setWarnIfHeld(Object warnIfHeld) {
         mWarnIfHeld = warnIfHeld;
+    }
+
+    /**
+     * Returns true if the installer is isolated, i.e. if this object should <em>not</em> connect to
+     * the real {@code installd}. All remote calls will be ignored unless you extend this class and
+     * intercept them.
+     */
+    public boolean isIsolated() {
+        return mIsolated;
     }
 
     @Override
