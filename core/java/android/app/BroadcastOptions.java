@@ -262,7 +262,12 @@ public class BroadcastOptions extends ComponentOptions {
      * Creates a basic {@link BroadcastOptions} with no options initially set.
      *
      * @return an instance of {@code BroadcastOptions} against which options can be set
+     *
+     * @deprecated Use {@link BroadcastOptions#BroadcastOptions()} instead.
+     * @hide
      */
+    @Deprecated
+    @SystemApi
     public static @NonNull BroadcastOptions makeBasic() {
         BroadcastOptions opts = new BroadcastOptions();
         return opts;
@@ -280,7 +285,10 @@ public class BroadcastOptions extends ComponentOptions {
         return opts;
     }
 
-    private BroadcastOptions() {
+    /**
+     * Creates a new {@code BroadcastOptions} with no options initially set.
+     */
+    public BroadcastOptions() {
         super();
         resetTemporaryAppAllowlist();
     }
