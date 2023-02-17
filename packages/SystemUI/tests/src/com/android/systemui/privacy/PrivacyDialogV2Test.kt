@@ -16,10 +16,12 @@
 
 package com.android.systemui.privacy
 
+import android.content.Intent
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.TextView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -34,8 +36,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import android.content.Intent
-import android.text.TextUtils
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -46,10 +46,44 @@ class PrivacyDialogV2Test : SysuiTestCase() {
         private const val TEST_PACKAGE_NAME = "test_pkg"
         private const val TEST_USER_ID = 0
         private const val TEST_PERM_GROUP = "test_perm_group"
+
+        private val TEST_INTENT = Intent("test_intent_action")
+
+        private fun createPrivacyElement(
+            type: PrivacyType = PrivacyType.TYPE_MICROPHONE,
+            packageName: String = TEST_PACKAGE_NAME,
+            userId: Int = TEST_USER_ID,
+            applicationName: CharSequence = "App",
+            attributionTag: CharSequence? = null,
+            attributionLabel: CharSequence? = null,
+            proxyLabel: CharSequence? = null,
+            lastActiveTimestamp: Long = 0L,
+            isActive: Boolean = false,
+            isPhoneCall: Boolean = false,
+            isService: Boolean = false,
+            permGroupName: String = TEST_PERM_GROUP,
+            navigationIntent: Intent = TEST_INTENT
+        ) =
+            PrivacyDialogV2.PrivacyElement(
+                type,
+                packageName,
+                userId,
+                applicationName,
+                attributionTag,
+                attributionLabel,
+                proxyLabel,
+                lastActiveTimestamp,
+                isActive,
+                isPhoneCall,
+                isService,
+                permGroupName,
+                navigationIntent
+            )
     }
 
-    @Mock
-    private lateinit var starter: (String, Int, CharSequence?, Intent?) -> Unit
+    @Mock private lateinit var manageApp: (String, Int, Intent) -> Unit
+    @Mock private lateinit var closeApp: (String, Int) -> Unit
+    @Mock private lateinit var openPrivacyDashboard: () -> Unit
     private lateinit var dialog: PrivacyDialogV2
 
     @Before
@@ -65,340 +99,224 @@ class PrivacyDialogV2Test : SysuiTestCase() {
     }
 
     @Test
-    fun testStarterCalledWithCorrectParams() {
-        val list = listOf(
-                PrivacyDialogV2.PrivacyElement(
-                        PrivacyType.TYPE_MICROPHONE,
-                        TEST_PACKAGE_NAME,
-                        TEST_USER_ID,
-                        "App",
-                        null,
-                        null,
-                        null,
-                        0L,
-                        false,
-                        false,
-                        false,
-                        TEST_PERM_GROUP,
-                        null
-                )
-        )
-        dialog = PrivacyDialogV2(context, list, starter)
+    fun testManageAppCalledWithCorrectParams() {
+        val list = listOf(createPrivacyElement())
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
         dialog.show()
-        dialog.requireViewById<View>(R.id.privacy_item).callOnClick()
-        verify(starter).invoke(TEST_PACKAGE_NAME, TEST_USER_ID, null, null)
+
+        dialog.requireViewById<View>(R.id.privacy_dialog_manage_app_button).callOnClick()
+
+        verify(manageApp).invoke(TEST_PACKAGE_NAME, TEST_USER_ID, TEST_INTENT)
+    }
+
+    @Test
+    fun testCloseAppCalledWithCorrectParams() {
+        val list = listOf(createPrivacyElement(isActive = true))
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
+        dialog.show()
+
+        dialog.requireViewById<View>(R.id.privacy_dialog_close_app_button).callOnClick()
+
+        verify(closeApp).invoke(TEST_PACKAGE_NAME, TEST_USER_ID)
+    }
+
+    @Test
+    fun testCloseAppMissingForService() {
+        val list = listOf(createPrivacyElement(isActive = true, isService = true))
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
+
+        dialog.show()
+
+        assertThat(dialog.findViewById<View>(R.id.privacy_dialog_manage_app_button)).isNotNull()
+        assertThat(dialog.findViewById<View>(R.id.privacy_dialog_close_app_button)).isNull()
+    }
+
+    @Test
+    fun testMoreButton() {
+        dialog = PrivacyDialogV2(context, emptyList(), manageApp, closeApp, openPrivacyDashboard)
+        dialog.show()
+
+        dialog.requireViewById<View>(R.id.privacy_dialog_more_button).callOnClick()
+
+        verify(openPrivacyDashboard).invoke()
+    }
+
+    @Test
+    fun testCloseButton() {
+        dialog = PrivacyDialogV2(context, emptyList(), manageApp, closeApp, openPrivacyDashboard)
+        val dismissListener = mock(PrivacyDialogV2.OnDialogDismissed::class.java)
+        dialog.addOnDismissListener(dismissListener)
+        dialog.show()
+        verify(dismissListener, never()).onDialogDismissed()
+
+        dialog.requireViewById<View>(R.id.privacy_dialog_close_button).callOnClick()
+
+        verify(dismissListener).onDialogDismissed()
     }
 
     @Test
     fun testDismissListenerCalledOnDismiss() {
-        dialog = PrivacyDialogV2(context, emptyList(), starter)
+        dialog = PrivacyDialogV2(context, emptyList(), manageApp, closeApp, openPrivacyDashboard)
         val dismissListener = mock(PrivacyDialogV2.OnDialogDismissed::class.java)
         dialog.addOnDismissListener(dismissListener)
         dialog.show()
-
         verify(dismissListener, never()).onDialogDismissed()
+
         dialog.dismiss()
+
         verify(dismissListener).onDialogDismissed()
     }
 
     @Test
     fun testDismissListenerCalledImmediatelyIfDialogAlreadyDismissed() {
-        dialog = PrivacyDialogV2(context, emptyList(), starter)
+        dialog = PrivacyDialogV2(context, emptyList(), manageApp, closeApp, openPrivacyDashboard)
         val dismissListener = mock(PrivacyDialogV2.OnDialogDismissed::class.java)
         dialog.show()
         dialog.dismiss()
 
         dialog.addOnDismissListener(dismissListener)
+
         verify(dismissListener).onDialogDismissed()
     }
 
     @Test
     fun testCorrectNumElements() {
-        val list = listOf(
-                PrivacyDialogV2.PrivacyElement(
-                        PrivacyType.TYPE_CAMERA,
-                        TEST_PACKAGE_NAME,
-                        TEST_USER_ID,
-                        "App",
-                        null,
-                        null,
-                        null,
-                        0L,
-                        true,
-                        false,
-                        false,
-                        TEST_PERM_GROUP,
-                        null
-                ),
-                PrivacyDialogV2.PrivacyElement(
-                        PrivacyType.TYPE_MICROPHONE,
-                        TEST_PACKAGE_NAME,
-                        TEST_USER_ID,
-                        "App",
-                        null,
-                        null,
-                        null,
-                        0L,
-                        false,
-                        false,
-                        false,
-                        TEST_PERM_GROUP,
-                        null
-                )
-        )
-        dialog = PrivacyDialogV2(context, list, starter)
+        val list =
+            listOf(
+                createPrivacyElement(type = PrivacyType.TYPE_CAMERA, isActive = true),
+                createPrivacyElement()
+            )
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
+
         dialog.show()
-        assertThat(dialog.requireViewById<ViewGroup>(R.id.root).childCount).isEqualTo(2)
+
+        assertThat(
+                dialog.requireViewById<ViewGroup>(R.id.privacy_dialog_items_container).childCount
+            )
+            .isEqualTo(2)
+    }
+
+    @Test
+    fun testHeaderText() {
+        val list = listOf(createPrivacyElement())
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
+
+        dialog.show()
+
+        assertThat(dialog.requireViewById<TextView>(R.id.privacy_dialog_item_header_title).text)
+            .isEqualTo(TEST_PERM_GROUP)
     }
 
     @Test
     fun testUsingText() {
-        val element = PrivacyDialogV2.PrivacyElement(
-                PrivacyType.TYPE_CAMERA,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                null,
-                null,
-                0L,
-                true,
-                false,
-                false,
-                TEST_PERM_GROUP,
-                null
-        )
+        val list = listOf(createPrivacyElement(type = PrivacyType.TYPE_CAMERA, isActive = true))
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
 
-        val list = listOf(element)
-        dialog = PrivacyDialogV2(context, list, starter)
         dialog.show()
-        assertThat(dialog.requireViewById<TextView>(R.id.text).text).isEqualTo(
-                context.getString(
-                        R.string.ongoing_privacy_dialog_using_op,
-                        element.applicationName,
-                        element.type.getName(context)
-                )
-        )
+
+        assertThat(dialog.requireViewById<TextView>(R.id.privacy_dialog_item_header_summary).text)
+            .isEqualTo("In use by App")
     }
 
     @Test
     fun testRecentText() {
-        val element = PrivacyDialogV2.PrivacyElement(
-                PrivacyType.TYPE_MICROPHONE,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                null,
-                null,
-                0L,
-                false,
-                false,
-                false,
-                TEST_PERM_GROUP,
-                null
-        )
+        val list = listOf(createPrivacyElement())
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
 
-        val list = listOf(element)
-        dialog = PrivacyDialogV2(context, list, starter)
         dialog.show()
-        assertThat(dialog.requireViewById<TextView>(R.id.text).text).isEqualTo(
-                context.getString(
-                        R.string.ongoing_privacy_dialog_recent_op,
-                        element.applicationName,
-                        element.type.getName(context)
-                )
-        )
-    }
 
-    @Test
-    fun testEnterprise() {
-        val element = PrivacyDialogV2.PrivacyElement(
-                PrivacyType.TYPE_MICROPHONE,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                null,
-                null,
-                0L,
-                false,
-                true,
-                false,
-                TEST_PERM_GROUP,
-                null
-        )
-
-        val list = listOf(element)
-        dialog = PrivacyDialogV2(context, list, starter)
-        dialog.show()
-        assertThat(dialog.requireViewById<TextView>(R.id.text).text.toString()).contains(
-                context.getString(R.string.ongoing_privacy_dialog_enterprise)
-        )
+        assertThat(dialog.requireViewById<TextView>(R.id.privacy_dialog_item_header_summary).text)
+            .isEqualTo("Recently used by App")
     }
 
     @Test
     fun testPhoneCall() {
-        val element = PrivacyDialogV2.PrivacyElement(
-                PrivacyType.TYPE_MICROPHONE,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                null,
-                null,
-                0L,
-                false,
-                false,
-                true,
-                TEST_PERM_GROUP,
-                null
-        )
+        val list = listOf(createPrivacyElement(isPhoneCall = true))
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
 
-        val list = listOf(element)
-        dialog = PrivacyDialogV2(context, list, starter)
         dialog.show()
-        assertThat(dialog.requireViewById<TextView>(R.id.text).text.toString()).contains(
-                context.getString(R.string.ongoing_privacy_dialog_phonecall)
-        )
+
+        assertThat(dialog.requireViewById<TextView>(R.id.privacy_dialog_item_header_summary).text)
+            .isEqualTo("Recently used in phone call")
     }
 
     @Test
     fun testPhoneCallNotClickable() {
-        val element = PrivacyDialogV2.PrivacyElement(
-                PrivacyType.TYPE_MICROPHONE,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                null,
-                null,
-                0L,
-                false,
-                false,
-                true,
-                TEST_PERM_GROUP,
-                null
-        )
+        val list = listOf(createPrivacyElement(isPhoneCall = true))
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
 
-        val list = listOf(element)
-        dialog = PrivacyDialogV2(context, list, starter)
         dialog.show()
-        assertThat(dialog.requireViewById<View>(R.id.privacy_item).isClickable).isFalse()
-        assertThat(dialog.requireViewById<View>(R.id.chevron).visibility).isEqualTo(View.GONE)
+
+        assertThat(dialog.requireViewById<View>(R.id.privacy_dialog_item_card).isClickable)
+            .isFalse()
+        assertThat(
+                dialog
+                    .requireViewById<View>(R.id.privacy_dialog_item_header_expand_toggle)
+                    .visibility
+            )
+            .isEqualTo(View.GONE)
     }
 
     @Test
     fun testProxyLabel() {
-        val element = PrivacyDialogV2.PrivacyElement(
-                PrivacyType.TYPE_MICROPHONE,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                null,
-                "proxyLabel",
-                0L,
-                false,
-                false,
-                true,
-                TEST_PERM_GROUP,
-                null
-        )
+        val list = listOf(createPrivacyElement(proxyLabel = "proxy label"))
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
 
-        val list = listOf(element)
-        dialog = PrivacyDialogV2(context, list, starter)
         dialog.show()
-        assertThat(dialog.requireViewById<TextView>(R.id.text).text.toString()).contains(
-                context.getString(
-                        R.string.ongoing_privacy_dialog_attribution_text,
-                        element.proxyLabel
-                )
-        )
+
+        assertThat(dialog.requireViewById<TextView>(R.id.privacy_dialog_item_header_summary).text)
+            .isEqualTo("Recently used by App (proxy label)")
     }
 
     @Test
     fun testSubattribution() {
-        val element = PrivacyDialogV2.PrivacyElement(
-                PrivacyType.TYPE_MICROPHONE,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                "For subattribution",
-                null,
-                0L,
-                true,
-                false,
-                false,
-                TEST_PERM_GROUP,
-                null
-        )
-
-        val list = listOf(element)
-        dialog = PrivacyDialogV2(context, list, starter)
-        dialog.show()
-        assertThat(dialog.requireViewById<TextView>(R.id.text).text.toString()).contains(
-                context.getString(
-                        R.string.ongoing_privacy_dialog_attribution_label,
-                        element.attributionLabel
+        val list =
+            listOf(
+                createPrivacyElement(
+                    attributionLabel = "For subattribution",
+                    isActive = true,
+                    isService = true
                 )
-        )
+            )
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
+
+        dialog.show()
+
+        assertThat(dialog.requireViewById<TextView>(R.id.privacy_dialog_item_header_summary).text)
+            .isEqualTo("In use by App (For subattribution)")
     }
 
     @Test
     fun testSubattributionAndProxyLabel() {
-        val element = PrivacyDialogV2.PrivacyElement(
-                PrivacyType.TYPE_MICROPHONE,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                "For subattribution",
-                "proxy label",
-                0L,
-                true,
-                false,
-                false,
-                TEST_PERM_GROUP,
-                null
-        )
-
-        val list = listOf(element)
-        dialog = PrivacyDialogV2(context, list, starter)
-        dialog.show()
-        assertThat(dialog.requireViewById<TextView>(R.id.text).text.toString()).contains(
-                context.getString(
-                        R.string.ongoing_privacy_dialog_attribution_proxy_label,
-                        element.attributionLabel, element.proxyLabel
+        val list =
+            listOf(
+                createPrivacyElement(
+                    attributionLabel = "For subattribution",
+                    proxyLabel = "proxy label",
+                    isActive = true
                 )
-        )
+            )
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
+        dialog.show()
+        assertThat(dialog.requireViewById<TextView>(R.id.privacy_dialog_item_header_summary).text)
+            .isEqualTo("In use by App (For subattribution \u2022 proxy label)")
     }
 
     @Test
     fun testDialogHasTitle() {
-        // Dialog must have a non-empty title for a11y purposes.
-
-        val list = listOf(
-            PrivacyDialogV2.PrivacyElement(
-                PrivacyType.TYPE_MICROPHONE,
-                TEST_PACKAGE_NAME,
-                TEST_USER_ID,
-                "App",
-                null,
-                null,
-                null,
-                0L,
-                false,
-                false,
-                false,
-                TEST_PERM_GROUP,
-                null
-            )
-        )
-        dialog = PrivacyDialogV2(context, list, starter)
+        val list = listOf(createPrivacyElement())
+        dialog = PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
         dialog.show()
 
-        assertThat(TextUtils.isEmpty(dialog.window?.attributes?.title)).isFalse()
+        assertThat(dialog.window?.attributes?.title).isEqualTo("Microphone & Camera")
+    }
+
+    @Test
+    fun testDialogIsFullscreen() {
+        dialog = PrivacyDialogV2(context, emptyList(), manageApp, closeApp, openPrivacyDashboard)
+        dialog.show()
+
+        assertThat(dialog.window?.attributes?.width).isEqualTo(MATCH_PARENT)
+        assertThat(dialog.window?.attributes?.height).isEqualTo(MATCH_PARENT)
     }
 }

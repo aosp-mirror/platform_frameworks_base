@@ -18,13 +18,20 @@ package com.android.systemui.privacy
 
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
+import com.android.internal.logging.UiEventLogger.UiEventEnum.RESERVE_NEW_UI_EVENT_ID
 
 enum class PrivacyDialogEvent(private val _id: Int) : UiEventLogger.UiEventEnum {
     @UiEvent(doc = "Privacy dialog is clicked by user to go to the app settings page.")
     PRIVACY_DIALOG_ITEM_CLICKED_TO_APP_SETTINGS(904),
 
     @UiEvent(doc = "Privacy dialog is dismissed by user.")
-    PRIVACY_DIALOG_DISMISSED(905);
+    PRIVACY_DIALOG_DISMISSED(905),
+
+    @UiEvent(doc = "Privacy dialog item is clicked by user to close the app using a sensor.")
+    PRIVACY_DIALOG_ITEM_CLICKED_TO_CLOSE_APP(1396),
+
+    @UiEvent(doc = "Privacy dialog is clicked by user to see the privacy dashboard.")
+    PRIVACY_DIALOG_CLICK_TO_PRIVACY_DASHBOARD(1397);
 
     override fun getId() = _id
 }

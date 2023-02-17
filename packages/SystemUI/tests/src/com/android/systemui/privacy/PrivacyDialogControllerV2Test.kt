@@ -30,9 +30,11 @@ import android.os.UserHandle
 import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
 import android.testing.AndroidTestingRunner
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.logging.PrivacyLogger
@@ -40,6 +42,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -48,7 +51,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
@@ -77,6 +79,8 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
         private const val PERM_CAMERA = android.Manifest.permission_group.CAMERA
         private const val PERM_MICROPHONE = android.Manifest.permission_group.MICROPHONE
         private const val PERM_LOCATION = android.Manifest.permission_group.LOCATION
+
+        private val TEST_INTENT = Intent("test_intent_action")
     }
 
     @Mock
@@ -105,6 +109,8 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
     private lateinit var intentCaptor: ArgumentCaptor<Intent>
     @Mock
     private lateinit var uiEventLogger: UiEventLogger
+    @Mock
+    private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
 
     private val backgroundExecutor = FakeExecutor(FakeSystemClock())
     private val uiExecutor = FakeExecutor(FakeSystemClock())
@@ -113,15 +119,21 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
 
     private val dialogProvider = object : PrivacyDialogControllerV2.DialogProvider {
         var list: List<PrivacyDialogV2.PrivacyElement>? = null
-        var starter: ((String, Int, CharSequence?, Intent?) -> Unit)? = null
+        var manageApp: ((String, Int, Intent) -> Unit)? = null
+        var closeApp: ((String, Int) -> Unit)? = null
+        var openPrivacyDashboard: (() -> Unit)? = null
 
         override fun makeDialog(
             context: Context,
             list: List<PrivacyDialogV2.PrivacyElement>,
-            starter: (String, Int, CharSequence?, Intent?) -> Unit
+            manageApp: (String, Int, Intent) -> Unit,
+            closeApp: (String, Int) -> Unit,
+            openPrivacyDashboard: () -> Unit
         ): PrivacyDialogV2 {
             this.list = list
-            this.starter = starter
+            this.manageApp = manageApp
+            this.closeApp = closeApp
+            this.openPrivacyDashboard = openPrivacyDashboard
             return dialog
         }
     }
@@ -144,6 +156,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
                 keyguardStateController,
                 appOpsController,
                 uiEventLogger,
+                dialogLaunchAnimator,
                 dialogProvider
         )
     }
@@ -152,7 +165,9 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
     fun tearDown() {
         FakeExecutor.exhaustExecutors(uiExecutor, backgroundExecutor)
         dialogProvider.list = null
-        dialogProvider.starter = null
+        dialogProvider.manageApp = null
+        dialogProvider.closeApp = null
+        dialogProvider.openPrivacyDashboard = null
     }
 
     @Test
@@ -186,14 +201,28 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
     }
 
     @Test
-    fun testShowDialogShowsDialog() {
+    fun testShowDialogShowsDialogWithoutView() {
         val usage = createMockPermGroupUsage()
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
 
         controller.showDialog(context)
         exhaustExecutors()
 
+        verify(dialogLaunchAnimator, never()).showFromView(any(), any(), any(), anyBoolean())
         verify(dialog).show()
+    }
+
+    @Test
+    fun testShowDialogShowsDialogWithView() {
+        val view = View(context)
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+
+        controller.showDialog(context, view)
+        exhaustExecutors()
+
+        verify(dialogLaunchAnimator).showFromView(dialog, view)
+        verify(dialog, never()).show()
     }
 
     @Test
@@ -271,9 +300,9 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
             assertThat(list.get(0).attributionLabel).isNull()
             assertThat(list.get(0).proxyLabel).isEqualTo(TEST_PROXY_LABEL)
             assertThat(list.get(0).lastActiveTimestamp).isEqualTo(5L)
-            assertThat(list.get(0).active).isTrue()
-            assertThat(list.get(0).phoneCall).isFalse()
-            assertThat(list.get(0).enterprise).isFalse()
+            assertThat(list.get(0).isActive).isTrue()
+            assertThat(list.get(0).isPhoneCall).isFalse()
+            assertThat(list.get(0).isService).isFalse()
             assertThat(list.get(0).permGroupName).isEqualTo(PERM_CAMERA)
             assertThat(isIntentEqual(list.get(0).navigationIntent!!,
                     controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
@@ -330,7 +359,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
         exhaustExecutors()
 
         assertThat(dialogProvider.list).hasSize(1)
-        assertThat(dialogProvider.list?.get(0)?.active).isTrue()
+        assertThat(dialogProvider.list?.get(0)?.isActive).isTrue()
     }
 
     @Test
@@ -482,20 +511,6 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
     }
 
     @Test
-    fun testEnterpriseUser() {
-        val usage_enterprise = createMockPermGroupUsage(
-                uid = generateUidForUser(ENT_USER_ID)
-        )
-        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean()))
-                .thenReturn(listOf(usage_enterprise))
-
-        controller.showDialog(context)
-        exhaustExecutors()
-
-        assertThat(dialogProvider.list?.single()?.enterprise).isTrue()
-    }
-
-    @Test
     fun testNotCurrentUser() {
         val usage_other = createMockPermGroupUsage(
                 uid = generateUidForUser(ENT_USER_ID + 1)
@@ -510,46 +525,13 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
     }
 
     @Test
-    fun testStartActivityCorrectIntent() {
-        val usage = createMockPermGroupUsage()
-        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
-        controller.showDialog(context)
-        exhaustExecutors()
-
-        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID, null, null)
-        verify(activityStarter)
-                .startActivity(capture(intentCaptor), eq(true), any<ActivityStarter.Callback>())
-
-        assertThat(intentCaptor.value.action).isEqualTo(Intent.ACTION_MANAGE_APP_PERMISSIONS)
-        assertThat(intentCaptor.value.getStringExtra(Intent.EXTRA_PACKAGE_NAME))
-                .isEqualTo(TEST_PACKAGE_NAME)
-        assertThat(intentCaptor.value.getParcelableExtra(Intent.EXTRA_USER) as? UserHandle)
-                .isEqualTo(UserHandle.of(USER_ID))
-    }
-
-    @Test
-    fun testStartActivityCorrectIntent_enterpriseUser() {
-        val usage = createMockPermGroupUsage()
-        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
-        controller.showDialog(context)
-        exhaustExecutors()
-
-        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, ENT_USER_ID, null, null)
-        verify(activityStarter)
-                .startActivity(capture(intentCaptor), eq(true), any<ActivityStarter.Callback>())
-
-        assertThat(intentCaptor.value.getParcelableExtra(Intent.EXTRA_USER) as? UserHandle)
-                .isEqualTo(UserHandle.of(ENT_USER_ID))
-    }
-
-    @Test
     fun testStartActivitySuccess() {
         val usage = createMockPermGroupUsage()
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID, null, null)
+        dialogProvider.manageApp?.invoke(TEST_PACKAGE_NAME, USER_ID, TEST_INTENT)
         verify(activityStarter).startActivity(any(), eq(true), capture(activityStartedCaptor))
 
         activityStartedCaptor.value.onActivityStarted(ActivityManager.START_DELIVERED_TO_TOP)
@@ -564,7 +546,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID, null, null)
+        dialogProvider.manageApp?.invoke(TEST_PACKAGE_NAME, USER_ID, TEST_INTENT)
         verify(activityStarter).startActivity(any(), eq(true), capture(activityStartedCaptor))
 
         activityStartedCaptor.value.onActivityStarted(ActivityManager.START_ABORTED)
@@ -588,15 +570,38 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
     }
 
     @Test
-    fun testStartActivityLogs() {
+    fun testManageAppLogs() {
         val usage = createMockPermGroupUsage()
         `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
         controller.showDialog(context)
         exhaustExecutors()
 
-        dialogProvider.starter?.invoke(TEST_PACKAGE_NAME, USER_ID, null, null)
+        dialogProvider.manageApp?.invoke(TEST_PACKAGE_NAME, USER_ID, TEST_INTENT)
         verify(uiEventLogger).log(PrivacyDialogEvent.PRIVACY_DIALOG_ITEM_CLICKED_TO_APP_SETTINGS,
                 USER_ID, TEST_PACKAGE_NAME)
+    }
+
+    @Test
+    fun testCloseAppLogs() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.closeApp?.invoke(TEST_PACKAGE_NAME, USER_ID)
+        verify(uiEventLogger).log(PrivacyDialogEvent.PRIVACY_DIALOG_ITEM_CLICKED_TO_CLOSE_APP,
+                USER_ID, TEST_PACKAGE_NAME)
+    }
+
+    @Test
+    fun testOpenPrivacyDashboardLogs() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.openPrivacyDashboard?.invoke()
+        verify(uiEventLogger).log(PrivacyDialogEvent.PRIVACY_DIALOG_CLICK_TO_PRIVACY_DASHBOARD)
     }
 
     @Test
@@ -616,14 +621,44 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
     }
 
     @Test
-    fun testInvalidAttributionTag() {
+    fun testDefaultIntent() {
+        val usage = createMockPermGroupUsage()
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.list?.let { list ->
+            assertThat(isIntentEqual(list.get(0).navigationIntent!!,
+                    controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
+                    .isTrue()
+            assertThat(list.get(0).isService).isFalse()
+        }
+    }
+
+    @Test
+    fun testDefaultIntentOnEnterpriseUser() {
+        val usage =
+            createMockPermGroupUsage(
+                uid = generateUidForUser(ENT_USER_ID),
+            )
+        `when`(permissionManager.getIndicatorAppOpUsageData(anyBoolean())).thenReturn(listOf(usage))
+
+        controller.showDialog(context)
+        exhaustExecutors()
+
+        dialogProvider.list?.let { list ->
+            assertThat(isIntentEqual(list.get(0).navigationIntent!!,
+                    controller.getDefaultManageAppPermissionsIntent(
+                        TEST_PACKAGE_NAME, ENT_USER_ID)))
+                        .isTrue()
+            assertThat(list.get(0).isService).isFalse()
+        }
+    }
+
+    @Test
+    fun testDefaultIntentOnInvalidAttributionTag() {
         val usage = createMockPermGroupUsage(
-                packageName = TEST_PACKAGE_NAME,
-                uid = generateUidForUser(USER_ID),
-                permissionGroupName = PERM_CAMERA,
-                lastAccessTimeMillis = 5L,
-                isActive = true,
-                isPhoneCall = false,
                 attributionTag = "INVALID_ATTRIBUTION_TAG",
                 proxyLabel = TEST_PROXY_LABEL
         )
@@ -633,26 +668,15 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
         exhaustExecutors()
 
         dialogProvider.list?.let { list ->
-            assertThat(list.get(0).type).isEqualTo(PrivacyType.TYPE_CAMERA)
-            assertThat(list.get(0).packageName).isEqualTo(TEST_PACKAGE_NAME)
-            assertThat(list.get(0).userId).isEqualTo(USER_ID)
-            assertThat(list.get(0).applicationName).isEqualTo(TEST_PACKAGE_NAME)
-            assertThat(list.get(0).attributionTag).isEqualTo("INVALID_ATTRIBUTION_TAG")
-            assertThat(list.get(0).attributionLabel).isNull()
-            assertThat(list.get(0).proxyLabel).isEqualTo(TEST_PROXY_LABEL)
-            assertThat(list.get(0).lastActiveTimestamp).isEqualTo(5L)
-            assertThat(list.get(0).active).isTrue()
-            assertThat(list.get(0).phoneCall).isFalse()
-            assertThat(list.get(0).enterprise).isFalse()
-            assertThat(list.get(0).permGroupName).isEqualTo(PERM_CAMERA)
             assertThat(isIntentEqual(list.get(0).navigationIntent!!,
                     controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
                     .isTrue()
+            assertThat(list.get(0).isService).isFalse()
         }
     }
 
     @Test
-    fun testCorrectIntentSubAttribution() {
+    fun testServiceIntentOnCorrectSubAttribution() {
         val usage = createMockPermGroupUsage(
                 attributionTag = TEST_ATTRIBUTION_TAG,
                 attributionLabel = "TEST_LABEL"
@@ -675,6 +699,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
                     .isEqualTo(arrayOf(TEST_ATTRIBUTION_TAG.toString()))
             assertThat(navigationIntent.getBooleanExtra(Intent.EXTRA_SHOWING_ATTRIBUTION, false))
                     .isTrue()
+            assertThat(list.get(0).isService).isTrue()
         }
     }
 
@@ -696,6 +721,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
             assertThat(isIntentEqual(list.get(0).navigationIntent!!,
                     controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
                     .isTrue()
+            assertThat(list.get(0).isService).isFalse()
         }
     }
 
@@ -719,6 +745,7 @@ class PrivacyDialogControllerV2Test : SysuiTestCase() {
             assertThat(isIntentEqual(list.get(0).navigationIntent!!,
                     controller.getDefaultManageAppPermissionsIntent(TEST_PACKAGE_NAME, USER_ID)))
                     .isTrue()
+            assertThat(list.get(0).isService).isFalse()
         }
     }
 

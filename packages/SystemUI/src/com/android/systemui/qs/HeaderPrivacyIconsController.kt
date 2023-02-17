@@ -149,7 +149,7 @@ class HeaderPrivacyIconsController @Inject constructor(
             uiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_CLICK)
             if (safetyCenterEnabled) {
                 if (featureFlags.isEnabled(Flags.ENABLE_NEW_PRIVACY_DIALOG)) {
-                    privacyDialogControllerV2.showDialog(privacyChip.context)
+                    privacyDialogControllerV2.showDialog(privacyChip.context, privacyChip)
                 } else {
                     showSafetyCenter()
                 }

@@ -27,6 +27,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
@@ -171,7 +172,8 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         verify(privacyChip).setOnClickListener(capture(captor))
         captor.value.onClick(privacyChip)
         verify(privacyDialogController).showDialog(any(Context::class.java))
-        verify(privacyDialogControllerV2, never()).showDialog(any(Context::class.java))
+        verify(privacyDialogControllerV2, never())
+            .showDialog(any(Context::class.java), any(View::class.java))
     }
 
     @Test
@@ -183,7 +185,8 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         verify(privacyChip).setOnClickListener(capture(captor))
         captor.value.onClick(privacyChip)
         verify(privacyDialogController).showDialog(any(Context::class.java))
-        verify(privacyDialogControllerV2, never()).showDialog(any(Context::class.java))
+        verify(privacyDialogControllerV2, never())
+                .showDialog(any(Context::class.java), any(View::class.java))
     }
 
     @Test
@@ -203,7 +206,8 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         verify(privacyChip).setOnClickListener(capture(captor))
         captor.value.onClick(privacyChip)
         verify(privacyDialogController, never()).showDialog(any(Context::class.java))
-        verify(privacyDialogControllerV2, never()).showDialog(any(Context::class.java))
+        verify(privacyDialogControllerV2, never())
+            .showDialog(any(Context::class.java), any(View::class.java))
     }
 
     @Test
@@ -222,7 +226,7 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         val captor = argumentCaptor<View.OnClickListener>()
         verify(privacyChip).setOnClickListener(capture(captor))
         captor.value.onClick(privacyChip)
-        verify(privacyDialogControllerV2).showDialog(any(Context::class.java))
+        verify(privacyDialogControllerV2).showDialog(any(Context::class.java), eq(privacyChip))
         verify(privacyDialogController, never()).showDialog(any(Context::class.java))
     }
 

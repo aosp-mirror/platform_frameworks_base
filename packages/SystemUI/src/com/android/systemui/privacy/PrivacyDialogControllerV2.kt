@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import android.content.pm.PackageManager
 import android.os.UserHandle
 import android.permission.PermissionGroupUsage
 import android.permission.PermissionManager
-import android.util.Log
+import android.view.View
 import androidx.annotation.MainThread
-import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.appops.AppOpsController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -42,15 +42,18 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
-private val defaultDialogProvider = object : PrivacyDialogControllerV2.DialogProvider {
-    override fun makeDialog(
-        context: Context,
-        list: List<PrivacyDialogV2.PrivacyElement>,
-        starter: (String, Int, CharSequence?, Intent?) -> Unit
-    ): PrivacyDialogV2 {
-        return PrivacyDialogV2(context, list, starter)
+private val defaultDialogProvider =
+    object : PrivacyDialogControllerV2.DialogProvider {
+        override fun makeDialog(
+            context: Context,
+            list: List<PrivacyDialogV2.PrivacyElement>,
+            manageApp: (String, Int, Intent) -> Unit,
+            closeApp: (String, Int) -> Unit,
+            openPrivacyDashboard: () -> Unit
+        ): PrivacyDialogV2 {
+            return PrivacyDialogV2(context, list, manageApp, closeApp, openPrivacyDashboard)
+        }
     }
-}
 
 /**
  * Controller for [PrivacyDialogV2].
@@ -71,7 +74,8 @@ class PrivacyDialogControllerV2(
     private val keyguardStateController: KeyguardStateController,
     private val appOpsController: AppOpsController,
     private val uiEventLogger: UiEventLogger,
-    @VisibleForTesting private val dialogProvider: DialogProvider
+    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val dialogProvider: DialogProvider
 ) {
 
     @Inject
@@ -86,57 +90,72 @@ class PrivacyDialogControllerV2(
         privacyLogger: PrivacyLogger,
         keyguardStateController: KeyguardStateController,
         appOpsController: AppOpsController,
-        uiEventLogger: UiEventLogger
+        uiEventLogger: UiEventLogger,
+        dialogLaunchAnimator: DialogLaunchAnimator
     ) : this(
-            permissionManager,
-            packageManager,
-            privacyItemController,
-            userTracker,
-            activityStarter,
-            backgroundExecutor,
-            uiExecutor,
-            privacyLogger,
-            keyguardStateController,
-            appOpsController,
-            uiEventLogger,
-            defaultDialogProvider
+        permissionManager,
+        packageManager,
+        privacyItemController,
+        userTracker,
+        activityStarter,
+        backgroundExecutor,
+        uiExecutor,
+        privacyLogger,
+        keyguardStateController,
+        appOpsController,
+        uiEventLogger,
+        dialogLaunchAnimator,
+        defaultDialogProvider
     )
-
-    companion object {
-        private const val TAG = "PrivacyDialogController"
-    }
 
     private var dialog: Dialog? = null
 
-    private val onDialogDismissed = object : PrivacyDialogV2.OnDialogDismissed {
-        override fun onDialogDismissed() {
-            privacyLogger.logPrivacyDialogDismissed()
-            uiEventLogger.log(PrivacyDialogEvent.PRIVACY_DIALOG_DISMISSED)
-            dialog = null
+    private val onDialogDismissed =
+        object : PrivacyDialogV2.OnDialogDismissed {
+            override fun onDialogDismissed() {
+                privacyLogger.logPrivacyDialogDismissed()
+                uiEventLogger.log(PrivacyDialogEvent.PRIVACY_DIALOG_DISMISSED)
+                dialog = null
+            }
         }
+
+    @WorkerThread
+    private fun closeApp(packageName: String, userId: Int) {
+        uiEventLogger.log(
+            PrivacyDialogEvent.PRIVACY_DIALOG_ITEM_CLICKED_TO_CLOSE_APP,
+            userId,
+            packageName
+        )
+        privacyLogger.logCloseAppFromDialog(packageName, userId)
+        ActivityManager.getService().stopAppForUser(packageName, userId)
     }
 
     @MainThread
-    private fun startActivity(
-        packageName: String,
-        userId: Int,
-        attributionTag: CharSequence?,
-        navigationIntent: Intent?
-    ) {
-        val intent = if (navigationIntent == null) {
-            getDefaultManageAppPermissionsIntent(packageName, userId)
-        } else {
-            navigationIntent
-        }
-        uiEventLogger.log(PrivacyDialogEvent.PRIVACY_DIALOG_ITEM_CLICKED_TO_APP_SETTINGS,
-            userId, packageName)
+    private fun manageApp(packageName: String, userId: Int, navigationIntent: Intent) {
+        uiEventLogger.log(
+            PrivacyDialogEvent.PRIVACY_DIALOG_ITEM_CLICKED_TO_APP_SETTINGS,
+            userId,
+            packageName
+        )
         privacyLogger.logStartSettingsActivityFromDialog(packageName, userId)
+        startActivity(navigationIntent)
+    }
+
+    @MainThread
+    private fun openPrivacyDashboard() {
+        uiEventLogger.log(PrivacyDialogEvent.PRIVACY_DIALOG_CLICK_TO_PRIVACY_DASHBOARD)
+        privacyLogger.logStartPrivacyDashboardFromDialog()
+        startActivity(Intent(Intent.ACTION_REVIEW_PERMISSION_USAGE))
+    }
+
+    @MainThread
+    private fun startActivity(navigationIntent: Intent) {
         if (!keyguardStateController.isUnlocked) {
             // If we are locked, hide the dialog so the user can unlock
             dialog?.hide()
         }
         // startActivity calls internally startActivityDismissingKeyguard
-        activityStarter.startActivity(intent, true) {
+        activityStarter.startActivity(navigationIntent, true) {
             if (ActivityManager.isStartResultSuccessful(it)) {
                 dismissDialog()
             } else {
@@ -146,31 +165,29 @@ class PrivacyDialogControllerV2(
     }
 
     @WorkerThread
-    private fun getManagePermissionIntent(
+    private fun getStartViewPermissionUsageIntent(
         packageName: String,
-        userId: Int,
-        permGroupName: CharSequence,
+        permGroupName: String,
         attributionTag: CharSequence?,
         isAttributionSupported: Boolean
-    ): Intent
-    {
-        lateinit var intent: Intent
+    ): Intent? {
         if (attributionTag != null && isAttributionSupported) {
-            intent = Intent(Intent.ACTION_MANAGE_PERMISSION_USAGE)
+            val intent = Intent(Intent.ACTION_MANAGE_PERMISSION_USAGE)
             intent.setPackage(packageName)
-            intent.putExtra(Intent.EXTRA_PERMISSION_GROUP_NAME, permGroupName.toString())
+            intent.putExtra(Intent.EXTRA_PERMISSION_GROUP_NAME, permGroupName)
             intent.putExtra(Intent.EXTRA_ATTRIBUTION_TAGS, arrayOf(attributionTag.toString()))
             intent.putExtra(Intent.EXTRA_SHOWING_ATTRIBUTION, true)
-            val resolveInfo = packageManager.resolveActivity(
-                    intent, PackageManager.ResolveInfoFlags.of(0))
-            if (resolveInfo != null && resolveInfo.activityInfo != null &&
-                    resolveInfo.activityInfo.permission ==
-                    android.Manifest.permission.START_VIEW_PERMISSION_USAGE) {
+            val resolveInfo =
+                packageManager.resolveActivity(intent, PackageManager.ResolveInfoFlags.of(0))
+            if (
+                resolveInfo?.activityInfo?.permission ==
+                    Manifest.permission.START_VIEW_PERMISSION_USAGE
+            ) {
                 intent.component = ComponentName(packageName, resolveInfo.activityInfo.name)
                 return intent
             }
         }
-        return getDefaultManageAppPermissionsIntent(packageName, userId)
+        return null
     }
 
     fun getDefaultManageAppPermissionsIntent(packageName: String, userId: Int): Intent {
@@ -197,73 +214,84 @@ class PrivacyDialogControllerV2(
      * @param context A context to use to create the dialog.
      * @see filterAndSelect
      */
-    fun showDialog(context: Context) {
+    fun showDialog(context: Context, view: View? = null) {
         dismissDialog()
         backgroundExecutor.execute {
             val usage = permGroupUsage()
             val userInfos = userTracker.userProfiles
             privacyLogger.logUnfilteredPermGroupUsage(usage)
-            val items = usage.mapNotNull {
-                val type = filterType(permGroupToPrivacyType(it.permissionGroupName))
-                val userInfo = userInfos.firstOrNull { ui -> ui.id == UserHandle.getUserId(it.uid) }
-                if (userInfo != null || it.isPhoneCall) {
-                    type?.let { t ->
+            val items =
+                usage.mapNotNull {
+                    val userInfo =
+                        userInfos.firstOrNull { ui -> ui.id == UserHandle.getUserId(it.uid) }
+                    if (
+                        isAvailable(it.permissionGroupName) && (userInfo != null || it.isPhoneCall)
+                    ) {
                         // Only try to get the app name if we actually need it
-                        val appName = if (it.isPhoneCall) {
-                            ""
-                        } else {
-                            getLabelForPackage(it.packageName, it.uid)
-                        }
+                        val appName =
+                            if (it.isPhoneCall) {
+                                ""
+                            } else {
+                                getLabelForPackage(it.packageName, it.uid)
+                            }
                         val userId = UserHandle.getUserId(it.uid)
-                        PrivacyDialogV2.PrivacyElement(
-                                t,
+                        val viewUsageIntent =
+                            getStartViewPermissionUsageIntent(
                                 it.packageName,
-                                userId,
-                                appName,
-                                it.attributionTag,
-                                it.attributionLabel,
-                                it.proxyLabel,
-                                it.lastAccessTimeMillis,
-                                it.isActive,
-                                // If there's no user info, we're in a phoneCall in secondary user
-                                userInfo?.isManagedProfile ?: false,
-                                it.isPhoneCall,
                                 it.permissionGroupName,
-                                getManagePermissionIntent(
-                                        it.packageName,
-                                        userId,
-                                        it.permissionGroupName,
-                                        it.attributionTag,
-                                        // attributionLabel is set only when subattribution policies
-                                        // are supported and satisfied
-                                        it.attributionLabel != null
-                                )
+                                it.attributionTag,
+                                // attributionLabel is set only when subattribution policies
+                                // are supported and satisfied
+                                it.attributionLabel != null
+                            )
+                        PrivacyDialogV2.PrivacyElement(
+                            permGroupToPrivacyType(it.permissionGroupName)!!,
+                            it.packageName,
+                            userId,
+                            appName,
+                            it.attributionTag,
+                            it.attributionLabel,
+                            it.proxyLabel,
+                            it.lastAccessTimeMillis,
+                            it.isActive,
+                            it.isPhoneCall,
+                            viewUsageIntent != null,
+                            it.permissionGroupName,
+                            viewUsageIntent
+                                ?: getDefaultManageAppPermissionsIntent(it.packageName, userId)
                         )
+                    } else {
+                        null
                     }
-                } else {
-                    // No matching user or phone call
-                    null
                 }
-            }
             uiExecutor.execute {
                 val elements = filterAndSelect(items)
                 if (elements.isNotEmpty()) {
-                    val d = dialogProvider.makeDialog(context, elements, this::startActivity)
+                    val d =
+                        dialogProvider.makeDialog(
+                            context,
+                            elements,
+                            this::manageApp,
+                            this::closeApp,
+                            this::openPrivacyDashboard
+                        )
                     d.setShowForAllUsers(true)
                     d.addOnDismissListener(onDialogDismissed)
-                    d.show()
+                    if (view != null) {
+                        dialogLaunchAnimator.showFromView(d, view)
+                    } else {
+                        d.show()
+                    }
                     privacyLogger.logShowDialogV2Contents(elements)
                     dialog = d
                 } else {
-                    Log.w(TAG, "Trying to show empty dialog")
+                    privacyLogger.logEmptyDialog()
                 }
             }
         }
     }
 
-    /**
-     * Dismisses the dialog
-     */
+    /** Dismisses the dialog */
     fun dismissDialog() {
         dialog?.dismiss()
     }
@@ -275,7 +303,7 @@ class PrivacyDialogControllerV2(
                 .getApplicationInfoAsUser(packageName, 0, UserHandle.getUserId(uid))
                 .loadLabel(packageManager)
         } catch (_: PackageManager.NameNotFoundException) {
-            Log.w(TAG, "Label not found for: $packageName")
+            privacyLogger.logLabelNotFound(packageName)
             packageName
         }
     }
@@ -289,16 +317,12 @@ class PrivacyDialogControllerV2(
         }
     }
 
-    private fun filterType(type: PrivacyType?): PrivacyType? {
-        return type?.let {
-            if ((it == PrivacyType.TYPE_CAMERA || it == PrivacyType.TYPE_MICROPHONE) &&
-                privacyItemController.micCameraAvailable) {
-                it
-            } else if (it == PrivacyType.TYPE_LOCATION && privacyItemController.locationAvailable) {
-                it
-            } else {
-                null
-            }
+    private fun isAvailable(group: String): Boolean {
+        return when (group) {
+            Manifest.permission_group.CAMERA -> privacyItemController.micCameraAvailable
+            Manifest.permission_group.MICROPHONE -> privacyItemController.micCameraAvailable
+            Manifest.permission_group.LOCATION -> privacyItemController.locationAvailable
+            else -> false
         }
     }
 
@@ -311,16 +335,18 @@ class PrivacyDialogControllerV2(
     private fun filterAndSelect(
         list: List<PrivacyDialogV2.PrivacyElement>
     ): List<PrivacyDialogV2.PrivacyElement> {
-        return list.groupBy { it.type }.toSortedMap().flatMap { (_, elements) ->
-            val actives = elements.filter { it.active }
-            if (actives.isNotEmpty()) {
-                actives.sortedByDescending { it.lastActiveTimestamp }
-            } else {
-                elements.maxByOrNull { it.lastActiveTimestamp }?.let {
-                    listOf(it)
-                } ?: emptyList()
+        return list
+            .groupBy { it.type }
+            .toSortedMap()
+            .flatMap { (_, elements) ->
+                val actives = elements.filter { it.isActive }
+                if (actives.isNotEmpty()) {
+                    actives.sortedByDescending { it.lastActiveTimestamp }
+                } else {
+                    elements.maxByOrNull { it.lastActiveTimestamp }?.let { listOf(it) }
+                        ?: emptyList()
+                }
             }
-        }
     }
 
     /**
@@ -329,13 +355,13 @@ class PrivacyDialogControllerV2(
      * Can be used to inject a mock creator.
      */
     interface DialogProvider {
-        /**
-         * Create a [PrivacyDialogV2].
-         */
+        /** Create a [PrivacyDialogV2]. */
         fun makeDialog(
             context: Context,
             list: List<PrivacyDialogV2.PrivacyElement>,
-            starter: (String, Int, CharSequence?, Intent?) -> Unit
+            manageApp: (String, Int, Intent) -> Unit,
+            closeApp: (String, Int) -> Unit,
+            openPrivacyDashboard: () -> Unit
         ): PrivacyDialogV2
     }
 }
