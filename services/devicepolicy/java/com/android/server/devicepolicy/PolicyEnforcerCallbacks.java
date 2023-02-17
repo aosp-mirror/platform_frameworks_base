@@ -215,10 +215,9 @@ final class PolicyEnforcerCallbacks {
             }
             UserRestrictionPolicyKey parsedKey =
                     (UserRestrictionPolicyKey) policyKey;
-            // TODO: call into new UserManager API when merged
             UserManagerInternal userManager = LocalServices.getService(UserManagerInternal.class);
-//            userManager.setUserRestriction(
-//                    userId, parsedKey.getRestriction(), enabled != null && enabled);
+            userManager.setUserRestriction(
+                    userId, parsedKey.getRestriction(), enabled != null && enabled);
             return true;
         }));
     }
