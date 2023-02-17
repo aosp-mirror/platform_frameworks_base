@@ -395,7 +395,7 @@ public class AudioDeviceInventory {
                 case BluetoothProfile.LE_AUDIO:
                 case BluetoothProfile.LE_AUDIO_BROADCAST:
                     if (switchToUnavailable) {
-                        makeLeAudioDeviceUnavailable(address, btInfo.mAudioSystemDevice);
+                        makeLeAudioDeviceUnavailableNow(address, btInfo.mAudioSystemDevice);
                     } else if (switchToAvailable) {
                         makeLeAudioDeviceAvailable(address, BtHelper.getName(btInfo.mDevice),
                                 streamType, btInfo.mVolume == -1 ? -1 : btInfo.mVolume * 10,
@@ -504,6 +504,12 @@ public class AudioDeviceInventory {
     /*package*/ void onMakeA2dpDeviceUnavailableNow(String address, int a2dpCodec) {
         synchronized (mDevicesLock) {
             makeA2dpDeviceUnavailableNow(address, a2dpCodec);
+        }
+    }
+
+    /*package*/ void onMakeLeAudioDeviceUnavailableNow(String address, int device) {
+        synchronized (mDevicesLock) {
+            makeLeAudioDeviceUnavailableNow(address, device);
         }
     }
 
@@ -1027,10 +1033,11 @@ public class AudioDeviceInventory {
             new MediaMetrics.Item(mMetricsId + "disconnectLeAudio")
                     .record();
             if (toRemove.size() > 0) {
-                final int delay = checkSendBecomingNoisyIntentInt(device, 0,
+                final int delay = checkSendBecomingNoisyIntentInt(device,
+                        AudioService.CONNECTION_STATE_DISCONNECTED,
                         AudioSystem.DEVICE_NONE);
                 toRemove.stream().forEach(deviceAddress ->
-                        makeLeAudioDeviceUnavailable(deviceAddress, device)
+                        makeLeAudioDeviceUnavailableLater(deviceAddress, device, delay)
                 );
             }
         }
@@ -1366,7 +1373,7 @@ public class AudioDeviceInventory {
     }
 
     @GuardedBy("mDevicesLock")
-    private void makeLeAudioDeviceUnavailable(String address, int device) {
+    private void makeLeAudioDeviceUnavailableNow(String address, int device) {
         if (device != AudioSystem.DEVICE_NONE) {
             final int res = AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
                     device, address),
@@ -1387,6 +1394,14 @@ public class AudioDeviceInventory {
         }
 
         setCurrentAudioRouteNameIfPossible(null, false /*fromA2dp*/);
+    }
+
+    @GuardedBy("mDevicesLock")
+    private void makeLeAudioDeviceUnavailableLater(String address, int device, int delayMs) {
+        // the device will be made unavailable later, so consider it disconnected right away
+        mConnectedDevices.remove(DeviceInfo.makeDeviceListKey(device, address));
+        // send the delayed message to make the device unavailable later
+        mDeviceBroker.setLeAudioTimeout(address, device, delayMs);
     }
 
     @GuardedBy("mDevicesLock")
