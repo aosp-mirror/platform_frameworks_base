@@ -4589,6 +4589,22 @@ public class DeviceIdleController extends SystemService
                     Binder.restoreCallingIdentity(token);
                 }
             }
+        } else if ("force-active".equals(cmd)) {
+            getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
+                    null);
+            synchronized (this) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mForceIdle = true;
+                    becomeActiveLocked("force-active", Process.myUid());
+                    pw.print("Light state: ");
+                    pw.print(lightStateToString(mLightState));
+                    pw.print(", deep state: ");
+                    pw.println(stateToString(mState));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
         } else if ("force-idle".equals(cmd)) {
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
