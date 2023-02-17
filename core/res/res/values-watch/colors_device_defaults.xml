@@ -72,11 +72,11 @@
          ! replaced with custom color #333333
            (derived from background color + foreground @ 20% opacity)
     -->
-    <color name="primary_dark_device_default_dark">#333333</color>
+    <color name="surface_dark">#333333</color>
 
     <!--
        button_normal_device_default_dark
-         - uses ?attr/disabledAlpha and ?attr/colorPrimaryDark to draw state list
+         - uses ?attr/disabledAlpha and ?attr/colorSurface to draw state list
            (used as colorButtonNormal attribute in theme)
          - see color-watch/btn_watch_default_dark.xml
     -->
