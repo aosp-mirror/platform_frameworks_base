@@ -131,7 +131,7 @@ class CustomizationProvider :
             throw UnsupportedOperationException()
         }
 
-        return runBlocking { insertSelection(values) }
+        return runBlocking(mainDispatcher) { insertSelection(values) }
     }
 
     override fun query(
@@ -171,7 +171,7 @@ class CustomizationProvider :
             throw UnsupportedOperationException()
         }
 
-        return runBlocking { deleteSelection(uri, selectionArgs) }
+        return runBlocking(mainDispatcher) { deleteSelection(uri, selectionArgs) }
     }
 
     override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {
