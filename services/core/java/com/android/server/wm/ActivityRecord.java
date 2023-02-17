@@ -5225,7 +5225,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Debug.getCallers(6));
 
         // Before setting mVisibleRequested so we can track changes.
-        mTransitionController.collect(this);
+        boolean isCollecting = false;
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            isCollecting = mTransitionController.isCollecting();
+            if (isCollecting) {
+                mTransitionController.collect(this);
+            } else {
+                Slog.e(TAG, "setVisibility=" + visible + " while transition is not collecting "
+                        + this + " caller=" + Debug.getCallers(8));
+            }
+        }
 
         onChildVisibilityRequested(visible);
 
@@ -5297,9 +5306,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Defer committing visibility until transition starts.
-        if (inTransition()) {
-            if (!visible && mTransitionController.inPlayingTransition(this)
-                    && mTransitionController.isCollecting(this)) {
+        if (isCollecting) {
+            // It may be occluded by the activity above that calls convertFromTranslucent().
+            if (!visible && mTransitionController.inPlayingTransition(this)) {
                 mTransitionChangeFlags |= FLAG_IS_OCCLUDED;
             }
             return;
@@ -5319,11 +5328,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Then its visibility will be committed until the transition is ready.
      */
     private boolean deferCommitVisibilityChange(boolean visible) {
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            // Shell transition doesn't use opening/closing sets.
+            return false;
+        }
         if (!mDisplayContent.mAppTransition.isTransitionSet()) {
-            if (mTransitionController.isShellTransitionsEnabled()) {
-                // Shell transition doesn't use opening/closing sets.
-                return false;
-            }
             // Defer committing visibility for non-home app which is animating by recents.
             if (isActivityTypeHome() || !isAnimating(PARENTS, ANIMATION_TYPE_RECENTS)) {
                 return false;
