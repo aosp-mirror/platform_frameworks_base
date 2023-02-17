@@ -152,9 +152,7 @@ public class QuickStatusBarHeader extends FrameLayout {
         Configuration config = mContext.getResources().getConfiguration();
         setDatePrivacyContainersWidth(config.orientation == Configuration.ORIENTATION_LANDSCAPE);
 
-        // QS will always show the estimate, and BatteryMeterView handles the case where
-        // it's unavailable or charging
-        mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
+        updateBatteryMode();
 
         mIconsAlphaAnimatorFixed = new TouchAnimator.Builder()
                 .addFloat(mIconContainer, "alpha", 0, 1)
@@ -460,24 +458,24 @@ public class QuickStatusBarHeader extends FrameLayout {
                 (LinearLayout.LayoutParams) mDatePrivacySeparator.getLayoutParams();
         LinearLayout.LayoutParams mClockIconsSeparatorLayoutParams =
                 (LinearLayout.LayoutParams) mClockIconsSeparator.getLayoutParams();
-        if (cutout != null) {
-            Rect topCutout = cutout.getBoundingRectTop();
-            if (topCutout.isEmpty() || hasCornerCutout) {
-                datePrivacySeparatorLayoutParams.width = 0;
-                mDatePrivacySeparator.setVisibility(View.GONE);
-                mClockIconsSeparatorLayoutParams.width = 0;
-                setSeparatorVisibility(false);
-                mShowClockIconsSeparator = false;
-                mHasCenterCutout = false;
-            } else {
-                datePrivacySeparatorLayoutParams.width = topCutout.width();
-                mDatePrivacySeparator.setVisibility(View.VISIBLE);
-                mClockIconsSeparatorLayoutParams.width = topCutout.width();
-                mShowClockIconsSeparator = true;
-                setSeparatorVisibility(mKeyguardExpansionFraction == 0f);
-                mHasCenterCutout = true;
-            }
+
+        Rect topCutout = cutout == null ? null : cutout.getBoundingRectTop();
+        if (topCutout == null || topCutout.isEmpty() || hasCornerCutout) {
+            datePrivacySeparatorLayoutParams.width = 0;
+            mDatePrivacySeparator.setVisibility(View.GONE);
+            mClockIconsSeparatorLayoutParams.width = 0;
+            setSeparatorVisibility(false);
+            mShowClockIconsSeparator = false;
+            mHasCenterCutout = false;
+        } else {
+            datePrivacySeparatorLayoutParams.width = topCutout.width();
+            mDatePrivacySeparator.setVisibility(View.VISIBLE);
+            mClockIconsSeparatorLayoutParams.width = topCutout.width();
+            mShowClockIconsSeparator = true;
+            setSeparatorVisibility(mKeyguardExpansionFraction == 0f);
+            mHasCenterCutout = true;
         }
+
         mDatePrivacySeparator.setLayoutParams(datePrivacySeparatorLayoutParams);
         mClockIconsSeparator.setLayoutParams(mClockIconsSeparatorLayoutParams);
         mCutOutPaddingLeft = sbInsets.first;

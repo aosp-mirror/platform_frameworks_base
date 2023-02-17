@@ -25,8 +25,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -108,6 +106,11 @@ public class QSPanel extends LinearLayout implements Tunable {
     private boolean mShouldMoveMediaOnExpansion = true;
     private boolean mUsingCombinedHeaders = false;
     private QSLogger mQsLogger;
+    /**
+     * Specifies if we can collapse to QQS in current state. In split shade that should be always
+     * false. It influences available accessibility actions.
+     */
+    private boolean mCanCollapse = true;
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -650,7 +653,9 @@ public class QSPanel extends LinearLayout implements Tunable {
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+        if (mCanCollapse) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+        }
     }
 
     @Override
@@ -669,15 +674,11 @@ public class QSPanel extends LinearLayout implements Tunable {
         mCollapseExpandAction = action;
     }
 
-    private class H extends Handler {
-        private static final int ANNOUNCE_FOR_ACCESSIBILITY = 1;
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == ANNOUNCE_FOR_ACCESSIBILITY) {
-                announceForAccessibility((CharSequence) msg.obj);
-            }
-        }
+    /**
+     * Specifies if these expanded QS can collapse to QQS.
+     */
+    public void setCanCollapse(boolean canCollapse) {
+        mCanCollapse = canCollapse;
     }
 
     public interface QSTileLayout {

@@ -18,21 +18,30 @@ package com.android.systemui.qs.tiles
 import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSTileHost
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.anyBoolean
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
@@ -46,15 +55,20 @@ class FontScalingTileTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var uiEventLogger: UiEventLogger
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var fontScalingTile: FontScalingTile
+
+    val featureFlags = FakeFeatureFlags()
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         `when`(qsHost.getContext()).thenReturn(mContext)
+        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
+
         fontScalingTile =
             FontScalingTile(
                 qsHost,
@@ -66,15 +80,37 @@ class FontScalingTileTest : SysuiTestCase() {
                 activityStarter,
                 qsLogger,
                 dialogLaunchAnimator,
-                FakeSettings()
+                FakeSettings(),
+                featureFlags
             )
         fontScalingTile.initialize()
+        testableLooper.processAllMessages()
     }
 
     @Test
-    fun isNotAvailable_whenNotSupportedDevice_returnsFalse() {
+    fun isAvailable_whenFlagIsFalse_returnsFalse() {
+        featureFlags.set(Flags.ENABLE_FONT_SCALING_TILE, false)
+
         val isAvailable = fontScalingTile.isAvailable()
 
         assertThat(isAvailable).isFalse()
+    }
+
+    @Test
+    fun isAvailable_whenFlagIsTrue_returnsTrue() {
+        featureFlags.set(Flags.ENABLE_FONT_SCALING_TILE, true)
+
+        val isAvailable = fontScalingTile.isAvailable()
+
+        assertThat(isAvailable).isTrue()
+    }
+
+    @Test
+    fun clickTile_showDialog() {
+        val view = View(context)
+        fontScalingTile.click(view)
+        testableLooper.processAllMessages()
+
+        verify(dialogLaunchAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
     }
 }

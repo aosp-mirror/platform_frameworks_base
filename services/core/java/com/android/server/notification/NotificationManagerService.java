@@ -8543,6 +8543,9 @@ public class NotificationManagerService extends SystemService {
             if (interceptBefore && !record.isIntercepted()
                     && record.isNewEnoughForAlerting(System.currentTimeMillis())) {
                 buzzBeepBlinkLocked(record);
+
+                // Log alert after change in intercepted state to Zen Log as well
+                ZenLog.traceAlertOnUpdatedIntercept(record);
             }
         }
         if (changed) {

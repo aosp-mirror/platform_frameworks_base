@@ -187,6 +187,8 @@ class LockscreenShadeTransitionController @Inject constructor(
 
     private val qsTransitionController = qsTransitionControllerFactory.create { qS }
 
+    private val callbacks = mutableListOf<Callback>()
+
     /** See [LockscreenShadeQsTransitionController.qsTransitionFraction].*/
     @get:FloatRange(from = 0.0, to = 1.0)
     val qSDragProgress: Float
@@ -319,8 +321,8 @@ class LockscreenShadeTransitionController @Inject constructor(
                                     true /* drag down is always an open */)
                         }
                         notificationPanelController.animateToFullShade(delay)
-                        notificationPanelController.setTransitionToFullShadeAmount(0f,
-                                true /* animated */, delay)
+                        callbacks.forEach { it.setTransitionToFullShadeAmount(0f,
+                                true /* animated */, delay) }
 
                         // Let's reset ourselves, ready for the next animation
 
@@ -424,8 +426,8 @@ class LockscreenShadeTransitionController @Inject constructor(
 
                     qsTransitionController.dragDownAmount = value
 
-                    notificationPanelController.setTransitionToFullShadeAmount(field,
-                            false /* animate */, 0 /* delay */)
+                    callbacks.forEach { it.setTransitionToFullShadeAmount(field,
+                            false /* animate */, 0 /* delay */) }
 
                     mediaHierarchyManager.setTransitionToFullShadeAmount(field)
                     scrimTransitionController.dragDownAmount = value
@@ -688,7 +690,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         if (cancelled) {
             setPulseHeight(0f, animate = true)
         } else {
-            notificationPanelController.onPulseExpansionFinished()
+            callbacks.forEach { it.onPulseExpansionFinished() }
             setPulseHeight(0f, animate = false)
         }
     }
@@ -719,6 +721,27 @@ class LockscreenShadeTransitionController @Inject constructor(
             it.println("hasPendingHandlerOnKeyguardDismiss: " +
                 "${animationHandlerOnKeyguardDismiss != null}")
         }
+    }
+
+
+    fun addCallback(callback: Callback) {
+        if (!callbacks.contains(callback)) {
+            callbacks.add(callback)
+        }
+    }
+
+    /**
+     * Callback for authentication events.
+     */
+    interface Callback {
+        /** TODO: comment here  */
+        fun onPulseExpansionFinished() {}
+
+        /**
+         * Sets the amount of pixels we have currently dragged down if we're transitioning
+         * to the full shade. 0.0f means we're not transitioning yet.
+         */
+        fun setTransitionToFullShadeAmount(pxAmount: Float, animate: Boolean, delay: Long) {}
     }
 }
 

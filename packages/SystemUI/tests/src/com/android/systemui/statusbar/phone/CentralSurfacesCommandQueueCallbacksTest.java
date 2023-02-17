@@ -46,6 +46,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DisableFlagsLogger;
@@ -73,6 +74,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
+    @Mock private QuickSettingsController mQuickSettingsController;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
@@ -101,6 +103,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         mSbcqCallbacks = new CentralSurfacesCommandQueueCallbacks(
                 mCentralSurfaces,
+                mQuickSettingsController,
                 mContext,
                 mContext.getResources(),
                 mShadeController,

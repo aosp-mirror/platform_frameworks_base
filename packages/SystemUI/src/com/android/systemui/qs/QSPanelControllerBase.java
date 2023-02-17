@@ -104,14 +104,14 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                     switchTileLayoutIfNeeded();
                     onConfigurationChanged();
                     if (previousSplitShadeState != mShouldUseSplitNotificationShade) {
-                        onSplitShadeChanged();
+                        onSplitShadeChanged(mShouldUseSplitNotificationShade);
                     }
                 }
             };
 
     protected void onConfigurationChanged() { }
 
-    protected void onSplitShadeChanged() { }
+    protected void onSplitShadeChanged(boolean shouldUseSplitNotificationShade) { }
 
     private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
         if (mMediaVisibilityChangedListener != null) {
