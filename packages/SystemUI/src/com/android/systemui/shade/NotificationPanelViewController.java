@@ -2206,7 +2206,12 @@ public final class NotificationPanelViewController implements Dumpable {
                 && mQsController.getFullyExpanded()) {
             // Upon initialisation when we are not layouted yet we don't want to announce that we
             // are fully expanded, hence the != 0.0f check.
-            return mResources.getString(R.string.accessibility_desc_quick_settings);
+            if (mSplitShadeEnabled) {
+                // In split shade, QS is expanded but it also shows notifications
+                return mResources.getString(R.string.accessibility_desc_qs_notification_shade);
+            } else {
+                return mResources.getString(R.string.accessibility_desc_quick_settings);
+            }
         } else if (mBarState == KEYGUARD) {
             return mResources.getString(R.string.accessibility_desc_lock_screen);
         } else {
