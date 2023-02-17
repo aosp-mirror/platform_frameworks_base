@@ -298,7 +298,7 @@ final class ProcessServiceRecord {
 
             for (int c = clist.size() - 1; c >= 0; --c) {
                 final ConnectionRecord cr = clist.get(c);
-                if ((cr.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0) {
+                if (cr.hasFlag(Context.BIND_ALMOST_PERCEPTIBLE)) {
                     return true;
                 }
             }
@@ -341,7 +341,7 @@ final class ProcessServiceRecord {
         mHasAboveClient = false;
         for (int i = mConnections.size() - 1; i >= 0; i--) {
             ConnectionRecord cr = mConnections.valueAt(i);
-            if ((cr.flags & Context.BIND_ABOVE_CLIENT) != 0) {
+            if (cr.hasFlag(Context.BIND_ABOVE_CLIENT)) {
                 mHasAboveClient = true;
                 break;
             }
@@ -507,7 +507,7 @@ final class ProcessServiceRecord {
         return mConnections.size();
     }
 
-    void addBoundClientUid(int clientUid, String clientPackageName, int bindFlags) {
+    void addBoundClientUid(int clientUid, String clientPackageName, long bindFlags) {
         mBoundClientUids.add(clientUid);
         mApp.getWindowProcessController()
                 .addBoundClientUid(clientUid, clientPackageName, bindFlags);
@@ -531,7 +531,7 @@ final class ProcessServiceRecord {
                 for (int i = 0; i < c.size(); i++) {
                     ConnectionRecord cr = c.get(i);
                     boundClientUids.add(cr.clientUid);
-                    controller.addBoundClientUid(cr.clientUid, cr.clientPackageName, cr.flags);
+                    controller.addBoundClientUid(cr.clientUid, cr.clientPackageName, cr.getFlags());
                 }
             }
         }
@@ -549,7 +549,7 @@ final class ProcessServiceRecord {
                 ConnectionRecord cr = c.get(i);
                 mBoundClientUids.add(cr.clientUid);
                 mApp.getWindowProcessController()
-                        .addBoundClientUid(cr.clientUid, cr.clientPackageName, cr.flags);
+                        .addBoundClientUid(cr.clientUid, cr.clientPackageName, cr.getFlags());
 
             }
         }

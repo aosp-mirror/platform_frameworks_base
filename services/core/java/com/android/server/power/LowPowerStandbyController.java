@@ -16,19 +16,25 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
 import static android.os.PowerManager.lowPowerStandbyAllowedReasonsToString;
 
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
+import android.app.IActivityManager;
+import android.app.IForegroundServiceObserver;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -53,6 +59,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
@@ -82,6 +89,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * Controls Low Power Standby state.
@@ -115,7 +123,8 @@ public class LowPowerStandbyController {
     private static final int MSG_NOTIFY_ACTIVE_CHANGED = 1;
     private static final int MSG_NOTIFY_ALLOWLIST_CHANGED = 2;
     private static final int MSG_NOTIFY_POLICY_CHANGED = 3;
-    private static final int MSG_NOTIFY_STANDBY_PORTS_CHANGED = 4;
+    private static final int MSG_FOREGROUND_SERVICE_STATE_CHANGED = 4;
+    private static final int MSG_NOTIFY_STANDBY_PORTS_CHANGED = 5;
 
     private static final String TAG_ROOT = "low-power-standby-policy";
     private static final String TAG_IDENTIFIER = "identifier";
@@ -127,6 +136,7 @@ public class LowPowerStandbyController {
     private final Handler mHandler;
     private final SettingsObserver mSettingsObserver;
     private final DeviceConfigWrapper mDeviceConfig;
+    private final Supplier<IActivityManager> mActivityManager;
     private final File mPolicyFile;
     private final Object mLock = new Object();
 
@@ -160,6 +170,7 @@ public class LowPowerStandbyController {
     };
     private final TempAllowlistChangeListener mTempAllowlistChangeListener =
             new TempAllowlistChangeListener();
+    private final PhoneCallServiceTracker mPhoneCallServiceTracker = new PhoneCallServiceTracker();
 
     private final BroadcastReceiver mPackageBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -243,6 +254,7 @@ public class LowPowerStandbyController {
     private AlarmManager mAlarmManager;
     @GuardedBy("mLock")
     private PowerManager mPowerManager;
+    private ActivityManagerInternal mActivityManagerInternal;
     @GuardedBy("mLock")
     private boolean mSupportedConfig;
     @GuardedBy("mLock")
@@ -314,18 +326,20 @@ public class LowPowerStandbyController {
 
     public LowPowerStandbyController(Context context, Looper looper) {
         this(context, looper, SystemClock::elapsedRealtime,
-                new DeviceConfigWrapper(),
+                new DeviceConfigWrapper(), () -> ActivityManager.getService(),
                 new File(Environment.getDataSystemDirectory(), "low_power_standby_policy.xml"));
     }
 
     @VisibleForTesting
     LowPowerStandbyController(Context context, Looper looper, Clock clock,
-            DeviceConfigWrapper deviceConfig, File policyFile) {
+            DeviceConfigWrapper deviceConfig, Supplier<IActivityManager> activityManager,
+            File policyFile) {
         mContext = context;
         mHandler = new LowPowerStandbyHandler(looper);
         mClock = clock;
         mSettingsObserver = new SettingsObserver(mHandler);
         mDeviceConfig = deviceConfig;
+        mActivityManager = activityManager;
         mPolicyFile = policyFile;
     }
 
@@ -343,6 +357,7 @@ public class LowPowerStandbyController {
 
             mAlarmManager = mContext.getSystemService(AlarmManager.class);
             mPowerManager = mContext.getSystemService(PowerManager.class);
+            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
             mStandbyTimeoutConfig = resources.getInteger(
                     R.integer.config_lowPowerStandbyNonInteractiveTimeout);
@@ -707,6 +722,8 @@ public class LowPowerStandbyController {
 
         PowerAllowlistInternal pai = LocalServices.getService(PowerAllowlistInternal.class);
         pai.registerTempAllowlistChangeListener(mTempAllowlistChangeListener);
+
+        mPhoneCallServiceTracker.register();
     }
 
     private void unregisterListeners() {
@@ -1142,6 +1159,10 @@ public class LowPowerStandbyController {
                 case MSG_NOTIFY_POLICY_CHANGED:
                     notifyPolicyChanged((LowPowerStandbyPolicy) msg.obj);
                     break;
+                case MSG_FOREGROUND_SERVICE_STATE_CHANGED:
+                    final int uid = msg.arg1;
+                    mPhoneCallServiceTracker.foregroundServiceStateChanged(uid);
+                    break;
                 case MSG_NOTIFY_STANDBY_PORTS_CHANGED:
                     notifyStandbyPortsChanged();
                     break;
@@ -1404,6 +1425,83 @@ public class LowPowerStandbyController {
         public void onAppRemoved(int uid) {
             removeFromAllowlistInternal(uid,
                     LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST);
+        }
+    }
+
+    final class PhoneCallServiceTracker extends IForegroundServiceObserver.Stub {
+        private boolean mRegistered = false;
+        private final SparseBooleanArray mUidsWithPhoneCallService = new SparseBooleanArray();
+
+        public void register() {
+            if (mRegistered) {
+                return;
+            }
+            try {
+                mActivityManager.get().registerForegroundServiceObserver(this);
+                mRegistered = true;
+            } catch (RemoteException e) {
+                // call within system server
+            }
+        }
+
+        @Override
+        public void onForegroundStateChanged(IBinder serviceToken, String packageName,
+                int userId, boolean isForeground) {
+            try {
+                final long now = mClock.elapsedRealtime();
+                final int uid = mContext.getPackageManager()
+                        .getPackageUidAsUser(packageName, userId);
+                final Message message =
+                        mHandler.obtainMessage(MSG_FOREGROUND_SERVICE_STATE_CHANGED, uid, 0);
+                mHandler.sendMessageAtTime(message, now);
+            } catch (PackageManager.NameNotFoundException e) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onForegroundStateChanged: Unknown package: " + packageName
+                            + ", userId=" + userId);
+                }
+            }
+        }
+
+        public void foregroundServiceStateChanged(int uid) {
+            if (DEBUG) {
+                Slog.d(TAG, "foregroundServiceStateChanged: uid=" + uid);
+            }
+
+            final boolean hadPhoneCallService = mUidsWithPhoneCallService.get(uid);
+            final boolean hasPhoneCallService =
+                    mActivityManagerInternal.hasRunningForegroundService(uid,
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL);
+
+            if (DEBUG) {
+                Slog.d(TAG, "uid=" + uid + ", hasPhoneCallService=" + hasPhoneCallService
+                        + ", hadPhoneCallService=" + hadPhoneCallService);
+            }
+
+            if (hasPhoneCallService == hadPhoneCallService) {
+                return;
+            }
+
+            if (hasPhoneCallService) {
+                mUidsWithPhoneCallService.append(uid, true);
+                uidStartedPhoneCallService(uid);
+            } else {
+                mUidsWithPhoneCallService.delete(uid);
+                uidStoppedPhoneCallService(uid);
+            }
+        }
+
+        private void uidStartedPhoneCallService(int uid) {
+            if (DEBUG) {
+                Slog.d(TAG, "FGS of type phoneCall started: uid=" + uid);
+            }
+            addToAllowlistInternal(uid, LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL);
+        }
+
+        private void uidStoppedPhoneCallService(int uid) {
+            if (DEBUG) {
+                Slog.d(TAG, "FGSs of type phoneCall stopped: uid=" + uid);
+            }
+            removeFromAllowlistInternal(uid, LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL);
         }
     }
 }

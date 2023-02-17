@@ -141,6 +141,16 @@ public abstract class NotificationListenerService extends Service {
             = "android.service.notification.disabled_filter_types";
 
     /**
+     * The name of the {@code meta-data} tag containing a boolean value that is used to decide if
+     * this listener should be automatically bound by default.
+     * If the value is 'false', the listener can be bound on demand using {@link #requestRebind}
+     * <p>An absent value means that the default is 'true'</p>
+     *
+     */
+    public static final String META_DATA_DEFAULT_AUTOBIND
+            = "android.service.notification.default_autobind_listenerservice";
+
+    /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
      *     Normal interruption filter.
      */
@@ -1318,6 +1328,21 @@ public abstract class NotificationListenerService extends Service {
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         try {
             noMan.requestBindListener(componentName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request that the service be unbound.
+     *
+     * <p>This method will fail for components that are not part of the calling app.
+     */
+    public static void requestUnbind(@NonNull ComponentName componentName) {
+        INotificationManager noMan = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        try {
+            noMan.requestUnbindListenerComponent(componentName);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

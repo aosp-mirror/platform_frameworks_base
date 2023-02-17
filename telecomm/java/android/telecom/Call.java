@@ -360,6 +360,18 @@ public final class Call {
             "android.telecom.extra.DIAGNOSTIC_MESSAGE";
 
     /**
+     * Event reported from the Telecom stack to indicate that the {@link Connection} is not able to
+     * find any network and likely will not get connected. Upon receiving this event, the dialer
+     * app should show satellite SOS button if satellite is provisioned.
+     * <p>
+     * The dialer app receives this event via
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * @hide
+     */
+    public static final String EVENT_DISPLAY_SOS_MESSAGE =
+            "android.telecom.event.DISPLAY_SOS_MESSAGE";
+
+    /**
      * Reject reason used with {@link #reject(int)} to indicate that the user is rejecting this
      * call because they have declined to answer it.  This typically means that they are unable
      * to answer the call at this time and would prefer it be sent to voicemail.

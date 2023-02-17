@@ -49,27 +49,41 @@ import java.util.Objects;
  * Context.sendBroadcast(Intent)} and related methods.
  */
 public class BroadcastOptions extends ComponentOptions {
+    private @Flags int mFlags;
     private long mTemporaryAppAllowlistDuration;
     private @TempAllowListType int mTemporaryAppAllowlistType;
     private @ReasonCode int mTemporaryAppAllowlistReasonCode;
     private @Nullable String mTemporaryAppAllowlistReason;
     private int mMinManifestReceiverApiLevel = 0;
     private int mMaxManifestReceiverApiLevel = Build.VERSION_CODES.CUR_DEVELOPMENT;
-    private boolean mDontSendToRestrictedApps = false;
-    private boolean mAllowBackgroundActivityStarts;
     private String[] mRequireAllOfPermissions;
     private String[] mRequireNoneOfPermissions;
     private long mRequireCompatChangeId = CHANGE_INVALID;
-    private boolean mRequireCompatChangeEnabled = true;
-    private boolean mIsAlarmBroadcast = false;
-    private boolean mIsDeferUntilActive = false;
-    private boolean mShareIdentity = false;
     private long mIdForResponseEvent;
     private @Nullable IntentFilter mRemoveMatchingFilter;
     private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
     private @Nullable String mDeliveryGroupMatchingKey;
     private @Nullable BundleMerger mDeliveryGroupExtrasMerger;
     private @Nullable IntentFilter mDeliveryGroupMatchingFilter;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_DONT_SEND_TO_RESTRICTED_APPS,
+            FLAG_ALLOW_BACKGROUND_ACTIVITY_STARTS,
+            FLAG_REQUIRE_COMPAT_CHANGE_ENABLED,
+            FLAG_IS_ALARM_BROADCAST,
+            FLAG_IS_DEFER_UNTIL_ACTIVE,
+            FLAG_SHARE_IDENTITY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
+
+    private static final int FLAG_DONT_SEND_TO_RESTRICTED_APPS = 1 << 0;
+    private static final int FLAG_ALLOW_BACKGROUND_ACTIVITY_STARTS = 1 << 1;
+    private static final int FLAG_REQUIRE_COMPAT_CHANGE_ENABLED = 1 << 2;
+    private static final int FLAG_IS_ALARM_BROADCAST = 1 << 3;
+    private static final int FLAG_IS_DEFER_UNTIL_ACTIVE = 1 << 4;
+    private static final int FLAG_SHARE_IDENTITY = 1 << 5;
 
     /**
      * Change ID which is invalid.
@@ -97,6 +111,11 @@ public class BroadcastOptions extends ComponentOptions {
     @ChangeId
     @Disabled
     public static final long CHANGE_ALWAYS_DISABLED = 210856463L;
+
+    /**
+     * Corresponds to {@link #mFlags}.
+     */
+    private static final String KEY_FLAGS = "android:broadcast.flags";
 
     /**
      * How long to temporarily put an app on the power allowlist when executing this broadcast
@@ -127,18 +146,6 @@ public class BroadcastOptions extends ComponentOptions {
             = "android:broadcast.maxManifestReceiverApiLevel";
 
     /**
-     * Corresponds to {@link #setDontSendToRestrictedApps}.
-     */
-    private static final String KEY_DONT_SEND_TO_RESTRICTED_APPS =
-            "android:broadcast.dontSendToRestrictedApps";
-
-    /**
-     * Corresponds to {@link #setBackgroundActivityStartsAllowed}.
-     */
-    private static final String KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS =
-            "android:broadcast.allowBackgroundActivityStarts";
-
-    /**
      * Corresponds to {@link #setRequireAllOfPermissions}
      * @hide
      */
@@ -157,25 +164,6 @@ public class BroadcastOptions extends ComponentOptions {
      */
     private static final String KEY_REQUIRE_COMPAT_CHANGE_ID =
             "android:broadcast.requireCompatChangeId";
-
-    /**
-     * Corresponds to {@link #setRequireCompatChange(long, boolean)}
-     */
-    private static final String KEY_REQUIRE_COMPAT_CHANGE_ENABLED =
-            "android:broadcast.requireCompatChangeEnabled";
-
-    /**
-     * Corresponds to {@link #setAlarmBroadcast(boolean)}
-     * @hide
-     */
-    public static final String KEY_ALARM_BROADCAST =
-            "android:broadcast.is_alarm";
-
-    /**
-     * Whether the broadcasting app's identity should be available to the receiver.
-     * @see #setShareIdentityEnabled(boolean)
-     */
-    private static final String KEY_SHARE_IDENTITY = "android:broadcast.share_identity";
 
     /**
      * @hide
@@ -206,12 +194,6 @@ public class BroadcastOptions extends ComponentOptions {
      */
     private static final String KEY_REMOVE_MATCHING_FILTER =
             "android:broadcast.removeMatchingFilter";
-
-    /**
-     * Corresponds to {@link #setDeferUntilActive(boolean)}.
-     */
-    private static final String KEY_DEFER_UNTIL_ACTIVE =
-            "android:broadcast.deferuntilactive";
 
     /**
      * Corresponds to {@link #setDeliveryGroupPolicy(int)}.
@@ -308,6 +290,7 @@ public class BroadcastOptions extends ComponentOptions {
     public BroadcastOptions(@NonNull Bundle opts) {
         super(opts);
         // Match the logic in toBundle().
+        mFlags = opts.getInt(KEY_FLAGS, 0);
         if (opts.containsKey(KEY_TEMPORARY_APP_ALLOWLIST_DURATION)) {
             mTemporaryAppAllowlistDuration = opts.getLong(KEY_TEMPORARY_APP_ALLOWLIST_DURATION);
             mTemporaryAppAllowlistType = opts.getInt(KEY_TEMPORARY_APP_ALLOWLIST_TYPE);
@@ -320,16 +303,10 @@ public class BroadcastOptions extends ComponentOptions {
         mMinManifestReceiverApiLevel = opts.getInt(KEY_MIN_MANIFEST_RECEIVER_API_LEVEL, 0);
         mMaxManifestReceiverApiLevel = opts.getInt(KEY_MAX_MANIFEST_RECEIVER_API_LEVEL,
                 Build.VERSION_CODES.CUR_DEVELOPMENT);
-        mDontSendToRestrictedApps = opts.getBoolean(KEY_DONT_SEND_TO_RESTRICTED_APPS, false);
-        mAllowBackgroundActivityStarts = opts.getBoolean(KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS,
-                false);
         mRequireAllOfPermissions = opts.getStringArray(KEY_REQUIRE_ALL_OF_PERMISSIONS);
         mRequireNoneOfPermissions = opts.getStringArray(KEY_REQUIRE_NONE_OF_PERMISSIONS);
         mRequireCompatChangeId = opts.getLong(KEY_REQUIRE_COMPAT_CHANGE_ID, CHANGE_INVALID);
-        mRequireCompatChangeEnabled = opts.getBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, true);
         mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
-        mIsAlarmBroadcast = opts.getBoolean(KEY_ALARM_BROADCAST, false);
-        mShareIdentity = opts.getBoolean(KEY_SHARE_IDENTITY, false);
         mRemoveMatchingFilter = opts.getParcelable(KEY_REMOVE_MATCHING_FILTER,
                 IntentFilter.class);
         mDeliveryGroupPolicy = opts.getInt(KEY_DELIVERY_GROUP_POLICY,
@@ -339,7 +316,6 @@ public class BroadcastOptions extends ComponentOptions {
                 BundleMerger.class);
         mDeliveryGroupMatchingFilter = opts.getParcelable(KEY_DELIVERY_GROUP_MATCHING_FILTER,
                 IntentFilter.class);
-        mIsDeferUntilActive = opts.getBoolean(KEY_DEFER_UNTIL_ACTIVE, false);
     }
 
     /**
@@ -521,7 +497,11 @@ public class BroadcastOptions extends ComponentOptions {
      */
     @SystemApi
     public void setDontSendToRestrictedApps(boolean dontSendToRestrictedApps) {
-        mDontSendToRestrictedApps = dontSendToRestrictedApps;
+        if (dontSendToRestrictedApps) {
+            mFlags |= FLAG_DONT_SEND_TO_RESTRICTED_APPS;
+        } else {
+            mFlags &= ~FLAG_DONT_SEND_TO_RESTRICTED_APPS;
+        }
     }
 
     /**
@@ -529,7 +509,7 @@ public class BroadcastOptions extends ComponentOptions {
      * @return #setDontSendToRestrictedApps
      */
     public boolean isDontSendToRestrictedApps() {
-        return mDontSendToRestrictedApps;
+        return (mFlags & FLAG_DONT_SEND_TO_RESTRICTED_APPS) != 0;
     }
 
     /**
@@ -540,15 +520,20 @@ public class BroadcastOptions extends ComponentOptions {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND)
     public void setBackgroundActivityStartsAllowed(boolean allowBackgroundActivityStarts) {
-        mAllowBackgroundActivityStarts = allowBackgroundActivityStarts;
+        if (allowBackgroundActivityStarts) {
+            mFlags |= FLAG_ALLOW_BACKGROUND_ACTIVITY_STARTS;
+        } else {
+            mFlags &= ~FLAG_ALLOW_BACKGROUND_ACTIVITY_STARTS;
+        }
     }
 
     /**
      * @hide
      * @return #setAllowBackgroundActivityStarts
      */
+    @Deprecated
     public boolean allowsBackgroundActivityStarts() {
-        return mAllowBackgroundActivityStarts;
+        return (mFlags & FLAG_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0;
     }
 
     /**
@@ -610,7 +595,11 @@ public class BroadcastOptions extends ComponentOptions {
     @SystemApi
     public void setRequireCompatChange(long changeId, boolean enabled) {
         mRequireCompatChangeId = changeId;
-        mRequireCompatChangeEnabled = enabled;
+        if (enabled) {
+            mFlags |= FLAG_REQUIRE_COMPAT_CHANGE_ENABLED;
+        } else {
+            mFlags &= ~FLAG_REQUIRE_COMPAT_CHANGE_ENABLED;
+        }
     }
 
     /**
@@ -620,8 +609,7 @@ public class BroadcastOptions extends ComponentOptions {
      */
     @SystemApi
     public void clearRequireCompatChange() {
-        mRequireCompatChangeId = CHANGE_INVALID;
-        mRequireCompatChangeEnabled = true;
+        setRequireCompatChange(CHANGE_INVALID, true);
     }
 
     /**
@@ -633,7 +621,11 @@ public class BroadcastOptions extends ComponentOptions {
      * @param senderIsAlarm Whether the broadcast is alarm-triggered.
      */
     public void setAlarmBroadcast(boolean senderIsAlarm) {
-        mIsAlarmBroadcast = senderIsAlarm;
+        if (senderIsAlarm) {
+            mFlags |= FLAG_IS_ALARM_BROADCAST;
+        } else {
+            mFlags &= ~FLAG_IS_ALARM_BROADCAST;
+        }
     }
 
     /**
@@ -642,7 +634,7 @@ public class BroadcastOptions extends ComponentOptions {
      * @hide
      */
     public boolean isAlarmBroadcast() {
-        return mIsAlarmBroadcast;
+        return (mFlags & FLAG_IS_ALARM_BROADCAST) != 0;
     }
 
     /**
@@ -662,7 +654,11 @@ public class BroadcastOptions extends ComponentOptions {
      * @see BroadcastReceiver#getSentFromPackage()
      */
     public @NonNull BroadcastOptions setShareIdentityEnabled(boolean shareIdentityEnabled) {
-        mShareIdentity = shareIdentityEnabled;
+        if (shareIdentityEnabled) {
+            mFlags |= FLAG_SHARE_IDENTITY;
+        } else {
+            mFlags &= ~FLAG_SHARE_IDENTITY;
+        }
         return this;
     }
 
@@ -675,7 +671,7 @@ public class BroadcastOptions extends ComponentOptions {
      * @see BroadcastReceiver#getSentFromPackage()
      */
     public boolean isShareIdentityEnabled() {
-        return mShareIdentity;
+        return (mFlags & FLAG_SHARE_IDENTITY) != 0;
     }
 
     /**
@@ -714,8 +710,8 @@ public class BroadcastOptions extends ComponentOptions {
     @TestApi
     public boolean testRequireCompatChange(int uid) {
         if (mRequireCompatChangeId != CHANGE_INVALID) {
-            return CompatChanges.isChangeEnabled(mRequireCompatChangeId,
-                    uid) == mRequireCompatChangeEnabled;
+            final boolean requireEnabled = (mFlags & FLAG_REQUIRE_COMPAT_CHANGE_ENABLED) != 0;
+            return CompatChanges.isChangeEnabled(mRequireCompatChangeId, uid) == requireEnabled;
         } else {
             return true;
         }
@@ -770,7 +766,11 @@ public class BroadcastOptions extends ComponentOptions {
      */
     @SystemApi
     public @NonNull BroadcastOptions setDeferUntilActive(boolean shouldDefer) {
-        mIsDeferUntilActive = shouldDefer;
+        if (shouldDefer) {
+            mFlags |= FLAG_IS_DEFER_UNTIL_ACTIVE;
+        } else {
+            mFlags &= ~FLAG_IS_DEFER_UNTIL_ACTIVE;
+        }
         return this;
     }
 
@@ -785,7 +785,7 @@ public class BroadcastOptions extends ComponentOptions {
      */
     @SystemApi
     public boolean isDeferUntilActive() {
-        return mIsDeferUntilActive;
+        return (mFlags & FLAG_IS_DEFER_UNTIL_ACTIVE) != 0;
     }
 
     /**
@@ -1057,29 +1057,20 @@ public class BroadcastOptions extends ComponentOptions {
     @Override
     public @NonNull Bundle toBundle() {
         Bundle b = super.toBundle();
+        if (mFlags != 0) {
+            b.putInt(KEY_FLAGS, mFlags);
+        }
         if (isTemporaryAppAllowlistSet()) {
             b.putLong(KEY_TEMPORARY_APP_ALLOWLIST_DURATION, mTemporaryAppAllowlistDuration);
             b.putInt(KEY_TEMPORARY_APP_ALLOWLIST_TYPE, mTemporaryAppAllowlistType);
             b.putInt(KEY_TEMPORARY_APP_ALLOWLIST_REASON_CODE, mTemporaryAppAllowlistReasonCode);
             b.putString(KEY_TEMPORARY_APP_ALLOWLIST_REASON, mTemporaryAppAllowlistReason);
         }
-        if (mIsAlarmBroadcast) {
-            b.putBoolean(KEY_ALARM_BROADCAST, true);
-        }
-        if (mShareIdentity) {
-            b.putBoolean(KEY_SHARE_IDENTITY, true);
-        }
         if (mMinManifestReceiverApiLevel != 0) {
             b.putInt(KEY_MIN_MANIFEST_RECEIVER_API_LEVEL, mMinManifestReceiverApiLevel);
         }
         if (mMaxManifestReceiverApiLevel != Build.VERSION_CODES.CUR_DEVELOPMENT) {
             b.putInt(KEY_MAX_MANIFEST_RECEIVER_API_LEVEL, mMaxManifestReceiverApiLevel);
-        }
-        if (mDontSendToRestrictedApps) {
-            b.putBoolean(KEY_DONT_SEND_TO_RESTRICTED_APPS, true);
-        }
-        if (mAllowBackgroundActivityStarts) {
-            b.putBoolean(KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS, true);
         }
         if (mRequireAllOfPermissions != null) {
             b.putStringArray(KEY_REQUIRE_ALL_OF_PERMISSIONS, mRequireAllOfPermissions);
@@ -1089,7 +1080,6 @@ public class BroadcastOptions extends ComponentOptions {
         }
         if (mRequireCompatChangeId != CHANGE_INVALID) {
             b.putLong(KEY_REQUIRE_COMPAT_CHANGE_ID, mRequireCompatChangeId);
-            b.putBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, mRequireCompatChangeEnabled);
         }
         if (mIdForResponseEvent != 0) {
             b.putLong(KEY_ID_FOR_RESPONSE_EVENT, mIdForResponseEvent);
@@ -1115,9 +1105,11 @@ public class BroadcastOptions extends ComponentOptions {
         if (mDeliveryGroupMatchingFilter != null) {
             b.putParcelable(KEY_DELIVERY_GROUP_MATCHING_FILTER, mDeliveryGroupMatchingFilter);
         }
-        if (mIsDeferUntilActive) {
-            b.putBoolean(KEY_DEFER_UNTIL_ACTIVE, mIsDeferUntilActive);
-        }
         return b.isEmpty() ? null : b;
+    }
+
+    /** @hide */
+    public static @Nullable BroadcastOptions fromBundle(@Nullable Bundle options) {
+        return (options != null) ? new BroadcastOptions(options) : null;
     }
 }

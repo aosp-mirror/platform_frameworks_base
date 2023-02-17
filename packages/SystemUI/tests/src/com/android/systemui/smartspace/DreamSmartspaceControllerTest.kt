@@ -99,8 +99,6 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
 
         override fun setPrimaryTextColor(color: Int) {}
 
-        override fun setIsDreaming(isDreaming: Boolean) {}
-
         override fun setUiSurface(uiSurface: String) {}
 
         override fun setDozeAmount(amount: Float) {}

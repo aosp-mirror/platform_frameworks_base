@@ -67,7 +67,10 @@ import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.aidl.IRcsConfigCallback;
-import android.telephony.satellite.ISatelliteStateListener;
+import android.telephony.satellite.ISatelliteDatagramCallback;
+import android.telephony.satellite.ISatellitePositionUpdateCallback;
+import android.telephony.satellite.ISatelliteProvisionStateCallback;
+import android.telephony.satellite.ISatelliteStateCallback;
 import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
 import com.android.ims.internal.IImsServiceFeatureCallback;
@@ -2703,7 +2706,7 @@ interface ITelephony {
     void getCarrierRestrictionStatus(IIntegerConsumer internalCallback, String packageName);
 
     /**
-     * Enable or disable the satellite modem.
+     * Request to enable or disable the satellite modem.
      *
      * @param subId The subId of the subscription to enable or disable the satellite modem for.
      * @param enable True to enable the satellite modem and false to disable.
@@ -2711,7 +2714,7 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void setSatelliteEnabled(int subId, boolean enable, in IIntegerConsumer callback);
+    void requestSatelliteEnabled(int subId, boolean enable, in IIntegerConsumer callback);
 
     /**
      * Request to get whether the satellite modem is enabled.
@@ -2754,7 +2757,7 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void startSatellitePositionUpdates(int subId, in IIntegerConsumer errorCallback,
-            in ISatelliteStateListener callback);
+            in ISatellitePositionUpdateCallback callback);
 
     /**
      * Stop receiving satellite pointing updates.
@@ -2766,7 +2769,7 @@ interface ITelephony {
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void stopSatellitePositionUpdates(int subId, in IIntegerConsumer errorCallback,
-            in ISatelliteStateListener callback);
+            in ISatellitePositionUpdateCallback callback);
 
     /**
      * Request to get the maximum number of characters per text message on satellite.
@@ -2821,19 +2824,20 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int registerForSatelliteProvisionStateChanged(int subId, in ISatelliteStateListener callback);
+    int registerForSatelliteProvisionStateChanged(int subId,
+            in ISatelliteProvisionStateCallback callback);
 
     /**
      * Unregister for the satellite provision state change.
+     * If callback was not registered before, the request will be ignored.
      *
      * @param subId The subId of the subscription to unregister for provision state changes.
      * @param callback The callback that was passed to registerForSatelliteProvisionStateChanged.
-     *
-     * @return The {@link SatelliteError} result of the operation.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int unregisterForSatelliteProvisionStateChanged(int subId, in ISatelliteStateListener callback);
+    void unregisterForSatelliteProvisionStateChanged(int subId,
+            in ISatelliteProvisionStateCallback callback);
 
     /**
      * Request to get whether the device is provisioned with a satellite provider.
@@ -2856,44 +2860,43 @@ interface ITelephony {
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int registerForSatelliteModemStateChange(int subId, ISatelliteStateListener callback);
+    int registerForSatelliteModemStateChange(int subId, ISatelliteStateCallback callback);
 
     /**
      * Unregister to stop listening to satellite modem state changes.
+     * If callback was not registered before, the request will be ignored.
      *
      * @param subId The subId of the subscription to unregister for satellite modem state changes.
      * @param callback The callback that was passed to registerForSatelliteStateChange.
-     *
-     * @return The {@link SatelliteError} result of the operation.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int unregisterForSatelliteModemStateChange(int subId, ISatelliteStateListener callback);
+    void unregisterForSatelliteModemStateChange(int subId, ISatelliteStateCallback callback);
 
    /**
      * Register to receive incoming datagrams over satellite.
      *
      * @param subId The subId of the subscription to register for incoming satellite datagrams.
      * @param datagramType Type of datagram.
-     * @param callback The callback to handle receiving incoming datagrams.
+     * @param callback The callback to handle the incoming datagrams.
      *
      * @return The {@link SatelliteError} result of the operation.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int registerForSatelliteDatagram(int subId, int datagramType, ISatelliteStateListener callback);
+    int registerForSatelliteDatagram(
+            int subId, int datagramType, ISatelliteDatagramCallback callback);
 
    /**
      * Unregister to stop receiving incoming datagrams over satellite.
+     * If callback was not registered before, the request will be ignored.
      *
      * @param subId The subId of the subscription to unregister for incoming satellite datagrams.
      * @param callback The callback that was passed to registerForSatelliteDatagram.
-     *
-     * @return The {@link SatelliteError} result of the operation.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int unregisterForSatelliteDatagram(int subId, ISatelliteStateListener callback);
+    void unregisterForSatelliteDatagram(int subId, ISatelliteDatagramCallback callback);
 
    /**
     * Poll pending satellite datagrams over satellite.

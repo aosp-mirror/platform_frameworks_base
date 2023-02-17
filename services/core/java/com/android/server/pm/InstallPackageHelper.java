@@ -1092,6 +1092,7 @@ final class InstallPackageHelper {
 
             // Determine if enforcement is in strict mode
             boolean strictMode = false;
+
             if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     "MinInstallableTargetSdk__install_block_strict_mode_enabled",
                     false)) {

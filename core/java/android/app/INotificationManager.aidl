@@ -147,6 +147,7 @@ interface INotificationManager
 
     void requestBindListener(in ComponentName component);
     void requestUnbindListener(in INotificationListener token);
+    void requestUnbindListenerComponent(in ComponentName component);
     void requestBindProvider(in ComponentName component);
     void requestUnbindProvider(in IConditionProvider token);
 

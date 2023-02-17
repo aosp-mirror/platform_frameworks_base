@@ -148,7 +148,7 @@
         <provider android:name=".wear.WearPackageIconProvider"
                   android:authorities="com.google.android.packageinstaller.wear.provider"
                   android:grantUriPermissions="true"
-                  android:exported="true" />
+                  android:exported="false" />
     </application>
 
 </manifest>

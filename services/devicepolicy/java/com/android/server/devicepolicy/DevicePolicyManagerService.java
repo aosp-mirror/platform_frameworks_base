@@ -4549,7 +4549,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean addCrossProfileWidgetProvider(ComponentName admin, String callerPackageName,
             String packageName) {
-        final CallerIdentity caller = getCallerIdentity(admin, callerPackageName);
+        CallerIdentity caller;
+
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(admin, callerPackageName);
+        } else {
+            caller = getCallerIdentity(admin);
+        }
         ActiveAdmin activeAdmin;
 
         if (isPermissionCheckFlagEnabled()) {
@@ -4597,7 +4603,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean removeCrossProfileWidgetProvider(ComponentName admin, String callerPackageName,
             String packageName) {
-        final CallerIdentity caller = getCallerIdentity(admin, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(admin, callerPackageName);
+        } else {
+            caller = getCallerIdentity(admin);
+        }
+
         ActiveAdmin activeAdmin;
 
         if (isPermissionCheckFlagEnabled()) {
@@ -4645,7 +4657,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public List<String> getCrossProfileWidgetProviders(ComponentName admin,
             String callerPackageName) {
-        final CallerIdentity caller = getCallerIdentity(admin, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(admin, callerPackageName);
+        } else {
+            caller = getCallerIdentity(admin);
+        }
         ActiveAdmin activeAdmin;
 
         if (isPermissionCheckFlagEnabled()) {
@@ -7370,7 +7387,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature && !hasCallingOrSelfPermission(permission.MASTER_CLEAR)) {
             return;
         }
-        final CallerIdentity caller = getCallerIdentity(callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(callerPackageName);
+        }  else {
+            caller = getCallerIdentity();
+        }
         ActiveAdmin admin;
 
         boolean calledByProfileOwnerOnOrgOwnedDevice =
@@ -8653,7 +8675,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
 
         if (isPermissionCheckFlagEnabled()) {
             // The effect of this policy is device-wide.
@@ -8682,8 +8709,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
 
         if (isPermissionCheckFlagEnabled()) {
             enforceCanQuery(SET_TIME, caller.getPackageName(), UserHandle.USER_ALL);
@@ -8707,7 +8738,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             // The effect of this policy is device-wide.
@@ -8748,7 +8784,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
 
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
 
         if (isPermissionCheckFlagEnabled()) {
             // The effect of this policy is device-wide.
@@ -8978,7 +9019,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         if (isPermissionCheckFlagEnabled()) {
             Preconditions.checkCallAuthorization(
                     hasFullCrossUsersPermission(caller, userHandle)
@@ -10915,7 +10961,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void addPersistentPreferredActivity(ComponentName who, String callerPackageName,
             IntentFilter filter, ComponentName activity) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
 
         final int userId = caller.getUserId();
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
@@ -10965,7 +11016,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void clearPackagePersistentPreferredActivities(ComponentName who,
             String callerPackageName, String packageName) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         final int userId = caller.getUserId();
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
@@ -11044,7 +11100,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setDefaultSmsApplication(ComponentName admin, String callerPackageName,
             String packageName, boolean parent) {
-        final CallerIdentity caller = getCallerIdentity(admin, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(admin, callerPackageName);
+        } else {
+            caller = getCallerIdentity(admin);
+        }
+
         final int userId;
 
         if (isPermissionCheckFlagEnabled()) {
@@ -11358,7 +11420,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void addCrossProfileIntentFilter(ComponentName who, String callerPackageName,
             IntentFilter filter, int flags) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         int callingUserId = caller.getUserId();
 
         if (isPermissionCheckFlagEnabled()) {
@@ -11417,7 +11484,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void clearCrossProfileIntentFilters(ComponentName who, String callerPackageName) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         int callingUserId = caller.getUserId();
 
         if (isPermissionCheckFlagEnabled()) {
@@ -12737,7 +12809,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ComponentName who, String callerPackage, String key, boolean enabledFromThisOwner,
             boolean parent) {
 
-        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackage);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         int userId = caller.getUserId();
 
         if (!UserRestrictionsUtils.isValidRestriction(key)) {
@@ -12953,8 +13030,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return null;
         }
-
-        final CallerIdentity caller = getCallerIdentity(who, callerPackage);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackage);
+        } else {
+            caller = getCallerIdentity(who);
+        }
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             EnforcingAdmin admin = getEnforcingAdminForCaller(who, callerPackage);
@@ -13431,7 +13512,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         synchronized (getLockObject()) {
             final ActiveAdmin ap;
             if (isPermissionCheckFlagEnabled()) {
@@ -14079,11 +14165,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setLockTaskPackages(ComponentName who, String callerPackageName, String[] packages)
             throws SecurityException {
         Objects.requireNonNull(packages, "packages is null");
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
-        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_PACKAGES);
-        synchronized (getLockObject()) {
-            enforceCanCallLockTaskLocked(caller);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
         }
+        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_PACKAGES);
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             EnforcingAdmin enforcingAdmin;
@@ -14135,7 +14223,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public String[] getLockTaskPackages(ComponentName who, String callerPackageName) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         final int userHandle = caller.getUserId();
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
@@ -14197,9 +14290,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkArgument(hasHome || !hasNotification,
             "Cannot use LOCK_TASK_FEATURE_NOTIFICATIONS without LOCK_TASK_FEATURE_HOME");
 
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         final int userHandle = caller.getUserId();
-        checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_FEATURES);
+        synchronized (getLockObject()) {
+            checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_LOCK_TASK_FEATURES);
+        }
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             EnforcingAdmin enforcingAdmin;
@@ -14243,7 +14343,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public int getLockTaskFeatures(ComponentName who, String callerPackageName) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         final int userHandle = caller.getUserId();
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
@@ -14540,11 +14645,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean setTime(@Nullable ComponentName who, String callerPackageName, long millis) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
         if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
             // This is a global action.
             enforcePermission(SET_TIME, caller.getPackageName(), UserHandle.USER_ALL);
         } else {
+            caller = getCallerIdentity(who);
             Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallAuthorization(
                     isDefaultDeviceOwner(caller)
@@ -14566,11 +14673,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean setTimeZone(@Nullable ComponentName who, String callerPackageName,
             String timeZone) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
         if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
             // This is a global action.
             enforcePermission(SET_TIME_ZONE, caller.getPackageName(), UserHandle.USER_ALL);
         } else {
+            caller = getCallerIdentity(who);
             Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallAuthorization(
                     isDefaultDeviceOwner(caller)
@@ -14779,7 +14888,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean setStatusBarDisabled(ComponentName who, String callerPackageName,
             boolean disabled) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         if (isPermissionCheckFlagEnabled()) {
             enforcePermission(MANAGE_DEVICE_POLICY_STATUS_BAR, caller.getPackageName(),
                     UserHandle.USER_ALL);
@@ -16551,10 +16665,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
         ActiveAdmin admin;
 
         if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     who,
                     MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE,
@@ -16562,6 +16677,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     caller.getUserId());
             admin = enforcingAdmin.getActiveAdmin();
         } else {
+            caller = getCallerIdentity(who);
             Objects.requireNonNull(who, "ComponentName is null");
             synchronized (getLockObject()) {
                 admin = getActiveAdminForUidLocked(who, caller.getUid());
@@ -16586,10 +16702,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return null;
         }
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
         ActiveAdmin admin;
 
         if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     who,
                     MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE,
@@ -16597,6 +16714,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     caller.getUserId());
             admin = enforcingAdmin.getActiveAdmin();
         } else {
+            caller = getCallerIdentity(who);
             Objects.requireNonNull(who, "ComponentName is null");
             synchronized (getLockObject()) {
                 admin = getActiveAdminForUidLocked(who, caller.getUid());
@@ -17610,7 +17728,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean bindDeviceAdminServiceAsUser(
             @NonNull ComponentName admin, @NonNull IApplicationThread caller,
             @Nullable IBinder activtiyToken, @NonNull Intent serviceIntent,
-            @NonNull IServiceConnection connection, int flags, @UserIdInt int targetUserId) {
+            @NonNull IServiceConnection connection, long flags, @UserIdInt int targetUserId) {
         if (!mHasFeature) {
             return false;
         }
@@ -18193,7 +18311,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (token == null || token.length < 32) {
             throw new IllegalArgumentException("token must be at least 32-byte long");
         }
-        final CallerIdentity caller = getCallerIdentity(admin, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(admin, callerPackageName);
+        } else {
+            caller = getCallerIdentity(admin);
+        }
         final int userId = caller.getUserId();
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
@@ -18251,7 +18374,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return false;
         }
-        final CallerIdentity caller = getCallerIdentity(admin, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(admin, callerPackageName);
+        } else {
+            caller = getCallerIdentity(admin);
+        }
         final int userId = caller.getUserId();
         boolean result = false;
 
@@ -18293,7 +18421,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return false;
         }
-        final CallerIdentity caller = getCallerIdentity(admin, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(admin, callerPackageName);
+        } else {
+            caller = getCallerIdentity(admin);
+        }
         int userId = caller.getUserId();
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
@@ -18337,7 +18470,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         Objects.requireNonNull(token);
 
-        final CallerIdentity caller = getCallerIdentity(admin, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(admin, callerPackageName);
+        } else {
+            caller = getCallerIdentity(admin);
+        }
 
         int userId = caller.getUserId();
         boolean result = false;
@@ -19521,7 +19659,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setUserControlDisabledPackages(ComponentName who, String callerPackageName,
             List<String> packages) {
         Objects.requireNonNull(packages, "packages is null");
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         checkCanExecuteOrThrowUnsafe(
                 DevicePolicyManager.OPERATION_SET_USER_CONTROL_DISABLED_PACKAGES);
 
@@ -19598,7 +19741,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public List<String> getUserControlDisabledPackages(ComponentName who,
             String callerPackageName) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
             enforceCanQuery(
@@ -19626,7 +19774,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setCommonCriteriaModeEnabled(ComponentName who, String callerPackageName,
             boolean enabled) {
-        final CallerIdentity caller = getCallerIdentity(who, callerPackageName);
+        CallerIdentity caller;
+        if (isPermissionCheckFlagEnabled()) {
+            caller = getCallerIdentity(who, callerPackageName);
+        } else {
+            caller = getCallerIdentity(who);
+        }
         final ActiveAdmin admin;
 
         if (isPermissionCheckFlagEnabled()) {

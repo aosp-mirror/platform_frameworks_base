@@ -135,6 +135,10 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     private void respondToClientWithResponseAndFinish(CreateCredentialResponse response) {
         Log.i(TAG, "respondToClientWithResponseAndFinish");
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Log.i(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
         if (isSessionCancelled()) {
             // TODO: Differentiate btw cancelled and false
             logApiCalled(RequestType.CREATE_CREDENTIALS, /* isSuccessful */ true);
@@ -153,6 +157,10 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
         Log.i(TAG, "respondToClientWithErrorAndFinish");
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Log.i(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
         if (isSessionCancelled()) {
             // TODO: Differentiate btw cancelled and false
             logApiCalled(RequestType.CREATE_CREDENTIALS, /* isSuccessful */ true);

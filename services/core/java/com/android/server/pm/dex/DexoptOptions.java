@@ -231,6 +231,8 @@ public final class DexoptOptions {
                 return ReasonMapping.REASON_INACTIVE;
             case PackageManagerService.REASON_CMDLINE:
                 return ReasonMapping.REASON_CMDLINE;
+            case PackageManagerService.REASON_BOOT_AFTER_MAINLINE_UPDATE:
+                return ReasonMapping.REASON_BOOT_AFTER_MAINLINE_UPDATE;
             case PackageManagerService.REASON_POST_BOOT:
             case PackageManagerService.REASON_SHARED:
             case PackageManagerService.REASON_AB_OTA:
