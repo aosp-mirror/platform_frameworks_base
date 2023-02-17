@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static android.os.Trace.TRACE_TAG_ALWAYS;
+import static android.os.Trace.TRACE_TAG_APP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
@@ -1121,7 +1121,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @Override
     public void requestLayout() {
-        Trace.instant(TRACE_TAG_ALWAYS, "NotificationStackScrollLayout#requestLayout");
+        Trace.instant(TRACE_TAG_APP, "NotificationStackScrollLayout#requestLayout");
         super.requestLayout();
     }
 
