@@ -68,14 +68,16 @@ protected:
     enum Flags { kMirror = 1, kReset = 2, kHasBlend = 4 };
     static float ComputeRelativeT(uint32_t time, uint32_t prevTime, uint32_t nextTime,
                                   const float blend[4] = nullptr);
-    int16_t fFrameCount;
-    uint8_t fElemCount;
-    uint8_t fFlags;
-    float fRepeat;
     struct SkTimeCode {
         uint32_t fTime;
         float fBlend[4];
     };
+    static int binarySearch(const SkTimeCode* arr, int count, uint32_t target);
+
+    int16_t fFrameCount;
+    uint8_t fElemCount;
+    uint8_t fFlags;
+    float fRepeat;
     SkTimeCode* fTimes;  // pointer into fStorage
     void* fStorage;
 };
