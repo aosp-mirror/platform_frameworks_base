@@ -32,11 +32,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,7 +42,6 @@ import static org.mockito.Mockito.when;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricOverlayConstants;
-import android.hardware.biometrics.BiometricSourceType;
 import android.media.AudioManager;
 import android.telephony.TelephonyManager;
 import android.testing.AndroidTestingRunner;
@@ -53,7 +50,6 @@ import android.testing.TestableResources;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
 
@@ -96,10 +92,8 @@ import java.util.Optional;
 @TestableLooper.RunWithLooper()
 public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     private static final int TARGET_USER_ID = 100;
-
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
-
     @Mock
     private KeyguardSecurityContainer mView;
     @Mock
@@ -368,131 +362,9 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onBouncerVisibilityChanged_allConditionsGood_sideFpsHintShown() {
-        setupConditionsToEnableSideFpsHint();
-        reset(mSideFpsController);
-
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-
-        verify(mSideFpsController).show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
-        verify(mSideFpsController, never()).hide(any());
-    }
-
-    @Test
-    public void onBouncerVisibilityChanged_fpsSensorNotRunning_sideFpsHintHidden() {
-        setupConditionsToEnableSideFpsHint();
-        setFingerprintDetectionRunning(false);
-        reset(mSideFpsController);
-
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-
-        verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any(), anyInt());
-    }
-
-    @Test
-    public void onBouncerVisibilityChanged_withoutSidedSecurity_sideFpsHintHidden() {
-        setupConditionsToEnableSideFpsHint();
-        setSideFpsHintEnabledFromResources(false);
-        reset(mSideFpsController);
-
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-
-        verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any(), anyInt());
-    }
-
-    @Test
-    public void onBouncerVisibilityChanged_unlockingWithFingerprintNotAllowed_sideFpsHintHidden() {
-        setupConditionsToEnableSideFpsHint();
-        setUnlockingWithFingerprintAllowed(false);
-        reset(mSideFpsController);
-
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-
-        verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any(), anyInt());
-    }
-
-    @Test
-    public void onBouncerVisibilityChanged_sideFpsHintShown_sideFpsHintHidden() {
-        setupGetSecurityView();
-        setupConditionsToEnableSideFpsHint();
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-        verify(mSideFpsController, atLeastOnce()).show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
-        reset(mSideFpsController);
-
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.INVISIBLE);
-
-        verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any(), anyInt());
-    }
-
-    @Test
     public void onBouncerVisibilityChanged_resetsScale() {
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.INVISIBLE);
-
+        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(false);
         verify(mView).resetScale();
-    }
-
-    @Test
-    public void onStartingToHide_sideFpsHintShown_sideFpsHintHidden() {
-        setupGetSecurityView();
-        setupConditionsToEnableSideFpsHint();
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-        verify(mSideFpsController, atLeastOnce()).show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
-        reset(mSideFpsController);
-
-        mKeyguardSecurityContainerController.onStartingToHide();
-
-        verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any(), anyInt());
-    }
-
-    @Test
-    public void onPause_sideFpsHintShown_sideFpsHintHidden() {
-        setupGetSecurityView();
-        setupConditionsToEnableSideFpsHint();
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-        verify(mSideFpsController, atLeastOnce()).show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
-        reset(mSideFpsController);
-
-        mKeyguardSecurityContainerController.onPause();
-
-        verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any(), anyInt());
-    }
-
-    @Test
-    public void onResume_sideFpsHintShouldBeShown_sideFpsHintShown() {
-        setupGetSecurityView();
-        setupConditionsToEnableSideFpsHint();
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-        reset(mSideFpsController);
-
-        mKeyguardSecurityContainerController.onResume(0);
-
-        verify(mSideFpsController).show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
-        verify(mSideFpsController, never()).hide(any());
-    }
-
-    @Test
-    public void onResume_sideFpsHintShouldNotBeShown_sideFpsHintHidden() {
-        setupGetSecurityView();
-        setupConditionsToEnableSideFpsHint();
-        setSideFpsHintEnabledFromResources(false);
-        mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-        reset(mSideFpsController);
-
-        mKeyguardSecurityContainerController.onResume(0);
-
-        verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any(), anyInt());
     }
 
     @Test
@@ -719,37 +591,29 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 any(KeyguardSecurityCallback.class));
     }
 
+    @Test
+    public void testSideFpsControllerShow() {
+        mKeyguardSecurityContainerController.updateSideFpsVisibility(/* isVisible= */ true);
+        verify(mSideFpsController).show(
+                SideFpsUiRequestSource.PRIMARY_BOUNCER,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
+    }
+
+    @Test
+    public void testSideFpsControllerHide() {
+        mKeyguardSecurityContainerController.updateSideFpsVisibility(/* isVisible= */ false);
+        verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
+    }
+
     private KeyguardSecurityContainer.SwipeListener getRegisteredSwipeListener() {
         mKeyguardSecurityContainerController.onViewAttached();
         verify(mView).setSwipeListener(mSwipeListenerArgumentCaptor.capture());
         return mSwipeListenerArgumentCaptor.getValue();
     }
 
-    private void setupConditionsToEnableSideFpsHint() {
-        attachView();
-        setSideFpsHintEnabledFromResources(true);
-        setFingerprintDetectionRunning(true);
-        setUnlockingWithFingerprintAllowed(true);
-    }
-
     private void attachView() {
         mKeyguardSecurityContainerController.onViewAttached();
         verify(mKeyguardUpdateMonitor).registerCallback(mKeyguardUpdateMonitorCallback.capture());
-    }
-
-    private void setFingerprintDetectionRunning(boolean running) {
-        when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(running);
-        mKeyguardUpdateMonitorCallback.getValue().onBiometricRunningStateChanged(running,
-                BiometricSourceType.FINGERPRINT);
-    }
-
-    private void setSideFpsHintEnabledFromResources(boolean enabled) {
-        mTestableResources.addOverride(R.bool.config_show_sidefps_hint_on_bouncer,
-                enabled);
-    }
-
-    private void setUnlockingWithFingerprintAllowed(boolean allowed) {
-        when(mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed()).thenReturn(allowed);
     }
 
     private void setupGetSecurityView() {
