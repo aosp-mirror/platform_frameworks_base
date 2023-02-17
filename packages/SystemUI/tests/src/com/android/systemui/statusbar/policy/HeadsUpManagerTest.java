@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -82,7 +81,6 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
                 UiEventLogger uiEventLogger) {
             super(context, logger, handler, accessibilityManagerWrapper, uiEventLogger);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mStickyDisplayTime = TEST_STICKY_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
         }
     }
@@ -129,86 +127,6 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
         assertFalse("Test timed out", mTimedOut);
         assertTrue("Heads up should live long enough", mLivesPastNormalTime);
         assertFalse(mHeadsUpManager.isAlerting(mEntry.getKey()));
-    }
-
-
-    @Test
-    public void testIsSticky_rowPinnedAndExpanded_true() {
-        NotificationEntry notifEntry = new NotificationEntryBuilder()
-                .setSbn(createNewNotification(/* id= */ 0))
-                .build();
-
-        when(mRow.isPinned()).thenReturn(true);
-        notifEntry.setRow(mRow);
-
-        mHeadsUpManager.showNotification(notifEntry);
-
-        HeadsUpManager.HeadsUpEntry headsUpEntry =
-                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
-        headsUpEntry.setExpanded(true);
-
-        assertTrue(mHeadsUpManager.isSticky(notifEntry.getKey()));
-    }
-
-    @Test
-    public void testIsSticky_remoteInputActive_true() {
-        NotificationEntry notifEntry = new NotificationEntryBuilder()
-                .setSbn(createNewNotification(/* id= */ 0))
-                .build();
-
-        mHeadsUpManager.showNotification(notifEntry);
-
-        HeadsUpManager.HeadsUpEntry headsUpEntry =
-                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
-
-        headsUpEntry.remoteInputActive = true;
-
-        assertTrue(mHeadsUpManager.isSticky(notifEntry.getKey()));
-    }
-
-    @Test
-    public void testIsSticky_hasFullScreenIntent_true() {
-        NotificationEntry notifEntry = new NotificationEntryBuilder()
-                .setSbn(createNewNotification(/* id= */ 0))
-                .build();
-
-        mHeadsUpManager.showNotification(notifEntry);
-
-        HeadsUpManager.HeadsUpEntry headsUpEntry =
-                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
-
-        notifEntry.getSbn().getNotification().fullScreenIntent = PendingIntent.getActivity(
-                getContext(), 0, new Intent(getContext(), this.getClass()),
-                PendingIntent.FLAG_MUTABLE_UNAUDITED);
-
-        assertTrue(mHeadsUpManager.isSticky(notifEntry.getKey()));
-    }
-
-    @Test
-    public void testIsSticky_stickyAndNotDemoted_true() {
-        NotificationEntry alertEntry = new NotificationEntryBuilder()
-                .setSbn(createStickySbn(0))
-                .build();
-
-        mHeadsUpManager.showNotification(alertEntry);
-
-        assertTrue(mHeadsUpManager.isSticky(alertEntry.getKey()));
-    }
-
-    @Test
-    public void testIsSticky_false() {
-        NotificationEntry notifEntry = new NotificationEntryBuilder()
-                .setSbn(createNewNotification(/* id= */ 0))
-                .build();
-
-        mHeadsUpManager.showNotification(notifEntry);
-
-        HeadsUpManager.HeadsUpEntry headsUpEntry =
-                mHeadsUpManager.getHeadsUpEntry(notifEntry.getKey());
-        headsUpEntry.setExpanded(false);
-        headsUpEntry.remoteInputActive = false;
-
-        assertFalse(mHeadsUpManager.isSticky(notifEntry.getKey()));
     }
 
     @Test
