@@ -1523,6 +1523,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 case MSG_I_BT_SERVICE_DISCONNECTED_PROFILE:
                     if (msg.arg1 != BluetoothProfile.HEADSET) {
                         synchronized (mDeviceStateLock) {
+                            mBtHelper.onBtProfileDisconnected(msg.arg1);
                             mDeviceInventory.onBtProfileDisconnected(msg.arg1);
                         }
                     } else {
