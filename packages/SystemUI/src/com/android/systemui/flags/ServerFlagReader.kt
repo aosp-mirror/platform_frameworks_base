@@ -54,11 +54,10 @@ class ServerFlagReaderImpl @Inject constructor(
                 return
             }
 
-
             for ((listener, flags) in listeners) {
                 propLoop@ for (propName in properties.keyset) {
                     for (flag in flags) {
-                        if (propName == getServerOverrideName(flag.id) || propName == flag.name) {
+                        if (propName == flag.name) {
                             listener.onChange()
                             break@propLoop
                         }
@@ -94,10 +93,6 @@ class ServerFlagReaderImpl @Inject constructor(
             )
         }
         listeners.add(Pair(listener, flags))
-    }
-
-    private fun getServerOverrideName(flagId: Int): String {
-        return "flag_override_$flagId"
     }
 }
 
