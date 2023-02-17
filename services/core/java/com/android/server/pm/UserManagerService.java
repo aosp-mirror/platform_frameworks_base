@@ -457,30 +457,12 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * User restrictions set by {@link com.android.server.devicepolicy.DevicePolicyManagerService}
-     * that should be applied to all users, including guests. Only non-empty restriction bundles are
-     * stored.
-     * The key is the user id of the user whom the restriction originated from.
-     */
-    @GuardedBy("mRestrictionsLock")
-    private final RestrictionsSet mDevicePolicyGlobalUserRestrictions = new RestrictionsSet();
-
-    /**
-     * Id of the user that set global restrictions.
-     */
-    @GuardedBy("mRestrictionsLock")
-    private int mDeviceOwnerUserId = UserHandle.USER_NULL;
-
-    /**
-     * User restrictions set by {@link com.android.server.devicepolicy.DevicePolicyManagerService}
-     * for each user.
+     * for each user. Restrictions that apply to all users (global) are represented by
+     * {@link com.android.os.UserHandle.USER_ALL}.
      * The key is the user id of the user whom the restrictions are targeting.
-     * The key inside the restrictionsSet is the user id of the user whom the restriction
-     * originated from.
-     * targetUserId -> originatingUserId -> restrictionBundle
      */
     @GuardedBy("mRestrictionsLock")
-    private final SparseArray<RestrictionsSet> mDevicePolicyLocalUserRestrictions =
-            new SparseArray<>();
+    private final RestrictionsSet mDevicePolicyUserRestrictions = new RestrictionsSet();
 
     @GuardedBy("mGuestRestrictions")
     private final Bundle mGuestRestrictions = new Bundle();
@@ -2567,150 +2549,69 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    private void setUserRestrictionInner(int userId, @NonNull String key, boolean value) {
+        if (!UserRestrictionsUtils.isValidRestriction(key)) {
+            return;
+        }
+        synchronized (mRestrictionsLock) {
+            final Bundle newRestrictions = BundleUtils.clone(
+                    mDevicePolicyUserRestrictions.getRestrictions(userId));
+            newRestrictions.putBoolean(key, value);
+
+            if (mDevicePolicyUserRestrictions.updateRestrictions(userId, newRestrictions)) {
+                if (userId == UserHandle.USER_ALL) {
+                    applyUserRestrictionsForAllUsersLR();
+                } else {
+                    applyUserRestrictionsLR(userId);
+                }
+            }
+        }
+    }
+
     /**
      * See {@link UserManagerInternal#setDevicePolicyUserRestrictions}
      */
     private void setDevicePolicyUserRestrictionsInner(@UserIdInt int originatingUserId,
             @NonNull Bundle global, @NonNull RestrictionsSet local,
             boolean isDeviceOwner) {
-        boolean globalChanged, localChanged;
-        List<Integer> updatedLocalTargetUserIds;
         synchronized (mRestrictionsLock) {
-            // Update global and local restrictions if they were changed.
-            globalChanged = mDevicePolicyGlobalUserRestrictions
-                    .updateRestrictions(originatingUserId, global);
-            updatedLocalTargetUserIds = getUpdatedTargetUserIdsFromLocalRestrictions(
-                    originatingUserId, local);
-            localChanged = updateLocalRestrictionsForTargetUsersLR(originatingUserId, local,
-                    updatedLocalTargetUserIds);
-            if (isDeviceOwner) {
-                // Remember the global restriction owner userId to be able to make a distinction
-                // in getUserRestrictionSource on who set local policies.
-                mDeviceOwnerUserId = originatingUserId;
-            } else {
-                if (mDeviceOwnerUserId == originatingUserId) {
-                    // When profile owner sets restrictions it passes null global bundle and we
-                    // reset global restriction owner userId.
-                    // This means this user used to have DO, but now the DO is gone and the user
-                    // instead has PO.
-                    mDeviceOwnerUserId = UserHandle.USER_NULL;
-                }
-            }
-        }
-        if (DBG) {
-            Slog.d(LOG_TAG, "setDevicePolicyUserRestrictions: "
-                    + " originatingUserId=" + originatingUserId
-                    + " global=" + global + (globalChanged ? " (changed)" : "")
-                    + " local=" + local + (localChanged ? " (changed)" : "")
-            );
-        }
-        // Don't call them within the mRestrictionsLock.
-        synchronized (mPackagesLock) {
-            if (globalChanged || localChanged) {
-                if (updatedLocalTargetUserIds.size() == 1
-                        && updatedLocalTargetUserIds.contains(originatingUserId)) {
-                    writeUserLP(getUserDataNoChecks(originatingUserId));
-                } else {
-                    if (globalChanged) {
-                        writeUserLP(getUserDataNoChecks(originatingUserId));
-                    }
-                    if (localChanged) {
-                        for (int targetUserId : updatedLocalTargetUserIds) {
-                            writeAllTargetUsersLP(targetUserId);
-                        }
-                    }
-                }
-            }
-        }
+            final IntArray updatedUserIds = mDevicePolicyUserRestrictions.getUserIds();
 
-        synchronized (mRestrictionsLock) {
-            if (globalChanged) {
-                applyUserRestrictionsForAllUsersLR();
-            } else if (localChanged) {
-                for (int targetUserId : updatedLocalTargetUserIds) {
-                    applyUserRestrictionsLR(targetUserId);
-                }
-            }
-        }
-    }
+            mCachedEffectiveUserRestrictions.removeAllRestrictions();
+            mDevicePolicyUserRestrictions.removeAllRestrictions();
 
-    /**
-     * @return the list of updated target user ids in device policy local restrictions for a
-     * given originating user id.
-     */
-    private List<Integer> getUpdatedTargetUserIdsFromLocalRestrictions(int originatingUserId,
-            @NonNull RestrictionsSet local) {
-        List<Integer> targetUserIds = new ArrayList<>();
-        // Update all the target user ids from the local restrictions set
-        for (int i = 0; i < local.size(); i++) {
-            targetUserIds.add(local.keyAt(i));
-        }
-        // Update the target user id from device policy local restrictions if the local
-        // restrictions set does not contain the target user id.
-        for (int i = 0; i < mDevicePolicyLocalUserRestrictions.size(); i++) {
-            int targetUserId = mDevicePolicyLocalUserRestrictions.keyAt(i);
-            RestrictionsSet restrictionsSet = mDevicePolicyLocalUserRestrictions.valueAt(i);
-            if (!local.containsKey(targetUserId)
-                    && restrictionsSet.containsKey(originatingUserId)) {
-                targetUserIds.add(targetUserId);
-            }
-        }
-        return targetUserIds;
-    }
+            mDevicePolicyUserRestrictions.updateRestrictions(UserHandle.USER_ALL, global);
 
-    /**
-     * Update restrictions for all target users in the restriction set. If a target user does not
-     * exist in device policy local restrictions, remove the restrictions bundle for that target
-     * user originating from the specified originating user.
-     */
-    @GuardedBy("mRestrictionsLock")
-    private boolean updateLocalRestrictionsForTargetUsersLR(int originatingUserId,
-            RestrictionsSet local, List<Integer> updatedTargetUserIds) {
-        boolean changed = false;
-        for (int targetUserId : updatedTargetUserIds) {
-            Bundle restrictions = local.getRestrictions(targetUserId);
-            if (restrictions == null) {
-                restrictions = new Bundle();
+            final IntArray localUserIds = local.getUserIds();
+            for (int i = 0; i < localUserIds.size(); i++) {
+                final int userId = localUserIds.get(i);
+                mDevicePolicyUserRestrictions.updateRestrictions(userId,
+                        local.getRestrictions(userId));
+                updatedUserIds.add(userId);
             }
-            if (getDevicePolicyLocalRestrictionsForTargetUserLR(targetUserId)
-                    .updateRestrictions(originatingUserId, restrictions)) {
-                changed = true;
-            }
-        }
-        return changed;
-    }
 
-    /**
-     * A new restriction set is created if a restriction set does not already exist for a given
-     * target user.
-     *
-     * @return restrictions set for a given target user.
-     */
-    @GuardedBy("mRestrictionsLock")
-    private @NonNull RestrictionsSet getDevicePolicyLocalRestrictionsForTargetUserLR(
-            int targetUserId) {
-        RestrictionsSet result = mDevicePolicyLocalUserRestrictions.get(targetUserId);
-        if (result == null) {
-            result = new RestrictionsSet();
-            mDevicePolicyLocalUserRestrictions.put(targetUserId, result);
+            applyUserRestrictionsForAllUsersLR();
+            for (int i = 0; i < updatedUserIds.size(); i++) {
+                applyUserRestrictionsLR(updatedUserIds.get(i));
+            }
         }
-        return result;
     }
 
     @GuardedBy("mRestrictionsLock")
     private Bundle computeEffectiveUserRestrictionsLR(@UserIdInt int userId) {
-        final Bundle baseRestrictions =
-                UserRestrictionsUtils.nonNull(mBaseUserRestrictions.getRestrictions(userId));
-        final Bundle global = mDevicePolicyGlobalUserRestrictions.mergeAll();
-        final RestrictionsSet local = getDevicePolicyLocalRestrictionsForTargetUserLR(userId);
+        final Bundle baseRestrictions = mBaseUserRestrictions.getRestrictionsNonNull(userId);
 
-        if (BundleUtils.isEmpty(global) && local.isEmpty()) {
+        final Bundle global = mDevicePolicyUserRestrictions.getRestrictionsNonNull(
+                UserHandle.USER_ALL);
+        final Bundle local = mDevicePolicyUserRestrictions.getRestrictionsNonNull(userId);
+
+        if (global.isEmpty() && local.isEmpty()) {
             // Common case first.
             return baseRestrictions;
         }
         final Bundle effective = BundleUtils.clone(baseRestrictions);
         UserRestrictionsUtils.merge(effective, global);
-        UserRestrictionsUtils.merge(effective, local.mergeAll());
+        UserRestrictionsUtils.merge(effective, local);
 
         return effective;
     }
@@ -2834,13 +2735,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         synchronized (mRestrictionsLock) {
-            // Check if it is set as a local restriction.
-            result.addAll(getDevicePolicyLocalRestrictionsForTargetUserLR(userId).getEnforcingUsers(
-                    restrictionKey, mDeviceOwnerUserId));
-
-            // Check if it is set as a global restriction.
-            result.addAll(mDevicePolicyGlobalUserRestrictions.getEnforcingUsers(restrictionKey,
-                    mDeviceOwnerUserId));
+            result.addAll(mDevicePolicyUserRestrictions.getEnforcingUsers(restrictionKey, userId));
         }
         return result;
     }
@@ -2990,6 +2885,7 @@ public class UserManagerService extends IUserManager.Stub {
     @GuardedBy("mRestrictionsLock")
     private void applyUserRestrictionsLR(@UserIdInt int userId) {
         updateUserRestrictionsInternalLR(null, userId);
+        scheduleWriteUser(getUserDataNoChecks(userId));
     }
 
     @GuardedBy("mRestrictionsLock")
@@ -3666,10 +3562,6 @@ public class UserManagerService extends IUserManager.Stub {
                         parser.getAttributeInt(null, ATTR_USER_TYPE_VERSION, mUserTypeVersion);
             }
 
-            // Pre-O global user restriction were stored as a single bundle (as opposed to per-user
-            // currently), take care of it in case of upgrade.
-            Bundle oldDevicePolicyGlobalUserRestrictions = null;
-
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 if (type == XmlPullParser.START_TAG) {
                     final String name = parser.getName();
@@ -3698,23 +3590,12 @@ public class UserManagerService extends IUserManager.Stub {
                                 break;
                             }
                         }
-                    } else if (name.equals(TAG_DEVICE_OWNER_USER_ID)
-                            // Legacy name, should only be encountered when upgrading from pre-O.
-                            || name.equals(TAG_GLOBAL_RESTRICTION_OWNER_ID)) {
-                        synchronized (mRestrictionsLock) {
-                            mDeviceOwnerUserId =
-                                    parser.getAttributeInt(null, ATTR_ID, mDeviceOwnerUserId);
-                        }
-                    } else if (name.equals(TAG_DEVICE_POLICY_RESTRICTIONS)) {
-                        // Should only happen when upgrading from pre-O (version < 7).
-                        oldDevicePolicyGlobalUserRestrictions =
-                                UserRestrictionsUtils.readRestrictions(parser);
                     }
                 }
             }
 
             updateUserIds();
-            upgradeIfNecessaryLP(oldDevicePolicyGlobalUserRestrictions);
+            upgradeIfNecessaryLP();
         } catch (IOException | XmlPullParserException e) {
             fallbackToSingleUserLP();
         } finally {
@@ -3724,21 +3605,19 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * Upgrade steps between versions, either for fixing bugs or changing the data format.
-     * @param oldGlobalUserRestrictions Pre-O global device policy restrictions.
      */
     @GuardedBy({"mPackagesLock"})
-    private void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions) {
-        upgradeIfNecessaryLP(oldGlobalUserRestrictions, mUserVersion, mUserTypeVersion);
+    private void upgradeIfNecessaryLP() {
+        upgradeIfNecessaryLP(mUserVersion, mUserTypeVersion);
     }
 
     /**
-     * Version of {@link #upgradeIfNecessaryLP(Bundle)} that takes in the userVersion for testing
-     * purposes. For non-tests, use {@link #upgradeIfNecessaryLP(Bundle)}.
+     * Version of {@link #upgradeIfNecessaryLP()} that takes in the userVersion for testing
+     * purposes. For non-tests, use {@link #upgradeIfNecessaryLP()}.
      */
     @GuardedBy({"mPackagesLock"})
     @VisibleForTesting
-    void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions, int userVersion,
-            int userTypeVersion) {
+    void upgradeIfNecessaryLP(int userVersion, int userTypeVersion) {
         Slog.i(LOG_TAG, "Upgrading users from userVersion " + userVersion + " to " + USER_VERSION);
         Set<Integer> userIdsToWrite = new ArraySet<>();
         final int originalVersion = mUserVersion;
@@ -3792,16 +3671,11 @@ public class UserManagerService extends IUserManager.Stub {
         if (userVersion < 7) {
             // Previously only one user could enforce global restrictions, now it is per-user.
             synchronized (mRestrictionsLock) {
-                if (!BundleUtils.isEmpty(oldGlobalUserRestrictions)
-                        && mDeviceOwnerUserId != UserHandle.USER_NULL) {
-                    mDevicePolicyGlobalUserRestrictions.updateRestrictions(
-                            mDeviceOwnerUserId, oldGlobalUserRestrictions);
+                if (mDevicePolicyUserRestrictions.removeRestrictionsForAllUsers(
+                        UserManager.ENSURE_VERIFY_APPS)) {
+                    mDevicePolicyUserRestrictions.getRestrictionsNonNull(UserHandle.USER_ALL)
+                            .putBoolean(UserManager.ENSURE_VERIFY_APPS, true);
                 }
-                // ENSURE_VERIFY_APPS is now enforced globally even if put by profile owner, so move
-                // it from local to global bundle for all users who set it.
-                UserRestrictionsUtils.moveRestriction(UserManager.ENSURE_VERIFY_APPS,
-                        mDevicePolicyLocalUserRestrictions, mDevicePolicyGlobalUserRestrictions
-                );
             }
             // DISALLOW_CONFIG_WIFI was made a default guest restriction some time during version 6.
             final List<UserInfo> guestUsers = getGuestUsers();
@@ -4135,17 +4009,6 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @GuardedBy({"mPackagesLock"})
-    private void writeAllTargetUsersLP(int originatingUserId) {
-        for (int i = 0; i < mDevicePolicyLocalUserRestrictions.size(); i++) {
-            int targetUserId = mDevicePolicyLocalUserRestrictions.keyAt(i);
-            RestrictionsSet restrictionsSet = mDevicePolicyLocalUserRestrictions.valueAt(i);
-            if (restrictionsSet.containsKey(originatingUserId)) {
-                writeUserLP(getUserDataNoChecks(targetUserId));
-            }
-        }
-    }
-
-    @GuardedBy({"mPackagesLock"})
     private void writeUserLP(UserData userData) {
         if (DBG) {
             debug("writeUserLP " + userData);
@@ -4231,11 +4094,14 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mRestrictionsLock) {
             UserRestrictionsUtils.writeRestrictions(serializer,
                     mBaseUserRestrictions.getRestrictions(userInfo.id), TAG_RESTRICTIONS);
-            getDevicePolicyLocalRestrictionsForTargetUserLR(userInfo.id).writeRestrictions(
-                    serializer, TAG_DEVICE_POLICY_LOCAL_RESTRICTIONS);
+
             UserRestrictionsUtils.writeRestrictions(serializer,
-                    mDevicePolicyGlobalUserRestrictions.getRestrictions(userInfo.id),
-                    TAG_DEVICE_POLICY_GLOBAL_RESTRICTIONS);
+                    mDevicePolicyUserRestrictions.getRestrictions(UserHandle.USER_ALL),
+                    TAG_DEVICE_POLICY_RESTRICTIONS);
+
+            UserRestrictionsUtils.writeRestrictions(serializer,
+                    mDevicePolicyUserRestrictions.getRestrictions(userInfo.id),
+                    TAG_DEVICE_POLICY_RESTRICTIONS);
         }
 
         if (userData.account != null) {
@@ -4303,11 +4169,6 @@ public class UserManagerService extends IUserManager.Stub {
                         .writeRestrictions(serializer, mGuestRestrictions, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_GUEST_RESTRICTIONS);
-            serializer.startTag(null, TAG_DEVICE_OWNER_USER_ID);
-            synchronized (mRestrictionsLock) {
-                serializer.attributeInt(null, ATTR_ID, mDeviceOwnerUserId);
-            }
-            serializer.endTag(null, TAG_DEVICE_OWNER_USER_ID);
             int[] userIdsToWrite;
             synchronized (mUsersLock) {
                 userIdsToWrite = new int[mUsers.size()];
@@ -4379,7 +4240,7 @@ public class UserManagerService extends IUserManager.Stub {
         UserProperties userProperties = null;
         Bundle baseRestrictions = null;
         Bundle legacyLocalRestrictions = null;
-        RestrictionsSet localRestrictions = null;
+        Bundle localRestrictions = null;
         Bundle globalRestrictions = null;
         boolean ignorePrepareStorageErrors = true; // default is true for old users
 
@@ -4445,8 +4306,7 @@ public class UserManagerService extends IUserManager.Stub {
                 } else if (TAG_DEVICE_POLICY_RESTRICTIONS.equals(tag)) {
                     legacyLocalRestrictions = UserRestrictionsUtils.readRestrictions(parser);
                 } else if (TAG_DEVICE_POLICY_LOCAL_RESTRICTIONS.equals(tag)) {
-                    localRestrictions = RestrictionsSet.readRestrictions(parser,
-                            TAG_DEVICE_POLICY_LOCAL_RESTRICTIONS);
+                    localRestrictions = UserRestrictionsUtils.readRestrictions(parser);
                 } else if (TAG_DEVICE_POLICY_GLOBAL_RESTRICTIONS.equals(tag)) {
                     globalRestrictions = UserRestrictionsUtils.readRestrictions(parser);
                 } else if (TAG_ACCOUNT.equals(tag)) {
@@ -4516,19 +4376,15 @@ public class UserManagerService extends IUserManager.Stub {
                 mBaseUserRestrictions.updateRestrictions(id, baseRestrictions);
             }
             if (localRestrictions != null) {
-                mDevicePolicyLocalUserRestrictions.put(id, localRestrictions);
+                mDevicePolicyUserRestrictions.updateRestrictions(id, localRestrictions);
                 if (legacyLocalRestrictions != null) {
                     Slog.wtf(LOG_TAG, "Seeing both legacy and current local restrictions in xml");
                 }
             } else if (legacyLocalRestrictions != null) {
-                RestrictionsSet legacyLocalRestrictionsSet =
-                        legacyLocalRestrictions.isEmpty()
-                                ? new RestrictionsSet()
-                                : new RestrictionsSet(id, legacyLocalRestrictions);
-                mDevicePolicyLocalUserRestrictions.put(id, legacyLocalRestrictionsSet);
+                mDevicePolicyUserRestrictions.updateRestrictions(id, legacyLocalRestrictions);
             }
             if (globalRestrictions != null) {
-                mDevicePolicyGlobalUserRestrictions.updateRestrictions(id,
+                mDevicePolicyUserRestrictions.updateRestrictions(UserHandle.USER_ALL,
                         globalRestrictions);
             }
         }
@@ -5364,18 +5220,12 @@ public class UserManagerService extends IUserManager.Stub {
             }
         } else if (atomTag == FrameworkStatsLog.MULTI_USER_INFO) {
             if (UserManager.getMaxSupportedUsers() > 1) {
-                int deviceOwnerUserId = UserHandle.USER_NULL;
-
-                synchronized (mRestrictionsLock) {
-                    deviceOwnerUserId = mDeviceOwnerUserId;
-                }
-
                 data.add(FrameworkStatsLog.buildStatsEvent(FrameworkStatsLog.MULTI_USER_INFO,
                         UserManager.getMaxSupportedUsers(),
-                        isUserSwitcherEnabled(deviceOwnerUserId),
+                        isUserSwitcherEnabled(UserHandle.USER_ALL),
                         UserManager.supportsMultipleUsers()
                                 && !hasUserRestriction(UserManager.DISALLOW_ADD_USER,
-                                deviceOwnerUserId)));
+                                        UserHandle.USER_ALL)));
             }
         } else {
             Slogf.e(LOG_TAG, "Unexpected atom tag: %d", atomTag);
@@ -5843,17 +5693,8 @@ public class UserManagerService extends IUserManager.Stub {
             mBaseUserRestrictions.remove(userId);
             mAppliedUserRestrictions.remove(userId);
             mCachedEffectiveUserRestrictions.remove(userId);
-            // Remove local restrictions affecting user
-            mDevicePolicyLocalUserRestrictions.delete(userId);
-            // Remove local restrictions set by user
-            boolean changed = false;
-            for (int i = 0; i < mDevicePolicyLocalUserRestrictions.size(); i++) {
-                int targetUserId = mDevicePolicyLocalUserRestrictions.keyAt(i);
-                changed |= getDevicePolicyLocalRestrictionsForTargetUserLR(targetUserId)
-                        .remove(userId);
-            }
-            changed |= mDevicePolicyGlobalUserRestrictions.remove(userId);
-            if (changed) {
+            // Remove restrictions affecting the user
+            if (mDevicePolicyUserRestrictions.remove(userId)) {
                 applyUserRestrictionsForAllUsersLR();
             }
         }
@@ -6587,10 +6428,12 @@ public class UserManagerService extends IUserManager.Stub {
 
             pw.println();
             pw.println("Device properties:");
+            pw.println("  Device policy global restrictions:");
             synchronized (mRestrictionsLock) {
-                pw.println("  Device owner id:" + mDeviceOwnerUserId);
+                UserRestrictionsUtils.dumpRestrictions(
+                        pw, "    ",
+                        mDevicePolicyUserRestrictions.getRestrictions(UserHandle.USER_ALL));
             }
-            pw.println();
             pw.println("  Guest restrictions:");
             synchronized (mGuestRestrictions) {
                 UserRestrictionsUtils.dumpRestrictions(pw, "    ", mGuestRestrictions);
@@ -6768,13 +6611,10 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mRestrictionsLock) {
             UserRestrictionsUtils.dumpRestrictions(
                     pw, "      ", mBaseUserRestrictions.getRestrictions(userInfo.id));
-            pw.println("    Device policy global restrictions:");
+            pw.println("    Device policy restrictions:");
             UserRestrictionsUtils.dumpRestrictions(
                     pw, "      ",
-                    mDevicePolicyGlobalUserRestrictions.getRestrictions(userInfo.id));
-            pw.println("    Device policy local restrictions:");
-            getDevicePolicyLocalRestrictionsForTargetUserLR(
-                    userInfo.id).dumpRestrictions(pw, "      ");
+                    mDevicePolicyUserRestrictions.getRestrictions(userInfo.id));
             pw.println("    Effective restrictions:");
             UserRestrictionsUtils.dumpRestrictions(
                     pw, "      ",
@@ -6854,6 +6694,11 @@ public class UserManagerService extends IUserManager.Stub {
                 boolean isDeviceOwner) {
             UserManagerService.this.setDevicePolicyUserRestrictionsInner(originatingUserId,
                     global, local, isDeviceOwner);
+        }
+
+        @Override
+        public void setUserRestriction(int userId, @NonNull String key, boolean value) {
+            UserManagerService.this.setUserRestrictionInner(userId, key, value);
         }
 
         @Override
