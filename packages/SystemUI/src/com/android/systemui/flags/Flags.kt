@@ -90,7 +90,7 @@ object Flags {
 
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
-        unreleasedFlag(259395680, "simplified_appear_fraction", teamfood = true)
+        releasedFlag(259395680, "simplified_appear_fraction")
 
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
