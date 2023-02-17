@@ -26,6 +26,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -57,5 +58,17 @@ class ServerFlagReaderImplTest : SysuiTestCase() {
         executor.runAllReady()
 
         verify(changeListener).onChange(flag)
+    }
+
+    @Test
+    fun testChange_ignoresListenersDuringTest() {
+        val serverFlagReader = ServerFlagReaderImpl(NAMESPACE, deviceConfig, executor, true)
+        val flag = ReleasedFlag(1, "1", "test")
+        serverFlagReader.listenForChanges(listOf(flag), changeListener)
+
+        deviceConfig.setProperty(NAMESPACE, "flag_override_1", "1", false)
+        executor.runAllReady()
+
+        verify(changeListener, never()).onChange(flag)
     }
 }
