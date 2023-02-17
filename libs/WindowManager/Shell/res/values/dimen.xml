@@ -331,30 +331,6 @@
     -->
     <dimen name="overridable_minimal_size_pip_resizable_task">48dp</dimen>
 
-    <!-- The size of the drag handle / menu shown along with a floating task. -->
-    <dimen name="floating_task_menu_size">32dp</dimen>
-
-    <!-- The size of menu items in the floating task menu. -->
-    <dimen name="floating_task_menu_item_size">24dp</dimen>
-
-    <!-- The horizontal margin of menu items in the floating task menu. -->
-    <dimen name="floating_task_menu_item_padding">5dp</dimen>
-
-    <!-- The width of visible floating view region when stashed. -->
-    <dimen name="floating_task_stash_offset">32dp</dimen>
-
-    <!-- The amount of elevation for a floating task. -->
-    <dimen name="floating_task_elevation">8dp</dimen>
-
-    <!-- The amount of padding around the bottom and top of the task. -->
-    <dimen name="floating_task_vertical_padding">8dp</dimen>
-
-    <!-- The normal size of the dismiss target. -->
-    <dimen name="floating_task_dismiss_circle_size">150dp</dimen>
-
-    <!-- The smaller size of the dismiss target (shrinks when something is in the target). -->
-    <dimen name="floating_dismiss_circle_small">120dp</dimen>
-
     <!-- The thickness of shadows of a window that has focus in DIP. -->
     <dimen name="freeform_decor_shadow_focused_thickness">20dp</dimen>
 
