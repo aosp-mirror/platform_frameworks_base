@@ -1620,6 +1620,18 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     private void notifyFinishReceiver(@Nullable BroadcastProcessQueue queue,
             @NonNull BroadcastRecord r, int index, @NonNull Object receiver) {
+        if (r.wasDeliveryAttempted(index)) {
+            logBroadcastDeliveryEventReported(queue, r, index, receiver);
+        }
+
+        final boolean recordFinished = (r.terminalCount == r.receivers.size());
+        if (recordFinished) {
+            notifyFinishBroadcast(r);
+        }
+    }
+
+    private void logBroadcastDeliveryEventReported(@Nullable BroadcastProcessQueue queue,
+            @NonNull BroadcastRecord r, int index, @NonNull Object receiver) {
         // Report statistics for each individual receiver
         final int uid = getReceiverUid(receiver);
         final int senderUid = (r.callingUid == -1) ? Process.SYSTEM_UID : r.callingUid;
@@ -1646,11 +1658,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, uid, senderUid, actionName,
                     receiverType, type, dispatchDelay, receiveDelay, finishDelay, packageState);
-        }
-
-        final boolean recordFinished = (r.terminalCount == r.receivers.size());
-        if (recordFinished) {
-            notifyFinishBroadcast(r);
         }
     }
 

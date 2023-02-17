@@ -16,6 +16,10 @@
 
 package com.android.server.am;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
+import static com.android.internal.util.FrameworkStatsLog.BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST;
 import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_ALARM;
 import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_FOREGROUND;
 import static com.android.server.am.BroadcastProcessQueue.REASON_CONTAINS_INTERACTIVE;
@@ -44,8 +48,12 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
 import android.annotation.NonNull;
 import android.app.Activity;
@@ -70,6 +78,11 @@ import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
+import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.ExtendedMockitoTestCase;
+import com.android.server.am.BroadcastQueueTest.SyncBarrier;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,7 +99,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(MockitoJUnitRunner.class)
-public class BroadcastQueueModernImplTest {
+public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
     private static final int TEST_UID = android.os.Process.FIRST_APPLICATION_UID;
     private static final int TEST_UID2 = android.os.Process.FIRST_APPLICATION_UID + 1;
 
@@ -104,6 +117,11 @@ public class BroadcastQueueModernImplTest {
     BroadcastQueueModernImpl mImpl;
 
     BroadcastProcessQueue mHead;
+
+    @Override
+    protected void initializeSession(StaticMockitoSessionBuilder builder) {
+        builder.spyStatic(FrameworkStatsLog.class);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -1079,6 +1097,28 @@ public class BroadcastQueueModernImplTest {
                 assertEquals(errMsg, BroadcastRecord.DELIVERY_SKIPPED, record.getDeliveryState(i));
             }
         }
+    }
+
+    @Test
+    public void testBroadcastDeliveryEventReported() throws Exception {
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        final BroadcastOptions optionsTimeTick = BroadcastOptions.makeBasic();
+        optionsTimeTick.setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
+
+        // Halt all processing so that we get a consistent view
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
+            mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
+            mImpl.enqueueBroadcastLocked(makeBroadcastRecord(timeTick, optionsTimeTick));
+        }
+        mImpl.waitForIdle(null);
+
+        // Verify that there is only one delivery event reported since one of the broadcasts
+        // should have been skipped.
+        verify(() -> FrameworkStatsLog.write(eq(BROADCAST_DELIVERY_EVENT_REPORTED),
+                eq(getUidForPackage(PACKAGE_GREEN)), anyInt(), eq(Intent.ACTION_TIME_TICK),
+                eq(BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST),
+                eq(BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD),
+                anyLong(), anyLong(), anyLong(), anyInt()), times(1));
     }
 
     private Intent createPackageChangedIntent(int uid, List<String> componentNameList) {
