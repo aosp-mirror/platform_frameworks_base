@@ -130,7 +130,7 @@ public class SatelliteManager {
 
     /**
      * Bundle key to get the response from
-     * {@link #requestMaxCharactersPerSatelliteTextMessage(Executor, OutcomeReceiver)}.
+     * {@link #requestMaxSizePerSendingDatagram(Executor, OutcomeReceiver)} .
      * @hide
      */
     public static final String KEY_MAX_CHARACTERS_PER_SATELLITE_TEXT =
@@ -157,6 +157,13 @@ public class SatelliteManager {
      * @hide
      */
     public static final String KEY_SATELLITE_NEXT_VISIBILITY = "satellite_next_visibility";
+
+    /**
+     * Bundle key to get the respoonse from
+     * {@link #sendSatelliteDatagram(long, int, SatelliteDatagram, Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_SEND_SATELLITE_DATAGRAM = "send_satellite_datagram";
 
     /**
      * The request was successfully processed.
@@ -541,8 +548,8 @@ public class SatelliteManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteModemState {}
 
-    /** Datagram type indicating that the datagram to be sent or received is of type SOS SMS. */
-    public static final int DATAGRAM_TYPE_SOS_SMS = 0;
+    /** Datagram type indicating that the datagram to be sent or received is of type SOS message. */
+    public static final int DATAGRAM_TYPE_SOS_MESSAGE = 0;
 
     /** Datagram type indicating that the datagram to be sent or received is of type
      * location sharing. */
@@ -551,7 +558,7 @@ public class SatelliteManager {
     @IntDef(
             prefix = "DATAGRAM_TYPE_",
             value = {
-                    DATAGRAM_TYPE_SOS_SMS,
+                    DATAGRAM_TYPE_SOS_MESSAGE,
                     DATAGRAM_TYPE_LOCATION_SHARING,
             })
     @Retention(RetentionPolicy.SOURCE)
@@ -651,19 +658,20 @@ public class SatelliteManager {
     }
 
     /**
-     * Request to get the maximum number of characters per text message on satellite.
+     * Request to get the maximum number of bytes per datagram that can be sent to satellite.
      *
      * @param executor The executor on which the callback will be called.
      * @param callback The callback object to which the result will be delivered.
      *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
-     *                 will return the maximum number of characters per text message on satellite.
+     *                 will return the maximum number of bytes per datagram that can be sent to
+     *                 satellite.
      *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    public void requestMaxCharactersPerSatelliteTextMessage(
+    public void requestMaxSizePerSendingDatagram(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Integer, SatelliteException> callback) {
         Objects.requireNonNull(executor);
@@ -693,7 +701,7 @@ public class SatelliteManager {
                         }
                     }
                 };
-                telephony.requestMaxCharactersPerSatelliteTextMessage(mSubId, receiver);
+                telephony.requestMaxSizePerSendingDatagram(mSubId, receiver);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
@@ -1039,7 +1047,8 @@ public class SatelliteManager {
      *
      * This method requests modem to check if there are any pending datagrams to be received over
      * satellite. If there are any incoming datagrams, they will be received via
-     * {@link SatelliteDatagramCallback#onSatelliteDatagrams(SatelliteDatagram[])})}.
+     * {@link SatelliteDatagramCallback#onSatelliteDatagramReceived(long, SatelliteDatagram, int,
+     *          ISatelliteDatagramReceiverAck)}
      *
      * @param executor The executor on which the result listener will be called.
      * @param resultListener Listener for the {@link SatelliteError} result of the operation.
@@ -1076,39 +1085,60 @@ public class SatelliteManager {
     /**
      * Send datagram over satellite.
      *
-     * Gateway encodes SOS SMS or location sharing message into a datagram and passes it as input to
-     * this method. Datagram received here will be passed down to modem without any encoding or
-     * encryption.
+     * Gateway encodes SOS message or location sharing message into a datagram and passes it as
+     * input to this method. Datagram received here will be passed down to modem without any
+     * encoding or encryption.
      *
+     * @param datagramId An id that uniquely identifies datagram requested to be sent.
      * @param datagramType datagram type indicating whether the datagram is of type
      *                     SOS_SMS or LOCATION_SHARING.
      * @param datagram encoded gateway datagram which is encrypted by the caller.
      *                 Datagram will be passed down to modem without any encoding or encryption.
      * @param executor The executor on which the result listener will be called.
-     * @param resultListener Listener for the {@link SatelliteError} result of the operation.
+     * @param callback The callback object to which the result will be returned.
+     *                 If datagram is sent successfully, then
+     *                 {@link OutcomeReceiver#onResult(Object)} will return datagramId.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteError}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    public void sendSatelliteDatagram(@DatagramType int datagramType,
+    public void sendSatelliteDatagram(long datagramId, @DatagramType int datagramType,
             @NonNull SatelliteDatagram datagram, @NonNull @CallbackExecutor Executor executor,
-            @SatelliteError @NonNull Consumer<Integer> resultListener) {
+            @NonNull OutcomeReceiver<Long, SatelliteException> callback) {
         Objects.requireNonNull(datagram);
         Objects.requireNonNull(executor);
-        Objects.requireNonNull(resultListener);
+        Objects.requireNonNull(callback);
 
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                IIntegerConsumer internalCallback = new IIntegerConsumer.Stub() {
+                ResultReceiver receiver = new ResultReceiver(null) {
                     @Override
-                    public void accept(int result) {
-                        executor.execute(() -> Binder.withCleanCallingIdentity(
-                                () -> resultListener.accept(result)));
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_ERROR_NONE) {
+                            if (resultData.containsKey(KEY_SEND_SATELLITE_DATAGRAM)) {
+                                long resultDatagramId = resultData
+                                        .getLong(KEY_SEND_SATELLITE_DATAGRAM);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(resultDatagramId)));
+                            } else {
+                                loge("KEY_SEND_SATELLITE_DATAGRAM does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(
+                                                new SatelliteException(SATELLITE_REQUEST_FAILED))));
+                            }
+
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
                     }
                 };
-                telephony.sendSatelliteDatagram(mSubId, datagramType, datagram, internalCallback);
+                telephony.sendSatelliteDatagram(mSubId, datagramId, datagramType, datagram,
+                        receiver);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
