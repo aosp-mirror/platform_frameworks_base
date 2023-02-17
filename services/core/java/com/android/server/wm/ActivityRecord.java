@@ -2159,7 +2159,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         boolean appActivityEmbeddingEnabled = false;
         try {
-            appActivityEmbeddingEnabled = WindowManagerService.sWindowExtensionsEnabled
+            appActivityEmbeddingEnabled = WindowManager.hasWindowExtensionsEnabled()
                     && mAtmService.mContext.getPackageManager()
                             .getProperty(PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED, packageName)
                             .getBoolean();
