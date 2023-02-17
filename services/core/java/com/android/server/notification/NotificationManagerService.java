@@ -6863,11 +6863,7 @@ public class NotificationManagerService extends SystemService {
      * A notification should be dismissible, unless it's exempted for some reason.
      */
     private boolean canBeNonDismissible(ApplicationInfo ai, Notification notification) {
-        // Check if the app is on the system partition, or an update to an app on the system
-        // partition.
-        boolean isSystemAppExempt = (ai.flags
-                & (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP | ApplicationInfo.FLAG_SYSTEM)) > 0;
-        return isSystemAppExempt || notification.isMediaNotification() || isEnterpriseExempted(ai);
+        return notification.isMediaNotification() || isEnterpriseExempted(ai);
     }
 
     private boolean isEnterpriseExempted(ApplicationInfo ai) {
