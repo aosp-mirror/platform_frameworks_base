@@ -1194,9 +1194,21 @@ public class AudioDeviceInventory {
              */
             mDeviceBroker.setBluetoothA2dpOnInt(true, false /*fromA2dp*/, eventSource);
 
-            AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(device, address, name),
+            final int res = AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                    device, address, name),
                     AudioSystem.DEVICE_STATE_AVAILABLE,
                     AudioSystem.AUDIO_FORMAT_DEFAULT);
+            if (res != AudioSystem.AUDIO_STATUS_OK) {
+                AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                        "APM failed to make available LE Audio device addr=" + address
+                                + " error=" + res).printLog(TAG));
+                // TODO: connection failed, stop here
+                // TODO: return;
+            } else {
+                AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                        "LE Audio device addr=" + address + " now available").printLog(TAG));
+            }
+
             mConnectedDevices.put(DeviceInfo.makeDeviceListKey(device, address),
                     new DeviceInfo(device, name, address, AudioSystem.AUDIO_FORMAT_DEFAULT));
             mDeviceBroker.postAccessoryPlugMediaUnmute(device);
@@ -1219,9 +1231,21 @@ public class AudioDeviceInventory {
     @GuardedBy("mDevicesLock")
     private void makeLeAudioDeviceUnavailableNow(String address, int device) {
         if (device != AudioSystem.DEVICE_NONE) {
-            AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(device, address),
+            final int res = AudioSystem.setDeviceConnectionState(new AudioDeviceAttributes(
+                    device, address),
                     AudioSystem.DEVICE_STATE_UNAVAILABLE,
                     AudioSystem.AUDIO_FORMAT_DEFAULT);
+
+            if (res != AudioSystem.AUDIO_STATUS_OK) {
+                AudioService.sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                        "APM failed to make unavailable LE Audio device addr=" + address
+                                + " error=" + res).printLog(TAG));
+                // TODO:  failed to disconnect, stop here
+                // TODO: return;
+            } else {
+                AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+                        "LE Audio device addr=" + address + " made unavailable")).printLog(TAG));
+            }
             mConnectedDevices.remove(DeviceInfo.makeDeviceListKey(device, address));
         }
 
