@@ -243,10 +243,29 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `quickAffordance - bottom end affordance is hidden when disabled by device policy`() =
+    fun `quickAffordance - hidden when all features are disabled by device policy`() =
         testScope.runTest {
             whenever(devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId))
                 .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL)
+            quickAccessWallet.setState(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                    icon = ICON,
+                )
+            )
+
+            val collectedValue by
+                collectLastValue(
+                    underTest.quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_END)
+                )
+
+            assertThat(collectedValue).isInstanceOf(KeyguardQuickAffordanceModel.Hidden::class.java)
+        }
+
+    @Test
+    fun `quickAffordance - hidden when shortcuts feature is disabled by device policy`() =
+        testScope.runTest {
+            whenever(devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId))
+                .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL)
             quickAccessWallet.setState(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     icon = ICON,
