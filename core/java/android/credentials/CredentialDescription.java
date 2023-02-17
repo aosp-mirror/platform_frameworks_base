@@ -151,16 +151,4 @@ public final class CredentialDescription implements Parcelable {
     public List<CredentialEntry> getCredentialEntries() {
         return mCredentialEntries;
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(mType, mFlattenedRequestString);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return Objects.equals(mType, ((CredentialDescription) obj).getType())
-                && Objects.equals(mFlattenedRequestString, ((CredentialDescription) obj)
-                .getFlattenedRequestString());
-    }
 }
