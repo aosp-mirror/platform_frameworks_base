@@ -1820,6 +1820,42 @@ public class BroadcastQueueTest {
     }
 
     /**
+     * Verify that we OOM adjust for ordered broadcast receivers.
+     */
+    @Test
+    public void testOomAdjust_Ordered() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final IIntentReceiver orderedResultTo = mock(IIntentReceiver.class);
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeOrderedBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_BLUE),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_RED)), orderedResultTo, null));
+
+        waitForIdle();
+        verify(mAms, atLeastOnce()).enqueueOomAdjTargetLocked(any());
+    }
+
+    /**
+     * Verify that we OOM adjust for resultTo broadcast receivers.
+     */
+    @Test
+    public void testOomAdjust_ResultTo() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+
+        final IIntentReceiver resultTo = mock(IIntentReceiver.class);
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp,
+                List.of(makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_BLUE),
+                        makeManifestReceiver(PACKAGE_GREEN, CLASS_RED)), resultTo));
+
+        waitForIdle();
+        verify(mAms, atLeastOnce()).enqueueOomAdjTargetLocked(any());
+    }
+
+    /**
      * Verify that we never OOM adjust for registered receivers.
      */
     @Test

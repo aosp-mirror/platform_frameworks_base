@@ -466,7 +466,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
             // Emit all trace events for this process into a consistent track
             queue.runningTraceTrackName = TAG + ".mRunning[" + queueIndex + "]";
-            queue.runningOomAdjusted = queue.isPendingManifest();
+            queue.runningOomAdjusted = queue.isPendingManifest()
+                    || queue.isPendingOrdered()
+                    || queue.isPendingResultTo();
 
             // If already warm, we can make OOM adjust request immediately;
             // otherwise we need to wait until process becomes warm
