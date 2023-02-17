@@ -262,6 +262,9 @@ public class BubbleController implements ConfigurationChangeListener,
     /** Used to send bubble events to launcher. */
     private Bubbles.BubbleStateListener mBubbleStateListener;
 
+    /** Used to send updates to the views from {@link #mBubbleDataListener}. */
+    private BubbleViewCallback mBubbleViewCallback;
+
     public BubbleController(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
@@ -343,6 +346,9 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     protected void onInit() {
+        mBubbleViewCallback = isShowingAsBubbleBar()
+                ? mBubbleBarViewCallback
+                : mBubbleStackViewCallback;
         mBubbleData.setListener(mBubbleDataListener);
         mBubbleData.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
         mDataRepository.setSuppressionChangedListener(this::onBubbleMetadataFlagChanged);
@@ -1459,7 +1465,8 @@ public class BubbleController implements ConfigurationChangeListener,
         });
     }
 
-    private final BubbleViewCallback mBubbleViewCallback = new BubbleViewCallback() {
+    /** When bubbles are floating, this will be used to notify the floating views. */
+    private final BubbleViewCallback mBubbleStackViewCallback = new BubbleViewCallback() {
         @Override
         public void removeBubble(Bubble removedBubble) {
             if (mStackView != null) {
@@ -1508,6 +1515,62 @@ public class BubbleController implements ConfigurationChangeListener,
                 mStackView.setSelectedBubble(selectedBubble);
             }
 
+        }
+    };
+
+    /** When bubbles are in the bubble bar, this will be used to notify bubble bar views. */
+    private final BubbleViewCallback mBubbleBarViewCallback = new BubbleViewCallback() {
+        @Override
+        public void removeBubble(Bubble removedBubble) {
+            if (mLayerView != null) {
+                // TODO: need to check if there's something that needs to happen here, e.g. if
+                //  the currently selected & expanded bubble is removed?
+            }
+        }
+
+        @Override
+        public void addBubble(Bubble addedBubble) {
+            // Nothing to do for adds, these are handled by launcher / in the bubble bar.
+        }
+
+        @Override
+        public void updateBubble(Bubble updatedBubble) {
+            // Nothing to do for updates, these are handled by launcher / in the bubble bar.
+        }
+
+        @Override
+        public void bubbleOrderChanged(List<Bubble> bubbleOrder, boolean updatePointer) {
+            // Nothing to do for order changes, these are handled by launcher / in the bubble bar.
+        }
+
+        @Override
+        public void suppressionChanged(Bubble bubble, boolean isSuppressed) {
+            if (mLayerView != null) {
+                // TODO (b/273316505) handle suppression changes, although might not need to
+                //  to do anything on the layerview side for this...
+            }
+        }
+
+        @Override
+        public void expansionChanged(boolean isExpanded) {
+            if (mLayerView != null) {
+                if (!isExpanded) {
+                    mLayerView.collapse();
+                } else {
+                    BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
+                    if (selectedBubble != null) {
+                        mLayerView.showExpandedView(selectedBubble);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void selectionChanged(BubbleViewProvider selectedBubble) {
+            // Only need to update the layer view if we're currently expanded for selection changes.
+            if (mLayerView != null && isStackExpanded()) {
+                mLayerView.showExpandedView(selectedBubble);
+            }
         }
     };
 
