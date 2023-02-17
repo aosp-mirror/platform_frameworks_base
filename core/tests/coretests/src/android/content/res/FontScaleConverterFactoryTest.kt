@@ -90,11 +90,7 @@ class FontScaleConverterFactoryTest {
             }
             .forEach { (table, sp) ->
                 try {
-                    assertWithMessage(
-                        "convertSpToDp(%s) on table: %s",
-                        sp.toString(),
-                        table.toString()
-                    )
+                    assertWithMessage("convertSpToDp(%s) on table: %s", sp, table)
                         .that(table.convertSpToDp(sp))
                         .isFinite()
                 } catch (e: Exception) {
