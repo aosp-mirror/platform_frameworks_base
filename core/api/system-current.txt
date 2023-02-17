@@ -10152,7 +10152,6 @@ package android.net.wifi.sharedconnectivity.service {
 
   public abstract class SharedConnectivityService extends android.app.Service {
     ctor public SharedConnectivityService();
-    ctor public SharedConnectivityService(@NonNull android.os.Handler);
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onConnectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
     method public abstract void onConnectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
