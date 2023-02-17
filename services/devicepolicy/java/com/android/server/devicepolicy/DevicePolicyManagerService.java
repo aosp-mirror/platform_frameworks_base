@@ -12823,11 +12823,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_USER_RESTRICTION);
 
         if (useDevicePolicyEngine(caller, /* delegateScope= */ null)) {
+            int affectedUserId = parent ? getProfileParentId(userId) : userId;
             EnforcingAdmin admin = enforcePermissionForUserRestriction(
                     who,
                     key,
                     caller.getPackageName(),
-                    userId);
+                    affectedUserId);
             PolicyDefinition<Boolean> policyDefinition =
                     PolicyDefinition.getPolicyDefinitionForUserRestriction(key);
             if (enabledFromThisOwner) {
@@ -12835,7 +12836,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         policyDefinition,
                         admin,
                         new BooleanPolicyValue(true),
-                        parent ? getProfileParentId(userId) : userId);
+                        affectedUserId);
             } else {
                 // Remove any local and global policy that was set by the admin
                 if (!policyDefinition.isLocalOnlyPolicy()) {
