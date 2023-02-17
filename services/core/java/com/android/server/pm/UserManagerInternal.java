@@ -141,6 +141,18 @@ public abstract class UserManagerInternal {
     public abstract void setDevicePolicyUserRestrictions(int originatingUserId,
             @Nullable Bundle global, @Nullable RestrictionsSet local, boolean isDeviceOwner);
 
+    /**
+     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to set a
+     * user restriction.
+     *
+     * @param userId user id to apply the restriction to. {@link com.android.os.UserHandle.USER_ALL}
+     *               will apply the restriction to all users globally.
+     * @param key    The key of the restriction.
+     * @param value  The value of the restriction.
+     */
+    public abstract void setUserRestriction(@UserIdInt int userId, @NonNull String key,
+            boolean value);
+
     /** Return a user restriction. */
     public abstract boolean getUserRestriction(int userId, String key);
 
