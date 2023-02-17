@@ -135,11 +135,15 @@ public class ViewPropertyAnimatorTest {
      * @throws Exception
      */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws Throwable {
         final BasicAnimatorActivity activity = mActivityRule.getActivity();
         Button button = activity.findViewById(R.id.animatingButton);
 
         mAnimator = button.animate().x(100).y(100);
+        mActivityRule.runOnUiThread(() -> {
+            mAnimator.start();
+            mAnimator.cancel();
+        });
 
         // mListener is the main testing mechanism of this file. The asserts of each test
         // are embedded in the listener callbacks that it implements.
