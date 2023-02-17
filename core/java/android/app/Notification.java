@@ -5249,17 +5249,17 @@ public class Notification implements Parcelable
             boolean hasSecondLine = showProgress;
             if (p.hasTitle()) {
                 contentView.setViewVisibility(p.mTitleViewId, View.VISIBLE);
-                contentView.setTextViewText(p.mTitleViewId, processTextSpans(p.title));
+                contentView.setTextViewText(p.mTitleViewId, processTextSpans(p.mTitle));
                 setTextViewColorPrimary(contentView, p.mTitleViewId, p);
             } else if (p.mTitleViewId != R.id.title) {
                 // This alternate title view ID is not cleared by resetStandardTemplate
                 contentView.setViewVisibility(p.mTitleViewId, View.GONE);
                 contentView.setTextViewText(p.mTitleViewId, null);
             }
-            if (p.text != null && p.text.length() != 0
+            if (p.mText != null && p.mText.length() != 0
                     && (!showProgress || p.mAllowTextWithProgress)) {
                 contentView.setViewVisibility(p.mTextViewId, View.VISIBLE);
-                contentView.setTextViewText(p.mTextViewId, processTextSpans(p.text));
+                contentView.setTextViewText(p.mTextViewId, processTextSpans(p.mText));
                 setTextViewColorSecondary(contentView, p.mTextViewId, p);
                 hasSecondLine = true;
             } else if (p.mTextViewId != R.id.text) {
@@ -5533,20 +5533,20 @@ public class Notification implements Parcelable
             if (p.mHideSubText) {
                 return false;
             }
-            CharSequence summaryText = p.summaryText;
-            if (summaryText == null && mStyle != null && mStyle.mSummaryTextSet
+            CharSequence headerText = p.mSubText;
+            if (headerText == null && mStyle != null && mStyle.mSummaryTextSet
                     && mStyle.hasSummaryInHeader()) {
-                summaryText = mStyle.mSummaryText;
+                headerText = mStyle.mSummaryText;
             }
-            if (summaryText == null
+            if (headerText == null
                     && mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N
                     && mN.extras.getCharSequence(EXTRA_INFO_TEXT) != null) {
-                summaryText = mN.extras.getCharSequence(EXTRA_INFO_TEXT);
+                headerText = mN.extras.getCharSequence(EXTRA_INFO_TEXT);
             }
-            if (!TextUtils.isEmpty(summaryText)) {
+            if (!TextUtils.isEmpty(headerText)) {
                 // TODO: Remove the span entirely to only have the string with propper formating.
                 contentView.setTextViewText(R.id.header_text, processTextSpans(
-                        processLegacyText(summaryText)));
+                        processLegacyText(headerText)));
                 setTextViewColorSecondary(contentView, R.id.header_text, p);
                 contentView.setViewVisibility(R.id.header_text, View.VISIBLE);
                 if (hasTextToLeft) {
@@ -5566,9 +5566,9 @@ public class Notification implements Parcelable
             if (p.mHideSubText) {
                 return false;
             }
-            if (!TextUtils.isEmpty(p.headerTextSecondary)) {
+            if (!TextUtils.isEmpty(p.mHeaderTextSecondary)) {
                 contentView.setTextViewText(R.id.header_text_secondary, processTextSpans(
-                        processLegacyText(p.headerTextSecondary)));
+                        processLegacyText(p.mHeaderTextSecondary)));
                 setTextViewColorSecondary(contentView, R.id.header_text_secondary, p);
                 contentView.setViewVisibility(R.id.header_text_secondary, View.VISIBLE);
                 if (hasTextToLeft) {
@@ -6175,7 +6175,7 @@ public class Notification implements Parcelable
                     .viewType(StandardTemplateParams.VIEW_TYPE_MINIMIZED)
                     .highlightExpander(false)
                     .fillTextsFrom(this);
-            if (!useRegularSubtext || TextUtils.isEmpty(p.summaryText)) {
+            if (!useRegularSubtext || TextUtils.isEmpty(p.mSubText)) {
                 p.summaryText(createSummaryText());
             }
             RemoteViews header = makeNotificationHeader(p);
@@ -7190,7 +7190,7 @@ public class Notification implements Parcelable
             checkBuilder();
 
             if (mBigContentTitle != null) {
-                p.title = mBigContentTitle;
+                p.mTitle = mBigContentTitle;
             }
 
             return mBuilder.applyStandardTemplateWithActions(layoutId, p, result);
@@ -12453,10 +12453,10 @@ public class Notification implements Parcelable
         boolean mAllowTextWithProgress;
         int mTitleViewId;
         int mTextViewId;
-        CharSequence title;
-        CharSequence text;
-        CharSequence headerTextSecondary;
-        CharSequence summaryText;
+        @Nullable CharSequence mTitle;
+        @Nullable CharSequence mText;
+        @Nullable CharSequence mHeaderTextSecondary;
+        @Nullable CharSequence mSubText;
         int maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
         boolean allowColorization  = true;
         boolean mHighlightExpander = false;
@@ -12478,10 +12478,10 @@ public class Notification implements Parcelable
             mAllowTextWithProgress = false;
             mTitleViewId = R.id.title;
             mTextViewId = R.id.text;
-            title = null;
-            text = null;
-            summaryText = null;
-            headerTextSecondary = null;
+            mTitle = null;
+            mText = null;
+            mSubText = null;
+            mHeaderTextSecondary = null;
             maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
             allowColorization = true;
             mHighlightExpander = false;
@@ -12489,7 +12489,7 @@ public class Notification implements Parcelable
         }
 
         final boolean hasTitle() {
-            return !TextUtils.isEmpty(title) && !mHideTitle;
+            return !TextUtils.isEmpty(mTitle) && !mHideTitle;
         }
 
         final StandardTemplateParams viewType(int viewType) {
@@ -12562,23 +12562,23 @@ public class Notification implements Parcelable
             return this;
         }
 
-        final StandardTemplateParams title(CharSequence title) {
-            this.title = title;
+        final StandardTemplateParams title(@Nullable CharSequence title) {
+            this.mTitle = title;
             return this;
         }
 
-        final StandardTemplateParams text(CharSequence text) {
-            this.text = text;
+        final StandardTemplateParams text(@Nullable CharSequence text) {
+            this.mText = text;
             return this;
         }
 
-        final StandardTemplateParams summaryText(CharSequence text) {
-            this.summaryText = text;
+        final StandardTemplateParams summaryText(@Nullable CharSequence text) {
+            this.mSubText = text;
             return this;
         }
 
-        final StandardTemplateParams headerTextSecondary(CharSequence text) {
-            this.headerTextSecondary = text;
+        final StandardTemplateParams headerTextSecondary(@Nullable CharSequence text) {
+            this.mHeaderTextSecondary = text;
             return this;
         }
 
@@ -12605,9 +12605,9 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams fillTextsFrom(Builder b) {
             Bundle extras = b.mN.extras;
-            this.title = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE));
-            this.text = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
-            this.summaryText = extras.getCharSequence(EXTRA_SUB_TEXT);
+            this.mTitle = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE));
+            this.mText = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
+            this.mSubText = extras.getCharSequence(EXTRA_SUB_TEXT);
             return this;
         }
 
