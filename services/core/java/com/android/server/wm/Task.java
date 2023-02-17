@@ -2035,6 +2035,10 @@ class Task extends TaskFragment {
         Rect outOverrideBounds = getResolvedOverrideConfiguration().windowConfiguration.getBounds();
 
         if (windowingMode == WINDOWING_MODE_FULLSCREEN) {
+            if (!mCreatedByOrganizer) {
+                // Use empty bounds to indicate "fill parent".
+                outOverrideBounds.setEmpty();
+            }
             // The bounds for fullscreen mode shouldn't be adjusted by minimal size. Otherwise if
             // the parent or display is smaller than the size, the content may be cropped.
             return;

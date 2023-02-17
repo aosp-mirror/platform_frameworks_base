@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
@@ -1696,7 +1697,8 @@ public class TransitionTests extends WindowTestsBase {
     @Test
     public void testTransitionVisibleChange() {
         registerTestTransitionPlayer();
-        final ActivityRecord app = createActivityRecord(mDisplayContent);
+        final ActivityRecord app = createActivityRecord(
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         final Transition transition = new Transition(TRANSIT_OPEN, 0 /* flags */,
                 app.mTransitionController, mWm.mSyncEngine);
         app.mTransitionController.moveToCollecting(transition, BLASTSyncEngine.METHOD_NONE);
@@ -1746,7 +1748,8 @@ public class TransitionTests extends WindowTestsBase {
     @Test
     public void testVisibleChange_snapshot() {
         registerTestTransitionPlayer();
-        final ActivityRecord app = createActivityRecord(mDisplayContent);
+        final ActivityRecord app = createActivityRecord(
+                mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         final Transition transition = new Transition(TRANSIT_CHANGE, 0 /* flags */,
                 app.mTransitionController, mWm.mSyncEngine);
         app.mTransitionController.moveToCollecting(transition, BLASTSyncEngine.METHOD_NONE);
