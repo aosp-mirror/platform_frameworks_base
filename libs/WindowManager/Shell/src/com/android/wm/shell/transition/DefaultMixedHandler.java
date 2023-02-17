@@ -17,6 +17,7 @@
 package com.android.wm.shell.transition;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
@@ -28,11 +29,13 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
+import android.util.Pair;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
+import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -61,6 +64,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         /** Both the display and split-state (enter/exit) is changing */
         static final int TYPE_DISPLAY_AND_SPLIT_CHANGE = 2;
 
+        /** Pip was entered while handling an intent with its own remoteTransition. */
+        static final int TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE = 3;
+
         /** The default animation for this mixed transition. */
         static final int ANIM_TYPE_DEFAULT = 0;
 
@@ -84,6 +90,23 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         MixedTransition(int type, IBinder transition) {
             mType = type;
             mTransition = transition;
+        }
+
+        void joinFinishArgs(WindowContainerTransaction wct,
+                WindowContainerTransactionCallback wctCB) {
+            if (wctCB != null) {
+                // Technically can probably support 1, but don't want to encourage CB usage since
+                // it creates instabliity, so just throw.
+                throw new IllegalArgumentException("Can't mix transitions that require finish"
+                        + " sync callback");
+            }
+            if (wct != null) {
+                if (mFinishWCT == null) {
+                    mFinishWCT = wct;
+                } else {
+                    mFinishWCT.merge(wct, true /* transfer */);
+                }
+            }
         }
     }
 
@@ -125,6 +148,25 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
             mPipHandler.augmentRequest(transition, request, out);
             mSplitHandler.addEnterOrExitIfNeeded(request, out);
             return out;
+        } else if (request.getRemoteTransition() != null
+                && Transitions.isOpeningType(request.getType())
+                && (request.getTriggerTask() == null
+                || (request.getTriggerTask().topActivityType != ACTIVITY_TYPE_HOME
+                        && request.getTriggerTask().topActivityType != ACTIVITY_TYPE_RECENTS))) {
+            // Only select transitions with an intent-provided remote-animation because that will
+            // usually grab priority and often won't handle PiP. If there isn't an intent-provided
+            // remote, then the transition will be dispatched normally and the PipHandler will
+            // pick it up.
+            Pair<Transitions.TransitionHandler, WindowContainerTransaction> handler =
+                    mPlayer.dispatchRequest(transition, request, this);
+            if (handler == null) {
+                return null;
+            }
+            final MixedTransition mixed = new MixedTransition(
+                    MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE, transition);
+            mixed.mLeftoversHandler = handler.first;
+            mActiveTransitions.add(mixed);
+            return handler.second;
         }
         return null;
     }
@@ -169,11 +211,67 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
                     finishCallback);
         } else if (mixed.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
             return false;
+        } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
+            return animateOpenIntentWithRemoteAndPip(mixed, info, startTransaction,
+                    finishTransaction, finishCallback);
         } else {
             mActiveTransitions.remove(mixed);
             throw new IllegalStateException("Starting mixed animation without a known mixed type? "
                     + mixed.mType);
         }
+    }
+
+    private boolean animateOpenIntentWithRemoteAndPip(@NonNull MixedTransition mixed,
+            @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        TransitionInfo.Change pipChange = null;
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            TransitionInfo.Change change = info.getChanges().get(i);
+            if (mPipHandler.isEnteringPip(change, info.getType())) {
+                if (pipChange != null) {
+                    throw new IllegalStateException("More than 1 pip-entering changes in one"
+                            + " transition? " + info);
+                }
+                pipChange = change;
+                info.getChanges().remove(i);
+            }
+        }
+        if (pipChange == null) {
+            if (mixed.mLeftoversHandler != null) {
+                return mixed.mLeftoversHandler.startAnimation(mixed.mTransition, info,
+                        startTransaction, finishTransaction, finishCallback);
+            }
+            return false;
+        }
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Splitting PIP into a separate"
+                        + " animation because remote-animation likely doesn't support it");
+        mixed.mFinishCallback = finishCallback;
+        Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
+            --mixed.mInFlightSubAnimations;
+            mixed.joinFinishArgs(wct, wctCB);
+            if (mixed.mInFlightSubAnimations > 0) return;
+            mActiveTransitions.remove(mixed);
+            mixed.mFinishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
+        };
+        // Split the transition into 2 parts: the pip part and the rest.
+        mixed.mInFlightSubAnimations = 2;
+        // make a new startTransaction because pip's startEnterAnimation "consumes" it so
+        // we need a separate one to send over to launcher.
+        SurfaceControl.Transaction otherStartT = new SurfaceControl.Transaction();
+
+        mPipHandler.startEnterAnimation(pipChange, otherStartT, finishTransaction, finishCB);
+
+        // Dispatch the rest of the transition normally.
+        if (mixed.mLeftoversHandler != null
+                && mixed.mLeftoversHandler.startAnimation(mixed.mTransition, info,
+                    startTransaction, finishTransaction, finishCB)) {
+            return true;
+        }
+        mixed.mLeftoversHandler = mPlayer.dispatchTransition(mixed.mTransition, info,
+                startTransaction, finishTransaction, finishCB, this);
+        return true;
     }
 
     private boolean animateEnterPipFromSplit(@NonNull final MixedTransition mixed,
@@ -211,12 +309,13 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         mixed.mFinishCallback = finishCallback;
         Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
             --mixed.mInFlightSubAnimations;
+            mixed.joinFinishArgs(wct, wctCB);
             if (mixed.mInFlightSubAnimations > 0) return;
             mActiveTransitions.remove(mixed);
             if (isGoingHome) {
                 mSplitHandler.onTransitionAnimationComplete();
             }
-            mixed.mFinishCallback.onTransitionFinished(wct, wctCB);
+            mixed.mFinishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
         };
         if (isGoingHome) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animation is actually mixed "
@@ -317,17 +416,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
 
         Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
             --mixed.mInFlightSubAnimations;
-            if (wctCB != null) {
-                throw new IllegalArgumentException("Can't mix transitions that require finish"
-                        + " sync callback");
-            }
-            if (wct != null) {
-                if (mixed.mFinishWCT == null) {
-                    mixed.mFinishWCT = wct;
-                } else {
-                    mixed.mFinishWCT.merge(wct, true /* transfer */);
-                }
-            }
+            mixed.joinFinishArgs(wct, wctCB);
             if (mixed.mInFlightSubAnimations > 0) return;
             mActiveTransitions.remove(mixed);
             mixed.mFinishCallback.onTransitionFinished(mixed.mFinishWCT, null /* wctCB */);
@@ -342,8 +431,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         // Note: at this point, startT has probably already been applied, so we are basically
         // giving splitHandler an empty startT. This is currently OK because display-change will
         // grab a screenshot and paste it on top anyways.
-        mSplitHandler.startPendingAnimation(
-                transition, everythingElse, startT, finishT, finishCB);
+        mSplitHandler.startPendingAnimation(transition, everythingElse, startT, finishT, finishCB);
         return true;
     }
 
