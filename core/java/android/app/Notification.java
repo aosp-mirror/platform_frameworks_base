@@ -4634,7 +4634,7 @@ public class Notification implements Parcelable
          * Set whether this is an "ongoing" notification.
          *
          * Ongoing notifications cannot be dismissed by the user on locked devices, or by
-         * notification listeners, and some notifications cannnot be dismissed on unlocked 
+         * notification listeners, and some notifications cannnot be dismissed on unlocked
          * devices (system, device management, media), so your application or service must take 
          * care of canceling them.
          *
@@ -6992,8 +6992,10 @@ public class Notification implements Parcelable
     /**
      * Returns whether an app can colorize due to the android.permission.USE_COLORIZED_NOTIFICATIONS
      * permission. The permission is checked when a notification is enqueued.
+     *
+     * @hide
      */
-    private boolean hasColorizedPermission() {
+    public boolean hasColorizedPermission() {
         return (flags & Notification.FLAG_CAN_COLORIZE) != 0;
     }
 
