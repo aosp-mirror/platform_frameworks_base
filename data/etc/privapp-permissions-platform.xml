@@ -506,6 +506,8 @@ applications that come with the platform
         <permission name="android.permission.ACCESS_BROADCAST_RADIO"/>
         <!-- Permission required for CTS test - CtsAmbientContextServiceTestCases -->
         <permission name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT"/>
+        <!-- Permission required for CTS test - CtsTelephonyProviderTestCases -->
+        <permission name="android.permission.WRITE_APN_SETTINGS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
