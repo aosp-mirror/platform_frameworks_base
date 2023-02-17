@@ -588,8 +588,7 @@ object Flags {
     @JvmField val UDFPS_ELLIPSE_DETECTION = releasedFlag(2201, "udfps_ellipse_detection")
 
     // 2300 - stylus
-    @JvmField
-    val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used", teamfood = true)
+    @JvmField val TRACK_STYLUS_EVER_USED = releasedFlag(2300, "track_stylus_ever_used")
     @JvmField
     val ENABLE_STYLUS_CHARGING_UI =
         unreleasedFlag(2301, "enable_stylus_charging_ui", teamfood = true)
