@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.Context.BindServiceFlags;
+import android.content.Context.BindServiceFlagsBits;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -95,19 +97,31 @@ public interface ActivityManagerLocal {
     boolean bindSdkSandboxService(@NonNull Intent service, @NonNull ServiceConnection conn,
             int clientAppUid, @NonNull IBinder clientAppProcessToken,
             @NonNull String clientAppPackage, @NonNull String processName,
-            @Context.BindServiceFlags int flags)
+            @BindServiceFlagsBits int flags)
+            throws RemoteException;
+
+    /**
+     * See {@link #bindSdkSandboxService(Intent, ServiceConnection, int, IBinder, String, String,
+     *       int)}
+     */
+    @SuppressLint("RethrowRemoteException")
+    boolean bindSdkSandboxService(@NonNull Intent service, @NonNull ServiceConnection conn,
+            int clientAppUid, @NonNull IBinder clientAppProcessToken,
+            @NonNull String clientAppPackage, @NonNull String processName,
+            @NonNull BindServiceFlags flags)
             throws RemoteException;
 
     /**
      * @deprecated Please use
-     * {@link #bindSdkSandboxService(Intent, ServiceConnection, int, IBinder, String, String, int)}
+     * {@link #bindSdkSandboxService(Intent, ServiceConnection, int, IBinder, String, String,
+     *       BindServiceFlags)}
      *
      * This API can't be deleted yet because it can be used by early AdService module versions.
      */
     @SuppressLint("RethrowRemoteException")
     boolean bindSdkSandboxService(@NonNull Intent service, @NonNull ServiceConnection conn,
             int clientAppUid, @NonNull String clientAppPackage, @NonNull String processName,
-            @Context.BindServiceFlags int flags)
+            @BindServiceFlagsBits int flags)
             throws RemoteException;
 
     /**

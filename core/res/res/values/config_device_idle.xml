@@ -28,10 +28,16 @@
     <integer name="device_idle_flex_time_short_ms">60000</integer>
 
     <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT -->
-    <integer name="device_idle_light_after_inactive_to_ms">180000</integer>
+    <integer name="device_idle_light_after_inactive_to_ms">240000</integer>
 
     <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_TIMEOUT -->
     <integer name="device_idle_light_idle_to_ms">300000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_TIMEOUT_MAX_FLEX -->
+    <integer name="device_idle_light_idle_to_init_flex_ms">60000</integer>
+
+    <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_TIMEOUT_MAX_FLEX -->
+    <integer name="device_idle_light_idle_to_max_flex_ms">900000</integer>
 
     <!-- Default for DeviceIdleController.Constants.LIGHT_IDLE_FACTOR -->
     <item name="device_idle_light_idle_factor" format="float" type="integer">2.0</item>

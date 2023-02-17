@@ -133,6 +133,7 @@ import android.os.WorkSource;
 import android.provider.MediaStore;
 import android.util.ArrayMap;
 import android.util.MergedConfiguration;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -1635,14 +1636,18 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Prevent recursion.
             return;
         }
-        boolean passesAsmChecks = true;
+        boolean shouldBlockActivitySwitchIfFeatureEnabled = false;
+        boolean wouldBlockActivitySwitchIgnoringFlags = false;
         // We may have already checked that the callingUid has additional clearTask privileges, and
         // cleared the calling identify. If so, we infer we do not need further restrictions here.
         // TODO(b/263368846) Move to live with the rest of the ASM logic.
         if (callingUid != SYSTEM_UID) {
-            passesAsmChecks = doesTopActivityMatchingUidExistForAsm(task, callingUid,
+            Pair<Boolean, Boolean> pair = doesTopActivityMatchingUidExistForAsm(task,
+                    callingUid,
                     null);
-            if (!passesAsmChecks) {
+            shouldBlockActivitySwitchIfFeatureEnabled = !pair.first;
+            wouldBlockActivitySwitchIgnoringFlags = !pair.second;
+            if (wouldBlockActivitySwitchIgnoringFlags) {
                 ActivityRecord topActivity =  task.getActivity(ar ->
                         !ar.isState(FINISHING) && !ar.isAlwaysOnTop());
                 FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
@@ -1685,13 +1690,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             if (task.isPersistable) {
                 mService.notifyTaskPersisterLocked(null, true);
             }
-            if (!passesAsmChecks) {
-                boolean shouldRestrictActivitySwitch =
-                        ActivitySecurityModelFeatureFlags.shouldRestrictActivitySwitch(callingUid);
-
+            if (wouldBlockActivitySwitchIgnoringFlags) {
+                boolean restrictActivitySwitch = ActivitySecurityModelFeatureFlags
+                        .shouldRestrictActivitySwitch(callingUid)
+                        && shouldBlockActivitySwitchIfFeatureEnabled;
                 if (ActivitySecurityModelFeatureFlags.shouldShowToast(callingUid)) {
                     UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
-                            (shouldRestrictActivitySwitch
+                            (restrictActivitySwitch
                                     ? "Returning home due to "
                                     : "Would return home due to ")
                                     + ActivitySecurityModelFeatureFlags.DOC_LINK,
@@ -1701,7 +1706,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // If the activity switch should be restricted, return home rather than the
                 // previously top task, to prevent users from being confused which app they're
                 // viewing
-                if (shouldRestrictActivitySwitch) {
+                if (restrictActivitySwitch) {
                     Slog.w(TAG, "Return to home as source uid: " + callingUid
                             + "is not on top of task t: " + task);
                     task.getTaskDisplayArea().moveHomeActivityToTop("taskRemoved");
@@ -1721,14 +1726,18 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      *
      *  The 'sourceRecord' can be considered top even if it is 'finishing'
      *
-     *  TODO(b/263368846) Shift to BackgroundActivityStartController once class is ready
+     * @return A pair where the first value is the return value matching the checks above, and the
+     * second value is the return value disregarding the feature flag or target api levels. Use the
+     * first value for blocking launches - the second value is only used to determine if a toast
+     * should be displayed, and will be used alongside a feature flag in {@link ActivityStarter}.
      */
+    // TODO(b/263368846) Shift to BackgroundActivityStartController once class is ready
     @Nullable
-    static boolean doesTopActivityMatchingUidExistForAsm(@Nullable Task task,
+    static Pair<Boolean, Boolean> doesTopActivityMatchingUidExistForAsm(@Nullable Task task,
             int uid, @Nullable ActivityRecord sourceRecord) {
         // If the source is visible, consider it 'top'.
         if (sourceRecord != null && sourceRecord.isVisible()) {
-            return true;
+            return new Pair<>(true, true);
         }
 
         // Consider the source activity, whether or not it is finishing. Do not consider any other
@@ -1739,28 +1748,33 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // Check top of stack (or the first task fragment for embedding).
         ActivityRecord topActivity = task.getActivity(topOfStackPredicate);
         if (topActivity == null) {
-            return false;
+            return new Pair<>(false, false);
         }
 
-        if (topActivity.getUid() == uid) {
-            return true;
+        Pair<Boolean, Boolean> pair = topActivity.allowCrossUidActivitySwitchFromBelow(uid);
+        if (pair.first) {
+            return new Pair<>(true, pair.second);
         }
 
         // Even if the top activity is not a match, we may be in an embedded activity scenario with
         // an adjacent task fragment. Get the second fragment.
         TaskFragment taskFragment = topActivity.getTaskFragment();
         if (taskFragment == null) {
-            return false;
+            return new Pair<>(false, false);
         }
 
         TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
         if (adjacentTaskFragment == null) {
-            return false;
+            return new Pair<>(false, false);
         }
 
         // Check the second fragment.
         topActivity = adjacentTaskFragment.getActivity(topOfStackPredicate);
-        return topActivity != null && topActivity.getUid() == uid;
+        if (topActivity == null) {
+            return new Pair<>(false, false);
+        }
+
+        return topActivity.allowCrossUidActivitySwitchFromBelow(uid);
     }
 
     void cleanUpRemovedTaskLocked(Task task, boolean killProcess, boolean removeFromRecents) {

@@ -368,8 +368,8 @@ public class ServiceInfo extends ComponentInfo
      *   <li>App has a UID &lt; {@link android.os.Process#FIRST_APPLICATION_UID}</li>
      *   <li>App is on Doze allowlist</li>
      *   <li>Device is running in <a href="https://android.googlesource.com/platform/frameworks/base/+/master/packages/SystemUI/docs/demo_mode.md">Demo Mode</a></li>
-     *   <li><a href="https://source.android.com/devices/tech/admin/provision">Device owner app</a><li>
-     *   <li><a href="https://source.android.com/devices/tech/admin/managed-profiles">Profile owner apps</a><li>
+     *   <li><a href="https://source.android.com/devices/tech/admin/provision">Device owner app</a></li>
+     *   <li><a href="https://source.android.com/devices/tech/admin/managed-profiles">Profile owner apps</a></li>
      *   <li>Persistent apps</li>
      *   <li><a href="https://source.android.com/docs/core/connect/carrier">Carrier privileged apps</a></li>
      *   <li>Apps that have the {@code android.app.role.RoleManager#ROLE_EMERGENCY} role</li>

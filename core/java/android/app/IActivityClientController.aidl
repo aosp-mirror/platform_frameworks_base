@@ -120,6 +120,7 @@ interface IActivityClientController {
     oneway void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
     oneway void setInheritShowWhenLocked(in IBinder token, boolean setInheritShownWhenLocked);
     oneway void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
+    oneway void setAllowCrossUidActivitySwitchFromBelow(in IBinder token, boolean allowed);
     oneway void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
     oneway void overrideActivityTransition(IBinder token, boolean open, int enterAnim, int exitAnim,
             int backgroundColor);

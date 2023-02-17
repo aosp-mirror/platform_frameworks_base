@@ -112,6 +112,10 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
     }
 
     private void respondToClientWithResponseAndFinish(GetCredentialResponse response) {
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Log.i(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
         if (isSessionCancelled()) {
             // TODO: Differentiate btw cancelled and false
             logApiCalled(RequestType.GET_CREDENTIALS, /* isSuccessful */ false);
@@ -129,11 +133,16 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
     }
 
     private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Log.i(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
         if (isSessionCancelled()) {
             logApiCalled(RequestType.GET_CREDENTIALS, /* isSuccessful */ false);
             finishSession(/*propagateCancellation=*/true);
             return;
         }
+
         try {
             mClientCallback.onError(errorType, errorMsg);
         } catch (RemoteException e) {
@@ -157,7 +166,7 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
     @Override
     public void onUiSelectorInvocationFailure() {
         respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
-                    "No credentials to show on the selector.");
+                    "No credentials available.");
     }
 
     @Override

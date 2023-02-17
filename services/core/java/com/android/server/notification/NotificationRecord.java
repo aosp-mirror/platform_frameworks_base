@@ -114,6 +114,8 @@ public final class NotificationRecord {
 
     // is this notification currently being intercepted by Zen Mode?
     private boolean mIntercept;
+    // has the intercept value been set explicitly? we only want to log it if new or changed
+    private boolean mInterceptSet;
 
     // is this notification hidden since the app pkg is suspended?
     private boolean mHidden;
@@ -929,6 +931,7 @@ public final class NotificationRecord {
 
     public boolean setIntercepted(boolean intercept) {
         mIntercept = intercept;
+        mInterceptSet = true;
         return mIntercept;
     }
 
@@ -947,6 +950,10 @@ public final class NotificationRecord {
 
     public boolean isIntercepted() {
         return mIntercept;
+    }
+
+    public boolean hasInterceptBeenSet() {
+        return mInterceptSet;
     }
 
     public boolean isNewEnoughForAlerting(long now) {

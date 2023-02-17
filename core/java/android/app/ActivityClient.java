@@ -478,6 +478,14 @@ public class ActivityClient {
         }
     }
 
+    void setAllowCrossUidActivitySwitchFromBelow(IBinder token, boolean allowed) {
+        try {
+            getActivityClientController().setAllowCrossUidActivitySwitchFromBelow(token, allowed);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     int setVrMode(IBinder token, boolean enabled, ComponentName packageName) {
         try {
             return getActivityClientController().setVrMode(token, enabled, packageName);

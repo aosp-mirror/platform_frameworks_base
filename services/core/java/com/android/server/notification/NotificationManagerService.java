@@ -4547,6 +4547,27 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void requestUnbindListenerComponent(ComponentName component) {
+            checkCallerIsSameApp(component.getPackageName());
+            int uid = Binder.getCallingUid();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationLock) {
+                    ManagedServices manager =
+                            mAssistants.isComponentEnabledForCurrentProfiles(component)
+                                    ? mAssistants
+                                    : mListeners;
+                    if (manager.isPackageOrComponentAllowed(component.flattenToString(),
+                            UserHandle.getUserId(uid))) {
+                        manager.setComponentState(component, UserHandle.getUserId(uid), false);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void setNotificationsShownFromListener(INotificationListener token, String[] keys) {
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -8674,6 +8695,9 @@ public class NotificationManagerService extends SystemService {
             if (interceptBefore && !record.isIntercepted()
                     && record.isNewEnoughForAlerting(System.currentTimeMillis())) {
                 buzzBeepBlinkLocked(record);
+
+                // Log alert after change in intercepted state to Zen Log as well
+                ZenLog.traceAlertOnUpdatedIntercept(record);
             }
         }
         if (changed) {

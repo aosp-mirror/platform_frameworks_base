@@ -29,6 +29,7 @@ import android.testing.TestableLooper
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -328,7 +329,7 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
             )
             .isTrue()
 
-        underTest.hide()
+        underTest.hide(parent)
 
         clearInvocations(controlsListingController, taskViewFactory)
         controlsSettingsRepository.setAllowActionOnTrivialControlsInLockscreen(false)
@@ -385,6 +386,28 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         whenever(controlsListingController.getCurrentServices()).thenReturn(listOf(csi))
 
         assertThat(underTest.resolveActivity()).isEqualTo(ControlsActivity::class.java)
+    }
+
+    @Test
+    fun testRemoveViewsOnlyForParentPassedInHide() {
+        underTest.show(parent, {}, context)
+        parent.addView(View(context))
+
+        val mockParent: ViewGroup = mock()
+
+        underTest.hide(mockParent)
+
+        verify(mockParent).removeAllViews()
+        assertThat(parent.childCount).isGreaterThan(0)
+    }
+
+    @Test
+    fun testHideDifferentParentDoesntCancelListeners() {
+        underTest.show(parent, {}, context)
+        underTest.hide(mock())
+
+        verify(controlsController, never()).unsubscribe()
+        verify(controlsListingController, never()).removeCallback(any())
     }
 
     private fun setUpPanel(panel: SelectedItem.PanelItem): ControlsServiceInfo {

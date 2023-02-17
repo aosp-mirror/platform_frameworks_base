@@ -181,6 +181,44 @@ public final class NotificationEntry extends ListEntry {
     private boolean mBlockable;
 
     /**
+     * The {@link SystemClock#elapsedRealtime()} when this notification entry was created.
+     */
+    public long mCreationElapsedRealTime;
+
+    /**
+     * Whether this notification has ever been a non-sticky HUN.
+     */
+    private boolean mIsDemoted = false;
+
+    /**
+     * True if both
+     *  1) app provided full screen intent but does not have the permission to send it
+     *  2) this notification has never been demoted before
+     */
+    public boolean isStickyAndNotDemoted() {
+
+        final boolean fsiRequestedButDenied =  (getSbn().getNotification().flags
+                & Notification.FLAG_FSI_REQUESTED_BUT_DENIED) != 0;
+
+        if (!fsiRequestedButDenied && !mIsDemoted) {
+            demoteStickyHun();
+        }
+        return fsiRequestedButDenied && !mIsDemoted;
+    }
+
+    @VisibleForTesting
+    public boolean isDemoted() {
+        return mIsDemoted;
+    }
+
+    /**
+     * Make sticky HUN not sticky.
+     */
+    public void demoteStickyHun() {
+        mIsDemoted = true;
+    }
+
+    /**
      * @param sbn the StatusBarNotification from system server
      * @param ranking also from system server
      * @param creationTime SystemClock.uptimeMillis of when we were created
@@ -197,8 +235,13 @@ public final class NotificationEntry extends ListEntry {
         mKey = sbn.getKey();
         setSbn(sbn);
         setRanking(ranking);
+        mCreationElapsedRealTime = SystemClock.elapsedRealtime();
     }
 
+    @VisibleForTesting
+    public void setCreationElapsedRealTime(long time) {
+        mCreationElapsedRealTime = time;
+    }
     @Override
     public NotificationEntry getRepresentativeEntry() {
         return this;

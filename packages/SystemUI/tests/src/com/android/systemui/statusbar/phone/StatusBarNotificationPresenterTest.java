@@ -43,6 +43,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
+import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -112,6 +113,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(
                 mContext,
                 mock(NotificationPanelViewController.class),
+                mock(QuickSettingsController.class),
                 mock(HeadsUpManagerPhone.class),
                 notificationShadeWindowView,
                 mock(ActivityStarter.class),

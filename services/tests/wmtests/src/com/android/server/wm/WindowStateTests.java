@@ -730,9 +730,8 @@ public class WindowStateTests extends WindowTestsBase {
         invisibleApp.requestDrawIfNeeded(outWaitingForDrawn);
         assertTrue(outWaitingForDrawn.isEmpty());
 
-        // Drawn state should not be changed for insets change when screen is off.
-        spyOn(mWm.mPolicy);
-        doReturn(false).when(mWm.mPolicy).isScreenOn();
+        // Drawn state should not be changed for insets change if the window is not visible.
+        startingApp.mActivityRecord.setVisibleRequested(false);
         makeWindowVisibleAndDrawn(startingApp);
         startingApp.getConfiguration().orientation = 0; // Reset to be the same as last reported.
         startingApp.getWindowFrames().setInsetsChanged(true);
@@ -742,9 +741,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(startingApp.getOrientationChanging());
 
         // Even if the display is frozen, invisible requested window should not be affected.
-        startingApp.mActivityRecord.setVisibleRequested(false);
         mWm.startFreezingDisplay(0, 0, mDisplayContent);
-        doReturn(true).when(mWm.mPolicy).isScreenOn();
         startingApp.getWindowFrames().setInsetsChanged(true);
         startingApp.updateResizingWindowIfNeeded();
         assertTrue(startingApp.isDrawn());
@@ -830,11 +827,7 @@ public class WindowStateTests extends WindowTestsBase {
         win.reportResized();
         embeddedTf.setBounds(500, 0, 1000, 2000);
 
-        // Clear all drawn when the embedded TaskFragment is in mDisplayContent.mChangingContainers.
-        win.updateResizingWindowIfNeeded();
-        verify(embeddedActivity, never()).clearAllDrawn();
-
-        mDisplayContent.mChangingContainers.add(embeddedTf);
+        // Clear all drawn when the window config of embedded TaskFragment is changed.
         win.updateResizingWindowIfNeeded();
         verify(embeddedActivity).clearAllDrawn();
     }

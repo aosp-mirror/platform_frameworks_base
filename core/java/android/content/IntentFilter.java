@@ -531,6 +531,28 @@ public class IntentFilter implements Parcelable {
         mInstantAppVisibility = o.mInstantAppVisibility;
     }
 
+    /** {@inheritDoc} */
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("IntentFilter {");
+        sb.append(" pri=");
+        sb.append(mPriority);
+        if (countActions() > 0) {
+            sb.append(" act=");
+            sb.append(mActions.toString());
+        }
+        if (countCategories() > 0) {
+            sb.append(" cat=");
+            sb.append(mCategories.toString());
+        }
+        if (countDataSchemes() > 0) {
+            sb.append(" sch=");
+            sb.append(mDataSchemes.toString());
+        }
+        sb.append(" }");
+        return sb.toString();
+    }
+
     /**
      * Modify priority of this filter.  This only affects receiver filters.
      * The priority of activity filters are set in XML and cannot be changed

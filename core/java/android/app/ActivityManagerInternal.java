@@ -982,4 +982,21 @@ public abstract class ActivityManagerInternal {
      * while it's being created.
      */
     public abstract boolean startProfileEvenWhenDisabled(@UserIdInt int userId);
+
+    /**
+     * Internal method for logging foreground service API journey start.
+     * Used with FGS metrics logging
+     *
+     * @hide
+     */
+    public abstract void logFgsApiBegin(int apiType, int uid, int pid);
+
+    /**
+     * Internal method for logging foreground service API journey end.
+     * Used with FGS metrics logging
+     *
+     * @hide
+     */
+    public abstract void logFgsApiEnd(int apiType, int uid, int pid);
+
 }

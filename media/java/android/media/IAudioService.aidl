@@ -107,11 +107,11 @@ interface IAudioService {
     void setStreamVolumeWithAttribution(int streamType, int index, int flags,
             in String callingPackage, in String attributionTag);
 
-    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
     void setDeviceVolume(in VolumeInfo vi, in AudioDeviceAttributes ada,
             in String callingPackage);
 
-    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
     VolumeInfo getDeviceVolume(in VolumeInfo vi, in AudioDeviceAttributes ada,
             in String callingPackage);
 
@@ -139,21 +139,21 @@ interface IAudioService {
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
     List<AudioVolumeGroup> getAudioVolumeGroups();
 
-    @EnforcePermission(anyOf={"MODIFY_AUDIO_SYSTEM_SETTINGS", "MODIFY_AUDIO_ROUTING"})
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
     void setVolumeGroupVolumeIndex(int groupId, int index, int flags, String callingPackage,
             in String attributionTag);
 
-    @EnforcePermission(anyOf={"MODIFY_AUDIO_SYSTEM_SETTINGS", "MODIFY_AUDIO_ROUTING"})
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
     int getVolumeGroupVolumeIndex(int groupId);
 
-    @EnforcePermission(anyOf={"MODIFY_AUDIO_SYSTEM_SETTINGS", "MODIFY_AUDIO_ROUTING"})
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
     int getVolumeGroupMaxVolumeIndex(int groupId);
 
-    @EnforcePermission(anyOf={"MODIFY_AUDIO_SYSTEM_SETTINGS", "MODIFY_AUDIO_ROUTING"})
+    @EnforcePermission(anyOf={"MODIFY_AUDIO_SETTINGS_PRIVILEGED", "MODIFY_AUDIO_ROUTING"})
     int getVolumeGroupMinVolumeIndex(int groupId);
 
     @EnforcePermission("QUERY_AUDIO_STATE")
-    int getLastAudibleVolumeGroupVolume(int groupId);
+    int getLastAudibleVolumeForVolumeGroup(int groupId);
 
     boolean isVolumeGroupMuted(int groupId);
 
@@ -258,19 +258,19 @@ interface IAudioService {
     IRingtonePlayer getRingtonePlayer();
     int getUiSoundsStreamType();
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     List getIndependentStreamTypes();
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     int getStreamTypeAlias(int streamType);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     boolean isVolumeControlUsingVolumeGroups();
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     oneway void registerStreamAliasingDispatcher(IStreamAliasingDispatcher isad, boolean register);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     void setNotifAliasRingForTest(boolean alias);
 
     @EnforcePermission("MODIFY_AUDIO_ROUTING")
@@ -295,25 +295,25 @@ interface IAudioService {
 
     void lowerVolumeToRs1(String callingPackage);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     float getRs2Value();
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     oneway void setRs2Value(float rs2Value);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     float getCsd();
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     oneway void setCsd(float csd);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     oneway void forceUseFrameworkMel(boolean useFrameworkMel);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     oneway void forceComputeCsdOnAllDevices(boolean computeCsdOnAllDevices);
 
-    @EnforcePermission("MODIFY_AUDIO_SYSTEM_SETTINGS")
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     boolean isCsdEnabled();
 
     int setHdmiSystemAudioSupported(boolean on);
@@ -428,11 +428,11 @@ interface IAudioService {
 
     oneway void setRttEnabled(in boolean rttEnabled);
 
-    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
     void setDeviceVolumeBehavior(in AudioDeviceAttributes device,
              in int deviceVolumeBehavior, in String pkgName);
 
-    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "QUERY_AUDIO_STATE", "MODIFY_AUDIO_SYSTEM_SETTINGS"})
+    @EnforcePermission(anyOf = {"MODIFY_AUDIO_ROUTING", "QUERY_AUDIO_STATE", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
     int getDeviceVolumeBehavior(in AudioDeviceAttributes device);
 
     // WARNING: read warning at top of file, new methods that need to be used by native

@@ -888,7 +888,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         @NonNull
         final TextClassifierServiceConnection mConnection;
         final boolean mIsTrusted;
-        @Context.BindServiceFlags
+        @Context.BindServiceFlagsBits
         final int mBindServiceFlags;
         @NonNull
         @GuardedBy("mLock")
@@ -925,7 +925,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             mEnabled = isServiceEnabledForUser();
         }
 
-        @Context.BindServiceFlags
+        @Context.BindServiceFlagsBits
         private int createBindServiceFlags(@NonNull String packageName) {
             int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
             if (!packageName.equals(mDefaultTextClassifierPackage)) {

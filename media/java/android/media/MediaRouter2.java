@@ -461,16 +461,30 @@ public final class MediaRouter2 {
     }
 
     /**
-     * Shows the system UI output switcher.
+     * Shows the system output switcher dialog.
+     *
+     * <p>Should only be called when the context of MediaRouter2 is in the foreground and visible on
+     * the screen.
+     *
+     * <p>The appearance and precise behaviour of the system output switcher dialog may vary across
+     * different devices, OS versions, and form factors, but the basic functionality stays the same.
+     *
+     * <p>See <a
+     * href="https://developer.android.com/guide/topics/media/media-routing#output-switcher">Output
+     * Switcher documentation</a> for more details.
+     *
+     * @return {@code true} if the output switcher dialog is being shown, or {@code false} if the
+     * call is ignored because the app is in the background.
      */
-    public void showSystemOutputSwitcher() {
+    public boolean showSystemOutputSwitcher() {
         synchronized (mLock) {
             try {
-                mMediaRouterService.showMediaOutputSwitcher(mPackageName);
+                return mMediaRouterService.showMediaOutputSwitcher(mPackageName);
             } catch (RemoteException ex) {
                 ex.rethrowFromSystemServer();
             }
         }
+        return false;
     }
 
     /**

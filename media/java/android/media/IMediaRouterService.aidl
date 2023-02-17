@@ -94,5 +94,5 @@ interface IMediaRouterService {
     void setSessionVolumeWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId, int volume);
     void releaseSessionWithManager(IMediaRouter2Manager manager, int requestId, String sessionId);
-    void showMediaOutputSwitcher(String packageName);
+    boolean showMediaOutputSwitcher(String packageName);
 }
