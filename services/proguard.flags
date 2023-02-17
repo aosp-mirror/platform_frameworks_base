@@ -110,8 +110,6 @@
   public <init>(...);
 }
 -keep,allowoptimization,allowaccessmodification class android.hardware.usb.gadget.** { *; }
--keep,allowoptimization,allowaccessmodification class com.android.server.policy.TentModeDeviceStatePolicy { *; }
--keep,allowoptimization,allowaccessmodification class com.android.server.policy.TentModeDeviceStatePolicy$Provider { *; }
 
 # Needed when optimizations enabled
 # TODO(b/210510433): Revisit and fix with @Keep.
