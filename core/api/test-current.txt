@@ -1947,8 +1947,17 @@ package android.net {
 package android.net.wifi.sharedconnectivity.app {
 
   public class SharedConnectivityManager {
+    method @Nullable public static android.net.wifi.sharedconnectivity.app.SharedConnectivityManager create(@NonNull android.content.Context, @NonNull String, @NonNull String);
     method @Nullable public android.content.ServiceConnection getServiceConnection();
     method public void setService(@Nullable android.os.IInterface);
+  }
+
+}
+
+package android.net.wifi.sharedconnectivity.service {
+
+  public abstract class SharedConnectivityService extends android.app.Service {
+    method public void onBind();
   }
 
 }

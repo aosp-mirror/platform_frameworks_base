@@ -19,6 +19,7 @@ package android.net.wifi.sharedconnectivity.app;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.ComponentName;
@@ -170,6 +171,17 @@ public class SharedConnectivityManager {
                     + " package name and intent action string must be defined");
         }
         return null;
+    }
+
+    /**
+     * @hide
+     */
+    @SuppressLint("ManagerLookup")
+    @TestApi
+    @Nullable
+    public static SharedConnectivityManager create(@NonNull Context context,
+            @NonNull String servicePackageName, @NonNull String serviceIntentAction) {
+        return new SharedConnectivityManager(context, servicePackageName, serviceIntentAction);
     }
 
     private SharedConnectivityManager(@NonNull Context context, String servicePackageName,
