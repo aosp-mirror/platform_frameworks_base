@@ -1065,18 +1065,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsHave");
     }
 
-    private static final String[] UNPROTECTED_SETTINGS = {
-        // These three LOCK_PATTERN_* settings have traditionally been readable via the public API
-        // android.provider.Settings.{System,Secure}.getString() without any permission.
-        Settings.Secure.LOCK_PATTERN_ENABLED,
-        Settings.Secure.LOCK_PATTERN_VISIBLE,
-        Settings.Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
-    };
-
     private final void checkDatabaseReadPermission(String requestedKey, int userId) {
-        if (ArrayUtils.contains(UNPROTECTED_SETTINGS, requestedKey)) {
-            return;
-        }
         if (!hasPermission(PERMISSION)) {
             throw new SecurityException("uid=" + getCallingUid() + " needs permission "
                     + PERMISSION + " to read " + requestedKey + " for user " + userId);
@@ -1190,9 +1179,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public boolean getBoolean(String key, boolean defaultValue, int userId) {
         checkDatabaseReadPermission(key, userId);
-        if (Settings.Secure.LOCK_PATTERN_ENABLED.equals(key)) {
-            return getCredentialTypeInternal(userId) == CREDENTIAL_TYPE_PATTERN;
-        }
         return mStorage.getBoolean(key, defaultValue, userId);
     }
 
