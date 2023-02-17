@@ -3616,7 +3616,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final int N = admins.size();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = admins.get(i);
-                if (admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)
+                if ((admin.isPermissionBased || admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD))
                         && admin.passwordExpirationTimeout > 0L
                         && now >= admin.passwordExpirationDate - EXPIRATION_GRACE_PERIOD_MS
                         && admin.passwordExpirationDate > 0L) {
@@ -4296,15 +4296,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @GuardedBy("getLockObject()")
     private List<ActiveAdmin> getActiveAdminsForLockscreenPoliciesLocked(int userHandle) {
         if (isSeparateProfileChallengeEnabled(userHandle)) {
+
+            if (isPermissionCheckFlagEnabled()) {
+                return getActiveAdminsForAffectedUserInclPermissionBasedAdminLocked(userHandle);
+            }
             // If this user has a separate challenge, only return its restrictions.
             return getUserDataUnchecked(userHandle).mAdminList;
         }
         // If isSeparateProfileChallengeEnabled is false and userHandle points to a managed profile
         // we need to query the parent user who owns the credential.
-        return getActiveAdminsForUserAndItsManagedProfilesLocked(getProfileParentId(userHandle),
-                (user) -> !mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id));
+        if (isPermissionCheckFlagEnabled()) {
+            return getActiveAdminsForUserAndItsManagedProfilesInclPermissionBasedAdminLocked(getProfileParentId(userHandle),
+                    (user) -> !mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id));
+        } else {
+            return getActiveAdminsForUserAndItsManagedProfilesLocked(getProfileParentId(userHandle),
+                    (user) -> !mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id));
+        }
+
     }
 
     /**
@@ -4340,7 +4351,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @GuardedBy("getLockObject()")
     private List<ActiveAdmin> getActiveAdminsForAffectedUserInclPermissionBasedAdminLocked(
             int userHandle) {
-        List<ActiveAdmin> list = getActiveAdminsForAffectedUserLocked(userHandle);
+        List<ActiveAdmin> list;
+
+        if (isManagedProfile(userHandle)) {
+            list = getUserDataUnchecked(userHandle).mAdminList;
+        }
+        list = getActiveAdminsForUserAndItsManagedProfilesInclPermissionBasedAdminLocked(userHandle,
+                /* shouldIncludeProfileAdmins */ (user) -> false);
+
         if (getUserData(userHandle).mPermissionBasedAdmin != null) {
             list.add(getUserData(userHandle).mPermissionBasedAdmin);
         }
@@ -4371,6 +4389,44 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         if (shouldIncludeProfileAdmins.test(userInfo)) {
                             admins.add(admin);
                         }
+                    }
+                }
+            }
+        });
+        return admins;
+    }
+
+    /**
+     * Returns the list of admins on the given user, as well as parent admins for each managed
+     * profile associated with the given user. Optionally also include the admin of each managed
+     * profile.
+     * <p> Should not be called on a profile user.
+     */
+    @GuardedBy("getLockObject()")
+    private List<ActiveAdmin> getActiveAdminsForUserAndItsManagedProfilesInclPermissionBasedAdminLocked(int userHandle,
+            Predicate<UserInfo> shouldIncludeProfileAdmins) {
+        ArrayList<ActiveAdmin> admins = new ArrayList<>();
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
+                if (userInfo.id == userHandle) {
+                    admins.addAll(policy.mAdminList);
+                    if (policy.mPermissionBasedAdmin != null) {
+                        admins.add(policy.mPermissionBasedAdmin);
+                    }
+                } else if (userInfo.isManagedProfile()) {
+                    for (int i = 0; i < policy.mAdminList.size(); i++) {
+                        ActiveAdmin admin = policy.mAdminList.get(i);
+                        if (admin.hasParentActiveAdmin()) {
+                            admins.add(admin.getParentActiveAdmin());
+                        }
+                        if (shouldIncludeProfileAdmins.test(userInfo)) {
+                            admins.add(admin);
+                        }
+                    }
+                    if (policy.mPermissionBasedAdmin != null
+                            && shouldIncludeProfileAdmins.test(userInfo)) {
+                        admins.add(policy.mPermissionBasedAdmin);
                     }
                 }
             }
@@ -4697,6 +4753,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Return a single admin's expiration date/time, or the min (soonest) for all admins.
      * Returns 0 if not configured.
      */
+    @GuardedBy("getLockObject()")
     private long getPasswordExpirationLocked(ComponentName who, int userHandle, boolean parent) {
         long timeout = 0L;
 
@@ -5282,11 +5339,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     adminPackageName, userId, affectedUserId, complexity);
         }
     }
-
+    @GuardedBy("getLockObject()")
     private int getAggregatedPasswordComplexityLocked(@UserIdInt int userHandle) {
         return getAggregatedPasswordComplexityLocked(userHandle, false);
     }
 
+    @GuardedBy("getLockObject()")
     private int getAggregatedPasswordComplexityLocked(@UserIdInt int userHandle,
             boolean deviceWideOnly) {
         ensureLocked();
@@ -5469,6 +5527,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * profile.
      * Returns {@code null} if no participating admin has that policy set.
      */
+    @GuardedBy("getLockObject()")
     private ActiveAdmin getAdminWithMinimumFailedPasswordsForWipeLocked(
             int userHandle, boolean parent) {
         int count = 0;
@@ -5699,6 +5758,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @GuardedBy("getLockObject()")
     private void updateMaximumTimeToLockLocked(@UserIdInt int userId) {
         // Update the profile's timeout
         if (isManagedProfile(userId)) {
@@ -5727,6 +5787,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         });
     }
 
+    @GuardedBy("getLockObject()")
     private void updateProfileLockTimeoutLocked(@UserIdInt int userId) {
         final long timeMs;
         if (isSeparateProfileChallengeEnabled(userId)) {
@@ -7459,9 +7520,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final String adminName;
         final ComponentName adminComp;
         if (admin != null) {
-            adminComp = admin.info.getComponent();
-            adminName = adminComp.flattenToShortString();
-            event.setAdmin(adminComp);
+            if (admin.isPermissionBased) {
+                adminComp = null;
+                adminName = caller.getPackageName();
+                event.setAdmin(adminName);
+            } else {
+                adminComp = admin.info.getComponent();
+                adminName = adminComp.flattenToShortString();
+                event.setAdmin(adminComp);
+            }
         } else {
             adminComp = null;
             adminName = mInjector.getPackageManager().getPackagesForUid(caller.getUid())[0];
@@ -7750,13 +7817,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 || hasCallingPermission(permission.MASTER_CLEAR)
                                 || hasCallingPermission(MANAGE_DEVICE_POLICY_FACTORY_RESET),
                         "Must be called by the FRP management agent on device");
-                // TODO(b/261999445): Remove
-                if (isHeadlessFlagEnabled()) {
-                    admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
-                } else {
-                    admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                            UserHandle.getUserId(frpManagementAgentUid));
-                }
+                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceOrSystemPermissionBasedAdminLocked();
             } else {
                 Preconditions.checkCallAuthorization(
                         isDefaultDeviceOwner(caller)
@@ -7927,12 +7988,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      *
      * @return the set of user IDs that have been affected
      */
+    @GuardedBy("getLockObject()")
     private Set<Integer> updatePasswordExpirationsLocked(int userHandle) {
         final ArraySet<Integer> affectedUserIds = new ArraySet<>();
         List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle);
         for (int i = 0; i < admins.size(); i++) {
             ActiveAdmin admin = admins.get(i);
-            if (admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)) {
+            if (admin.isPermissionBased || admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD)) {
                 affectedUserIds.add(admin.getUserHandle().getIdentifier());
                 long timeout = admin.passwordExpirationTimeout;
                 admin.passwordExpirationDate =
@@ -8026,6 +8088,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     private int getUserIdToWipeForFailedPasswords(ActiveAdmin admin) {
         final int userId = admin.getUserHandle().getIdentifier();
+        if (admin.isPermissionBased) {
+            return userId;
+        }
         final ComponentName component = admin.info.getComponent();
         return isProfileOwnerOfOrganizationOwnedDevice(component, userId)
                 ? getProfileParentId(userId) : userId;
@@ -9653,6 +9718,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return admin;
     }
 
+    ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceOrSystemPermissionBasedAdminLocked() {
+        ensureLocked();
+        ActiveAdmin doOrPo = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+        if (isPermissionCheckFlagEnabled() && doOrPo == null) {
+            return getUserData(0).mPermissionBasedAdmin;
+        }
+        return doOrPo;
+    }
+
     ActiveAdmin getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(int userId) {
         ensureLocked();
         ActiveAdmin admin = getDeviceOwnerAdminLocked();
@@ -10659,9 +10733,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
 
-        final ComponentName profileOwner = getProfileOwnerAsUser(userId);
-        if (profileOwner == null) {
-            return false;
+        if (!isPermissionCheckFlagEnabled()) {
+            // TODO: Figure out if something like this needs to be restored for policy engine
+            final ComponentName profileOwner = getProfileOwnerAsUser(userId);
+            if (profileOwner == null) {
+                return false;
+            }
         }
 
         // Managed profiles are not allowed to use lock task
@@ -11884,7 +11961,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (getLockObject()) {
             List<String> result = null;
             // Only device or profile owners can have permitted lists set.
-            List<ActiveAdmin> admins = getActiveAdminsForAffectedUserLocked(userId);
+            List<ActiveAdmin> admins = getActiveAdminsForAffectedUserInclPermissionBasedAdminLocked(userId);
             for (ActiveAdmin admin: admins) {
                 List<String> fromAdmin = admin.permittedInputMethods;
                 if (fromAdmin != null) {
@@ -13623,7 +13700,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     new BooleanPolicyValue(uninstallBlocked),
                     caller.getUserId());
         } else {
-            Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                     && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)
                     || isFinancedDeviceOwner(caller)))
@@ -14265,7 +14341,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final int userId = mInjector.userHandleGetCallingUserId();
         // Is it ok to just check that no active policies exist currently?
-        if (mDevicePolicyEngine.hasActivePolicies()) {
+        if (isDevicePolicyEngineFlagEnabled() && mDevicePolicyEngine.hasActivePolicies()) {
             LockTaskPolicy policy = mDevicePolicyEngine.getResolvedPolicy(
                     PolicyDefinition.LOCK_TASK, userId);
             if (policy == null) {
@@ -15814,7 +15890,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (admin.mPasswordPolicy.quality < minPasswordQuality) {
             return false;
         }
-        return admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
+        return admin.isPermissionBased || admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
     }
 
     @Override
@@ -21451,13 +21527,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (getLockObject()) {
             ActiveAdmin admin;
-            // TODO(b/261999445): remove
-            if (isHeadlessFlagEnabled()) {
-                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
-            } else {
-                admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
-                        UserHandle.USER_SYSTEM);
-            }
+            admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceOrSystemPermissionBasedAdminLocked();
             return admin != null ? admin.mWifiSsidPolicy : null;
         }
     }
@@ -22454,7 +22524,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return EnforcingAdmin.createDeviceAdminEnforcingAdmin(who, userId, admin);
         }
         if (admin == null) {
-            admin = getUserData(userId).createOrGetPermissionBasedAdmin();
+            admin = getUserData(userId).createOrGetPermissionBasedAdmin(userId);
         }
         return  EnforcingAdmin.createEnforcingAdmin(caller.getPackageName(), userId, admin);
     }
@@ -23014,26 +23084,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return admins;
     }
 
-    // TODO: This can actually accept an EnforcingAdmin that gets created in the permission check
-    //  method.
     private boolean useDevicePolicyEngine(CallerIdentity caller, @Nullable String delegateScope) {
-        if (!isCallerActiveAdminOrDelegate(caller, delegateScope)) {
-            if (!isDevicePolicyEngineFlagEnabled()) {
-                throw new IllegalStateException("Non DPC caller can't set device policies.");
-            }
-            if (hasDPCsNotSupportingCoexistence()) {
-                throw new IllegalStateException("Non DPC caller can't set device policies with "
-                        + "existing legacy admins on the device.");
-            }
-            return true;
-        } else {
-            return isDevicePolicyEngineEnabled();
-        }
+        return isDevicePolicyEngineEnabled();
     }
 
     private boolean isDevicePolicyEngineEnabled() {
-        return isDevicePolicyEngineFlagEnabled() && !hasDPCsNotSupportingCoexistence()
-                && isPermissionCheckFlagEnabled();
+        return isDevicePolicyEngineFlagEnabled() && isPermissionCheckFlagEnabled();
     }
 
     private boolean isDevicePolicyEngineFlagEnabled() {
