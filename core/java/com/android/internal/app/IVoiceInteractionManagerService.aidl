@@ -51,7 +51,7 @@ interface IVoiceInteractionManagerService {
     int startVoiceActivity(IBinder token, in Intent intent, String resolvedType,
             String attributionTag);
     int startAssistantActivity(IBinder token, in Intent intent, String resolvedType,
-            String attributionTag);
+            String attributionTag, in Bundle bundle);
     void setKeepAwake(IBinder token, boolean keepAwake);
     void closeSystemDialogs(IBinder token);
     void finish(IBinder token);
