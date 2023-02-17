@@ -102,6 +102,12 @@ class TransitionController {
      */
     private final ArrayList<Transition> mPlayingTransitions = new ArrayList<>();
 
+    /**
+     * The windows that request to be invisible while it is in transition. After the transition
+     * is finished and the windows are no longer animating, their surfaces will be destroyed.
+     */
+    final ArrayList<WindowState> mAnimatingExitWindows = new ArrayList<>();
+
     final Lock mRunningLock = new Lock();
 
     private final IBinder.DeathRecipient mTransitionPlayerDeath;
@@ -658,6 +664,15 @@ class TransitionController {
         mPlayingTransitions.remove(record);
         updateRunningRemoteAnimation(record, false /* isPlaying */);
         record.finishTransition();
+        for (int i = mAnimatingExitWindows.size() - 1; i >= 0; i--) {
+            final WindowState w = mAnimatingExitWindows.get(i);
+            if (w.mAnimatingExit && w.mHasSurface && !w.inTransition()) {
+                w.onExitAnimationDone();
+            }
+            if (!w.mAnimatingExit || !w.mHasSurface) {
+                mAnimatingExitWindows.remove(i);
+            }
+        }
         mRunningLock.doNotifyLocked();
     }
 

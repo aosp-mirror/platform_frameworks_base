@@ -1922,16 +1922,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * Is this window visible, ignoring its app token? It is not visible if there is no surface,
-     * or we are in the process of running an exit animation that will remove the surface.
-     */
-    // TODO: Can we consolidate this with #isVisible() or have a more appropriate name for this?
-    boolean isWinVisibleLw() {
-        return (mActivityRecord == null || mActivityRecord.isVisibleRequested()
-                || mActivityRecord.isAnimating(TRANSITION | PARENTS)) && isVisible();
-    }
-
-    /**
      * The same as isVisible(), but follows the current hidden state of the associated app token,
      * not the pending requested hidden state.
      */
@@ -2530,7 +2520,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
 
                 // If we are not currently running the exit animation, we need to see about starting one
-                wasVisible = isWinVisibleLw();
+                wasVisible = isVisible();
 
                 if (keepVisibleDeadWindow) {
                     ProtoLog.v(WM_DEBUG_ADD_REMOVE,
@@ -2556,7 +2546,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         // look weird if its orientation is changed.
                         && !inRelaunchingActivity();
 
-                if (wasVisible) {
+                if (wasVisible && isDisplayed()) {
                     final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
 
                     // Try starting an animation.
@@ -3111,7 +3101,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * interacts with it.
      */
     private boolean shouldKeepVisibleDeadAppWindow() {
-        if (!isWinVisibleLw() || mActivityRecord == null || !mActivityRecord.isClientVisible()) {
+        if (!isVisible() || mActivityRecord == null || !mActivityRecord.isClientVisible()) {
             // Not a visible app window or the app isn't dead.
             return false;
         }
