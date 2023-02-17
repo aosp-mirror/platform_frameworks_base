@@ -143,6 +143,9 @@
                   android:authorities="com.google.android.packageinstaller.wear.provider"
                   android:grantUriPermissions="true"
                   android:exported="false" />
+
+        <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver"
+            tools:node="remove" />
     </application>
 
 </manifest>
