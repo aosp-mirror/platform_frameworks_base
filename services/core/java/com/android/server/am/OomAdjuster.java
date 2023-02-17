@@ -723,7 +723,7 @@ public class OomAdjuster {
             final ProcessServiceRecord psr = pr.mServices;
             for (int i = psr.numberOfConnections() - 1; i >= 0; i--) {
                 ConnectionRecord cr = psr.getConnectionAt(i);
-                ProcessRecord service = (cr.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
+                ProcessRecord service = cr.hasFlag(ServiceInfo.FLAG_ISOLATED_PROCESS)
                         ? cr.binding.service.isolationHostProc : cr.binding.service.app;
                 if (service == null || service == pr
                         || ((service.mState.getMaxAdj() >= ProcessList.SYSTEM_ADJ)
@@ -734,10 +734,9 @@ public class OomAdjuster {
                 if (service.mState.isReachable()) {
                     continue;
                 }
-                if ((cr.flags & (Context.BIND_WAIVE_PRIORITY
-                        | Context.BIND_TREAT_LIKE_ACTIVITY
-                        | Context.BIND_ADJUST_WITH_ACTIVITY))
-                        == Context.BIND_WAIVE_PRIORITY) {
+                if (cr.hasFlag(Context.BIND_WAIVE_PRIORITY)
+                        && cr.notHasFlag(Context.BIND_TREAT_LIKE_ACTIVITY
+                        | Context.BIND_ADJUST_WITH_ACTIVITY)) {
                     continue;
                 }
                 queue.offer(service);
@@ -2218,7 +2217,7 @@ public class OomAdjuster {
                     // we check the final procstate, and remove it if the procsate is below BFGS.
                     capability |= getBfslCapabilityFromClient(client);
 
-                    if ((cr.flags & Context.BIND_WAIVE_PRIORITY) == 0) {
+                    if (cr.notHasFlag(Context.BIND_WAIVE_PRIORITY)) {
                         if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
                             capability |= cstate.getCurCapability();
                         }
@@ -2231,8 +2230,7 @@ public class OomAdjuster {
                         if ((cstate.getCurCapability() & PROCESS_CAPABILITY_NETWORK) != 0) {
                             if (clientProcState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
                                 // This is used to grant network access to Expedited Jobs.
-                                if ((cr.flags & Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS)
-                                        != 0) {
+                                if (cr.hasFlag(Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS)) {
                                     capability |= PROCESS_CAPABILITY_NETWORK;
                                 }
                             } else {
@@ -2251,7 +2249,7 @@ public class OomAdjuster {
                             clientProcState = PROCESS_STATE_CACHED_EMPTY;
                         }
                         String adjType = null;
-                        if ((cr.flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
+                        if (cr.hasFlag(Context.BIND_ALLOW_OOM_MANAGEMENT)) {
                             // Similar to BIND_WAIVE_PRIORITY, keep it unfrozen.
                             if (clientAdj < CACHED_APP_MIN_ADJ) {
                                 app.mOptRecord.setShouldNotFreeze(true);
@@ -2300,8 +2298,8 @@ public class OomAdjuster {
                             } else {
                                 int newAdj;
                                 int lbAdj = VISIBLE_APP_ADJ; // lower bound of adj.
-                                if ((cr.flags&(Context.BIND_ABOVE_CLIENT
-                                        |Context.BIND_IMPORTANT)) != 0) {
+                                if (cr.hasFlag(Context.BIND_ABOVE_CLIENT
+                                        | Context.BIND_IMPORTANT)) {
                                     if (clientAdj >= PERSISTENT_SERVICE_ADJ) {
                                         newAdj = clientAdj;
                                     } else {
@@ -2312,26 +2310,26 @@ public class OomAdjuster {
                                         cr.trackProcState(procState, mAdjSeq);
                                         trackedProcState = true;
                                     }
-                                } else if ((cr.flags & Context.BIND_NOT_PERCEPTIBLE) != 0
+                                } else if (cr.hasFlag(Context.BIND_NOT_PERCEPTIBLE)
                                         && clientAdj <= PERCEPTIBLE_APP_ADJ
                                         && adj >= (lbAdj = PERCEPTIBLE_LOW_APP_ADJ)) {
                                     newAdj = PERCEPTIBLE_LOW_APP_ADJ;
-                                } else if ((cr.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0
-                                        && (cr.flags & Context.BIND_NOT_FOREGROUND) == 0
+                                } else if (cr.hasFlag(Context.BIND_ALMOST_PERCEPTIBLE)
+                                        && cr.notHasFlag(Context.BIND_NOT_FOREGROUND)
                                         && clientAdj < PERCEPTIBLE_APP_ADJ
                                         && adj >= (lbAdj = PERCEPTIBLE_APP_ADJ)) {
                                     // This is for user-initiated jobs.
                                     // We use APP_ADJ + 1 here, so we can tell them apart from FGS.
                                     newAdj = PERCEPTIBLE_APP_ADJ + 1;
-                                } else if ((cr.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0
-                                        && (cr.flags & Context.BIND_NOT_FOREGROUND) != 0
+                                } else if (cr.hasFlag(Context.BIND_ALMOST_PERCEPTIBLE)
+                                        && cr.hasFlag(Context.BIND_NOT_FOREGROUND)
                                         && clientAdj < PERCEPTIBLE_APP_ADJ
                                         && adj >= (lbAdj = (PERCEPTIBLE_MEDIUM_APP_ADJ + 2))) {
                                     // This is for expedited jobs.
                                     // We use MEDIUM_APP_ADJ + 2 here, so we can tell apart
                                     // EJ and short-FGS.
                                     newAdj = PERCEPTIBLE_MEDIUM_APP_ADJ + 2;
-                                } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
+                                } else if (cr.hasFlag(Context.BIND_NOT_VISIBLE)
                                         && clientAdj < PERCEPTIBLE_APP_ADJ
                                         && adj >= (lbAdj = PERCEPTIBLE_APP_ADJ)) {
                                     newAdj = PERCEPTIBLE_APP_ADJ;
@@ -2359,14 +2357,14 @@ public class OomAdjuster {
                                 }
                             }
                         }
-                        if ((cr.flags & (Context.BIND_NOT_FOREGROUND
-                                | Context.BIND_IMPORTANT_BACKGROUND)) == 0) {
+                        if (cr.notHasFlag(Context.BIND_NOT_FOREGROUND
+                                | Context.BIND_IMPORTANT_BACKGROUND)) {
                             // This will treat important bound services identically to
                             // the top app, which may behave differently than generic
                             // foreground work.
                             final int curSchedGroup = cstate.getCurrentSchedulingGroup();
                             if (curSchedGroup > schedGroup) {
-                                if ((cr.flags&Context.BIND_IMPORTANT) != 0) {
+                                if (cr.hasFlag(Context.BIND_IMPORTANT)) {
                                     schedGroup = curSchedGroup;
                                 } else {
                                     schedGroup = SCHED_GROUP_DEFAULT;
@@ -2383,8 +2381,8 @@ public class OomAdjuster {
                                     clientProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
                                 } else if (mService.mWakefulness.get()
                                         == PowerManagerInternal.WAKEFULNESS_AWAKE
-                                        && (cr.flags & Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE)
-                                                != 0) {
+                                        && cr.hasFlag(Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE))
+                                {
                                     clientProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
                                 } else {
                                     clientProcState =
@@ -2408,7 +2406,7 @@ public class OomAdjuster {
                                     capability |= cstate.getCurCapability();
                                 }
                             }
-                        } else if ((cr.flags & Context.BIND_IMPORTANT_BACKGROUND) == 0) {
+                        } else if (cr.notHasFlag(Context.BIND_IMPORTANT_BACKGROUND)) {
                             if (clientProcState <
                                     PROCESS_STATE_TRANSIENT_BACKGROUND) {
                                 clientProcState =
@@ -2423,7 +2421,7 @@ public class OomAdjuster {
                         }
 
                         if (schedGroup < SCHED_GROUP_TOP_APP
-                                && (cr.flags & Context.BIND_SCHEDULE_LIKE_TOP_APP) != 0
+                                && cr.hasFlag(Context.BIND_SCHEDULE_LIKE_TOP_APP)
                                 && clientIsSystem) {
                             schedGroup = SCHED_GROUP_TOP_APP;
                             scheduleLikeTopApp = true;
@@ -2441,7 +2439,7 @@ public class OomAdjuster {
                             }
                         }
                         if (procState < PROCESS_STATE_IMPORTANT_BACKGROUND
-                                && (cr.flags & Context.BIND_SHOWING_UI) != 0) {
+                                && cr.hasFlag(Context.BIND_SHOWING_UI)) {
                             app.setPendingUiClean(true);
                         }
                         if (adjType != null) {
@@ -2472,17 +2470,17 @@ public class OomAdjuster {
                             app.mOptRecord.setShouldNotFreeze(true);
                         }
                     }
-                    if ((cr.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
+                    if (cr.hasFlag(Context.BIND_TREAT_LIKE_ACTIVITY)) {
                         psr.setTreatLikeActivity(true);
                     }
                     final ActivityServiceConnectionsHolder a = cr.activity;
-                    if ((cr.flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
+                    if (cr.hasFlag(Context.BIND_ADJUST_WITH_ACTIVITY)) {
                         if (a != null && adj > FOREGROUND_APP_ADJ
                                 && a.isActivityVisible()) {
                             adj = FOREGROUND_APP_ADJ;
                             state.setCurRawAdj(adj);
-                            if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
-                                if ((cr.flags&Context.BIND_IMPORTANT) != 0) {
+                            if (cr.notHasFlag(Context.BIND_NOT_FOREGROUND)) {
+                                if (cr.hasFlag(Context.BIND_IMPORTANT)) {
                                     schedGroup = SCHED_GROUP_TOP_APP_BOUND;
                                 } else {
                                     schedGroup = SCHED_GROUP_DEFAULT;

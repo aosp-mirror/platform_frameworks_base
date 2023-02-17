@@ -32,6 +32,7 @@ import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_OK;
 import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_PERMISSION_DENIED_ENFORCED;
 import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_PERMISSION_DENIED_PERMISSIVE;
 import static android.app.ForegroundServiceTypePolicy.FGS_TYPE_POLICY_CHECK_UNKNOWN;
+import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
@@ -87,6 +88,8 @@ import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STA
 import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER;
 import static com.android.internal.util.FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
+import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
@@ -369,6 +372,9 @@ public final class ActiveServices {
     @GuardedBy("mAm")
     private final ArraySet<String> mRestartBackoffDisabledPackages = new ArraySet<>();
 
+    // Used for logging foreground service API starts and end
+    private final ForegroundServiceTypeLoggerModule mFGSLogger;
+
     /**
      * For keeping ActiveForegroundApps retaining state while the screen is off.
      */
@@ -624,6 +630,7 @@ public final class ActiveServices {
                 ? maxBg : ActivityManager.isLowRamDeviceStatic() ? 1 : 8;
 
         final IBinder b = ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
+        this.mFGSLogger = new ForegroundServiceTypeLoggerModule();
     }
 
     void systemServicesReady() {
@@ -1271,6 +1278,10 @@ public final class ActiveServices {
             return new ComponentName("!!", error);
         }
 
+        final boolean wasStopped = (r.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
+        final int packageState = wasStopped
+                ? SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
+                : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
         FrameworkStatsLog.write(SERVICE_REQUEST_EVENT_REPORTED, uid, callingUid,
                 service.getAction(),
                 SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__START, false,
@@ -1280,7 +1291,8 @@ public final class ActiveServices {
                 ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT
                 : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM),
                 getShortProcessNameForStats(callingUid, callingProcessName),
-                getShortServiceNameForStats(r));
+                getShortServiceNameForStats(r),
+                packageState);
 
         if (r.startRequested && addToStarting) {
             boolean first = smap.mStartingBackground.size() == 0;
@@ -1830,6 +1842,24 @@ public final class ActiveServices {
                 && isForegroundServiceAllowedInBackgroundRestricted(app);
     }
 
+    void logFgsApiBeginLocked(int uid, int pid, int apiType) {
+        synchronized (mFGSLogger) {
+            mFGSLogger.logForegroundServiceApiEventBegin(uid, pid, apiType, "");
+        }
+    }
+
+    void logFgsApiEndLocked(int uid, int pid, int apiType) {
+        synchronized (mFGSLogger) {
+            mFGSLogger.logForegroundServiceApiEventEnd(uid, pid, apiType);
+        }
+    }
+
+    void logFgsApiStateChangedLocked(int uid, int pid, int apiType, int state) {
+        synchronized (mFGSLogger) {
+            mFGSLogger.logForegroundServiceApiStateChanged(uid, pid, apiType, state);
+        }
+    }
+
     /**
      * @param id Notification ID.  Zero === exit foreground state for the given service.
      */
@@ -2225,6 +2255,9 @@ public final class ActiveServices {
                         logFGSStateChangeLocked(r,
                                 FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER,
                                 0, FGS_STOP_REASON_UNKNOWN, fgsTypeCheckCode);
+                        synchronized (mFGSLogger) {
+                            mFGSLogger.logForegroundServiceStart(r.appInfo.uid, 0, r);
+                        }
                         updateNumForegroundServicesLocked();
                     }
                     // Even if the service is already a FGS, we need to update the notification,
@@ -2319,6 +2352,9 @@ public final class ActiveServices {
                 // foregroundServiceType is used in logFGSStateChangeLocked(), so we can't clear it
                 // earlier.
                 r.foregroundServiceType = 0;
+                synchronized (mFGSLogger) {
+                    mFGSLogger.logForegroundServiceStop(r.appInfo.uid, r);
+                }
                 r.mFgsNotificationWasDeferred = false;
                 signalForegroundServiceObserversLocked(r);
                 resetFgsRestrictionLocked(r);
@@ -3250,14 +3286,14 @@ public final class ActiveServices {
     }
 
     int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
-            String resolvedType, final IServiceConnection connection, int flags,
+            String resolvedType, final IServiceConnection connection, long flags,
             String instanceName, boolean isSdkSandboxService, int sdkSandboxClientAppUid,
             String sdkSandboxClientAppPackage, IApplicationThread sdkSandboxClientApplicationThread,
             String callingPackage, final int userId)
             throws TransactionTooLargeException {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
-                + " flags=0x" + Integer.toHexString(flags));
+                + " flags=0x" + Long.toHexString(flags));
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         final ProcessRecord callerApp = mAm.getRecordForAppLOSP(caller);
@@ -3308,7 +3344,7 @@ public final class ActiveServices {
                     + ") set BIND_SCHEDULE_LIKE_TOP_APP when binding service " + service);
         }
 
-        if ((flags & Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0 && !isCallerSystem) {
+        if ((flags & BIND_ALLOW_WHITELIST_MANAGEMENT) != 0 && !isCallerSystem) {
             throw new SecurityException(
                     "Non-system caller " + caller + " (pid=" + callingPid
                     + ") set BIND_ALLOW_WHITELIST_MANAGEMENT when binding service " + service);
@@ -3339,7 +3375,9 @@ public final class ActiveServices {
 
         final boolean callerFg = callerApp.mState.getSetSchedGroup()
                 != ProcessList.SCHED_GROUP_BACKGROUND;
-        final boolean isBindExternal = (flags & Context.BIND_EXTERNAL_SERVICE) != 0;
+        final boolean isBindExternal =
+                (flags & Integer.toUnsignedLong(Context.BIND_EXTERNAL_SERVICE)) != 0
+                || (flags & Context.BIND_EXTERNAL_SERVICE_LONG) != 0;
         final boolean allowInstant = (flags & Context.BIND_ALLOW_INSTANT) != 0;
         final boolean inSharedIsolatedProcess = (flags & Context.BIND_SHARED_ISOLATED_PROCESS) != 0;
 
@@ -3408,6 +3446,7 @@ public final class ActiveServices {
                 mAm.requireAllowedAssociationsLocked(s.appInfo.packageName);
             }
 
+            final boolean wasStopped = (s.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
             final boolean wasStartRequested = s.startRequested;
             final boolean hadConnections = !s.getConnections().isEmpty();
             mAm.startAssociationLocked(callerApp.uid, callerApp.processName,
@@ -3430,23 +3469,23 @@ public final class ActiveServices {
             }
             clientPsr.addConnection(c);
             c.startAssociationIfNeeded();
-            if ((c.flags&Context.BIND_ABOVE_CLIENT) != 0) {
+            if (c.hasFlag(Context.BIND_ABOVE_CLIENT)) {
                 clientPsr.setHasAboveClient(true);
             }
-            if ((c.flags&Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
+            if (c.hasFlag(BIND_ALLOW_WHITELIST_MANAGEMENT)) {
                 s.allowlistManager = true;
             }
-            if ((flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
+            if (c.hasFlag(Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS)) {
                 s.setAllowedBgActivityStartsByBinding(true);
             }
 
-            if ((flags & Context.BIND_NOT_APP_COMPONENT_USAGE) != 0) {
+            if (c.hasFlag(Context.BIND_NOT_APP_COMPONENT_USAGE)) {
                 s.isNotAppComponentUsage = true;
             }
 
             if (s.app != null && s.app.mState != null
                     && s.app.mState.getCurProcState() <= PROCESS_STATE_TOP
-                    && (flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0) {
+                    && c.hasFlag(Context.BIND_ALMOST_PERCEPTIBLE)) {
                 s.lastTopAlmostPerceptibleBindRequestUptimeMs = SystemClock.uptimeMillis();
             }
 
@@ -3461,7 +3500,7 @@ public final class ActiveServices {
             clist.add(c);
 
             boolean needOomAdj = false;
-            if ((flags&Context.BIND_AUTO_CREATE) != 0) {
+            if (c.hasFlag(Context.BIND_AUTO_CREATE)) {
                 s.lastActivity = SystemClock.uptimeMillis();
                 needOomAdj = true;
                 if (bringUpServiceLocked(s, service.getFlags(), callerFg, false,
@@ -3475,7 +3514,7 @@ public final class ActiveServices {
 
             if (s.app != null) {
                 ProcessServiceRecord servicePsr = s.app.mServices;
-                if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
+                if (c.hasFlag(Context.BIND_TREAT_LIKE_ACTIVITY)) {
                     servicePsr.setTreatLikeActivity(true);
                 }
                 if (s.allowlistManager) {
@@ -3485,7 +3524,7 @@ public final class ActiveServices {
                 mAm.updateLruProcessLocked(s.app, (callerApp.hasActivitiesOrRecentTasks()
                             && servicePsr.hasClientActivities())
                         || (callerApp.mState.getCurProcState() <= PROCESS_STATE_TOP
-                            && (flags & Context.BIND_TREAT_LIKE_ACTIVITY) != 0),
+                            && c.hasFlag(Context.BIND_TREAT_LIKE_ACTIVITY)),
                         b.client);
                 needOomAdj = true;
                 mAm.enqueueOomAdjTargetLocked(s.app);
@@ -3494,6 +3533,9 @@ public final class ActiveServices {
                 mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE);
             }
 
+            final int packageState = wasStopped
+                    ? SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_STOPPED
+                    : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
             FrameworkStatsLog.write(SERVICE_REQUEST_EVENT_REPORTED, s.appInfo.uid, callingUid,
                     ActivityManagerService.getShortAction(service.getAction()),
                     SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__BIND, false,
@@ -3503,7 +3545,8 @@ public final class ActiveServices {
                     ? SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_HOT
                     : SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM),
                     getShortProcessNameForStats(callingUid, callerApp.processName),
-                    getShortServiceNameForStats(s));
+                    getShortServiceNameForStats(s),
+                    packageState);
 
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bind " + s + " with " + b
                     + ": received=" + b.intent.received
@@ -3700,7 +3743,7 @@ public final class ActiveServices {
                         updateAllowlistManagerLocked(psr);
                     }
                     // This could have made the service less important.
-                    if ((r.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
+                    if (r.hasFlag(Context.BIND_TREAT_LIKE_ACTIVITY)) {
                         psr.setTreatLikeActivity(true);
                         mAm.updateLruProcessLocked(app, true, null);
                     }
@@ -5395,6 +5438,9 @@ public final class ActiveServices {
                             ? (int) (r.mFgsExitTime - r.mFgsEnterTime) : 0,
                     FGS_STOP_REASON_STOP_SERVICE,
                     FGS_TYPE_POLICY_CHECK_UNKNOWN);
+            synchronized (mFGSLogger) {
+                mFGSLogger.logForegroundServiceStop(r.appInfo.uid, r);
+            }
             mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
 
             // TODO(short-service): Make sure we stop the timeout by here.
@@ -5544,23 +5590,23 @@ public final class ActiveServices {
         if (b.client != skipApp) {
             final ProcessServiceRecord psr = b.client.mServices;
             psr.removeConnection(c);
-            if ((c.flags&Context.BIND_ABOVE_CLIENT) != 0) {
+            if (c.hasFlag(Context.BIND_ABOVE_CLIENT)) {
                 psr.updateHasAboveClientLocked();
             }
             // If this connection requested allowlist management, see if we should
             // now clear that state.
-            if ((c.flags&Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
+            if (c.hasFlag(BIND_ALLOW_WHITELIST_MANAGEMENT)) {
                 s.updateAllowlistManager();
                 if (!s.allowlistManager && s.app != null) {
                     updateAllowlistManagerLocked(s.app.mServices);
                 }
             }
             // And do the same for bg activity starts ability.
-            if ((c.flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
+            if (c.hasFlag(Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS)) {
                 s.updateIsAllowedBgActivityStartsByBinding();
             }
             // And for almost perceptible exceptions.
-            if ((c.flags & Context.BIND_ALMOST_PERCEPTIBLE) != 0) {
+            if (c.hasFlag(Context.BIND_ALMOST_PERCEPTIBLE)) {
                 psr.updateHasTopStartedAlmostPerceptibleServices();
             }
             if (s.app != null) {
@@ -5590,7 +5636,7 @@ public final class ActiveServices {
                 try {
                     bumpServiceExecutingLocked(s, false, "unbind",
                             OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
-                    if (b.client != s.app && (c.flags&Context.BIND_WAIVE_PRIORITY) == 0
+                    if (b.client != s.app && c.notHasFlag(Context.BIND_WAIVE_PRIORITY)
                             && s.app.mState.getSetProcState() <= PROCESS_STATE_HEAVY_WEIGHT) {
                         // If this service's process is not already in the cached list,
                         // then update it in the LRU list here because this may be causing
@@ -5615,7 +5661,7 @@ public final class ActiveServices {
                 mPendingBringups.remove(s);
             }
 
-            if ((c.flags&Context.BIND_AUTO_CREATE) != 0) {
+            if (c.hasFlag(Context.BIND_AUTO_CREATE)) {
                 boolean hasAutoCreate = s.hasAutoCreateConnections();
                 if (!hasAutoCreate) {
                     if (s.tracker != null) {
@@ -6185,8 +6231,9 @@ public final class ActiveServices {
                     boolean hasCreate = false;
                     for (int conni = abind.connections.size() - 1; conni >= 0; conni--) {
                         ConnectionRecord conn = abind.connections.valueAt(conni);
-                        if ((conn.flags&(Context.BIND_AUTO_CREATE|Context.BIND_ALLOW_OOM_MANAGEMENT
-                                |Context.BIND_WAIVE_PRIORITY)) == Context.BIND_AUTO_CREATE) {
+                        if (conn.hasFlag(Context.BIND_AUTO_CREATE)
+                                && conn.notHasFlag(Context.BIND_ALLOW_OOM_MANAGEMENT
+                                |Context.BIND_WAIVE_PRIORITY)) {
                             hasCreate = true;
                             break;
                         }
@@ -7739,8 +7786,7 @@ public final class ActiveServices {
                 r.mIsFgsDelegate,
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mClientUid : INVALID_UID,
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mDelegationService
-                        : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT
-        );
+                        : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT);
 
         int event = 0;
         if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER) {

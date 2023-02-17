@@ -603,7 +603,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /**
      * Add bound client Uid.
      */
-    public void addBoundClientUid(int clientUid, String clientPackageName, int bindFlags) {
+    public void addBoundClientUid(int clientUid, String clientPackageName, long bindFlags) {
         mBgLaunchController.addBoundClientUid(clientUid, clientPackageName, bindFlags);
     }
 

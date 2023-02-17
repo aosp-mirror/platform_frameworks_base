@@ -70,8 +70,8 @@ import java.util.Objects;
  * <li>{@link #onTileAdded()} and {@link #onTileRemoved()} may be called outside of the
  * {@link #onCreate()} - {@link #onDestroy()} window</li>
  * </ul>
- * <p>TileService will be detected by tiles that match the {@value #ACTION_QS_TILE}
- * and require the permission "android.permission.BIND_QUICK_SETTINGS_TILE".
+ * <p>TileService will resolve against services that match the {@value #ACTION_QS_TILE} action
+ * and require the permission {@code android.permission.BIND_QUICK_SETTINGS_TILE}.
  * The label and icon for the service will be used as the default label and
  * icon for the tile. Here is an example TileService declaration.</p>
  * <pre class="prettyprint">

@@ -894,7 +894,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         // if we have a process attached, add bound client uid of this connection to it
         if (app != null) {
-            app.mServices.addBoundClientUid(c.clientUid, c.clientPackageName, c.flags);
+            app.mServices.addBoundClientUid(c.clientUid, c.clientPackageName, c.getFlags());
             app.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_BOUND_SERVICE);
         }
     }
@@ -924,7 +924,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         for (int conni = connections.size() - 1; conni >= 0; conni--) {
             ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
             for (int i = 0; i < cr.size(); i++) {
-                if ((cr.get(i).flags & Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS) != 0) {
+                if (cr.get(i).hasFlag(Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS)) {
                     isAllowedByBinding = true;
                     break;
                 }
@@ -1093,7 +1093,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         for (int conni=connections.size()-1; conni>=0; conni--) {
             ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
             for (int i=0; i<cr.size(); i++) {
-                if ((cr.get(i).flags&Context.BIND_AUTO_CREATE) != 0) {
+                if (cr.get(i).hasFlag(Context.BIND_AUTO_CREATE)) {
                     return true;
                 }
             }
@@ -1106,7 +1106,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         for (int conni=connections.size()-1; conni>=0; conni--) {
             ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
             for (int i=0; i<cr.size(); i++) {
-                if ((cr.get(i).flags&Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
+                if (cr.get(i).hasFlag(Context.BIND_ALLOW_WHITELIST_MANAGEMENT)) {
                     allowlistManager = true;
                     return;
                 }

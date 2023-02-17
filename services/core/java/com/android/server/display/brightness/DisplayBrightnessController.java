@@ -18,6 +18,7 @@ package com.android.server.display.brightness;
 
 import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
+import android.os.HandlerExecutor;
 import android.os.PowerManager;
 import android.util.IndentingPrintWriter;
 
@@ -79,12 +80,16 @@ public final class DisplayBrightnessController {
     @GuardedBy("mLock")
     private DisplayBrightnessStrategy mDisplayBrightnessStrategy;
 
+    // The executor on which the mOnBrightnessChangeRunnable is executed. This ensures that the
+    // callback is not executed in sync and is not blocking the thread from which it is called.
+    private final HandlerExecutor mBrightnessChangeExecutor;
+
     /**
      * The constructor of DisplayBrightnessController.
      */
     public DisplayBrightnessController(Context context, Injector injector, int displayId,
             float defaultScreenBrightness, BrightnessSetting brightnessSetting,
-            Runnable onBrightnessChangeRunnable) {
+            Runnable onBrightnessChangeRunnable, HandlerExecutor brightnessChangeExecutor) {
         if (injector == null) {
             injector = new Injector();
         }
@@ -97,6 +102,7 @@ public final class DisplayBrightnessController {
         mOnBrightnessChangeRunnable = onBrightnessChangeRunnable;
         mDisplayBrightnessStrategySelector = injector.getDisplayBrightnessStrategySelector(context,
                 displayId);
+        mBrightnessChangeExecutor = brightnessChangeExecutor;
     }
 
     /**
@@ -152,12 +158,14 @@ public final class DisplayBrightnessController {
      * Sets the current screen brightness to the supplied value, and notifies all the listeners
      * requesting for change events on brightness change.
      */
-    public void setCurrentScreenBrightness(float brightnessValue) {
+    public void setAndNotifyCurrentScreenBrightness(float brightnessValue) {
+        final boolean hasBrightnessChanged;
         synchronized (mLock) {
-            if (brightnessValue != mCurrentScreenBrightness) {
-                mCurrentScreenBrightness = brightnessValue;
-                mOnBrightnessChangeRunnable.run();
-            }
+            hasBrightnessChanged = (brightnessValue != mCurrentScreenBrightness);
+            setCurrentScreenBrightnessLocked(brightnessValue);
+        }
+        if (hasBrightnessChanged) {
+            notifyCurrentScreenBrightness();
         }
     }
 
@@ -205,12 +213,14 @@ public final class DisplayBrightnessController {
                 setTemporaryBrightnessLocked(PowerManager.BRIGHTNESS_INVALID_FLOAT);
                 return false;
             }
-            setCurrentScreenBrightness(mPendingScreenBrightness);
+            setCurrentScreenBrightnessLocked(mPendingScreenBrightness);
             mLastUserSetScreenBrightness = mPendingScreenBrightness;
             mPendingScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
             setTemporaryBrightnessLocked(PowerManager.BRIGHTNESS_INVALID_FLOAT);
-            return true;
         }
+        notifyCurrentScreenBrightness();
+        return true;
+
     }
 
     /**
@@ -264,9 +274,10 @@ public final class DisplayBrightnessController {
                     || brightnessValue == mCurrentScreenBrightness) {
                 return;
             }
-            setCurrentScreenBrightness(brightnessValue);
-            setBrightness(brightnessValue);
+            setCurrentScreenBrightnessLocked(brightnessValue);
         }
+        notifyCurrentScreenBrightness();
+        setBrightness(brightnessValue);
     }
 
     /**
@@ -312,7 +323,7 @@ public final class DisplayBrightnessController {
     }
 
     @VisibleForTesting
-    BrightnessSetting.BrightnessSettingListener getBrightnessSettingListenerLocked() {
+    BrightnessSetting.BrightnessSettingListener getBrightnessSettingListener() {
         return mBrightnessSettingListener;
     }
 
@@ -320,16 +331,26 @@ public final class DisplayBrightnessController {
      * Returns the current selected DisplayBrightnessStrategy
      */
     @VisibleForTesting
-    DisplayBrightnessStrategy getCurrentDisplayBrightnessStrategyLocked() {
+    DisplayBrightnessStrategy getCurrentDisplayBrightnessStrategy() {
         synchronized (mLock) {
             return mDisplayBrightnessStrategy;
         }
     }
 
+    @GuardedBy("mLock")
     private void setTemporaryBrightnessLocked(float temporaryBrightness) {
-        synchronized (mLock) {
-            mDisplayBrightnessStrategySelector.getTemporaryDisplayBrightnessStrategy()
-                    .setTemporaryScreenBrightness(temporaryBrightness);
+        mDisplayBrightnessStrategySelector.getTemporaryDisplayBrightnessStrategy()
+                .setTemporaryScreenBrightness(temporaryBrightness);
+    }
+
+    @GuardedBy("mLock")
+    private void setCurrentScreenBrightnessLocked(float brightnessValue) {
+        if (brightnessValue != mCurrentScreenBrightness) {
+            mCurrentScreenBrightness = brightnessValue;
         }
+    }
+
+    private void notifyCurrentScreenBrightness() {
+        mBrightnessChangeExecutor.execute(mOnBrightnessChangeRunnable);
     }
 }

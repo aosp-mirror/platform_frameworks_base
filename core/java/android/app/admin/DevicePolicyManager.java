@@ -14522,18 +14522,40 @@ public class DevicePolicyManager {
      * @see Context#bindService(Intent, ServiceConnection, int)
      * @see #getBindDeviceAdminTargetUsers(ComponentName)
      */
-    public boolean bindDeviceAdminServiceAsUser(
-            @NonNull ComponentName admin,  Intent serviceIntent, @NonNull ServiceConnection conn,
-            @Context.BindServiceFlags int flags, @NonNull UserHandle targetUser) {
+    public boolean bindDeviceAdminServiceAsUser(@NonNull ComponentName admin,
+            @NonNull Intent serviceIntent, @NonNull ServiceConnection conn,
+            @Context.BindServiceFlagsBits int flags, @NonNull UserHandle targetUser) {
         throwIfParentInstance("bindDeviceAdminServiceAsUser");
         // Keep this in sync with ContextImpl.bindServiceCommon.
         try {
             final IServiceConnection sd = mContext.getServiceDispatcher(
-                    conn, mContext.getMainThreadHandler(), flags);
+                    conn, mContext.getMainThreadHandler(), Integer.toUnsignedLong(flags));
             serviceIntent.prepareToLeaveProcess(mContext);
             return mService.bindDeviceAdminServiceAsUser(admin,
                     mContext.getIApplicationThread(), mContext.getActivityToken(), serviceIntent,
-                    sd, flags, targetUser.getIdentifier());
+                    sd, Integer.toUnsignedLong(flags), targetUser.getIdentifier());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * See {@link #bindDeviceAdminServiceAsUser(ComponentName, Intent, ServiceConnection, int,
+     *       UserHandle)}.
+     * Call {@link Context.BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     */
+    public boolean bindDeviceAdminServiceAsUser(@NonNull ComponentName admin,
+            @NonNull Intent serviceIntent, @NonNull ServiceConnection conn,
+            @NonNull Context.BindServiceFlags flags, @NonNull UserHandle targetUser) {
+        throwIfParentInstance("bindDeviceAdminServiceAsUser");
+        // Keep this in sync with ContextImpl.bindServiceCommon.
+        try {
+            final IServiceConnection sd = mContext.getServiceDispatcher(
+                    conn, mContext.getMainThreadHandler(), flags.getValue());
+            serviceIntent.prepareToLeaveProcess(mContext);
+            return mService.bindDeviceAdminServiceAsUser(admin,
+                    mContext.getIApplicationThread(), mContext.getActivityToken(), serviceIntent,
+                    sd, flags.getValue(), targetUser.getIdentifier());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

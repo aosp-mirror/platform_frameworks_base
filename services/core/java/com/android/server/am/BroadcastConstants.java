@@ -225,7 +225,7 @@ public class BroadcastConstants {
     public int MAX_HISTORY_COMPLETE_SIZE = DEFAULT_MAX_HISTORY_COMPLETE_SIZE;
     private static final String KEY_MAX_HISTORY_COMPLETE_SIZE = "bcast_max_history_complete_size";
     private static final int DEFAULT_MAX_HISTORY_COMPLETE_SIZE =
-            ActivityManager.isLowRamDeviceStatic() ? 10 : 50;
+            ActivityManager.isLowRamDeviceStatic() ? 64 : 256;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of summarized
@@ -234,7 +234,7 @@ public class BroadcastConstants {
     public int MAX_HISTORY_SUMMARY_SIZE = DEFAULT_MAX_HISTORY_SUMMARY_SIZE;
     private static final String KEY_MAX_HISTORY_SUMMARY_SIZE = "bcast_max_history_summary_size";
     private static final int DEFAULT_MAX_HISTORY_SUMMARY_SIZE =
-            ActivityManager.isLowRamDeviceStatic() ? 25 : 300;
+            ActivityManager.isLowRamDeviceStatic() ? 256 : 1024;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of broadcast receivers to process in a

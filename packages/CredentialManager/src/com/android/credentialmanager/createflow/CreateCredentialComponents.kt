@@ -153,7 +153,7 @@ fun CreateCredentialScreen(
                 }
             }
         },
-        onDismiss = viewModel::onCancel
+        onDismiss = viewModel::onUserCancel
     )
 }
 

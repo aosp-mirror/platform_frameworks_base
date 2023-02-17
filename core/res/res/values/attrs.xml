@@ -2221,6 +2221,10 @@
         <!-- Elevation to use for the window. -->
         <attr name="windowElevation" format="dimension" />
 
+        <!-- Flag indicating whether this window should skip movement animations.
+             See also {@link android.view.WindowManager.LayoutParams#setCanPlayMoveAnimation} -->
+        <attr name="windowNoMoveAnimation" format="boolean" />
+
         <!-- Whether to clip window content to the outline of the window background. -->
         <attr name="windowClipToOutline" format="boolean" />
 

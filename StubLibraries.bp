@@ -546,7 +546,8 @@ droidstubs {
         "api-versions-jars-dir",
     ],
     api_levels_sdk_type: "module-lib",
-    extensions_info_file: ":sdk-extensions-info",
+    // extensions_info_file is purposefully omitted, because this module should just be
+    // the non-updatable portions of the sdk, and extension sdks are updatable.
 }
 
 droidstubs {
@@ -563,7 +564,8 @@ droidstubs {
         "api-versions-jars-dir",
     ],
     api_levels_sdk_type: "system-server",
-    extensions_info_file: ":sdk-extensions-info",
+    // extensions_info_file is purposefully omitted, because this module should just be
+    // the non-updatable portions of the sdk, and extension sdks are updatable.
 }
 
 /////////////////////////////////////////////////////////////////////

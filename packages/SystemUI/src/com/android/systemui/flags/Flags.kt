@@ -59,7 +59,7 @@ object Flags {
         )
 
     // TODO(b/254512517): Tracking Bug
-    val FSI_REQUIRES_KEYGUARD = unreleasedFlag(110, "fsi_requires_keyguard", teamfood = true)
+    val FSI_REQUIRES_KEYGUARD = releasedFlag(110, "fsi_requires_keyguard")
 
     // TODO(b/259130119): Tracking Bug
     val FSI_ON_DND_UPDATE = unreleasedFlag(259130119, "fsi_on_dnd_update", teamfood = true)
@@ -187,7 +187,7 @@ object Flags {
 
     // TODO(b/262780002): Tracking Bug
     @JvmField
-    val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = false)
+    val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = true)
 
     /** A different path for unocclusion transitions back to keyguard */
     // TODO(b/262859270): Tracking Bug
@@ -217,6 +217,7 @@ object Flags {
         unreleasedFlag(
             228,
             "lock_screen_long_press_enabled",
+            teamfood = true,
         )
 
     // 300 - power menu

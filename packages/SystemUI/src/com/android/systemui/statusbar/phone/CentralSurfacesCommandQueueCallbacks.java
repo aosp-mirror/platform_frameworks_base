@@ -54,6 +54,7 @@ import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -101,6 +102,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final VibrationEffect mCameraLaunchGestureVibrationEffect;
     private final SystemBarAttributesListener mSystemBarAttributesListener;
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
+    private final QuickSettingsController mQsController;
 
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
@@ -108,6 +110,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     @Inject
     CentralSurfacesCommandQueueCallbacks(
             CentralSurfaces centralSurfaces,
+            QuickSettingsController quickSettingsController,
             Context context,
             @Main Resources resources,
             ShadeController shadeController,
@@ -134,6 +137,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             Lazy<CameraLauncher> cameraLauncherLazy,
             UserTracker userTracker) {
         mCentralSurfaces = centralSurfaces;
+        mQsController = quickSettingsController;
         mContext = context;
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
@@ -331,9 +335,9 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mNotificationStackScrollLayoutController.setWillExpand(true);
                 mHeadsUpManager.unpinAll(true /* userUnpinned */);
                 mMetricsLogger.count("panel_open", 1);
-            } else if (!mNotificationPanelViewController.isInSettings()
+            } else if (!mQsController.getExpanded()
                     && !mNotificationPanelViewController.isExpanding()) {
-                mNotificationPanelViewController.flingSettings(0 /* velocity */,
+                mQsController.flingQs(0 /* velocity */,
                         NotificationPanelViewController.FLING_EXPAND);
                 mMetricsLogger.count("panel_open_qs", 1);
             }

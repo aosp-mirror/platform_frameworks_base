@@ -690,7 +690,7 @@ public class SyncManager {
         context.registerReceiver(mConnectivityIntentReceiver, intentFilter);
 
         intentFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
-        intentFilter.setPriority(100);
+        intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         context.registerReceiver(mShutdownIntentReceiver, intentFilter);
 
         intentFilter = new IntentFilter();

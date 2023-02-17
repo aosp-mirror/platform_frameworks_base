@@ -55,8 +55,17 @@ class CredentialSelectorViewModel(
     /**************************************************************************/
     /*****                       Shared Callbacks                         *****/
     /**************************************************************************/
-    fun onCancel() {
+    fun onUserCancel() {
+        Log.d(Constants.LOG_TAG, "User cancelled, finishing the ui")
         credManRepo.onUserCancel()
+        uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+    }
+
+    /** Close the activity and don't report anything to the backend.
+     *  Example use case is the no-auth-info snackbar where the activity should simply display the
+     *  UI and then be dismissed. */
+    fun silentlyFinishActivity() {
+        Log.d(Constants.LOG_TAG, "Silently finishing the ui")
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }
 
