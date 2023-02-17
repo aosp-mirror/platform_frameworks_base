@@ -66,7 +66,7 @@ import java.util.concurrent.Executor;
 public final class DisplayManager {
     private static final String TAG = "DisplayManager";
     private static final boolean DEBUG = false;
-    private static final boolean ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE = false;
+    private static final boolean ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE = true;
 
     private final Context mContext;
     private final DisplayManagerGlobal mGlobal;
