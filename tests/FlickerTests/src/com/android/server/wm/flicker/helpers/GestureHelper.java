@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.app.Instrumentation;
 import android.app.UiAutomation;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.MotionEvent;
@@ -30,6 +31,7 @@ import android.view.MotionEvent.PointerProperties;
  * Injects gestures given an {@link Instrumentation} object.
  */
 public class GestureHelper {
+    private static final String TAG = GestureHelper.class.getSimpleName();
     // Inserted after each motion event injection.
     private static final int MOTION_EVENT_INJECTION_DELAY_MILLIS = 5;
 
@@ -153,6 +155,9 @@ public class GestureHelper {
             for (int j = 0; j < coords.length; j++) {
                 coords[j].x += (endPoints[j].x - startPoints[j].x) / steps;
                 coords[j].y += (endPoints[j].y - startPoints[j].y) / steps;
+
+                // TODO: remove logging once b/269505548 is resolved
+                Log.d(TAG, "(" + coords[j].x + ", " + coords[j].y + ")");
             }
 
             eventTime = SystemClock.uptimeMillis();
