@@ -54,6 +54,7 @@ import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.FakeKeyguardStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -61,8 +62,11 @@ import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.captureMany
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
 import com.google.common.truth.Truth.assertThat
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -88,8 +92,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
-import java.io.PrintWriter
-import java.io.StringWriter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -183,8 +185,11 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     private fun createDeviceEntryFaceAuthRepositoryImpl(
         fmOverride: FaceManager? = faceManager,
         bypassControllerOverride: KeyguardBypassController? = bypassController
-    ) =
-        DeviceEntryFaceAuthRepositoryImpl(
+    ): DeviceEntryFaceAuthRepositoryImpl {
+        val systemClock = FakeSystemClock()
+        val faceAuthBuffer = TableLogBuffer(10, "face auth", systemClock)
+        val faceDetectBuffer = TableLogBuffer(10, "face detect", systemClock)
+        return DeviceEntryFaceAuthRepositoryImpl(
             mContext,
             fmOverride,
             fakeUserRepository,
@@ -200,8 +205,11 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             keyguardRepository,
             keyguardInteractor,
             alternateBouncerInteractor,
+            faceDetectBuffer,
+            faceAuthBuffer,
             dumpManager,
         )
+    }
 
     @Test
     fun faceAuthRunsAndProvidesAuthStatusUpdates() =
