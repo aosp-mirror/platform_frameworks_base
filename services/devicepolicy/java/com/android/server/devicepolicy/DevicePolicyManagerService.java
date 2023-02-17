@@ -12597,7 +12597,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return policies.get(enforcingAdmin).getValue();
         } else {
-            Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                     && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
                     || (caller.hasPackage() && isCallerDelegate(caller,
