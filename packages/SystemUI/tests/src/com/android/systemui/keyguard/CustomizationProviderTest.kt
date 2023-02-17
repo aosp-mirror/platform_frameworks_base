@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard
 
+import android.app.admin.DevicePolicyManager
 import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.content.pm.ProviderInfo
@@ -90,6 +91,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var previewSurfacePackage: SurfaceControlViewHost.SurfacePackage
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
     @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     private lateinit var underTest: CustomizationProvider
     private lateinit var testScope: TestScope
@@ -183,6 +185,8 @@ class CustomizationProviderTest : SysuiTestCase() {
                 featureFlags = featureFlags,
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
+                devicePolicyManager = devicePolicyManager,
+                backgroundDispatcher = testDispatcher,
             )
         underTest.previewManager =
             KeyguardRemotePreviewManager(
