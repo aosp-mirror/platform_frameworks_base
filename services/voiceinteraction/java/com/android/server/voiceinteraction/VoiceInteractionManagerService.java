@@ -1049,7 +1049,8 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public int startAssistantActivity(@NonNull IBinder token, @NonNull Intent intent,
-                @Nullable String resolvedType, @Nullable String attributionTag) {
+                @Nullable String resolvedType, @NonNull String attributionTag,
+                @NonNull Bundle bundle) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "startAssistantActivity without running voice interaction service");
@@ -1060,7 +1061,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     return mImpl.startAssistantActivityLocked(attributionTag, callingPid,
-                            callingUid, token, intent, resolvedType);
+                            callingUid, token, intent, resolvedType, bundle);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
