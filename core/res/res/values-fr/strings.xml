@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Messagerie vocale"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problème de connexion ou code IHM non valide."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Fonctionnalité non disponible."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Opération réservée aux numéros autorisés"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Impossible de modifier les paramètres de transfert d\'appel depuis votre téléphone lorsque vous êtes en itinérance."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Le service a été activé."</string>
@@ -580,7 +581,7 @@
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Utilisez la biométrie ou le verrouillage de l\'écran pour continuer"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Matériel biométrique indisponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Authentification annulée"</string>
-    <string name="biometric_not_recognized" msgid="5106687642694635888">"Non reconnu"</string>
+    <string name="biometric_not_recognized" msgid="5106687642694635888">"Non reconnue"</string>
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Authentification annulée"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Aucun code, schéma ni mot de passe n\'est défini"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erreur d\'authentification"</string>
@@ -1166,8 +1167,8 @@
     <string name="no" msgid="5122037903299899715">"Annuler"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Attention"</string>
     <string name="loading" msgid="3138021523725055037">"Chargement…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"OUI"</string>
-    <string name="capital_off" msgid="7443704171014626777">"NON"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ACTIVÉ"</string>
+    <string name="capital_off" msgid="7443704171014626777">"DÉSACTIVÉ"</string>
     <string name="checked" msgid="9179896827054513119">"activé"</string>
     <string name="not_checked" msgid="7972320087569023342">"désactivé"</string>
     <string name="selected" msgid="6614607926197755875">"sélectionné"</string>
@@ -2003,7 +2004,7 @@
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Aucune suggestion de saisie automatique"</string>
     <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 suggestion de saisie automatique}one{# suggestion de saisie automatique}many{# suggestions de saisie automatique}other{# suggestions de saisie automatique}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Enregistrer dans "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ?"</string>
-    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Enregistrer la <xliff:g id="TYPE">%1$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ?"</string>
+    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Enregistrer le <xliff:g id="TYPE">%1$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Enregistrer <xliff:g id="TYPE_0">%1$s</xliff:g> et <xliff:g id="TYPE_1">%2$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"Enregistrer <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> et <xliff:g id="TYPE_2">%3$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"Mettre à jour cet élément dans "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ?"</string>
@@ -2052,8 +2053,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Autoriser un accès unique"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne pas autoriser"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre les problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre des problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil.\n\nEn savoir plus sur g.co/android/devicelogs"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne plus afficher"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> souhaite afficher des éléments de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifier"</string>

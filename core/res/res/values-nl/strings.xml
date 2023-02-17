@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Voicemail"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Verbindingsprobleem of ongeldige MMI-code."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Functie niet ondersteund."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Bewerking is beperkt tot vaste nummers."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Kan instellingen voor doorschakelen van gesprekken niet wijzigen vanaf je telefoon tijdens roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Service staat aan."</string>
@@ -260,7 +261,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Stille modus"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Geluid is UIT"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Geluid is AAN"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Vliegtuigmodus"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"Vliegtuig­modus"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"Vliegtuigmodus is AAN"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"Vliegtuigmodus is UIT"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"Instellingen"</string>
@@ -990,7 +991,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Gebruikersselectie"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Status"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Camera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Mediabediening"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Media­bediening"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Opnieuw indelen van widget gestart."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Opnieuw indelen van widget beëindigd."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Widget <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> verwijderd."</string>
@@ -1482,7 +1483,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"U gebruikt deze app in je werkprofiel"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Invoermethode"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Synchroniseren"</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Toegankelijkheid"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Toe­gankelijk­heid"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Achtergrond"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Achtergrond wijzigen"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Listener voor meldingen"</string>
@@ -1986,7 +1987,7 @@
     <string name="app_category_news" msgid="1172762719574964544">"Nieuws en tijdschriften"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Maps en navigatie"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Productiviteit"</string>
-    <string name="app_category_accessibility" msgid="6643521607848547683">"Toegankelijkheid"</string>
+    <string name="app_category_accessibility" msgid="6643521607848547683">"Toe­gankelijk­heid"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Apparaatopslag"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB-foutopsporing"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"uur"</string>

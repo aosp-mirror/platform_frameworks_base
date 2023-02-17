@@ -66,10 +66,13 @@ public class KeyguardUserSwitcherPopupMenu extends ListPopupWindow {
         listView.setDividerHeight(mContext.getResources().getDimensionPixelSize(
                 R.dimen.bouncer_user_switcher_popup_divider_height));
 
-        int height  = mContext.getResources().getDimensionPixelSize(
-                R.dimen.bouncer_user_switcher_popup_header_height);
-        listView.addHeaderView(createSpacer(height), null, false);
-        listView.addFooterView(createSpacer(height), null, false);
+        if (listView.getTag(R.id.header_footer_views_added_tag_key) == null) {
+            int height = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.bouncer_user_switcher_popup_header_height);
+            listView.addHeaderView(createSpacer(height), null, false);
+            listView.addFooterView(createSpacer(height), null, false);
+            listView.setTag(R.id.header_footer_views_added_tag_key, new Object());
+        }
 
         listView.setOnTouchListener((v, ev) -> {
             if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {

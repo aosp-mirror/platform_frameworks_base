@@ -175,10 +175,7 @@ public class UiTranslationController implements Dumpable {
      */
     public void onActivityDestroyed() {
         synchronized (mLock) {
-            if (DEBUG) {
-                Log.i(TAG,
-                        "onActivityDestroyed(): mCurrentState is " + stateToString(mCurrentState));
-            }
+            Log.i(TAG, "onActivityDestroyed(): mCurrentState is " + stateToString(mCurrentState));
             if (mCurrentState != STATE_UI_TRANSLATION_FINISHED) {
                 notifyTranslationFinished(/* activityDestroyed= */ true);
             }

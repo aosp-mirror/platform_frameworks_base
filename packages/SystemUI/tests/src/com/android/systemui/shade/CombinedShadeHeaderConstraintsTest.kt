@@ -17,14 +17,18 @@
 package com.android.systemui.shade
 
 import android.testing.AndroidTestingRunner
+import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.google.common.truth.Expect
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -36,13 +40,16 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
     private lateinit var qsConstraint: ConstraintSet
     private lateinit var largeScreenConstraint: ConstraintSet
 
+    @get:Rule
+    val expect: Expect = Expect.create()
+
     @Before
     fun setUp() {
         qqsConstraint = ConstraintSet().apply {
             load(context, context.resources.getXml(R.xml.qqs_header))
         }
         qsConstraint = ConstraintSet().apply {
-            load(context, context.resources.getXml(R.xml.qs_header_new))
+            load(context, context.resources.getXml(R.xml.qs_header))
         }
         largeScreenConstraint = ConstraintSet().apply {
             load(context, context.resources.getXml(R.xml.large_screen_shade_header))
@@ -86,12 +93,12 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
             assertThat(getConstraint(R.id.clock).layout.horizontalBias).isEqualTo(0f)
 
             assertThat(getConstraint(R.id.date).layout.startToStart).isEqualTo(PARENT_ID)
-            assertThat(getConstraint(R.id.date).layout.horizontalBias).isEqualTo(0f)
+            assertThat(getConstraint(R.id.date).layout.horizontalBias).isEqualTo(0.5f)
 
             assertThat(getConstraint(R.id.batteryRemainingIcon).layout.endToEnd)
                 .isEqualTo(PARENT_ID)
             assertThat(getConstraint(R.id.batteryRemainingIcon).layout.horizontalBias)
-                .isEqualTo(1f)
+                .isEqualTo(0.5f)
 
             assertThat(getConstraint(R.id.privacy_container).layout.endToEnd)
                 .isEqualTo(R.id.end_guide)
@@ -318,6 +325,65 @@ class CombinedShadeHeaderConstraintsTest : SysuiTestCase() {
         }
 
         assertThat(changes.largeScreenConstraintsChanges).isNull()
+    }
+
+    @Test
+    fun testRelevantViewsAreNotMatchConstraints() {
+        val views = mapOf(
+                R.id.clock to "clock",
+                R.id.date to "date",
+                R.id.privacy_container to "privacy",
+                R.id.carrier_group to "carriers",
+        )
+        views.forEach { (id, name) ->
+            assertWithMessage("$name has 0 height in qqs")
+                    .that(qqsConstraint.getConstraint(id).layout.mHeight).isNotEqualTo(0)
+            assertWithMessage("$name has 0 width in qqs")
+                    .that(qqsConstraint.getConstraint(id).layout.mWidth).isNotEqualTo(0)
+            assertWithMessage("$name has 0 height in qs")
+                    .that(qsConstraint.getConstraint(id).layout.mHeight).isNotEqualTo(0)
+            assertWithMessage("$name has 0 width in qs")
+                    .that(qsConstraint.getConstraint(id).layout.mWidth).isNotEqualTo(0)
+        }
+    }
+
+    @Test
+    fun testCheckViewsDontChangeSizeBetweenAnimationConstraints() {
+        val views = mapOf(
+                R.id.clock to "clock",
+                R.id.privacy_container to "privacy",
+                R.id.carrier_group to "carriers",
+        )
+        views.forEach { (id, name) ->
+            expect.withMessage("$name changes height")
+                    .that(qqsConstraint.getConstraint(id).layout.mHeight.fromConstraint())
+                    .isEqualTo(qsConstraint.getConstraint(id).layout.mHeight.fromConstraint())
+            expect.withMessage("$name changes width")
+                    .that(qqsConstraint.getConstraint(id).layout.mWidth.fromConstraint())
+                    .isEqualTo(qsConstraint.getConstraint(id).layout.mWidth.fromConstraint())
+        }
+    }
+
+    private fun Int.fromConstraint() = when (this) {
+        ViewGroup.LayoutParams.MATCH_PARENT -> "MATCH_PARENT"
+        ViewGroup.LayoutParams.WRAP_CONTENT -> "WRAP_CONTENT"
+        else -> toString()
+    }
+
+    @Test
+    fun testEmptyCutoutDateIconsAreConstrainedWidth() {
+        CombinedShadeHeadersConstraintManagerImpl.emptyCutoutConstraints()()
+
+        assertThat(qqsConstraint.getConstraint(R.id.date).layout.constrainedWidth).isTrue()
+        assertThat(qqsConstraint.getConstraint(R.id.statusIcons).layout.constrainedWidth).isTrue()
+    }
+
+    @Test
+    fun testCenterCutoutDateIconsAreConstrainedWidth() {
+        CombinedShadeHeadersConstraintManagerImpl.centerCutoutConstraints(false, 10)()
+
+        assertThat(qqsConstraint.getConstraint(R.id.date).layout.constrainedWidth).isTrue()
+        assertThat(qqsConstraint.getConstraint(R.id.statusIcons).layout.constrainedWidth).isTrue()
     }
 
     private operator fun ConstraintsChanges.invoke() {

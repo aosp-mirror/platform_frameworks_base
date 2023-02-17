@@ -38,6 +38,7 @@ class FlagManager constructor(
         const val ACTION_SET_FLAG = "com.android.systemui.action.SET_FLAG"
         const val ACTION_GET_FLAGS = "com.android.systemui.action.GET_FLAGS"
         const val FLAGS_PERMISSION = "com.android.systemui.permission.FLAGS"
+        const val ACTION_SYSUI_STARTED = "com.android.systemui.STARTED"
         const val EXTRA_ID = "id"
         const val EXTRA_VALUE = "value"
         const val EXTRA_FLAGS = "flags"

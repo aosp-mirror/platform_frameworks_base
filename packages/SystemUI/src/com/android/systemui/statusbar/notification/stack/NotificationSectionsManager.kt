@@ -19,11 +19,13 @@ import android.annotation.ColorInt
 import android.util.Log
 import android.view.View
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.media.KeyguardMediaController
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.media.controls.ui.KeyguardMediaController
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.SourceType
 import com.android.systemui.statusbar.notification.collection.render.MediaContainerController
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
-import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager
 import com.android.systemui.statusbar.notification.dagger.AlertingHeader
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader
 import com.android.systemui.statusbar.notification.dagger.PeopleHeader
@@ -45,11 +47,15 @@ class NotificationSectionsManager @Inject internal constructor(
     private val keyguardMediaController: KeyguardMediaController,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val mediaContainerController: MediaContainerController,
+    private val notificationRoundnessManager: NotificationRoundnessManager,
     @IncomingHeader private val incomingHeaderController: SectionHeaderController,
     @PeopleHeader private val peopleHeaderController: SectionHeaderController,
     @AlertingHeader private val alertingHeaderController: SectionHeaderController,
-    @SilentHeader private val silentHeaderController: SectionHeaderController
+    @SilentHeader private val silentHeaderController: SectionHeaderController,
+    featureFlags: FeatureFlags
 ) : SectionProvider {
+
+    private val useRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES)
 
     private val configurationListener = object : ConfigurationController.ConfigurationListener {
         override fun onLocaleListChanged() {
@@ -178,11 +184,49 @@ class NotificationSectionsManager @Inject internal constructor(
                         size = sections.size,
                         operation = SectionBounds::addNotif
                 )
+
+        // Build a set of the old first/last Views of the sections
+        val oldFirstChildren = sections.mapNotNull { it.firstVisibleChild }.toSet().toMutableSet()
+        val oldLastChildren = sections.mapNotNull { it.lastVisibleChild }.toSet().toMutableSet()
+
         // Update each section with the associated boundary, tracking if there was a change
         val changed = sections.fold(false) { changed, section ->
             val bounds = sectionBounds[section.bucket] ?: SectionBounds.None
-            bounds.updateSection(section) || changed
+            val isSectionChanged = bounds.updateSection(section)
+            isSectionChanged || changed
         }
+
+        if (useRoundnessSourceTypes) {
+            val newFirstChildren = sections.mapNotNull { it.firstVisibleChild }
+            val newLastChildren = sections.mapNotNull { it.lastVisibleChild }
+
+            // Update the roundness of Views that weren't already in the first/last position
+            newFirstChildren.forEach { firstChild ->
+                val wasFirstChild = oldFirstChildren.remove(firstChild)
+                if (!wasFirstChild) {
+                    val notAnimatedChild = !notificationRoundnessManager.isAnimatedChild(firstChild)
+                    val animated = firstChild.isShown && notAnimatedChild
+                    firstChild.requestTopRoundness(1f, SECTION, animated)
+                }
+            }
+            newLastChildren.forEach { lastChild ->
+                val wasLastChild = oldLastChildren.remove(lastChild)
+                if (!wasLastChild) {
+                    val notAnimatedChild = !notificationRoundnessManager.isAnimatedChild(lastChild)
+                    val animated = lastChild.isShown && notAnimatedChild
+                    lastChild.requestBottomRoundness(1f, SECTION, animated)
+                }
+            }
+
+            // The Views left in the set are no longer in the first/last position
+            oldFirstChildren.forEach { noMoreFirstChild ->
+                noMoreFirstChild.requestTopRoundness(0f, SECTION)
+            }
+            oldLastChildren.forEach { noMoreLastChild ->
+                noMoreLastChild.requestBottomRoundness(0f, SECTION)
+            }
+        }
+
         if (DEBUG) {
             logSections(sections)
         }
@@ -216,5 +260,6 @@ class NotificationSectionsManager @Inject internal constructor(
     companion object {
         private const val TAG = "NotifSectionsManager"
         private const val DEBUG = false
+        private val SECTION = SourceType.from("Section")
     }
 }

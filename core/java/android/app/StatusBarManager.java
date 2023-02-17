@@ -229,10 +229,15 @@ public class StatusBarManager {
     public static final int CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP = 1;
     /** @hide */
     public static final int CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER = 2;
+    /** @hide */
+    public static final int CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE = 3;
 
     /**
      * Session flag for {@link #registerSessionListener} indicating the listener
-     * is interested in sessions on the keygaurd
+     * is interested in sessions on the keygaurd.
+     * Keyguard Session Boundaries:
+     *     START_SESSION: device starts going to sleep OR the keyguard is newly shown
+     *     END_SESSION: device starts going to sleep OR keyguard is no longer showing
      * @hide
      */
     public static final int SESSION_KEYGUARD = 1 << 0;
@@ -506,10 +511,26 @@ public class StatusBarManager {
     @SystemApi
     public static final int MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER = 1;
 
+    /**
+     * State indicating that media transfer to this receiver device is succeeded.
+     *
+     * @hide
+     */
+    public static final int MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED = 2;
+
+    /**
+     * State indicating that media transfer to this receiver device is failed.
+     *
+     * @hide
+     */
+    public static final int MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED = 3;
+
     /** @hide */
     @IntDef(prefix = {"MEDIA_TRANSFER_RECEIVER_STATE_"}, value = {
             MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
             MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+            MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            MEDIA_TRANSFER_RECEIVER_STATE_TRANSFER_TO_RECEIVER_FAILED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MediaTransferReceiverState {}

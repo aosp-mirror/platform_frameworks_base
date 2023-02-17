@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Correio de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problema de conexão ou código MMI inválido."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Recurso indisponível."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"A operação é limitada somente a números de discagem fixa."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Não é possível alterar as configurações de encaminhamento de chamada do seu smartphone em roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"O serviço foi ativado."</string>
@@ -296,7 +297,7 @@
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Modo de segurança"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
-    <string name="user_owner_label" msgid="8628726904184471211">"Deslize até o perfil pessoal"</string>
+    <string name="user_owner_label" msgid="8628726904184471211">"Mudar para o perfil pessoal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Perfil de trabalho"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatos"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acesse seus contatos"</string>
@@ -749,7 +750,7 @@
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permite que o proprietário use serviços da operadora. Não deve ser necessário para apps comuns."</string>
     <string name="permlab_access_notification_policy" msgid="5524112842876975537">"acessar \"Não perturbe\""</string>
     <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permitir que o app leia e grave a configuração \"Não perturbe\"."</string>
-    <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"iniciar uso da permissão para visualização"</string>
+    <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"começar a usar a permissão para ver"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite que o sistema inicie o uso de permissão para um app. Não deve ser necessário para apps comuns."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"decisões de permissão da visualização inicial"</string>
     <string name="permdesc_startReviewPermissionDecisions" msgid="2775556853503004236">"Autoriza o detentor a iniciar a tela para revisar as decisões de permissão. Não deve ser necessário para apps normais."</string>
@@ -896,7 +897,7 @@
     <string name="relationTypeFriend" msgid="3192092625893980574">"Amigo(a)"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Gerente"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"Mãe"</string>
-    <string name="relationTypeParent" msgid="4177920938333039882">"Pai/Mãe"</string>
+    <string name="relationTypeParent" msgid="4177920938333039882">"familiar responsável"</string>
     <string name="relationTypePartner" msgid="4018017075116766194">"Parceiro"</string>
     <string name="relationTypeReferredBy" msgid="5285082289602849400">"Indicado por"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"Parente"</string>

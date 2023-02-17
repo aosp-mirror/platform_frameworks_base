@@ -60,7 +60,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         FloatingContentCoordinator.FloatingContent {
 
     public static final boolean ENABLE_FLING_TO_DISMISS_PIP =
-            SystemProperties.getBoolean("persist.wm.debug.fling_to_dismiss_pip", true);
+            SystemProperties.getBoolean("persist.wm.debug.fling_to_dismiss_pip", false);
     private static final String TAG = "PipMotionHelper";
     private static final boolean DEBUG = false;
 

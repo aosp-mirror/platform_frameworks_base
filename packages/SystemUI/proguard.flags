@@ -22,6 +22,9 @@
 
 -keep class ** extends androidx.preference.PreferenceFragment
 -keep class com.android.systemui.tuner.*
+
+# The plugins subpackage acts as a shared library that might be referenced in
+# dynamically-loaded plugin APKs.
 -keep class com.android.systemui.plugins.** {
     *;
 }

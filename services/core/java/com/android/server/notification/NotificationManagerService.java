@@ -61,6 +61,7 @@ import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_TELECOM;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.MATCH_ALL;
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -4867,6 +4868,13 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public int getHintsFromListener(INotificationListener token) {
+            synchronized (mNotificationLock) {
+                return mListenerHints;
+            }
+        }
+
+        @Override
+        public int getHintsFromListenerNoToken() {
             synchronized (mNotificationLock) {
                 return mListenerHints;
             }
@@ -10652,10 +10660,18 @@ public class NotificationManagerService extends SystemService {
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
         ArrayMap<Pair<ComponentName, Integer>, NotificationListenerFilter>
                 mRequestedNotificationListeners = new ArrayMap<>();
+        private final boolean mIsHeadlessSystemUserMode;
 
         public NotificationListeners(Context context, Object lock, UserProfiles userProfiles,
                 IPackageManager pm) {
+            this(context, lock, userProfiles, pm, UserManager.isHeadlessSystemUserMode());
+        }
+
+        @VisibleForTesting
+        public NotificationListeners(Context context, Object lock, UserProfiles userProfiles,
+                IPackageManager pm, boolean isHeadlessSystemUserMode) {
             super(context, lock, userProfiles, pm);
+            this.mIsHeadlessSystemUserMode = isHeadlessSystemUserMode;
         }
 
         @Override
@@ -10680,10 +10696,16 @@ public class NotificationManagerService extends SystemService {
                     if (TextUtils.isEmpty(listeners[i])) {
                         continue;
                     }
+                    int packageQueryFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
+                    // In the headless system user mode, packages might not be installed for the
+                    // system user. Match packages for any user since apps can be installed only for
+                    // non-system users and would be considering uninstalled for the system user.
+                    if (mIsHeadlessSystemUserMode) {
+                        packageQueryFlags += MATCH_ANY_USER;
+                    }
                     ArraySet<ComponentName> approvedListeners =
-                            this.queryPackageForServices(listeners[i],
-                                    MATCH_DIRECT_BOOT_AWARE
-                                            | MATCH_DIRECT_BOOT_UNAWARE, USER_SYSTEM);
+                            this.queryPackageForServices(listeners[i], packageQueryFlags,
+                                    USER_SYSTEM);
                     for (int k = 0; k < approvedListeners.size(); k++) {
                         ComponentName cn = approvedListeners.valueAt(k);
                         addDefaultComponentOrPackage(cn.flattenToString());

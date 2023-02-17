@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkraunama"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Greitai įkraunama"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lėtai įkraunama"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkrovimas pristabdytas siekiant apsaugoti akumuliatorių"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Įkrovimas optimizuotas siekiant apsaugoti akumuliatorių"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Paspauskite meniu, jei norite atrakinti."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Tinklas užrakintas"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Nėra SIM kortelės"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Iš naujo paleidus įrenginį būtinas atrakinimo piešinys"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Iš naujo paleidus įrenginį būtinas PIN kodas"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Iš naujo paleidus įrenginį būtinas slaptažodis"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Norint užtikrinti papildomą saugą būtinas atrakinimo piešinys"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Norint užtikrinti papildomą saugą būtinas PIN kodas"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Norint užtikrinti papildomą saugą būtinas slaptažodis"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Papildomai saugai užtikrinti geriau naudokite atrakinimo piešinį"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Papildomai saugai užtikrinti geriau naudokite PIN kodą"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Papildomai saugai užtikrinti geriau naudokite slaptažodį"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Įrenginį užrakino administratorius"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Įrenginys užrakintas neautomatiškai"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Neatpažinta"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Numatytasis"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Debesėlis"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analoginis"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Įrenginio atrakinimas norint tęsti"</string>
 </resources>

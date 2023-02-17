@@ -116,7 +116,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"المكالمات الهاتفية"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"نقل الملف"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"جهاز الإرسال"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"استخدام الإنترنت"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"الوصول إلى الإنترنت"</string>
     <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"مشاركة جهات الاتصال وسجل المكالمات"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"استخدام إعدادات بلوتوث لمشاركة جهات الاتصال وسجل المكالمات"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"مشاركة اتصال الإنترنت"</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"يتبقّى <xliff:g id="TIME">%1$s</xliff:g> حتى اكتمال شحن البطارية."</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - يتبقّى <xliff:g id="TIME">%2$s</xliff:g> حتى اكتمال شحن البطارية."</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - تم إيقاف الشحن مؤقتًا"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - تم تحسين الشحن"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - تم تحسين الشحن"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"غير معروف"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"جارٍ الشحن"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"جارٍ الشحن سريعًا"</string>

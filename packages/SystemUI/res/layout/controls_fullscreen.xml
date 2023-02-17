@@ -15,28 +15,19 @@
      limitations under the License.
 -->
 
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/control_detail_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-  <com.android.systemui.globalactions.MinHeightScrollView
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"
-      android:orientation="vertical"
-      android:scrollbars="none">
 
     <LinearLayout
         android:id="@+id/global_actions_controls"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipChildren="false"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:clipToPadding="false"
         android:paddingHorizontal="@dimen/controls_padding_horizontal" />
 
-  </com.android.systemui.globalactions.MinHeightScrollView>
-</LinearLayout>
+</FrameLayout>

@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"የድምፅ መልዕክት"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"የተያያዥ ችግር ወይም  ትክከል ያልሆነየMMI ኮድ ባህሪ።"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ባህሪ አይደገፍም።"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"ክዋኔ ለቋሚ መደወያ ቁጥሮች ብቻ ተገድቧል።"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Can not change call forwarding settings from your phone while you are roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"አገልግሎት ነቅቶ ነበር።"</string>
@@ -178,7 +179,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"በጣም ብዙ <xliff:g id="CONTENT_TYPE">%s</xliff:g> ለመሰረዝ ተሞክሯል።"</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"የጡባዊ ተኮ ማከማቻ ሙሉ ነው! ቦታ ነፃ ለማድረግ አንዳንድ ፋይሎች ሰርዝ።"</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"የእጅ ሰዓት ማከማቻ ሙሉ ነው። ቦታ ለማስለቀቅ አንዳንድ ፋይሎችን ይሰርዙ።"</string>
-    <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV መሣሪያ ማከማቻ ሙሉ ነው። ባዶ ቦታን ነጻ ለማድረግ አንዳንድ ፋይሎችን ይሰርዙ።"</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV መሣሪያ ማከማቻ ሙሉ ነው። ባዶ ቦታን ነፃ ለማድረግ አንዳንድ ፋይሎችን ይሰርዙ።"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"የስልክ ማከማቻ ሙሉ ነው! ቦታ ነፃ ለማድረግ አንዳንድ ፋይሎች ሰርዝ።"</string>
     <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{የእውቅና ማረጋገጫ ባለስልጣን ተጭኗል}one{የእውቅና ማረጋገጫ ባለስልጣናት ተጭነዋል}other{የእውቅና ማረጋገጫ ባለስልጣናት ተጭነዋል}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"ባልታወቀ ሶስተኛ ወገን"</string>
@@ -1156,7 +1157,7 @@
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"የግቤት ስልትን ቀይር"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"የማከማቻ ቦታ እያለቀ ነው"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"አንዳንድ የስርዓት ተግባራት ላይሰሩ ይችላሉ"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ለስርዓቱ የሚሆን በቂ ቦታ የለም። 250 ሜባ ነጻ ቦታ እንዳለዎት ያረጋግጡና ዳግም ያስጀምሩ።"</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ለስርዓቱ የሚሆን በቂ ቦታ የለም። 250 ሜባ ነፃ ቦታ እንዳለዎት ያረጋግጡና ዳግም ያስጀምሩ።"</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> እያሄደ ነው"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"ተጨማሪ መረጃ ለማግኘት ወይም መተግበሪያውን ለማቆም መታ ያድርጉ።"</string>
     <string name="ok" msgid="2646370155170753815">"እሺ"</string>
@@ -1202,7 +1203,7 @@
     <string name="use_a_different_app" msgid="4987790276170972776">"የተለየ መተግበሪያ ይጠቀሙ"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"ነባሪ አጽዳ በስርዓት ቅንብሮች  ውስጥ  &gt; Apps &amp;gt፤ወርዷል፡፡"</string>
     <string name="chooseActivity" msgid="8563390197659779956">"ድርጊት ምረጥ"</string>
-    <string name="chooseUsbActivity" msgid="2096269989990986612">"ለUSB መሳሪያ መተግበሪያ ምረጥ"</string>
+    <string name="chooseUsbActivity" msgid="2096269989990986612">"ለUSB መሣሪያ መተግበሪያ ምረጥ"</string>
     <string name="noApplications" msgid="1186909265235544019">"ምንም መተግበሪያዎች ይህን ድርጊት ማከናወን አይችሉም።"</string>
     <string name="aerr_application" msgid="4090916809370389109">"<xliff:g id="APPLICATION">%1$s</xliff:g> አቁሟል"</string>
     <string name="aerr_process" msgid="4268018696970966407">"<xliff:g id="PROCESS">%1$s</xliff:g> ቆሟል"</string>
@@ -1211,7 +1212,7 @@
     <string name="aerr_restart" msgid="2789618625210505419">"መተግበሪያውን እንደገና ክፈት"</string>
     <string name="aerr_report" msgid="3095644466849299308">"ግብረመልስ ይላኩ"</string>
     <string name="aerr_close" msgid="3398336821267021852">"ዝጋ"</string>
-    <string name="aerr_mute" msgid="2304972923480211376">"መሣሪያ ዳግም እስኪጀመር ድረስ ድምጽ ያጥፉ"</string>
+    <string name="aerr_mute" msgid="2304972923480211376">"መሣሪያ ዳግም እስኪጀመር ድረስ ድምፅ ያጥፉ"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"ጠብቅ"</string>
     <string name="aerr_close_app" msgid="8318883106083050970">"መተግበሪያን ዝጋ"</string>
     <string name="anr_title" msgid="7290329487067300120"></string>
@@ -1273,7 +1274,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"የ<xliff:g id="PROC">%1$s</xliff:g> ሂደት ተራጋፊ ክምር ለማጋራት ለእርስዎ ይገኛል። ይጠንቀቁ፦ ይህ ተራጋፊ ክምር ሂደቱ ሊደርስባቸው የሚችለው ማንኛውም የግል መረጃ ሊኖረው ይችላል፣ ይህ እርስዎ የተየቧቸውን ነገሮች ሊያካትት ይችላል።"</string>
     <string name="sendText" msgid="493003724401350724">"ለፅሁፍ ድርጊት ምረጥ"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"የስልክ ጥሪ ድምፅ"</string>
-    <string name="volume_music" msgid="7727274216734955095">"የማህደረ መረጃ ድምጽ መጠን"</string>
+    <string name="volume_music" msgid="7727274216734955095">"የማህደረ መረጃ ድምፅ መጠን"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"በብሉቱዝ በኩል ማጫወት"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"የፀጥታ የስልክ የደውል ድምፅ ተዘጋጅቷል"</string>
     <string name="volume_call" msgid="7625321655265747433">"የጥሪ ላይ ድም ፅ መጨመሪያ/መቀነሻ"</string>
@@ -1284,7 +1285,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"የብሉቱዝ ድምፅ መጠን"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"የስልክ ጥሪ ድምፅ መጠን"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"የስልክ ጥሪ ድምፅ መጠን"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"የማህደረ መረጃ ድምጽ መጠን"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"የማህደረ መረጃ ድምፅ መጠን"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"የማሳወቂያ ክፍልፍል"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ነባሪ የስልክ ላይ ጥሪ"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ነባሪ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1448,7 +1449,7 @@
     <string name="ext_media_status_missing" msgid="6520746443048867314">"አልገባም"</string>
     <string name="activity_list_empty" msgid="4219430010716034252">"ምንም ተመሳሳይ እንቅስቃሴዎች አልተገኙም።"</string>
     <string name="permlab_route_media_output" msgid="8048124531439513118">"የሚዲያ ውፅዓት ማዛወር"</string>
-    <string name="permdesc_route_media_output" msgid="1759683269387729675">"አንድ መተግበሪያ የሚዲያ ውፅአትን ወደ ሌላ ውጫዊ መሳሪያ እንዲመራ ይፈቅድለታል።"</string>
+    <string name="permdesc_route_media_output" msgid="1759683269387729675">"አንድ መተግበሪያ የሚዲያ ውፅአትን ወደ ሌላ ውጫዊ መሣሪያ እንዲመራ ይፈቅድለታል።"</string>
     <string name="permlab_readInstallSessions" msgid="7279049337895583621">"የመጫን ክፍለ ጊዜዎችን ማንበብ"</string>
     <string name="permdesc_readInstallSessions" msgid="4012608316610763473">"መተግበሪያው የመጫን ክፍለ ጊዜዎችን እንዲያነብ ይፈቅድለታል። ይህም ስለ ገቢር የጥቅል ጭነቶች ዝርዝር መረጃን እንዲያይ ይፈቅድለታል።"</string>
     <string name="permlab_requestInstallPackages" msgid="7600020863445351154">"የጭነት ጥቅሎችን መጠየቅ"</string>
@@ -1617,7 +1618,7 @@
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"የጆሮ ማዳመጫዎች"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"ዩ ኤስ ቢ"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"ስርዓት"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"የብሉቱዝ ድምጽ"</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"የብሉቱዝ ድምፅ"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"ገመድ አልባ ማሳያ"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Cast"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"ከመሳሪያ ጋር ያገናኙ"</string>
@@ -1674,7 +1675,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"የመክፈቻ ስርዓተ ጥለቱን <xliff:g id="NUMBER_0">%1$d</xliff:g> ጊዜ በትክክል አልሳሉትም። ከ<xliff:g id="NUMBER_1">%2$d</xliff:g> ተጨማሪ ያልተሳኩ ሙከራዎች በኋላ የኢሜይል መለያ ተጠቅመው ስልክዎን እንዲከፍቱ ይጠየቃሉ።\n\nእባክዎ ከ<xliff:g id="NUMBER_2">%3$d</xliff:g> ሰከንዶች በኋላ እንደገና ይሞክሩ።"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"አስወግድ"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ድምጹ ከሚመከረው መጠን በላይ ከፍ ይበል?\n\nበከፍተኛ ድምጽ ለረጅም ጊዜ ማዳመጥ ጆሮዎን ሊጎዳው ይችላል።"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ድምጹ ከሚመከረው መጠን በላይ ከፍ ይበል?\n\nበከፍተኛ ድምፅ ለረጅም ጊዜ ማዳመጥ ጆሮዎን ሊጎዳው ይችላል።"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"የተደራሽነት አቋራጭ ጥቅም ላይ ይዋል?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"አቋራጩ ሲበራ ሁለቱንም የድምጽ አዝራሮች ለ3 ሰከንዶች ተጭኖ መቆየት የተደራሽነት ባህሪን ያስጀምረዋል።"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"የተደራሽነት ባህሪዎች አቋራጭ ይብራ?"</string>
@@ -1834,7 +1835,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"አዲስ ፒን ያረጋግጡ"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"ገደቦችን ለመቀየር ፒን ይፍጠሩ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"ፒኖች አይዛመዱም። እንደገና ይሞክሩ።"</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ፒን በጣም አጭር ነው። ቢያንስ 4 አኃዝ መሆን አለበት።"</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ፒን በጣም አጭር ነው። ቢያንስ 4 አሃዝ መሆን አለበት።"</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ቆይተው እንደገና ይሞክሩ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ሙሉ ገጽ በማሳየት ላይ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ለመውጣት፣ ከላይ ወደታች ጠረግ ያድርጉ።"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"የአንድ ጊዜ መዳረሻን ፍቀድ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"አትፍቀድ"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"የመሣሪያ ምዝግብ ማስታወሻዎች በመሣሪያዎ ላይ ምን እንደሚከሰት ይመዘግባሉ። መተግበሪያዎች ችግሮችን ለማግኘት እና ለማስተካከል እነዚህን ምዝግብ ማስታወሻዎች መጠቀም ይችላሉ።\n\nአንዳንድ ምዝግብ ማስታወሻዎች ሚስጥራዊነት ያለው መረጃ ሊይዙ ይችላሉ፣ ስለዚህ የሚያምኗቸውን መተግበሪያዎች ብቻ ሁሉንም የመሣሪያ ምዝግብ ማስታወሻዎች እንዲደርሱ ይፍቀዱላቸው። \n\nይህ መተግበሪያ ሁሉንም የመሣሪያ ምዝግብ ማስታወሻዎች እንዲደርስ ካልፈቀዱለት አሁንም የራሱን ምዝግብ ማስታወሻዎች መድረስ ይችላል። የእርስዎ መሣሪያ አምራች አሁንም አንዳንድ ምዝግብ ማስታወሻዎችን ወይም መረጃዎችን በመሣሪያዎ ላይ ሊደርስ ይችላል።"</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"የመሣሪያ ምዝግብ ማስታወሻዎች በመሣሪያዎ ላይ ምን እንደሚከሰት ይመዘግባሉ። መተግበሪያዎች ችግሮችን ለማግኘት እና ለማስተካከል እነዚህን ምዝግብ ማስታወሻዎች መጠቀም ይችላሉ።\n\nአንዳንድ ምዝግብ ማስታወሻዎች ሚስጥራዊነት ያለው መረጃ ሊይዙ ይችላሉ፣ ስለዚህ የሚያምኗቸው መተግበሪያዎች ብቻ ሁሉንም የመሣሪያ ምዝግብ ማስታወሻዎች እንዲደርሱ ይፍቀዱላቸው። \n\nይህ መተግበሪያ ሁሉንም የመሣሪያ ምዝግብ ማስታወሻዎች እንዲደርስ ካልፈቀዱለት አሁንም የራሱን ምዝግብ ማስታወሻዎች መድረስ ይችላል። የመሣሪያዎ አምራች አሁንም አንዳንድ ምዝግብ ማስታወሻዎችን ወይም መረጃዎችን በመሣሪያዎ ላይ ሊደርስ ይችላል።\n\ng.co/android/devicelogs ላይ የበለጠ ይወቁ።"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"ዳግም አታሳይ"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> የ<xliff:g id="APP_2">%2$s</xliff:g> ቁራጮችን ማሳየት ይፈልጋል"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"አርትዕ"</string>

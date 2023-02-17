@@ -294,7 +294,7 @@ public class ActivityThreadClientTest {
 
         private void resumeActivity(ActivityClientRecord r) {
             mThread.handleResumeActivity(r, true /* finalStateRequest */,
-                    true /* isForward */, "test");
+                    true /* isForward */, false /* shouldSendCompatFakeFocus */, "test");
         }
 
         private void pauseActivity(ActivityClientRecord r) {

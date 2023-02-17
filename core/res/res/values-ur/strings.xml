@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"صوتی میل"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"‏کنکشن مسئلہ یا غلط MMI کوڈ۔"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"خصوصیت تعاون یافتہ نہیں ہے۔"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"آپریشن صرف متعین ڈائلنگ نمبرز تک محدود ہے۔"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"جب آپ رومنگ پر ہوں تو اپنے فون سے کال فارورڈنگ کی ترتیبات تبدیل نہیں کی جا سکتیں۔"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"سروس فعال کی گئی۔"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"یک وقتی رسائی کی اجازت دیں"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"اجازت نہ دیں"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنے بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔"</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"‏آپ کے آلے پر جو ہوتا ہے آلے کے لاگز اسے ریکارڈ کر لیتے ہیں۔ ایپس ان لاگز کا استعمال مسائل کو تلاش کرنے اور ان کو حل کرنے کے لیے کر سکتی ہیں۔\n\nکچھ لاگز میں حساس معلومات شامل ہو سکتی ہیں، اس لیے صرف اپنی بھروسے مند ایپس کو ہی آلے کے تمام لاگز تک رسائی کی اجازت دیں۔ \n\nاگر آپ اس ایپ کو آلے کے تمام لاگز تک رسائی کی اجازت نہیں دیتے ہیں تب بھی یہ اپنے لاگز تک رسائی حاصل کر سکتی ہے۔ آپ کے آلے کا مینوفیکچرر اب بھی آپ کے آلے پر کچھ لاگز یا معلومات تک رسائی حاصل کر سکتا ہے۔\n\ng.co/android/devicelogs پر مزید جانیں۔"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"دوبارہ نہ دکھائیں"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> کے سلائسز دکھانا چاہتی ہے"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ترمیم کریں"</string>

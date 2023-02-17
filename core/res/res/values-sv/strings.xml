@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Röstbrevlåda"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Anslutningsproblem eller ogiltig MMI-kod."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funktionen stöds inte."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Endast fasta nummer kan användas."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Det går inte att ändra inställningarna för vidarebefordran av samtal medan mobilen är i roaming-läge."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Tjänsten har aktiverats."</string>
@@ -1172,7 +1173,7 @@
     <string name="selected" msgid="6614607926197755875">"valt"</string>
     <string name="not_selected" msgid="410652016565864475">"inte valt"</string>
     <string name="in_progress" msgid="2149208189184319441">"pågår"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Slutför åtgärd genom att använda"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Slutför åtgärd med"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Slutför åtgärden med %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Slutför åtgärd"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Öppna med"</string>
@@ -1485,7 +1486,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"Tillgänglighet"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Bakgrund"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Ändra bakgrund"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Meddelandelyssnare"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"Aviseringslyssnare"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"Lyssnare för VR"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Leverantör"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Rankningstjänst för aviseringar"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Tillåt engångsåtkomst"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Tillåt inte"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"I enhetsloggar registreras vad som händer på enheten. Appar kan använda dessa loggar för att hitta och åtgärda problem.\n\nVissa loggar kan innehålla känsliga uppgifter, så du ska bara bevilja appar du litar på åtkomst till alla enhetsloggar. \n\nEn app har åtkomst till sina egna loggar även om du inte ger den åtkomst till alla enhetsloggar. Enhetens tillverkare kan fortfarande ha åtkomst till vissa loggar eller viss information på enheten."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Enhetsloggar registrerar vad som händer på enheten. Appar kan använda dessa loggar för att hitta och åtgärda problem.\n\nVissa loggar kan innehålla känsliga uppgifter, så du ska bara bevilja appar du litar på åtkomst till alla enhetsloggar. \n\nEn app har åtkomst till sina egna loggar även om du inte ger den åtkomst till alla enhetsloggar. Enhetens tillverkare kan fortfarande ha åtkomst till vissa loggar eller viss information på enheten.\n\nLäs mer på g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Visa inte igen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vill kunna visa bitar av <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Redigera"</string>

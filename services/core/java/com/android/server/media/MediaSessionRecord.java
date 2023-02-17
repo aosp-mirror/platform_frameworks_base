@@ -52,6 +52,8 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -936,8 +938,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         }
 
         @Override
-        public void setMediaButtonReceiver(PendingIntent pi, String sessionPackageName)
-                throws RemoteException {
+        public void setMediaButtonReceiver(PendingIntent pi) throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
                 if ((mPolicies & MediaSessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
@@ -945,7 +946,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                     return;
                 }
                 mMediaButtonReceiverHolder =
-                        MediaButtonReceiverHolder.create(mContext, mUserId, pi, sessionPackageName);
+                        MediaButtonReceiverHolder.create(mUserId, pi, mPackageName);
                 mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -956,6 +957,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         public void setMediaButtonBroadcastReceiver(ComponentName receiver) throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
+                //mPackageName has been verified in MediaSessionService.enforcePackageName().
+                if (receiver != null && !TextUtils.equals(
+                        mPackageName, receiver.getPackageName())) {
+                    EventLog.writeEvent(0x534e4554, "238177121", -1, ""); // SafetyNet logging.
+                    throw new IllegalArgumentException("receiver does not belong to "
+                            + "package name provided to MediaSessionRecord. Pkg = " + mPackageName
+                            + ", Receiver Pkg = " + receiver.getPackageName());
+                }
                 if ((mPolicies & MediaSessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
                         != 0) {
                     return;

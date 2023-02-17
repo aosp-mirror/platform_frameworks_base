@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ଭଏସ୍‌ ମେଲ୍"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"ସଂଯୋଗରେ ସମସ୍ୟା ଅଛି କିମ୍ବା ଅମାନ୍ୟ MMI କୋଡ୍।"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ଫିଚର ସମର୍ଥିତ ନୁହେଁ।"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"କେବଳ ସ୍ଥାୟୀ ଡାୟଲିଙ୍ଗ ନମ୍ବର୍‌ ପାଇଁ କାର୍ଯ୍ୟ ସୀମିତ ଅଟେ।"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ଆପଣ ରୋମିଙ୍ଗରେ ଥିବାବେଳେ କଲ୍‍ ଫର୍‌ୱର୍ଡିଙ୍ଗ ସେଟିଙ୍ଗ ବଦଳାଇପାରିବେ ନାହିଁ।"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"ସେବା ସକ୍ଷମ କରାଯାଇଥିଲା।"</string>
@@ -90,7 +91,7 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ଆଲର୍ଟ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"କଲ୍‌ ଫରୱାର୍ଡିଂ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ଜରୁରୀକାଳୀନ କଲବ୍ୟାକ୍‍ ମୋଡ୍‍"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"ମୋବାଇଲ୍‍ ଡାଟା ଷ୍ଟାଟସ୍‌"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"ମୋବାଇଲ ଡାଟା ଷ୍ଟାଟସ"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS ମେସେଜ୍‌"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"ଭଏସମେଲ୍‍ ମେସେଜ୍‍"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"ୱାଇ-ଫାଇ କଲିଙ୍ଗ"</string>
@@ -799,30 +800,30 @@
     <item msgid="8150904584178569699">"ୱାର୍କ ଫ୍ୟାକ୍ସ"</item>
     <item msgid="4537253139152229577">"ହୋମ ଫାକ୍ସ"</item>
     <item msgid="6751245029698664340">"ପେଜର୍"</item>
-    <item msgid="1692790665884224905">"ଅନ୍ୟାନ୍ୟ"</item>
+    <item msgid="1692790665884224905">"ଅନ୍ୟ"</item>
     <item msgid="6216981255272016212">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="7786349763648997741">"ହୋମ"</item>
     <item msgid="435564470865989199">"ୱାର୍କ"</item>
-    <item msgid="4199433197875490373">"ଅନ୍ୟାନ୍ୟ"</item>
+    <item msgid="4199433197875490373">"ଅନ୍ୟ"</item>
     <item msgid="3233938986670468328">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="3861463339764243038">"ହୋମ"</item>
     <item msgid="5472578890164979109">"ୱାର୍କ"</item>
-    <item msgid="5718921296646594739">"ଅନ୍ୟାନ୍ୟ"</item>
+    <item msgid="5718921296646594739">"ଅନ୍ୟ"</item>
     <item msgid="5523122236731783179">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="588088543406993772">"ହୋମ"</item>
     <item msgid="5503060422020476757">"ୱାର୍କ"</item>
-    <item msgid="2530391194653760297">"ଅନ୍ୟାନ୍ୟ"</item>
+    <item msgid="2530391194653760297">"ଅନ୍ୟ"</item>
     <item msgid="7640927178025203330">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="6144047813304847762">"ୱାର୍କ"</item>
-    <item msgid="7402720230065674193">"ଅନ୍ୟାନ୍ୟ"</item>
+    <item msgid="7402720230065674193">"ଅନ୍ୟ"</item>
     <item msgid="808230403067569648">"କଷ୍ଟମ୍‌"</item>
   </string-array>
   <string-array name="imProtocols">
@@ -842,7 +843,7 @@
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"ୱାର୍କ ଫାକ୍ସ"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"ହୋମ ଫାକ୍ସ"</string>
     <string name="phoneTypePager" msgid="576402072263522767">"ପେଜର୍"</string>
-    <string name="phoneTypeOther" msgid="6918196243648754715">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="phoneTypeOther" msgid="6918196243648754715">"ଅନ୍ୟ"</string>
     <string name="phoneTypeCallback" msgid="3455781500844157767">"କଲବ୍ୟାକ୍"</string>
     <string name="phoneTypeCar" msgid="4604775148963129195">"କାର୍"</string>
     <string name="phoneTypeCompanyMain" msgid="4482773154536455441">"କମ୍ପାନୀର ମୁଖ୍ୟ"</string>
@@ -863,16 +864,16 @@
     <string name="emailTypeCustom" msgid="1809435350482181786">"କଷ୍ଟମ୍‌"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"ହୋମ"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"ୱାର୍କ"</string>
-    <string name="emailTypeOther" msgid="5131130857030897465">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="emailTypeOther" msgid="5131130857030897465">"ଅନ୍ୟ"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"ମୋବାଇଲ୍‍"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"କଷ୍ଟମ୍‌"</string>
     <string name="postalTypeHome" msgid="7562272480949727912">"ହୋମ"</string>
     <string name="postalTypeWork" msgid="8553425424652012826">"ୱାର୍କ"</string>
-    <string name="postalTypeOther" msgid="7094245413678857420">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="postalTypeOther" msgid="7094245413678857420">"ଅନ୍ୟ"</string>
     <string name="imTypeCustom" msgid="5653384545085765570">"କଷ୍ଟମ୍‌"</string>
     <string name="imTypeHome" msgid="6996507981044278216">"ହୋମ"</string>
     <string name="imTypeWork" msgid="2099668940169903123">"ୱାର୍କ"</string>
-    <string name="imTypeOther" msgid="8068447383276219810">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="imTypeOther" msgid="8068447383276219810">"ଅନ୍ୟ"</string>
     <string name="imProtocolCustom" msgid="4437878287653764692">"କଷ୍ଟମ୍‌"</string>
     <string name="imProtocolAim" msgid="4050198236506604378">"AIM"</string>
     <string name="imProtocolMsn" msgid="2257148557766499232">"Windows Live"</string>
@@ -884,7 +885,7 @@
     <string name="imProtocolJabber" msgid="7919269388889582015">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="4985002408136148256">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="8684458700669564172">"ୱାର୍କ"</string>
-    <string name="orgTypeOther" msgid="5450675258408005553">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="orgTypeOther" msgid="5450675258408005553">"ଅନ୍ୟ"</string>
     <string name="orgTypeCustom" msgid="1126322047677329218">"କଷ୍ଟମ୍‌"</string>
     <string name="relationTypeCustom" msgid="282938315217441351">"କଷ୍ଟମ୍‌"</string>
     <string name="relationTypeAssistant" msgid="4057605157116589315">"Assistant"</string>
@@ -904,7 +905,7 @@
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"କଷ୍ଟମ୍‌"</string>
     <string name="sipAddressTypeHome" msgid="5918441930656878367">"ହୋମ"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"ୱାର୍କ"</string>
-    <string name="sipAddressTypeOther" msgid="6317012577345187275">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="sipAddressTypeOther" msgid="6317012577345187275">"ଅନ୍ୟ"</string>
     <string name="quick_contacts_not_available" msgid="1262709196045052223">"ଏହି କଣ୍ଟାକ୍ଟ ଦେଖିବାକୁ କୌଣସି ଆପ୍ଲିକେସନ ମିଳିଲା ନାହିଁ।"</string>
     <string name="keyguard_password_enter_pin_code" msgid="6401406801060956153">"PIN କୋଡ୍‍ ଟାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="keyguard_password_enter_puk_code" msgid="3112256684547584093">"PUK ଓ ନୂଆ PIN କୋଡ୍‍ ଟାଇପ୍‍ କରନ୍ତୁ"</string>

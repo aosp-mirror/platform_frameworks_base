@@ -6,7 +6,7 @@
     <string name="portal_notification_id" msgid="5155057562457079297">"موبائل ڈیٹا ختم ہو چکا ہے"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"آپ کا موبائل ڈیٹا غیر فعال کر دیا گیا ہے"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"‏‎%s ویب سائٹ ملاحظہ کرنے کیلئے تھپتھپائیں"</string>
-    <string name="no_data_notification_detail" msgid="3112125343857014825">"‏براہ کرم اپنے خدمت کے فراہم کنندہ %s سے رابطہ کریں"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"‏براہ کرم اپنے سروس فراہم کنندہ %s سے رابطہ کریں"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"کوئی موبائل ڈیٹا کنکشن نہیں ہے"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"‏%s کے ذریعے ڈیٹا یا رومنگ پلان شامل کریں"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"موبائل ڈیٹا کی صورت حال"</string>

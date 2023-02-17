@@ -28,6 +28,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -40,6 +42,7 @@ import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
@@ -62,12 +65,16 @@ public class StatusBarIconControllerImpl implements Tunable,
         ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController, DemoMode {
 
     private static final String TAG = "StatusBarIconController";
+    // Use this suffix to prevent external icon slot names from unintentionally overriding our
+    // internal, system-level slot names. See b/255428281.
+    @VisibleForTesting
+    protected static final String EXTERNAL_SLOT_SUFFIX = "__external";
 
     private final StatusBarIconList mStatusBarIconList;
     private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
     private final ArraySet<String> mIconHideList = new ArraySet<>();
-
-    private Context mContext;
+    private final StatusBarPipelineFlags mStatusBarPipelineFlags;
+    private final Context mContext;
 
     /** */
     @Inject
@@ -78,9 +85,12 @@ public class StatusBarIconControllerImpl implements Tunable,
             ConfigurationController configurationController,
             TunerService tunerService,
             DumpManager dumpManager,
-            StatusBarIconList statusBarIconList) {
+            StatusBarIconList statusBarIconList,
+            StatusBarPipelineFlags statusBarPipelineFlags
+    ) {
         mStatusBarIconList = statusBarIconList;
         mContext = context;
+        mStatusBarPipelineFlags = statusBarPipelineFlags;
 
         configurationController.addCallback(this);
         commandQueue.addCallback(this);
@@ -191,12 +201,13 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
     }
 
-    /**
-     * Signal icons need to be handled differently, because they can be
-     * composite views
-     */
     @Override
-    public void setSignalIcon(String slot, WifiIconState state) {
+    public void setWifiIcon(String slot, WifiIconState state) {
+        if (mStatusBarPipelineFlags.useNewWifiIcon()) {
+            Log.d(TAG, "ignoring old pipeline callback because the new wifi icon is enabled");
+            return;
+        }
+
         if (state == null) {
             removeIcon(slot, 0);
             return;
@@ -212,6 +223,24 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
     }
 
+
+    @Override
+    public void setNewWifiIcon() {
+        if (!mStatusBarPipelineFlags.useNewWifiIcon()) {
+            Log.d(TAG, "ignoring new pipeline callback because the new wifi icon is disabled");
+            return;
+        }
+
+        String slot = mContext.getString(com.android.internal.R.string.status_bar_wifi);
+        StatusBarIconHolder holder = mStatusBarIconList.getIconHolder(slot, /* tag= */ 0);
+        if (holder == null) {
+            holder = StatusBarIconHolder.forNewWifiIcon();
+            setIcon(slot, holder);
+        } else {
+            // Don't have to do anything in the new world
+        }
+    }
+
     /**
      * Accept a list of MobileIconStates, which all live in the same slot(?!), and then are sorted
      * by subId. Don't worry this definitely makes sense and works.
@@ -220,6 +249,11 @@ public class StatusBarIconControllerImpl implements Tunable,
      */
     @Override
     public void setMobileIcons(String slot, List<MobileIconState> iconStates) {
+        if (mStatusBarPipelineFlags.useNewMobileIcons()) {
+            Log.d(TAG, "ignoring old pipeline callbacks, because the new mobile "
+                    + "icons are enabled");
+            return;
+        }
         Slot mobileSlot = mStatusBarIconList.getSlot(slot);
 
         // Reverse the sort order to show icons with left to right([Slot1][Slot2]..).
@@ -227,7 +261,6 @@ public class StatusBarIconControllerImpl implements Tunable,
         Collections.reverse(iconStates);
 
         for (MobileIconState state : iconStates) {
-
             StatusBarIconHolder holder = mobileSlot.getHolderForTag(state.subId);
             if (holder == null) {
                 holder = StatusBarIconHolder.fromMobileIconState(state);
@@ -235,6 +268,34 @@ public class StatusBarIconControllerImpl implements Tunable,
             } else {
                 holder.setMobileState(state);
                 handleSet(slot, holder);
+            }
+        }
+    }
+
+    @Override
+    public void setNewMobileIconSubIds(List<Integer> subIds) {
+        if (!mStatusBarPipelineFlags.useNewMobileIcons()) {
+            Log.d(TAG, "ignoring new pipeline callback, "
+                    + "since the new mobile icons are disabled");
+            return;
+        }
+        String slotName = mContext.getString(com.android.internal.R.string.status_bar_mobile);
+        Slot mobileSlot = mStatusBarIconList.getSlot(slotName);
+
+        // Because of the way we cache the icon holders, we need to remove everything any time
+        // we get a new set of subscriptions. This might change in the future, but is required
+        // to support demo mode for now
+        removeAllIconsForSlot(slotName);
+
+        Collections.reverse(subIds);
+
+        for (Integer subId : subIds) {
+            StatusBarIconHolder holder = mobileSlot.getHolderForTag(subId);
+            if (holder == null) {
+                holder = StatusBarIconHolder.fromSubIdForModernMobileIcon(subId);
+                setIcon(slotName, holder);
+            } else {
+                // Don't have to do anything in the new world
             }
         }
     }
@@ -291,21 +352,26 @@ public class StatusBarIconControllerImpl implements Tunable,
 
     @Override
     public void setExternalIcon(String slot) {
-        int viewIndex = mStatusBarIconList.getViewIndex(slot, 0);
+        String slotName = createExternalSlotName(slot);
+        int viewIndex = mStatusBarIconList.getViewIndex(slotName, 0);
         int height = mContext.getResources().getDimensionPixelSize(
                 R.dimen.status_bar_icon_drawing_size);
         mIconGroups.forEach(l -> l.onIconExternal(viewIndex, height));
     }
 
-    //TODO: remove this (used in command queue and for 3rd party tiles?)
+    // Override for *both* CommandQueue.Callbacks AND StatusBarIconController.
+    // TODO(b/265307726): Pull out the CommandQueue callbacks into a member variable to
+    //  differentiate between those callback methods and StatusBarIconController methods.
+    @Override
     public void setIcon(String slot, StatusBarIcon icon) {
+        String slotName = createExternalSlotName(slot);
         if (icon == null) {
-            removeAllIconsForSlot(slot);
+            removeAllIconsForSlot(slotName);
             return;
         }
 
         StatusBarIconHolder holder = StatusBarIconHolder.fromIcon(icon);
-        setIcon(slot, holder);
+        setIcon(slotName, holder);
     }
 
     private void setIcon(String slot, @NonNull StatusBarIconHolder holder) {
@@ -351,10 +417,12 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
     }
 
-    /** */
+    // CommandQueue.Callbacks override
+    // TODO(b/265307726): Pull out the CommandQueue callbacks into a member variable to
+    //  differentiate between those callback methods and StatusBarIconController methods.
     @Override
     public void removeIcon(String slot) {
-        removeAllIconsForSlot(slot);
+        removeAllIconsForExternalSlot(slot);
     }
 
     /** */
@@ -366,6 +434,11 @@ public class StatusBarIconControllerImpl implements Tunable,
         int viewIndex = mStatusBarIconList.getViewIndex(slot, tag);
         mStatusBarIconList.removeIcon(slot, tag);
         mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
+    }
+
+    @Override
+    public void removeAllIconsForExternalSlot(String slotName) {
+        removeAllIconsForSlot(createExternalSlotName(slotName));
     }
 
     /** */
@@ -383,8 +456,6 @@ public class StatusBarIconControllerImpl implements Tunable,
             mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
         }
     }
-
-
 
     private void handleSet(String slotName, StatusBarIconHolder holder) {
         int viewIndex = mStatusBarIconList.getViewIndex(slotName, holder.getTag());
@@ -452,5 +523,13 @@ public class StatusBarIconControllerImpl implements Tunable,
     @Override
     public void onDensityOrFontScaleChanged() {
         refreshIconGroups();
+    }
+
+    private String createExternalSlotName(String slot) {
+        if (slot.endsWith(EXTERNAL_SLOT_SUFFIX)) {
+            return slot;
+        } else {
+            return slot + EXTERNAL_SLOT_SUFFIX;
+        }
     }
 }

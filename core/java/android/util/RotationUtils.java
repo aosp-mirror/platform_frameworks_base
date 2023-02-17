@@ -25,6 +25,7 @@ import android.annotation.Dimension;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
@@ -175,6 +176,29 @@ public class RotationUtils {
     public static void rotatePoint(Point inOutPoint, @Rotation int rotation,
             int parentW, int parentH) {
         int origX = inOutPoint.x;
+        switch (rotation) {
+            case ROTATION_0:
+                return;
+            case ROTATION_90:
+                inOutPoint.x = inOutPoint.y;
+                inOutPoint.y = parentW - origX;
+                return;
+            case ROTATION_180:
+                inOutPoint.x = parentW - inOutPoint.x;
+                inOutPoint.y = parentH - inOutPoint.y;
+                return;
+            case ROTATION_270:
+                inOutPoint.x = parentH - inOutPoint.y;
+                inOutPoint.y = origX;
+        }
+    }
+
+    /**
+     * Same as {@link #rotatePoint}, but for float coordinates.
+     */
+    public static void rotatePointF(PointF inOutPoint, @Rotation int rotation,
+            float parentW, float parentH) {
+        float origX = inOutPoint.x;
         switch (rotation) {
             case ROTATION_0:
                 return;

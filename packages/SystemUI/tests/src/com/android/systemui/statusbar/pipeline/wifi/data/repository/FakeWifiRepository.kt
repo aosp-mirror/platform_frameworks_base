@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository
 
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositoryImpl.Companion.ACTIVITY_DEFAULT
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl.Companion.ACTIVITY_DEFAULT
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -27,22 +27,29 @@ class FakeWifiRepository : WifiRepository {
     private val _isWifiEnabled: MutableStateFlow<Boolean> = MutableStateFlow(false)
     override val isWifiEnabled: StateFlow<Boolean> = _isWifiEnabled
 
+    private val _isWifiDefault: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val isWifiDefault: StateFlow<Boolean> = _isWifiDefault
+
     private val _wifiNetwork: MutableStateFlow<WifiNetworkModel> =
         MutableStateFlow(WifiNetworkModel.Inactive)
     override val wifiNetwork: StateFlow<WifiNetworkModel> = _wifiNetwork
 
     private val _wifiActivity = MutableStateFlow(ACTIVITY_DEFAULT)
-    override val wifiActivity: StateFlow<WifiActivityModel> = _wifiActivity
+    override val wifiActivity: StateFlow<DataActivityModel> = _wifiActivity
 
     fun setIsWifiEnabled(enabled: Boolean) {
         _isWifiEnabled.value = enabled
+    }
+
+    fun setIsWifiDefault(default: Boolean) {
+        _isWifiDefault.value = default
     }
 
     fun setWifiNetwork(wifiNetworkModel: WifiNetworkModel) {
         _wifiNetwork.value = wifiNetworkModel
     }
 
-    fun setWifiActivity(activity: WifiActivityModel) {
+    fun setWifiActivity(activity: DataActivityModel) {
         _wifiActivity.value = activity
     }
 }

@@ -19,12 +19,13 @@ package com.android.systemui.doze
 import android.view.Display
 import com.android.systemui.doze.DozeLog.Reason
 import com.android.systemui.doze.DozeLog.reasonToString
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel.DEBUG
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel.DEBUG
+import com.android.systemui.plugins.log.LogLevel.ERROR
+import com.android.systemui.plugins.log.LogLevel.INFO
 import com.android.systemui.log.dagger.DozeLog
 import com.android.systemui.statusbar.policy.DevicePostureController
+import com.google.errorprone.annotations.CompileTimeConstant
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -95,13 +96,11 @@ class DozeLogger @Inject constructor(
     fun logFling(
         expand: Boolean,
         aboveThreshold: Boolean,
-        thresholdNeeded: Boolean,
         screenOnFromTouch: Boolean
     ) {
         buffer.log(TAG, DEBUG, {
             bool1 = expand
             bool2 = aboveThreshold
-            bool3 = thresholdNeeded
             bool4 = screenOnFromTouch
         }, {
             "Fling expand=$bool1 aboveThreshold=$bool2 thresholdNeeded=$bool3 " +
@@ -155,11 +154,11 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logKeyguardVisibilityChange(isShowing: Boolean) {
+    fun logKeyguardVisibilityChange(isVisible: Boolean) {
         buffer.log(TAG, INFO, {
-            bool1 = isShowing
+            bool1 = isVisible
         }, {
-            "Keyguard visibility change, isShowing=$bool1"
+            "Keyguard visibility change, isVisible=$bool1"
         })
     }
 
@@ -224,13 +223,16 @@ class DozeLogger @Inject constructor(
         })
     }
 
-    fun logPulseDropped(pulsePending: Boolean, state: DozeMachine.State, blocked: Boolean) {
+    /**
+     * Log why a pulse was dropped and the current doze machine state. The state can be null
+     * if the DozeMachine is the middle of transitioning between states.
+     */
+    fun logPulseDropped(from: String, state: DozeMachine.State?) {
         buffer.log(TAG, INFO, {
-            bool1 = pulsePending
-            str1 = state.name
-            bool2 = blocked
+            str1 = from
+            str2 = state?.name
         }, {
-            "Pulse dropped, pulsePending=$bool1 state=$str1 blocked=$bool2"
+            "Pulse dropped, cannot pulse from=$str1 state=$str2"
         })
     }
 
@@ -240,6 +242,16 @@ class DozeLogger @Inject constructor(
             str1 = reason
         }, {
             "SensorEvent [$int1] dropped, reason=$str1"
+        })
+    }
+
+    fun logPulseEvent(pulseEvent: String, dozing: Boolean, pulseReason: String) {
+        buffer.log(TAG, DEBUG, {
+            str1 = pulseEvent
+            bool1 = dozing
+            str2 = pulseReason
+        }, {
+            "Pulse-$str1 dozing=$bool1 pulseReason=$str2"
         })
     }
 
@@ -310,6 +322,58 @@ class DozeLogger @Inject constructor(
         buffer.log(TAG, INFO, {}, {
             "Doze car mode started"
         })
+    }
+
+    fun logSensorRegisterAttempt(sensorInfo: String, successfulRegistration: Boolean) {
+        buffer.log(TAG, INFO, {
+            str1 = sensorInfo
+            bool1 = successfulRegistration
+        }, {
+            "Register sensor. Success=$bool1 sensor=$str1"
+        })
+    }
+
+    fun logSensorUnregisterAttempt(sensorInfo: String, successfulUnregister: Boolean) {
+        buffer.log(TAG, INFO, {
+            str1 = sensorInfo
+            bool1 = successfulUnregister
+        }, {
+            "Unregister sensor. Success=$bool1 sensor=$str1"
+        })
+    }
+
+    fun logSensorUnregisterAttempt(
+            sensorInfo: String,
+            successfulUnregister: Boolean,
+            reason: String
+    ) {
+        buffer.log(TAG, INFO, {
+            str1 = sensorInfo
+            bool1 = successfulUnregister
+            str2 = reason
+        }, {
+            "Unregister sensor. reason=$str2. Success=$bool1 sensor=$str1"
+        })
+    }
+
+    fun logSkipSensorRegistration(sensor: String) {
+        buffer.log(TAG, DEBUG, {
+            str1 = sensor
+        }, {
+            "Skipping sensor registration because its already registered. sensor=$str1"
+        })
+    }
+
+    fun logSetIgnoreTouchWhilePulsing(ignoreTouchWhilePulsing: Boolean) {
+        buffer.log(TAG, DEBUG, {
+            bool1 = ignoreTouchWhilePulsing
+        }, {
+            "Prox changed while pulsing. setIgnoreTouchWhilePulsing=$bool1"
+        })
+    }
+
+    fun log(@CompileTimeConstant msg: String) {
+        buffer.log(TAG, DEBUG, msg)
     }
 }
 

@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Talhólf"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Vandamál með tengingu eða ógild MMI-kóðaskipun."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Eiginleiki ekki studdur."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Aðgerð takmarkast við fast númeraval."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Ekki er hægt að breyta stillingum fyrir framsendingu símtala úr símanum á meðan þú ert í reiki."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Þjónustan var virkjuð."</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Leyfa aðgang í eitt skipti"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ekki leyfa"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Annálar tækisins skrá það sem gerist í tækinu. Forrit geta notað þessa annála til að finna og lagfæra vandamál.\n\nTilteknir annálar innihalda viðkvæmar upplýsingar og því skaltu einungis veita forritum sem þú treystir aðgang að öllum annálum tækisins. \n\nEf þú veitir þessu forriti ekki aðgang að öllum annálum tækisins hefur það áfram aðgang að eigin annálum. Framleiðandi tækisins getur þó hugsanlega opnað tiltekna annála eða upplýsingar í tækinu."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Annálar tækisins skrá það sem gerist í tækinu. Forrit geta notað þessa annála til að finna og lagfæra vandamál.\n\nTilteknir annálar innihalda viðkvæmar upplýsingar og því skaltu einungis veita forritum sem þú treystir aðgang að öllum annálum tækisins. \n\nEf þú veitir þessu forriti ekki aðgang að öllum annálum tækisins hefur það áfram aðgang að eigin annálum. Framleiðandi tækisins getur þó hugsanlega opnað tiltekna annála eða upplýsingar í tækinu.\n\nNánar á g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ekki sýna aftur"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vill sýna sneiðar úr <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Breyta"</string>

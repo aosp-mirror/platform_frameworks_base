@@ -17,18 +17,19 @@
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import android.graphics.Color
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /** A view model for the wifi icon shown in quick settings (when the shade is pulled down). */
 class QsWifiViewModel(
     statusBarPipelineFlags: StatusBarPipelineFlags,
-    wifiIcon: StateFlow<Icon.Resource?>,
+    wifiIcon: StateFlow<WifiIcon>,
     isActivityInViewVisible: Flow<Boolean>,
     isActivityOutViewVisible: Flow<Boolean>,
     isActivityContainerVisible: Flow<Boolean>,
+    isAirplaneSpacerVisible: Flow<Boolean>,
 ) :
     LocationBasedWifiViewModel(
         statusBarPipelineFlags,
@@ -37,4 +38,5 @@ class QsWifiViewModel(
         isActivityInViewVisible,
         isActivityOutViewVisible,
         isActivityContainerVisible,
+        isAirplaneSpacerVisible,
     )

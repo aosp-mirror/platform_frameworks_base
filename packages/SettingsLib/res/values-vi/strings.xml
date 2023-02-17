@@ -278,7 +278,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"Ứng dụng vị trí mô phỏng: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Mạng"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Chứng nhận hiển thị không dây"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Bật ghi nhật ký chi tiết Wi‑Fi"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Bật tính năng ghi nhật ký chi tiết Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Hạn chế quét tìm Wi-Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Tạo địa chỉ MAC ngẫu nhiên, không cố định mỗi khi kết nối Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dữ liệu di động luôn hoạt động"</string>
@@ -290,7 +290,7 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Chọn phiên bản Bluetooth AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Phiên bản Bluetooth MAP"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Chọn phiên bản Bluetooth MAP"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Codec âm thanh Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Bộ mã hoá và giải mã âm thanh qua Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Kích hoạt chế độ chọn codec\nâm thanh Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Tốc độ lấy mẫu âm thanh Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Kích hoạt chế độ chọn codec\nâm thanh Bluetooth: Tần số lấy mẫu"</string>
@@ -384,7 +384,7 @@
     <string name="window_blurs" msgid="6831008984828425106">"Cho phép làm mờ cửa sổ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Bắt buộc 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Bật 4x MSAA trong ứng dụng OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"Gỡ lỗi hoạt động của clip không phải là hình chữ nhật"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"Gỡ lỗi hoạt động của đoạn không phải hình chữ nhật"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Kết xuất HWUI cấu hình"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Bật lớp gỡ lỗi GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Cho phép tải lớp gỡ lỗi GPU cho ứng dụng gỡ lỗi"</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> nữa là pin đầy"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> nữa là pin đầy"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – Đã tạm dừng sạc"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – Quá trình sạc được tối ưu hoá"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – Quá trình sạc được tối ưu hoá"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Không xác định"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Đang sạc"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Đang sạc nhanh"</string>

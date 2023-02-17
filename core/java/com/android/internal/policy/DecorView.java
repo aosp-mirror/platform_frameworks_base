@@ -2402,7 +2402,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             return;
         }
         final ThreadedRenderer renderer = getThreadedRenderer();
-        if (renderer != null) {
+        if (renderer != null && !CAPTION_ON_SHELL) {
             loadBackgroundDrawablesIfNeeded();
             WindowInsets rootInsets = getRootWindowInsets();
             mBackdropFrameRenderer = new BackdropFrameRenderer(this, renderer,

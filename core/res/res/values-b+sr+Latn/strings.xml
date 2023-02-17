@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Glasovna pošta"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problemi sa vezom ili nevažeći MMI kôd."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcija nije podržana."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Rad je ograničen samo na brojeve fiksnog biranja."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Ne možete da promenite podešavanja preusmeravanja poziva sa telefona dok ste u romingu."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Usluga je omogućena."</string>

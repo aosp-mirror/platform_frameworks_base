@@ -344,7 +344,7 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Жергілікті терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Жергілікті шелл-код қол жетімділігін ұсынатын терминалды қолданбаны қосу"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP тексерісі"</string>
-    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP (кең жолақты цифрлық мазмұн қорғау) тексеру мүмкіндігін орнату"</string>
+    <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP (кең жолақты цифрлық контент қорғау) тексеру мүмкіндігін орнату"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Түзету"</string>
     <string name="debug_app" msgid="8903350241392391766">"Түзету қолданбасын таңдау"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Түзету қолданбалары орнатылмаған."</string>
@@ -424,7 +424,7 @@
   <string-array name="color_mode_descriptions">
     <item msgid="6828141153199944847">"Жақсартылған түстер"</item>
     <item msgid="4548987861791236754">"Көзбен көргендегі табиғи түстер"</item>
-    <item msgid="1282170165150762976">"Сандық мазмұн үшін оңтайландырылған түстер"</item>
+    <item msgid="1282170165150762976">"Сандық контент үшін оңтайландырылған түстер"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="5372523625297212320">"Күту режиміндегі қолданбалар"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Белсенді емес. Ауыстырып қосу үшін түртіңіз."</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Толық зарядталғанға дейін <xliff:g id="TIME">%1$s</xliff:g> қалды."</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – толық зарядталғанға дейін <xliff:g id="TIME">%2$s</xliff:g> қалды."</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядтау кідіртілді."</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядтау оңтайландырылды."</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядтау оңтайландырылды."</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгісіз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарядталуда"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядталуда"</string>
@@ -566,8 +567,8 @@
     <string name="accessor_expires_text" msgid="4625619273236786252">"Рұқсаттың аяқталу мерзімі: <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="delete_blob_text" msgid="2819192607255625697">"Ортақ деректерді жою"</string>
     <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Осы ортақ деректерді шынымен жойғыңыз келе ме?"</string>
-    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Пайдаланушылардың өздерінің қолданбалары мен мазмұны болады"</string>
-    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Өз аккаунтыңыздан қолданбалар мен мазмұнға қол жетімділікті шектеуіңізге болады"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Пайдаланушылардың өздерінің қолданбалары мен контенті болады"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Өз аккаунтыңыздан қолданбалар мен контентке қол жетімділікті шектеуіңізге болады"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Пайдаланушы"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Шектелген профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңа пайдаланушы қосылсын ба?"</string>

@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ਵੌਇਸਮੇਲ"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"ਕਨੈਕਸ਼ਨ ਸਮੱਸਿਆ ਜਾਂ ਅਵੈਧ MMI ਕੋਡ।"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ਵਿਸ਼ੇਸ਼ਤਾ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ।"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"ਓਪਰੇਸ਼ਨ ਕੇਵਲ ਫਿਕਸਡ ਡਾਇਲਿੰਗ ਨੰਬਰਾਂ ਤੱਕ ਸੀਮਿਤ ਹੈ।"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ਤੁਹਾਡੇ ਰੋਮਿੰਗ ਵਿੱਚ ਹੋਣ ਦੌਰਾਨ ਤੁਹਾਡੇ ਫ਼ੋਨ ਤੋਂ ਕਾਲ ਫਾਰਵਰਡਿੰਗ ਸੈਟਿੰਗਾਂ ਨੂੰ ਬਦਲਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"ਸੇਵਾ ਅਸਮਰੱਥ ਬਣਾਈ ਗਈ ਸੀ।"</string>
@@ -1287,7 +1288,7 @@
     <string name="volume_icon_description_media" msgid="4997633254078171233">"ਮੀਡੀਆ ਦੀ ਅਵਾਜ਼"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"ਸੂਚਨਾ ਵੌਲਿਊਮ"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਰਿੰਗਟੋਨ"</string>
-    <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ਪੂਰਵ-ਨਿਰਧਾਰਤ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"ਕੋਈ ਨਹੀਂ"</string>
     <string name="ringtone_picker_title" msgid="667342618626068253">"ਰਿੰਗਟੋਨਾਂ"</string>
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"ਅਲਾਰਮ ਧੁਨੀਆਂ"</string>

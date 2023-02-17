@@ -1176,6 +1176,11 @@ static void relabelAllDirs(const char* path, const char* context, fail_fn_t fail
   closedir(dir);
 }
 
+static bool is_sdk_sandbox_uid(uid_t uid) {
+    appid_t appId = multiuser_get_app_id(uid);
+    return appId >= AID_SDK_SANDBOX_PROCESS_START && appId <= AID_SDK_SANDBOX_PROCESS_END;
+}
+
 /**
  * Make other apps data directory not visible in CE, DE storage.
  *
@@ -1262,68 +1267,77 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   }
   closedir(dir);
 
-  // Prepare default dirs for user 0 as user 0 always exists.
-  int result = symlink("/data/data", "/data/user/0");
-  if (result != 0) {
-    fail_fn(CREATE_ERROR("Failed to create symlink /data/user/0 %s", strerror(errno)));
-  }
-  PrepareDirIfNotPresent("/data/user_de/0", DEFAULT_DATA_DIR_PERMISSION,
-      AID_ROOT, AID_ROOT, fail_fn);
-
-  for (int i = 0; i < size; i += 3) {
-    std::string const & packageName = merged_data_info_list[i];
-    std::string const & volUuid  = merged_data_info_list[i + 1];
-    std::string const & inode = merged_data_info_list[i + 2];
-
-    std::string::size_type sz;
-    long long ceDataInode = std::stoll(inode, &sz);
-
-    std::string actualCePath, actualDePath;
-    if (volUuid.compare("null") != 0) {
-      // Volume that is stored in /mnt/expand
-      char volPath[PATH_MAX];
-      char volCePath[PATH_MAX];
-      char volDePath[PATH_MAX];
-      char volCeUserPath[PATH_MAX];
-      char volDeUserPath[PATH_MAX];
-
-      snprintf(volPath, PATH_MAX, "/mnt/expand/%s", volUuid.c_str());
-      snprintf(volCePath, PATH_MAX, "%s/user", volPath);
-      snprintf(volDePath, PATH_MAX, "%s/user_de", volPath);
-      snprintf(volCeUserPath, PATH_MAX, "%s/%d", volCePath, userId);
-      snprintf(volDeUserPath, PATH_MAX, "%s/%d", volDePath, userId);
-
-      PrepareDirIfNotPresent(volPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
-      PrepareDirIfNotPresent(volCePath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
-      PrepareDirIfNotPresent(volDePath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
-      PrepareDirIfNotPresent(volCeUserPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
-          fail_fn);
-      PrepareDirIfNotPresent(volDeUserPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
-          fail_fn);
-
-      actualCePath = volCeUserPath;
-      actualDePath = volDeUserPath;
-    } else {
-      // Internal volume that stored in /data
-      char internalCeUserPath[PATH_MAX];
-      char internalDeUserPath[PATH_MAX];
-      snprintf(internalCeUserPath, PATH_MAX, "/data/user/%d", userId);
-      snprintf(internalDeUserPath, PATH_MAX, "/data/user_de/%d", userId);
-      // If it's not user 0, create /data/user/$USER.
-      if (userId == 0) {
-        actualCePath = internalLegacyCePath;
-      } else {
-        PrepareDirIfNotPresent(internalCeUserPath, DEFAULT_DATA_DIR_PERMISSION,
-            AID_ROOT, AID_ROOT, fail_fn);
-        actualCePath = internalCeUserPath;
+  // No bind mounting of app data should occur in the case of a sandbox process since SDK sandboxes
+  // should not be able to read app data. Tmpfs was mounted however since a sandbox should not have
+  // access to app data.
+  if (!is_sdk_sandbox_uid(uid)) {
+      // Prepare default dirs for user 0 as user 0 always exists.
+      int result = symlink("/data/data", "/data/user/0");
+      if (result != 0) {
+          fail_fn(CREATE_ERROR("Failed to create symlink /data/user/0 %s", strerror(errno)));
       }
-      PrepareDirIfNotPresent(internalDeUserPath, DEFAULT_DATA_DIR_PERMISSION,
-          AID_ROOT, AID_ROOT, fail_fn);
-      actualDePath = internalDeUserPath;
-    }
-    isolateAppDataPerPackage(userId, packageName, volUuid, ceDataInode,
-        actualCePath, actualDePath, fail_fn);
+      PrepareDirIfNotPresent("/data/user_de/0", DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
+                             fail_fn);
+
+      for (int i = 0; i < size; i += 3) {
+          std::string const& packageName = merged_data_info_list[i];
+          std::string const& volUuid = merged_data_info_list[i + 1];
+          std::string const& inode = merged_data_info_list[i + 2];
+
+          std::string::size_type sz;
+          long long ceDataInode = std::stoll(inode, &sz);
+
+          std::string actualCePath, actualDePath;
+          if (volUuid.compare("null") != 0) {
+              // Volume that is stored in /mnt/expand
+              char volPath[PATH_MAX];
+              char volCePath[PATH_MAX];
+              char volDePath[PATH_MAX];
+              char volCeUserPath[PATH_MAX];
+              char volDeUserPath[PATH_MAX];
+
+              snprintf(volPath, PATH_MAX, "/mnt/expand/%s", volUuid.c_str());
+              snprintf(volCePath, PATH_MAX, "%s/user", volPath);
+              snprintf(volDePath, PATH_MAX, "%s/user_de", volPath);
+              snprintf(volCeUserPath, PATH_MAX, "%s/%d", volCePath, userId);
+              snprintf(volDeUserPath, PATH_MAX, "%s/%d", volDePath, userId);
+
+              PrepareDirIfNotPresent(volPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
+                                     fail_fn);
+              PrepareDirIfNotPresent(volCePath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
+                                     fail_fn);
+              PrepareDirIfNotPresent(volDePath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
+                                     fail_fn);
+              PrepareDirIfNotPresent(volCeUserPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
+                                     fail_fn);
+              PrepareDirIfNotPresent(volDeUserPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT,
+                                     fail_fn);
+
+              actualCePath = volCeUserPath;
+              actualDePath = volDeUserPath;
+          } else {
+              // Internal volume that stored in /data
+              char internalCeUserPath[PATH_MAX];
+              char internalDeUserPath[PATH_MAX];
+              snprintf(internalCeUserPath, PATH_MAX, "/data/user/%d", userId);
+              snprintf(internalDeUserPath, PATH_MAX, "/data/user_de/%d", userId);
+              // If it's not user 0, create /data/user/$USER.
+              if (userId == 0) {
+                  actualCePath = internalLegacyCePath;
+              } else {
+                  PrepareDirIfNotPresent(internalCeUserPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT,
+                                         AID_ROOT, fail_fn);
+                  actualCePath = internalCeUserPath;
+              }
+              PrepareDirIfNotPresent(internalDeUserPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT,
+                                     AID_ROOT, fail_fn);
+              actualDePath = internalDeUserPath;
+          }
+          isolateAppDataPerPackage(userId, packageName, volUuid, ceDataInode, actualCePath,
+                                   actualDePath, fail_fn);
+      }
   }
+
   // We set the label AFTER everything is done, as we are applying
   // the file operations on tmpfs. If we set the label when we mount
   // tmpfs, SELinux will not happy as we are changing system_data_files.
@@ -1361,6 +1375,167 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   closedir(dir);
 
   freecon(dataDataContext);
+}
+
+/**
+ * Without sdk sandbox data isolation, the sandbox could detect if another app is installed on the
+ * system by "touching" other data directories like /data/misc_ce/0/sdksandbox/com.whatsapp, similar
+ * to apps without app data isolation (see {@link #isolateAppData()}).
+ *
+ * To prevent this, tmpfs is mounted onto misc_ce and misc_de directories on all possible volumes in
+ * a separate mount namespace. The sandbox directory path is then created containing the name of the
+ * client app package associated with the sdk sandbox. The contents for this (sdk level storage and
+ * shared sdk storage) are bind mounted from the sandbox data mirror.
+ */
+static void isolateSdkSandboxData(JNIEnv* env, jobjectArray pkg_data_info_list, uid_t uid,
+                                  const char* process_name, jstring managed_nice_name,
+                                  fail_fn_t fail_fn) {
+    const userid_t userId = multiuser_get_user_id(uid);
+
+    int size = (pkg_data_info_list != nullptr) ? env->GetArrayLength(pkg_data_info_list) : 0;
+    // The sandbox should only have information of one associated client app (package, uuid, inode)
+    if (size != 3) {
+        fail_fn(CREATE_ERROR(
+                "Unable to isolate sandbox data, incorrect associated app information"));
+    }
+
+    auto extract_fn = [env, process_name, managed_nice_name,
+                       pkg_data_info_list](int info_list_idx) {
+        jstring jstr = (jstring)(env->GetObjectArrayElement(pkg_data_info_list, info_list_idx));
+        return ExtractJString(env, process_name, managed_nice_name, jstr).value();
+    };
+    std::string packageName = extract_fn(0);
+    std::string volUuid = extract_fn(1);
+
+    char internalCePath[PATH_MAX];
+    char internalDePath[PATH_MAX];
+    char externalPrivateMountPath[PATH_MAX];
+    snprintf(internalCePath, PATH_MAX, "/data/misc_ce");
+    snprintf(internalDePath, PATH_MAX, "/data/misc_de");
+    snprintf(externalPrivateMountPath, PATH_MAX, "/mnt/expand");
+
+    char ceUserPath[PATH_MAX];
+    char deUserPath[PATH_MAX];
+    if (volUuid != "null") {
+        snprintf(ceUserPath, PATH_MAX, "%s/%s/misc_ce/%d", externalPrivateMountPath,
+                 volUuid.c_str(), userId);
+        snprintf(deUserPath, PATH_MAX, "%s/%s/misc_de/%d", externalPrivateMountPath,
+                 volUuid.c_str(), userId);
+    } else {
+        snprintf(ceUserPath, PATH_MAX, "%s/%d", internalCePath, userId);
+        snprintf(deUserPath, PATH_MAX, "%s/%d", internalDePath, userId);
+    }
+
+    char ceSandboxPath[PATH_MAX];
+    char deSandboxPath[PATH_MAX];
+    snprintf(ceSandboxPath, PATH_MAX, "%s/sdksandbox", ceUserPath);
+    snprintf(deSandboxPath, PATH_MAX, "%s/sdksandbox", deUserPath);
+
+    // If the client app using the sandbox has been installed when the device is locked and the
+    // sandbox starts up when the device is locked, sandbox storage might not have been created.
+    // In that case, mount tmpfs for data isolation, but don't bind mount.
+    bool bindMountCeSandboxDataDirs = true;
+    bool bindMountDeSandboxDataDirs = true;
+    if (access(ceSandboxPath, F_OK) != 0) {
+        bindMountCeSandboxDataDirs = false;
+    }
+    if (access(deSandboxPath, F_OK) != 0) {
+        bindMountDeSandboxDataDirs = false;
+    }
+
+    char* context = nullptr;
+    char* userContext = nullptr;
+    char* sandboxContext = nullptr;
+    if (getfilecon(internalDePath, &context) < 0) {
+        fail_fn(CREATE_ERROR("Unable to getfilecon on %s %s", internalDePath, strerror(errno)));
+    }
+    if (bindMountDeSandboxDataDirs) {
+        if (getfilecon(deUserPath, &userContext) < 0) {
+            fail_fn(CREATE_ERROR("Unable to getfilecon on %s %s", deUserPath, strerror(errno)));
+        }
+        if (getfilecon(deSandboxPath, &sandboxContext) < 0) {
+            fail_fn(CREATE_ERROR("Unable to getfilecon on %s %s", deSandboxPath, strerror(errno)));
+        }
+    }
+
+    MountAppDataTmpFs(internalCePath, fail_fn);
+    MountAppDataTmpFs(internalDePath, fail_fn);
+
+    // Mount tmpfs on all external volumes
+    DIR* dir = opendir(externalPrivateMountPath);
+    if (dir == nullptr) {
+        fail_fn(CREATE_ERROR("Failed to opendir %s", externalPrivateMountPath));
+    }
+    struct dirent* ent;
+    while ((ent = readdir(dir))) {
+        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+        if (ent->d_type != DT_DIR) {
+            fail_fn(CREATE_ERROR("Unexpected type: %d %s", ent->d_type, ent->d_name));
+        }
+        auto volPath = StringPrintf("%s/%s", externalPrivateMountPath, ent->d_name);
+        auto externalCePath = StringPrintf("%s/misc_ce", volPath.c_str());
+        auto externalDePath = StringPrintf("%s/misc_de", volPath.c_str());
+
+        WaitUntilDirReady(externalCePath.c_str(), fail_fn);
+        MountAppDataTmpFs(externalCePath.c_str(), fail_fn);
+        WaitUntilDirReady(externalDePath.c_str(), fail_fn);
+        MountAppDataTmpFs(externalDePath.c_str(), fail_fn);
+    }
+    closedir(dir);
+
+    char mirrorCeSandboxPath[PATH_MAX];
+    char mirrorDeSandboxPath[PATH_MAX];
+    snprintf(mirrorCeSandboxPath, PATH_MAX, "/data_mirror/misc_ce/%s/%d/sdksandbox",
+             volUuid.c_str(), userId);
+    snprintf(mirrorDeSandboxPath, PATH_MAX, "/data_mirror/misc_de/%s/%d/sdksandbox",
+             volUuid.c_str(), userId);
+
+    if (bindMountCeSandboxDataDirs) {
+        PrepareDir(ceUserPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
+        PrepareDir(ceSandboxPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
+        // TODO(b/231322885): Use inode numbers to find the correct app path when the device locked.
+        createAndMountAppData(packageName, packageName, mirrorCeSandboxPath, ceSandboxPath, fail_fn,
+                              true /*call_fail_fn*/);
+
+        relabelDir(ceSandboxPath, sandboxContext, fail_fn);
+        relabelDir(ceUserPath, userContext, fail_fn);
+    }
+    if (bindMountDeSandboxDataDirs) {
+        PrepareDir(deUserPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
+        PrepareDir(deSandboxPath, DEFAULT_DATA_DIR_PERMISSION, AID_ROOT, AID_ROOT, fail_fn);
+        createAndMountAppData(packageName, packageName, mirrorDeSandboxPath, deSandboxPath, fail_fn,
+                              true /*call_fail_fn*/);
+
+        relabelDir(deSandboxPath, sandboxContext, fail_fn);
+        relabelDir(deUserPath, userContext, fail_fn);
+    }
+
+    // We set the label AFTER everything is done, as we are applying
+    // the file operations on tmpfs. If we set the label when we mount
+    // tmpfs, SELinux will not happy as we are changing system_data_files.
+    relabelDir(internalCePath, context, fail_fn);
+    relabelDir(internalDePath, context, fail_fn);
+
+    // Relabel CE and DE dirs under /mnt/expand
+    dir = opendir(externalPrivateMountPath);
+    if (dir == nullptr) {
+        fail_fn(CREATE_ERROR("Failed to opendir %s", externalPrivateMountPath));
+    }
+    while ((ent = readdir(dir))) {
+        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+        auto volPath = StringPrintf("%s/%s", externalPrivateMountPath, ent->d_name);
+        auto externalCePath = StringPrintf("%s/misc_ce", volPath.c_str());
+        auto externalDePath = StringPrintf("%s/misc_de", volPath.c_str());
+        relabelDir(externalCePath.c_str(), context, fail_fn);
+        relabelDir(externalDePath.c_str(), context, fail_fn);
+    }
+    closedir(dir);
+
+    if (bindMountDeSandboxDataDirs) {
+        freecon(sandboxContext);
+        freecon(userContext);
+    }
+    freecon(context);
 }
 
 static void insertPackagesToMergedList(JNIEnv* env,
@@ -1427,6 +1602,12 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
   // the original profile directory anymore.
   MountAppDataTmpFs(kCurProfileDirPath, fail_fn);
   MountAppDataTmpFs(kRefProfileDirPath, fail_fn);
+
+  // Sandbox processes do not have JIT profile, so no data needs to be bind mounted. However, it
+  // should still not have access to JIT profile, so tmpfs is mounted.
+  if (is_sdk_sandbox_uid(uid)) {
+      return;
+  }
 
   // Create profile directory for this user.
   std::string actualCurUserProfile = StringPrintf("%s/%d", kCurProfileDirPath, user_id);
@@ -1580,9 +1761,15 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     // Make sure app is running in its own mount namespace before isolating its data directories.
     ensureInAppMountNamespace(fail_fn);
 
-    // Sandbox data and jit profile directories by overlaying a tmpfs on those dirs and bind
-    // mount all related packages separately.
+    // Isolate app data, jit profile and sandbox data directories by overlaying a tmpfs on those
+    // dirs and bind mount all related packages separately.
     if (mount_data_dirs) {
+        // Sdk sandbox data isolation does not need to occur for app processes since sepolicy
+        // prevents access to sandbox data anyway.
+        if (is_sdk_sandbox_uid(uid)) {
+            isolateSdkSandboxData(env, pkg_data_info_list, uid, process_name, managed_nice_name,
+                                  fail_fn);
+        }
         isolateAppData(env, pkg_data_info_list, allowlisted_data_info_list, uid, process_name,
                        managed_nice_name, fail_fn);
         isolateJitProfile(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);

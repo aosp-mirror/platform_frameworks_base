@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"व्हॉइसमेल"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"कनेक्शन समस्या किंवा अवैध MMI कोड."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"वैशिष्ट्याला सपोर्ट नाही."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"कार्य फक्त निश्चित डायलिंग नंबरसाठी प्रतिबंधित आहे."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"तुम्ही रोमिंगमध्ये असताना आपल्या फोनवरील कॉल फॉरवर्डिंग सेटिंंग्ज बदलू शकत नाही."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"सेवा सक्षम केली."</string>
@@ -367,7 +368,7 @@
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"ॲपला तुमच्या डिव्हाइसवर सुरू असलेल्या कॉलचे तपशील पाहण्याची आणि या कॉलना नियंत्रित करण्याची अनुमती द्या."</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"सेल प्रसारण मेसेज वाचा"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"आपल्या डिव्हाइसद्वारे प्राप्त केलेले सेल प्रसारण मेसेज वाचण्यासाठी अ‍ॅप ला अनुमती देते. काही स्थानांमध्ये तुम्हाला आणीबाणीच्या परिस्थितीची चेतावणी देण्यासाठी सेल प्रसारण सूचना वितरीत केल्या जातात. आणीबाणी सेल प्रसारण प्राप्त होते तेव्हा आपल्या डिव्हाइसच्या कार्यप्रदर्शनात किंवा कार्यात दुर्भावनापूर्ण अ‍ॅप्स व्यत्यय आणू शकतात."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"सदस्यता घेतलेली फीड वाचा"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"सदस्यत्व घेतलेली फीड वाचा"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"सध्या संकालित केलेल्या फीडविषयी तपशील मिळविण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"SMS मेसेज पाठवणे आणि पाहणे"</string>
     <string name="permdesc_sendSms" msgid="6757089798435130769">"SMS मेसेज पाठविण्यासाठी अ‍ॅप ला अनुमती देते. हे अनपेक्षित शुल्कामुळे होऊ शकते. दुर्भावनापूर्ण अ‍ॅप्स नी आपल्या पुष्टिकरणाशिवाय मेसेज पाठवल्यामुळे तुमचे पैसे खर्च होऊ शकतात."</string>

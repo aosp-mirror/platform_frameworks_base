@@ -456,19 +456,24 @@ public final class Settings implements Watchable, Snappable {
     // The user's preferred activities associated with particular intent
     // filters.
     @Watched
-    private final WatchedSparseArray<PreferredIntentResolver>
-            mPreferredActivities = new WatchedSparseArray<>();
+    private final WatchedSparseArray<PreferredIntentResolver> mPreferredActivities;
+    private final SnapshotCache<WatchedSparseArray<PreferredIntentResolver>>
+            mPreferredActivitiesSnapshot;
 
     // The persistent preferred activities of the user's profile/device owner
     // associated with particular intent filters.
     @Watched
     private final WatchedSparseArray<PersistentPreferredIntentResolver>
-            mPersistentPreferredActivities = new WatchedSparseArray<>();
+            mPersistentPreferredActivities;
+    private final SnapshotCache<WatchedSparseArray<PersistentPreferredIntentResolver>>
+            mPersistentPreferredActivitiesSnapshot;
+
 
     // For every user, it is used to find to which other users the intent can be forwarded.
     @Watched
-    private final WatchedSparseArray<CrossProfileIntentResolver>
-            mCrossProfileIntentResolvers = new WatchedSparseArray<>();
+    private final WatchedSparseArray<CrossProfileIntentResolver> mCrossProfileIntentResolvers;
+    private final SnapshotCache<WatchedSparseArray<CrossProfileIntentResolver>>
+            mCrossProfileIntentResolversSnapshot;
 
     @Watched
     final WatchedArrayMap<String, SharedUserSetting> mSharedUsers = new WatchedArrayMap<>();
@@ -477,11 +482,12 @@ public final class Settings implements Watchable, Snappable {
 
     // For reading/writing settings file.
     @Watched
-    private final WatchedArrayList<Signature> mPastSignatures =
-            new WatchedArrayList<Signature>();
+    private final WatchedArrayList<Signature> mPastSignatures;
+    private final SnapshotCache<WatchedArrayList<Signature>> mPastSignaturesSnapshot;
+
     @Watched
-    private final WatchedArrayMap<Long, Integer> mKeySetRefs =
-            new WatchedArrayMap<Long, Integer>();
+    private final WatchedArrayMap<Long, Integer> mKeySetRefs;
+    private final SnapshotCache<WatchedArrayMap<Long, Integer>> mKeySetRefsSnapshot;
 
     // Packages that have been renamed since they were first installed.
     // Keys are the new names of the packages, values are the original
@@ -512,7 +518,8 @@ public final class Settings implements Watchable, Snappable {
      * scanning to make it less confusing.
      */
     @Watched
-    private final WatchedArrayList<PackageSetting> mPendingPackages = new WatchedArrayList<>();
+    private final WatchedArrayList<PackageSetting> mPendingPackages;
+    private final SnapshotCache<WatchedArrayList<PackageSetting>> mPendingPackagesSnapshot;
 
     private final File mSystemDir;
 
@@ -584,6 +591,26 @@ public final class Settings implements Watchable, Snappable {
         mInstallerPackagesSnapshot =
                 new SnapshotCache.Auto<>(mInstallerPackages, mInstallerPackages,
                                          "Settings.mInstallerPackages");
+        mPreferredActivities = new WatchedSparseArray<>();
+        mPreferredActivitiesSnapshot = new SnapshotCache.Auto<>(mPreferredActivities,
+                mPreferredActivities, "Settings.mPreferredActivities");
+        mPersistentPreferredActivities = new WatchedSparseArray<>();
+        mPersistentPreferredActivitiesSnapshot = new SnapshotCache.Auto<>(
+                mPersistentPreferredActivities, mPersistentPreferredActivities,
+                "Settings.mPersistentPreferredActivities");
+        mCrossProfileIntentResolvers = new WatchedSparseArray<>();
+        mCrossProfileIntentResolversSnapshot = new SnapshotCache.Auto<>(
+                mCrossProfileIntentResolvers, mCrossProfileIntentResolvers,
+                "Settings.mCrossProfileIntentResolvers");
+        mPastSignatures = new WatchedArrayList<>();
+        mPastSignaturesSnapshot = new SnapshotCache.Auto<>(mPastSignatures, mPastSignatures,
+                "Settings.mPastSignatures");
+        mKeySetRefs = new WatchedArrayMap<>();
+        mKeySetRefsSnapshot = new SnapshotCache.Auto<>(mKeySetRefs, mKeySetRefs,
+                "Settings.mKeySetRefs");
+        mPendingPackages = new WatchedArrayList<>();
+        mPendingPackagesSnapshot = new SnapshotCache.Auto<>(mPendingPackages, mPendingPackages,
+                "Settings.mPendingPackages");
         mKeySetManagerService = new KeySetManagerService(mPackages);
 
         // Test-only handler working on background thread.
@@ -624,6 +651,26 @@ public final class Settings implements Watchable, Snappable {
         mInstallerPackagesSnapshot =
                 new SnapshotCache.Auto<>(mInstallerPackages, mInstallerPackages,
                                          "Settings.mInstallerPackages");
+        mPreferredActivities = new WatchedSparseArray<>();
+        mPreferredActivitiesSnapshot = new SnapshotCache.Auto<>(mPreferredActivities,
+                mPreferredActivities, "Settings.mPreferredActivities");
+        mPersistentPreferredActivities = new WatchedSparseArray<>();
+        mPersistentPreferredActivitiesSnapshot = new SnapshotCache.Auto<>(
+                mPersistentPreferredActivities, mPersistentPreferredActivities,
+                "Settings.mPersistentPreferredActivities");
+        mCrossProfileIntentResolvers = new WatchedSparseArray<>();
+        mCrossProfileIntentResolversSnapshot = new SnapshotCache.Auto<>(
+                mCrossProfileIntentResolvers, mCrossProfileIntentResolvers,
+                "Settings.mCrossProfileIntentResolvers");
+        mPastSignatures = new WatchedArrayList<>();
+        mPastSignaturesSnapshot = new SnapshotCache.Auto<>(mPastSignatures, mPastSignatures,
+                "Settings.mPastSignatures");
+        mKeySetRefs = new WatchedArrayMap<>();
+        mKeySetRefsSnapshot = new SnapshotCache.Auto<>(mKeySetRefs, mKeySetRefs,
+                "Settings.mKeySetRefs");
+        mPendingPackages = new WatchedArrayList<>();
+        mPendingPackagesSnapshot = new SnapshotCache.Auto<>(mPendingPackages, mPendingPackages,
+                "Settings.mPendingPackages");
         mKeySetManagerService = new KeySetManagerService(mPackages);
 
         mHandler = handler;
@@ -700,24 +747,27 @@ public final class Settings implements Watchable, Snappable {
         mBlockUninstallPackages.snapshot(r.mBlockUninstallPackages);
         mVersion.putAll(r.mVersion);
         mVerifierDeviceIdentity = r.mVerifierDeviceIdentity;
-        WatchedSparseArray.snapshot(
-                mPreferredActivities, r.mPreferredActivities);
-        WatchedSparseArray.snapshot(
-                mPersistentPreferredActivities, r.mPersistentPreferredActivities);
-        WatchedSparseArray.snapshot(
-                mCrossProfileIntentResolvers, r.mCrossProfileIntentResolvers);
+        mPreferredActivities = r.mPreferredActivitiesSnapshot.snapshot();
+        mPreferredActivitiesSnapshot = new SnapshotCache.Sealed<>();
+        mPersistentPreferredActivities = r.mPersistentPreferredActivitiesSnapshot.snapshot();
+        mPersistentPreferredActivitiesSnapshot = new SnapshotCache.Sealed<>();
+        mCrossProfileIntentResolvers = r.mCrossProfileIntentResolversSnapshot.snapshot();
+        mCrossProfileIntentResolversSnapshot = new SnapshotCache.Sealed<>();
+
         mSharedUsers.snapshot(r.mSharedUsers);
         mAppIds = r.mAppIds.snapshot();
-        WatchedArrayList.snapshot(
-                mPastSignatures, r.mPastSignatures);
-        WatchedArrayMap.snapshot(
-                mKeySetRefs, r.mKeySetRefs);
+
+        mPastSignatures = r.mPastSignaturesSnapshot.snapshot();
+        mPastSignaturesSnapshot = new SnapshotCache.Sealed<>();
+        mKeySetRefs = r.mKeySetRefsSnapshot.snapshot();
+        mKeySetRefsSnapshot = new SnapshotCache.Sealed<>();
+
         mRenamedPackages.snapshot(r.mRenamedPackages);
         mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
         mDefaultBrowserApp.snapshot(r.mDefaultBrowserApp);
         // mReadMessages
-        WatchedArrayList.snapshot(
-                mPendingPackages, r.mPendingPackages);
+        mPendingPackages = r.mPendingPackagesSnapshot.snapshot();
+        mPendingPackagesSnapshot = new SnapshotCache.Sealed<>();
         mSystemDir = null;
         // mKeySetManagerService;
         mPermissions = r.mPermissions;

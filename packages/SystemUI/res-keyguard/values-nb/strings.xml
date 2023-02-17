@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lader"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lader raskt"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Lader sakte"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladingen er satt på pause for å beskytte batteriet"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ladingen er optimalisert for å beskytte batteriet"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Trykk på menyknappen for å låse opp."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Nettverket er låst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM-kort mangler"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Du må tegne mønsteret etter at enheten har startet på nytt"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Du må skrive inn PIN-koden etter at enheten har startet på nytt"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Du må skrive inn passordet etter at enheten har startet på nytt"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Du må tegne mønsteret for ekstra sikkerhet"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Du må skrive inn PIN-koden for ekstra sikkerhet"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Du må skrive inn passordet for ekstra sikkerhet"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Bruk mønster i stedet, for å øke sikkerheten"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Bruk PIN-kode i stedet, for å øke sikkerheten"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Bruk passord i stedet, for å øke sikkerheten"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Enheten er låst av administratoren"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Enheten ble låst manuelt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ikke gjenkjent"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Standard"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Boble"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analog"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Lås opp enheten for å fortsette"</string>
 </resources>

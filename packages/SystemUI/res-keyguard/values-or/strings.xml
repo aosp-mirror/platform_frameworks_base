@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଦ୍ରୁତ ଭାବେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ବେଟେରୀକୁ ସୁରକ୍ଷିତ ରଖିବା ପାଇଁ ଚାର୍ଜିଂକୁ ବିରତ କରାଯାଇଛି"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ବେଟେରୀକୁ ସୁରକ୍ଷିତ ରଖିବା ପାଇଁ ଚାର୍ଜିଂକୁ ଅପ୍ଟିମାଇଜ କରାଯାଇଛି"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ଅନଲକ୍‌ କରିବା ପାଇଁ ମେନୁକୁ ଦବାନ୍ତୁ।"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ନେଟୱର୍କକୁ ଲକ୍‌ କରାଯାଇଛି"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"କୌଣସି SIM କାର୍ଡ ନାହିଁ"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ଡିଭାଇସ୍‍ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ ପାଟର୍ନ ଆବଶ୍ୟକ ଅଟେ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ଡିଭାଇସ୍‍ ରିଷ୍ଟାର୍ଟ ହେବାପରେ ପାସ୍‌ୱର୍ଡ ଆବଶ୍ୟକ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ଡିଭାଇସ୍‍ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ ପାସୱର୍ଡ ଆବଶ୍ୟକ ଅଟେ"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ପାଟର୍ନ ଆବଶ୍ୟକ"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ PIN ଆବଶ୍ୟକ ଅଟେ"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ ପାସ୍‌ୱର୍ଡ ଆବଶ୍ୟକ"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ, ଏହା ପରିବର୍ତ୍ତେ ପାଟର୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ, ଏହା ପରିବର୍ତ୍ତେ PIN ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ଅତିରିକ୍ତ ସୁରକ୍ଷା ପାଇଁ, ଏହା ପରିବର୍ତ୍ତେ ପାସୱାର୍ଡ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ଡିଭାଇସ୍‍ ଆଡମିନଙ୍କ ଦ୍ୱାରା ଲକ୍‍ କରାଯାଇଛି"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ଡିଭାଇସ୍‍ ମାନୁଆଲ ଭାବେ ଲକ୍‍ କରାଗଲା"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"ଡିଫଲ୍ଟ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ବବଲ୍"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ଆନାଲଗ୍"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ଜାରି ରଖିବା ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସକୁ ଅନଲକ କରନ୍ତୁ"</string>
 </resources>

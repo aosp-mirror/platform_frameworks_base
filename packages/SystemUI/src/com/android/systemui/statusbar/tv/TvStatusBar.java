@@ -37,19 +37,20 @@ import dagger.Lazy;
  * Serves as a collection of UI components, rather than showing its own UI.
  */
 @SysUISingleton
-public class TvStatusBar extends CoreStartable implements CommandQueue.Callbacks {
+public class TvStatusBar implements CoreStartable, CommandQueue.Callbacks {
 
     private static final String ACTION_SHOW_PIP_MENU =
             "com.android.wm.shell.pip.tv.notification.action.SHOW_PIP_MENU";
     private static final String SYSTEMUI_PERMISSION = "com.android.systemui.permission.SELF";
 
+    private final Context mContext;
     private final CommandQueue mCommandQueue;
     private final Lazy<AssistManager> mAssistManagerLazy;
 
     @Inject
     public TvStatusBar(Context context, CommandQueue commandQueue,
             Lazy<AssistManager> assistManagerLazy) {
-        super(context);
+        mContext = context;
         mCommandQueue = commandQueue;
         mAssistManagerLazy = assistManagerLazy;
     }

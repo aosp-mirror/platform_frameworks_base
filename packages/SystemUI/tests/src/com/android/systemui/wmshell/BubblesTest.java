@@ -80,17 +80,21 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeWindowLogger;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
@@ -138,6 +142,7 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -148,6 +153,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -190,6 +196,8 @@ public class BubblesTest extends SysuiTestCase {
     private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock
     private AuthController mAuthController;
+    @Mock
+    private ShadeExpansionStateManager mShadeExpansionStateManager;
 
     private SysUiState mSysUiState;
     private boolean mSysUiStateBubblesExpanded;
@@ -266,6 +274,8 @@ public class BubblesTest extends SysuiTestCase {
     private Optional<OneHandedController> mOneHandedOptional;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private ShadeWindowLogger mShadeWindowLogger;
 
     private TestableBubblePositioner mPositioner;
 
@@ -290,7 +300,8 @@ public class BubblesTest extends SysuiTestCase {
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardViewMediator, mKeyguardBypassController,
                 mColorExtractor, mDumpManager, mKeyguardStateController,
-                mScreenOffAnimationController, mAuthController);
+                mScreenOffAnimationController, mAuthController, mShadeExpansionStateManager,
+                mShadeWindowLogger);
         mNotificationShadeWindowController.setNotificationShadeView(mNotificationShadeWindowView);
         mNotificationShadeWindowController.attach();
 
@@ -343,7 +354,8 @@ public class BubblesTest extends SysuiTestCase {
                         mock(NotificationInterruptLogger.class),
                         mock(Handler.class),
                         mock(NotifPipelineFlags.class),
-                        mock(KeyguardNotificationVisibilityProvider.class)
+                        mock(KeyguardNotificationVisibilityProvider.class),
+                        mock(UiEventLogger.class)
                 );
         when(mShellTaskOrganizer.getExecutor()).thenReturn(syncExecutor);
         mBubbleController = new TestableBubbleController(
@@ -389,6 +401,7 @@ public class BubblesTest extends SysuiTestCase {
                 mCommonNotifCollection,
                 mNotifPipeline,
                 mSysUiState,
+                mock(FeatureFlags.class),
                 syncExecutor);
         mBubblesManager.addNotifCallback(mNotifCallback);
 
@@ -400,6 +413,15 @@ public class BubblesTest extends SysuiTestCase {
         // Get a reference to KeyguardStateController.Callback
         verify(mKeyguardStateController, atLeastOnce())
                 .addCallback(mKeyguardStateControllerCallbackCaptor.capture());
+    }
+
+    @After
+    public void tearDown() {
+        ArrayList<Bubble> bubbles = new ArrayList<>(mBubbleData.getBubbles());
+        for (int i = 0; i < bubbles.size(); i++) {
+            mBubbleController.removeBubble(bubbles.get(i).getKey(),
+                    Bubbles.DISMISS_NO_LONGER_BUBBLE);
+        }
     }
 
     @Test
@@ -1414,10 +1436,40 @@ public class BubblesTest extends SysuiTestCase {
         assertStackCollapsed();
         // Post status bar state change update with the same value
         mBubbleController.onStatusBarStateChanged(false);
-        // Stack should remain collapsedb
+        // Stack should remain collapsed
         assertStackCollapsed();
         // Post status bar state change which should trigger bubble to expand
         mBubbleController.onStatusBarStateChanged(true);
+        assertStackExpanded();
+    }
+
+    /**
+     * Test to verify behavior for the following scenario:
+     * <ol>
+     *     <li>device is locked with keyguard on, status bar shade state updates to
+     *     <code>false</code></li>
+     *     <li>notification entry is marked to be a bubble and it is set to auto-expand</li>
+     *     <li>device unlock starts, status bar shade state receives another update to
+     *     <code>false</code></li>
+     *     <li>device is unlocked and status bar shade state is set to <code>true</code></li>
+     *     <li>bubble should be expanded</li>
+     * </ol>
+     */
+    @Test
+    public void testOnStatusBarStateChanged_newAutoExpandedBubbleRemainsExpanded() {
+        // Set device as locked
+        mBubbleController.onStatusBarStateChanged(false);
+
+        // Create a auto-expanded bubble
+        NotificationEntry entry = mNotificationTestHelper.createAutoExpandedBubble();
+        mEntryListener.onEntryAdded(entry);
+
+        // When unlocking, we may receive duplicate updates with shade=false, ensure they don't
+        // clear the expanded state
+        mBubbleController.onStatusBarStateChanged(false);
+        mBubbleController.onStatusBarStateChanged(true);
+
+        // After unlocking, stack should be expanded
         assertStackExpanded();
     }
 

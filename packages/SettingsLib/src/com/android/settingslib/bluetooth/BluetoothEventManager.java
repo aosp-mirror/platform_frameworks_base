@@ -233,7 +233,22 @@ public class BluetoothEventManager {
             @Nullable CachedBluetoothDevice activeDevice,
             int bluetoothProfile) {
         for (CachedBluetoothDevice cachedDevice : mDeviceManager.getCachedDevicesCopy()) {
+            Set<CachedBluetoothDevice> memberSet = cachedDevice.getMemberDevice();
             boolean isActive = Objects.equals(cachedDevice, activeDevice);
+            if (!isActive && !memberSet.isEmpty()) {
+                for (CachedBluetoothDevice memberCachedDevice : memberSet) {
+                    isActive = Objects.equals(memberCachedDevice, activeDevice);
+                    if (isActive) {
+                        Log.d(TAG,
+                                "The active device is the member device "
+                                        + activeDevice.getDevice().getAnonymizedAddress()
+                                        + ". change activeDevice as main device "
+                                        + cachedDevice.getDevice().getAnonymizedAddress());
+                        activeDevice = cachedDevice;
+                        break;
+                    }
+                }
+            }
             cachedDevice.onActiveDeviceChanged(isActive, bluetoothProfile);
         }
         for (BluetoothCallback callback : mCallbacks) {

@@ -311,7 +311,7 @@ public class DragLayout extends LinearLayout {
                     animateSplitContainers(true, null /* animCompleteCallback */);
                     animateHighlight(target);
                 }
-            } else {
+            } else if (mCurrentTarget.type != target.type) {
                 // Switching between targets
                 mDropZoneView1.animateSwitch();
                 mDropZoneView2.animateSwitch();

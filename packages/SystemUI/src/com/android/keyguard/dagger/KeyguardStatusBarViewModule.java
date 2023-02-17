@@ -21,10 +21,7 @@ import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherControllerImpl;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 
@@ -50,10 +47,4 @@ public abstract class KeyguardStatusBarViewModule {
     static StatusBarUserSwitcherContainer getUserSwitcherContainer(KeyguardStatusBarView view) {
         return view.findViewById(R.id.user_switcher_container);
     }
-
-    /** */
-    @Binds
-    @KeyguardStatusBarViewScope
-    abstract StatusBarUserSwitcherController bindStatusBarUserSwitcherController(
-            StatusBarUserSwitcherControllerImpl controller);
 }

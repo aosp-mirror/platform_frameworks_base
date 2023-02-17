@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <!--
+      ~ Copyright (C) 2022 The Android Open Source Project
+      ~
+      ~ Licensed under the Apache License, Version 2.0 (the "License");
+      ~ you may not use this file except in compliance with the License.
+      ~ You may obtain a copy of the License at
+      ~
+      ~      http://www.apache.org/licenses/LICENSE-2.0
+      ~
+      ~ Unless required by applicable law or agreed to in writing, software
+      ~ distributed under the License is distributed on an "AS IS" BASIS,
+      ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      ~ See the License for the specific language governing permissions and
+      ~ limitations under the License.
+      -->
+<com.android.wm.shell.windowdecor.WindowDecorLinearLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/handle_menu"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:gravity="center_horizontal"
+android:background="@drawable/desktop_mode_decor_menu_background">
+    <Button
+        style="@style/CaptionButtonStyle"
+        android:id="@+id/fullscreen_button"
+        android:contentDescription="@string/fullscreen_text"
+        android:background="@drawable/caption_fullscreen_button"/>
+    <Button
+        style="@style/CaptionButtonStyle"
+        android:id="@+id/split_screen_button"
+        android:contentDescription="@string/split_screen_text"
+        android:background="@drawable/caption_split_screen_button"/>
+    <Button
+        style="@style/CaptionButtonStyle"
+        android:id="@+id/floating_button"
+        android:contentDescription="@string/float_button_text"
+        android:background="@drawable/caption_floating_button"/>
+    <Button
+        style="@style/CaptionButtonStyle"
+        android:id="@+id/desktop_button"
+        android:contentDescription="@string/desktop_text"
+        android:background="@drawable/caption_desktop_button"/>
+    <Button
+        style="@style/CaptionButtonStyle"
+        android:id="@+id/more_button"
+        android:contentDescription="@string/more_button_text"
+        android:background="@drawable/caption_more_button"/>
+</com.android.wm.shell.windowdecor.WindowDecorLinearLayout>

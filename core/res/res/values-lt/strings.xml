@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Balso paštas"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Ryšio problema arba neteisingas MMI kodas."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcija nepalaikoma."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operacija ribojama tik naudojant fiksuoto rinkimo numerius."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Negalima pakeisti telefono skambučio peradresavimo nustatymų, kai naudojate tarptinklinį ryšį."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Paslauga įgalinta."</string>
@@ -2053,8 +2054,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Leisti vienkartinę prieigą"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Neleisti"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Įrenginyje įrašoma, kas įvyksta jūsų įrenginyje. Programos gali naudoti šiuos žurnalus, kad surastų ir išspręstų problemas.\n\nKai kuriuose žurnaluose gali būti neskelbtinos informacijos, todėl visus įrenginio žurnalus leiskite pasiekti tik programoms, kuriomis pasitikite. \n\nJei neleisite šiai programai pasiekti visų įrenginio žurnalų, ji vis tiek galės pasiekti savo žurnalus. Įrenginio gamintojui vis tiek gali būti leidžiama pasiekti tam tikrus žurnalus ar informaciją jūsų įrenginyje."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Įrenginyje įrašoma, kas jame įvyksta. Programos gali naudoti šiuos žurnalus, kai reikia surasti ir išspręsti problemas.\n\nKai kuriuose žurnaluose gali būti neskelbtinos informacijos, todėl visus įrenginio žurnalus leiskite pasiekti tik programoms, kuriomis pasitikite. \n\nJei neleisite šiai programai pasiekti visų įrenginio žurnalų, ji vis tiek galės pasiekti savo žurnalus. Įrenginio gamintojui vis tiek gali būti leidžiama pasiekti tam tikrus žurnalus ar informaciją jūsų įrenginyje.\n\nSužinokite daugiau adresu g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Daugiau neberodyti"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"„<xliff:g id="APP_0">%1$s</xliff:g>“ nori rodyti „<xliff:g id="APP_2">%2$s</xliff:g>“ fragmentus"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Redaguoti"</string>

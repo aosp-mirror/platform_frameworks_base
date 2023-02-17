@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.phone.CentralSurfaces.MULTIUSER_DEB
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -179,7 +180,6 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             mNotifShadeEventSource.setNotifRemovedByUserCallback(this::maybeEndAmbientPulse);
             notificationInterruptStateProvider.addSuppressor(mInterruptSuppressor);
             mLockscreenUserManager.setUpWithPresenter(this);
-            mMediaManager.setUpWithPresenter(this);
             mGutsManager.setUpWithPresenter(
                     this, mNotifListContainer, mOnSettingsClickListener);
 
@@ -271,7 +271,8 @@ class StatusBarNotificationPresenter implements NotificationPresenter,
             boolean nowExpanded) {
         mHeadsUpManager.setExpanded(clickedEntry, nowExpanded);
         mCentralSurfaces.wakeUpIfDozing(
-                SystemClock.uptimeMillis(), clickedView, "NOTIFICATION_CLICK");
+                SystemClock.uptimeMillis(), clickedView, "NOTIFICATION_CLICK",
+                PowerManager.WAKE_REASON_GESTURE);
         if (nowExpanded) {
             if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                 mShadeTransitionController.goToLockedShade(clickedEntry.getRow());

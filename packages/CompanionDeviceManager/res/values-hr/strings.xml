@@ -19,7 +19,7 @@
     <string name="app_label" msgid="4470785958457506021">"Companion Device Manager"</string>
     <string name="confirmation_title" msgid="3785000297483688997">"Dopustite aplikaciji &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; da pristupa vašem uređaju &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"satom"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Odaberite profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g> kojim će upravljati aplikacija &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"Odaberite <xliff:g id="PROFILE_NAME">%1$s</xliff:g> kojim će upravljati aplikacija &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="summary_watch" msgid="3002344206574997652">"Ta je aplikacija potrebna za upravljanje vašim uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. Aplikacija <xliff:g id="APP_NAME">%2$s</xliff:g> moći će stupati u interakciju s vašim obavijestima i pristupati dopuštenjima za telefon, SMS-ove, kontakte, kalendar, zapisnike poziva i uređaje u blizini."</string>
     <string name="permission_apps" msgid="6142133265286656158">"Aplikacije"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"Streaming aplikacija vašeg telefona"</string>

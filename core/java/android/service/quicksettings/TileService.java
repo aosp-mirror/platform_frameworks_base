@@ -20,6 +20,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
@@ -331,6 +332,20 @@ public class TileService extends Service {
         startActivity(intent);
         try {
             mService.onStartActivity(mTileToken);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Starts an {@link android.app.Activity}.
+     * Will collapse Quick Settings after launching.
+     *
+     * @param pendingIntent A PendingIntent for an Activity to be launched immediately.
+     * @hide
+     */
+    public void startActivityAndCollapse(PendingIntent pendingIntent) {
+        try {
+            mService.startActivity(mTileToken, pendingIntent);
         } catch (RemoteException e) {
         }
     }

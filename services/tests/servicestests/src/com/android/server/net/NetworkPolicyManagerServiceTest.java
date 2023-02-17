@@ -75,6 +75,7 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOO
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
 import static com.android.server.net.NetworkPolicyManagerService.UidBlockedState.getEffectiveBlockedReasons;
+import static com.android.server.net.NetworkPolicyManagerService.normalizeTemplate;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -112,8 +113,10 @@ import android.app.NotificationManager;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -133,6 +136,7 @@ import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
 import android.net.wifi.WifiInfo;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.PersistableBundle;
@@ -151,6 +155,7 @@ import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
@@ -175,6 +180,7 @@ import com.google.common.util.concurrent.AbstractFuture;
 import libcore.io.Streams;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -284,6 +290,8 @@ public class NetworkPolicyManagerServiceTest {
 
     private NetworkPolicyListenerAnswer mPolicyListener;
     private NetworkPolicyManagerService mService;
+
+    private final ArraySet<BroadcastReceiver> mRegisteredReceivers = new ArraySet<>();
 
     /**
      * In some of the tests while initializing NetworkPolicyManagerService,
@@ -436,6 +444,21 @@ public class NetworkPolicyManagerServiceTest {
             public void enforceCallingOrSelfPermission(String permission, String message) {
                 // Assume that we're AID_SYSTEM
             }
+
+            @Override
+            public Intent registerReceiver(BroadcastReceiver receiver,
+                    IntentFilter filter, String broadcastPermission, Handler scheduler) {
+                mRegisteredReceivers.add(receiver);
+                return super.registerReceiver(receiver, filter, broadcastPermission, scheduler);
+            }
+
+            @Override
+            public Intent registerReceiverForAllUsers(BroadcastReceiver receiver,
+                    IntentFilter filter, String broadcastPermission, Handler scheduler) {
+                mRegisteredReceivers.add(receiver);
+                return super.registerReceiverForAllUsers(receiver, filter, broadcastPermission,
+                        scheduler);
+            }
         };
 
         setNetpolicyXml(context);
@@ -554,6 +577,13 @@ public class NetworkPolicyManagerServiceTest {
     @After
     public void resetClock() throws Exception {
         RecurrenceRule.sClock = Clock.systemDefaultZone();
+    }
+
+    @After
+    public void unregisterReceivers() throws Exception {
+        for (BroadcastReceiver receiver : mRegisteredReceivers) {
+            mServiceContext.unregisterReceiver(receiver);
+        }
     }
 
     @Test
@@ -2028,6 +2058,18 @@ public class NetworkPolicyManagerServiceTest {
                 actualPolicy.template.getSubscriberIds().size(), 0);
         assertEquals("Unexpected template meteredness in network policies",
                 METERED_NO, actualPolicy.template.getMeteredness());
+    }
+
+    @Test
+    public void testNormalizeTemplate_duplicatedMergedImsiList() {
+        final NetworkTemplate template = new NetworkTemplate.Builder(MATCH_CARRIER)
+                .setSubscriberIds(Set.of(TEST_IMSI)).build();
+        final String[] mergedImsiGroup = new String[] {TEST_IMSI, TEST_IMSI};
+        final ArrayList<String[]> mergedList = new ArrayList<>();
+        mergedList.add(mergedImsiGroup);
+        // Verify the duplicated items in the merged IMSI list won't crash the system.
+        final NetworkTemplate result = normalizeTemplate(template, mergedList);
+        assertEquals(template, result);
     }
 
     private String formatBlockedStateError(int uid, int rule, boolean metered,

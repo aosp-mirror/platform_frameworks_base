@@ -57,8 +57,7 @@ import android.os.Message;
  * @deprecated IntentService is subject to all the
  *   <a href="{@docRoot}about/versions/oreo/background.html">background execution limits</a>
  *   imposed with Android 8.0 (API level 26). Consider using {@link androidx.work.WorkManager}
- *   or {@link androidx.core.app.JobIntentService}, which uses jobs
- *   instead of services when running on Android 8.0 or higher.
+ *   instead.
  */
 @Deprecated
 public abstract class IntentService extends Service {

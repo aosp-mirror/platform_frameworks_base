@@ -40,6 +40,7 @@ import dagger.multibindings.ElementsIntoSet;
 public interface FalsingModule {
     String BRIGHT_LINE_GESTURE_CLASSIFERS = "bright_line_gesture_classifiers";
     String SINGLE_TAP_TOUCH_SLOP = "falsing_single_tap_touch_slop";
+    String LONG_TAP_TOUCH_SLOP = "falsing_long_tap_slop";
     String DOUBLE_TAP_TOUCH_SLOP = "falsing_double_tap_touch_slop";
     String DOUBLE_TAP_TIMEOUT_MS = "falsing_double_tap_timeout_ms";
 
@@ -80,5 +81,12 @@ public interface FalsingModule {
     @Named(SINGLE_TAP_TOUCH_SLOP)
     static float providesSingleTapTouchSlop(ViewConfiguration viewConfiguration) {
         return viewConfiguration.getScaledTouchSlop();
+    }
+
+    /** */
+    @Provides
+    @Named(LONG_TAP_TOUCH_SLOP)
+    static float providesLongTapTouchSlop(ViewConfiguration viewConfiguration) {
+        return viewConfiguration.getScaledTouchSlop() * 1.25f;
     }
 }

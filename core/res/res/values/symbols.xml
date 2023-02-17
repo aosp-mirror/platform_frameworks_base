@@ -467,7 +467,7 @@
   <java-symbol type="integer" name="config_multiuserMaximumUsers" />
   <java-symbol type="integer" name="config_multiuserMaxRunningUsers" />
   <java-symbol type="bool" name="config_multiuserDelayUserDataLocking" />
-  <java-symbol type="bool" name="config_enableTimeoutToUserZeroWhenDocked" />
+  <java-symbol type="bool" name="config_enableTimeoutToDockUserWhenDocked" />
   <java-symbol type="integer" name="config_userTypePackageWhitelistMode"/>
   <java-symbol type="xml" name="config_user_types" />
   <java-symbol type="integer" name="config_safe_media_volume_index" />
@@ -838,6 +838,7 @@
   <java-symbol type="string" name="mismatchPin" />
   <java-symbol type="string" name="mmiComplete" />
   <java-symbol type="string" name="mmiError" />
+  <java-symbol type="string" name="mmiErrorNotSupported" />
   <java-symbol type="string" name="mmiFdnError" />
   <java-symbol type="string" name="mmiErrorWhileRoaming" />
   <java-symbol type="string" name="month_day_year" />
@@ -2235,11 +2236,17 @@
   <java-symbol type="integer" name="config_dreamsBatteryLevelMinimumWhenNotPowered" />
   <java-symbol type="integer" name="config_dreamsBatteryLevelDrainCutoff" />
   <java-symbol type="string" name="config_dreamsDefaultComponent" />
-  <java-symbol type="bool" name="config_dreamsOnlyEnabledForSystemUser" />
+  <java-symbol type="bool" name="config_dreamsDisabledByAmbientModeSuppressionConfig" />
+  <java-symbol type="bool" name="config_dreamsOnlyEnabledForDockUser" />
+  <java-symbol type="integer" name="config_dreamOpenAnimationDuration" />
+  <java-symbol type="integer" name="config_dreamCloseAnimationDuration" />
   <java-symbol type="array" name="config_supportedDreamComplications" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
   <java-symbol type="bool" name="config_dismissDreamOnActivityStart" />
-  <java-symbol type="string" name="config_loggable_dream_prefix" />
+  <java-symbol type="integer" name="config_dreamOverlayReconnectTimeoutMs" />
+  <java-symbol type="integer" name="config_dreamOverlayMaxReconnectAttempts" />
+  <java-symbol type="integer" name="config_minDreamOverlayDurationMs" />
+  <java-symbol type="array" name="config_loggable_dream_prefixes" />
   <java-symbol type="string" name="config_dozeComponent" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_message" />
@@ -2325,6 +2332,7 @@
   <java-symbol type="drawable" name="scrubber_control_selector_holo" />
   <java-symbol type="drawable" name="scrubber_progress_horizontal_holo_dark" />
   <java-symbol type="drawable" name="progress_small_material" />
+  <java-symbol type="drawable" name="ic_chevron_end" />
   <java-symbol type="string" name="chooseUsbActivity" />
   <java-symbol type="string" name="ext_media_badremoval_notification_message" />
   <java-symbol type="string" name="ext_media_badremoval_notification_title" />
@@ -2717,6 +2725,7 @@
   <java-symbol type="array" name="config_face_acquire_vendor_biometricprompt_ignorelist" />
   <java-symbol type="bool" name="config_faceAuthSupportsSelfIllumination" />
   <java-symbol type="bool" name="config_faceAuthDismissesKeyguard" />
+  <java-symbol type="bool" name="config_requireScreenOnToAuthEnabled" />
 
   <!-- Face config -->
   <java-symbol type="integer" name="config_faceMaxTemplatesPerUser" />
@@ -3460,6 +3469,9 @@
   <!-- Captive Portal Login -->
   <java-symbol type="string" name="config_defaultCaptivePortalLoginPackageName" />
 
+  <!-- Dock Manager -->
+  <java-symbol type="string" name="config_defaultDockManagerPackageName" />
+
   <!-- Optional IPsec algorithms -->
   <java-symbol type="array" name="config_optionalIpSecAlgorithms" />
 
@@ -3804,6 +3816,7 @@
   <java-symbol type="string" name="config_cameraShutterSound" />
   <java-symbol type="integer" name="config_autoGroupAtCount" />
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
+  <java-symbol type="bool" name="config_dozePickupGestureEnabled" />
   <java-symbol type="bool" name="config_dozeAlwaysOnEnabled" />
   <java-symbol type="bool" name="config_dozeSupportsAodWallpaper" />
   <java-symbol type="bool" name="config_displayBlanksAfterDoze" />
@@ -4002,6 +4015,8 @@
 
   <!-- For Foldables -->
   <java-symbol type="array" name="config_foldedDeviceStates" />
+  <java-symbol type="array" name="config_halfFoldedDeviceStates" />
+  <java-symbol type="bool" name="config_windowManagerHalfFoldAutoRotateOverride" />
   <java-symbol type="array" name="config_deviceStatesOnWhichToWakeUp" />
   <java-symbol type="array" name="config_deviceStatesOnWhichToSleep" />
   <java-symbol type="string" name="config_foldedArea" />
@@ -4388,6 +4403,9 @@
   <!-- Set to true to make assistant show in front of the dream/screensaver. -->
   <java-symbol type="bool" name="config_assistantOnTopOfDream"/>
 
+  <!-- Set to true to enable letterboxing on translucent activities. -->
+  <java-symbol type="bool" name="config_letterboxIsEnabledForTranslucentActivities" />
+
   <java-symbol type="string" name="config_overrideComponentUiPackage" />
 
   <java-symbol type="string" name="notification_channel_network_status" />
@@ -4418,10 +4436,13 @@
   <java-symbol type="array" name="config_keep_warming_services" />
   <java-symbol type="string" name="config_display_features" />
   <java-symbol type="array" name="config_device_state_postures" />
+  <java-symbol type="array" name="config_deviceTabletopRotations" />
+  <java-symbol type="bool" name="config_isDisplayHingeAlwaysSeparating" />
 
   <java-symbol type="dimen" name="controls_thumbnail_image_max_height" />
   <java-symbol type="dimen" name="controls_thumbnail_image_max_width" />
 
+  <java-symbol type="bool" name="config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled" />
   <java-symbol type="dimen" name="config_fixedOrientationLetterboxAspectRatio" />
   <java-symbol type="dimen" name="config_letterboxBackgroundWallpaperBlurRadius" />
   <java-symbol type="integer" name="config_letterboxActivityCornersRadius" />
@@ -4430,13 +4451,20 @@
   <java-symbol type="color" name="config_letterboxBackgroundColor" />
   <java-symbol type="dimen" name="config_letterboxHorizontalPositionMultiplier" />
   <java-symbol type="dimen" name="config_letterboxVerticalPositionMultiplier" />
+  <java-symbol type="dimen" name="config_letterboxBookModePositionMultiplier" />
+  <java-symbol type="dimen" name="config_letterboxTabletopModePositionMultiplier" />
   <java-symbol type="bool" name="config_letterboxIsHorizontalReachabilityEnabled" />
   <java-symbol type="bool" name="config_letterboxIsVerticalReachabilityEnabled" />
   <java-symbol type="integer" name="config_letterboxDefaultPositionForHorizontalReachability" />
   <java-symbol type="integer" name="config_letterboxDefaultPositionForVerticalReachability" />
+  <java-symbol type="integer" name="config_letterboxDefaultPositionForBookModeReachability" />
+  <java-symbol type="integer" name="config_letterboxDefaultPositionForTabletopModeReachability" />
+  <java-symbol type="bool" name="config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled" />
   <java-symbol type="bool" name="config_letterboxIsEducationEnabled" />
   <java-symbol type="dimen" name="config_letterboxDefaultMinAspectRatioForUnresizableApps" />
   <java-symbol type="bool" name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled" />
+  <java-symbol type="bool" name="config_isCompatFakeFocusEnabled" />
+  <java-symbol type="bool" name="config_isWindowManagerCameraCompatTreatmentEnabled" />
   <java-symbol type="bool" name="config_isCameraCompatControlForStretchedIssuesEnabled" />
 
   <java-symbol type="bool" name="config_hideDisplayCutoutWithDisplayArea" />
@@ -4841,6 +4869,7 @@
   <java-symbol type="array" name="config_deviceStatesAvailableForAppRequests" />
   <java-symbol type="array" name="config_serviceStateLocationAllowedPackages" />
   <java-symbol type="integer" name="config_deviceStateRearDisplay"/>
+  <java-symbol type="bool" name="config_independentLockscreenLiveWallpaper"/>
 
   <!-- For app language picker -->
   <java-symbol type="string" name="system_locale_title" />
@@ -4852,6 +4881,4 @@
   <java-symbol type="id" name="language_picker_header" />
 
   <java-symbol type="dimen" name="status_bar_height_default" />
-
-  <java-symbol type="bool" name="system_server_plays_face_haptics" />
 </resources>

@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Kõnepost"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Ühendusprobleem või kehtetu MMI-kood."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funktsiooni ei toetata."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Toiming on ainult fikseeritud valimisnumbritele."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Kõne suunamise seadeid ei saa rändluse ajal teie telefonis muuta."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Teenus on lubatud."</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Luba ühekordne juurdepääs"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ära luba"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Seadmelogid jäädvustavad, mis teie seadmes toimub. Rakendused saavad neid logisid kasutada probleemide tuvastamiseks ja lahendamiseks.\n\nMõned logid võivad sisaldada tundlikku teavet, seega lubage juurdepääs kõigile seadmelogidele ainult rakendustele, mida usaldate. \n\nKui te ei luba sellel rakendusel kõigile seadmelogidele juurde pääseda, pääseb see siiski juurde oma logidele. Teie seadme tootja võib teie seadmes siiski teatud logidele või teabele juurde pääseda."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Seadmelogid jäädvustavad, mis teie seadmes toimub. Rakendused saavad neid logisid kasutada probleemide tuvastamiseks ja lahendamiseks.\n\nMõned logid võivad sisaldada tundlikku teavet, seega lubage juurdepääs kõigile seadmelogidele ainult rakendustele, mida usaldate. \n\nKui te ei luba sellel rakendusel kõigile seadmelogidele juurde pääseda, pääseb see siiski juurde oma logidele. Teie seadme tootja võib teie seadmes siiski teatud logidele või teabele juurde pääseda.\n\nLugege lisateavet aadressil g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ära kuva uuesti"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Rakendus <xliff:g id="APP_0">%1$s</xliff:g> soovib näidata rakenduse <xliff:g id="APP_2">%2$s</xliff:g> lõike"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Muuda"</string>

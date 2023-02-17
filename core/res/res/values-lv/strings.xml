@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Balss pasts"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Savienojuma problēma vai nederīgs MMI kods."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcija netiek atbalstīta."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Darbība ir atļauta tikai fiksēto numuru sastādīšanai."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Nevar mainīt zvanu pāradresēšanas iestatījumus tālrunī, kamēr izmantojat viesabonēšanu."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Pakalpojums tika iespējots."</string>
@@ -1958,7 +1959,7 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Šī lietotne pieprasa papildu drošību. Mēģiniet tai piekļūt savā tālrunī."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Šajā ierīcē (<xliff:g id="DEVICE">%1$s</xliff:g>) nevar piekļūt tālvadībai. Mēģiniet tai piekļūt savā Android TV ierīcē."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Šajā ierīcē (<xliff:g id="DEVICE">%1$s</xliff:g>) nevar piekļūt tālvadībai. Mēģiniet tai piekļūt savā planšetdatorā."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Šajā ierīcē (<xliff:g id="DEVICE">%1$s</xliff:g>) nevar piekļūt tālvadībai. Mēģiniet tai piekļūt savā tālrunī."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Ierīcē <xliff:g id="DEVICE">%1$s</xliff:g> nevar piekļūt šai funkcijai. Mēģiniet tai piekļūt tālrunī."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Šī lietotne tika izstrādāta vecākai Android versijai un var nedarboties pareizi. Meklējiet atjauninājumus vai sazinieties ar izstrādātāju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Meklēt atjauninājumu"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Jums ir jaunas īsziņas."</string>
@@ -2052,8 +2053,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Atļaut vienreizēju piekļuvi"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Neatļaut"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Ierīces žurnālos tiek reģistrēti ierīces procesi un notikumi. Lietotņu izstrādātāji var izmantot šos žurnālus, lai atrastu un izlabotu problēmas savās lietotnēs.\n\nDažos žurnālos var būt ietverta sensitīva informācija, tāpēc atļaujiet tikai uzticamām lietotnēm piekļūt visiem ierīces žurnāliem. \n\nJa neatļausiet šai lietotnei piekļūt visiem ierīces žurnāliem, lietotnes izstrādātājs joprojām varēs piekļūt pašas lietotnes žurnāliem. Iespējams, ierīces ražotājs joprojām varēs piekļūt noteiktiem žurnāliem vai informācijai jūsu ierīcē."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Ierīces žurnālos tiek reģistrēti ierīces procesi un notikumi. Lietotņu izstrādātāji var izmantot šos žurnālus, lai atrastu un izlabotu problēmas savās lietotnēs.\n\nDažos žurnālos var būt ietverta sensitīva informācija, tāpēc atļaujiet tikai uzticamām lietotnēm piekļūt visiem ierīces žurnāliem. \n\nJa neatļausiet šai lietotnei piekļūt visiem ierīces žurnāliem, lietotnes izstrādātājs joprojām varēs piekļūt pašas lietotnes žurnāliem. Iespējams, ierīces ražotājs joprojām varēs piekļūt noteiktiem žurnāliem vai informācijai jūsu ierīcē.\n\nŠeit varat uzzināt vairāk: g.co/android/devicelogs"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Vairs nerādīt"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Lietotne <xliff:g id="APP_0">%1$s</xliff:g> vēlas rādīt lietotnes <xliff:g id="APP_2">%2$s</xliff:g> sadaļas"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Rediģēt"</string>

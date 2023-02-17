@@ -602,7 +602,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
 
         mInconsistencyTracker.logNewMissingNotifications(rankingMap);
         mInconsistencyTracker.logNewInconsistentRankings(currentEntriesWithoutRankings, rankingMap);
-        if (currentEntriesWithoutRankings != null && mNotifPipelineFlags.removeUnrankedNotifs()) {
+        if (currentEntriesWithoutRankings != null) {
             for (NotificationEntry entry : currentEntriesWithoutRankings.values()) {
                 entry.mCancellationReason = REASON_UNKNOWN;
                 tryRemoveNotification(entry);

@@ -1152,6 +1152,9 @@ public class CompanionDeviceManagerService extends SystemService {
     }
 
     private void updateSpecialAccessPermissionAsSystem(PackageInfo packageInfo) {
+        if (packageInfo == null) {
+            return;
+        }
         if (containsEither(packageInfo.requestedPermissions,
                 android.Manifest.permission.RUN_IN_BACKGROUND,
                 android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)) {

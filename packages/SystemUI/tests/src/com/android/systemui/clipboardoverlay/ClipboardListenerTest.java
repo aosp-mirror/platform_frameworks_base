@@ -18,6 +18,8 @@ package com.android.systemui.clipboardoverlay;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CLIPBOARD_OVERLAY_ENABLED;
 
+import static com.google.android.setupcompat.util.WizardManagerHelper.SETTINGS_SECURE_USER_SETUP_COMPLETE;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -32,12 +34,15 @@ import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.os.PersistableBundle;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.util.DeviceConfigProxyFake;
 
 import org.junit.Before;
@@ -47,6 +52,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+
+import javax.inject.Provider;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -55,11 +63,17 @@ public class ClipboardListenerTest extends SysuiTestCase {
     @Mock
     private ClipboardManager mClipboardManager;
     @Mock
-    private ClipboardOverlayControllerFactory mClipboardOverlayControllerFactory;
+    private ClipboardOverlayControllerLegacyFactory mClipboardOverlayControllerLegacyFactory;
+    @Mock
+    private ClipboardOverlayControllerLegacy mOverlayControllerLegacy;
     @Mock
     private ClipboardOverlayController mOverlayController;
     @Mock
+    private ClipboardToast mClipboardToast;
+    @Mock
     private UiEventLogger mUiEventLogger;
+    @Mock
+    private FeatureFlags mFeatureFlags;
     private DeviceConfigProxyFake mDeviceConfigProxy;
 
     private ClipData mSampleClipData;
@@ -72,14 +86,22 @@ public class ClipboardListenerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<String> mStringCaptor;
 
+    @Spy
+    private Provider<ClipboardOverlayController> mOverlayControllerProvider;
+
+    private ClipboardListener mClipboardListener;
+
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-        when(mClipboardOverlayControllerFactory.create(any())).thenReturn(
-                mOverlayController);
-        when(mClipboardManager.hasPrimaryClip()).thenReturn(true);
+        mOverlayControllerProvider = () -> mOverlayController;
 
+        MockitoAnnotations.initMocks(this);
+        when(mClipboardOverlayControllerLegacyFactory.create(any()))
+                .thenReturn(mOverlayControllerLegacy);
+        when(mClipboardManager.hasPrimaryClip()).thenReturn(true);
+        Settings.Secure.putInt(
+                mContext.getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 1);
 
         mSampleClipData = new ClipData("Test", new String[]{"text/plain"},
                 new ClipData.Item("Test Item"));
@@ -87,15 +109,17 @@ public class ClipboardListenerTest extends SysuiTestCase {
         when(mClipboardManager.getPrimaryClipSource()).thenReturn(mSampleSource);
 
         mDeviceConfigProxy = new DeviceConfigProxyFake();
+
+        mClipboardListener = new ClipboardListener(getContext(), mDeviceConfigProxy,
+                mOverlayControllerProvider, mClipboardOverlayControllerLegacyFactory,
+                mClipboardToast, mClipboardManager, mUiEventLogger, mFeatureFlags);
     }
 
     @Test
     public void test_disabled() {
         mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED,
                 "false", false);
-        ClipboardListener listener = new ClipboardListener(getContext(), mDeviceConfigProxy,
-                mClipboardOverlayControllerFactory, mClipboardManager, mUiEventLogger);
-        listener.start();
+        mClipboardListener.start();
         verifyZeroInteractions(mClipboardManager);
         verifyZeroInteractions(mUiEventLogger);
     }
@@ -104,25 +128,59 @@ public class ClipboardListenerTest extends SysuiTestCase {
     public void test_enabled() {
         mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED,
                 "true", false);
-        ClipboardListener listener = new ClipboardListener(getContext(), mDeviceConfigProxy,
-                mClipboardOverlayControllerFactory, mClipboardManager, mUiEventLogger);
-        listener.start();
+        mClipboardListener.start();
         verify(mClipboardManager).addPrimaryClipChangedListener(any());
         verifyZeroInteractions(mUiEventLogger);
     }
 
     @Test
     public void test_consecutiveCopies() {
+        when(mFeatureFlags.isEnabled(Flags.CLIPBOARD_OVERLAY_REFACTOR)).thenReturn(false);
+
         mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED,
                 "true", false);
-        ClipboardListener listener = new ClipboardListener(getContext(), mDeviceConfigProxy,
-                mClipboardOverlayControllerFactory, mClipboardManager, mUiEventLogger);
-        listener.start();
-        listener.onPrimaryClipChanged();
+        mClipboardListener.start();
+        mClipboardListener.onPrimaryClipChanged();
 
-        verify(mClipboardOverlayControllerFactory).create(any());
+        verify(mClipboardOverlayControllerLegacyFactory).create(any());
 
-        verify(mOverlayController).setClipData(mClipDataCaptor.capture(), mStringCaptor.capture());
+        verify(mOverlayControllerLegacy).setClipData(
+                mClipDataCaptor.capture(), mStringCaptor.capture());
+
+        assertEquals(mSampleClipData, mClipDataCaptor.getValue());
+        assertEquals(mSampleSource, mStringCaptor.getValue());
+
+        verify(mOverlayControllerLegacy).setOnSessionCompleteListener(mRunnableCaptor.capture());
+
+        // Should clear the overlay controller
+        mRunnableCaptor.getValue().run();
+
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mClipboardOverlayControllerLegacyFactory, times(2)).create(any());
+
+        // Not calling the runnable here, just change the clip again and verify that the overlay is
+        // NOT recreated.
+
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mClipboardOverlayControllerLegacyFactory, times(2)).create(any());
+        verifyZeroInteractions(mOverlayControllerProvider);
+    }
+
+    @Test
+    public void test_consecutiveCopies_new() {
+        when(mFeatureFlags.isEnabled(Flags.CLIPBOARD_OVERLAY_REFACTOR)).thenReturn(true);
+
+        mDeviceConfigProxy.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED,
+                "true", false);
+        mClipboardListener.start();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mOverlayControllerProvider).get();
+
+        verify(mOverlayController).setClipData(
+                mClipDataCaptor.capture(), mStringCaptor.capture());
 
         assertEquals(mSampleClipData, mClipDataCaptor.getValue());
         assertEquals(mSampleSource, mStringCaptor.getValue());
@@ -132,16 +190,17 @@ public class ClipboardListenerTest extends SysuiTestCase {
         // Should clear the overlay controller
         mRunnableCaptor.getValue().run();
 
-        listener.onPrimaryClipChanged();
+        mClipboardListener.onPrimaryClipChanged();
 
-        verify(mClipboardOverlayControllerFactory, times(2)).create(any());
+        verify(mOverlayControllerProvider, times(2)).get();
 
         // Not calling the runnable here, just change the clip again and verify that the overlay is
         // NOT recreated.
 
-        listener.onPrimaryClipChanged();
+        mClipboardListener.onPrimaryClipChanged();
 
-        verify(mClipboardOverlayControllerFactory, times(2)).create(any());
+        verify(mOverlayControllerProvider, times(2)).get();
+        verifyZeroInteractions(mClipboardOverlayControllerLegacyFactory);
     }
 
     @Test
@@ -168,5 +227,50 @@ public class ClipboardListenerTest extends SysuiTestCase {
                 true));
         assertTrue(ClipboardListener.shouldSuppressOverlay(suppressableClipData,
                 ClipboardListener.SHELL_PACKAGE, false));
+    }
+
+    @Test
+    public void test_logging_enterAndReenter() {
+        when(mFeatureFlags.isEnabled(Flags.CLIPBOARD_OVERLAY_REFACTOR)).thenReturn(false);
+
+        mClipboardListener.start();
+
+        mClipboardListener.onPrimaryClipChanged();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED, 0, mSampleSource);
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_OVERLAY_UPDATED, 0, mSampleSource);
+    }
+
+    @Test
+    public void test_logging_enterAndReenter_new() {
+        when(mFeatureFlags.isEnabled(Flags.CLIPBOARD_OVERLAY_REFACTOR)).thenReturn(true);
+
+        mClipboardListener.start();
+
+        mClipboardListener.onPrimaryClipChanged();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED, 0, mSampleSource);
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_OVERLAY_UPDATED, 0, mSampleSource);
+    }
+
+    @Test
+    public void test_userSetupIncomplete_showsToast() {
+        Settings.Secure.putInt(
+                mContext.getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0);
+
+        mClipboardListener.start();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN, 0, mSampleSource);
+        verify(mClipboardToast, times(1)).showCopiedToast();
+        verifyZeroInteractions(mOverlayControllerProvider);
+        verifyZeroInteractions(mClipboardOverlayControllerLegacyFactory);
     }
 }

@@ -24,7 +24,6 @@ import android.os.UserHandle;
 import android.view.MotionEvent;
 
 import com.android.systemui.shared.recents.model.Task;
-import com.android.systemui.shared.system.RemoteTransitionCompat;
 
 /**
  * Temporary callbacks into SystemUI.
@@ -81,11 +80,6 @@ interface ISystemUiProxy {
      */
     void stopScreenPinning() = 17;
 
-    /*
-     * Notifies that the swipe-to-home (recents animation) is finished.
-     */
-    void notifySwipeToHomeFinished() = 23;
-
     /**
      * Notifies that quickstep will switch to a new task
      * @param rotation indicates which Surface.Rotation the gesture was started in
@@ -110,9 +104,6 @@ interface ISystemUiProxy {
 
     /** Sets home rotation enabled. */
     void setHomeRotationEnabled(boolean enabled) = 45;
-
-    /** Notifies that a swipe-up gesture has started */
-    oneway void notifySwipeUpGestureStarted() = 46;
 
     /** Notifies when taskbar status updated */
     oneway void notifyTaskbarStatus(boolean visible, boolean stashed) = 47;

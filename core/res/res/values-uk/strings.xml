@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Голосова пошта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Пробл. підключення чи недійсний код MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Функція не підтримується."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Операція лише для номерів фіксованого набору."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"У роумінгу на телефоні не можна змінити налаштування переадресації викликів."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Послугу ввімкнено."</string>
@@ -1167,8 +1168,8 @@
     <string name="no" msgid="5122037903299899715">"Скасувати"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Увага"</string>
     <string name="loading" msgid="3138021523725055037">"Завантаження..."</string>
-    <string name="capital_on" msgid="2770685323900821829">"УВІМК"</string>
-    <string name="capital_off" msgid="7443704171014626777">"ВИМК"</string>
+    <string name="capital_on" msgid="2770685323900821829">"УВІМКНЕНО"</string>
+    <string name="capital_off" msgid="7443704171014626777">"ВИМКНЕНО"</string>
     <string name="checked" msgid="9179896827054513119">"вибрано"</string>
     <string name="not_checked" msgid="7972320087569023342">"не вибрано"</string>
     <string name="selected" msgid="6614607926197755875">"вибрано"</string>
@@ -2053,8 +2054,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Надати доступ лише цього разу"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Не дозволяти"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"У журналах пристрою реєструється все, що відбувається на ньому. За допомогою цих журналів додатки можуть виявляти й усувати проблеми.\n\nДеякі журнали можуть містити конфіденційні дані, тому надавати доступ до всіх журналів пристрою слід лише надійним додаткам. \n\nЯкщо додаток не має доступу до всіх журналів пристрою, він усе одно може використовувати власні журнали. Виробник вашого пристрою все одно може використовувати деякі журнали чи інформацію на ньому."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"У журналах пристрою реєструється все, що відбувається на ньому. За допомогою цих журналів додатки можуть виявляти й усувати проблеми.\n\nДеякі журнали можуть містити конфіденційні дані, тому надавати доступ до всіх журналів пристрою слід лише надійним додаткам. \n\nЯкщо додаток не має доступу до всіх журналів пристрою, він усе одно може використовувати власні журнали. Виробник вашого пристрою все одно може використовувати деякі журнали чи інформацію на ньому.\n\nДокладніше: g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Більше не показувати"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> хоче показати фрагменти додатка <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Редагувати"</string>

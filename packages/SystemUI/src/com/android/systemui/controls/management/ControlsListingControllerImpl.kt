@@ -18,17 +18,23 @@ package com.android.systemui.controls.management
 
 import android.content.ComponentName
 import android.content.Context
-import android.content.pm.ServiceInfo
 import android.os.UserHandle
 import android.service.controls.ControlsProviderService
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.applications.ServiceListing
 import com.android.settingslib.widget.CandidateInfo
+import com.android.systemui.Dumpable
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.indentIfPossible
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
@@ -57,16 +63,19 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     private val context: Context,
     @Background private val backgroundExecutor: Executor,
     private val serviceListingBuilder: (Context) -> ServiceListing,
-    userTracker: UserTracker
-) : ControlsListingController {
+    private val userTracker: UserTracker,
+    dumpManager: DumpManager,
+    featureFlags: FeatureFlags
+) : ControlsListingController, Dumpable {
 
     @Inject
-    constructor(context: Context, executor: Executor, userTracker: UserTracker): this(
-            context,
-            executor,
-            ::createServiceListing,
-            userTracker
-    )
+    constructor(
+            context: Context,
+            @Background executor: Executor,
+            userTracker: UserTracker,
+            dumpManager: DumpManager,
+            featureFlags: FeatureFlags
+    ) : this(context, executor, ::createServiceListing, userTracker, dumpManager, featureFlags)
 
     private var serviceListing = serviceListingBuilder(context)
     // All operations in background thread
@@ -76,27 +85,28 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
         private const val TAG = "ControlsListingControllerImpl"
     }
 
-    private var availableComponents = emptySet<ComponentName>()
-    private var availableServices = emptyList<ServiceInfo>()
+    private var availableServices = emptyList<ControlsServiceInfo>()
     private var userChangeInProgress = AtomicInteger(0)
 
     override var currentUserId = userTracker.userId
         private set
 
-    private val serviceListingCallback = ServiceListing.Callback {
-        val newServices = it.toList()
-        val newComponents =
-            newServices.mapTo(mutableSetOf<ComponentName>(), { s -> s.getComponentName() })
-
+    private val serviceListingCallback = ServiceListing.Callback { list ->
+        Log.d(TAG, "ServiceConfig reloaded, count: ${list.size}")
+        val newServices = list.map { ControlsServiceInfo(userTracker.userContext, it) }
+        // After here, `list` is not captured, so we don't risk modifying it outside of the callback
         backgroundExecutor.execute {
             if (userChangeInProgress.get() > 0) return@execute
-            if (!newComponents.equals(availableComponents)) {
-                Log.d(TAG, "ServiceConfig reloaded, count: ${newComponents.size}")
-                availableComponents = newComponents
+            if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
+                val allowAllApps = featureFlags.isEnabled(Flags.APP_PANELS_ALL_APPS_ALLOWED)
+                newServices.forEach {
+                    it.resolvePanelActivity(allowAllApps) }
+            }
+
+            if (newServices != availableServices) {
                 availableServices = newServices
-                val currentServices = getCurrentServices()
                 callbacks.forEach {
-                    it.onServicesUpdated(currentServices)
+                    it.onServicesUpdated(getCurrentServices())
                 }
             }
         }
@@ -104,6 +114,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
 
     init {
         Log.d(TAG, "Initializing")
+        dumpManager.registerDumpable(TAG, this)
         serviceListing.addCallback(serviceListingCallback)
         serviceListing.setListening(true)
         serviceListing.reload()
@@ -165,7 +176,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
      *         [ControlsProviderService]
      */
     override fun getCurrentServices(): List<ControlsServiceInfo> =
-            availableServices.map { ControlsServiceInfo(context, it) }
+            availableServices.map(ControlsServiceInfo::copy)
 
     /**
      * Get the localized label for the component.
@@ -174,7 +185,15 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
      * @return a label as returned by [CandidateInfo.loadLabel] or `null`.
      */
     override fun getAppLabel(name: ComponentName): CharSequence? {
-        return getCurrentServices().firstOrNull { it.componentName == name }
+        return availableServices.firstOrNull { it.componentName == name }
                 ?.loadLabel()
+    }
+
+    override fun dump(writer: PrintWriter, args: Array<out String>) {
+        writer.println("ControlsListingController:")
+        writer.asIndenting().indentIfPossible {
+            println("Callbacks: $callbacks")
+            println("Services: ${getCurrentServices()}")
+        }
     }
 }

@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Glasovna pošta"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Težava s povezavo ali neveljavna koda MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcija ni podprta."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operacija je omejena na dovoljene telefonske številke, za katere ne velja zapora odhodnega klica."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Nastavitev preusmerjanja klicev ni mogoče spremeniti v telefonu med gostovanjem v tujem omrežju."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Storitev je omogočena."</string>
@@ -1253,7 +1254,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Zagon aplikacij."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Dokončevanje zagona."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pritisnili ste gumb za vklop, s čimer običajno izklopite zaslon.\n\nPoskusite se narahlo dotakniti med nastavljanjem prstnega odtisa."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Za končanje nastavitve izklopite zaslon"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Za končanje nastavitve izklopite zaslon."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Izklopi"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Želite nadaljevati preverjanje prstnega odtisa?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pritisnili ste gumb za vklop, s čimer običajno izklopite zaslon.\n\nZa preverjanje prstnega odtisa se poskusite narahlo dotakniti."</string>
@@ -2053,8 +2054,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dovoli enkratni dostop"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne dovoli"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"V dnevnikih naprave se beleži dogajanje v napravi. Aplikacije lahko te dnevnike uporabijo za iskanje in odpravljanje težav.\n\nNekateri dnevniki morda vsebujejo občutljive podatke, zato dostop do vseh dnevnikov naprave omogočite le aplikacijam, ki jim zaupate. \n\nČe tej aplikaciji ne dovolite dostopa do vseh dnevnikov naprave, bo aplikacija kljub temu lahko dostopala do svojih dnevnikov. Proizvajalec naprave bo morda lahko kljub temu dostopal do nekaterih dnevnikov ali podatkov v napravi."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"V dnevnikih naprave se beleži dogajanje v napravi. Aplikacije lahko te dnevnike uporabijo za iskanje in odpravljanje težav.\n\nNekateri dnevniki morda vsebujejo občutljive podatke, zato dostop do vseh dnevnikov naprave omogočite le aplikacijam, ki jim zaupate. \n\nČe tej aplikaciji ne dovolite dostopa do vseh dnevnikov naprave, bo aplikacija kljub temu lahko dostopala do svojih dnevnikov. Proizvajalec naprave bo morda lahko kljub temu dostopal do nekaterih dnevnikov ali podatkov v napravi.\n\nPreberite več o tem na g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikaži več"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati izreze aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Uredi"</string>

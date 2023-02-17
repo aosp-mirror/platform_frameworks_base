@@ -244,7 +244,7 @@
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR kod skaneri yordamida yangi qurilmalarni ulang"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Qurilmani ulanish kodi orqali ulash"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Olti xonali kod yordamida yangi qurilmalarni ulash mumkin"</string>
-    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Ulangan qurilmalar"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Juftlangan qurilmalar"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Hozirda ulangan"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Qurilma tafsilotlari"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Olib tashlash"</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Toʻlishiga <xliff:g id="TIME">%1$s</xliff:g> qoldi"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Toʻlishiga <xliff:g id="TIME">%2$s</xliff:g> qoldi"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvatlash pauza qilindi"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvatlash optimallashtirildi"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Quvvatlash optimallashtirildi"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Noma’lum"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Tezkor quvvat olmoqda"</string>
@@ -558,7 +559,7 @@
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"Bu foydalanuvchining umumiy maʼlumotlari topilmadi."</string>
     <string name="shared_data_query_failure_text" msgid="3489828881998773687">"Umumiy maʼlumotlarni yuklashda xatolik yuz berdi. Qayta urining."</string>
     <string name="blob_id_text" msgid="8680078988996308061">"Umumiy maʼlumotlar identifikatori: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
-    <string name="blob_expires_text" msgid="7882727111491739331">"Amal qilish muddati: <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Muddati: <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"Umumiy maʼlumotlarni oʻchirishda xatolik yuz berdi."</string>
     <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"Bu umumiy maʼlumotlar yuzasidan kelgan soʻrov topilmadi. Oʻchirib tashlansinmi?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"Umumiy maʼlumotlar bor ilovalar"</string>

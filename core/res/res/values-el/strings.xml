@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Αυτ/τος τηλεφωνητής"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Πρόβλημα σύνδεσης ή μη έγκυρος κώδικας MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Η λειτουργία δεν υποστηρίζεται."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Η λειτουργία περιορίζεται μόνο σε προκαθορισμένους αριθμούς κλήσης."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Δεν είναι δυνατή η αλλαγή των ρυθμίσεων προώθησης κλήσεων από το τηλέφωνό σας κατά τη διάρκεια της περιαγωγής."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Η υπηρεσία ενεργοποιήθηκε."</string>
@@ -2290,7 +2291,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο. Πατήστε για διαχείριση της χρήσης της μπαταρίας."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> μπορεί να επηρεάσει τη διάρκεια ζωής μπαταρίας. Πατήστε για έλεγχο των ενεργών εφαρμογών."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
-    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του τηλεφώνου από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Δεν είναι δυνατή η πρόσβαση στην κάμερα τηλεφώνου από το <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Δεν είναι δυνατή η πρόσβαση στην κάμερα του tablet από τη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Δεν είναι δυνατή η πρόσβαση σε αυτό το στοιχείο κατά τη ροή. Δοκιμάστε στο τηλέφωνό σας."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Προεπιλογή συστήματος"</string>

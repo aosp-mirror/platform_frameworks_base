@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"取消"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"配对之后，所配对的设备将可以在建立连接后访问您的通讯录和通话记录。"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”进行配对。"</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN 码或密钥不正确，因此无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”配对。"</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN 码或通行密钥不正确，因此无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”配对。"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"无法与“<xliff:g id="DEVICE_NAME">%1$s</xliff:g>”进行通信。"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> 已拒绝配对。"</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"计算机"</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"还需<xliff:g id="TIME">%1$s</xliff:g>充满"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 还需<xliff:g id="TIME">%2$s</xliff:g>充满"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充电已暂停"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充电方式已优化"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充电方式已优化"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"未知"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"正在充电"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"正在快速充电"</string>

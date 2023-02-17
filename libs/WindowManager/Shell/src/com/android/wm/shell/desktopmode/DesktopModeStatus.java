@@ -33,8 +33,36 @@ public class DesktopModeStatus {
     /**
      * Flag to indicate whether desktop mode is available on the device
      */
-    public static final boolean IS_SUPPORTED = SystemProperties.getBoolean(
+    private static final boolean IS_SUPPORTED = SystemProperties.getBoolean(
             "persist.wm.debug.desktop_mode", false);
+
+    /**
+     * Flag to indicate whether desktop mode proto 2 is available on the device
+     */
+    private static final boolean IS_PROTO2_ENABLED = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_mode_2", false);
+
+    /**
+     * Return {@code true} if desktop mode support is enabled
+     */
+    public static boolean isProto1Enabled() {
+        return IS_SUPPORTED;
+    }
+
+    /**
+     * Return {@code true} is desktop windowing proto 2 is enabled
+     */
+    public static boolean isProto2Enabled() {
+        return IS_PROTO2_ENABLED;
+    }
+
+    /**
+     * Return {@code true} if proto 1 or 2 is enabled.
+     * Can be used to guard logic that is common for both prototypes.
+     */
+    public static boolean isAnyEnabled() {
+        return isProto1Enabled() || isProto2Enabled();
+    }
 
     /**
      * Check if desktop mode is active
@@ -42,13 +70,16 @@ public class DesktopModeStatus {
      * @return {@code true} if active
      */
     public static boolean isActive(Context context) {
-        if (!IS_SUPPORTED) {
+        if (!isAnyEnabled()) {
             return false;
+        }
+        if (isProto2Enabled()) {
+            // Desktop mode is always active in prototype 2
+            return true;
         }
         try {
             int result = Settings.System.getIntForUser(context.getContentResolver(),
                     Settings.System.DESKTOP_MODE, UserHandle.USER_CURRENT);
-            ProtoLog.d(WM_SHELL_DESKTOP_MODE, "isDesktopModeEnabled=%s", result);
             return result != 0;
         } catch (Exception e) {
             ProtoLog.e(WM_SHELL_DESKTOP_MODE, "Failed to read DESKTOP_MODE setting %s", e);

@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.gesture
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.SwipeStatusBarAwayLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
 /** Log messages for [SwipeStatusBarAwayGestureHandler]. */

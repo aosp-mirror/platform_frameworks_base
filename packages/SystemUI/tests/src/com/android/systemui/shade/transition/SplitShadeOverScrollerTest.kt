@@ -7,11 +7,11 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
+import com.android.systemui.shade.STATE_CLOSED
+import com.android.systemui.shade.STATE_OPEN
+import com.android.systemui.shade.STATE_OPENING
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.phone.panelstate.STATE_CLOSED
-import com.android.systemui.statusbar.phone.panelstate.STATE_OPEN
-import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import org.junit.Before
 import org.junit.Test

@@ -64,7 +64,8 @@ class AppAdapter(
                 val localeComparator = compareBy<ControlsServiceInfo, CharSequence>(collator) {
                     it.loadLabel() ?: ""
                 }
-                listOfServices = serviceInfos.sortedWith(localeComparator)
+                listOfServices = serviceInfos.filter { it.panelActivity == null }
+                        .sortedWith(localeComparator)
                 uiExecutor.execute(::notifyDataSetChanged)
             }
         }

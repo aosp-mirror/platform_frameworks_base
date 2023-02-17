@@ -86,13 +86,23 @@ class TaskFragmentAnimationSpec {
     /** Animation for target that is opening in a change transition. */
     @NonNull
     Animation createChangeBoundsOpenAnimation(@NonNull RemoteAnimationTarget target) {
-        final Rect bounds = target.localBounds;
-        // The target will be animated in from left or right depends on its position.
-        final int startLeft = bounds.left == 0 ? -bounds.width() : bounds.width();
+        final Rect parentBounds = target.taskInfo.configuration.windowConfiguration.getBounds();
+        final Rect bounds = target.screenSpaceBounds;
+        final int startLeft;
+        final int startTop;
+        if (parentBounds.top == bounds.top && parentBounds.bottom == bounds.bottom) {
+            // The window will be animated in from left or right depending on its position.
+            startTop = 0;
+            startLeft = parentBounds.left == bounds.left ? -bounds.width() : bounds.width();
+        } else {
+            // The window will be animated in from top or bottom depending on its position.
+            startTop = parentBounds.top == bounds.top ? -bounds.height() : bounds.height();
+            startLeft = 0;
+        }
 
         // The position should be 0-based as we will post translate in
         // TaskFragmentAnimationAdapter#onAnimationUpdate
-        final Animation animation = new TranslateAnimation(startLeft, 0, 0, 0);
+        final Animation animation = new TranslateAnimation(startLeft, 0, startTop, 0);
         animation.setInterpolator(mFastOutExtraSlowInInterpolator);
         animation.setDuration(CHANGE_ANIMATION_DURATION);
         animation.initialize(bounds.width(), bounds.height(), bounds.width(), bounds.height());
@@ -103,13 +113,24 @@ class TaskFragmentAnimationSpec {
     /** Animation for target that is closing in a change transition. */
     @NonNull
     Animation createChangeBoundsCloseAnimation(@NonNull RemoteAnimationTarget target) {
-        final Rect bounds = target.localBounds;
-        // The target will be animated out to left or right depends on its position.
-        final int endLeft = bounds.left == 0 ? -bounds.width() : bounds.width();
+        final Rect parentBounds = target.taskInfo.configuration.windowConfiguration.getBounds();
+        // Use startBounds if the window is closing in case it may also resize.
+        final Rect bounds = target.startBounds;
+        final int endTop;
+        final int endLeft;
+        if (parentBounds.top == bounds.top && parentBounds.bottom == bounds.bottom) {
+            // The window will be animated out to left or right depending on its position.
+            endTop = 0;
+            endLeft = parentBounds.left == bounds.left ? -bounds.width() : bounds.width();
+        } else {
+            // The window will be animated out to top or bottom depending on its position.
+            endTop = parentBounds.top == bounds.top ? -bounds.height() : bounds.height();
+            endLeft = 0;
+        }
 
         // The position should be 0-based as we will post translate in
         // TaskFragmentAnimationAdapter#onAnimationUpdate
-        final Animation animation = new TranslateAnimation(0, endLeft, 0, 0);
+        final Animation animation = new TranslateAnimation(0, endLeft, 0, endTop);
         animation.setInterpolator(mFastOutExtraSlowInInterpolator);
         animation.setDuration(CHANGE_ANIMATION_DURATION);
         animation.initialize(bounds.width(), bounds.height(), bounds.width(), bounds.height());
@@ -161,7 +182,7 @@ class TaskFragmentAnimationSpec {
         // The position should be 0-based as we will post translate in
         // TaskFragmentAnimationAdapter#onAnimationUpdate
         final Animation endTranslate = new TranslateAnimation(startBounds.left - endBounds.left, 0,
-                0, 0);
+                startBounds.top - endBounds.top, 0);
         endTranslate.setDuration(CHANGE_ANIMATION_DURATION);
         endSet.addAnimation(endTranslate);
         // The end leash is resizing, we should update the window crop based on the clip rect.

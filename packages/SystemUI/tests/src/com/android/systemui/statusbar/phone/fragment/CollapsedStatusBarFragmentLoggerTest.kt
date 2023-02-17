@@ -20,7 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.plugins.log.LogcatEchoTracker
 import com.android.systemui.statusbar.DisableFlagsLogger
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

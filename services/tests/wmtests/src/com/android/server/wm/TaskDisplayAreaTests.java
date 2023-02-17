@@ -29,8 +29,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LOCKED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -398,7 +399,7 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
                     .setParentTask(rootHomeTask).setCreateTask(true).build();
         }
         homeActivity.setVisible(false);
-        homeActivity.mVisibleRequested = true;
+        homeActivity.setVisibleRequested(true);
         assertFalse(rootHomeTask.isVisible());
 
         assertEquals(defaultTaskDisplayArea.getOrientation(), rootHomeTask.getOrientation());
@@ -422,24 +423,26 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         // Activity on TDA1 is focused
         mDisplayContent.setFocusedApp(firstActivity);
 
-        assertThat(firstTaskDisplayArea.canSpecifyOrientation()).isTrue();
-        assertThat(secondTaskDisplayArea.canSpecifyOrientation()).isFalse();
+        final int testOrientation = SCREEN_ORIENTATION_PORTRAIT;
+
+        assertThat(firstTaskDisplayArea.canSpecifyOrientation(testOrientation)).isTrue();
+        assertThat(secondTaskDisplayArea.canSpecifyOrientation(testOrientation)).isFalse();
 
         // No focused app, TDA1 is still recorded as last focused.
         mDisplayContent.setFocusedApp(null);
 
-        assertThat(firstTaskDisplayArea.canSpecifyOrientation()).isTrue();
-        assertThat(secondTaskDisplayArea.canSpecifyOrientation()).isFalse();
+        assertThat(firstTaskDisplayArea.canSpecifyOrientation(testOrientation)).isTrue();
+        assertThat(secondTaskDisplayArea.canSpecifyOrientation(testOrientation)).isFalse();
 
         // Activity on TDA2 is focused
         mDisplayContent.setFocusedApp(secondActivity);
 
-        assertThat(firstTaskDisplayArea.canSpecifyOrientation()).isFalse();
-        assertThat(secondTaskDisplayArea.canSpecifyOrientation()).isTrue();
+        assertThat(firstTaskDisplayArea.canSpecifyOrientation(testOrientation)).isFalse();
+        assertThat(secondTaskDisplayArea.canSpecifyOrientation(testOrientation)).isTrue();
     }
 
     @Test
-    public void testIsLastFocused_onlyCountIfTaskDisplayAreaHandlesOrientationRequest() {
+    public void testCanSpecifyOrientation() {
         final TaskDisplayArea firstTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
                 mDisplayContent, mRootWindowContainer.mWmService, "TestTaskDisplayArea",
@@ -455,34 +458,88 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
         firstTaskDisplayArea.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         secondTaskDisplayArea.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
 
-        // Activity on TDA1 is focused, but TDA1 doesn't respect orientation request
+        final int testOrientation = SCREEN_ORIENTATION_PORTRAIT;
+
+        // Activity on TDA1 is focused, but TDA1 cannot specify orientation because
+        // ignoreOrientationRequest is true
+        // Activity on TDA2 has ignoreOrientationRequest false but it doesn't have focus so it
+        // cannot specify orientation
         mDisplayContent.setFocusedApp(firstActivity);
 
-        assertThat(firstTaskDisplayArea.canSpecifyOrientation()).isFalse();
-        assertThat(secondTaskDisplayArea.canSpecifyOrientation()).isFalse();
+        assertThat(firstTaskDisplayArea.canSpecifyOrientation(testOrientation)).isFalse();
+        assertThat(secondTaskDisplayArea.canSpecifyOrientation(testOrientation)).isFalse();
 
-        // Activity on TDA2 is focused, and TDA2 respects orientation request
+        // Activity on TDA1 is not focused, and so it cannot specify orientation
+        // Activity on TDA2 is focused, and it can specify orientation because
+        // ignoreOrientationRequest is false
         mDisplayContent.setFocusedApp(secondActivity);
 
-        assertThat(firstTaskDisplayArea.canSpecifyOrientation()).isFalse();
-        assertThat(secondTaskDisplayArea.canSpecifyOrientation()).isTrue();
+        assertThat(firstTaskDisplayArea.canSpecifyOrientation(testOrientation)).isFalse();
+        assertThat(secondTaskDisplayArea.canSpecifyOrientation(testOrientation)).isTrue();
     }
 
     @Test
-    public void testIgnoreOrientationRequest() {
-        final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
-        final Task task = taskDisplayArea.createRootTask(
+    public void testCanSpecifyOrientationNoSensor() {
+        final TaskDisplayArea firstTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
+        final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "TestTaskDisplayArea",
+                FEATURE_VENDOR_FIRST);
+        final Task firstRootTask = firstTaskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task).build();
+        final Task secondRootTask = secondTaskDisplayArea.createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
+                .setTask(firstRootTask).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
+                .setTask(secondRootTask).build();
+        firstTaskDisplayArea.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        secondTaskDisplayArea.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
 
-        mDisplayContent.setFocusedApp(activity);
-        activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        final int testOrientation = SCREEN_ORIENTATION_NOSENSOR;
 
-        assertThat(taskDisplayArea.getOrientation()).isEqualTo(SCREEN_ORIENTATION_LANDSCAPE);
+        // ignoreOrientationRequest is always false for SCREEN_ORIENTATION_NOSENSOR so
+        // only the TDAs with focus can specify orientations
+        mDisplayContent.setFocusedApp(firstActivity);
 
-        taskDisplayArea.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        assertThat(firstTaskDisplayArea.canSpecifyOrientation(testOrientation)).isTrue();
+        assertThat(secondTaskDisplayArea.canSpecifyOrientation(testOrientation)).isFalse();
 
-        assertThat(taskDisplayArea.getOrientation()).isEqualTo(SCREEN_ORIENTATION_UNSET);
+        mDisplayContent.setFocusedApp(secondActivity);
+
+        assertThat(firstTaskDisplayArea.canSpecifyOrientation(testOrientation)).isFalse();
+        assertThat(secondTaskDisplayArea.canSpecifyOrientation(testOrientation)).isTrue();
+    }
+
+    @Test
+    public void testCanSpecifyOrientationLocked() {
+        final TaskDisplayArea firstTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
+        final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
+                mDisplayContent, mRootWindowContainer.mWmService, "TestTaskDisplayArea",
+                FEATURE_VENDOR_FIRST);
+        final Task firstRootTask = firstTaskDisplayArea.createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final Task secondRootTask = secondTaskDisplayArea.createRootTask(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final ActivityRecord firstActivity = new ActivityBuilder(mAtm)
+                .setTask(firstRootTask).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mAtm)
+                .setTask(secondRootTask).build();
+        firstTaskDisplayArea.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        secondTaskDisplayArea.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
+
+        final int testOrientation = SCREEN_ORIENTATION_LOCKED;
+
+        // ignoreOrientationRequest is always false for SCREEN_ORIENTATION_NOSENSOR so
+        // only the TDAs with focus can specify orientations
+        mDisplayContent.setFocusedApp(firstActivity);
+
+        assertThat(firstTaskDisplayArea.canSpecifyOrientation(testOrientation)).isTrue();
+        assertThat(secondTaskDisplayArea.canSpecifyOrientation(testOrientation)).isFalse();
+
+        mDisplayContent.setFocusedApp(secondActivity);
+
+        assertThat(firstTaskDisplayArea.canSpecifyOrientation(testOrientation)).isFalse();
+        assertThat(secondTaskDisplayArea.canSpecifyOrientation(testOrientation)).isTrue();
     }
 
     @Test

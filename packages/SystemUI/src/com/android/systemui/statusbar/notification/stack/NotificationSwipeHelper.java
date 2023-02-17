@@ -20,6 +20,7 @@ package com.android.systemui.statusbar.notification.stack;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_ROW_SWIPE;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -34,9 +35,11 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 
@@ -49,6 +52,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     @VisibleForTesting
     protected static final long COVER_MENU_DELAY = 4000;
     private static final String TAG = "NotificationSwipeHelper";
+    private static final SourceType SWIPE_DISMISS = SourceType.from("SwipeDismiss");
     private final Runnable mFalsingCheck;
     private View mTranslatingParentView;
     private View mMenuExposedView;
@@ -64,13 +68,21 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     private WeakReference<NotificationMenuRowPlugin> mCurrMenuRowRef;
     private boolean mIsExpanded;
     private boolean mPulsing;
+    private final NotificationRoundnessManager mNotificationRoundnessManager;
+    private final boolean mUseRoundnessSourceTypes;
 
     NotificationSwipeHelper(
-            Resources resources, ViewConfiguration viewConfiguration,
-            FalsingManager falsingManager, FeatureFlags featureFlags,
-            int swipeDirection, NotificationCallback callback,
-            NotificationMenuRowPlugin.OnMenuEventListener menuListener) {
+            Resources resources,
+            ViewConfiguration viewConfiguration,
+            FalsingManager falsingManager,
+            FeatureFlags featureFlags,
+            int swipeDirection,
+            NotificationCallback callback,
+            NotificationMenuRowPlugin.OnMenuEventListener menuListener,
+            NotificationRoundnessManager notificationRoundnessManager) {
         super(swipeDirection, callback, resources, viewConfiguration, falsingManager, featureFlags);
+        mNotificationRoundnessManager = notificationRoundnessManager;
+        mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
         mMenuListener = menuListener;
         mCallback = callback;
         mFalsingCheck = () -> resetExposedMenuView(true /* animate */, true /* force */);
@@ -185,6 +197,13 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         return false;
     }
 
+    @Override
+    protected void updateSwipeProgressAlpha(View animView, float alpha) {
+        if (animView instanceof ExpandableNotificationRow) {
+            ((ExpandableNotificationRow) animView).setContentAlpha(alpha);
+        }
+    }
+
     @VisibleForTesting
     protected void handleMenuRowSwipe(MotionEvent ev, View animView, float velocity,
             NotificationMenuRowPlugin menuRow) {
@@ -295,6 +314,33 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         }
         mCallback.onDismiss();
         handleMenuCoveredOrDismissed();
+    }
+
+    @Override
+    protected void prepareDismissAnimation(View view, Animator anim) {
+        super.prepareDismissAnimation(view, anim);
+
+        if (mUseRoundnessSourceTypes
+                && view instanceof ExpandableNotificationRow
+                && mNotificationRoundnessManager.isClearAllInProgress()) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    row.requestRoundness(/* top = */ 1f, /* bottom = */ 1f, SWIPE_DISMISS);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    row.requestRoundnessReset(SWIPE_DISMISS);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    row.requestRoundnessReset(SWIPE_DISMISS);
+                }
+            });
+        }
     }
 
     @VisibleForTesting
@@ -514,14 +560,17 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         private int mSwipeDirection;
         private NotificationCallback mNotificationCallback;
         private NotificationMenuRowPlugin.OnMenuEventListener mOnMenuEventListener;
+        private NotificationRoundnessManager mNotificationRoundnessManager;
 
         @Inject
         Builder(@Main Resources resources, ViewConfiguration viewConfiguration,
-                FalsingManager falsingManager, FeatureFlags featureFlags) {
+                FalsingManager falsingManager, FeatureFlags featureFlags,
+                NotificationRoundnessManager notificationRoundnessManager) {
             mResources = resources;
             mViewConfiguration = viewConfiguration;
             mFalsingManager = falsingManager;
             mFeatureFlags = featureFlags;
+            mNotificationRoundnessManager = notificationRoundnessManager;
         }
 
         Builder setSwipeDirection(int swipeDirection) {
@@ -542,7 +591,8 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
 
         NotificationSwipeHelper build() {
             return new NotificationSwipeHelper(mResources, mViewConfiguration, mFalsingManager,
-                    mFeatureFlags, mSwipeDirection, mNotificationCallback, mOnMenuEventListener);
+                    mFeatureFlags, mSwipeDirection, mNotificationCallback, mOnMenuEventListener,
+                    mNotificationRoundnessManager);
         }
     }
 }

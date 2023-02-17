@@ -44,7 +44,8 @@ import java.io.PrintWriter;
 import javax.inject.Inject;
 
 /**
- * A global state to track all input states for the algorithm.
+ * Global state to track all input states for
+ * {@link com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm}.
  */
 @SysUISingleton
 public class AmbientState implements Dumpable {
@@ -140,6 +141,11 @@ public class AmbientState implements Dumpable {
      * False when we stop flinging or leave lockscreen.
      */
     private boolean mIsFlingRequiredAfterLockScreenSwipeUp = false;
+
+    /**
+     * Whether the shade is currently closing.
+     */
+    private boolean mIsClosing;
 
     @VisibleForTesting
     public boolean isFlingRequiredAfterLockScreenSwipeUp() {
@@ -713,7 +719,21 @@ public class AmbientState implements Dumpable {
      */
     public boolean isBouncerInTransit() {
         return mStatusBarKeyguardViewManager != null
-                && mStatusBarKeyguardViewManager.isBouncerInTransit();
+                && mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit();
+    }
+
+    /**
+     * @param isClosing Whether the shade is currently closing.
+     */
+    public void setIsClosing(boolean isClosing) {
+        mIsClosing = isClosing;
+    }
+
+    /**
+     * @return Whether the shade is currently closing.
+     */
+    public boolean isClosing() {
+        return mIsClosing;
     }
 
     @Override
@@ -760,5 +780,6 @@ public class AmbientState implements Dumpable {
                 + mIsFlingRequiredAfterLockScreenSwipeUp);
         pw.println("mZDistanceBetweenElements=" + mZDistanceBetweenElements);
         pw.println("mBaseZHeight=" + mBaseZHeight);
+        pw.println("mIsClosing=" + mIsClosing);
     }
 }

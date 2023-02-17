@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ការសាក​ថ្ម​ត្រូវ​បាន​ផ្អាក ដើម្បី​ការពារ​ថ្ម"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • បានបង្កើនប្រសិទ្ធភាពនៃការសាក ដើម្បីការពារថ្ម"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ចុចម៉ឺនុយ ​ដើម្បី​ដោះ​សោ។"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"បណ្ដាញ​ជាប់​សោ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"គ្មាន​ស៊ីម​កាត​ទេ"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"តម្រូវឲ្យប្រើលំនាំ បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"តម្រូវឲ្យបញ្ចូលកូដ PIN បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់ បន្ទាប់ពីឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"តម្រូវឲ្យប្រើលំនាំ ដើម្បីទទួលបានសវុត្ថិភាពបន្ថែម"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"តម្រូវឲ្យបញ្ចូលកូដ PIN ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"តម្រូវឲ្យបញ្ចូលពាក្យសម្ងាត់ ដើម្បីទទួលបានសុវត្ថិភាពបន្ថែម"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ដើម្បីសុវត្ថិភាពបន្ថែម សូមប្រើលំនាំជំនួសវិញ"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ដើម្បីសុវត្ថិភាពបន្ថែម សូមប្រើកូដ PIN ជំនួសវិញ"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ដើម្បីសុវត្ថិភាពបន្ថែម សូមប្រើពាក្យសម្ងាត់ជំនួសវិញ"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ឧបករណ៍​ត្រូវបាន​ចាក់សោ​ដោយអ្នក​គ្រប់គ្រង"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ឧបករណ៍ត្រូវបានចាក់សោដោយអ្នកប្រើផ្ទាល់"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"មិនអាចសម្គាល់បានទេ"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"លំនាំដើម"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ពពុះ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"អាណាឡូក"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ដោះសោឧបករណ៍របស់អ្នកដើម្បីបន្ត"</string>
 </resources>

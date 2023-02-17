@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • వేగంగా ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • బ్యాటరీని రక్షించడానికి ఛార్జింగ్ పాజ్ చేయబడింది"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • బ్యాటరీని రక్షించడానికి ఛార్జింగ్ ఆప్టిమైజ్ చేయబడింది"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"అన్‌లాక్ చేయడానికి మెనూను నొక్కండి."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"నెట్‌వర్క్ లాక్ చేయబడింది"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM కార్డ్ లేదు"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత నమూనాను గీయాలి"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"డివైజ్‌ను పునఃప్రారంభించిన తర్వాత పిన్ నమోదు చేయాలి"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత పాస్‌వర్డ్‌ను నమోదు చేయాలి"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"అదనపు సెక్యూరిటీ కోసం ఆకృతి అవసరం"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"అదనపు సెక్యూరిటీ కోసం పిన్ ఎంటర్ చేయాలి"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"అదనపు సెక్యూరిటీ కోసం పాస్‌వర్డ్‌ను ఎంటర్ చేయాలి"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"అదనపు సెక్యూరిటీ కోసం, బదులుగా ఆకృతిని ఉపయోగించండి"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"అదనపు సెక్యూరిటీ కోసం, బదులుగా PINను ఉపయోగించండి"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"అదనపు సెక్యూరిటీ కోసం, బదులుగా పాస్‌వర్డ్‌ను ఉపయోగించండి"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"పరికరం నిర్వాహకుల ద్వారా లాక్ చేయబడింది"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"పరికరం మాన్యువల్‌గా లాక్ చేయబడింది"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"గుర్తించలేదు"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"ఆటోమేటిక్"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"బబుల్"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ఎనలాగ్"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"కొనసాగించడానికి మీ పరికరాన్ని అన్‌లాక్ చేయండి"</string>
 </resources>

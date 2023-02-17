@@ -169,9 +169,9 @@ public class StackStateAnimator {
         adaptDurationWhenGoingToFullShade(child, viewState, wasAdded, animationStaggerCount);
         mAnimationProperties.delay = 0;
         if (wasAdded || mAnimationFilter.hasDelays
-                        && (viewState.yTranslation != child.getTranslationY()
-                        || viewState.zTranslation != child.getTranslationZ()
-                        || viewState.alpha != child.getAlpha()
+                        && (viewState.getYTranslation() != child.getTranslationY()
+                        || viewState.getZTranslation() != child.getTranslationZ()
+                        || viewState.getAlpha() != child.getAlpha()
                         || viewState.height != child.getActualHeight()
                         || viewState.clipTopAmount != child.getClipTopAmount())) {
             mAnimationProperties.delay = mCurrentAdditionalDelay
@@ -191,7 +191,7 @@ public class StackStateAnimator {
                 mAnimationProperties.duration = ANIMATION_DURATION_APPEAR_DISAPPEAR + 50
                         + (long) (100 * longerDurationFactor);
             }
-            child.setTranslationY(viewState.yTranslation + startOffset);
+            child.setTranslationY(viewState.getYTranslation() + startOffset);
         }
     }
 
@@ -400,7 +400,7 @@ public class StackStateAnimator {
                     // travelled
                     ExpandableViewState viewState =
                             ((ExpandableView) event.viewAfterChangingView).getViewState();
-                    translationDirection = ((viewState.yTranslation
+                    translationDirection = ((viewState.getYTranslation()
                             - (ownPosition + actualHeight / 2.0f)) * 2 /
                             actualHeight);
                     translationDirection = Math.max(Math.min(translationDirection, 1.0f),-1.0f);
@@ -433,7 +433,7 @@ public class StackStateAnimator {
                 ExpandableViewState viewState = changingView.getViewState();
                 mTmpState.copyFrom(viewState);
                 if (event.headsUpFromBottom) {
-                    mTmpState.yTranslation = mHeadsUpAppearHeightBottom;
+                    mTmpState.setYTranslation(mHeadsUpAppearHeightBottom);
                 } else {
                     Runnable onAnimationEnd = null;
                     if (loggable) {

@@ -35,6 +35,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.display.AmbientDisplayConfiguration;
@@ -49,6 +50,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeSensors.TriggerSensor;
 import com.android.systemui.plugins.SensorManagerPlugin;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
@@ -75,7 +77,8 @@ import java.util.function.Consumer;
 @RunWithLooper
 @SmallTest
 public class DozeSensorsTest extends SysuiTestCase {
-
+    @Mock
+    private Resources mResources;
     @Mock
     private AsyncSensorManager mSensorManager;
     @Mock
@@ -96,6 +99,8 @@ public class DozeSensorsTest extends SysuiTestCase {
     private AuthController mAuthController;
     @Mock
     private DevicePostureController mDevicePostureController;
+    @Mock
+    private UserTracker mUserTracker;
     @Mock
     private ProximitySensor mProximitySensor;
 
@@ -423,22 +428,60 @@ public class DozeSensorsTest extends SysuiTestCase {
 
     @Test
     public void testGesturesAllInitiallyRespectSettings() {
-        DozeSensors dozeSensors = new DozeSensors(getContext(), mSensorManager, mDozeParameters,
+        DozeSensors dozeSensors = new DozeSensors(mResources, mSensorManager, mDozeParameters,
                 mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
                 mProximitySensor, mFakeSettings, mAuthController,
-                mDevicePostureController);
+                mDevicePostureController, mUserTracker);
 
         for (TriggerSensor sensor : dozeSensors.mTriggerSensors) {
             assertFalse(sensor.mIgnoresSetting);
         }
     }
 
+    @Test
+    public void liftToWake_defaultSetting_configDefaultFalse() {
+        // WHEN the default lift to wake gesture setting is false
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_dozePickupGestureEnabled)).thenReturn(false);
+
+        DozeSensors dozeSensors = new DozeSensors(mResources, mSensorManager, mDozeParameters,
+                mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
+                mProximitySensor, mFakeSettings, mAuthController,
+                mDevicePostureController, mUserTracker);
+
+        for (TriggerSensor sensor : dozeSensors.mTriggerSensors) {
+            // THEN lift to wake's TriggerSensor enabledBySettings is false
+            if (sensor.mPulseReason == DozeLog.REASON_SENSOR_PICKUP) {
+                assertFalse(sensor.enabledBySetting());
+            }
+        }
+    }
+
+    @Test
+    public void liftToWake_defaultSetting_configDefaultTrue() {
+        // WHEN the default lift to wake gesture setting is true
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_dozePickupGestureEnabled)).thenReturn(true);
+
+        DozeSensors dozeSensors = new DozeSensors(mResources, mSensorManager, mDozeParameters,
+                mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
+                mProximitySensor, mFakeSettings, mAuthController,
+                mDevicePostureController, mUserTracker);
+
+        for (TriggerSensor sensor : dozeSensors.mTriggerSensors) {
+            // THEN lift to wake's TriggerSensor enabledBySettings is true
+            if (sensor.mPulseReason == DozeLog.REASON_SENSOR_PICKUP) {
+                assertTrue(sensor.enabledBySetting());
+            }
+        }
+    }
+
     private class TestableDozeSensors extends DozeSensors {
         TestableDozeSensors() {
-            super(getContext(), mSensorManager, mDozeParameters,
+            super(mResources, mSensorManager, mDozeParameters,
                     mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
                     mProximitySensor, mFakeSettings, mAuthController,
-                    mDevicePostureController);
+                    mDevicePostureController, mUserTracker);
             for (TriggerSensor sensor : mTriggerSensors) {
                 if (sensor instanceof PluginSensor
                         && ((PluginSensor) sensor).mPluginSensor.getType()

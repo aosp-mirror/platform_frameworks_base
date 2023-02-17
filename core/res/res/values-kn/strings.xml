@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ಧ್ವನಿಮೇಲ್"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"ಸಂಪರ್ಕ ಸಮಸ್ಯೆ ಇಲ್ಲವೇ ಅಮಾನ್ಯ MMI ಕೋಡ್."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ಫೀಚರ್ ಬಂಬಲಿಸುತ್ತಿಲ್ಲ."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"ಕಾರ್ಯಾಚರಣೆಯನ್ನು ಸ್ಥಿರ ದೂರವಾಣಿ ಸಂಖ್ಯೆಗಳಿಗೆ ಮಾತ್ರ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ನೀವು ರೋಮಿಂಗ್‌ನಲ್ಲಿರುವಾಗ ನಿಮ್ಮ ಫೋನ್‌ನಿಂದ ಕರೆ ಫಾರ್ವರ್ಡ್ ಮಾಡುವಿಕೆಯ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"ಸೇವೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
@@ -1177,7 +1178,7 @@
     <string name="whichApplicationLabel" msgid="7852182961472531728">"ಕ್ರಿಯೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"ಇದರ ಮೂಲಕ ತೆರೆಯಿರಿ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$s ಜೊತೆಗೆ ತೆರೆಯಿರಿ"</string>
-    <string name="whichViewApplicationLabel" msgid="7367556735684742409">"ತೆರೆ"</string>
+    <string name="whichViewApplicationLabel" msgid="7367556735684742409">"ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"ಇವುಗಳ ಮೂಲಕ <xliff:g id="HOST">%1$s</xliff:g> ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"ಇವುಗಳ ಮೂಲಕ ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"<xliff:g id="APPLICATION">%1$s</xliff:g> ಮೂಲಕ ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
@@ -1364,7 +1365,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ಅನ್‌ಲಾಗ್ ಆಡಿಯೋ ಪರಿಕರ ಪತ್ತೆಯಾಗಿದೆ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ಲಗತ್ತಿಸಲಾದ ಸಾಧನವು ಈ ಫೋನಿನೊಂದಿಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ ಕನೆಕ್ಟ್‌ ಆಗಿದೆ"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆ ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ಡೀಬಗಿಂಗ್ ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>

@@ -251,5 +251,22 @@ public class MobileMappings {
             }
             return config;
         }
+
+        /**
+         * Returns true if this config and the other config are semantically equal.
+         *
+         * Does not override isEquals because existing clients may be relying on the currently
+         * defined equals behavior.
+         */
+        public boolean areEqual(Config other) {
+            return showAtLeast3G == other.showAtLeast3G
+                    && show4gFor3g == other.show4gFor3g
+                    && alwaysShowCdmaRssi == other.alwaysShowCdmaRssi
+                    && show4gForLte == other.show4gForLte
+                    && show4glteForLte == other.show4glteForLte
+                    && hideLtePlus == other.hideLtePlus
+                    && hspaDataDistinguishable == other.hspaDataDistinguishable
+                    && alwaysShowDataRatIcon == other.alwaysShowDataRatIcon;
+        }
     }
 }

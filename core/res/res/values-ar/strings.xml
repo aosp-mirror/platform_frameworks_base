@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"البريد الصوتي"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"‏حدثت مشكلة في الاتصال أو أن رمز MMI غير صحيح."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"الميزة غير متاحة."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"تم تقييد التشغيل لأرقام الاتصال الثابت فقط."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"يتعذر تغيير إعدادات إعادة توجيه المكالمات من هاتفك أثناء التجوال."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"تم تفعيل الخدمة."</string>
@@ -514,7 +515,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="2491273043569751867">"للسماح للتطبيق بالحصول على قائمة بالحسابات التي يعرفها الهاتف. وقد يتضمن ذلك أي حسابات تم إنشاؤها بواسطة التطبيقات التي ثبتها."</string>
     <string name="permlab_accessNetworkState" msgid="2349126720783633918">"عرض اتصالات الشبكة"</string>
     <string name="permdesc_accessNetworkState" msgid="4394564702881662849">"للسماح للتطبيق بعرض معلومات حول اتصالات الشبكة كعرض معلومات عن الشبكات المتوفرة والشبكات المتصلة."</string>
-    <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"حق الوصول الكامل إلى الشبكة"</string>
+    <string name="permlab_createNetworkSockets" msgid="3224420491603590541">"الإذن بالوصول الكامل إلى الشبكة"</string>
     <string name="permdesc_createNetworkSockets" msgid="7722020828749535988">"للسماح للتطبيق بإنشاء مقابس شبكات واستخدام بروتوكولات شبكات مخصصة. ويوفر المتصفح وتطبيقات أخرى طرقًا لإرسال البيانات إلى الإنترنت، ولذلك لا يعد هذا الإذن مطلوبًا لإرسال البيانات إلى الإنترنت."</string>
     <string name="permlab_changeNetworkState" msgid="8945711637530425586">"تغيير اتصال الشبكة"</string>
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"للسماح للتطبيق بتغيير حالة اتصال الشبكة."</string>
@@ -1272,7 +1273,7 @@
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"نَسْخ الذاكرة <xliff:g id="PROC">%1$s</xliff:g> جاهز"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"تم جمع مقدار كبير من بيانات الذاكرة. انقر للمشاركة."</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"هل تريد مشاركة نَسْخ الذاكرة؟"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"تجاوزت عملية <xliff:g id="PROC">%1$s</xliff:g> حد الذاكرة المخصص لها وقدره <xliff:g id="SIZE">%2$s</xliff:g>، ويتوفر نَسْخ للذاكرة لمشاركته مع مطور برامج العملية ولكن توخ الحذر حيث قد يحتوي نَسْخ الذاكرة هذا على معلومات شخصية يملك التطبيق حق الوصول إليها."</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"تجاوزت عملية <xliff:g id="PROC">%1$s</xliff:g> حد الذاكرة المخصص لها وقدره <xliff:g id="SIZE">%2$s</xliff:g>، ويتوفر نَسْخ للذاكرة لمشاركته مع مطور برامج العملية ولكن توخ الحذر حيث قد يحتوي نَسْخ الذاكرة هذا على معلومات شخصية يملك التطبيق الإذن بالوصول إليها."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"تجاوزت عملية <xliff:g id="PROC">%1$s</xliff:g> القيد المفروض على الذاكرة الذي يبلغ <xliff:g id="SIZE">%2$s</xliff:g>. ويتوفّر نَسْخ ذاكرة يمكنك مشاركته. تحذير: قد يحتوي نَسْخ الذاكرة هذا على معلومات شخصية حسّاسة يمكن للعملية الوصول إليها، وقد يتضمن معلومات سبق لك كتابتها."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"يتوفّر نَسْخ ذاكرة من عملية <xliff:g id="PROC">%1$s</xliff:g> حتى تتمكّن من مشاركته. تحذير: قد يحتوي نَسْخ الذاكرة هذا على معلومات شخصية حسّاسة يمكن للعملية الوصول إليها، وقد يتضمن معلومات سبق لك كتابتها."</string>
     <string name="sendText" msgid="493003724401350724">"اختيار إجراء للنص"</string>
@@ -2055,8 +2056,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"السماح بالوصول إلى السجلّ لمرة واحدة"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"عدم السماح"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"ترصد سجلّات الجهاز ما يحدث على جهازك. يمكن أن تستخدم التطبيقات هذه السجلّات لتحديد المشاكل وحلها.\n\nقد تحتوي بعض السجلّات على معلومات حساسة، ولذلك يجب عدم السماح بالوصول إلى جميع سجلّات الجهاز إلا للتطبيقات التي تثق بها. \n\nإذا لم تسمح بوصول هذا التطبيق إلى جميع سجلّات الجهاز، يظل بإمكان التطبيق الوصول إلى سجلّاته. ويظل بإمكان الشركة المصنِّعة لجهازك الوصول إلى بعض السجلّات أو المعلومات المتوفّرة على جهازك."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"‏ترصد سجلّات الجهاز ما يحدث على جهازك. يمكن أن تستخدم التطبيقات هذه السجلّات لتحديد المشاكل وحلّها.\n\nقد تحتوي بعض السجلّات على معلومات حساسة، ولذلك يجب عدم السماح بالوصول إلى جميع سجلّات الجهاز إلا للتطبيقات التي تثق بها. \n\nإذا لم تسمح بوصول هذا التطبيق إلى جميع سجلّات الجهاز، يظل بإمكان التطبيق الوصول إلى سجلّاته. وقد يظل بإمكان الشركة المصنِّعة لجهازك الوصول إلى بعض السجلّات أو المعلومات المتوفّرة على جهازك.\n\nتعرَّف على مزيد من المعلومات على الرابط g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"عدم الإظهار مرة أخرى"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"يريد تطبيق <xliff:g id="APP_0">%1$s</xliff:g> عرض شرائح تطبيق <xliff:g id="APP_2">%2$s</xliff:g>."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"تعديل"</string>

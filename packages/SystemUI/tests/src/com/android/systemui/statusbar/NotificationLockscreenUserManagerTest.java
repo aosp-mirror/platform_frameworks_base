@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static android.content.Intent.ACTION_USER_SWITCHED;
-
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -34,7 +32,6 @@ import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Handler;
@@ -52,6 +49,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.NotificationStateChangedListener;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
@@ -77,6 +76,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private NotificationPresenter mPresenter;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private UserTracker mUserTracker;
 
     // Dependency mocks:
     @Mock
@@ -87,6 +88,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private DevicePolicyManager mDevicePolicyManager;
     @Mock
     private NotificationClickNotifier mClickNotifier;
+    @Mock
+    private OverviewProxyService mOverviewProxyService;
     @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
@@ -112,6 +115,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         int currentUserId = ActivityManager.getCurrentUser();
+        when(mUserTracker.getUserId()).thenReturn(currentUserId);
         mSettings = new FakeSettings();
         mSettings.setUserId(ActivityManager.getCurrentUser());
         mCurrentUser = new UserInfo(currentUserId, "", 0);
@@ -286,11 +290,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testActionUserSwitchedCallsOnUserSwitched() {
-        Intent intent = new Intent()
-                .setAction(ACTION_USER_SWITCHED)
-                .putExtra(Intent.EXTRA_USER_HANDLE, mSecondaryUser.id);
-        mLockscreenUserManager.getBaseBroadcastReceiverForTest().onReceive(mContext, intent);
+    public void testUserSwitchedCallsOnUserSwitched() {
+        mLockscreenUserManager.getUserTrackerCallbackForTest().onUserChanged(mSecondaryUser.id,
+                mContext);
         verify(mPresenter, times(1)).onUserSwitched(mSecondaryUser.id);
     }
 
@@ -341,9 +343,11 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                     mBroadcastDispatcher,
                     mDevicePolicyManager,
                     mUserManager,
+                    mUserTracker,
                     (() -> mVisibilityProvider),
                     (() -> mNotifCollection),
                     mClickNotifier,
+                    (() -> mOverviewProxyService),
                     NotificationLockscreenUserManagerTest.this.mKeyguardManager,
                     mStatusBarStateController,
                     Handler.createAsync(Looper.myLooper()),
@@ -355,6 +359,10 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {
             return mBaseBroadcastReceiver;
+        }
+
+        public UserTracker.Callback getUserTrackerCallbackForTest() {
+            return mUserChangedCallback;
         }
 
         public ContentObserver getLockscreenSettingsObserverForTest() {

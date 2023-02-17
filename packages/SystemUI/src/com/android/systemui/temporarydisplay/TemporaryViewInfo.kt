@@ -19,12 +19,43 @@ package com.android.systemui.temporarydisplay
 /**
  * A superclass view state used with [TemporaryViewDisplayController].
  */
-interface TemporaryViewInfo {
+abstract class TemporaryViewInfo {
     /**
-     * Returns the amount of time the given view state should display on the screen before it times
-     * out and disappears.
+     * The title to use for the window that displays the temporary view. Should be normally cased,
+     * like "Window Title".
      */
-    fun getTimeoutMs(): Long = DEFAULT_TIMEOUT_MILLIS
+    abstract val windowTitle: String
+
+    /**
+     * A string used for logging if we needed to wake the screen in order to display the temporary
+     * view. Should be screaming snake cased, like WAKE_REASON.
+     */
+    abstract val wakeReason: String
+
+    /**
+     * The amount of time the given view state should display on the screen before it times out and
+     * disappears.
+     */
+    open val timeoutMs: Int = DEFAULT_TIMEOUT_MILLIS
+
+    /**
+     * The id of the temporary view.
+     */
+    abstract val id: String
+
+    /** The priority for this view. */
+    abstract val priority: ViewPriority
 }
 
-const val DEFAULT_TIMEOUT_MILLIS = 10000L
+const val DEFAULT_TIMEOUT_MILLIS = 10000
+
+/**
+ * The priority of the view being displayed.
+ *
+ * Must be ordered from lowest priority to highest priority. (CRITICAL is currently the highest
+ * priority.)
+ */
+enum class ViewPriority {
+    NORMAL,
+    CRITICAL,
+}

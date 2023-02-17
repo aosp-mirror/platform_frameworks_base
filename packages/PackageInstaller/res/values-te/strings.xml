@@ -73,8 +73,8 @@
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ఈ యాప్ కొందరు వినియోగదారులకు లేదా కొన్ని ప్రొఫైళ్లకు అవసరం, ఇతరులకు అన్‌ఇన్‌స్టాల్ చేయబడింది"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"మీ ప్రొఫైల్ కోసం ఈ యాప్ అవసరం, అందువల్ల దీన్ని అన్ఇన్‌స్టాల్ చేయడం కుదరదు."</string>
     <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"మీ పరికర నిర్వాహకులకు ఈ యాప్ అవసరం, అందువల్ల దీన్ని అన్‌ఇన్‌స్టాల్ చేయడం కుదరదు."</string>
-    <string name="manage_device_administrators" msgid="3092696419363842816">"పరికర నిర్వాహక యాప్‌లను నిర్వహించు"</string>
-    <string name="manage_users" msgid="1243995386982560813">"వినియోగదారులను నిర్వహించు"</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"పరికర నిర్వాహక యాప్‌లను మేనేజ్ చేయండి"</string>
+    <string name="manage_users" msgid="1243995386982560813">"వినియోగదారులను మేనేజ్ చేయండి"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని అన్‌ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"ప్యాకేజీని అన్వయించడంలో సమస్య ఏర్పడింది."</string>
     <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>

@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Сейфтен чыгаруу"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Колдонмодо экран бөлүнбөшү мүмкүн."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Колдонмодо экран бөлүнбөйт."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Бул колдонмону 1 терезеде гана ачууга болот."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Колдонмо кошумча экранда иштебей коюшу мүмкүн."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Колдонмону кошумча экрандарда иштетүүгө болбойт."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Экранды бөлгүч"</string>
@@ -56,9 +57,9 @@
     <string name="bubble_content_description_single" msgid="8495748092720065813">"<xliff:g id="APP_NAME">%2$s</xliff:g> колдонмосунан <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="8071515017164630429">"<xliff:g id="APP_NAME">%2$s</xliff:g> жана дагы <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> колдонмодон <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move_top_left" msgid="2644118920500782758">"Жогорку сол жакка жылдыруу"</string>
-    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Жогорку оң жакка жылдырыңыз"</string>
+    <string name="bubble_accessibility_action_move_top_right" msgid="5864594920870245525">"Жогорку оң жакка жылдыруу"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="850271002773745634">"Төмөнкү сол жакка жылдыруу"</string>
-    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Төмөнкү оң жакка жылдырыңыз"</string>
+    <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Төмөнкү оң жакка жылдыруу"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> жөндөөлөрү"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Калкып чыкма билдирмени жабуу"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Жазышууда калкып чыкма билдирмелер көрүнбөсүн"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Чоңойтуу"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Кичирейтүү"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Жабуу"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Артка"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Маркер"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Толук экран"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Компьютер режими"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Экранды бөлүү"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Дагы"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Калкыма"</string>
 </resources>

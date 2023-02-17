@@ -88,6 +88,7 @@ internal class FixedTimingTransitionProgressProvider(
 
         override fun onAnimationStart(animator: Animator) {
             listeners.forEach { it.onTransitionStarted() }
+            listeners.forEach { it.onTransitionFinishing() }
         }
 
         override fun onAnimationEnd(animator: Animator) {

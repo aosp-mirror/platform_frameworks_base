@@ -19,10 +19,10 @@ package android.animation;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.Choreographer;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -78,7 +78,7 @@ public class AnimationHandler {
      * store visible (foreground) requestors; if the set size reaches zero, there are no
      * objects in the foreground and it is time to pause animators.
      */
-    private final ArraySet<Object> mAnimatorRequestors = new ArraySet<>();
+    private final ArrayList<WeakReference<Object>> mAnimatorRequestors = new ArrayList<>();
 
     private final Choreographer.FrameCallback mFrameCallback = new Choreographer.FrameCallback() {
         @Override
@@ -141,19 +141,9 @@ public class AnimationHandler {
      * tracking obsolete+enabled requestors.
      */
     public static void removeRequestor(Object requestor) {
-        getInstance().removeRequestorImpl(requestor);
-    }
-
-    private void removeRequestorImpl(Object requestor) {
-        // Also request disablement, in case that requestor was the sole object keeping
-        // animators un-paused
-        requestAnimatorsEnabled(false, requestor);
-        mAnimatorRequestors.remove(requestor);
+        getInstance().requestAnimatorsEnabledImpl(false, requestor);
         if (LOCAL_LOGV) {
-            Log.v(TAG, "removeRequestorImpl for " + requestor);
-            for (int i = 0; i < mAnimatorRequestors.size(); ++i) {
-                Log.v(TAG, "animatorRequesters " + i + " = " + mAnimatorRequestors.valueAt(i));
-            }
+            Log.v(TAG, "removeRequestor for " + requestor);
         }
     }
 
@@ -173,10 +163,36 @@ public class AnimationHandler {
     private void requestAnimatorsEnabledImpl(boolean enable, Object requestor) {
         boolean wasEmpty = mAnimatorRequestors.isEmpty();
         setAnimatorPausingEnabled(isPauseBgAnimationsEnabledInSystemProperties());
-        if (enable) {
-            mAnimatorRequestors.add(requestor);
-        } else {
-            mAnimatorRequestors.remove(requestor);
+        synchronized (mAnimatorRequestors) {
+            // Only store WeakRef objects to avoid leaks
+            if (enable) {
+                // First, check whether such a reference is already on the list
+                WeakReference<Object> weakRef = null;
+                for (int i = mAnimatorRequestors.size() - 1; i >= 0; --i) {
+                    WeakReference<Object> ref = mAnimatorRequestors.get(i);
+                    Object referent = ref.get();
+                    if (referent == requestor) {
+                        weakRef = ref;
+                    } else if (referent == null) {
+                        // Remove any reference that has been cleared
+                        mAnimatorRequestors.remove(i);
+                    }
+                }
+                if (weakRef == null) {
+                    weakRef = new WeakReference<>(requestor);
+                    mAnimatorRequestors.add(weakRef);
+                }
+            } else {
+                for (int i = mAnimatorRequestors.size() - 1; i >= 0; --i) {
+                    WeakReference<Object> ref = mAnimatorRequestors.get(i);
+                    Object referent = ref.get();
+                    if (referent == requestor || referent == null) {
+                        // remove requested item or item that has been cleared
+                        mAnimatorRequestors.remove(i);
+                    }
+                }
+                // If a reference to the requestor wasn't in the list, nothing to remove
+            }
         }
         if (!sAnimatorPausingEnabled) {
             // Resume any animators that have been paused in the meantime, otherwise noop
@@ -198,9 +214,12 @@ public class AnimationHandler {
             }
         }
         if (LOCAL_LOGV) {
-            Log.v(TAG, enable ? "enable" : "disable" + " animators for " + requestor);
+            Log.v(TAG, (enable ? "enable" : "disable") + " animators for " + requestor
+                    + " with pauseDelay of " + Animator.getBackgroundPauseDelay());
             for (int i = 0; i < mAnimatorRequestors.size(); ++i) {
-                Log.v(TAG, "animatorRequesters " + i + " = " + mAnimatorRequestors.valueAt(i));
+                Log.v(TAG, "animatorRequestors " + i + " = "
+                        + mAnimatorRequestors.get(i) + " with referent "
+                        + mAnimatorRequestors.get(i).get());
             }
         }
     }
@@ -219,12 +238,14 @@ public class AnimationHandler {
             return;
         }
         for (int i = 0; i < mAnimationCallbacks.size(); ++i) {
-            Animator animator = ((Animator) mAnimationCallbacks.get(i));
-            if (animator != null
-                    && animator.getTotalDuration() == Animator.DURATION_INFINITE
-                    && !animator.isPaused()) {
-                mPausedAnimators.add(animator);
-                animator.pause();
+            AnimationFrameCallback callback = mAnimationCallbacks.get(i);
+            if (callback instanceof Animator) {
+                Animator animator = ((Animator) callback);
+                if (animator.getTotalDuration() == Animator.DURATION_INFINITE
+                        && !animator.isPaused()) {
+                    mPausedAnimators.add(animator);
+                    animator.pause();
+                }
             }
         }
     };
@@ -432,8 +453,9 @@ public class AnimationHandler {
 
     /**
      * Callbacks that receives notifications for animation timing and frame commit timing.
+     * @hide
      */
-    interface AnimationFrameCallback {
+    public interface AnimationFrameCallback {
         /**
          * Run animation based on the frame time.
          * @param frameTime The frame start time, in the {@link SystemClock#uptimeMillis()} time

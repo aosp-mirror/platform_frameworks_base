@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"取消保護"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"應用程式可能無法在分割畫面中運作。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"應用程式不支援分割畫面。"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"此應用程式只可在 1 個視窗中開啟"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"應用程式可能無法在次要顯示屏上運作。"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"應用程式無法在次要顯示屏上啟動。"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"分割畫面分隔線"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"最大化"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"最小化"</string>
     <string name="close_button_text" msgid="2913281996024033299">"關閉"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"返去"</string>
+    <string name="handle_text" msgid="1766582106752184456">"控點"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"全螢幕"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"桌面模式"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"分割螢幕"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"更多"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"浮動"</string>
 </resources>

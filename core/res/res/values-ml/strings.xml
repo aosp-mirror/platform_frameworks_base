@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"വോയ്സ് മെയില്‍"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"കണക്ഷൻ പ്രശ്‌നം അല്ലെങ്കിൽ MMI കോഡ് അസാധുവാണ്."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ഫീച്ചർ പിന്തുണയ്‌ക്കുന്നില്ല."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"നിശ്ചയിച്ചുറപ്പിച്ച ഡയൽ ചെയ്യൽ നമ്പറുകൾക്ക് മാത്രമായി പ്രവർത്തനം പരിമിതപ്പെടുത്തിയിരിക്കുന്നു."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"റോമിംഗിൽ ആയിരിക്കുമ്പോൾ നിങ്ങളുടെ ഫോണിൽ നിന്ന് കോൾ കൈമാറ്റ ക്രമീകരണം സാധിക്കില്ല."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"സേവനം പ്രവർത്തനക്ഷമമാക്കി."</string>

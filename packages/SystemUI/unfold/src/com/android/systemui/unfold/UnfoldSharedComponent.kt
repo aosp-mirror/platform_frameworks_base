@@ -20,10 +20,12 @@ import android.content.ContentResolver
 import android.content.Context
 import android.hardware.SensorManager
 import android.os.Handler
+import android.view.IWindowManager
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.dagger.UnfoldBackground
 import com.android.systemui.unfold.dagger.UnfoldMain
 import com.android.systemui.unfold.updates.FoldProvider
+import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.util.CurrentActivityTypeProvider
 import com.android.systemui.unfold.util.UnfoldTransitionATracePrefix
@@ -39,11 +41,11 @@ import javax.inject.Singleton
  *
  * This component is meant to be used for places that don't use dagger. By providing those
  * parameters to the factory, all dagger objects are correctly instantiated. See
- * [createUnfoldTransitionProgressProvider] for an example.
+ * [createUnfoldSharedComponent] for an example.
  */
 @Singleton
 @Component(modules = [UnfoldSharedModule::class])
-internal interface UnfoldSharedComponent {
+interface UnfoldSharedComponent {
 
     @Component.Factory
     interface Factory {
@@ -58,9 +60,11 @@ internal interface UnfoldSharedComponent {
             @BindsInstance @UnfoldMain executor: Executor,
             @BindsInstance @UnfoldBackground backgroundExecutor: Executor,
             @BindsInstance @UnfoldTransitionATracePrefix tracingTagPrefix: String,
+            @BindsInstance windowManager: IWindowManager,
             @BindsInstance contentResolver: ContentResolver = context.contentResolver
         ): UnfoldSharedComponent
     }
 
     val unfoldTransitionProvider: Optional<UnfoldTransitionProgressProvider>
+    val rotationChangeProvider: RotationChangeProvider
 }

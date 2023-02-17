@@ -247,7 +247,7 @@
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Appareils associés"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Actuellement connecté"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Infos sur l\'appareil"</string>
-    <string name="adb_device_forget" msgid="193072400783068417">"Supprimer"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Retirer"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Empreinte de l\'appareil : <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Échec de la connexion"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Vérifiez que l\'appareil <xliff:g id="DEVICE_NAME">%1$s</xliff:g> est connecté au bon réseau"</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Chargée à 100 %% dans <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - chargée à 100 %% dans <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – La recharge est en pause"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Recharge optimisée"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Recharge optimisée"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Batterie en charge"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Charge rapide"</string>

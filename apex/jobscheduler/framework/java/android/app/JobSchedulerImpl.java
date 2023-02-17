@@ -16,7 +16,10 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.app.job.IJobScheduler;
+import android.app.job.IUserVisibleJobObserver;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.app.job.JobSnapshot;
@@ -118,5 +121,29 @@ public class JobSchedulerImpl extends JobScheduler {
         } catch (RemoteException e) {
             return null;
         }
+    }
+
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    @Override
+    public void registerUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer) {
+        // TODO(255767350): implement
+    }
+
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    @Override
+    public void unregisterUserVisibleJobObserver(@NonNull IUserVisibleJobObserver observer) {
+        // TODO(255767350): implement
+    }
+
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MANAGE_ACTIVITY_TASKS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+    @Override
+    public void stopUserVisibleJobsForUser(@NonNull String packageName, int userId) {
+        // TODO(255767350): implement
     }
 }

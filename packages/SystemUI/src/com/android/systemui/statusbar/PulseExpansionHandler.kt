@@ -22,7 +22,6 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
 import android.os.PowerManager
-import android.os.PowerManager.WAKE_REASON_GESTURE
 import android.os.SystemClock
 import android.util.IndentingPrintWriter
 import android.view.MotionEvent
@@ -39,6 +38,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionStateManager
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -52,7 +52,10 @@ import javax.inject.Inject
 import kotlin.math.max
 
 /**
- * A utility class to enable the downward swipe on when pulsing.
+ * A utility class that handles notification panel expansion when a user swipes downward on a
+ * notification from the pulsing state.
+ * If face-bypass is enabled, the user can swipe down anywhere on the screen (not just from a
+ * notification) to trigger the notification panel expansion.
  */
 @SysUISingleton
 class PulseExpansionHandler @Inject
@@ -62,9 +65,10 @@ constructor(
     private val bypassController: KeyguardBypassController,
     private val headsUpManager: HeadsUpManagerPhone,
     private val roundnessManager: NotificationRoundnessManager,
-    private val configurationController: ConfigurationController,
+    configurationController: ConfigurationController,
     private val statusBarStateController: StatusBarStateController,
     private val falsingManager: FalsingManager,
+    shadeExpansionStateManager: ShadeExpansionStateManager,
     private val lockscreenShadeTransitionController: LockscreenShadeTransitionController,
     private val falsingCollector: FalsingCollector,
     dumpManager: DumpManager
@@ -123,6 +127,13 @@ constructor(
                 initResources(context)
             }
         })
+
+        shadeExpansionStateManager.addQsExpansionListener { isQsExpanded ->
+            if (qsExpanded != isQsExpanded) {
+                qsExpanded = isQsExpanded
+            }
+        }
+
         mPowerManager = context.getSystemService(PowerManager::class.java)
         dumpManager.registerDumpable(this)
     }
@@ -237,7 +248,7 @@ constructor(
         }
         if (statusBarStateController.isDozing) {
             wakeUpCoordinator.willWakeUp = true
-            mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), WAKE_REASON_GESTURE,
+            mPowerManager!!.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
                     "com.android.systemui:PULSEDRAG")
         }
         lockscreenShadeTransitionController.goToLockedShade(startingChild,

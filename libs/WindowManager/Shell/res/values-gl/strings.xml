@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Non esconder"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Pode que a aplicación non funcione coa pantalla dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"A aplicación non é compatible coa función de pantalla dividida."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Esta aplicación só se pode abrir en 1 ventá."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"É posible que a aplicación non funcione nunha pantalla secundaria."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"A aplicación non se pode iniciar en pantallas secundarias."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Divisor de pantalla dividida"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximizar"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimizar"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Pechar"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Atrás"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Controlador"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Pantalla completa"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Modo de escritorio"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Pantalla dividida"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Máis"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Flotante"</string>
 </resources>

@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • تیزی سے چارج ہو رہا ہے"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • آہستہ چارج ہو رہا ہے"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • بیٹری کی حفاظت کے لیے چارجنگ رک گیا ہے"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • بیٹری کی حفاظت کے لیے چارجنگ کو بہتر بنایا گیا"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"غیر مقفل کرنے کیلئے مینو دبائیں۔"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"نیٹ ورک مقفل ہو گیا"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"‏کوئی SIM کارڈ نہیں ہے"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"آلہ دوبارہ چالو ہونے کے بعد پیٹرن درکار ہوتا ہے"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"‏آلہ دوبارہ چالو ہونے کے بعد PIN درکار ہوتا ہے"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"آلہ دوبارہ چالو ہونے کے بعد پاس ورڈ درکار ہوتا ہے"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"اضافی سیکیورٹی کیلئے پیٹرن درکار ہے"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"‏اضافی سیکیورٹی کیلئے PIN درکار ہے"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"اضافی سیکیورٹی کیلئے پاس ورڈ درکار ہے"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"اضافی سیکیورٹی کے لئے، اس کے بجائے پیٹرن استعمال کریں"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"‏اضافی سیکیورٹی کے لئے، اس کے بجائے PIN استعمال کریں"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"اضافی سیکیورٹی کے لئے، اس کے بجائے پاس ورڈ استعمال کریں"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"آلہ منتظم کی جانب سے مقفل ہے"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"آلہ کو دستی طور پر مقفل کیا گیا تھا"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"تسلیم شدہ نہیں ہے"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"ڈیفالٹ"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"بلبلہ"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"اینالاگ"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"جاری رکھنے کے لئے اپنا آلہ غیر مقفل کریں"</string>
 </resources>

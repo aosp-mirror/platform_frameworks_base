@@ -21,8 +21,8 @@
     <string name="label_destination" msgid="9132510997381599275">"గమ్యం"</string>
     <string name="label_copies" msgid="3634531042822968308">"కాపీలు"</string>
     <string name="label_copies_summary" msgid="3861966063536529540">"కాపీలు:"</string>
-    <string name="label_paper_size" msgid="908654383827777759">"కాగితపు పరిమాణం"</string>
-    <string name="label_paper_size_summary" msgid="5668204981332138168">"కాగితపు పరిమాణం:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"కాగితపు సైజ్‌"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"కాగితపు సైజ్‌:"</string>
     <string name="label_color" msgid="1108690305218188969">"రంగు"</string>
     <string name="label_duplex" msgid="5370037254347072243">"రెండు వైపుల"</string>
     <string name="label_orientation" msgid="2853142581990496477">"ఓరియంటేషన్"</string>
@@ -35,24 +35,24 @@
     <string name="install_for_print_preview" msgid="6366303997385509332">"ప్రివ్యూ చేయడానికి PDF వ్యూయర్‌ను ఇన్‌స్టాల్ చేయండి"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"ముద్రణ యాప్ క్రాష్ అయ్యింది"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"ముద్రణ జాబ్‌ను ఉత్పన్నం చేస్తోంది"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"PDF లాగా సేవ్ చేయి"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF లాగా సేవ్ చేయండి"</string>
     <string name="all_printers" msgid="5018829726861876202">"అన్ని ప్రింటర్‌లు…"</string>
     <string name="print_dialog" msgid="32628687461331979">"ముద్రణ డైలాగ్"</string>
     <string name="current_page_template" msgid="5145005201131935302">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g>లో <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>వ పేజీ"</string>
-    <string name="summary_template" msgid="8899734908625669193">"సారాంశం, కాపీలు <xliff:g id="COPIES">%1$s</xliff:g>, కాగితం పరిమాణం <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
+    <string name="summary_template" msgid="8899734908625669193">"సారాంశం, కాపీలు <xliff:g id="COPIES">%1$s</xliff:g>, కాగితం సైజ్‌ <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
     <string name="expand_handle" msgid="7282974448109280522">"విస్తరణ హ్యాండిల్"</string>
     <string name="collapse_handle" msgid="6886637989442507451">"కుదింపు హ్యాండిల్"</string>
     <string name="print_button" msgid="645164566271246268">"ప్రింట్ చేయండి"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"PDF లాగా సేవ్ చేయి"</string>
+    <string name="savetopdf_button" msgid="2976186791686924743">"PDF లాగా సేవ్ చేయండి"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"ముద్రణ ఎంపికలు విస్తరించబడ్డాయి"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"ముద్రణ ఎంపికలు కుదించబడ్డాయి"</string>
     <string name="search" msgid="5421724265322228497">"సెర్చ్"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"అన్ని ప్రింటర్‌లు"</string>
-    <string name="add_print_service_label" msgid="5356702546188981940">"సేవను జోడించు"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"సేవను జోడించండి"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"సెర్చ్ బాక్స్ చూపబడింది"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"సెర్చ్ బాక్స్ దాచబడింది"</string>
-    <string name="print_add_printer" msgid="1088656468360653455">"ప్రింటర్‌ను జోడించు"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"ప్రింటర్‌ను జోడించండి"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"ప్రింటర్‌ను ఎంచుకోండి"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"ప్రింటర్‌ను విస్మరించు"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">

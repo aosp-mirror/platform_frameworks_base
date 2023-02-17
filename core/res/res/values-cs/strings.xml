@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Hlasová schránka"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problém s připojením nebo neplatný kód MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkce není podporována."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operace je omezena pouze na povolená telefonní čísla."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Když je aktivní roaming, nastavení přesměrování hovorů z telefonu nelze změnit."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Služba byla zapnuta."</string>
@@ -326,7 +327,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"uskutečňování a spravování telefonních hovorů"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tělesné senzory"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"přístup k datům ze snímačů vašich životních funkcí"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"přístup k datům ze senzorů vašich životních funkcí"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Oznámení"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"zobrazovat oznámení"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Načítat obsah oken"</string>
@@ -2053,8 +2054,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Povolit jednorázový přístup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nepovolovat"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Do protokolů zařízení se zaznamenává, co se na zařízení děje. Aplikace tyto protokoly mohou používat k vyhledání a odstranění problémů.\n\nNěkteré protokoly mohou zahrnovat citlivé údaje. Přístup k protokolům zařízení proto povolte pouze aplikacím, kterým důvěřujete. \n\nPokud této aplikaci nepovolíte přístup ke všem protokolům zařízení, bude mít stále přístup ke svým vlastním protokolům. Výrobce zařízení může mít stále přístup k některým protokolům nebo informacím na vašem zařízení."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Do protokolů zařízení se zaznamenává, co se na zařízení děje. Aplikace tyto protokoly mohou používat k vyhledání a odstranění problémů.\n\nNěkteré protokoly mohou zahrnovat citlivé údaje. Přístup k protokolům zařízení proto povolte pouze aplikacím, kterým důvěřujete. \n\nPokud této aplikaci nepovolíte přístup ke všem protokolům zařízení, bude mít stále přístup ke svým vlastním protokolům. Výrobce zařízení může mít stále přístup k některým protokolům nebo informacím na vašem zařízení.\n\nDalší informace najdete na stránce g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Příště nezobrazovat"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikace <xliff:g id="APP_0">%1$s</xliff:g> chce zobrazovat ukázky z aplikace <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Upravit"</string>

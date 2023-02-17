@@ -104,6 +104,9 @@
     <uses-permission android:name="android.permission.PACKAGE_VERIFICATION_AGENT" />
     <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
     <uses-permission android:name="android.permission.BATTERY_STATS" />
+    <uses-permission android:name="android.permission.UPDATE_LOCK_TASK_PACKAGES" />
+    <uses-permission android:name="android.permission.ACCESS_CONTEXT_HUB" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC_INTERNAL" />
 
     <queries>
         <package android:name="com.android.servicestests.apps.suspendtestapp" />
@@ -301,11 +304,4 @@
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
          android:targetPackage="com.android.frameworks.servicestests"
          android:label="Frameworks Services Tests"/>
-    <key-sets>
-        <key-set android:name="A" >
-            <public-key android:name="keyA"
-                android:value="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsMpNthdOxud7roPDZMMomOqXgJJdRfIWpkKEqmC61Mv+Nf6QY3TorEwJeghjSmqj7IbBKrtvfQq4E2XJO1HuspmQO4Ng2gvn+r+6EwNfKc9k55d6s+27SR867jKurBbHNtZMG+tjL1yH4r+tNzcuJCsgyAFqLmxFdcxEwzNvREyRpoYc5RDR0mmTwkMCUhJ6CId1EYEKiCEdNzxv+fWPEb21u+/MWpleGCILs8kglRVb2q/WOzAAvGr4FY5plfaE6N+lr7+UschQ+aMi1+uqewo2o0qPFVmZP5hnwj55K4UMzu/NhhDqQQsX4cSGES1KgHo5MTqRqZjN/I7emw5pFQIDAQAB"/>
-        </key-set>
-        <upgrade-key-set android:name="A"/>
-    </key-sets>
 </manifest>

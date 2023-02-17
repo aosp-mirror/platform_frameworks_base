@@ -726,7 +726,7 @@ class ActivityMetricsLogger {
         // visible such as after the top task is finished.
         for (int i = mTransitionInfoList.size() - 2; i >= 0; i--) {
             final TransitionInfo prevInfo = mTransitionInfoList.get(i);
-            if (prevInfo.mIsDrawn || !prevInfo.mLastLaunchedActivity.mVisibleRequested) {
+            if (prevInfo.mIsDrawn || !prevInfo.mLastLaunchedActivity.isVisibleRequested()) {
                 scheduleCheckActivityToBeDrawn(prevInfo.mLastLaunchedActivity, 0 /* delay */);
             }
         }
@@ -851,7 +851,7 @@ class ActivityMetricsLogger {
             return;
         }
         if (DEBUG_METRICS) {
-            Slog.i(TAG, "notifyVisibilityChanged " + r + " visible=" + r.mVisibleRequested
+            Slog.i(TAG, "notifyVisibilityChanged " + r + " visible=" + r.isVisibleRequested()
                     + " state=" + r.getState() + " finishing=" + r.finishing);
         }
         if (r.isState(ActivityRecord.State.RESUMED) && r.mDisplayContent.isSleeping()) {
@@ -860,7 +860,7 @@ class ActivityMetricsLogger {
             // the tracking of launch event.
             return;
         }
-        if (!r.mVisibleRequested || r.finishing) {
+        if (!r.isVisibleRequested() || r.finishing) {
             // Check if the tracker can be cancelled because the last launched activity may be
             // no longer visible.
             scheduleCheckActivityToBeDrawn(r, 0 /* delay */);
@@ -893,7 +893,7 @@ class ActivityMetricsLogger {
             // activities in this task may be finished, invisible or drawn, so the transition event
             // should be cancelled.
             if (t != null && t.forAllActivities(
-                    a -> a.mVisibleRequested && !a.isReportedDrawn() && !a.finishing)) {
+                    a -> a.isVisibleRequested() && !a.isReportedDrawn() && !a.finishing)) {
                 return;
             }
 

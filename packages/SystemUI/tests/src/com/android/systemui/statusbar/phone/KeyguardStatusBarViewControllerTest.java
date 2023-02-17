@@ -47,6 +47,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
@@ -55,14 +56,12 @@ import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserInfoTracker;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherFeatureController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -111,18 +110,15 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     private StatusBarContentInsetsProvider mStatusBarContentInsetsProvider;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private StatusBarUserChipViewModel mStatusBarUserChipViewModel;
     @Captor
     private ArgumentCaptor<ConfigurationListener> mConfigurationListenerCaptor;
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardCallbackCaptor;
-    @Mock
-    private StatusBarUserSwitcherFeatureController mStatusBarUserSwitcherFeatureController;
-    @Mock
-    private StatusBarUserSwitcherController mStatusBarUserSwitcherController;
-    @Mock
-    private StatusBarUserInfoTracker mStatusBarUserInfoTracker;
     @Mock private SecureSettings mSecureSettings;
     @Mock private CommandQueue mCommandQueue;
+    @Mock private KeyguardLogger mLogger;
 
     private TestNotificationPanelViewStateProvider mNotificationPanelViewStateProvider;
     private KeyguardStatusBarView mKeyguardStatusBarView;
@@ -167,12 +163,11 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mStatusBarContentInsetsProvider,
                 mUserManager,
-                mStatusBarUserSwitcherFeatureController,
-                mStatusBarUserSwitcherController,
-                mStatusBarUserInfoTracker,
+                mStatusBarUserChipViewModel,
                 mSecureSettings,
                 mCommandQueue,
-                mFakeExecutor
+                mFakeExecutor,
+                mLogger
         );
     }
 
@@ -476,8 +471,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Test
     public void testNewUserSwitcherDisablesAvatar_newUiOn() {
         // GIVEN the status bar user switcher chip is enabled
-        when(mStatusBarUserSwitcherFeatureController.isStatusBarUserSwitcherFeatureEnabled())
-                .thenReturn(true);
+        when(mStatusBarUserChipViewModel.getChipEnabled()).thenReturn(true);
 
         // WHEN the controller is created
         mController = createController();
@@ -489,8 +483,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Test
     public void testNewUserSwitcherDisablesAvatar_newUiOff() {
         // GIVEN the status bar user switcher chip is disabled
-        when(mStatusBarUserSwitcherFeatureController.isStatusBarUserSwitcherFeatureEnabled())
-                .thenReturn(false);
+        when(mStatusBarUserChipViewModel.getChipEnabled()).thenReturn(false);
 
         // WHEN the controller is created
         mController = createController();

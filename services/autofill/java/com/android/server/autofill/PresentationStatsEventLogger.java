@@ -201,6 +201,30 @@ public final class PresentationStatsEventLogger {
         });
     }
 
+    public void maybeSetFillRequestSentTimestampMs(int timestamp) {
+        mEventInternal.ifPresent(event -> {
+            event.mFillRequestSentTimestampMs = timestamp;
+        });
+    }
+
+    public void maybeSetFillResponseReceivedTimestampMs(int timestamp) {
+        mEventInternal.ifPresent(event -> {
+            event.mFillResponseReceivedTimestampMs = timestamp;
+        });
+    }
+
+    public void maybeSetSuggestionSentTimestampMs(int timestamp) {
+        mEventInternal.ifPresent(event -> {
+            event.mSuggestionSentTimestampMs = timestamp;
+        });
+    }
+
+    public void maybeSetSuggestionPresentedTimestampMs(int timestamp) {
+        mEventInternal.ifPresent(event -> {
+            event.mSuggestionPresentedTimestampMs = timestamp;
+        });
+    }
+
     public void maybeSetInlinePresentationAndSuggestionHostUid(Context context, int userId) {
         mEventInternal.ifPresent(event -> {
             event.mDisplayPresentationType =
@@ -262,7 +286,11 @@ public final class PresentationStatsEventLogger {
                     + " mDisplayPresentationType=" + event.mDisplayPresentationType
                     + " mAutofillServiceUid=" + event.mAutofillServiceUid
                     + " mInlineSuggestionHostUid=" + event.mInlineSuggestionHostUid
-                    + " mIsRequestTriggered=" + event.mIsRequestTriggered);
+                    + " mIsRequestTriggered=" + event.mIsRequestTriggered
+                    + " mFillRequestSentTimestampMs=" + event.mFillRequestSentTimestampMs
+                    + " mFillResponseReceivedTimestampMs=" + event.mFillResponseReceivedTimestampMs
+                    + " mSuggestionSentTimestampMs=" + event.mSuggestionSentTimestampMs
+                    + " mSuggestionPresentedTimestampMs=" + event.mSuggestionPresentedTimestampMs);
         }
 
         // TODO(b/234185326): Distinguish empty responses from other no presentation reasons.
@@ -283,7 +311,11 @@ public final class PresentationStatsEventLogger {
                 event.mDisplayPresentationType,
                 event.mAutofillServiceUid,
                 event.mInlineSuggestionHostUid,
-                event.mIsRequestTriggered);
+                event.mIsRequestTriggered,
+                event.mFillRequestSentTimestampMs,
+                event.mFillResponseReceivedTimestampMs,
+                event.mSuggestionSentTimestampMs,
+                event.mSuggestionPresentedTimestampMs);
         mEventInternal = Optional.empty();
     }
 
@@ -300,6 +332,10 @@ public final class PresentationStatsEventLogger {
         int mAutofillServiceUid = -1;
         int mInlineSuggestionHostUid = -1;
         boolean mIsRequestTriggered;
+        int mFillRequestSentTimestampMs;
+        int mFillResponseReceivedTimestampMs;
+        int mSuggestionSentTimestampMs;
+        int mSuggestionPresentedTimestampMs;
 
         PresentationStatsEventInternal() {}
     }

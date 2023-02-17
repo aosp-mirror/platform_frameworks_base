@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Segreteria"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problema di connessione o codice MMI non valido."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funzionalità non supportata."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operazione limitata solo ai numeri di selezione fissa."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Impossibile modificare le impostazioni di deviazione chiamate dal telefono durante il roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Il servizio è stato attivato."</string>
@@ -1942,7 +1943,7 @@
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> non è al momento disponibile."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non disponibile"</string>
-    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"È necessaria l\'autorizzazione"</string>
+    <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Autorizzazione necessaria"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Fotocamera non disponibile"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Continua sul telefono"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Microfono non disponibile"</string>
@@ -1958,7 +1959,7 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Questa app richiede maggiore sicurezza. Prova a usare il telefono."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Non è possibile accedere a questa impostazione su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Non è possibile accedere a questa impostazione su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il tablet."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Non è possibile accedere a questa impostazione su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il telefono."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Non è possibile accedere su <xliff:g id="DEVICE">%1$s</xliff:g>. Prova a usare il telefono."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Questa app è stata realizzata per una versione precedente di Android e potrebbe non funzionare correttamente. Prova a verificare la disponibilità di aggiornamenti o contatta lo sviluppatore."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Cerca aggiornamenti"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Hai nuovi messaggi"</string>

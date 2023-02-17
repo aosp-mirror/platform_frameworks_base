@@ -321,4 +321,21 @@
 
     <!-- The smaller size of the dismiss target (shrinks when something is in the target). -->
     <dimen name="floating_dismiss_circle_small">120dp</dimen>
+
+    <!-- The thickness of shadows of a window that has focus in DIP. -->
+    <dimen name="freeform_decor_shadow_focused_thickness">20dp</dimen>
+
+    <!-- The thickness of shadows of a window that doesn't have focus in DIP. -->
+    <dimen name="freeform_decor_shadow_unfocused_thickness">5dp</dimen>
+
+    <!-- Height of button (32dp)  + 2 * margin (5dp each). -->
+    <dimen name="freeform_decor_caption_height">42dp</dimen>
+
+    <!-- Width of buttons (64dp) + handle (128dp) + padding (24dp total). -->
+    <dimen name="freeform_decor_caption_width">216dp</dimen>
+
+    <dimen name="freeform_resize_handle">30dp</dimen>
+
+    <dimen name="freeform_resize_corner">44dp</dimen>
+
 </resources>

@@ -16,15 +16,23 @@ package com.android.systemui.statusbar.policy;
 
 import static android.view.ContentInfo.SOURCE_CLIPBOARD;
 
+import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_STANDARD;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.PendingIntent;
@@ -43,12 +51,18 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.ContentInfo;
 import android.view.View;
+import android.view.ViewRootImpl;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import androidx.annotation.NonNull;
+import androidx.core.animation.AnimatorTestRule;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -56,17 +70,22 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.LightBarController;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -89,6 +108,9 @@ public class RemoteInputViewTest extends SysuiTestCase {
     @Mock private LightBarController mLightBarController;
     private BlockingQueueIntentReceiver mReceiver;
     private final UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
+
+    @ClassRule
+    public static AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
 
     @Before
     public void setUp() throws Exception {
@@ -229,6 +251,70 @@ public class RemoteInputViewTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPredictiveBack_registerAndUnregister() throws Exception {
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+
+        ViewRootImpl viewRoot = mock(ViewRootImpl.class);
+        WindowOnBackInvokedDispatcher backInvokedDispatcher = mock(
+                WindowOnBackInvokedDispatcher.class);
+        ArgumentCaptor<OnBackInvokedCallback> onBackInvokedCallbackCaptor = ArgumentCaptor.forClass(
+                OnBackInvokedCallback.class);
+        when(viewRoot.getOnBackInvokedDispatcher()).thenReturn(backInvokedDispatcher);
+        view.setViewRootImpl(viewRoot);
+
+        /* verify that predictive back callback registered when RemoteInputView becomes visible */
+        view.onVisibilityAggregated(true);
+        verify(backInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
+                onBackInvokedCallbackCaptor.capture());
+
+        /* verify that same callback unregistered when RemoteInputView becomes invisible */
+        view.onVisibilityAggregated(false);
+        verify(backInvokedDispatcher).unregisterOnBackInvokedCallback(
+                eq(onBackInvokedCallbackCaptor.getValue()));
+    }
+
+    @Test
+    public void testUiPredictiveBack_openAndDispatchCallback() throws Exception {
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+        ViewRootImpl viewRoot = mock(ViewRootImpl.class);
+        WindowOnBackInvokedDispatcher backInvokedDispatcher = mock(
+                WindowOnBackInvokedDispatcher.class);
+        ArgumentCaptor<OnBackInvokedCallback> onBackInvokedCallbackCaptor = ArgumentCaptor.forClass(
+                OnBackInvokedCallback.class);
+        when(viewRoot.getOnBackInvokedDispatcher()).thenReturn(backInvokedDispatcher);
+        view.setViewRootImpl(viewRoot);
+        view.onVisibilityAggregated(true);
+        view.setEditTextReferenceToSelf();
+
+        /* capture the callback during registration */
+        verify(backInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_OVERLAY),
+                onBackInvokedCallbackCaptor.capture());
+
+        view.focus();
+
+        /* invoke the captured callback */
+        onBackInvokedCallbackCaptor.getValue().onBackInvoked();
+
+        /* wait for RemoteInputView disappear animation to finish */
+        mAnimatorTestRule.advanceTimeBy(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+
+        /* verify that the RemoteInputView goes away */
+        assertEquals(view.getVisibility(), View.GONE);
+    }
+
+    @Test
     public void testUiEventLogging_openAndSend() throws Exception {
         NotificationTestHelper helper = new NotificationTestHelper(
                 mContext,
@@ -293,19 +379,75 @@ public class RemoteInputViewTest extends SysuiTestCase {
                 mUiEventLoggerFake.eventId(1));
     }
 
+    @Test
+    public void testFocusAnimation() throws Exception {
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+        bindController(view, row.getEntry());
+        view.setVisibility(View.GONE);
+
+        View crossFadeView = new View(mContext);
+
+        // Start focus animation
+        view.focusAnimated(crossFadeView);
+
+        assertTrue(view.isAnimatingAppearance());
+
+        // fast forward to end of animation
+        mAnimatorTestRule.advanceTimeBy(ANIMATION_DURATION_STANDARD);
+
+        // assert that crossFadeView's alpha is reset to 1f after the animation (hidden behind
+        // RemoteInputView)
+        assertEquals(1f, crossFadeView.getAlpha());
+        assertFalse(view.isAnimatingAppearance());
+        assertEquals(View.VISIBLE, view.getVisibility());
+        assertEquals(1f, view.getAlpha());
+    }
+
+    @Test
+    public void testDefocusAnimation() throws Exception {
+        NotificationTestHelper helper = new NotificationTestHelper(
+                mContext,
+                mDependency,
+                TestableLooper.get(this));
+        ExpandableNotificationRow row = helper.createRow();
+        FrameLayout remoteInputViewParent = new FrameLayout(mContext);
+        RemoteInputView view = RemoteInputView.inflate(mContext, null, row.getEntry(), mController);
+        remoteInputViewParent.addView(view);
+        bindController(view, row.getEntry());
+
+        // Start defocus animation
+        view.onDefocus(true, false);
+        assertEquals(View.VISIBLE, view.getVisibility());
+
+        // fast forward to end of animation
+        mAnimatorTestRule.advanceTimeBy(ANIMATION_DURATION_STANDARD);
+
+        // assert that RemoteInputView is no longer visible
+        assertEquals(View.GONE, view.getVisibility());
+    }
+
     // NOTE: because we're refactoring the RemoteInputView and moving logic into the
-    //  RemoteInputViewController, it's easiest to just test the system of the two classes together.
+    // RemoteInputViewController, it's easiest to just test the system of the two classes together.
     @NonNull
     private RemoteInputViewController bindController(
             RemoteInputView view,
             NotificationEntry entry) {
+        FakeFeatureFlags fakeFeatureFlags = new FakeFeatureFlags();
+        fakeFeatureFlags.set(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION, true);
         RemoteInputViewControllerImpl viewController = new RemoteInputViewControllerImpl(
                 view,
                 entry,
                 mRemoteInputQuickSettingsDisabler,
                 mController,
                 mShortcutManager,
-                mUiEventLoggerFake);
+                mUiEventLoggerFake,
+                fakeFeatureFlags
+                );
         viewController.bind();
         return viewController;
     }

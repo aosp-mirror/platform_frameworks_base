@@ -53,6 +53,7 @@ import android.annotation.WorkerThread;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
+import android.app.BroadcastOptions;
 import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
@@ -3211,6 +3212,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return isPackageDeviceAdmin(packageName, UserHandle.USER_ALL);
     }
 
+    // TODO(b/261957226): centralise this logic in DPM
     boolean isPackageDeviceAdmin(String packageName, int userId) {
         final IDevicePolicyManager dpm = getDevicePolicyManager();
         try {
@@ -3237,11 +3239,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     if (dpm.packageHasActiveAdmins(packageName, users[i])) {
                         return true;
                     }
+                    if (isDeviceManagementRoleHolder(packageName, users[i])) {
+                        return true;
+                    }
                 }
             }
         } catch (RemoteException e) {
         }
         return false;
+    }
+
+    private boolean isDeviceManagementRoleHolder(String packageName, int userId) {
+        return Objects.equals(packageName, getDevicePolicyManagementRoleHolderPackageName(userId));
+    }
+
+    @Nullable
+    private String getDevicePolicyManagementRoleHolderPackageName(int userId) {
+        return Binder.withCleanCallingIdentity(() -> {
+            RoleManager roleManager = mContext.getSystemService(RoleManager.class);
+            List<String> roleHolders =
+                    roleManager.getRoleHoldersAsUser(
+                            RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT, UserHandle.of(userId));
+            if (roleHolders.isEmpty()) {
+                return null;
+            }
+            return roleHolders.get(0);
+        });
     }
 
     /** Returns the device policy manager interface. */
@@ -3373,6 +3396,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         enforceOwnerRights(snapshot, ownerPackage, callingUid);
         PackageManagerServiceUtils.enforceShellRestriction(mInjector.getUserManagerInternal(),
                 UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, sourceUserId);
+        if (!intentFilter.checkDataPathAndSchemeSpecificParts()) {
+            EventLog.writeEvent(0x534e4554, "246749936", callingUid);
+            throw new IllegalArgumentException("Invalid intent data paths or scheme specific parts"
+                    + " in the filter.");
+        }
         if (intentFilter.countActions() == 0) {
             Slog.w(TAG, "Cannot set a crossProfile intent filter with no filter actions");
             return;
@@ -4771,7 +4799,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 }
                 if (pi != null) {
                     try {
-                        pi.sendIntent(null, success ? 1 : 0, null, null, null);
+                        final BroadcastOptions options = BroadcastOptions.makeBasic();
+                        options.setPendingIntentBackgroundActivityLaunchAllowed(false);
+                        pi.sendIntent(null, success ? 1 : 0, null /* intent */,
+                                null /* onFinished*/, null /* handler */,
+                                null /* requiredPermission */, options.toBundle());
                     } catch (SendIntentException e) {
                         Slog.w(TAG, e);
                     }

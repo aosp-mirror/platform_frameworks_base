@@ -40,7 +40,6 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
-import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
@@ -73,7 +72,6 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
-    @Mock private KeyguardViewMediator mKeyguardViewMediator;
     @Mock private StatusBarStateControllerImpl mStatusBarStateController;
     @Mock private BatteryController mBatteryController;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
@@ -101,7 +99,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
         mDozeServiceHost = new DozeServiceHost(mDozeLog, mPowerManager, mWakefullnessLifecycle,
                 mStatusBarStateController, mDeviceProvisionedController, mHeadsUpManager,
                 mBatteryController, mScrimController, () -> mBiometricUnlockController,
-                mKeyguardViewMediator, () -> mAssistManager, mDozeScrimController,
+                () -> mAssistManager, mDozeScrimController,
                 mKeyguardUpdateMonitor, mPulseExpansionHandler,
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
                 mAuthController, mNotificationIconAreaController);
@@ -132,18 +130,10 @@ public class DozeServiceHostTest extends SysuiTestCase {
         verify(mStatusBarStateController).setIsDozing(eq(false));
     }
 
-
     @Test
     public void testPulseWhileDozing_updatesScrimController() {
         mCentralSurfaces.setBarStateForTest(StatusBarState.KEYGUARD);
         mCentralSurfaces.showKeyguardImpl();
-
-        // Keep track of callback to be able to stop the pulse
-//        DozeHost.PulseCallback[] pulseCallback = new DozeHost.PulseCallback[1];
-//        doAnswer(invocation -> {
-//            pulseCallback[0] = invocation.getArgument(0);
-//            return null;
-//        }).when(mDozeScrimController).pulse(any(), anyInt());
 
         // Starting a pulse should change the scrim controller to the pulsing state
         mDozeServiceHost.pulseWhileDozing(new DozeHost.PulseCallback() {
@@ -209,5 +199,18 @@ public class DozeServiceHostTest extends SysuiTestCase {
                         + " passive auth. Please consider how this pulse reason should behave.");
             }
         }
+    }
+
+    @Test
+    public void testStopPulsing_setPendingPulseToFalse() {
+        // GIVEN a pending pulse
+        mDozeServiceHost.setPulsePending(true);
+
+        // WHEN pulsing is stopped
+        mDozeServiceHost.stopPulsing();
+
+        // THEN isPendingPulse=false, pulseOutNow is called
+        assertFalse(mDozeServiceHost.isPulsePending());
+        verify(mDozeScrimController).pulseOutNow();
     }
 }

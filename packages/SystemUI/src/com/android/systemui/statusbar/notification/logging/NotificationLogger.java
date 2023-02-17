@@ -36,6 +36,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
@@ -91,25 +92,6 @@ public class NotificationLogger implements StateListener {
     private Boolean mLockscreen = null;  // Use null to indicate state is not yet known
     private Boolean mPanelExpanded = null;  // Use null to indicate state is not yet known
     private boolean mLogging = false;
-
-    protected final OnChildLocationsChangedListener mNotificationLocationsChangedListener =
-            new OnChildLocationsChangedListener() {
-                @Override
-                public void onChildLocationsChanged() {
-                    if (mHandler.hasCallbacks(mVisibilityReporter)) {
-                        // Visibilities will be reported when the existing
-                        // callback is executed.
-                        return;
-                    }
-                    // Calculate when we're allowed to run the visibility
-                    // reporter. Note that this timestamp might already have
-                    // passed. That's OK, the callback will just be executed
-                    // ASAP.
-                    long nextReportUptimeMs =
-                            mLastVisibilityReportUptimeMs + VISIBILITY_REPORT_MIN_DELAY_MS;
-                    mHandler.postAtTime(mVisibilityReporter, nextReportUptimeMs);
-                }
-            };
 
     // Tracks notifications currently visible in mNotificationStackScroller and
     // emits visibility events via NoMan on changes.
@@ -219,6 +201,7 @@ public class NotificationLogger implements StateListener {
             NotificationVisibilityProvider visibilityProvider,
             NotifPipeline notifPipeline,
             StatusBarStateController statusBarStateController,
+            ShadeExpansionStateManager shadeExpansionStateManager,
             ExpansionStateLogger expansionStateLogger,
             NotificationPanelLogger notificationPanelLogger) {
         mNotificationListener = notificationListener;
@@ -232,6 +215,7 @@ public class NotificationLogger implements StateListener {
         mNotificationPanelLogger = notificationPanelLogger;
         // Not expected to be destroyed, don't need to unsubscribe
         statusBarStateController.addCallback(this);
+        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
         registerNewPipelineListener();
     }
@@ -278,14 +262,14 @@ public class NotificationLogger implements StateListener {
             if (DEBUG) {
                 Log.i(TAG, "startNotificationLogging");
             }
-            mListContainer.setChildLocationsChangedListener(mNotificationLocationsChangedListener);
+            mListContainer.setChildLocationsChangedListener(this::onChildLocationsChanged);
             // Some transitions like mVisibleToUser=false -> mVisibleToUser=true don't
             // cause the scroller to emit child location events. Hence generate
             // one ourselves to guarantee that we're reporting visible
             // notifications.
             // (Note that in cases where the scroller does emit events, this
             // additional event doesn't break anything.)
-            mNotificationLocationsChangedListener.onChildLocationsChanged();
+            onChildLocationsChanged();
         }
     }
 
@@ -411,26 +395,41 @@ public class NotificationLogger implements StateListener {
     }
 
     /**
-     * Called by CentralSurfaces to notify the logger that the panel expansion has changed.
-     * The panel may be showing any of the normal notification panel, the AOD, or the bouncer.
-     * @param isExpanded True if the panel is expanded.
-     */
-    public void onPanelExpandedChanged(boolean isExpanded) {
-        if (DEBUG) {
-            Log.i(TAG, "onPanelExpandedChanged: new=" + isExpanded);
-        }
-        mPanelExpanded = isExpanded;
-        synchronized (mDozingLock) {
-            maybeUpdateLoggingStatus();
-        }
-    }
-
-    /**
      * Called when the notification is expanded / collapsed.
      */
     public void onExpansionChanged(String key, boolean isUserAction, boolean isExpanded) {
         NotificationVisibility.NotificationLocation location = mVisibilityProvider.getLocation(key);
         mExpansionStateLogger.onExpansionChanged(key, isUserAction, isExpanded, location);
+    }
+
+    @VisibleForTesting
+    void onShadeExpansionFullyChanged(Boolean isExpanded) {
+        // mPanelExpanded is initialized as null
+        if (mPanelExpanded == null || !mPanelExpanded.equals(isExpanded)) {
+            if (DEBUG) {
+                Log.i(TAG, "onPanelExpandedChanged: new=" + isExpanded);
+            }
+            mPanelExpanded = isExpanded;
+            synchronized (mDozingLock) {
+                maybeUpdateLoggingStatus();
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void onChildLocationsChanged() {
+        if (mHandler.hasCallbacks(mVisibilityReporter)) {
+            // Visibilities will be reported when the existing
+            // callback is executed.
+            return;
+        }
+        // Calculate when we're allowed to run the visibility
+        // reporter. Note that this timestamp might already have
+        // passed. That's OK, the callback will just be executed
+        // ASAP.
+        long nextReportUptimeMs =
+                mLastVisibilityReportUptimeMs + VISIBILITY_REPORT_MIN_DELAY_MS;
+        mHandler.postAtTime(mVisibilityReporter, nextReportUptimeMs);
     }
 
     @VisibleForTesting

@@ -19,7 +19,7 @@
     <string name="app_label" msgid="4470785958457506021">"Menaxheri i pajisjes shoqëruese"</string>
     <string name="confirmation_title" msgid="3785000297483688997">"Lejo që &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; të ketë qasje te &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ora inteligjente"</string>
-    <string name="chooser_title" msgid="2262294130493605839">"Zgjidh një profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g> që do të menaxhohet nga &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
+    <string name="chooser_title" msgid="2262294130493605839">"Zgjidh \"<xliff:g id="PROFILE_NAME">%1$s</xliff:g>\" që do të menaxhohet nga &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="summary_watch" msgid="3002344206574997652">"Ky aplikacion nevojitet për të menaxhuar profilin tënd të <xliff:g id="DEVICE_NAME">%1$s</xliff:g>. <xliff:g id="APP_NAME">%2$s</xliff:g> do të lejohet të ndërveprojë me njoftimet e tua dhe të ketë qasje te lejet e \"Telefonit\", \"SMS-ve\", \"Kontakteve\", \"Kalendarit\", \"Evidencave të telefonatave\" dhe \"Pajisjeve në afërsi\"."</string>
     <string name="permission_apps" msgid="6142133265286656158">"Aplikacionet"</string>
     <string name="permission_apps_summary" msgid="798718816711515431">"Transmeto aplikacionet e telefonit tënd"</string>

@@ -3631,7 +3631,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 210;
+            private static final int SETTINGS_VERSION = 212;
 
             private final int mUserId;
 
@@ -5511,6 +5511,40 @@ public class SettingsProvider extends ContentProvider {
                 if (currentVersion == 209) {
                     // removed now that feature is enabled for everyone
                     currentVersion = 210;
+                }
+                if (currentVersion == 210) {
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting currentSetting = secureSettings.getSettingLocked(
+                            Secure.STATUS_BAR_SHOW_VIBRATE_ICON);
+                    if (currentSetting.isNull()) {
+                        final int defaultValueVibrateIconEnabled = getContext().getResources()
+                                .getInteger(R.integer.def_statusBarVibrateIconEnabled);
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.STATUS_BAR_SHOW_VIBRATE_ICON,
+                                String.valueOf(defaultValueVibrateIconEnabled),
+                                null /* tag */, true /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 211;
+                }
+                if (currentVersion == 211) {
+                    // Version 211: Set default value for
+                    // Secure#LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting lockScreenUnseenSetting = secureSettings
+                            .getSettingLocked(Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS);
+                    if (lockScreenUnseenSetting.isNull()) {
+                        final boolean defSetting = getContext().getResources()
+                                .getBoolean(R.bool.def_lock_screen_show_only_unseen_notifications);
+                        secureSettings.insertSettingOverrideableByRestoreLocked(
+                                Secure.LOCK_SCREEN_SHOW_ONLY_UNSEEN_NOTIFICATIONS,
+                                defSetting ? "1" : "0",
+                                null /* tag */,
+                                true /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 212;
                 }
 
                 // vXXX: Add new settings above this point.

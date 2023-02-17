@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Posta zanore"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problem në lidhje ose kod i pavlefshëm MMI-je."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Veçoria nuk mbështetet."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Veprimi është i kufizuar vetëm kundrejt numrave me telefonim të përzgjedhur"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Cilësimet e transferimit të telefonatave nuk mund të ndryshohen nga telefoni yt kur je në roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Shërbimi u aktivizua."</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Lejo qasjen vetëm për një herë"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Mos lejo"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Evidencat e pajisjes regjistrojnë çfarë ndodh në pajisjen tënde. Aplikacionet mund t\'i përdorin këto evidenca për të gjetur dhe rregulluar problemet.\n\nDisa evidenca mund të përmbajnë informacione delikate, ndaj lejo vetëm aplikacionet që u beson të kenë qasje te të gjitha evidencat e pajisjes. \n\nNëse nuk e lejon këtë aplikacion që të ketë qasje te të gjitha evidencat e pajisjes, ai mund të vazhdojë të ketë qasje tek evidencat e tij. Prodhuesi i pajisjes sate mund të jetë ende në gjendje që të ketë qasje te disa evidenca ose informacione në pajisjen tënde."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Evidencat e pajisjes regjistrojnë çfarë ndodh në pajisjen tënde. Aplikacionet mund t\'i përdorin këto evidenca për të gjetur dhe rregulluar problemet.\n\nDisa evidenca mund të përmbajnë informacione delikate, ndaj lejo vetëm aplikacionet që u beson të kenë qasje te të gjitha evidencat e pajisjes. \n\nNëse nuk e lejon këtë aplikacion që të ketë qasje te të gjitha evidencat e pajisjes, ai mund të vazhdojë të ketë qasje tek evidencat e tij. Prodhuesi i pajisjes sate mund të jetë ende në gjendje që të ketë qasje te disa evidenca ose informacione në pajisjen tënde.\n\nMëso më shumë në g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Mos e shfaq më"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> dëshiron të shfaqë pjesë të <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Modifiko"</string>

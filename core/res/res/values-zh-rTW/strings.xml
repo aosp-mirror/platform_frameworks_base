@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"語音留言"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"連線發生問題或錯誤的 MMI 碼。"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"不支援的功能。"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"僅限對固定撥號號碼執行此作業。"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"漫遊時無法透過你的手機變更來電轉接設定。"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"服務已啟用。"</string>
@@ -1950,13 +1951,13 @@
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"無法使用平板電腦設定"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"無法使用手機設定"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用 Android TV 裝置。"</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用平板電腦。"</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個項目，請改用平板電腦。"</string>
     <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"目前無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用手機。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"這個應用程式要求進行額外的安全性驗證，請改用 Android TV 裝置。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"這個應用程式要求進行額外的安全性驗證，請改用平板電腦。"</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"這個應用程式要求進行額外的安全性驗證，請改用手機。"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用 Android TV 裝置。"</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用平板電腦。"</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個項目，請改用平板電腦。"</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"無法在 <xliff:g id="DEVICE">%1$s</xliff:g> 上存取這個應用程式，請改用手機。"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"這個應用程式是專為舊版 Android 所打造，因此可能無法正常運作。請嘗試檢查更新，或是與開發人員聯絡。"</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"檢查更新"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"允許一次性存取"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允許"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"系統會透過裝置記錄記下裝置上的活動。應用程式可以根據這些記錄找出問題並進行修正。\n\n某些記錄可能含有機密資訊，因此請勿讓不信任的應用程式存取所有裝置記錄。\n\n即使你不允許這個應用程式存取所有裝置記錄，這個應用程式仍能存取自己的記錄，而且裝置製造商或許仍可存取裝置的某些記錄或資訊。"</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"裝置記錄會記下裝置上的活動。應用程式可以根據這些記錄找出問題並進行修正。\n\n由於某些記錄可能含有機密資訊，建議只讓信任的應用程式存取所有裝置記錄。\n\n如果你不允許這個應用程式存取所有裝置記錄，這個應用程式仍可存取屬於自己的記錄，而裝置製造商也或許還是可以存取裝置的某些記錄或資訊。\n\n請參閱以下網址瞭解詳情：g.co/android/devicelogs。"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不要再顯示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"「<xliff:g id="APP_0">%1$s</xliff:g>」想要顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的區塊"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"編輯"</string>

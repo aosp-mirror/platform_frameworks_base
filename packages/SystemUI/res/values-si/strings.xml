@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock අබලයි"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"රූපයක් එවන ලදී"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"තිර රුව සුරැකෙමින් පවතී…"</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"කාර්යාල පැතිකඩ වෙත තිර රුව සුරකිමින්…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"තිර රුව සුරකින ලදී"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"තිර රුව සුරැකිය නොහැකි විය"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"තිර රුව සුරැකීමට පෙර උපාංගය අගුලු හැරිය යුතුය"</string>
@@ -84,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"තිර රුව බෙදා ගන්න"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"තව ග්‍රහණය කරන්න"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"තිර රුව ඉවත ලන්න"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"කාර්යාල පැතිකඩ පණිවිඩය අස් කරන්න"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"තිර රූ පෙර දසුන"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ඉහළ සීමාව සියයට <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"පහළ සීමාව සියයට <xliff:g id="PERCENT">%1$d</xliff:g>"</string>
@@ -94,6 +96,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"තිර පටිගත කිරීමේ සැසියක් සඳහා කෙරෙන දැනුම් දීම"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"පටිගත කිරීම ආරම්භ කරන්නද?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"පටිගත කරන අතරතුර, Android පද්ධතියට ඔබේ තිරයේ පෙනෙන හෝ ඔබේ උපාංගයේ වාදනය කරන ඕනෑම සංවේදී තොරතුරක් ග්‍රහණය කර ගැනීමට හැකිය. මෙයට මුරපද, ගෙවීම් තොරතුරු, ඡායාරූප, පණිවිඩ සහ ඕඩියෝ ඇතුළත් වේ."</string>
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"සම්පූර්ණ තිරය පටිගත කරන්න"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"තනි යෙදුමක් පටිගත කරන්න"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"ඔබ පටිගත කරන අතරේ, Android හට ඔබේ තිරයේ පෙනෙන හෝ ඔබේ උපාංගයේ වාදනය වන ඕනෑම දෙයකට ප්‍රවේශය ඇත. එබැවින් මුරපද, ගෙවීම් විස්තර, පණිවිඩ හෝ වෙනත් සංවේදී තොරතුරු සමග ප්‍රවේශම් වන්න."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"ඔබ යෙදුමක් පටිගත කරන අතරේ, Android හට එම යෙදුමේ පෙන්වන හෝ වාදනය කරන ඕනෑම දෙයකට ප්‍රවේශය ඇත. එබැවින් මුරපද, ගෙවීම් විස්තර, පණිවිඩ හෝ වෙනත් සංවේදී තොරතුරු සමග ප්‍රවේශම් වන්න."</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"පටිගත කිරීම අරඹන්න"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ඕඩියෝ පටිගත කරන්න"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"උපාංග ඕඩියෝ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"සංගීතය, ඇමතුම් සහ නාද රිද්ම වැනි ඔබේ උපාංගය වෙතින් ශබ්ද"</string>
@@ -120,7 +127,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"හඬ සහාය"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR කේත ස්කෑනරය"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"අඟුල අරින්න"</string>
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"අගුළු හරින ලදි"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"උපාංගය අගුලු දමා ඇත"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"මුහුණ ස්කෑන් කිරීම"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"යවන්න"</string>
@@ -163,6 +170,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"මුහුණ හඳුනා ගත නොහැක"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"ඒ වෙනුවට ඇඟිලි සලකුණ භාවිත කරන්න"</string>
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"මුහුණෙන් අගුළු ඇරීම නැත"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"බ්ලූටූත් සම්බන්ධිතයි."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"බැටරි ප්‍රතිශතය නොදනී."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> වෙත සම්බන්ධ කරන ලදි."</string>
@@ -173,8 +181,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"අහස්යානා ආකාරය."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ක්‍රියාත්මකයි."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"බැටරි ප්‍රතිශතය <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"බැටරි ප්‍රතිශතය <xliff:g id="PERCENTAGE">%1$s</xliff:g>, ඔබේ භාවිතයට අනුව <xliff:g id="TIME">%2$s</xliff:g> ක් පමණ ඉතුරුයි"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"බැටරි ප්‍රතිශතය <xliff:g id="PERCENTAGE">%1$d</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"බැටරිය ආරෝපණය කරමින්, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"බැටරිය සියයට <xliff:g id="PERCENTAGE">%d</xliff:g>, බැටරි ආරක්ෂණය සඳහා ආරෝපණය විරාම ගන්වා ඇත."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"බැටරිය සියයට <xliff:g id="PERCENTAGE">%1$d</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>, බැටරි ආරක්ෂණය සඳහා ආරෝපණය විරාම ගන්වා ඇත."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"සියලු දැනුම්දීම් බලන්න"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter ක්‍රියාත්මකයි."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"හඬ නඟනය කම්පනය වේ."</string>
@@ -243,7 +253,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"දීප්තිමත් බව"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"වර්ණ අපවර්තනය"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"වර්ණ නිවැරදි කිරීම"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"පරිශීලක සැකසීම්"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"පරිශීලකයන් කළමනාකරණය කරන්න"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"නිමයි"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"වසන්න"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"සම්බන්ධිත"</string>
@@ -361,6 +371,18 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"මෙම ශ්‍රිතය සපයන සේවාවට පටිගත කරන හෝ විකාශ කරන අතරතුර ඔබේ තිරයේ දිස් වන හෝ ඔබේ උපාංගයෙන් වාදනය කරන සියලු තොරතුරු වෙත ප්‍රවේශය ලැබෙනු ඇත. මෙහි මුරපද, ගෙවීම් විස්තර, ඡායාරූප, පණිවිඩ සහ ඔබ වාදනය කරන ඕඩියෝ යනාදි තොරතුරු ඇතුළත් වේ."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"පටිගත කිරීම හෝ විකාශය කිරීම ආරම්භ කරන්නද?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> සමග පටිගත කිරීම හෝ විකාශය කිරීම ආරම්භ කරන්නද?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> හට බෙදා ගැනීමට හෝ පටිගත කිරීමට ඉඩ දෙන්න ද?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"සම්පූර්ණ තිරය"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"තනි යෙදුමක්"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"ඔබ බෙදා ගන්නා විට, පටිගත කරන විට, හෝ විකාශනය කරන විට, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> හට ඔබේ තිරයේ පෙනෙන හෝ ඔබේ උපාංගයේ වාදනය වන ඕනෑම දෙයකට ප්‍රවේශය ඇත. එබැවින් මුරපද, ගෙවීම් විස්තර, පණිවිඩ හෝ වෙනත් සංවේදී තොරතුරු සමග ප්‍රවේශම් වන්න."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"ඔබ යෙදුමක් බෙදා ගන්නා විට, පටිගත කරන විට හෝ විකාශය කරන විට, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> හට එම යෙදුමේ පෙන්වන හෝ වාදනය කරන ඕනෑම දෙයකට ප්‍රවේශය ඇත. එබැවින් මුරපද, ගෙවීම් විස්තර, පණිවිඩ හෝ වෙනත් සංවේදී තොරතුරු සමග ප්‍රවේශම් වන්න."</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"ඉදිරියට යන්න"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"යෙදුමක් බෙදා ගන්න හෝ පටිගත කරන්න"</string>
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"මෙම යෙදුම බෙදා ගැනීමට හෝ පටිගත කිරීමට ඉඩ දෙන්න ද?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"ඔබ බෙදා ගන්නා විට, පටිගත කරන විට, හෝ විකාශය කරන විට, හට ඔබේ තිරයේ පෙනෙන හෝ ඔබේ උපාංගයේ වාදනය වන ඕනෑම දෙයකට ප්‍රවේශය ඇත. එබැවින් මුරපද, ගෙවීම් විස්තර, පණිවිඩ හෝ වෙනත් සංවේදී තොරතුරු සමග ප්‍රවේශම් වන්න."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"ඔබ යෙදුමක් බෙදා ගන්නා විට, පටිගත කරන විට හෝ විකාශය කරන විට, හට එම යෙදුමේ පෙන්වන හෝ වාදනය කරන ඕනෑම දෙයකට ප්‍රවේශය ඇත. එබැවින් මුරපද, ගෙවීම් විස්තර, පණිවිඩ හෝ වෙනත් සංවේදී තොරතුරු සමග ප්‍රවේශම් වන්න."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"ඔබේ IT පරිපාලක විසින් අවහිර කර ඇත"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"උපාංග ප්‍රතිපත්තිය මගින් තිර ග්‍රහණය කිරීම අබල කර ඇත"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"සියල්ල හිස් කරන්න"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"කළමනාකරණය කරන්න"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ඉතිහාසය"</string>
@@ -372,6 +394,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"බාධා නොකරන්න මගින් විරාම කරන ලද දැනුම්දීම්"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"දැන් අරඹන්න"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"දැනුම්දීම් නැත"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"නව දැනුම්දීම් නැත"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"පැරණි දැනුම්දීම් බැලීමට අගුළු හරින්න"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"මෙම උපාංගය ඔබගේ මාපියන්ගෙන් අයකු විසින් කළමනාකරණය කෙරේ"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"ඔබේ සංවිධානයට මෙම උපාංගය අයිති අතර ජාල තදබදය නිරීක්ෂණය කළ හැකිය"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> සංවිධානයට මෙම උපාංගය අයිති අතර ජාල තදබදය නිරීක්ෂණය කළ හැකිය"</string>
@@ -476,7 +500,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"භාවිත කිරීමට අගුලු හරින්න"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"ඔබගේ කාඩ්පත ලබා ගැනීමේ ගැටලුවක් විය, කරුණාකර පසුව නැවත උත්සාහ කරන්න"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"අගුලු තිර සැකසීම්"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR කේතය ස්කෑන් කරන්න"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR කේත ස්කෑනරය"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"යාවත්කාලීන කිරීම"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"කාර්යාල පැතිකඩ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"ගුවන්යානා ප්‍රකාරය"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ඔබට ඔබේ ඊළඟ එලාමය <xliff:g id="WHEN">%1$s</xliff:g> නොඇසෙනු ඇත"</string>
@@ -707,6 +732,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi ක්‍රියා විරහිතයි"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"බ්ලූටූත් ක්‍රියා විරහිතයි"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"බාධා නොකරන්න ක්‍රියා විරහිතයි"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"බාධා නොකරන්න ක්‍රියාත්මකයි"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ස්වයංක්‍රිය රීතියක් මගින් බාධා නොකරන්න ක්‍රියාත්මක කරන ලදී (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"යෙදුමක් මගින් බාධා නොකරන්න ක්‍රියාත්මක කරන ලදී (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ස්වයංක්‍රිය රීතියක් හෝ යෙදුමක් මගින් බාධා නොකරන්න ක්‍රියාත්මක කරන ලදී."</string>
@@ -715,6 +741,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"ජංගම දත්ත ක්‍රියාවිරහිත කරන්නද?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"ඔබට <xliff:g id="CARRIER">%s</xliff:g> හරහා දත්ත හෝ අන්තර්ජාලයට පිවිසීමේ හැකියාවක් නැත. අන්තර්ජාලය Wi-Fi හරහා පමණක් ලබා ගත හැකිය."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"ඔබගේ වාහකය"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> වෙත ආපසු මාරු කරන්නද?"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"ජංගම දත්ත ලබා ගත හැකි වීමට අනුව ස්වයංක්‍රීයව මාරු නොවෙයි"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"එපා ස්තුතියි"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"ඔව්, මාරු කරන්න"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"යෙදුමක් අවසර ඉල්ලීමක් කරන නිසා, සැකසීම්වලට ඔබගේ ප්‍රතිචාරය සත්‍යාපනය කළ නොහැකිය."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g> හට කොටස් <xliff:g id="APP_2">%2$s</xliff:g>ක් පෙන්වීමට ඉඩ දෙන්නද?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- එයට <xliff:g id="APP">%1$s</xliff:g> වෙතින් තොරතුරු කියවිය හැකිය"</string>
@@ -823,6 +853,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"මෙහි ක්‍රීඩා කිරීමට <xliff:g id="DEVICENAME">%1$s</xliff:g> වෙත වඩා සමීප වන්න"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> හි වාදනය කරමින්"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"යම් දෙයක් වැරදිණි. නැවත උත්සාහ කරන්න."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"අක්‍රියයි, යෙදුම පරීක්ෂා කරන්න"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"හමු නොවිණි"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"පාලනය ලබා ගත නොහැකිය"</string>
@@ -844,6 +876,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"විකාශය නවතන්න"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ශ්‍රව්‍ය ප්‍රතිදානය සඳහා තිබෙන උපාංග."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"හඬ පරිමාව"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ස්පීකර් සහ සංදර්ශක"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"විකාශනය ක්‍රියා කරන ආකාරය"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"විකාශනය"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ගැළපෙන බ්ලූටූත් උපාංග සහිත ඔබ අවට සිටින පුද්ගලයින්ට ඔබ විකාශනය කරන මාධ්‍යයට සවන් දිය හැකිය"</string>
@@ -905,6 +939,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"ජංගම දත්ත"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"සම්බන්ධයි"</string>
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"තාවකාලිකව සම්බන්ධ කළා"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"දුර්වල සම්බන්ධතාව"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"ජංගම දත්ත ස්වංක්‍රියව සම්බන්ධ නොවනු ඇත"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"සම්බන්ධතාවයක් නැත"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"ලබා ගත හැකි වෙනත් ජාල නැත"</string>
@@ -955,13 +991,29 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"කැමරාව සහ මයික් ක්‍රියාවිරහිතයි"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{දැනුම්දීම් #ක්}one{දැනුම්දීම් #ක්}other{දැනුම්දීම් #ක්}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"සටහන් කර ගැනීම"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"විකාශනය කරමින්"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> විකාශනය කිරීම නවත්වන්නද?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"ඔබ <xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය කළහොත් හෝ ප්‍රතිදානය වෙනස් කළහොත්, ඔබගේ වත්මන් විකාශනය නවතිනු ඇත."</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> විකාශනය"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"ප්‍රතිදානය වෙනස් කරන්න"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"නොදනී"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, MMM d"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> විවෘත කරන්න"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• යෙදුම සකසා ඇත"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• Wallet වෙත අවම වශයෙන් එක කාඩ්පතක් එක් කර ඇත"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• කැමරා යෙදුමක් ස්ථාපන කරන්න"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• යෙදුම සකසා ඇත"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• අවම වශයෙන් එක උපාංගයක් ලැබේ"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ස්පර්ශ කර අල්ලා සිටීමේ කෙටිමඟ"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"අවලංගු කරන්න"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"දැන් පෙරළන්න"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"වඩා හොඳ සෙල්ෆියක් සඳහා දුරකථනය දිගහරින්න"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"වඩා හොඳ සෙල්ෆියක් සඳහා ඉදිරිපස සංදර්ශකයට පෙරළන්න ද?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"ඉහළ විභේදන සහිත පුළුල් ඡායාරූපයක් සඳහා පසුපසට මුහුණලා ඇති කැමරාව භාවිතා කරන්න."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ මෙම තිරය ක්‍රියා විරහිත වනු ඇත"</b></string>
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"දිග හැරෙමින් පවතින නැමිය හැකි උපාංගය"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"වටා පෙරළෙමින් තිබෙන නැමිය හැකි උපාංගය"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"පන්හිඳ බැටරිය අඩුයි"</string>
 </resources>

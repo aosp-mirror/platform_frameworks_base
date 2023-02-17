@@ -16,6 +16,9 @@
 
 package com.android.server.voiceinteraction;
 
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__DETECTOR_TYPE__NORMAL_DETECTOR;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__DETECTOR_TYPE__TRUSTED_DETECTOR_SOFTWARE;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__DETECTOR_TYPE__NORMAL_DETECTOR;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__DETECTOR_TYPE__TRUSTED_DETECTOR_SOFTWARE;
@@ -47,6 +50,12 @@ public final class HotwordMetricsLogger {
             HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
     private static final int METRICS_INIT_NORMAL_DETECTOR =
             HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED__DETECTOR_TYPE__NORMAL_DETECTOR;
+    private static final int AUDIO_EGRESS_DSP_DETECTOR =
+            HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
+    private static final int AUDIO_EGRESS_SOFTWARE_DETECTOR =
+            HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__DETECTOR_TYPE__TRUSTED_DETECTOR_SOFTWARE;
+    private static final int AUDIO_EGRESS_NORMAL_DETECTOR =
+            HOTWORD_AUDIO_EGRESS_EVENT_REPORTED__DETECTOR_TYPE__NORMAL_DETECTOR;
 
     private HotwordMetricsLogger() {
         // Class only contains static utility functions, and should not be instantiated
@@ -64,28 +73,28 @@ public final class HotwordMetricsLogger {
     /**
      * Logs information related to hotword detection service init result.
      */
-    public static void writeServiceInitResultEvent(int detectorType, int result) {
+    public static void writeServiceInitResultEvent(int detectorType, int result, int uid) {
         int metricsDetectorType = getInitMetricsDetectorType(detectorType);
         FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_INIT_RESULT_REPORTED,
-                metricsDetectorType, result);
+                metricsDetectorType, result, uid);
     }
 
     /**
      * Logs information related to hotword detection service restarting.
      */
-    public static void writeServiceRestartEvent(int detectorType, int reason) {
+    public static void writeServiceRestartEvent(int detectorType, int reason, int uid) {
         int metricsDetectorType = getRestartMetricsDetectorType(detectorType);
         FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_DETECTION_SERVICE_RESTARTED,
-                metricsDetectorType, reason);
+                metricsDetectorType, reason, uid);
     }
 
     /**
      * Logs information related to keyphrase trigger.
      */
-    public static void writeKeyphraseTriggerEvent(int detectorType, int result) {
+    public static void writeKeyphraseTriggerEvent(int detectorType, int result, int uid) {
         int metricsDetectorType = getKeyphraseMetricsDetectorType(detectorType);
         FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED,
-                metricsDetectorType, result);
+                metricsDetectorType, result, uid);
     }
 
     /**
@@ -95,6 +104,16 @@ public final class HotwordMetricsLogger {
         int metricsDetectorType = getDetectorMetricsDetectorType(detectorType);
         FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS,
                 metricsDetectorType, event, uid);
+    }
+
+    /**
+     * Logs information related to hotword audio egress events.
+     */
+    public static void writeAudioEgressEvent(int detectorType, int event, int uid,
+            int streamSizeBytes, int bundleSizeBytes, int streamCount) {
+        int metricsDetectorType = getAudioEgressDetectorType(detectorType);
+        FrameworkStatsLog.write(FrameworkStatsLog.HOTWORD_AUDIO_EGRESS_EVENT_REPORTED,
+                metricsDetectorType, event, uid, streamSizeBytes, bundleSizeBytes, streamCount);
     }
 
     private static int getCreateMetricsDetectorType(int detectorType) {
@@ -149,6 +168,17 @@ public final class HotwordMetricsLogger {
                 return HOTWORD_DETECTOR_EVENTS__DETECTOR_TYPE__TRUSTED_DETECTOR_DSP;
             default:
                 return HOTWORD_DETECTOR_EVENTS__DETECTOR_TYPE__NORMAL_DETECTOR;
+        }
+    }
+
+    private static int getAudioEgressDetectorType(int detectorType) {
+        switch (detectorType) {
+            case HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE:
+                return AUDIO_EGRESS_SOFTWARE_DETECTOR;
+            case HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP:
+                return AUDIO_EGRESS_DSP_DETECTOR;
+            default:
+                return AUDIO_EGRESS_NORMAL_DETECTOR;
         }
     }
 }

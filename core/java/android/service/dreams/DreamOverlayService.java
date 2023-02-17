@@ -42,9 +42,23 @@ public abstract class DreamOverlayService extends Service {
     private IDreamOverlay mDreamOverlay = new IDreamOverlay.Stub() {
         @Override
         public void startDream(WindowManager.LayoutParams layoutParams,
-                IDreamOverlayCallback callback) {
+                IDreamOverlayCallback callback, String dreamComponent,
+                boolean shouldShowComplications) {
             mDreamOverlayCallback = callback;
+            mDreamComponent = ComponentName.unflattenFromString(dreamComponent);
+            mShowComplications = shouldShowComplications;
             onStartDream(layoutParams);
+        }
+
+        @Override
+        public void wakeUp() {
+            onWakeUp(() -> {
+                try {
+                    mDreamOverlayCallback.onWakeUpComplete();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not notify dream of wakeUp:" + e);
+                }
+            });
         }
     };
 
@@ -56,10 +70,6 @@ public abstract class DreamOverlayService extends Service {
     @Nullable
     @Override
     public final IBinder onBind(@NonNull Intent intent) {
-        mShowComplications = intent.getBooleanExtra(DreamService.EXTRA_SHOW_COMPLICATIONS,
-                DreamService.DEFAULT_SHOW_COMPLICATIONS);
-        mDreamComponent = intent.getParcelableExtra(DreamService.EXTRA_DREAM_COMPONENT,
-                ComponentName.class);
         return mDreamOverlay.asBinder();
     }
 
@@ -70,6 +80,17 @@ public abstract class DreamOverlayService extends Service {
      *                     dream window.
      */
     public abstract void onStartDream(@NonNull WindowManager.LayoutParams layoutParams);
+
+    /**
+     * This method is overridden by implementations to handle when the dream has been requested
+     * to wakeup. This allows any overlay animations to run.
+     *
+     * @param onCompleteCallback The callback to trigger to notify the dream service that the
+     *                           overlay has completed waking up.
+     * @hide
+     */
+    public void onWakeUp(@NonNull Runnable onCompleteCallback) {
+    }
 
     /**
      * This method is invoked to request the dream exit.

@@ -33,18 +33,19 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"দেখুৱাওক"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"এপ্‌টোৱে বিভাজিত স্ক্ৰীনৰ সৈতে কাম নকৰিব পাৰে।"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"এপ্‌টোৱে বিভাজিত স্ক্ৰীন সমৰ্থন নকৰে।"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"এই এপ্‌টো কেৱল ১ খন ৱিণ্ড’ত খুলিব পাৰি।"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"গৌণ ডিছপ্লেত এপে সঠিকভাৱে কাম নকৰিব পাৰে।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"গৌণ ডিছপ্লেত এপ্ লঞ্চ কৰিব নোৱাৰি।"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"স্প্লিট স্ক্ৰীনৰ বিভাজক"</string>
     <string name="accessibility_action_divider_left_full" msgid="1792313656305328536">"বাওঁফালৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
-    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"বাওঁফালৰ স্ক্ৰীণখন ৭০% কৰক"</string>
-    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"বাওঁফালৰ স্ক্ৰীণখন ৫০% কৰক"</string>
-    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"বাওঁফালৰ স্ক্ৰীণখন ৩০% কৰক"</string>
+    <string name="accessibility_action_divider_left_70" msgid="8859845045360659250">"বাওঁফালৰ স্ক্ৰীনখন ৭০% কৰক"</string>
+    <string name="accessibility_action_divider_left_50" msgid="3488317024557521561">"বাওঁফালৰ স্ক্ৰীনখন ৫০% কৰক"</string>
+    <string name="accessibility_action_divider_left_30" msgid="6023611335723838727">"বাওঁফালৰ স্ক্ৰীনখন ৩০% কৰক"</string>
     <string name="accessibility_action_divider_right_full" msgid="3408505054325944903">"সোঁফালৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
     <string name="accessibility_action_divider_top_full" msgid="3495871951082107594">"শীৰ্ষ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
-    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"শীর্ষ স্ক্ৰীণখন ৭০% কৰক"</string>
-    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ স্ক্ৰীণখন ৫০% কৰক"</string>
-    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ স্ক্ৰীণখন ৩০% কৰক"</string>
+    <string name="accessibility_action_divider_top_70" msgid="1779164068887875474">"শীর্ষ স্ক্ৰীনখন ৭০% কৰক"</string>
+    <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ স্ক্ৰীনখন ৫০% কৰক"</string>
+    <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ স্ক্ৰীনখন ৩০% কৰক"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"তলৰ স্ক্ৰীনখন সম্পূৰ্ণ স্ক্ৰীন কৰক"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"এখন হাতেৰে ব্যৱহাৰ কৰা ম’ড ব্যৱহাৰ কৰা"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"বাহিৰ হ’বলৈ স্ক্ৰীনখনৰ একেবাৰে তলৰ পৰা ওপৰলৈ ছোৱাইপ কৰক অথবা এপ্‌টোৰ ওপৰত যিকোনো ঠাইত টিপক"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"সৰ্বাধিক মাত্ৰালৈ বঢ়াওক"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"মিনিমাইজ কৰক"</string>
     <string name="close_button_text" msgid="2913281996024033299">"বন্ধ কৰক"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"উভতি যাওক"</string>
+    <string name="handle_text" msgid="1766582106752184456">"হেণ্ডেল"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"সম্পূৰ্ণ স্ক্ৰীন"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"ডেস্কটপ ম’ড"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"বিভাজিত স্ক্ৰীন"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"অধিক"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"ওপঙা"</string>
 </resources>

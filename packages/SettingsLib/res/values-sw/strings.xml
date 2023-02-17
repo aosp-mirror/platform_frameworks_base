@@ -182,7 +182,7 @@
     <string name="unknown" msgid="3544487229740637809">"Haijulikani"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Mtumiaji: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Baadhi ya chaguomsingi zimewekwa"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Hakuna chaguo-misingi zilizowekwa"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Hakuna machaguomsingi yaliyowekwa"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Mipangilio ya kusoma maandishi kwa sauti"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Kusoma maandishi kwa sauti"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Kasi ya kutamka"</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Zimesalia <xliff:g id="TIME">%1$s</xliff:g> ijae chaji"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> zimesalia ijae chaji"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Imesitisha kuchaji"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Hali ya kuchaji imeboreshwa"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Hali ya kuchaji imeboreshwa"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Haijulikani"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Inachaji"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Inachaji kwa kasi"</string>

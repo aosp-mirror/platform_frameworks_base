@@ -48,6 +48,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import javax.inject.Inject;
@@ -74,14 +75,16 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
             QSLogger qsLogger,
             BroadcastDispatcher broadcastDispatcher,
             Lazy<ConnectivityManager> lazyConnectivityManager,
-            GlobalSettings globalSettings
+            GlobalSettings globalSettings,
+            UserTracker userTracker
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mBroadcastDispatcher = broadcastDispatcher;
         mLazyConnectivityManager = lazyConnectivityManager;
 
-        mSetting = new SettingObserver(globalSettings, mHandler, Global.AIRPLANE_MODE_ON) {
+        mSetting = new SettingObserver(globalSettings, mHandler, Global.AIRPLANE_MODE_ON,
+                userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 // mHandler is the background handler so calling this is OK

@@ -31,10 +31,13 @@ import com.android.systemui.statusbar.policy.DevicePostureController
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -79,6 +82,7 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
                 keyguardMessageAreaControllerFactory.create(any(KeyguardMessageArea::class.java))
             )
             .thenReturn(keyguardMessageAreaController)
+        `when`(keyguardPinView.resources).thenReturn(context.resources)
         pinViewController =
             KeyguardPinViewController(
                 keyguardPinView,
@@ -98,6 +102,14 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
     @Test
     fun startAppearAnimation() {
         pinViewController.startAppearAnimation()
-        verify(keyguardMessageAreaController).setMessageIfEmpty(R.string.keyguard_enter_your_pin)
+        verify(keyguardMessageAreaController)
+            .setMessage(context.resources.getString(R.string.keyguard_enter_your_pin), false)
+    }
+
+    @Test
+    fun startAppearAnimation_withExistingMessage() {
+        Mockito.`when`(keyguardMessageAreaController.message).thenReturn("Unlock to continue.")
+        pinViewController.startAppearAnimation()
+        verify(keyguardMessageAreaController, Mockito.never()).setMessage(anyString(), anyBoolean())
     }
 }

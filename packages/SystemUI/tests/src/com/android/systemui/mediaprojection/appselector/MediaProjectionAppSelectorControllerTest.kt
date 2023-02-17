@@ -25,6 +25,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
 
     private val controller = MediaProjectionAppSelectorController(
         taskListProvider,
+        view,
         scope,
         appSelectorComponentName
     )
@@ -33,7 +34,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
     fun initNoRecentTasks_bindsEmptyList() {
         taskListProvider.tasks = emptyList()
 
-        controller.init(view)
+        controller.init()
 
         verify(view).bind(emptyList())
     }
@@ -44,7 +45,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
             createRecentTask(taskId = 1)
         )
 
-        controller.init(view)
+        controller.init()
 
         verify(view).bind(
             listOf(
@@ -62,7 +63,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
         )
         taskListProvider.tasks = tasks
 
-        controller.init(view)
+        controller.init()
 
         verify(view).bind(
             listOf(
@@ -84,7 +85,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
         )
         taskListProvider.tasks = tasks
 
-        controller.init(view)
+        controller.init()
 
         verify(view).bind(
             listOf(

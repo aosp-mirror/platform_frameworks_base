@@ -21264,6 +21264,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return Math.max(vis1, vis2);
     }
 
+    private boolean mShouldFakeFocus = false;
+
+    /**
+     * Fake send a focus event after attaching to window.
+     * See {@link android.view.ViewRootImpl#dispatchCompatFakeFocus()} for details.
+     * @hide
+     */
+    public void fakeFocusAfterAttachingToWindow() {
+        mShouldFakeFocus = true;
+    }
+
     /**
      * @param info the {@link android.view.View.AttachInfo} to associated with
      *        this view
@@ -21332,6 +21343,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         notifyEnterOrExitForAutoFillIfNeeded(true);
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(true);
+
+        if (mShouldFakeFocus) {
+            getViewRootImpl().dispatchCompatFakeFocus();
+            mShouldFakeFocus = false;
+        }
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)

@@ -19,6 +19,7 @@ package com.android.systemui.testing.screenshot
 import android.app.Activity
 import android.graphics.Color
 import android.view.View
+import android.view.Window
 import android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -33,13 +34,19 @@ import platform.test.screenshot.*
 /**
  * A rule that allows to run a screenshot diff test on a view that is hosted in another activity.
  */
-class ExternalViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestRule {
+class ExternalViewScreenshotTestRule(
+    emulationSpec: DeviceEmulationSpec,
+    assetPathRelativeToBuildRoot: String
+) : TestRule {
 
     private val colorsRule = MaterialYouColorsRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
     private val screenshotRule =
         ScreenshotTestRule(
-            SystemUIGoldenImagePathManager(getEmulatedDevicePathConfig(emulationSpec))
+            SystemUIGoldenImagePathManager(
+                getEmulatedDevicePathConfig(emulationSpec),
+                assetPathRelativeToBuildRoot
+            )
         )
     private val delegateRule =
         RuleChain.outerRule(colorsRule).around(deviceEmulationRule).around(screenshotRule)
@@ -51,13 +58,14 @@ class ExternalViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestR
 
     /**
      * Compare the content of the [view] with the golden image identified by [goldenIdentifier] in
-     * the context of [emulationSpec].
+     * the context of [emulationSpec]. Window must be specified to capture views that render
+     * hardware buffers.
      */
-    fun screenshotTest(goldenIdentifier: String, view: View) {
+    fun screenshotTest(goldenIdentifier: String, view: View, window: Window? = null) {
         view.removeElevationRecursively()
 
         ScreenshotRuleAsserter.Builder(screenshotRule)
-            .setScreenshotProvider { view.toBitmap() }
+            .setScreenshotProvider { view.toBitmap(window) }
             .withMatcher(matcher)
             .build()
             .assertGoldenImage(goldenIdentifier)
@@ -94,6 +102,6 @@ class ExternalViewScreenshotTestRule(emulationSpec: DeviceEmulationSpec) : TestR
             activity.currentFocus?.clearFocus()
         }
 
-        screenshotTest(goldenIdentifier, rootView)
+        screenshotTest(goldenIdentifier, rootView, activity.window)
     }
 }

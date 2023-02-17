@@ -520,9 +520,23 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mActiveSession.stopListeningVisibleActivityChangedLocked();
     }
 
-    public void notifyActivityEventChangedLocked() {
+    public void notifyActivityDestroyedLocked(@NonNull IBinder activityToken) {
         if (DEBUG) {
-            Slog.d(TAG, "notifyActivityEventChangedLocked");
+            Slog.d(TAG, "notifyActivityDestroyedLocked activityToken=" + activityToken);
+        }
+        if (mActiveSession == null || !mActiveSession.mShown) {
+            if (DEBUG) {
+                Slog.d(TAG, "notifyActivityDestroyedLocked not allowed on no session or"
+                        + " hidden session");
+            }
+            return;
+        }
+        mActiveSession.notifyActivityDestroyedLocked(activityToken);
+    }
+
+    public void notifyActivityEventChangedLocked(@NonNull IBinder activityToken, int type) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyActivityEventChangedLocked type=" + type);
         }
         if (mActiveSession == null || !mActiveSession.mShown) {
             if (DEBUG) {
@@ -531,7 +545,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             }
             return;
         }
-        mActiveSession.notifyActivityEventChangedLocked();
+        mActiveSession.notifyActivityEventChangedLocked(activityToken, type);
     }
 
     public void updateStateLocked(
@@ -606,7 +620,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     private void logDetectorCreateEventIfNeeded(IHotwordRecognitionStatusCallback callback,
             int detectorType, boolean isCreated, int voiceInteractionServiceUid) {
         if (callback != null) {
-            HotwordMetricsLogger.writeDetectorCreateEvent(detectorType, true,
+            HotwordMetricsLogger.writeDetectorCreateEvent(detectorType, isCreated,
                     voiceInteractionServiceUid);
         }
 
@@ -697,7 +711,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             Slog.d(TAG, "createSoundTriggerCallbackLocked");
         }
         return new HotwordDetectionConnection.SoundTriggerCallback(callback,
-                mHotwordDetectionConnection);
+                mHotwordDetectionConnection, mInfo.getServiceInfo().applicationInfo.uid);
     }
 
     private static ServiceInfo getServiceInfoLocked(@NonNull ComponentName componentName,
@@ -866,5 +880,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     @Override
     public void onSessionHidden(VoiceInteractionSessionConnection connection) {
         mServiceStub.onSessionHidden();
+        // Notifies visibility change here can cause duplicate events, it is added to make sure
+        // client always get the callback even if session is unexpectedly closed.
+        mServiceStub.setSessionWindowVisible(connection.mToken, false);
     }
 }

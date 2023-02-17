@@ -25,8 +25,8 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.ToastPlugin;
-import com.android.systemui.shared.plugins.PluginManager;
 
 import java.io.PrintWriter;
 

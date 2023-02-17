@@ -377,7 +377,8 @@ public class AudioDeviceInventory {
                         makeLeAudioDeviceUnavailable(address, btInfo.mAudioSystemDevice);
                     } else if (switchToAvailable) {
                         makeLeAudioDeviceAvailable(address, BtHelper.getName(btInfo.mDevice),
-                                streamType, btInfo.mVolume, btInfo.mAudioSystemDevice,
+                                streamType, btInfo.mVolume == -1 ? -1 : btInfo.mVolume * 10,
+                                btInfo.mAudioSystemDevice,
                                 "onSetBtActiveDevice");
                     }
                     break;
@@ -1159,6 +1160,22 @@ public class AudioDeviceInventory {
                 .set(MediaMetrics.Property.DEVICE,
                         AudioSystem.getDeviceName(AudioSystem.DEVICE_OUT_HEARING_AID))
                 .record();
+    }
+
+    /**
+     * Returns whether a device of type DEVICE_OUT_HEARING_AID is connected.
+     * Visibility by APM plays no role
+     * @return true if a DEVICE_OUT_HEARING_AID is connected, false otherwise.
+     */
+    boolean isHearingAidConnected() {
+        synchronized (mDevicesLock) {
+            for (DeviceInfo di : mConnectedDevices.values()) {
+                if (di.mDeviceType == AudioSystem.DEVICE_OUT_HEARING_AID) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     @GuardedBy("mDevicesLock")

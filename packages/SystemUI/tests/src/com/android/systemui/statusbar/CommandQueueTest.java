@@ -117,13 +117,6 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCollapsePanels() {
-        mCommandQueue.animateCollapsePanels();
-        waitForIdleSync();
-        verify(mCallbacks).animateCollapsePanels(eq(0), eq(false));
-    }
-
-    @Test
     public void testExpandSettings() {
         String panel = "some_panel";
         mCommandQueue.animateExpandSettingsPanel(panel);
@@ -518,5 +511,13 @@ public class CommandQueueTest extends SysuiTestCase {
         mCommandQueue.setNavigationBarLumaSamplingEnabled(1, true);
         waitForIdleSync();
         verify(mCallbacks).setNavigationBarLumaSamplingEnabled(eq(1), eq(true));
+    }
+
+    @Test
+    public void testShowRearDisplayDialog() {
+        final int currentBaseState = 1;
+        mCommandQueue.showRearDisplayDialog(currentBaseState);
+        waitForIdleSync();
+        verify(mCallbacks).showRearDisplayDialog(eq(currentBaseState));
     }
 }

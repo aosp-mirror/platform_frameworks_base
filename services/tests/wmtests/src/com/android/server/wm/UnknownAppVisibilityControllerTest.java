@@ -95,7 +95,7 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
         final ActivityRecord activity = createNonAttachedActivityRecord(mDisplayContent);
         mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(activity);
         activity.finishing = true;
-        activity.mVisibleRequested = true;
+        activity.setVisibleRequested(true);
         activity.setVisibility(false, false);
         assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }

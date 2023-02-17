@@ -40,6 +40,7 @@
     <color name="settingslib_color_grey800">#3c4043</color>
     <color name="settingslib_color_grey700">#5f6368</color>
     <color name="settingslib_color_grey600">#80868b</color>
+    <color name="settingslib_color_grey500">#9AA0A6</color>
     <color name="settingslib_color_grey400">#bdc1c6</color>
     <color name="settingslib_color_grey300">#dadce0</color>
     <color name="settingslib_color_grey200">#e8eaed</color>

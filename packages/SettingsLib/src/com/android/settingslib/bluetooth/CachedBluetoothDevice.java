@@ -668,6 +668,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * @param bluetoothProfile the Bluetooth profile
      */
     public void onActiveDeviceChanged(boolean isActive, int bluetoothProfile) {
+        if (BluetoothUtils.D) {
+            Log.d(TAG, "onActiveDeviceChanged: "
+                    + "profile " + BluetoothProfile.getProfileName(bluetoothProfile)
+                    + ", device " + mDevice.getAnonymizedAddress()
+                    + ", isActive " + isActive);
+        }
         boolean changed = false;
         switch (bluetoothProfile) {
         case BluetoothProfile.A2DP:
@@ -758,23 +764,16 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public boolean isBusy() {
-        for (CachedBluetoothDevice memberDevice : getMemberDevice()) {
-            if (isBusyState(memberDevice)) {
-                return true;
+        synchronized (mProfileLock) {
+            for (LocalBluetoothProfile profile : mProfiles) {
+                int status = getProfileConnectionState(profile);
+                if (status == BluetoothProfile.STATE_CONNECTING
+                        || status == BluetoothProfile.STATE_DISCONNECTING) {
+                    return true;
+                }
             }
+            return getBondState() == BluetoothDevice.BOND_BONDING;
         }
-        return isBusyState(this);
-    }
-
-    private boolean isBusyState(CachedBluetoothDevice device){
-        for (LocalBluetoothProfile profile : device.getProfiles()) {
-            int status = device.getProfileConnectionState(profile);
-            if (status == BluetoothProfile.STATE_CONNECTING
-                    || status == BluetoothProfile.STATE_DISCONNECTING) {
-                return true;
-            }
-        }
-        return device.getBondState() == BluetoothDevice.BOND_BONDING;
     }
 
     private boolean updateProfiles() {
@@ -920,7 +919,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     @Override
     public String toString() {
-        return mDevice.toString();
+        return "CachedBluetoothDevice ("
+                + "anonymizedAddress="
+                + mDevice.getAnonymizedAddress()
+                + ", name="
+                + getName()
+                + ", groupId="
+                + mGroupId
+                + ")";
     }
 
     @Override

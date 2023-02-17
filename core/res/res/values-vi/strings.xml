@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Thư thoại"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Sự cố kết nối hoặc mã MMI không hợp lệ."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Tính năng không được hỗ trợ."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Chỉ hạn chế thao tác đối với số quay số định sẵn."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Không thể thay đổi cài đặt chuyển tiếp cuộc gọi từ điện thoại của bạn khi bạn đang chuyển vùng."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Dịch vụ đã được bật."</string>
@@ -1209,7 +1210,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> tiếp tục dừng"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> tiếp tục dừng"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Mở lại ứng dụng"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"Gửi phản hồi"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"Gửi ý kiến phản hồi"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Đóng"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"Tắt tiếng cho đến khi thiết bị khởi động lại"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"Đợi"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Cho phép truy cập một lần"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Không cho phép"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Nhật ký thiết bị ghi lại những hoạt động diễn ra trên thiết bị. Các ứng dụng có thể dùng nhật ký này để tìm và khắc phục sự cố.\n\nMột số nhật ký có thể chứa thông tin nhạy cảm, vì vậy, bạn chỉ nên cấp quyền truy cập vào toàn bộ nhật ký thiết bị cho những ứng dụng mà mình tin cậy. \n\nNếu bạn không cho phép ứng dụng này truy cập vào toàn bộ nhật ký thiết bị, thì ứng dụng vẫn có thể truy cập vào nhật ký của chính nó. Nhà sản xuất thiết bị vẫn có thể truy cập vào một số nhật ký hoặc thông tin trên thiết bị của bạn."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Nhật ký thiết bị ghi lại những hoạt động diễn ra trên thiết bị. Các ứng dụng có thể dùng các nhật ký này để tìm và khắc phục sự cố.\n\nMột số nhật ký có thể chứa thông tin nhạy cảm, vì vậy, bạn chỉ nên cấp quyền truy cập vào mọi nhật ký thiết bị cho những ứng dụng mà mình tin cậy. \n\nNếu bạn không cho phép ứng dụng này truy cập vào toàn bộ nhật ký thiết bị, thì ứng dụng vẫn có thể truy cập vào nhật ký của chính nó. Nhà sản xuất thiết bị vẫn có thể truy cập vào một số nhật ký hoặc thông tin trên thiết bị của bạn.\n\nTìm hiểu thêm tại g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Không hiện lại"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> muốn hiển thị các lát của <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Chỉnh sửa"</string>

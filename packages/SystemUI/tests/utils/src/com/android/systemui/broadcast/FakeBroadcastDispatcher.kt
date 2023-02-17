@@ -22,25 +22,35 @@ import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.os.UserHandle
-import android.util.ArraySet
 import android.util.Log
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserTracker
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 
 class FakeBroadcastDispatcher(
     context: SysuiTestableContext,
-    looper: Looper,
-    executor: Executor,
+    mainExecutor: Executor,
+    broadcastRunningLooper: Looper,
+    broadcastRunningExecutor: Executor,
     dumpManager: DumpManager,
     logger: BroadcastDispatcherLogger,
     userTracker: UserTracker
-) : BroadcastDispatcher(
-    context, looper, executor, dumpManager, logger, userTracker, PendingRemovalStore(logger)) {
+) :
+    BroadcastDispatcher(
+        context,
+        mainExecutor,
+        broadcastRunningLooper,
+        broadcastRunningExecutor,
+        dumpManager,
+        logger,
+        userTracker,
+        PendingRemovalStore(logger)
+    ) {
 
-    private val registeredReceivers = ArraySet<BroadcastReceiver>()
+    val registeredReceivers: MutableSet<BroadcastReceiver> = ConcurrentHashMap.newKeySet()
 
     override fun registerReceiverWithHandler(
         receiver: BroadcastReceiver,
