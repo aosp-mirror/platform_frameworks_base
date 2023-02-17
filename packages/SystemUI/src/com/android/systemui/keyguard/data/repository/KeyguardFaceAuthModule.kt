@@ -22,7 +22,10 @@ import dagger.Module
 
 @Module
 interface KeyguardFaceAuthModule {
-    @Binds fun faceAuthManager(impl: KeyguardFaceAuthManagerImpl): KeyguardFaceAuthManager
+    @Binds
+    fun deviceEntryFaceAuthRepository(
+        impl: DeviceEntryFaceAuthRepositoryImpl
+    ): DeviceEntryFaceAuthRepository
 
     @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
 }
