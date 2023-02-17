@@ -9026,10 +9026,10 @@
              {@link android.os.Build.VERSION_CODES#N} and not used in previous versions. -->
         <attr name="supportsLocalInteraction" format="boolean" />
         <!-- The service that provides {@link android.service.voice.HotwordDetectionService}.
-             @hide @SystemApi -->
+             Expect a component name to be provided. @hide @SystemApi -->
         <attr name="hotwordDetectionService" format="string" />
         <!-- The service that provides {@link android.service.voice.VisualQueryDetectionService}.
-             @hide @SystemApi -->
+             Expect a component name to be provided. @hide @SystemApi -->
         <attr name="visualQueryDetectionService" format="string" />
 
     </declare-styleable>
