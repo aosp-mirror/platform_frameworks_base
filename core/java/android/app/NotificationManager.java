@@ -1365,7 +1365,7 @@ public class NotificationManager {
     }
 
     /**
-     * Returns whether notifications from the calling package are blocked.
+     * Returns whether notifications from the calling package are enabled.
      */
     public boolean areNotificationsEnabled() {
         INotificationManager service = getService();
