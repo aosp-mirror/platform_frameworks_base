@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.UserHandle
 import androidx.test.filters.SmallTest
@@ -87,6 +88,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
     @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     private lateinit var underTest: KeyguardBottomAreaViewModel
 
@@ -140,6 +142,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                 bouncerRepository = FakeKeyguardBouncerRepository(),
             )
         whenever(userTracker.userHandle).thenReturn(mock())
+        whenever(userTracker.userId).thenReturn(10)
         whenever(lockPatternUtils.getStrongAuthForUser(anyInt()))
             .thenReturn(LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED)
         val testDispatcher = StandardTestDispatcher()
@@ -205,6 +208,8 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         featureFlags = featureFlags,
                         repository = { quickAffordanceRepository },
                         launchAnimator = launchAnimator,
+                        devicePolicyManager = devicePolicyManager,
+                        backgroundDispatcher = testDispatcher,
                     ),
                 bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository),
                 burnInHelperWrapper = burnInHelperWrapper,
@@ -235,6 +240,39 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             assertQuickAffordanceViewModel(
                 viewModel = latest(),
                 testConfig = testConfig,
+                configKey = configKey,
+            )
+        }
+
+    @Test
+    fun `startButton - hidden when device policy disables all keyguard features`() =
+        testScope.runTest {
+            whenever(devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId))
+                .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL)
+            repository.setKeyguardShowing(true)
+            val latest by collectLastValue(underTest.startButton)
+
+            val testConfig =
+                TestConfig(
+                    isVisible = true,
+                    isClickable = true,
+                    isActivated = true,
+                    icon = mock(),
+                    canShowWhileLocked = false,
+                    intent = Intent("action"),
+                )
+            val configKey =
+                setUpQuickAffordanceModel(
+                    position = KeyguardQuickAffordancePosition.BOTTOM_START,
+                    testConfig = testConfig,
+                )
+
+            assertQuickAffordanceViewModel(
+                viewModel = latest,
+                testConfig =
+                    TestConfig(
+                        isVisible = false,
+                    ),
                 configKey = configKey,
             )
         }
