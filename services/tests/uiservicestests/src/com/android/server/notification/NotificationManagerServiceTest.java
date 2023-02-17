@@ -18,6 +18,8 @@ package com.android.server.notification;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
+import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.SHOW_IMMEDIATELY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.Notification.FLAG_AUTO_CANCEL;
 import static android.app.Notification.FLAG_BUBBLE;
@@ -1160,6 +1162,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testEnqueuedBlockedNotifications_appBlockedChannelForegroundService()
             throws Exception {
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt())).thenReturn(SHOW_IMMEDIATELY);
 
         NotificationChannel channel = new NotificationChannel("blocked", "name",
                 NotificationManager.IMPORTANCE_NONE);
@@ -1182,6 +1186,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testEnqueuedBlockedNotifications_userBlockedChannelForegroundService()
             throws Exception {
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt())).thenReturn(SHOW_IMMEDIATELY);
 
         NotificationChannel channel =
                 new NotificationChannel("blockedbyuser", "name", IMPORTANCE_HIGH);
@@ -1261,6 +1267,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testEnqueuedBlockedNotifications_blockedAppForegroundService() throws Exception {
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
         when(mPermissionHelper.hasPermission(mUid)).thenReturn(false);
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt())).thenReturn(SHOW_IMMEDIATELY);
 
         final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
         sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
@@ -1590,6 +1598,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testEnqueueNotificationWithTag_FgsAddsFlags_dismissalAllowed() throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt())).thenReturn(SHOW_IMMEDIATELY);
+        mContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED,
@@ -1618,6 +1630,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testEnqueueNotificationWithTag_FGSaddsFlags_dismissalNotAllowed() throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt())).thenReturn(SHOW_IMMEDIATELY);
+        mContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED,
@@ -1904,6 +1920,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCancelAllNotifications_IgnoreForegroundService() throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt())).thenReturn(SHOW_IMMEDIATELY);
         final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
         sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, PKG,
@@ -1918,7 +1936,27 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testCancelAllNotifications_FgsFlag_NoFgs_Allowed() throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(NOT_FOREGROUND_SERVICE);
+        final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
+        sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCancelAllNotifications_IgnoreForegroundService",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
     public void testCancelAllNotifications_IgnoreOtherPackages() throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
         sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
         mBinderService.enqueueNotificationWithTag(PKG, PKG,
@@ -2006,6 +2044,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testRemoveForegroundServiceFlag_ImmediatelyAfterEnqueue() throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         Notification n =
                 new Notification.Builder(mContext, mTestNotificationChannel.getId())
                         .setSmallIcon(android.R.drawable.sym_def_app_icon)
@@ -2043,6 +2084,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelNotificationWithTag_fromApp_cannotCancelFgsChild()
             throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         mService.isSystemUid = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
@@ -2066,6 +2110,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelNotificationWithTag_fromApp_cannotCancelFgsParent()
             throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         mService.isSystemUid = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
@@ -2135,6 +2182,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelAllNotificationsFromApp_cannotCancelFgsChild()
             throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         mService.isSystemUid = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
@@ -2160,6 +2210,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelAllNotifications_fromApp_cannotCancelFgsParent()
             throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         mService.isSystemUid = false;
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
@@ -2281,6 +2334,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelNotificationsFromListener_clearAll_GroupWithFgsParent()
             throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         parent.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
@@ -2304,6 +2360,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelNotificationsFromListener_clearAll_GroupWithFgsChild()
             throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         final NotificationRecord child = generateNotificationRecord(
@@ -2402,6 +2461,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelNotificationsFromListener_clearAll_Fgs()
             throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         final NotificationRecord child2 = generateNotificationRecord(
                 mTestNotificationChannel, 3, null, false);
         child2.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
@@ -2466,6 +2528,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelNotificationsFromListener_byKey_GroupWithFgsParent()
             throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         parent.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
@@ -2491,6 +2556,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelNotificationsFromListener_byKey_GroupWithFgsChild()
             throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         final NotificationRecord child = generateNotificationRecord(
@@ -2596,6 +2664,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testCancelNotificationsFromListener_byKey_Fgs()
             throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         final NotificationRecord child2 = generateNotificationRecord(
                 mTestNotificationChannel, 3, null, false);
         child2.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
@@ -2762,6 +2833,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testUserInitiatedCancelAllWithGroup_ForegroundServiceFlag() throws Exception {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         final NotificationRecord parent = generateNotificationRecord(
                 mTestNotificationChannel, 1, "group", true);
         final NotificationRecord child = generateNotificationRecord(
@@ -6199,6 +6273,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testRemoveForegroundServiceFlagFromNotification_enqueued() {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         Notification n = new Notification.Builder(mContext, "").build();
         n.flags |= FLAG_FOREGROUND_SERVICE;
 
@@ -6218,6 +6295,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testRemoveForegroundServiceFlagFromNotification_posted() {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         Notification n = new Notification.Builder(mContext, "").build();
         n.flags |= FLAG_FOREGROUND_SERVICE;
 
@@ -6241,6 +6321,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCannotRemoveForegroundFlagWhenOverLimit_enqueued() {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
             Notification n = new Notification.Builder(mContext, "").build();
             StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, i, null, mUid, 0,
@@ -6269,6 +6352,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCannotRemoveForegroundFlagWhenOverLimit_posted() {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
             Notification n = new Notification.Builder(mContext, "").build();
             StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, i, null, mUid, 0,
@@ -8286,7 +8372,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertNotNull(n.publicVersion.bigContentView);
         assertNotNull(n.publicVersion.headsUpContentView);
 
-        mService.fixNotification(n, PKG, "tag", 9, 0);
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
 
         assertNull(n.contentView);
         assertNull(n.bigContentView);
@@ -8977,6 +9063,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCanPostFgsWhenOverLimit() throws RemoteException {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
             StatusBarNotification sbn = generateNotificationRecord(mTestNotificationChannel,
                     i, null, false).getSbn();
@@ -9002,6 +9091,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testCannotPostNonFgsWhenOverLimit() throws RemoteException {
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(SHOW_IMMEDIATELY);
         for (int i = 0; i < NotificationManagerService.MAX_PACKAGE_NOTIFICATIONS; i++) {
             StatusBarNotification sbn = generateNotificationRecord(mTestNotificationChannel,
                     i, null, false).getSbn();
@@ -9023,6 +9115,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.enqueueNotificationWithTag(PKG, PKG,
                 "testCanPostFgsWhenOverLimit - non fgs over limit!",
                 sbn2.getId(), sbn2.getNotification(), sbn2.getUserId());
+
+
+        when(mAmi.applyForegroundServiceNotification(
+                any(), anyString(), anyInt(), anyString(), anyInt()))
+                .thenReturn(NOT_FOREGROUND_SERVICE);
+        final StatusBarNotification sbn3 = generateNotificationRecord(mTestNotificationChannel,
+                101, null, false).getSbn();
+        sbn3.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, PKG,
+                "testCanPostFgsWhenOverLimit - fake fgs over limit!",
+                sbn3.getId(), sbn3.getNotification(), sbn3.getUserId());
 
         waitForIdle();
 
@@ -10080,5 +10183,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // no notification should be sent if the flag is off
         mInternalService.sendReviewPermissionsNotification();
         verify(mMockNm, never()).notify(anyString(), anyInt(), any(Notification.class));
+    }
+
+    @Test
+    public void fixNotification_withFgsFlag_butIsNotFgs() throws Exception {
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(applicationInfo);
+
+        Notification n = new Notification.Builder(mContext, "test")
+                .setFlag(FLAG_FOREGROUND_SERVICE, true)
+                .setFlag(FLAG_CAN_COLORIZE, true)
+                .build();
+
+        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
+
+        assertFalse(n.isForegroundService());
+        assertFalse(n.hasColorizedPermission());
     }
 }
