@@ -2432,21 +2432,24 @@ public class UserManager {
     }
 
     /**
-     * Used to check if the context user is an admin user. An admin user is allowed to
+     * Used to check if the context user is an admin user. An admin user may be allowed to
      * modify or configure certain settings that aren't available to non-admin users,
      * create and delete additional users, etc. There can be more than one admin users.
      *
      * @return whether the context user is an admin user.
-     * @hide
      */
-    @SystemApi
-    @RequiresPermission(anyOf = {
-            Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS,
-            Manifest.permission.QUERY_USERS})
-    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @UserHandleAware(
+            enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU,
+            requiresAnyOfPermissionsIfNotCallerProfileGroup = {
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.CREATE_USERS,
+                    Manifest.permission.QUERY_USERS})
     public boolean isAdminUser() {
-        return isUserAdmin(getContextUserIfAppropriate());
+        try {
+            return mService.isAdminUser(getContextUserIfAppropriate());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -3969,6 +3972,9 @@ public class UserManager {
      * The new user is created but not initialized. After switching into the user for the first
      * time, the preferred user name and account information are used by the setup process for that
      * user.
+     *
+     * This API should only be called if the current user is an {@link #isAdminUser() admin} user,
+     * as otherwise the returned intent will not be able to create a user.
      *
      * @param userName Optional name to assign to the user.
      * @param accountName Optional account name that will be used by the setup wizard to initialize

@@ -2048,6 +2048,27 @@ public class UserManagerService extends IUserManager.Stub {
                 + "permission to: check " + name);
     }
 
+    /**
+     * Enforces that the calling user is in the same profile group as {@code userId} or that only
+     * the system UID or root's UID or apps that have the
+     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS} or
+     * {@link android.Manifest.permission#CREATE_USERS CREATE_USERS} or
+     * {@link android.Manifest.permission#QUERY_USERS QUERY_USERS}
+     * can make certain calls to the UserManager.
+     *
+     * @param userId the user's id
+     * @param name used as message if SecurityException is thrown
+     * @throws SecurityException if the caller lacks the required permissions.
+     */
+    private void checkQueryOrCreateUsersPermissionIfCallerInOtherProfileGroup(
+            @UserIdInt int userId, String name) {
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId == userId || isSameProfileGroupNoChecks(callingUserId, userId)) {
+            return;
+        }
+        checkQueryOrCreateUsersPermission(name);
+    }
+
     @Override
     public boolean isDemoUser(@UserIdInt int userId) {
         final int callingUserId = UserHandle.getCallingUserId();
@@ -2058,6 +2079,15 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isDemo();
+        }
+    }
+
+    @Override
+    public boolean isAdminUser(@UserIdInt int userId) {
+        checkQueryOrCreateUsersPermissionIfCallerInOtherProfileGroup(userId, "isAdminUser");
+        synchronized (mUsersLock) {
+            final UserInfo userInfo = getUserInfoLU(userId);
+            return userInfo != null && userInfo.isAdmin();
         }
     }
 
