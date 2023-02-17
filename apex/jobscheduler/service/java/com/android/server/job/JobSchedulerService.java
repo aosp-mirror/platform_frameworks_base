@@ -478,7 +478,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                         case Constants.KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS:
                         case Constants.KEY_RUNTIME_MIN_GUARANTEE_MS:
                         case Constants.KEY_RUNTIME_MIN_EJ_GUARANTEE_MS:
-                        case Constants.KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS:
                         case Constants.KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS:
                         case Constants.KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS:
                         case Constants.KEY_RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS:
@@ -575,8 +574,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 "runtime_free_quota_max_limit_ms";
         private static final String KEY_RUNTIME_MIN_GUARANTEE_MS = "runtime_min_guarantee_ms";
         private static final String KEY_RUNTIME_MIN_EJ_GUARANTEE_MS = "runtime_min_ej_guarantee_ms";
-        private static final String KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS =
-                "runtime_min_high_priority_guarantee_ms";
         private static final String KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS =
                 "runtime_min_data_transfer_guarantee_ms";
         private static final String KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS =
@@ -619,8 +616,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         public static final long DEFAULT_RUNTIME_MIN_GUARANTEE_MS = 10 * MINUTE_IN_MILLIS;
         @VisibleForTesting
         public static final long DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS = 3 * MINUTE_IN_MILLIS;
-        @VisibleForTesting
-        static final long DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS = 5 * MINUTE_IN_MILLIS;
         public static final long DEFAULT_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS =
                 DEFAULT_RUNTIME_MIN_GUARANTEE_MS;
         public static final long DEFAULT_RUNTIME_DATA_TRANSFER_LIMIT_MS =
@@ -742,12 +737,6 @@ public class JobSchedulerService extends com.android.server.SystemService
          * The minimum amount of time we try to guarantee EJs will run for.
          */
         public long RUNTIME_MIN_EJ_GUARANTEE_MS = DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS;
-
-        /**
-         * The minimum amount of time we try to guarantee high priority jobs will run for.
-         */
-        public long RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS =
-                DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS;
 
         /**
          * The minimum amount of time we try to guarantee normal data transfer jobs will run for.
@@ -895,7 +884,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                     KEY_RUNTIME_MIN_GUARANTEE_MS, KEY_RUNTIME_MIN_EJ_GUARANTEE_MS,
-                    KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
                     KEY_RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR,
                     KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
                     KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS,
@@ -908,11 +896,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             RUNTIME_MIN_GUARANTEE_MS = Math.max(10 * MINUTE_IN_MILLIS,
                     properties.getLong(
                             KEY_RUNTIME_MIN_GUARANTEE_MS, DEFAULT_RUNTIME_MIN_GUARANTEE_MS));
-            // Make sure min runtime for high priority jobs is at least 4 minutes.
-            RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS = Math.max(4 * MINUTE_IN_MILLIS,
-                    properties.getLong(
-                            KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
-                            DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS));
             // Make sure min runtime for expedited jobs is at least one minute.
             RUNTIME_MIN_EJ_GUARANTEE_MS = Math.max(MINUTE_IN_MILLIS,
                     properties.getLong(
@@ -1008,8 +991,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             pw.print(KEY_RUNTIME_MIN_GUARANTEE_MS, RUNTIME_MIN_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_MIN_EJ_GUARANTEE_MS, RUNTIME_MIN_EJ_GUARANTEE_MS).println();
-            pw.print(KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
-                    RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS, RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                     .println();
             pw.print(KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
@@ -3333,8 +3314,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 return job.getEffectiveStandbyBucket() != RESTRICTED_INDEX
                         ? mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS
                         : Math.min(mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS, 5 * MINUTE_IN_MILLIS);
-            } else if (job.getEffectivePriority() >= JobInfo.PRIORITY_HIGH) {
-                return mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS;
             } else {
                 return mConstants.RUNTIME_MIN_GUARANTEE_MS;
             }
