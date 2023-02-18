@@ -16,7 +16,7 @@
 
 package android.service.voice;
 
-import android.media.AudioFormat;
+import android.service.voice.DetectorFailure;
 
 /**
  * Callback for returning the detected result from the VisualQueryDetectionService.
@@ -43,6 +43,5 @@ oneway interface IVisualQueryDetectionVoiceInteractionCallback {
     /**
      * Called when the detection fails due to an error.
      */
-    void onError();
-
+    void onDetectionFailure(in DetectorFailure detectorFailure);
 }

@@ -231,9 +231,12 @@ abstract class AbstractDetector implements HotwordDetector {
 
         /** Called when the detection fails due to an error. */
         @Override
-        public void onError() {
-            Slog.v(TAG, "BinderCallback#onError");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> mCallback.onError()));
+        public void onError(DetectorFailure detectorFailure) {
+            Slog.v(TAG, "BinderCallback#onError detectorFailure: " + detectorFailure);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                mCallback.onFailure(detectorFailure != null ? detectorFailure
+                        : new UnknownFailure("Error data is null"));
+            }));
         }
 
         @Override
