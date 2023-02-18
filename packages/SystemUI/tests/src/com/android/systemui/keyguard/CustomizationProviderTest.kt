@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard
 
+import android.app.admin.DevicePolicyManager
 import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.content.pm.ProviderInfo
@@ -61,7 +62,6 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -90,6 +90,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var previewSurfacePackage: SurfaceControlViewHost.SurfacePackage
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
     @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     private lateinit var underTest: CustomizationProvider
     private lateinit var testScope: TestScope
@@ -102,7 +103,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         whenever(backgroundHandler.looper).thenReturn(TestableLooper.get(this).looper)
 
         underTest = CustomizationProvider()
-        val testDispatcher = StandardTestDispatcher()
+        val testDispatcher = UnconfinedTestDispatcher()
         testScope = TestScope(testDispatcher)
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
@@ -183,6 +184,8 @@ class CustomizationProviderTest : SysuiTestCase() {
                 featureFlags = featureFlags,
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
+                devicePolicyManager = devicePolicyManager,
+                backgroundDispatcher = testDispatcher,
             )
         underTest.previewManager =
             KeyguardRemotePreviewManager(

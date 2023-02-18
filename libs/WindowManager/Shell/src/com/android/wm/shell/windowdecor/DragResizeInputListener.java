@@ -216,6 +216,7 @@ class DragResizeInputListener implements AutoCloseable {
 
     @Override
     public void close() {
+        mInputEventReceiver.dispose();
         mInputChannel.dispose();
         try {
             mWindowSession.remove(mFakeWindow);

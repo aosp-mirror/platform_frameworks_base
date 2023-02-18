@@ -60,10 +60,17 @@ public class UserInfo implements Parcelable {
      */
 
     /**
-     * Primary user. Only one user can have this flag set. It identifies the first human user
-     * on a device. This flag is not supported in headless system user mode.
+     * Primary user. In practice, this is just synonymous with {@link #FLAG_SYSTEM}.
+     *
+     * <p>On many devices, this will also be the first human user.
+     * However, in {@link UserManager#isHeadlessSystemUserMode() headless system user mode}, this
+     * should be regarded as unsupported since the system user may not be a human.
+     *
+     * @deprecated For checking for user 0, use {@link #FLAG_SYSTEM}.
+     *             For checking for the designated "main human user", use {@link #FLAG_MAIN}.
      */
     @UnsupportedAppUsage
+    @Deprecated
     public static final int FLAG_PRIMARY = 0x00000001;
 
     /**
@@ -335,7 +342,12 @@ public class UserInfo implements Parcelable {
         }
     }
 
+    /**
+     * @deprecated For checking for user 0, compare {@link #id} to {@link UserHandle#USER_SYSTEM}.
+     *             For checking for the designated "main human user", use {@link #isMain()}.
+     */
     @UnsupportedAppUsage
+    @Deprecated
     public boolean isPrimary() {
         return (flags & FLAG_PRIMARY) == FLAG_PRIMARY;
     }

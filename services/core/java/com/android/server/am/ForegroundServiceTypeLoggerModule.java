@@ -25,9 +25,11 @@ import static android.app.ActivityManager.FOREGROUND_SERVICE_API_TYPE_MEDIA_PLAY
 import static android.app.ActivityManager.FOREGROUND_SERVICE_API_TYPE_MICROPHONE;
 import static android.app.ActivityManager.FOREGROUND_SERVICE_API_TYPE_PHONE_CALL;
 import static android.app.ActivityManager.FOREGROUND_SERVICE_API_TYPE_USB;
+import static android.os.Process.INVALID_UID;
 
 import android.annotation.IntDef;
 import android.app.ActivityManager.ForegroundServiceApiType;
+import android.app.ForegroundServiceDelegationOptions;
 import android.content.ComponentName;
 import android.content.pm.ServiceInfo;
 import android.util.ArrayMap;
@@ -35,6 +37,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -430,33 +433,32 @@ public class ForegroundServiceTypeLoggerModule {
     public void logFgsApiEvent(ServiceRecord r, int fgsState,
             @FgsApiState int apiState,
             @ForegroundServiceApiType int[] apiType, long[] timestamp) {
-        // TODO: Uncomment when atom changes are in
-//        FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
-//                r.appInfo.uid,
-//                r.shortInstanceName,
-//                fgsState, // FGS State
-//                r.mAllowWhileInUsePermissionInFgs, // allowWhileInUsePermissionInFgs
-//                r.mAllowStartForeground, // fgsStartReasonCode
-//                r.appInfo.targetSdkVersion,
-//                r.mRecentCallingUid,
-//                0, // callerTargetSdkVersion
-//                r.mInfoTempFgsAllowListReason != null
-//                        ? r.mInfoTempFgsAllowListReason.mCallingUid : INVALID_UID,
-//                r.mFgsNotificationWasDeferred,
-//                r.mFgsNotificationShown,
-//                0, // durationMs
-//                r.mStartForegroundCount,
-//                ActivityManagerUtils.hashComponentNameForAtom(r.shortInstanceName),
-//                r.mFgsHasNotificationPermission,
-//                r.foregroundServiceType,
-//                0,
-//                r.mIsFgsDelegate,
-//                r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mClientUid : INVALID_UID,
-//                r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mDelegationService
-//                        : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT,
-//                apiState,
-//                apiType,
-//                timestamp);
+        FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
+                r.appInfo.uid,
+                r.shortInstanceName,
+                fgsState, // FGS State
+                r.mAllowWhileInUsePermissionInFgs, // allowWhileInUsePermissionInFgs
+                r.mAllowStartForeground, // fgsStartReasonCode
+                r.appInfo.targetSdkVersion,
+                r.mRecentCallingUid,
+                0, // callerTargetSdkVersion
+                r.mInfoTempFgsAllowListReason != null
+                        ? r.mInfoTempFgsAllowListReason.mCallingUid : INVALID_UID,
+                r.mFgsNotificationWasDeferred,
+                r.mFgsNotificationShown,
+                0, // durationMs
+                r.mStartForegroundCount,
+                ActivityManagerUtils.hashComponentNameForAtom(r.shortInstanceName),
+                r.mFgsHasNotificationPermission,
+                r.foregroundServiceType,
+                0,
+                r.mIsFgsDelegate,
+                r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mClientUid : INVALID_UID,
+                r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mDelegationService
+                        : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT,
+                apiState,
+                apiType,
+                timestamp);
     }
 
     /**
@@ -467,31 +469,30 @@ public class ForegroundServiceTypeLoggerModule {
     public void logFgsApiEventWithNoFgs(int uid,
             @FgsApiState int apiState,
             @ForegroundServiceApiType int[] apiType, long[] timestamp) {
-        // TODO: Uncomment when atom changes are in
-//        FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
-//                uid,
-//                null,
-//                FGS_STATE_CHANGED_API_CALL,
-//                false, // allowWhileInUsePermissionInFgs
-//                0, // fgsStartReasonCode
-//                0,
-//                uid,
-//                0, // callerTargetSdkVersion
-//                0,
-//                false,
-//                false,
-//                0, // durationMs
-//                0,
-//                0,
-//                false,
-//                0,
-//                0,
-//                false,
-//                0,
-//                0,
-//                apiState,
-//                apiType,
-//                timestamp);
+        FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
+                uid,
+                null,
+                FGS_STATE_CHANGED_API_CALL,
+                false, // allowWhileInUsePermissionInFgs
+                0, // fgsStartReasonCode
+                0,
+                uid,
+                0, // callerTargetSdkVersion
+                0,
+                false,
+                false,
+                0, // durationMs
+                0,
+                0,
+                false,
+                0,
+                0,
+                false,
+                0,
+                0,
+                apiState,
+                apiType,
+                timestamp);
     }
 
     /**

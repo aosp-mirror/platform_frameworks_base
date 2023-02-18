@@ -230,7 +230,7 @@ public class UserManagerServiceUserInfoTest {
         mUserManagerService.putUserInfo(createUser(105, FLAG_SYSTEM | FLAG_FULL, null));
         mUserManagerService.putUserInfo(createUser(106, FLAG_DEMO | FLAG_FULL, null));
 
-        mUserManagerService.upgradeIfNecessaryLP(null, versionToTest - 1, userTypeVersion);
+        mUserManagerService.upgradeIfNecessaryLP(versionToTest - 1, userTypeVersion);
 
         assertTrue(mUserManagerService.isUserOfType(100, USER_TYPE_PROFILE_MANAGED));
         assertTrue((mUserManagerService.getUserInfo(100).flags & FLAG_PROFILE) != 0);

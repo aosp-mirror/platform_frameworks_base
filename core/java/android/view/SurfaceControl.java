@@ -226,6 +226,9 @@ public final class SurfaceControl implements Parcelable {
             @DataSpace.NamedDataSpace int dataSpace);
     private static native void nativeSetExtendedRangeBrightness(long transactionObj,
             long nativeObject, float currentBufferRatio, float desiredRatio);
+
+    private static native void nativeSetCachingHint(long transactionObj,
+            long nativeObject, int cachingHint);
     private static native void nativeSetDamageRegion(long transactionObj, long nativeObject,
             Region region);
     private static native void nativeSetDimmingEnabled(long transactionObj, long nativeObject,
@@ -741,6 +744,29 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static final int POWER_MODE_ON_SUSPEND = 4;
+
+    /**
+     * Hint that this SurfaceControl should not participate in layer caching within SurfaceFlinger.
+     *
+     * A system layer may request that a layer does not participate in caching when there are known
+     * quality limitations when caching via the compositor's GPU path.
+     * Use only with {@link SurfaceControl.Transaction#setCachingHint}.
+     * @hide
+     */
+    public static final int CACHING_DISABLED = 0;
+
+    /**
+     * Hint that this SurfaceControl should participate in layer caching within SurfaceFlinger.
+     *
+     * Use only with {@link SurfaceControl.Transaction#setCachingHint}.
+     * @hide
+     */
+    public static final int CACHING_ENABLED = 1;
+
+    /** @hide */
+    @IntDef(flag = true, value = {CACHING_DISABLED, CACHING_ENABLED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CachingHint {}
 
     private void assignNativeObject(long nativeObject, String callsite) {
         if (mNativeObject != 0) {
@@ -3877,6 +3903,23 @@ public final class SurfaceControl implements Parcelable {
             }
             nativeSetExtendedRangeBrightness(mNativeObject, sc.mNativeObject, currentBufferRatio,
                     desiredRatio);
+            return this;
+        }
+
+        /**
+         * Sets the caching hint for the layer. By default, the caching hint is
+         * {@link CACHING_ENABLED}.
+         *
+         * @param sc The SurfaceControl to update
+         * @param cachingHint The caching hint to apply to the SurfaceControl. The CachingHint is
+         *                    not applied to any children of this SurfaceControl.
+         * @return this
+         * @hide
+         */
+        public @NonNull Transaction setCachingHint(
+                @NonNull SurfaceControl sc, @CachingHint int cachingHint) {
+            checkPreconditions(sc);
+            nativeSetCachingHint(mNativeObject, sc.mNativeObject, cachingHint);
             return this;
         }
 

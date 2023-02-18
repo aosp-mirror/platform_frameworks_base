@@ -106,6 +106,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -375,6 +376,90 @@ public class NotifCollectionTest extends SysuiTestCase {
                 entry.getSbn().getUser(),
                 channel,
                 NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+    }
+
+    @Test
+    public void testScheduleBuildNotificationListWhenChannelChanged() {
+        // GIVEN
+        final NotificationEntryBuilder neb = buildNotif(TEST_PACKAGE, 48);
+        final NotificationChannel channel = new NotificationChannel(
+                "channelId",
+                "channelName",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        neb.setChannel(channel);
+
+        final NotifEvent notif = mNoMan.postNotif(neb);
+        final NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+
+        when(mMainHandler.hasCallbacks(any())).thenReturn(false);
+
+        clearInvocations(mBuildListener);
+
+        // WHEN
+        mNotifHandler.onNotificationChannelModified(TEST_PACKAGE,
+                entry.getSbn().getUser(), channel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+
+        // THEN
+        verify(mMainHandler).postDelayed(any(), eq(1000L));
+    }
+
+    @Test
+    public void testCancelScheduledBuildNotificationListEventWhenNotifUpdatedSynchronously() {
+        // GIVEN
+        final NotificationEntry entry1 = buildNotif(TEST_PACKAGE, 1)
+                .setGroup(mContext, "group_1")
+                .build();
+        final NotificationEntry entry2 = buildNotif(TEST_PACKAGE, 2)
+                .setGroup(mContext, "group_1")
+                .setContentTitle(mContext, "New version")
+                .build();
+        final NotificationEntry entry3 = buildNotif(TEST_PACKAGE, 3)
+                .setGroup(mContext, "group_1")
+                .build();
+
+        final List<CoalescedEvent> entriesToBePosted = Arrays.asList(
+                new CoalescedEvent(entry1.getKey(), 0, entry1.getSbn(), entry1.getRanking(), null),
+                new CoalescedEvent(entry2.getKey(), 1, entry2.getSbn(), entry2.getRanking(), null),
+                new CoalescedEvent(entry3.getKey(), 2, entry3.getSbn(), entry3.getRanking(), null)
+        );
+
+        when(mMainHandler.hasCallbacks(any())).thenReturn(true);
+
+        // WHEN
+        mNotifHandler.onNotificationBatchPosted(entriesToBePosted);
+
+        // THEN
+        verify(mMainHandler).removeCallbacks(any());
+    }
+
+    @Test
+    public void testBuildNotificationListWhenChannelChanged() {
+        // GIVEN
+        final NotificationEntryBuilder neb = buildNotif(TEST_PACKAGE, 48);
+        final NotificationChannel channel = new NotificationChannel(
+                "channelId",
+                "channelName",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        neb.setChannel(channel);
+
+        final NotifEvent notif = mNoMan.postNotif(neb);
+        final NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+
+        when(mMainHandler.hasCallbacks(any())).thenReturn(false);
+        when(mMainHandler.postDelayed(any(), eq(1000L))).thenAnswer((Answer) invocation -> {
+            final Runnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        });
+
+        clearInvocations(mBuildListener);
+
+        // WHEN
+        mNotifHandler.onNotificationChannelModified(TEST_PACKAGE,
+                entry.getSbn().getUser(), channel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+
+        // THEN
+        verifyBuiltList(List.of(entry));
     }
 
     @Test

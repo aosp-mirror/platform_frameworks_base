@@ -17,22 +17,54 @@
 package android.net.wifi.sharedconnectivity.service;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.sharedconnectivity.app.KnownNetwork;
 import android.net.wifi.sharedconnectivity.app.TetherNetwork;
-import android.os.Handler;
-import android.os.test.TestLooper;
+import android.os.Looper;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Unit tests for {@link android.net.wifi.sharedconnectivity.service.SharedConnectivityService}.
  */
 @SmallTest
 public class SharedConnectivityServiceTest {
+
+    @Mock
+    Context mContext;
+
+    static class FakeSharedConnectivityService extends SharedConnectivityService {
+        public void attachBaseContext(Context context) {
+            super.attachBaseContext(context);
+        }
+
+        @Override
+        public void onConnectTetherNetwork(@NonNull TetherNetwork network) {}
+
+        @Override
+        public void onDisconnectTetherNetwork(@NonNull TetherNetwork network) {}
+
+        @Override
+        public void onConnectKnownNetwork(@NonNull KnownNetwork network) {}
+
+        @Override
+        public void onForgetKnownNetwork(@NonNull KnownNetwork network) {}
+    }
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
+    }
 
     /**
      * Verifies service returns
@@ -51,18 +83,8 @@ public class SharedConnectivityServiceTest {
     }
 
     private SharedConnectivityService createService() {
-        return new SharedConnectivityService(new Handler(new TestLooper().getLooper())) {
-            @Override
-            public void onConnectTetherNetwork(TetherNetwork network) {}
-
-            @Override
-            public void onDisconnectTetherNetwork(TetherNetwork network) {}
-
-            @Override
-            public void onConnectKnownNetwork(KnownNetwork network) {}
-
-            @Override
-            public void onForgetKnownNetwork(KnownNetwork network) {}
-        };
+        FakeSharedConnectivityService service = new FakeSharedConnectivityService();
+        service.attachBaseContext(mContext);
+        return service;
     }
 }
