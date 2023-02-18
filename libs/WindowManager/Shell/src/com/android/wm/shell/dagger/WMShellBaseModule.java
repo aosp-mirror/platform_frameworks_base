@@ -41,6 +41,7 @@ import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.back.BackAnimationController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.Bubbles;
+import com.android.wm.shell.common.DevicePostureController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -156,6 +157,16 @@ public abstract class WMShellBaseModule {
     @Provides
     static DisplayLayout provideDisplayLayout() {
         return new DisplayLayout();
+    }
+
+    @WMSingleton
+    @Provides
+    static DevicePostureController provideDevicePostureController(
+            Context context,
+            ShellInit shellInit,
+            @ShellMainThread ShellExecutor mainExecutor
+    ) {
+        return new DevicePostureController(context, shellInit, mainExecutor);
     }
 
     @WMSingleton
