@@ -342,21 +342,22 @@ public final class CredentialManagerService
             int userId,
             @Nullable String origin) {
         final PackageInfo packageInfo;
-        String actualPackageName = origin == null ? realPackageName : origin;
+        CallingAppInfo callingAppInfo;
         try {
             packageInfo =
                 getContext()
                     .getPackageManager()
                     .getPackageInfoAsUser(
-                        actualPackageName,
+                            realPackageName,
                         PackageManager.PackageInfoFlags.of(
                             PackageManager.GET_SIGNING_CERTIFICATES),
                         userId);
+            callingAppInfo = new CallingAppInfo(realPackageName, packageInfo.signingInfo, origin);
         } catch (PackageManager.NameNotFoundException e) {
             Log.i(TAG, "Issue while retrieving signatureInfo : " + e.getMessage());
-            return new CallingAppInfo(actualPackageName, null);
+            callingAppInfo = new CallingAppInfo(realPackageName, null, origin);
         }
-        return new CallingAppInfo(actualPackageName, packageInfo.signingInfo);
+        return callingAppInfo;
     }
 
     final class CredentialManagerServiceStub extends ICredentialManager.Stub {
@@ -368,9 +369,15 @@ public final class CredentialManagerService
             Log.i(TAG, "starting executeGetCredential with callingPackage: " + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
+            if (request.getOrigin() != null) {
+                // Check privileged permissions
+                mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ORIGIN, null);
+            }
+
             final int userId = UserHandle.getCallingUserId();
             final int callingUid = Binder.getCallingUid();
             enforceCallingPackage(callingPackage, callingUid);
+
             // New request session, scoped for this request only.
             final GetRequestSession session =
                     new GetRequestSession(
@@ -379,38 +386,8 @@ public final class CredentialManagerService
                             callingUid,
                             callback,
                             request,
-                            constructCallingAppInfo(callingPackage, userId, null),
+                            constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
                             CancellationSignal.fromTransport(cancelTransport));
-
-            processGetCredential(request, callback, session);
-            return cancelTransport;
-        }
-
-        public ICancellationSignal executeGetCredentialWithOrigin(
-                GetCredentialRequest request,
-                IGetCredentialCallback callback,
-                final String callingPackage,
-                final String origin) {
-            Log.i(TAG, "starting executeGetCredential with callingPackage: " + callingPackage);
-            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
-
-            // Check privileged permissions
-            mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ORIGIN, null);
-
-            final int userId = UserHandle.getCallingUserId();
-            final int callingUid = Binder.getCallingUid();
-            enforceCallingPackage(callingPackage, callingUid);
-
-            // New request session, scoped for this request only.
-            final GetRequestSession session =
-                    new GetRequestSession(
-                        getContext(),
-                        userId,
-                        callingUid,
-                        callback,
-                        request,
-                        constructCallingAppInfo(callingPackage, userId, origin),
-                        CancellationSignal.fromTransport(cancelTransport));
 
             processGetCredential(request, callback, session);
             return cancelTransport;
@@ -511,6 +488,11 @@ public final class CredentialManagerService
                     + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
+            if (request.getOrigin() != null) {
+                // Check privileged permissions
+                mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ORIGIN, null);
+            }
+
             final int userId = UserHandle.getCallingUserId();
             final int callingUid = Binder.getCallingUid();
             enforceCallingPackage(callingPackage, callingUid);
@@ -523,38 +505,8 @@ public final class CredentialManagerService
                             callingUid,
                             request,
                             callback,
-                            constructCallingAppInfo(callingPackage, userId, null),
+                            constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
                             CancellationSignal.fromTransport(cancelTransport));
-
-            processCreateCredential(request, callback, session);
-            return cancelTransport;
-        }
-
-        public ICancellationSignal executeCreateCredentialWithOrigin(
-                CreateCredentialRequest request,
-                ICreateCredentialCallback callback,
-                String callingPackage,
-                String origin) {
-            Log.i(TAG, "starting executeCreateCredential with callingPackage: " + callingPackage);
-            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
-
-            // Check privileged permissions
-            mContext.enforceCallingPermission(CREDENTIAL_MANAGER_SET_ORIGIN, null);
-
-            final int userId = UserHandle.getCallingUserId();
-            final int callingUid = Binder.getCallingUid();
-            enforceCallingPackage(callingPackage, callingUid);
-
-            // New request session, scoped for this request only.
-            final CreateRequestSession session =
-                    new CreateRequestSession(
-                        getContext(),
-                        userId,
-                        callingUid,
-                        request,
-                        callback,
-                        constructCallingAppInfo(callingPackage, userId, origin),
-                        CancellationSignal.fromTransport(cancelTransport));
 
             processCreateCredential(request, callback, session);
             return cancelTransport;

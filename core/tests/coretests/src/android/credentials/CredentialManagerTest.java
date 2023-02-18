@@ -102,8 +102,11 @@ public class CredentialManagerTest {
         mGetRequest = new GetCredentialRequest.Builder(Bundle.EMPTY).addCredentialOption(
                 new CredentialOption(Credential.TYPE_PASSWORD_CREDENTIAL, Bundle.EMPTY,
                         Bundle.EMPTY, false)).build();
-        mCreateRequest = new CreateCredentialRequest(Credential.TYPE_PASSWORD_CREDENTIAL,
-                Bundle.EMPTY, Bundle.EMPTY, false, false);
+        mCreateRequest = new CreateCredentialRequest.Builder(Bundle.EMPTY, Bundle.EMPTY)
+                .setType(Credential.TYPE_PASSWORD_CREDENTIAL)
+                .setIsSystemProviderRequired(false)
+                .setAlwaysSendAppInfoToProvider(false)
+                .build();
         mClearRequest = new ClearCredentialStateRequest(Bundle.EMPTY);
 
         final Slice slice = new Slice.Builder(Uri.parse("foo://bar"), null).addText("some text",
