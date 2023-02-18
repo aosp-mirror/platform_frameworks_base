@@ -112,6 +112,9 @@ interface ClockEvents {
     /** Call whenever the color palette should update */
     fun onColorPaletteChanged(resources: Resources) {}
 
+    /** Call if the seed color has changed and should be updated */
+    fun onSeedColorChanged(seedColor: Int?) {}
+
     /** Call whenever the weather data should update */
     fun onWeatherDataChanged(data: Weather) {}
 }
