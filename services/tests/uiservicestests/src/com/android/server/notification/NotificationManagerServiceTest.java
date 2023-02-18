@@ -443,6 +443,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
+        setDpmAppOppsExemptFromDismissal(false);
+
         mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
                 mNotificationInstanceIdSequence);
 
@@ -10319,8 +10321,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void fixSystemNotification_withOnGoingFlag_shouldBeNonDismissible()
+    public void fixSystemNotification_withOnGoingFlag_shouldBeDismissible()
             throws Exception {
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.packageName = "pkg";
+        ai.uid = mUid;
+        ai.flags |= ApplicationInfo.FLAG_SYSTEM;
+
+        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(ai);
+        when(mAppOpsManager.checkOpNoThrow(
+                AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, ai.uid,
+                ai.packageName)).thenReturn(AppOpsManager.MODE_IGNORED);
         // Given: a notification from an app on the system partition has the flag
         // FLAG_ONGOING_EVENT set
         // feature flag: ALLOW_DISMISS_ONGOING is on
@@ -10329,16 +10341,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setOngoing(true)
                 .build();
 
-        final ApplicationInfo systemAppInfo = new ApplicationInfo();
-        systemAppInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
-        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
-                .thenReturn(systemAppInfo);
-
         // When: fix the notification with NotificationManagerService
         mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
 
-        // Then: the notification's flag FLAG_NO_DISMISS should be set
-        assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
+        // Then: the notification's flag FLAG_NO_DISMISS should not be set
+        assertSame(0, n.flags & Notification.FLAG_NO_DISMISS);
     }
 
     @Test
@@ -10386,52 +10393,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Notification n = new Notification.Builder(mContext, "test")
                 .build();
         n.flags |= Notification.FLAG_NO_DISMISS;
-
-        // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
-
-        // Then: the notification's flag FLAG_NO_DISMISS should be cleared
-        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
-    }
-
-    @Test
-    public void fixSystemNotification_withoutOnGoingFlag_shouldBeDismissible() throws Exception {
-        // Given: a notification from an app on the system partition doesn't have the flag
-        // FLAG_ONGOING_EVENT set
-        // feature flag: ALLOW_DISMISS_ONGOING is on
-        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
-        Notification n = new Notification.Builder(mContext, "test")
-                .setOngoing(false)
-                .build();
-
-        final ApplicationInfo systemAppInfo = new ApplicationInfo();
-        systemAppInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
-        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
-                .thenReturn(systemAppInfo);
-
-        // When: fix the notification with NotificationManagerService
-        mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
-
-        // Then: the notification's flag FLAG_NO_DISMISS should not be set
-        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
-    }
-
-    @Test
-    public void fixSystemNotification_withoutOnGoingFlag_withNoDismissFlag_shouldBeDismissible()
-            throws Exception {
-        // Given: a notification from an app on the system partition doesn't have the flag
-        // FLAG_ONGOING_EVENT set, but has the flag FLAG_NO_DISMISS set
-        // feature flag: ALLOW_DISMISS_ONGOING is on
-        mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
-        Notification n = new Notification.Builder(mContext, "test")
-                .setOngoing(false)
-                .build();
-        n.flags |= Notification.FLAG_NO_DISMISS;
-
-        final ApplicationInfo systemAppInfo = new ApplicationInfo();
-        systemAppInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
-        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
-                .thenReturn(systemAppInfo);
 
         // When: fix the notification with NotificationManagerService
         mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
@@ -10503,7 +10464,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
         // feature flag: ALLOW_DISMISS_ONGOING is on
         mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
-        setSystemExemptFromDismissal(false);
+        setDpmAppOppsExemptFromDismissal(false);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -10516,15 +10477,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void fixSystemExemptAppOpNotification_withFlag_shouldBeNonDismissible()
+    public void fixExemptAppOpNotification_withFlag_shouldBeNonDismissible()
             throws Exception {
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.packageName = PKG;
+        ai.uid = mUid;
+        ai.flags |= ApplicationInfo.FLAG_SYSTEM;
+
+        when(mPackageManagerClient.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
+                .thenReturn(ai);
         when(mAppOpsManager.checkOpNoThrow(
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, mUid,
                 PKG)).thenReturn(AppOpsManager.MODE_ALLOWED);
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
         // feature flag: ALLOW_DISMISS_ONGOING is on
         mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
-        setSystemExemptFromDismissal(true);
+        setDpmAppOppsExemptFromDismissal(true);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -10532,14 +10500,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // When: fix the notification with NotificationManagerService
         mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
 
-        // Then: the notification's flag FLAG_NO_DISMISS should be set
-        assertNotSame(0, n.flags & Notification.FLAG_NO_DISMISS);
-
-        setSystemExemptFromDismissal(false);
+        // Then: the notification's flag FLAG_NO_DISMISS should be cleared
+        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
     }
 
     @Test
-    public void fixSystemExemptAppOpNotification_withoutFlag_shouldBeNonDismissible()
+    public void fixExemptAppOpNotification_withoutAppOpsFlag_shouldBeDismissible()
             throws Exception {
         when(mAppOpsManager.checkOpNoThrow(
                 AppOpsManager.OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS, mUid,
@@ -10547,7 +10513,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Given: a notification has the flag FLAG_ONGOING_EVENT set
         // feature flag: ALLOW_DISMISS_ONGOING is on
         mTestFlagResolver.setFlagOverride(ALLOW_DISMISS_ONGOING, true);
-        setSystemExemptFromDismissal(false);
+        setDpmAppOppsExemptFromDismissal(false);
         Notification n = new Notification.Builder(mContext, "test")
                 .setOngoing(true)
                 .build();
@@ -10556,10 +10522,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE);
 
         // Then: the notification's flag FLAG_NO_DISMISS should not be set
-        assertEquals(0, n.flags & Notification.FLAG_NO_DISMISS);
+        assertSame(0, n.flags & Notification.FLAG_NO_DISMISS);
     }
 
-    private void setSystemExemptFromDismissal(boolean isOn) {
+    private void setDpmAppOppsExemptFromDismissal(boolean isOn) {
         DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
                 /* name= */ "application_exemptions",
