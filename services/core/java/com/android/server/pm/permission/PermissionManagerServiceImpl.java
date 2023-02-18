@@ -3673,9 +3673,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 isAppOpPermission = bp.isAppOp();
             }
 
+            final int flags = getPermissionFlagsInternal(pkg.getPackageName(), permission,
+                    myUid, userId);
             if (shouldGrantRuntimePermission) {
-                final int flags = getPermissionFlagsInternal(pkg.getPackageName(), permission,
-                        myUid, userId);
                 if (supportsRuntimePermissions) {
                     // Installer cannot change immutable permissions.
                     if ((flags & immutableFlags) == 0) {
@@ -3693,6 +3693,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             } else if (isAppOpPermission
                     && PackageInstallerService.INSTALLER_CHANGEABLE_APP_OP_PERMISSIONS
                     .contains(permission)) {
+                if ((flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0) {
+                    continue;
+                }
                 int mode =
                         permissionState == PERMISSION_STATE_GRANTED ? MODE_ALLOWED : MODE_ERRORED;
                 int uid = UserHandle.getUid(userId, pkg.getUid());
