@@ -18,6 +18,7 @@ package android.service.credentials;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
+import android.Manifest;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
@@ -218,6 +219,11 @@ public abstract class CredentialProviderService extends Service {
                             GetCredentialException>() {
                         @Override
                         public void onResult(BeginGetCredentialResponse result) {
+                            // If provider service does not possess the HYBRID permission, this
+                            // check will throw an exception in the provider process.
+                            if (result.getRemoteCredentialEntry() != null) {
+                                enforceRemoteEntryPermission();
+                            }
                             try {
                                 callback.onSuccess(result);
                             } catch (RemoteException e) {
@@ -236,6 +242,15 @@ public abstract class CredentialProviderService extends Service {
             ));
             return transport;
         }
+        private void enforceRemoteEntryPermission() {
+            String permission =
+                    Manifest.permission.PROVIDE_REMOTE_CREDENTIALS;
+            getApplicationContext().enforceCallingOrSelfPermission(
+                    permission,
+                    String.format("Provider must have %s, in order to set a "
+                            + "remote entry", permission)
+            );
+        }
 
         @Override
         public ICancellationSignal onBeginCreateCredential(BeginCreateCredentialRequest request,
@@ -253,6 +268,11 @@ public abstract class CredentialProviderService extends Service {
                             BeginCreateCredentialResponse, CreateCredentialException>() {
                         @Override
                         public void onResult(BeginCreateCredentialResponse result) {
+                            // If provider service does not possess the HYBRID permission, this
+                            // check will throw an exception in the provider process.
+                            if (result.getRemoteCreateEntry() != null) {
+                                enforceRemoteEntryPermission();
+                            }
                             try {
                                 callback.onSuccess(result);
                             } catch (RemoteException e) {
