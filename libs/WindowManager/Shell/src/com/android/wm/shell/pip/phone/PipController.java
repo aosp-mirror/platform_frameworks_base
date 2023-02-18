@@ -715,6 +715,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void onDisplayChanged(DisplayLayout layout, boolean saveRestoreSnapFraction) {
         if (!mPipBoundsState.getDisplayLayout().isSameGeometry(layout)) {
+            PipAnimationController.PipTransitionAnimator animator =
+                    mPipAnimationController.getCurrentAnimator();
+            if (animator != null && animator.isRunning()) {
+                // cancel any running animator, as it is using stale display layout information
+                PipAnimationController.quietCancel(animator);
+            }
             onDisplayChangedUncheck(layout, saveRestoreSnapFraction);
         }
     }

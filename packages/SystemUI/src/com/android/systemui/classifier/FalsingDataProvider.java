@@ -380,8 +380,8 @@ public class FalsingDataProvider {
         return mBatteryController.isWirelessCharging() || mDockManager.isDocked();
     }
 
-    public boolean isFolded() {
-        return Boolean.TRUE.equals(mFoldStateListener.getFolded());
+    public boolean isUnfolded() {
+        return Boolean.FALSE.equals(mFoldStateListener.getFolded());
     }
 
     /** Implement to be alerted abotu the beginning and ending of falsing tracking. */

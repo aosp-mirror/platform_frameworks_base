@@ -1218,6 +1218,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
         sendILMsg(MSG_IL_BTA2DP_TIMEOUT, SENDMSG_QUEUE, a2dpCodec, address, delayMs);
     }
 
+    /*package*/ void setLeAudioTimeout(String address, int device, int delayMs) {
+        sendILMsg(MSG_IL_BTLEAUDIO_TIMEOUT, SENDMSG_QUEUE, device, address, delayMs);
+    }
+
     /*package*/ void setAvrcpAbsoluteVolumeSupported(boolean supported) {
         synchronized (mDeviceStateLock) {
             mBtHelper.setAvrcpAbsoluteVolumeSupported(supported);
@@ -1422,6 +1426,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         mDeviceInventory.onMakeA2dpDeviceUnavailableNow((String) msg.obj, msg.arg1);
                     }
                     break;
+                case MSG_IL_BTLEAUDIO_TIMEOUT:
+                    // msg.obj  == address of LE Audio device
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onMakeLeAudioDeviceUnavailableNow(
+                                (String) msg.obj, msg.arg1);
+                    }
+                    break;
                 case MSG_L_A2DP_DEVICE_CONFIG_CHANGE:
                     final BluetoothDevice btDevice = (BluetoothDevice) msg.obj;
                     synchronized (mDeviceStateLock) {
@@ -1512,6 +1523,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 case MSG_I_BT_SERVICE_DISCONNECTED_PROFILE:
                     if (msg.arg1 != BluetoothProfile.HEADSET) {
                         synchronized (mDeviceStateLock) {
+                            mBtHelper.onBtProfileDisconnected(msg.arg1);
                             mDeviceInventory.onBtProfileDisconnected(msg.arg1);
                         }
                     } else {
@@ -1648,11 +1660,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
     // process set volume for Le Audio, obj is BleVolumeInfo
     private static final int MSG_II_SET_LE_AUDIO_OUT_VOLUME = 46;
 
+    private static final int MSG_IL_BTLEAUDIO_TIMEOUT = 49;
+
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {
             case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
             case MSG_L_SET_BT_ACTIVE_DEVICE:
             case MSG_IL_BTA2DP_TIMEOUT:
+            case MSG_IL_BTLEAUDIO_TIMEOUT:
             case MSG_L_A2DP_DEVICE_CONFIG_CHANGE:
             case MSG_TOGGLE_HDMI:
             case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT:
@@ -1743,6 +1758,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 case MSG_L_SET_BT_ACTIVE_DEVICE:
                 case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
                 case MSG_IL_BTA2DP_TIMEOUT:
+                case MSG_IL_BTLEAUDIO_TIMEOUT:
                 case MSG_L_A2DP_DEVICE_CONFIG_CHANGE:
                     if (sLastDeviceConnectMsgTime >= time) {
                         // add a little delay to make sure messages are ordered as expected
