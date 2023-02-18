@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
 import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
@@ -6517,9 +6518,17 @@ public class NotificationManagerService extends SystemService {
 
         checkRestrictedCategories(notification);
 
+        // Notifications passed to setForegroundService() have FLAG_FOREGROUND_SERVICE,
+        // but it's also possible that the app has called notify() with an update to an
+        // FGS notification that hasn't yet been displayed.  Make sure we check for any
+        // FGS-related situation up front, outside of any locks so it's safe to call into
+        // the Activity Manager.
+        final ServiceNotificationPolicy policy = mAmi.applyForegroundServiceNotification(
+                notification, tag, id, pkg, userId);
+
         // Fix the notification as best we can.
         try {
-            fixNotification(notification, pkg, tag, id, userId, notificationUid);
+            fixNotification(notification, pkg, tag, id, userId, notificationUid, policy);
         } catch (Exception e) {
             if (notification.isForegroundService()) {
                 throw new SecurityException("Invalid FGS notification", e);
@@ -6528,13 +6537,7 @@ public class NotificationManagerService extends SystemService {
             return;
         }
 
-        // Notifications passed to setForegroundService() have FLAG_FOREGROUND_SERVICE,
-        // but it's also possible that the app has called notify() with an update to an
-        // FGS notification that hasn't yet been displayed.  Make sure we check for any
-        // FGS-related situation up front, outside of any locks so it's safe to call into
-        // the Activity Manager.
-        final ServiceNotificationPolicy policy = mAmi.applyForegroundServiceNotification(
-                notification, tag, id, pkg, userId);
+
         if (policy == ServiceNotificationPolicy.UPDATE_ONLY) {
             // Proceed if the notification is already showing/known, otherwise ignore
             // because the service lifecycle logic has retained responsibility for its
@@ -6707,13 +6710,16 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void fixNotification(Notification notification, String pkg, String tag, int id,
-            @UserIdInt int userId, int notificationUid) throws NameNotFoundException,
-            RemoteException {
-
+            @UserIdInt int userId, int notificationUid, ServiceNotificationPolicy fgsPolicy)
+            throws NameNotFoundException, RemoteException {
         final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
                 pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                 (userId == UserHandle.USER_ALL) ? USER_SYSTEM : userId);
         Notification.addFieldsFromContext(ai, notification);
+
+        if (notification.isForegroundService() && fgsPolicy == NOT_FOREGROUND_SERVICE) {
+            notification.flags &= ~FLAG_FOREGROUND_SERVICE;
+        }
 
         // Only notifications that can be non-dismissible can have the flag FLAG_NO_DISMISS
         if (mFlagResolver.isEnabled(ALLOW_DISMISS_ONGOING)) {
