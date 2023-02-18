@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.hardware.soundtrigger.SoundTrigger;
+import android.service.voice.DetectorFailure;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordRejectedResult;
 
@@ -60,6 +61,13 @@ oneway interface IHotwordRecognitionStatusCallback {
      * @param status The error code that was seen.
      */
     void onError(int status);
+
+    /**
+     * Called when the detection fails due to an error.
+     *
+     * @param detectorFailure It provides the error code, error message and suggested action.
+     */
+    void onDetectionFailure(in DetectorFailure detectorFailure);
 
     /**
      * Called when the recognition is paused temporarily for some reason.
