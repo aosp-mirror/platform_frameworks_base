@@ -2772,15 +2772,15 @@ interface ITelephony {
             in ISatellitePositionUpdateCallback callback);
 
     /**
-     * Request to get the maximum number of characters per text message on satellite.
+     * Request to get the maximum number of bytes per datagram that can be sent to satellite.
      *
      * @param subId The subId of the subscription to get the maximum number of characters for.
      * @param receiver Result receiver to get the error code of the request and the requested
-     *                 maximum number of characters per text message on satellite.
+     *                 maximum number of bytes per datagram that can be sent to satellite.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void requestMaxCharactersPerSatelliteTextMessage(int subId, in ResultReceiver receiver);
+    void requestMaxSizePerSendingDatagram(int subId, in ResultReceiver receiver);
 
     /**
      * Register the subscription with a satellite provider.
@@ -2912,14 +2912,16 @@ interface ITelephony {
     * Send datagram over satellite.
     *
     * @param subId The subId of the subscription to send satellite datagrams for.
+    * @param datagramId An id that uniquely identifies datagram requested to be sent.
     * @param datagramType Type of datagram.
     * @param datagram Datagram to send over satellite.
-    * @param callback The callback to get the error code of the request.
+    * @param receiver Result receiver to get the datagramId if datagram is sent successfully else
+    *                 error code of the request.
     */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void sendSatelliteDatagram(int subId, int datagramType, in SatelliteDatagram datagram,
-            IIntegerConsumer callback);
+    void sendSatelliteDatagram(int subId, long datagramId, int datagramType,
+            in SatelliteDatagram datagram, in ResultReceiver receiver);
 
     /**
      * Request to get whether satellite communication is allowed for the current location.

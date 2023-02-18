@@ -224,6 +224,10 @@ public class MediaEvent extends FilterEvent {
 
     /**
      * Gets audio presentations.
+     *
+     * <p>The audio presentation order matters. As specified in ETSI EN 300 468 V1.17.1, all the
+     * audio programme components corresponding to the first audio preselection in the loop are
+     * contained in the main NGA stream.
      */
     @NonNull
     public List<AudioPresentation> getAudioPresentations() {

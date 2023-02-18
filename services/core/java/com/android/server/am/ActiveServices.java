@@ -7786,7 +7786,10 @@ public final class ActiveServices {
                 r.mIsFgsDelegate,
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mClientUid : INVALID_UID,
                 r.mFgsDelegation != null ? r.mFgsDelegation.mOptions.mDelegationService
-                        : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT);
+                        : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT,
+                0,
+                null,
+                null);
 
         int event = 0;
         if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER) {

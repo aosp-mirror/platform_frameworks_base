@@ -54,7 +54,8 @@ public class MeshSpecification {
      */
     @IntDef(
         prefix = {"ALPHA_TYPE_"},
-        value = {ALPHA_TYPE_UNKNOWN, ALPHA_TYPE_OPAQUE, ALPHA_TYPE_PREMUL, ALPHA_TYPE_PREMULT}
+        value = {ALPHA_TYPE_UNKNOWN, ALPHA_TYPE_OPAQUE, ALPHA_TYPE_PREMULTIPLIED,
+                ALPHA_TYPE_UNPREMULTIPLIED}
     )
     @Retention(RetentionPolicy.SOURCE)
     private @interface AlphaType {}
@@ -72,12 +73,12 @@ public class MeshSpecification {
     /**
      * Pixel components are premultiplied by alpha.
      */
-    public static final int ALPHA_TYPE_PREMUL = 2;
+    public static final int ALPHA_TYPE_PREMULTIPLIED = 2;
 
     /**
      * Pixel components are independent of alpha.
      */
-    public static final int ALPHA_TYPE_PREMULT = 3;
+    public static final int ALPHA_TYPE_UNPREMULTIPLIED = 3;
 
     /**
      * Constants for {@link Attribute} and {@link Varying} for determining the data type.
@@ -220,7 +221,7 @@ public class MeshSpecification {
     /**
      * Creates a {@link MeshSpecification} object for use within {@link Mesh}. This uses a default
      * color space of {@link ColorSpace.Named#SRGB} and {@link AlphaType} of
-     * {@link #ALPHA_TYPE_PREMUL}.
+     * {@link #ALPHA_TYPE_PREMULTIPLIED}.
      *
      * @param attributes     list of attributes represented by {@link Attribute}. Can hold a max of
      *                       8.
@@ -253,7 +254,7 @@ public class MeshSpecification {
 
     /**
      * Creates a {@link MeshSpecification} object.  This uses a default {@link AlphaType} of
-     * {@link #ALPHA_TYPE_PREMUL}.
+     * {@link #ALPHA_TYPE_PREMULTIPLIED}.
      *
      * @param attributes     list of attributes represented by {@link Attribute}. Can hold a max of
      *                       8.
@@ -306,8 +307,8 @@ public class MeshSpecification {
      *                       one of
      *                       {@link MeshSpecification#ALPHA_TYPE_UNKNOWN},
      *                       {@link MeshSpecification#ALPHA_TYPE_OPAQUE},
-     *                       {@link MeshSpecification#ALPHA_TYPE_PREMUL}, or
-     *                       {@link MeshSpecification#ALPHA_TYPE_PREMULT}
+     *                       {@link MeshSpecification#ALPHA_TYPE_PREMULTIPLIED}, or
+     *                       {@link MeshSpecification#ALPHA_TYPE_UNPREMULTIPLIED}
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
      */
     @NonNull

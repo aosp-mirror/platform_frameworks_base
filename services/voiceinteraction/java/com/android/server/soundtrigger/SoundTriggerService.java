@@ -51,7 +51,6 @@ import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.SoundModel;
-import android.hardware.soundtrigger.SoundTriggerModule;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -89,6 +88,7 @@ import com.android.server.utils.EventLogger;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
@@ -215,47 +215,73 @@ public class SoundTriggerService extends SystemService {
         }
     }
 
-    private SoundTriggerHelper newSoundTriggerHelper() {
+    private SoundTriggerHelper newSoundTriggerHelper(ModuleProperties moduleProperties) {
         Identity middlemanIdentity = new Identity();
         middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
-
         Identity originatorIdentity = IdentityContext.getNonNull();
 
-        return new SoundTriggerHelper(mContext,
-                new SoundTriggerHelper.SoundTriggerModuleProvider() {
-                    @Override
-                    public int listModuleProperties(ArrayList<ModuleProperties> modules) {
-                        return SoundTrigger.listModulesAsMiddleman(modules, middlemanIdentity,
-                                originatorIdentity);
-                    }
+        ArrayList<ModuleProperties> moduleList = new ArrayList<>();
+        SoundTrigger.listModulesAsMiddleman(moduleList, middlemanIdentity,
+                                        originatorIdentity);
 
-                    @Override
-                    public SoundTriggerModule getModule(int moduleId,
-                            SoundTrigger.StatusListener statusListener) {
-                        return SoundTrigger.attachModuleAsMiddleman(moduleId, statusListener, null,
-                                middlemanIdentity, originatorIdentity);
-                    }
+        // Don't fail existing CTS tests which run without a ST module
+        final int moduleId = (moduleProperties != null) ?
+                moduleProperties.getId() : SoundTriggerHelper.INVALID_MODULE_ID;
+
+        if (moduleId != SoundTriggerHelper.INVALID_MODULE_ID) {
+            if (!moduleList.contains(moduleProperties)) {
+                throw new IllegalArgumentException("Invalid module properties");
+            }
+        }
+
+        return new SoundTriggerHelper(
+                mContext,
+                (SoundTrigger.StatusListener statusListener) ->
+                                        SoundTrigger.attachModuleAsMiddleman(
+                                        moduleId, statusListener, null /* handler */,
+                                        middlemanIdentity, originatorIdentity),
+                moduleId,
+                () -> {
+                    ArrayList<ModuleProperties> modulePropList = new ArrayList<>();
+                    SoundTrigger.listModulesAsMiddleman(modulePropList, middlemanIdentity,
+                                                    originatorIdentity);
+                    return modulePropList;
                 });
     }
 
     class SoundTriggerServiceStub extends ISoundTriggerService.Stub {
         @Override
-        public ISoundTriggerSession attachAsOriginator(Identity originatorIdentity,
+        public ISoundTriggerSession attachAsOriginator(@NonNull Identity originatorIdentity,
+                @NonNull ModuleProperties moduleProperties,
                 @NonNull IBinder client) {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                     originatorIdentity)) {
-                return new SoundTriggerSessionStub(client);
+                return new SoundTriggerSessionStub(client, newSoundTriggerHelper(moduleProperties));
             }
         }
 
         @Override
-        public ISoundTriggerSession attachAsMiddleman(Identity originatorIdentity,
-                Identity middlemanIdentity,
+        public ISoundTriggerSession attachAsMiddleman(@NonNull Identity originatorIdentity,
+                @NonNull Identity middlemanIdentity,
+                @NonNull ModuleProperties moduleProperties,
                 @NonNull IBinder client) {
             try (SafeCloseable ignored = PermissionUtil.establishIdentityIndirect(mContext,
                     SOUNDTRIGGER_DELEGATE_IDENTITY, middlemanIdentity,
                     originatorIdentity)) {
-                return new SoundTriggerSessionStub(client);
+                return new SoundTriggerSessionStub(client, newSoundTriggerHelper(moduleProperties));
+            }
+        }
+
+        @Override
+        public List<ModuleProperties> listModuleProperties(@NonNull Identity originatorIdentity) {
+            try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
+                    originatorIdentity)) {
+                Identity middlemanIdentity = new Identity();
+                middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
+                ArrayList<ModuleProperties> moduleList = new ArrayList<>();
+                SoundTrigger.listModulesAsMiddleman(moduleList, middlemanIdentity,
+                                                originatorIdentity);
+                return moduleList;
             }
         }
     }
@@ -269,8 +295,8 @@ public class SoundTriggerService extends SystemService {
         private final Object mCallbacksLock = new Object();
         private final TreeMap<UUID, IRecognitionStatusCallback> mCallbacks = new TreeMap<>();
 
-        SoundTriggerSessionStub(@NonNull IBinder client) {
-            mSoundTriggerHelper = newSoundTriggerHelper();
+        SoundTriggerSessionStub(@NonNull IBinder client, SoundTriggerHelper soundTriggerHelper) {
+            mSoundTriggerHelper = soundTriggerHelper;
             mClient = client;
             mOriginatorIdentity = IdentityContext.getNonNull();
             try {
@@ -1615,8 +1641,20 @@ public class SoundTriggerService extends SystemService {
         }
 
         @Override
-        public Session attach(@NonNull IBinder client) {
-            return new SessionImpl(newSoundTriggerHelper(), client);
+        public Session attach(@NonNull IBinder client, ModuleProperties underlyingModule) {
+            return new SessionImpl(newSoundTriggerHelper(underlyingModule), client);
+        }
+
+        @Override
+        public List<ModuleProperties> listModuleProperties(Identity originatorIdentity) {
+            Identity identity = new Identity();
+            identity.packageName = ActivityThread.currentOpPackageName();
+            ArrayList<ModuleProperties> moduleList = new ArrayList<>();
+            // Overwrite with our own identity to fix permission issues.
+            // VIMService always does its own validation, so this is fine.
+            // TODO(b/269765333)
+            SoundTrigger.listModulesAsOriginator(moduleList, identity);
+            return moduleList;
         }
 
         @Override

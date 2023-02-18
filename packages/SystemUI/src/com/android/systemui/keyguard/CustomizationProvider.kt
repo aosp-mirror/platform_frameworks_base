@@ -131,7 +131,7 @@ class CustomizationProvider :
             throw UnsupportedOperationException()
         }
 
-        return insertSelection(values)
+        return runBlocking(mainDispatcher) { insertSelection(values) }
     }
 
     override fun query(
@@ -171,7 +171,7 @@ class CustomizationProvider :
             throw UnsupportedOperationException()
         }
 
-        return deleteSelection(uri, selectionArgs)
+        return runBlocking(mainDispatcher) { deleteSelection(uri, selectionArgs) }
     }
 
     override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {
@@ -189,7 +189,7 @@ class CustomizationProvider :
         }
     }
 
-    private fun insertSelection(values: ContentValues?): Uri? {
+    private suspend fun insertSelection(values: ContentValues?): Uri? {
         if (values == null) {
             throw IllegalArgumentException("Cannot insert selection, no values passed in!")
         }
@@ -311,7 +311,7 @@ class CustomizationProvider :
             }
     }
 
-    private fun querySlots(): Cursor {
+    private suspend fun querySlots(): Cursor {
         return MatrixCursor(
                 arrayOf(
                     Contract.LockScreenQuickAffordances.SlotTable.Columns.ID,
@@ -330,7 +330,7 @@ class CustomizationProvider :
             }
     }
 
-    private fun queryFlags(): Cursor {
+    private suspend fun queryFlags(): Cursor {
         return MatrixCursor(
                 arrayOf(
                     Contract.FlagsTable.Columns.NAME,
@@ -353,7 +353,7 @@ class CustomizationProvider :
             }
     }
 
-    private fun deleteSelection(
+    private suspend fun deleteSelection(
         uri: Uri,
         selectionArgs: Array<out String>?,
     ): Int {

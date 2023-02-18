@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.app.admin.DevicePolicyManager
 import android.content.Intent
 import android.os.UserHandle
 import androidx.test.filters.SmallTest
@@ -54,7 +55,10 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -70,6 +74,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(Parameterized::class)
 class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
@@ -219,8 +224,10 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     @Mock private lateinit var expandable: Expandable
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
     @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     private lateinit var underTest: KeyguardQuickAffordanceInteractor
+    private lateinit var testScope: TestScope
 
     @JvmField @Parameter(0) var needStrongAuthAfterBoot: Boolean = false
     @JvmField @Parameter(1) var canShowWhileLocked: Boolean = false
@@ -292,6 +299,8 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, false)
                 set(Flags.FACE_AUTH_REFACTOR, true)
             }
+        val testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
         underTest =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor =
@@ -322,58 +331,61 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 featureFlags = featureFlags,
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
+                devicePolicyManager = devicePolicyManager,
+                backgroundDispatcher = testDispatcher,
             )
     }
 
     @Test
-    fun onQuickAffordanceTriggered() = runBlockingTest {
-        setUpMocks(
-            needStrongAuthAfterBoot = needStrongAuthAfterBoot,
-            keyguardIsUnlocked = keyguardIsUnlocked,
-        )
+    fun onQuickAffordanceTriggered() =
+        testScope.runTest {
+            setUpMocks(
+                needStrongAuthAfterBoot = needStrongAuthAfterBoot,
+                keyguardIsUnlocked = keyguardIsUnlocked,
+            )
 
-        homeControls.setState(
-            lockScreenState =
-                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
-                    icon = DRAWABLE,
-                )
-        )
-        homeControls.onTriggeredResult =
+            homeControls.setState(
+                lockScreenState =
+                    KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                        icon = DRAWABLE,
+                    )
+            )
+            homeControls.onTriggeredResult =
+                if (startActivity) {
+                    KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity(
+                        intent = INTENT,
+                        canShowWhileLocked = canShowWhileLocked,
+                    )
+                } else {
+                    KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                }
+
+            underTest.onQuickAffordanceTriggered(
+                configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
+                expandable = expandable,
+            )
+
             if (startActivity) {
-                KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity(
-                    intent = INTENT,
-                    canShowWhileLocked = canShowWhileLocked,
-                )
+                if (needsToUnlockFirst) {
+                    verify(activityStarter)
+                        .postStartActivityDismissingKeyguard(
+                            any(),
+                            /* delay= */ eq(0),
+                            same(animationController),
+                        )
+                } else {
+                    verify(activityStarter)
+                        .startActivity(
+                            any(),
+                            /* dismissShade= */ eq(true),
+                            same(animationController),
+                            /* showOverLockscreenWhenLocked= */ eq(true),
+                        )
+                }
             } else {
-                KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                verifyZeroInteractions(activityStarter)
             }
-
-        underTest.onQuickAffordanceTriggered(
-            configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
-            expandable = expandable,
-        )
-
-        if (startActivity) {
-            if (needsToUnlockFirst) {
-                verify(activityStarter)
-                    .postStartActivityDismissingKeyguard(
-                        any(),
-                        /* delay= */ eq(0),
-                        same(animationController),
-                    )
-            } else {
-                verify(activityStarter)
-                    .startActivity(
-                        any(),
-                        /* dismissShade= */ eq(true),
-                        same(animationController),
-                        /* showOverLockscreenWhenLocked= */ eq(true),
-                    )
-            }
-        } else {
-            verifyZeroInteractions(activityStarter)
         }
-    }
 
     private fun setUpMocks(
         needStrongAuthAfterBoot: Boolean = true,
