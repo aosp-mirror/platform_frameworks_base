@@ -20,12 +20,10 @@
 <resources>
     <!--
        accent_device_default_dark
-         > from values/colors_material/accent_material_dark
-         > from values/colors_material/material_deep_teal_200
-         = #ff80cbc4
-         ! replaced with custom color #5E97F6
+         > from values/system_accent1_100
+         ! replaced with color/system_accent1_400
     -->
-    <color name="accent_device_default_dark">#5E97F6</color>
+    <color name="accent_device_default_dark">@color/system_accent1_400</color>
 
     <!--
        foreground_device_default_dark
@@ -37,42 +35,23 @@
 
     <!--
        background_device_default_dark
-         > from values/colors_material/background_material_dark
-         > from values/colors_material/material_grey_850
-         = #ff303030
+         > from values/system_neutral1_900
          ! replaced with custom color #000000
-           (derived from accent color, constrained by brightness)
     -->
     <color name="background_device_default_dark">#000000</color>
 
-    <!--
-       background_floating_device_default_dark
-         > from values/colors_material/background_floating_material_dark
-         > from values/colors_material/material_grey_800
-         = #ff424242
-         ! replaced with custom color #1D2E4D
-           (derived from accent color, constrained by brightness)
-    -->
-    <color name="background_floating_device_default_dark">#1D2E4D</color>
+    <!-- Derived from accent color at 20% luminance -->
+    <color name="background_floating_device_default_dark">@color/system_accent1_800</color>
 
     <!--
-       primary_device_default_dark
-         > from values/colors_material/primary_material_dark
-         > from values/colors_material/material_grey_900
-         = #ff212121
-         ! replaced with custom color #808080
-           (derived from background color + foreground @ 50% opacity)
-    -->
-    <color name="primary_device_default_dark">#808080</color>
+        primary_device_default_dark
+          > from values/colors/system_neutral1_900
+          ! replaced with system_neutral1_500
+     -->
+    <color name="primary_device_default_dark">@color/system_neutral1_500</color>
 
-    <!--
-       primary_dark_device_default_dark
-         > from values/colors_material/primary_dark_material_dark
-         = @color/black
-         ! replaced with custom color #333333
-           (derived from background color + foreground @ 20% opacity)
-    -->
-    <color name="surface_dark">#333333</color>
+    <!-- Currently matches the "surface dark" definition for phones. -->
+    <color name="surface_dark">@color/system_neutral1_800</color>
 
     <!--
        button_normal_device_default_dark
@@ -82,10 +61,6 @@
     -->
     <color name="button_normal_device_default_dark">@color/btn_watch_default_dark</color>
 
-    <!--
-       error_color_device_default_dark
-         - introduced to avoid coupling to error_color_mtterial (also #F4511E)
-         - colorError typically falls through Theme.DeviceDefault to Theme.Material
-    -->
-    <color name="error_color_device_default_dark">#F4511E</color>
+    <!-- Matches the Wear Compose error color. -->
+    <color name="error_color_device_default_dark">#FF746E</color>
 </resources>
