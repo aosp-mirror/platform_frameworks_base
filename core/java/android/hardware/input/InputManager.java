@@ -74,6 +74,7 @@ import com.android.internal.os.SomeArgs;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -99,13 +100,12 @@ public final class InputManager {
     private final IInputManager mIm;
 
     /**
-     * InputManager has historically used its own static getter {@link #getInstance()} that doesn't
-     * provide a context. We provide a Context to the InputManager instance through the
-     * {@link android.app.SystemServiceRegistry}. Methods that need a Context must use
-     * {@link #getContext()} to obtain it.
+     * We hold a weak reference to the context to avoid leaking it indefinitely,
+     * since we currently store the input manager instance as a static variable that
+     * will outlive any context.
      */
     @Nullable
-    private Context mLateInitContext;
+    private WeakReference<Context> mWeakContext;
 
     /**
      * Whether a PointerIcon is shown for stylus pointers.
@@ -372,8 +372,8 @@ public final class InputManager {
                     throw new IllegalStateException(e);
                 }
             }
-            if (sInstance.mLateInitContext == null) {
-                sInstance.mLateInitContext = context;
+            if (sInstance.mWeakContext == null || sInstance.mWeakContext.get() == null) {
+                sInstance.mWeakContext = new WeakReference(context);
             }
             return sInstance;
         }
@@ -381,9 +381,14 @@ public final class InputManager {
 
     @NonNull
     private Context getContext() {
-        return Objects.requireNonNull(mLateInitContext,
+        WeakReference<Context> weakContext = Objects.requireNonNull(mWeakContext,
                 "A context is required for InputManager. Get the InputManager instance using "
                         + "Context#getSystemService before calling this method.");
+        // If we get at this point, an app calling this function could potentially expect a
+        // Context that has disappeared due to garbage collection. Holding a weak reference
+        // is a temporary solution that should be resolved before the release of a
+        // production version. This is being tracked in b/267758905
+        return Objects.requireNonNull(weakContext.get(), "missing Context");
     }
 
     /**
