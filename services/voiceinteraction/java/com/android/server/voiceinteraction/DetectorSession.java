@@ -70,6 +70,7 @@ import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
+import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordDetector;
 import android.service.voice.HotwordRejectedResult;
 import android.service.voice.IDspHotwordDetectionCallback;
@@ -122,10 +123,16 @@ abstract class DetectorSession {
             "Providing hotword detection result to VoiceInteractionService";
 
     // The error codes are used for onError callback
-    static final int HOTWORD_DETECTION_SERVICE_DIED = -1;
-    static final int CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION = -2;
-    static final int CALLBACK_DETECT_TIMEOUT = -3;
-    static final int CALLBACK_ONDETECTED_STREAM_COPY_ERROR = -4;
+    static final int HOTWORD_DETECTION_SERVICE_DIED =
+            HotwordDetectionServiceFailure.ERROR_CODE_BINDING_DIED;
+    static final int CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION =
+            HotwordDetectionServiceFailure.ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION;
+    static final int CALLBACK_DETECT_TIMEOUT =
+            HotwordDetectionServiceFailure.ERROR_CODE_DETECT_TIMEOUT;
+    static final int CALLBACK_ONDETECTED_STREAM_COPY_ERROR =
+            HotwordDetectionServiceFailure.ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE;
+    static final int CALLBACK_COPY_AUDIO_DATA_FAILURE =
+            HotwordDetectionServiceFailure.ERROR_CODE_COPY_AUDIO_DATA_FAILURE;
 
     // TODO: These constants need to be refined.
     private static final long MAX_UPDATE_TIMEOUT_MILLIS = 30000;
@@ -426,7 +433,9 @@ abstract class DetectorSession {
                 Slog.w(TAG, "Failed supplying audio data to validator", e);
 
                 try {
-                    callback.onError();
+                    callback.onError(
+                            new HotwordDetectionServiceFailure(CALLBACK_COPY_AUDIO_DATA_FAILURE,
+                                    "Copy audio data failure for external source detection."));
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to report onError status: " + ex);
                     if (getDetectorType() != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
@@ -505,7 +514,10 @@ abstract class DetectorSession {
                                                     getDetectorType(),
                                                     EXTERNAL_SOURCE_DETECT_SECURITY_EXCEPTION,
                                                     mVoiceInteractionServiceUid);
-                                            callback.onError();
+                                            callback.onError(new HotwordDetectionServiceFailure(
+                                                    CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION,
+                                                    "Security exception occurs in #onDetected"
+                                                            + " method."));
                                             return;
                                         }
                                         HotwordDetectedResult newResult;
@@ -514,7 +526,9 @@ abstract class DetectorSession {
                                                     .startCopyingAudioStreams(triggerResult);
                                         } catch (IOException e) {
                                             // TODO: Write event
-                                            callback.onError();
+                                            callback.onError(new HotwordDetectionServiceFailure(
+                                                    CALLBACK_ONDETECTED_STREAM_COPY_ERROR,
+                                                    "Copy audio stream failure."));
                                             return;
                                         }
                                         callback.onDetected(newResult, /* audioFormat= */ null,
@@ -569,9 +583,11 @@ abstract class DetectorSession {
         mRemoteDetectionService = remoteDetectionService;
     }
 
-    void reportErrorLocked(int status) {
+    void reportErrorLocked(int errorCode, @NonNull String errorMessage) {
         try {
-            mCallback.onError(status);
+            // TODO: Use instanceof(this) to get different detector to set the right error source.
+            mCallback.onDetectionFailure(
+                    new HotwordDetectionServiceFailure(errorCode, errorMessage));
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to report onError status: " + e);
             if (getDetectorType() != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
