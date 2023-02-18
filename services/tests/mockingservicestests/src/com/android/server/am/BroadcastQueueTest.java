@@ -53,7 +53,6 @@ import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
-import android.app.ReceiverInfo;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -66,7 +65,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
-import android.content.res.CompatibilityInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
@@ -298,16 +296,12 @@ public class BroadcastQueueTest {
         };
 
         if (mImpl == Impl.DEFAULT) {
-            var q = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(), TAG,
+            mQueue = new BroadcastQueueImpl(mAms, mHandlerThread.getThreadHandler(), TAG,
                     mConstants, mSkipPolicy, emptyHistory, false,
                     ProcessList.SCHED_GROUP_DEFAULT);
-            q.mReceiverBatch.mDeepReceiverCopy = true;
-            mQueue = q;
         } else if (mImpl == Impl.MODERN) {
-            var q = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
+            mQueue = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
                     mConstants, mConstants, mSkipPolicy, emptyHistory);
-            q.mReceiverBatch.mDeepReceiverCopy = true;
-            mQueue = q;
         } else {
             throw new UnsupportedOperationException();
         }
@@ -352,16 +346,18 @@ public class BroadcastQueueTest {
      * Helper that leverages try-with-resources to pause dispatch of
      * {@link #mHandlerThread} until released.
      */
-    private class SyncBarrier implements AutoCloseable {
+    static class SyncBarrier implements AutoCloseable {
         private final int mToken;
+        private HandlerThread mThread;
 
-        public SyncBarrier() {
-            mToken = mHandlerThread.getLooper().getQueue().postSyncBarrier();
+        SyncBarrier(HandlerThread thread) {
+            mThread = thread;
+            mToken = mThread.getLooper().getQueue().postSyncBarrier();
         }
 
         @Override
         public void close() throws Exception {
-            mHandlerThread.getLooper().getQueue().removeSyncBarrier(mToken);
+            mThread.getLooper().getQueue().removeSyncBarrier(mToken);
         }
     }
 
@@ -404,43 +400,6 @@ public class BroadcastQueueTest {
         final ApplicationInfo ai = makeApplicationInfo(packageName, processName, userId);
         return makeActiveProcessRecord(ai, ai.processName, behavior,
                 UnaryOperator.identity());
-    }
-
-    private void doRegisteredReceiver(ProcessRecord r, boolean wedge, boolean abort,
-            UnaryOperator<Bundle> extrasOperator, ReceiverInfo info) {
-        final Intent intent = info.intent;
-        final Bundle extras = info.extras;
-        final boolean assumeDelivered = info.assumeDelivered;
-        mScheduledBroadcasts.add(makeScheduledBroadcast(r, intent));
-        if (!wedge && !assumeDelivered) {
-            assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
-            assertNotEquals(ProcessList.SCHED_GROUP_UNDEFINED,
-                    mQueue.getPreferredSchedulingGroupLocked(r));
-            mHandlerThread.getThreadHandler().post(() -> {
-                synchronized (mAms) {
-                    mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
-                            null, extrasOperator.apply(extras), abort, false);
-                }
-            });
-        }
-    }
-
-    private void doManifestReceiver(ProcessRecord r, boolean wedge, boolean abort,
-            UnaryOperator<Bundle> extrasOperator, ReceiverInfo info) {
-        final Intent intent = info.intent;
-        final Bundle extras = info.extras;
-        mScheduledBroadcasts.add(makeScheduledBroadcast(r, intent));
-        if (!wedge) {
-            assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
-            assertNotEquals(ProcessList.SCHED_GROUP_UNDEFINED,
-                    mQueue.getPreferredSchedulingGroupLocked(r));
-            mHandlerThread.getThreadHandler().post(() -> {
-                synchronized (mAms) {
-                    mQueue.finishReceiverLocked(r, Activity.RESULT_OK, null,
-                            extrasOperator.apply(extras), abort, false);
-                }
-            });
-        }
     }
 
     private ProcessRecord makeActiveProcessRecord(ApplicationInfo ai, String processName,
@@ -486,22 +445,47 @@ public class BroadcastQueueTest {
         if (dead) return r;
 
         doAnswer((invocation) -> {
-            Log.v(TAG, "Intercepting scheduleReceiverList() for "
+            Log.v(TAG, "Intercepting scheduleReceiver() for "
                     + Arrays.toString(invocation.getArguments()));
-            final List<ReceiverInfo> data = invocation.getArgument(0);
-            for (int i = 0; i < data.size(); i++) {
-                ReceiverInfo info = data.get(i);
-                // The logic here mimics the logic in ActivityThread: elements of the list are
-                // forwarded to a handler for manifest receivers or to a handler for registered
-                // receivers.
-                if (info.registered) {
-                    doRegisteredReceiver(r, wedge, abort, extrasOperator, info);
-                } else {
-                    doManifestReceiver(r, wedge, abort, extrasOperator, info);
-                }
+            final Intent intent = invocation.getArgument(0);
+            final Bundle extras = invocation.getArgument(5);
+            mScheduledBroadcasts.add(makeScheduledBroadcast(r, intent));
+            if (!wedge) {
+                assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
+                assertNotEquals(ProcessList.SCHED_GROUP_UNDEFINED,
+                        mQueue.getPreferredSchedulingGroupLocked(r));
+                mHandlerThread.getThreadHandler().post(() -> {
+                    synchronized (mAms) {
+                        mQueue.finishReceiverLocked(r, Activity.RESULT_OK, null,
+                                extrasOperator.apply(extras), abort, false);
+                    }
+                });
             }
             return null;
-        }).when(thread).scheduleReceiverList(any());
+        }).when(thread).scheduleReceiver(any(), any(), any(), anyInt(), any(), any(), anyBoolean(),
+                anyBoolean(), anyInt(), anyInt(), anyInt(), any());
+
+        doAnswer((invocation) -> {
+            Log.v(TAG, "Intercepting scheduleRegisteredReceiver() for "
+                    + Arrays.toString(invocation.getArguments()));
+            final Intent intent = invocation.getArgument(1);
+            final Bundle extras = invocation.getArgument(4);
+            final boolean ordered = invocation.getArgument(5);
+            mScheduledBroadcasts.add(makeScheduledBroadcast(r, intent));
+            if (!wedge && ordered) {
+                assertTrue(r.mReceivers.numberOfCurReceivers() > 0);
+                assertNotEquals(ProcessList.SCHED_GROUP_UNDEFINED,
+                        mQueue.getPreferredSchedulingGroupLocked(r));
+                mHandlerThread.getThreadHandler().post(() -> {
+                    synchronized (mAms) {
+                        mQueue.finishReceiverLocked(r, Activity.RESULT_OK,
+                                null, extrasOperator.apply(extras), abort, false);
+                    }
+                });
+            }
+            return null;
+        }).when(thread).scheduleRegisteredReceiver(any(), any(), anyInt(), any(), any(),
+                anyBoolean(), anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyInt(), any());
 
         return r;
     }
@@ -643,131 +627,6 @@ public class BroadcastQueueTest {
         };
     }
 
-    private static <T> boolean matchElement(T a, T b) {
-        return a == null || a.equals(b);
-    }
-    private static <T> boolean matchObject(ArgumentMatcher<T> m, T b) {
-        return m == null || m.matches(b);
-    }
-
-    /**
-     * Create an ArgumentMatcher for a manifest receiver.  The parameters are in the order of
-     * {@link IApplicationThread#scheduleReceiver} but the names correspond to the field names in
-     * {@link ReceiverInfo}.  For every parameter, a null means "don't care".
-     */
-    private ArgumentMatcher<ReceiverInfo> manifestReceiverMatcher(
-            ArgumentMatcher<Intent> intent,
-            ArgumentMatcher<ActivityInfo> activityInfo,
-            ArgumentMatcher<CompatibilityInfo> compatInfo,
-            Integer resultCode,
-            ArgumentMatcher<String> data,
-            ArgumentMatcher<Bundle> extras,
-            Boolean sync,
-            Boolean assumeDelivered,
-            Integer sendingUser,
-            Integer processState) {
-        return (test) -> {
-            return test.registered == false
-                    && matchObject(intent, test.intent)
-                    && matchObject(activityInfo, test.activityInfo)
-                    && matchObject(compatInfo, test.compatInfo)
-                    && matchElement(resultCode, test.resultCode)
-                    && matchObject(data, test.data)
-                    && matchObject(extras, test.extras)
-                    && matchElement(sync, test.sync)
-                    && matchElement(assumeDelivered, test.assumeDelivered)
-                    && matchElement(sendingUser, test.sendingUser)
-                    && matchElement(processState, test.processState);
-        };
-    }
-
-
-    /**
-     * Create an argument suitable for the verify() mock methods, when the goal is to find a call
-     * containing a manifest receiver.
-     */
-    private List<ReceiverInfo> manifestReceiver(
-            ArgumentMatcher<Intent> intent,
-            ArgumentMatcher<ActivityInfo> activityInfo,
-            ArgumentMatcher<CompatibilityInfo> compatInfo,
-            Integer resultCode,
-            ArgumentMatcher<String> data,
-            ArgumentMatcher<Bundle> extras,
-            Boolean sync,
-            Boolean assumeDelivered,
-            Integer sendingUser,
-            Integer processState) {
-        return argThat(receiverList(manifestReceiverMatcher(intent, activityInfo, compatInfo,
-                resultCode, data, extras, sync, assumeDelivered,
-                sendingUser, processState)));
-    }
-
-    /**
-     * Create an ArgumentMatcher for a registered receiver.  The parameters are in the order of
-     * {@link IApplicationThread#scheduleRegisteredReceiver} but the names correspond to the field
-     * names in {@link ReceiverInfo}.  For every parameter, a null means "don't care".
-     */
-    private ArgumentMatcher<ReceiverInfo> registeredReceiverMatcher(
-            ArgumentMatcher<IIntentReceiver> receiver,
-            ArgumentMatcher<Intent> intent,
-            Integer resultCode,
-            ArgumentMatcher<String> data,
-            ArgumentMatcher<Bundle> extras,
-            Boolean ordered,
-            Boolean sticky,
-            Boolean assumeDelivered,
-            Integer sendingUser,
-            Integer processState) {
-        return (test) -> {
-            return test.registered == true
-                    && matchObject(receiver, test.receiver)
-                    && matchObject(intent, test.intent)
-                    && matchElement(resultCode, test.resultCode)
-                    && matchObject(data, test.data)
-                    && matchObject(extras, test.extras)
-                    && matchElement(ordered, test.ordered)
-                    && matchElement(sticky, test.sticky)
-                    && matchElement(assumeDelivered, test.assumeDelivered)
-                    && matchElement(sendingUser, test.sendingUser)
-                    && matchElement(processState, test.processState);
-        };
-    }
-
-    /**
-     * Create an argument suitable for the verify() mock methods, when the goal is to find a call
-     * containing a registered receiver.
-     */
-    private List<ReceiverInfo> registeredReceiver(
-            ArgumentMatcher<IIntentReceiver> receiver,
-            ArgumentMatcher<Intent> intent,
-            Integer resultCode,
-            ArgumentMatcher<String> data,
-            ArgumentMatcher<Bundle> extras,
-            Boolean ordered,
-            Boolean sticky,
-            Boolean assumeDelivered,
-            Integer sendingUser,
-            Integer processState) {
-        return argThat(receiverList(registeredReceiverMatcher(receiver, intent, resultCode,
-                data, extras, ordered, sticky, assumeDelivered,
-                sendingUser, processState)));
-    }
-
-    /**
-     * Apply a matcher to every element in a ReceiverInfo list.
-     */
-    private ArgumentMatcher<List<ReceiverInfo>> receiverList(ArgumentMatcher<ReceiverInfo> a) {
-        return (test) -> {
-            for (int i = 0; i < test.size(); i++) {
-                ReceiverInfo r = test.get(i);
-                if (a.matches(r)) {
-                    return true;
-                }
-            }
-            return false;
-        };
-    }
-
     private ArgumentMatcher<Bundle> bundleEquals(Bundle bundle) {
         return (test) -> {
             // TODO: check values in addition to keys
@@ -802,37 +661,42 @@ public class BroadcastQueueTest {
             ComponentName component) throws Exception {
         final Intent targetedIntent = new Intent(intent);
         targetedIntent.setComponent(component);
-        verify(app.getThread(), mode).scheduleReceiverList(
-                manifestReceiver(filterEquals(targetedIntent),
-                        null, null, null, null, null, null, null, UserHandle.USER_SYSTEM, null));
+        verify(app.getThread(), mode).scheduleReceiver(
+                argThat(filterEquals(targetedIntent)), any(), any(),
+                anyInt(), any(), any(), eq(false), anyBoolean(), eq(UserHandle.USER_SYSTEM),
+                anyInt(), anyInt(), any());
     }
 
     private void verifyScheduleReceiver(VerificationMode mode, ProcessRecord app,
             Intent intent, int userId) throws Exception {
-        verify(app.getThread(), mode).scheduleReceiverList(
-                manifestReceiver(filterEqualsIgnoringComponent(intent),
-                        null, null, null, null, null, null, null, userId, null));
+        verify(app.getThread(), mode).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(intent)), any(), any(),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), eq(userId),
+                anyInt(), anyInt(), any());
     }
 
     private void verifyScheduleReceiver(VerificationMode mode, ProcessRecord app,
             int userId) throws Exception {
-        verify(app.getThread(), mode).scheduleReceiverList(
-                manifestReceiver(null,
-                        null, null, null, null, null, null, null, userId, null));
+        verify(app.getThread(), mode).scheduleReceiver(
+                any(), any(), any(),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), eq(userId),
+                anyInt(), anyInt(), any());
     }
 
     private void verifyScheduleRegisteredReceiver(ProcessRecord app,
             Intent intent) throws Exception {
-        verify(app.getThread()).scheduleReceiverList(
-                registeredReceiver(null, filterEqualsIgnoringComponent(intent),
-                        null, null, null, null, null, null, UserHandle.USER_SYSTEM, null));
+        verify(app.getThread()).scheduleRegisteredReceiver(
+                any(), argThat(filterEqualsIgnoringComponent(intent)),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
     }
 
     private void verifyScheduleRegisteredReceiver(VerificationMode mode, ProcessRecord app,
             int userId) throws Exception {
-        verify(app.getThread(), mode).scheduleReceiverList(
-                registeredReceiver(null, null,
-                        null, null, null, null, null, null, userId, null));
+        verify(app.getThread(), mode).scheduleRegisteredReceiver(
+                any(), any(),
+                anyInt(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean(),
+                eq(userId), anyInt(), anyInt(), any());
     }
 
     static final int USER_GUEST = 11;
@@ -1258,7 +1122,7 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
                     List.of(makeRegisteredReceiver(receiverApp),
                             makeManifestReceiver(PACKAGE_GREEN, CLASS_RED),
@@ -1302,7 +1166,7 @@ public class BroadcastQueueTest {
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final Intent timeZone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, USER_GUEST, new ArrayList<>(
                     List.of(makeRegisteredReceiver(callerApp),
                             makeManifestReceiver(PACKAGE_GREEN, CLASS_RED, USER_GUEST),
@@ -1342,7 +1206,7 @@ public class BroadcastQueueTest {
         final ProcessRecord oldApp = makeActiveProcessRecord(PACKAGE_GREEN);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, new ArrayList<>(
                     List.of(makeRegisteredReceiver(oldApp),
                             makeManifestReceiver(PACKAGE_GREEN, CLASS_GREEN)))));
@@ -1485,24 +1349,25 @@ public class BroadcastQueueTest {
         final InOrder inOrder = inOrder(greenThread, blueThread, yellowThread, redThread);
         final Bundle expectedExtras = new Bundle();
         expectedExtras.putBoolean(PACKAGE_RED, true);
-        inOrder.verify(greenThread).scheduleReceiverList(manifestReceiver(
-                filterEqualsIgnoringComponent(airplane), null, null,
-                Activity.RESULT_OK, null, bundleEquals(expectedExtras), true, false,
-                UserHandle.USER_SYSTEM, null));
-        inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
-                filterEqualsIgnoringComponent(airplane), null, null,
-                Activity.RESULT_OK, null, bundleEquals(expectedExtras), true, false,
-                UserHandle.USER_SYSTEM, null));
+        inOrder.verify(greenThread).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(airplane)), any(), any(),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)),
+                eq(true), eq(false), eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
+        inOrder.verify(blueThread).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(airplane)), any(), any(),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)),
+                eq(true), eq(false), eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
         expectedExtras.putBoolean(PACKAGE_BLUE, true);
-        inOrder.verify(yellowThread).scheduleReceiverList(manifestReceiver(
-                filterEqualsIgnoringComponent(airplane), null, null,
-                Activity.RESULT_OK, null, bundleEquals(expectedExtras), true, false,
-                UserHandle.USER_SYSTEM, null));
+        inOrder.verify(yellowThread).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(airplane)), any(), any(),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)),
+                eq(true), eq(false), eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
         expectedExtras.putBoolean(PACKAGE_YELLOW, true);
-        inOrder.verify(redThread).scheduleReceiverList(registeredReceiver(
-                null, filterEquals(airplane),
-                Activity.RESULT_OK, null, bundleEquals(expectedExtras), false,
-                null, true, UserHandle.USER_SYSTEM, null));
+        inOrder.verify(redThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEquals(airplane)),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)),
+                eq(false), anyBoolean(), eq(true), eq(UserHandle.USER_SYSTEM), anyInt(),
+                anyInt(), any());
 
         // Finally, verify that we thawed the final receiver
         verify(mAms.mOomAdjuster.mCachedAppOptimizer).unfreezeTemporarily(eq(callerApp),
@@ -1565,24 +1430,25 @@ public class BroadcastQueueTest {
         // have invoked or skipped the second receiver depending on the intent
         // flag policy; we always deliver to final receiver regardless of abort
         final InOrder inOrder = inOrder(greenThread, blueThread, redThread);
-        inOrder.verify(greenThread).scheduleReceiverList(manifestReceiver(
-                filterEqualsIgnoringComponent(intent), null, null,
-                Activity.RESULT_OK, null, null, true, false, UserHandle.USER_SYSTEM,
-                null));
+        inOrder.verify(greenThread).scheduleReceiver(
+                argThat(filterEqualsIgnoringComponent(intent)), any(), any(),
+                eq(Activity.RESULT_OK), any(), any(), eq(true), eq(false),
+                eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
         if ((intent.getFlags() & Intent.FLAG_RECEIVER_NO_ABORT) != 0) {
-            inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
-                    filterEqualsIgnoringComponent(intent), null, null,
-                    Activity.RESULT_OK, null, null, true, false, UserHandle.USER_SYSTEM,
-                    null));
+            inOrder.verify(blueThread).scheduleReceiver(
+                    argThat(filterEqualsIgnoringComponent(intent)), any(), any(),
+                    eq(Activity.RESULT_OK), any(), any(), eq(true), eq(false),
+                    eq(UserHandle.USER_SYSTEM), anyInt(), anyInt(), any());
         } else {
-            inOrder.verify(blueThread, never()).scheduleReceiverList(manifestReceiver(
-                    null, null, null, null, null,
-                    null, null, null, null, null));
+            inOrder.verify(blueThread, never()).scheduleReceiver(
+                    any(), any(), any(), anyInt(), any(), any(),
+                    anyBoolean(), anyBoolean(), anyInt(), anyInt(), anyInt(), any());
         }
-        inOrder.verify(redThread).scheduleReceiverList(registeredReceiver(
-                null, filterEquals(intent),
-                Activity.RESULT_OK, null, bundleEquals(expectedExtras),
-                false, null, true, UserHandle.USER_SYSTEM, null));
+        inOrder.verify(redThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEquals(intent)),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(expectedExtras)),
+                eq(false), anyBoolean(), eq(true), eq(UserHandle.USER_SYSTEM),
+                anyInt(), anyInt(), any());
     }
 
     /**
@@ -1602,10 +1468,11 @@ public class BroadcastQueueTest {
                 orderedResultTo, orderedExtras));
 
         waitForIdle();
-        verify(callerThread).scheduleReceiverList(registeredReceiver(
-                null, filterEquals(airplane),
-                Activity.RESULT_OK, null, bundleEquals(orderedExtras), false,
-                null, true, UserHandle.USER_SYSTEM, null));
+        verify(callerThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEquals(airplane)),
+                eq(Activity.RESULT_OK), any(), argThat(bundleEquals(orderedExtras)),
+                eq(false), anyBoolean(), eq(true), eq(UserHandle.USER_SYSTEM),
+                anyInt(), anyInt(), any());
     }
 
     /**
@@ -1623,10 +1490,11 @@ public class BroadcastQueueTest {
                         makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE)), resultTo));
 
         waitForIdle();
-        verify(callerThread).scheduleReceiverList(registeredReceiver(
-                null, filterEquals(airplane),
-                Activity.RESULT_OK, null, null, false,
-                null, true, UserHandle.USER_SYSTEM, null));
+        verify(callerThread).scheduleRegisteredReceiver(
+                any(), argThat(filterEquals(airplane)),
+                eq(Activity.RESULT_OK), any(), any(),
+                eq(false), anyBoolean(), eq(true), eq(UserHandle.USER_SYSTEM),
+                anyInt(), anyInt(), any());
     }
 
     /**
@@ -1719,7 +1587,7 @@ public class BroadcastQueueTest {
         final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         airplane.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
                     List.of(makeRegisteredReceiver(receiverBlueApp, 10),
                             makeRegisteredReceiver(receiverGreenApp, 10),
@@ -1772,7 +1640,7 @@ public class BroadcastQueueTest {
         final IIntentReceiver resultToFirst = mock(IIntentReceiver.class);
         final IIntentReceiver resultToSecond = mock(IIntentReceiver.class);
 
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeOrderedBroadcastRecord(timezoneFirst, callerApp,
                     List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE),
                             makeManifestReceiver(PACKAGE_BLUE, CLASS_GREEN)),
@@ -1790,28 +1658,34 @@ public class BroadcastQueueTest {
         final InOrder inOrder = inOrder(callerThread, blueThread);
 
         // First broadcast is canceled
-        inOrder.verify(callerThread).scheduleReceiverList(registeredReceiver(null,
-                filterAndExtrasEquals(timezoneFirst), Activity.RESULT_CANCELED, null,
-                null, false, null, true, UserHandle.USER_SYSTEM, null));
+        inOrder.verify(callerThread).scheduleRegisteredReceiver(
+                any(), argThat(filterAndExtrasEquals(timezoneFirst)),
+                eq(Activity.RESULT_CANCELED), any(), any(),
+                eq(false), anyBoolean(), eq(true), eq(UserHandle.USER_SYSTEM),
+                anyInt(), anyInt(), any());
 
         // We deliver second broadcast to app
         timezoneSecond.setClassName(PACKAGE_BLUE, CLASS_GREEN);
-        inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
-                filterAndExtrasEquals(timezoneSecond),
-                null, null, null, null, null, true, false, null, null));
+        inOrder.verify(blueThread).scheduleReceiver(
+                argThat(filterAndExtrasEquals(timezoneSecond)), any(), any(),
+                anyInt(), any(), any(), eq(true), eq(false), anyInt(),
+                anyInt(), anyInt(), any());
 
         // Second broadcast is finished
         timezoneSecond.setComponent(null);
-        inOrder.verify(callerThread).scheduleReceiverList(registeredReceiver(null,
-                filterAndExtrasEquals(timezoneSecond), Activity.RESULT_OK, null,
-                null, false, null, true, UserHandle.USER_SYSTEM, null));
+        inOrder.verify(callerThread).scheduleRegisteredReceiver(
+                any(), argThat(filterAndExtrasEquals(timezoneSecond)),
+                eq(Activity.RESULT_OK), any(), any(),
+                eq(false), anyBoolean(), eq(true), eq(UserHandle.USER_SYSTEM),
+                anyInt(), anyInt(), any());
 
         // Since we "replaced" the first broadcast in its original position,
         // only now do we see the airplane broadcast
         airplane.setClassName(PACKAGE_BLUE, CLASS_RED);
-        inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
-                filterEquals(airplane),
-                null, null, null, null, null, false, false, null, null));
+        inOrder.verify(blueThread).scheduleReceiver(
+                argThat(filterEquals(airplane)), any(), any(),
+                anyInt(), any(), any(), eq(false), eq(false), anyInt(),
+                anyInt(), anyInt(), any());
     }
 
     @Test
@@ -1857,7 +1731,7 @@ public class BroadcastQueueTest {
         timeTickFirst.putExtra(Intent.EXTRA_INDEX, "third");
         timeTickThird.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
 
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             enqueueBroadcast(makeBroadcastRecord(timeTickFirst, callerApp,
                     List.of(makeManifestReceiver(PACKAGE_BLUE, CLASS_BLUE))));
             enqueueBroadcast(makeBroadcastRecord(timeTickSecond, callerApp,
@@ -1873,15 +1747,17 @@ public class BroadcastQueueTest {
 
         // First broadcast is delivered.
         timeTickFirst.setClassName(PACKAGE_BLUE, CLASS_BLUE);
-        inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
-                filterAndExtrasEquals(timeTickFirst),
-                null, null, null, null, null, false, false, null, null));
+        inOrder.verify(blueThread).scheduleReceiver(
+                argThat(filterAndExtrasEquals(timeTickFirst)), any(), any(),
+                anyInt(), any(), any(), eq(false), eq(false), anyInt(),
+                anyInt(), anyInt(), any());
 
         // Second broadcast should be replaced by third broadcast.
         timeTickThird.setClassName(PACKAGE_BLUE, CLASS_BLUE);
-        inOrder.verify(blueThread).scheduleReceiverList(manifestReceiver(
-                filterAndExtrasEquals(timeTickThird),
-                null, null, null, null, null, false, false, null, null));
+        inOrder.verify(blueThread).scheduleReceiver(
+                argThat(filterAndExtrasEquals(timeTickThird)), any(), any(),
+                anyInt(), any(), any(), eq(false), eq(false), anyInt(),
+                anyInt(), anyInt(), any());
     }
 
     @Test
@@ -1897,7 +1773,7 @@ public class BroadcastQueueTest {
         assertTrue(mQueue.isIdleLocked());
         assertTrue(mQueue.isBeyondBarrierLocked(beforeFirst));
 
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
             enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
                     List.of(makeRegisteredReceiver(receiverApp))));
@@ -1991,7 +1867,7 @@ public class BroadcastQueueTest {
         final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        try (SyncBarrier b = new SyncBarrier()) {
+        try (SyncBarrier b = new SyncBarrier(mHandlerThread)) {
             final Object greenReceiver = makeRegisteredReceiver(receiverGreenApp);
             final Object blueReceiver = makeRegisteredReceiver(receiverBlueApp);
             final Object yellowReceiver = makeManifestReceiver(PACKAGE_YELLOW, CLASS_YELLOW);

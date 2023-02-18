@@ -145,11 +145,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // We configure runnable size only once at boot; it'd be too complex to
         // try resizing dynamically at runtime
         mRunning = new BroadcastProcessQueue[mConstants.getMaxRunningQueues()];
-
-        // Set up the statistics for batched broadcasts.
-        final int batchSize = mConstants.MAX_BROADCAST_BATCH_SIZE;
-        mReceiverBatch = new BroadcastReceiverBatch(batchSize);
-        Slog.i(TAG, "maximum broadcast batch size " + batchSize);
     }
 
     /**
@@ -220,15 +215,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private final BroadcastConstants mBgConstants;
 
     /**
-     * The sole instance of BroadcastReceiverBatch that is used by scheduleReceiverWarmLocked().
-     * The class is not a true singleton but only one instance is needed for the broadcast queue.
-     * Although this is guarded by mService, it should never be accessed by any other function.
-     */
-    @VisibleForTesting
-    @GuardedBy("mService")
-    final BroadcastReceiverBatch mReceiverBatch;
-
-    /**
      * Timestamp when last {@link #testAllProcessQueues} failure was observed;
      * used for throttling log messages.
      */
@@ -248,19 +234,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
     private void enqueueFinishReceiver(@NonNull BroadcastProcessQueue queue,
             @DeliveryState int deliveryState, @NonNull String reason) {
-        enqueueFinishReceiver(queue, queue.getActive(), queue.getActiveIndex(),
-                deliveryState, reason);
-    }
-
-    private void enqueueFinishReceiver(@NonNull BroadcastProcessQueue queue,
-            @NonNull BroadcastRecord r, int index,
-            @DeliveryState int deliveryState, @NonNull String reason) {
         final SomeArgs args = SomeArgs.obtain();
         args.arg1 = queue;
         args.argi1 = deliveryState;
         args.arg2 = reason;
-        args.arg3 = r;
-        args.argi2 = index;
         mLocalHandler.sendMessage(Message.obtain(mLocalHandler, MSG_FINISH_RECEIVER, args));
     }
 
@@ -308,10 +285,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     final BroadcastProcessQueue queue = (BroadcastProcessQueue) args.arg1;
                     final int deliveryState = args.argi1;
                     final String reason = (String) args.arg2;
-                    final BroadcastRecord r = (BroadcastRecord) args.arg3;
-                    final int index = args.argi2;
                     args.recycle();
-                    finishReceiverLocked(queue, deliveryState, reason, r, index);
+                    finishReceiverActiveLocked(queue, deliveryState, reason);
                 }
                 return true;
             }
@@ -767,7 +742,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return;
         }
 
-        if (maybeSkipReceiver(queue, null, r, index)) {
+        if (maybeSkipReceiver(queue, r, index)) {
             mRunningColdStart = null;
             return;
         }
@@ -811,22 +786,20 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @GuardedBy("mService")
     private void scheduleReceiverWarmLocked(@NonNull BroadcastProcessQueue queue) {
         checkState(queue.isActive(), "isActive");
-        BroadcastReceiverBatch batch = mReceiverBatch;
-        batch.reset();
 
-        while (collectReceiverList(queue, batch)) {
-            if (batch.isFull()) {
-                break;
-            }
-            if (!shouldContinueScheduling(queue)) {
-                break;
-             }
-            if (queue.isEmpty()) {
-                break;
-            }
-            queue.makeActiveNextPending();
+        final BroadcastRecord r = queue.getActive();
+        final int index = queue.getActiveIndex();
+
+        if (r.terminalCount == 0) {
+            r.dispatchTime = SystemClock.uptimeMillis();
+            r.dispatchRealTime = SystemClock.elapsedRealtime();
+            r.dispatchClockTime = System.currentTimeMillis();
         }
-        processReceiverList(queue, batch);
+
+        if (maybeSkipReceiver(queue, r, index)) {
+            return;
+        }
+        dispatchReceivers(queue, r, index);
     }
 
     /**
@@ -834,14 +807,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      * skipped (and therefore no more work is required).
      */
     private boolean maybeSkipReceiver(@NonNull BroadcastProcessQueue queue,
-            @Nullable BroadcastReceiverBatch batch, @NonNull BroadcastRecord r, int index) {
+            @NonNull BroadcastRecord r, int index) {
         final String reason = shouldSkipReceiver(queue, r, index);
         if (reason != null) {
-            if (batch == null) {
-                enqueueFinishReceiver(queue, r, index, BroadcastRecord.DELIVERY_SKIPPED, reason);
-            } else {
-                batch.finish(r, index, BroadcastRecord.DELIVERY_SKIPPED, reason);
-            }
+            enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_SKIPPED, reason);
             return true;
         }
         return false;
@@ -884,147 +853,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     /**
-     * Collect receivers into a list, to be dispatched in a single receiver list call.  Return
-     * true if remaining receivers in the queue should be examined, and false if the current list
-     * is complete.
-     */
-    private boolean collectReceiverList(@NonNull BroadcastProcessQueue queue,
-            @NonNull BroadcastReceiverBatch batch) {
-        final ProcessRecord app = queue.app;
-        final BroadcastRecord r = queue.getActive();
-        final int index = queue.getActiveIndex();
-        final Object receiver = r.receivers.get(index);
-        final Intent receiverIntent = r.getReceiverIntent(receiver);
-
-        if (r.terminalCount == 0) {
-            r.dispatchTime = SystemClock.uptimeMillis();
-            r.dispatchRealTime = SystemClock.elapsedRealtime();
-            r.dispatchClockTime = System.currentTimeMillis();
-        }
-        if (maybeSkipReceiver(queue, batch, r, index)) {
-            return true;
-        }
-
-        final IApplicationThread thread = app.getOnewayThread();
-        if (thread == null) {
-            batch.finish(r, index, BroadcastRecord.DELIVERY_FAILURE, "missing IApplicationThread");
-            return true;
-        }
-
-        final boolean assumeDelivered = isAssumedDelivered(r, index);
-        if (receiver instanceof BroadcastFilter) {
-            batch.schedule(((BroadcastFilter) receiver).receiverList.receiver,
-                    receiverIntent, r.resultCode, r.resultData, r.resultExtras,
-                    r.ordered, r.initialSticky, assumeDelivered, r.userId,
-                    r.shareIdentity ? r.callingUid : Process.INVALID_UID,
-                    r.shareIdentity ? r.callerPackage : null,
-                    app.mState.getReportedProcState(), r, index);
-            // TODO: consider making registered receivers of unordered
-            // broadcasts report results to detect ANRs
-            if (assumeDelivered) {
-                batch.success(r, index, BroadcastRecord.DELIVERY_DELIVERED, "assuming delivered");
-                return true;
-            }
-        } else {
-            batch.schedule(receiverIntent, ((ResolveInfo) receiver).activityInfo,
-                    null, r.resultCode, r.resultData, r.resultExtras, r.ordered, assumeDelivered,
-                    r.userId, r.shareIdentity ? r.callingUid : Process.INVALID_UID,
-                    r.shareIdentity ? r.callerPackage : null,
-                    app.mState.getReportedProcState(), r, index);
-            if (assumeDelivered) {
-                batch.success(r, index, BroadcastRecord.DELIVERY_DELIVERED, "assuming delivered");
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Process the information in a BroadcastReceiverBatch.  Elements in the finish and success
-     * lists are sent to enqueueFinishReceiver().  Elements in the receivers list are transmitted
-     * to the target in a single binder call.
-     */
-    private void processReceiverList(@NonNull BroadcastProcessQueue queue,
-            @NonNull BroadcastReceiverBatch batch) {
-        // Transmit the receiver list.
-        final ProcessRecord app = queue.app;
-        final IApplicationThread thread = app.getOnewayThread();
-
-        batch.recordBatch(thread instanceof SameProcessApplicationThread);
-
-        // Mark all the receivers that were discarded.  None of these have actually been scheduled.
-        for (int i = 0; i < batch.finished().size(); i++) {
-            final var finish = batch.finished().get(i);
-            enqueueFinishReceiver(queue, finish.r, finish.index, finish.deliveryState,
-                    finish.reason);
-        }
-        // Prepare for delivery of all receivers that are about to be scheduled.
-        for (int i = 0; i < batch.cookies().size(); i++) {
-            final var cookie = batch.cookies().get(i);
-            prepareToDispatch(queue, cookie.r, cookie.index);
-        }
-
-        // Notify on dispatch.  Note that receiver/cookies are recorded only if the thread is
-        // non-null and the list will therefore be sent.
-        for (int i = 0; i < batch.cookies().size(); i++) {
-            // Cookies and receivers are 1:1
-            final var cookie = batch.cookies().get(i);
-            final BroadcastRecord r = cookie.r;
-            final int index = cookie.index;
-            final Object receiver = r.receivers.get(index);
-
-            if (r.shareIdentity) {
-                mService.mPackageManagerInt.grantImplicitAccess(r.userId, r.intent,
-                        UserHandle.getAppId(app.uid), r.callingUid, true);
-            }
-            if (receiver instanceof BroadcastFilter) {
-                notifyScheduleRegisteredReceiver(queue.app, r, (BroadcastFilter) receiver);
-            } else {
-                notifyScheduleReceiver(queue.app, r, (ResolveInfo) receiver);
-            }
-        }
-
-        // Transmit the enqueued receivers.  The thread cannot be null because the lock has been
-        // held since collectReceiverList(), which will not add any receivers if the thread is null.
-        boolean remoteFailed = false;
-        if (batch.receivers().size()  > 0) {
-            try {
-                thread.scheduleReceiverList(batch.receivers());
-            } catch (RemoteException e) {
-                // Log the failure of the first receiver in the list.  Note that there must be at
-                // least one receiver/cookie to reach this point in the code, which means
-                // cookie[0] is a valid element.
-                final var info = batch.cookies().get(0);
-                final BroadcastRecord r = info.r;
-                final int index = info.index;
-                final Object receiver = r.receivers.get(index);
-                final String msg = "Failed to schedule " + r + " to " + receiver
-                                   + " via " + app + ": " + e;
-                logw(msg);
-                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER, true);
-                remoteFailed = true;
-            }
-        }
-
-        if (!remoteFailed) {
-            // If transmission succeed, report all receivers that are assumed to be delivered.
-            for (int i = 0; i < batch.success().size(); i++) {
-                final var finish = batch.success().get(i);
-                enqueueFinishReceiver(queue, finish.r, finish.index, finish.deliveryState,
-                        finish.reason);
-            }
-        } else {
-            // If transmission failed, fail all receivers in the list.
-            for (int i = 0; i < batch.cookies().size(); i++) {
-                final var cookie = batch.cookies().get(i);
-                enqueueFinishReceiver(queue, cookie.r, cookie.index,
-                        BroadcastRecord.DELIVERY_FAILURE, "remote app");
-            }
-        }
-    }
-
-    /**
      * Return true if this receiver should be assumed to have been delivered.
      */
     private boolean isAssumedDelivered(BroadcastRecord r, int index) {
@@ -1035,7 +863,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     /**
      * A receiver is about to be dispatched.  Start ANR timers, if necessary.
      */
-    private void prepareToDispatch(@NonNull BroadcastProcessQueue queue,
+    private void dispatchReceivers(@NonNull BroadcastProcessQueue queue,
             @NonNull BroadcastRecord r, int index) {
         final ProcessRecord app = queue.app;
         final Object receiver = r.receivers.get(index);
@@ -1074,6 +902,47 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (DEBUG_BROADCAST) logv("Scheduling " + r + " to warm " + app);
         setDeliveryState(queue, app, r, index, receiver, BroadcastRecord.DELIVERY_SCHEDULED,
                 "scheduleReceiverWarmLocked");
+
+        final Intent receiverIntent = r.getReceiverIntent(receiver);
+        final IApplicationThread thread = app.getOnewayThread();
+        if (thread != null) {
+            try {
+                if (receiver instanceof BroadcastFilter) {
+                    notifyScheduleRegisteredReceiver(app, r, (BroadcastFilter) receiver);
+                    thread.scheduleRegisteredReceiver(
+                        ((BroadcastFilter) receiver).receiverList.receiver,
+                        receiverIntent, r.resultCode, r.resultData, r.resultExtras,
+                        r.ordered, r.initialSticky, assumeDelivered, r.userId,
+                        app.mState.getReportedProcState(),
+                        r.shareIdentity ? r.callingUid : Process.INVALID_UID,
+                        r.shareIdentity ? r.callerPackage : null);
+                    // TODO: consider making registered receivers of unordered
+                    // broadcasts report results to detect ANRs
+                    if (assumeDelivered) {
+                        enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_DELIVERED,
+                                "assuming delivered");
+                    }
+                } else {
+                    notifyScheduleReceiver(app, r, (ResolveInfo) receiver);
+                    thread.scheduleReceiver(receiverIntent, ((ResolveInfo) receiver).activityInfo,
+                            null, r.resultCode, r.resultData, r.resultExtras, r.ordered,
+                            assumeDelivered, r.userId,
+                            app.mState.getReportedProcState(),
+                            r.shareIdentity ? r.callingUid : Process.INVALID_UID,
+                            r.shareIdentity ? r.callerPackage : null);
+                }
+            } catch (RemoteException e) {
+                final String msg = "Failed to schedule " + r + " to " + receiver
+                        + " via " + app + ": " + e;
+                logw(msg);
+                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
+                enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_FAILURE, "remote app");
+            }
+        } else {
+            enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_FAILURE,
+                    "missing IApplicationThread");
+        }
     }
 
     /**
@@ -1093,13 +962,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             }
             try {
                 final boolean assumeDelivered = true;
-                thread.scheduleReceiverList(mReceiverBatch.registeredReceiver(
+                thread.scheduleRegisteredReceiver(
                         r.resultTo, r.intent,
                         r.resultCode, r.resultData, r.resultExtras, false, r.initialSticky,
                         assumeDelivered, r.userId,
+                        app.mState.getReportedProcState(),
                         r.shareIdentity ? r.callingUid : Process.INVALID_UID,
-                        r.shareIdentity ? r.callerPackage : null,
-                        app.mState.getReportedProcState()));
+                        r.shareIdentity ? r.callerPackage : null);
             } catch (RemoteException e) {
                 final String msg = "Failed to schedule result of " + r + " via " + app + ": " + e;
                 logw(msg);
@@ -1187,46 +1056,26 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             return false;
         }
 
-        final BroadcastRecord r = queue.getActive();
-        final int index = queue.getActiveIndex();
-        return finishReceiverLocked(queue, deliveryState, reason, r, index);
-    }
-
-    private boolean finishReceiverLocked(@NonNull BroadcastProcessQueue queue,
-            @DeliveryState int deliveryState, @NonNull String reason,
-            BroadcastRecord r, int index) {
-        if (!queue.isActive()) {
-            logw("Ignoring finish; no active broadcast for " + queue);
-            return false;
-        }
-
         final int cookie = traceBegin("finishReceiver");
         final ProcessRecord app = queue.app;
+        final BroadcastRecord r = queue.getActive();
+        final int index = queue.getActiveIndex();
         final Object receiver = r.receivers.get(index);
 
         setDeliveryState(queue, app, r, index, receiver, deliveryState, reason);
-
-        final boolean early = r != queue.getActive() || index != queue.getActiveIndex();
 
         if (deliveryState == BroadcastRecord.DELIVERY_TIMEOUT) {
             r.anrCount++;
             if (app != null && !app.isDebugging()) {
                 mService.appNotResponding(queue.app, TimeoutRecord.forBroadcastReceiver(r.intent));
             }
-        } else if (!early) {
+        } else {
             mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_SOFT, queue);
             mLocalHandler.removeMessages(MSG_DELIVERY_TIMEOUT_HARD, queue);
         }
 
         // Given that a receiver just finished, check if the "waitingFor" conditions are met.
         checkAndRemoveWaitingFor();
-
-        if (early) {
-            // This is an early receiver that was transmitted as part of a group.  The delivery
-            // state has been updated but don't make any further decisions.
-            traceEnd(cookie);
-            return false;
-        }
 
         final boolean res = shouldContinueScheduling(queue);
         if (res) {
@@ -1771,6 +1620,18 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     private void notifyFinishReceiver(@Nullable BroadcastProcessQueue queue,
             @NonNull BroadcastRecord r, int index, @NonNull Object receiver) {
+        if (r.wasDeliveryAttempted(index)) {
+            logBroadcastDeliveryEventReported(queue, r, index, receiver);
+        }
+
+        final boolean recordFinished = (r.terminalCount == r.receivers.size());
+        if (recordFinished) {
+            notifyFinishBroadcast(r);
+        }
+    }
+
+    private void logBroadcastDeliveryEventReported(@Nullable BroadcastProcessQueue queue,
+            @NonNull BroadcastRecord r, int index, @NonNull Object receiver) {
         // Report statistics for each individual receiver
         final int uid = getReceiverUid(receiver);
         final int senderUid = (r.callingUid == -1) ? Process.SYSTEM_UID : r.callingUid;
@@ -1797,11 +1658,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     : SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL;
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, uid, senderUid, actionName,
                     receiverType, type, dispatchDelay, receiveDelay, finishDelay, packageState);
-        }
-
-        final boolean recordFinished = (r.terminalCount == r.receivers.size());
-        if (recordFinished) {
-            notifyFinishBroadcast(r);
         }
     }
 
@@ -1977,17 +1833,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         ipw.println(" Broadcasts with ignored delivery group policies:");
         ipw.increaseIndent();
         mService.dumpDeliveryGroupPolicyIgnoredActions(ipw);
-        ipw.decreaseIndent();
-        ipw.println();
-
-        ipw.println("Batch statistics:");
-        ipw.increaseIndent();
-        {
-            final var stats = mReceiverBatch.getStatistics();
-            ipw.println("Finished         " + Arrays.toString(stats.finish));
-            ipw.println("DispatchedLocal  " + Arrays.toString(stats.local));
-            ipw.println("DispatchedRemote " + Arrays.toString(stats.remote));
-        }
         ipw.decreaseIndent();
         ipw.println();
 

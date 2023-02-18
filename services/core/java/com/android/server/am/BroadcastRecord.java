@@ -120,8 +120,6 @@ final class BroadcastRecord extends Binder {
     @UptimeMillisLong       long finishTime;         // when broadcast finished
     final @UptimeMillisLong long[] scheduledTime;    // when each receiver was scheduled
     final @UptimeMillisLong long[] terminalTime;     // when each receiver was terminal
-    final                   int[] transmitGroup;     // the batch group for each receiver
-    final                   int[] transmitOrder;     // the position of the receiver in the group
     final boolean timeoutExempt;  // true if this broadcast is not subject to receiver timeouts
     int resultCode;         // current result code value.
     @Nullable String resultData;      // current result data value.
@@ -400,8 +398,6 @@ final class BroadcastRecord extends Binder {
         blockedUntilTerminalCount = calculateBlockedUntilTerminalCount(receivers, _serialized);
         scheduledTime = new long[delivery.length];
         terminalTime = new long[delivery.length];
-        transmitGroup = new int[delivery.length];
-        transmitOrder = new int[delivery.length];
         resultToApp = _resultToApp;
         resultTo = _resultTo;
         resultCode = _resultCode;
@@ -457,8 +453,6 @@ final class BroadcastRecord extends Binder {
         blockedUntilTerminalCount = from.blockedUntilTerminalCount;
         scheduledTime = from.scheduledTime;
         terminalTime = from.terminalTime;
-        transmitGroup = from.transmitGroup;
-        transmitOrder = from.transmitOrder;
         resultToApp = from.resultToApp;
         resultTo = from.resultTo;
         enqueueTime = from.enqueueTime;
@@ -636,6 +630,18 @@ final class BroadcastRecord extends Binder {
 
     @DeliveryState int getDeliveryState(int index) {
         return delivery[index];
+    }
+
+    boolean wasDeliveryAttempted(int index) {
+        final int deliveryState = getDeliveryState(index);
+        switch (deliveryState) {
+            case DELIVERY_DELIVERED:
+            case DELIVERY_TIMEOUT:
+            case DELIVERY_FAILURE:
+                return true;
+            default:
+                return false;
+        }
     }
 
     void copyEnqueueTimeFrom(@NonNull BroadcastRecord replacedBroadcast) {

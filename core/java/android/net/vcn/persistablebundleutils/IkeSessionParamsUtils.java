@@ -74,6 +74,9 @@ public final class IkeSessionParamsUtils {
     private static final String DPD_DELAY_SEC_KEY = "DPD_DELAY_SEC_KEY";
     private static final String NATT_KEEPALIVE_DELAY_SEC_KEY = "NATT_KEEPALIVE_DELAY_SEC_KEY";
     private static final String IKE_OPTIONS_KEY = "IKE_OPTIONS_KEY";
+    private static final String IP_VERSION_KEY = "IP_VERSION_KEY";
+    private static final String ENCAP_TYPE_KEY = "ENCAP_TYPE_KEY";
+    // TODO: add DSCP_KEY and IS_IKE_FRAGMENT_SUPPORTED_KEY.
 
     // TODO: b/243181760 Use the IKE API when they are exposed
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -156,6 +159,8 @@ public final class IkeSessionParamsUtils {
         result.putInt(SOFT_LIFETIME_SEC_KEY, params.getSoftLifetimeSeconds());
         result.putInt(DPD_DELAY_SEC_KEY, params.getDpdDelaySeconds());
         result.putInt(NATT_KEEPALIVE_DELAY_SEC_KEY, params.getNattKeepAliveDelaySeconds());
+        result.putInt(IP_VERSION_KEY, params.getIpVersion());
+        result.putInt(ENCAP_TYPE_KEY, params.getEncapType());
 
         // TODO: b/185941731 Make sure IkeSessionParamsUtils is automatically updated when a new
         // IKE_OPTION is defined in IKE module and added in the IkeSessionParams
@@ -207,6 +212,8 @@ public final class IkeSessionParamsUtils {
                 in.getInt(HARD_LIFETIME_SEC_KEY), in.getInt(SOFT_LIFETIME_SEC_KEY));
         builder.setDpdDelaySeconds(in.getInt(DPD_DELAY_SEC_KEY));
         builder.setNattKeepAliveDelaySeconds(in.getInt(NATT_KEEPALIVE_DELAY_SEC_KEY));
+        builder.setIpVersion(in.getInt(IP_VERSION_KEY));
+        builder.setEncapType(in.getInt(ENCAP_TYPE_KEY));
 
         final PersistableBundle configReqListBundle = in.getPersistableBundle(CONFIG_REQUESTS_KEY);
         Objects.requireNonNull(configReqListBundle, "Config request list was null");
