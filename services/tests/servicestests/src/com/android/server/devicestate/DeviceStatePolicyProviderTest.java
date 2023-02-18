@@ -66,7 +66,7 @@ public class DeviceStatePolicyProviderTest {
     @Test
     public void test_badPolicyProvider_returnsDefault() {
         assertThat(DeviceStatePolicy.Provider.fromResources(
-                resourcesWithProvider("com.android.devicestate.nonexistent.policy")),
+                        resourcesWithProvider("com.android.devicestate.nonexistent.policy")),
                 instanceOf(DeviceStatePolicy.DefaultProvider.class));
     }
 
