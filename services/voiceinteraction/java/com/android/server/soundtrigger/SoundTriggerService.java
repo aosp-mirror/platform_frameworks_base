@@ -1647,11 +1647,13 @@ public class SoundTriggerService extends SystemService {
 
         @Override
         public List<ModuleProperties> listModuleProperties(Identity originatorIdentity) {
-            Identity middlemanIdentity = new Identity();
-            middlemanIdentity.packageName = ActivityThread.currentOpPackageName();
+            Identity identity = new Identity();
+            identity.packageName = ActivityThread.currentOpPackageName();
             ArrayList<ModuleProperties> moduleList = new ArrayList<>();
-            SoundTrigger.listModulesAsMiddleman(moduleList, middlemanIdentity,
-                                            originatorIdentity);
+            // Overwrite with our own identity to fix permission issues.
+            // VIMService always does its own validation, so this is fine.
+            // TODO(b/269765333)
+            SoundTrigger.listModulesAsOriginator(moduleList, identity);
             return moduleList;
         }
 
