@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
+import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordDetector;
 import android.service.voice.HotwordRejectedResult;
 import android.service.voice.IDspHotwordDetectionCallback;
@@ -121,7 +122,9 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                                 HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION,
                                 mVoiceInteractionServiceUid);
-                        mSoftwareCallback.onError();
+                        mSoftwareCallback.onError(new HotwordDetectionServiceFailure(
+                                CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION,
+                                "Security exception occurs in #onDetected method."));
                         return;
                     }
                     saveProximityValueToBundle(result);
@@ -130,7 +133,9 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                         newResult = mHotwordAudioStreamCopier.startCopyingAudioStreams(result);
                     } catch (IOException e) {
                         // TODO: Write event
-                        mSoftwareCallback.onError();
+                        mSoftwareCallback.onError(new HotwordDetectionServiceFailure(
+                                CALLBACK_ONDETECTED_STREAM_COPY_ERROR,
+                                "Copy audio stream failure."));
                         return;
                     }
                     mSoftwareCallback.onDetected(newResult, null, null);

@@ -193,6 +193,8 @@ class SplitScreenTransitions {
             mAnimatingTransition = transition;
             mFinishTransaction = finishTransaction;
 
+            startTransaction.apply();
+
             final SplitDecorManager topDecor = mPendingDismiss.mDismissTop == STAGE_TYPE_MAIN
                     ? mainDecor : sideDecor;
             topDecor.fadeOutDecor(() -> {
@@ -200,8 +202,6 @@ class SplitScreenTransitions {
                     onFinish(null /* wct */, null /* wctCB */);
                 });
             });
-
-            startTransaction.apply();
         } else {
             playAnimation(transition, info, startTransaction, finishTransaction,
                     finishCallback, mainRoot, sideRoot, topRoot);

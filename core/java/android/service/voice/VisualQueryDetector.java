@@ -216,8 +216,7 @@ public class VisualQueryDetector {
         /**
          * Called when the detection fails due to an error.
          */
-        //TODO(b/265390855): Replace this callback with the new onError(DetectorError) design.
-        void onError();
+        void onFailure(@NonNull DetectorFailure detectorFailure);
     }
 
     private class VisualQueryDetectorInitializationDelegate extends AbstractDetector {
@@ -294,12 +293,11 @@ public class VisualQueryDetector {
 
         /** Called when the detection fails due to an error. */
         @Override
-        public void onError() {
-            Slog.v(TAG, "BinderCallback#onError");
+        public void onDetectionFailure(DetectorFailure detectorFailure) {
+            Slog.v(TAG, "BinderCallback#onDetectionFailure");
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onError()));
+                    () -> mCallback.onFailure(detectorFailure)));
         }
-
     }
 
 
@@ -372,6 +370,10 @@ public class VisualQueryDetector {
         public void onError(int status) throws RemoteException {
             Slog.v(TAG, "Initialization Error: (" + status + ")");
             // Do nothing
+        }
+
+        @Override
+        public void onDetectionFailure(DetectorFailure detectorFailure) throws RemoteException {
         }
     }
 }

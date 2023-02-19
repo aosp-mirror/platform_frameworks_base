@@ -5462,7 +5462,8 @@ public class DevicePolicyManager {
     public boolean isActivePasswordSufficient() {
         if (mService != null) {
             try {
-                return mService.isActivePasswordSufficient(myUserId(), mParentInstance);
+                return mService.isActivePasswordSufficient(
+                        mContext.getPackageName(), myUserId(), mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -5619,7 +5620,8 @@ public class DevicePolicyManager {
         }
 
         try {
-            return mService.getRequiredPasswordComplexity(mParentInstance);
+            return mService.getRequiredPasswordComplexity(
+                    mContext.getPackageName(), mParentInstance);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -5743,7 +5745,8 @@ public class DevicePolicyManager {
     public int getCurrentFailedPasswordAttempts(int userHandle) {
         if (mService != null) {
             try {
-                return mService.getCurrentFailedPasswordAttempts(userHandle, mParentInstance);
+                return mService.getCurrentFailedPasswordAttempts(
+                        mContext.getPackageName(), userHandle, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -16643,7 +16646,7 @@ public class DevicePolicyManager {
             return null;
         }
         try {
-            return mService.getWifiSsidPolicy();
+            return mService.getWifiSsidPolicy(mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -751,6 +751,22 @@ class BroadcastProcessQueue {
     }
 
     /**
+     * Quickly determine if this queue has ordered broadcasts waiting to be delivered,
+     * which indicates we should request an OOM adjust.
+     */
+    public boolean isPendingOrdered() {
+        return mCountOrdered > 0;
+    }
+
+    /**
+     * Quickly determine if this queue has broadcasts waiting to be delivered for which result is
+     * expected from the senders, which indicates we should request an OOM adjust.
+     */
+    public boolean isPendingResultTo() {
+        return mCountResultTo > 0;
+    }
+
+    /**
      * Report whether this queue is currently handling an urgent broadcast.
      */
     public boolean isPendingUrgent() {

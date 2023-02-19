@@ -96,15 +96,15 @@ interface IDevicePolicyManager {
 
     long getPasswordExpiration(in ComponentName who, int userHandle, boolean parent);
 
-    boolean isActivePasswordSufficient(int userHandle, boolean parent);
+    boolean isActivePasswordSufficient(String callerPackageName, int userHandle, boolean parent);
     boolean isActivePasswordSufficientForDeviceRequirement();
     boolean isPasswordSufficientAfterProfileUnification(int userHandle, int profileUser);
     int getPasswordComplexity(boolean parent);
     void setRequiredPasswordComplexity(String callerPackageName, int passwordComplexity, boolean parent);
-    int getRequiredPasswordComplexity(boolean parent);
+    int getRequiredPasswordComplexity(String callerPackageName, boolean parent);
     int getAggregatedPasswordComplexityForUser(int userId, boolean deviceWideOnly);
     boolean isUsingUnifiedPassword(in ComponentName admin);
-    int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
+    int getCurrentFailedPasswordAttempts(String callerPackageName, int userHandle, boolean parent);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);
 
     void setMaximumFailedPasswordsForWipe(
@@ -572,7 +572,7 @@ interface IDevicePolicyManager {
     int getMinimumRequiredWifiSecurityLevel();
 
     void setWifiSsidPolicy(String callerPackageName, in WifiSsidPolicy policy);
-    WifiSsidPolicy getWifiSsidPolicy();
+    WifiSsidPolicy getWifiSsidPolicy(String callerPackageName);
 
     List<UserHandle> listForegroundAffiliatedUsers();
     void setDrawables(in List<DevicePolicyDrawableResource> drawables);

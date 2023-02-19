@@ -16,6 +16,9 @@
 
 package com.android.server.voiceinteraction;
 
+import static android.service.voice.VisualQueryDetectionServiceFailure.ERROR_CODE_ILLEGAL_ATTENTION_STATE;
+import static android.service.voice.VisualQueryDetectionServiceFailure.ERROR_CODE_ILLEGAL_STREAMING_STATE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -30,6 +33,7 @@ import android.service.voice.IDetectorSessionVisualQueryDetectionCallback;
 import android.service.voice.IMicrophoneHotwordDetectionVoiceInteractionCallback;
 import android.service.voice.ISandboxedDetectionService;
 import android.service.voice.IVisualQueryDetectionVoiceInteractionCallback;
+import android.service.voice.VisualQueryDetectionServiceFailure;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -102,6 +106,13 @@ final class VisualQueryDetectorSession extends DetectorSession {
                     mAttentionListener.onAttentionGained();
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error delivering attention gained event.", e);
+                    try {
+                        callback.onDetectionFailure(new VisualQueryDetectionServiceFailure(
+                                ERROR_CODE_ILLEGAL_ATTENTION_STATE,
+                                "Attention listener failed to switch to GAINED state."));
+                    } catch (RemoteException ex) {
+                        Slog.v(TAG, "Fail to call onDetectionFailure");
+                    }
                     return;
                 }
             }
@@ -117,6 +128,13 @@ final class VisualQueryDetectorSession extends DetectorSession {
                     mAttentionListener.onAttentionLost();
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error delivering attention lost event.", e);
+                    try {
+                        callback.onDetectionFailure(new VisualQueryDetectionServiceFailure(
+                                ERROR_CODE_ILLEGAL_ATTENTION_STATE,
+                                "Attention listener failed to switch to LOST state."));
+                    } catch (RemoteException ex) {
+                        Slog.v(TAG, "Fail to call onDetectionFailure");
+                    }
                     return;
                 }
             }
@@ -127,6 +145,9 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 Slog.v(TAG, "BinderCallback#onQueryDetected");
                 if (!mEgressingData) {
                     Slog.v(TAG, "Query should not be egressed within the unattention state.");
+                    callback.onDetectionFailure(new VisualQueryDetectionServiceFailure(
+                            ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                            "Cannot stream queries without attention signals."));
                     return;
                 }
                 mQueryStreaming = true;
@@ -140,6 +161,9 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 if (!mQueryStreaming) {
                     Slog.v(TAG, "Query streaming state signal FINISHED is block since there is"
                             + " no active query being streamed.");
+                    callback.onDetectionFailure(new VisualQueryDetectionServiceFailure(
+                            ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                            "Cannot send FINISHED signal with no query streamed."));
                     return;
                 }
                 callback.onQueryFinished();
@@ -152,6 +176,9 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 if (!mQueryStreaming) {
                     Slog.v(TAG, "Query streaming state signal REJECTED is block since there is"
                             + " no active query being streamed.");
+                    callback.onDetectionFailure(new VisualQueryDetectionServiceFailure(
+                            ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                            "Cannot send REJECTED signal with no query streamed."));
                     return;
                 }
                 callback.onQueryRejected();
