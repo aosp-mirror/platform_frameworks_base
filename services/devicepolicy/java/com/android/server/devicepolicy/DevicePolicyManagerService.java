@@ -5067,7 +5067,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean isActivePasswordSufficient(int userHandle, boolean parent) {
+    public boolean isActivePasswordSufficient(
+            String callerPackageName, int userHandle, boolean parent) {
         if (!mHasFeature) {
             return true;
         }
@@ -5081,7 +5082,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (isPermissionCheckFlagEnabled()) {
                 int affectedUser = parent ? getProfileParentId(userHandle) : userHandle;
                 enforcePermission(MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
-                        /*callerPackageName=*/ null, affectedUser);
+                        callerPackageName, affectedUser);
             } else {
                 // This API can only be called by an active device admin,
                 // so try to retrieve it to check that the caller is one.
@@ -5363,7 +5364,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public int getRequiredPasswordComplexity(boolean calledOnParent) {
+    public int getRequiredPasswordComplexity(String callerPackageName, boolean calledOnParent) {
         if (!mHasFeature) {
             return PASSWORD_COMPLEXITY_NONE;
         }
@@ -5374,7 +5375,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             int affectedUser = calledOnParent ? getProfileParentId(caller.getUserId())
                     : caller.getUserId();
             enforcePermission(MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
-                    /*callerPackageName=*/ null, affectedUser);
+                    callerPackageName, affectedUser);
         } else {
             Preconditions.checkCallAuthorization(
                     isDefaultDeviceOwner(caller) || isProfileOwner(caller));
@@ -5405,7 +5406,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
 
     @Override
-    public int getCurrentFailedPasswordAttempts(int userHandle, boolean parent) {
+    public int getCurrentFailedPasswordAttempts(
+            String callerPackageName, int userHandle, boolean parent) {
         if (!mLockPatternUtils.hasSecureLockScreen()) {
             return 0;
         }
@@ -5421,7 +5423,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (isPermissionCheckFlagEnabled()) {
                         int affectedUser = parent ? getProfileParentId(userHandle) : userHandle;
                         enforcePermission(MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
-                                /*callerPackageName=*/ null, affectedUser);
+                                callerPackageName, affectedUser);
                     } else {
                         getActiveAdminForCallerLocked(
                                 null, DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, parent);
@@ -14274,7 +14276,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
                 mDevicePolicyEngine.setLocalPolicy(
                         PolicyDefinition.LOCK_TASK,
-                        EnforcingAdmin.createEnterpriseEnforcingAdmin(who, caller.getUserId()),
+                        enforcingAdmin,
                         policy,
                         caller.getUserId());
             }
@@ -14625,7 +14627,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         CallerIdentity caller = getCallerIdentity(who);
         if (isPermissionCheckFlagEnabled()) {
-            enforcePermission(MANAGE_DEVICE_POLICY_WIFI, /*callerPackageName=*/ null,
+            enforcePermission(MANAGE_DEVICE_POLICY_WIFI, who.getPackageName(),
                     UserHandle.USER_ALL);
         } else {
             Preconditions.checkNotNull(who, "ComponentName is null");
@@ -21511,10 +21513,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public WifiSsidPolicy getWifiSsidPolicy() {
+    public WifiSsidPolicy getWifiSsidPolicy(String callerPackageName) {
         final CallerIdentity caller = getCallerIdentity();
         if (isPermissionCheckFlagEnabled()) {
-            enforcePermission(MANAGE_DEVICE_POLICY_WIFI, /*callerPackageName=*/ null,
+            enforcePermission(MANAGE_DEVICE_POLICY_WIFI, callerPackageName,
                     caller.getUserId());
         } else {
             Preconditions.checkCallAuthorization(
