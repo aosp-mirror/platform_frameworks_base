@@ -7604,6 +7604,13 @@
     <permission android:name="android.permission.LOG_PROCESS_ACTIVITIES"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @hide Allows an application to get type of any provider uri.
+         <p>Not for use by third-party applications.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.GET_ANY_PROVIDER_TYPE"
+                android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
