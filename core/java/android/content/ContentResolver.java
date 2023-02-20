@@ -920,8 +920,13 @@ public abstract class ContentResolver implements ContentInterface {
             return null;
         }
 
-        // XXX would like to have an acquireExistingUnstableProvider for this.
-        IContentProvider provider = acquireExistingProvider(url);
+        IContentProvider provider = null;
+        try {
+            provider = acquireProvider(url);
+        } catch (Exception e) {
+            // if unable to acquire the provider, then it should try to get the type
+            // using getTypeAnonymous via ActivityManagerService
+        }
         if (provider != null) {
             try {
                 final StringResultListener resultListener = new StringResultListener();
@@ -949,7 +954,7 @@ public abstract class ContentResolver implements ContentInterface {
 
         try {
             final StringResultListener resultListener = new StringResultListener();
-            ActivityManager.getService().getProviderMimeTypeAsync(
+            ActivityManager.getService().getMimeTypeFilterAsync(
                     ContentProvider.getUriWithoutUserId(url),
                     resolveUserId(url),
                     new RemoteCallback(resultListener));
