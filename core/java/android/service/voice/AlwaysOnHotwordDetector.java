@@ -732,7 +732,13 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
          */
         public abstract void onDetected(@NonNull EventPayload eventPayload);
 
-        /** {@inheritDoc} */
+        /**
+         * {@inheritDoc}
+         *
+         * @deprecated Use {@link HotwordDetector.Callback#onError(DetectorFailure)} instead.
+         */
+        @Deprecated
+        @Override
         public abstract void onError();
 
         /** {@inheritDoc} */
@@ -1658,9 +1664,18 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         @Override
         public void onError(int status) {
             Slog.i(TAG, "onError: " + status);
-            mHandler.sendEmptyMessage(MSG_DETECTION_ERROR);
+            // This is a workaround before the sound trigger uses the onDetectionFailure method.
+            Message.obtain(mHandler, MSG_DETECTION_ERROR,
+                    new SoundTriggerFailure(status, "Sound trigger error")).sendToTarget();
         }
 
+        @Override
+        public void onDetectionFailure(DetectorFailure detectorFailure) {
+            Slog.v(TAG, "onDetectionFailure detectorFailure: " + detectorFailure);
+            Message.obtain(mHandler, MSG_DETECTION_ERROR,
+                    detectorFailure != null ? detectorFailure
+                            : new UnknownFailure("Error data is null")).sendToTarget();
+        }
         @Override
         public void onRecognitionPaused() {
             Slog.i(TAG, "onRecognitionPaused");
@@ -1716,7 +1731,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                         mExternalCallback.onDetected((EventPayload) message.obj);
                         break;
                     case MSG_DETECTION_ERROR:
-                        mExternalCallback.onError();
+                        mExternalCallback.onFailure((DetectorFailure) msg.obj);
                         break;
                     case MSG_DETECTION_PAUSE:
                         mExternalCallback.onRecognitionPaused();

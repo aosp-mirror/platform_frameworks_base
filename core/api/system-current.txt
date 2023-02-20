@@ -13040,6 +13040,19 @@ package android.service.voice {
     method public int getStart();
   }
 
+  public abstract class DetectorFailure implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getErrorMessage();
+    method public abstract int getSuggestedAction();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.DetectorFailure> CREATOR;
+    field public static final int SUGGESTED_ACTION_DISABLE_DETECTION = 2; // 0x2
+    field public static final int SUGGESTED_ACTION_NONE = 1; // 0x1
+    field public static final int SUGGESTED_ACTION_RECREATE_DETECTOR = 3; // 0x3
+    field public static final int SUGGESTED_ACTION_RESTART_RECOGNITION = 4; // 0x4
+    field public static final int SUGGESTED_ACTION_UNKNOWN = 0; // 0x0
+  }
+
   public final class HotwordAudioStream implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.media.AudioFormat getAudioFormat();
@@ -13130,6 +13143,20 @@ package android.service.voice {
     method public void onRejected(@NonNull android.service.voice.HotwordRejectedResult);
   }
 
+  public final class HotwordDetectionServiceFailure extends android.service.voice.DetectorFailure {
+    method public int getErrorCode();
+    method public int getSuggestedAction();
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordDetectionServiceFailure> CREATOR;
+    field public static final int ERROR_CODE_BINDING_DIED = 2; // 0x2
+    field public static final int ERROR_CODE_BIND_FAILURE = 1; // 0x1
+    field public static final int ERROR_CODE_COPY_AUDIO_DATA_FAILURE = 3; // 0x3
+    field public static final int ERROR_CODE_DETECT_TIMEOUT = 4; // 0x4
+    field public static final int ERROR_CODE_ON_DETECTED_SECURITY_EXCEPTION = 5; // 0x5
+    field public static final int ERROR_CODE_ON_DETECTED_STREAM_COPY_FAILURE = 6; // 0x6
+    field public static final int ERROR_CODE_REMOTE_EXCEPTION = 7; // 0x7
+    field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
+  }
+
   public interface HotwordDetector {
     method public default void destroy();
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean startRecognition() throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
@@ -13140,7 +13167,8 @@ package android.service.voice {
 
   public static interface HotwordDetector.Callback {
     method public void onDetected(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload);
-    method public void onError();
+    method @Deprecated public void onError();
+    method public default void onFailure(@NonNull android.service.voice.DetectorFailure);
     method public void onHotwordDetectionServiceInitialized(int);
     method public void onHotwordDetectionServiceRestarted();
     method public void onRecognitionPaused();
@@ -13175,6 +13203,21 @@ package android.service.voice {
     field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
   }
 
+  public final class SoundTriggerFailure extends android.service.voice.DetectorFailure {
+    method public int getErrorCode();
+    method public int getSuggestedAction();
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.SoundTriggerFailure> CREATOR;
+    field public static final int ERROR_CODE_MODULE_DIED = 1; // 0x1
+    field public static final int ERROR_CODE_RECOGNITION_RESUME_FAILED = 2; // 0x2
+    field public static final int ERROR_CODE_UNEXPECTED_PREEMPTION = 3; // 0x3
+    field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
+  }
+
+  public final class UnknownFailure extends android.service.voice.DetectorFailure {
+    method public int getSuggestedAction();
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.UnknownFailure> CREATOR;
+  }
+
   public abstract class VisualQueryDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionServiceBase {
     ctor public VisualQueryDetectionService();
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
@@ -13193,6 +13236,18 @@ package android.service.voice {
     method public void onQueryRejected() throws java.lang.IllegalStateException;
   }
 
+  public final class VisualQueryDetectionServiceFailure extends android.service.voice.DetectorFailure {
+    method public int getErrorCode();
+    method public int getSuggestedAction();
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.VisualQueryDetectionServiceFailure> CREATOR;
+    field public static final int ERROR_CODE_BINDING_DIED = 2; // 0x2
+    field public static final int ERROR_CODE_BIND_FAILURE = 1; // 0x1
+    field public static final int ERROR_CODE_ILLEGAL_ATTENTION_STATE = 3; // 0x3
+    field public static final int ERROR_CODE_ILLEGAL_STREAMING_STATE = 4; // 0x4
+    field public static final int ERROR_CODE_REMOTE_EXCEPTION = 5; // 0x5
+    field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
+  }
+
   public class VisualQueryDetector {
     method public void destroy();
     method @RequiresPermission(allOf={android.Manifest.permission.CAMERA, android.Manifest.permission.RECORD_AUDIO}) public boolean startRecognition() throws android.service.voice.HotwordDetector.IllegalDetectorStateException;
@@ -13201,7 +13256,7 @@ package android.service.voice {
   }
 
   public static interface VisualQueryDetector.Callback {
-    method public void onError();
+    method public void onFailure(@NonNull android.service.voice.DetectorFailure);
     method public void onQueryDetected(@NonNull String);
     method public void onQueryFinished();
     method public void onQueryRejected();
