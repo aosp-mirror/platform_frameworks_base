@@ -52,14 +52,13 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.media.controls.ui.MediaHost;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
@@ -86,7 +85,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Mock private MediaHost mQSMediaHost;
     @Mock private MediaHost mQQSMediaHost;
     @Mock private KeyguardBypassController mBypassController;
-    @Mock private FalsingManager mFalsingManager;
     @Mock private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
     @Mock private TileServiceRequestController mTileServiceRequestController;
     @Mock private QSCustomizerController mQsCustomizerController;
@@ -503,11 +501,9 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         setUpMedia();
         setUpOther();
 
-        FakeFeatureFlags featureFlags = new FakeFeatureFlags();
         return new QSFragment(
                 new RemoteInputQuickSettingsDisabler(
                         context, commandQueue, mock(ConfigurationController.class)),
-                mock(QSTileHost.class),
                 mStatusBarStateController,
                 commandQueue,
                 mQSMediaHost,
@@ -515,9 +511,8 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mBypassController,
                 mQsComponentFactory,
                 mock(QSFragmentDisableFlagsLogger.class),
-                mFalsingManager,
                 mock(DumpManager.class),
-                featureFlags,
+                mock(QSLogger.class),
                 mock(FooterActionsController.class),
                 mFooterActionsViewModelFactory);
     }
