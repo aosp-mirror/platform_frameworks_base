@@ -1607,6 +1607,13 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_REQUEST_UPDATE_OWNERSHIP = 1 << 25;
 
+    /**
+     * Flag parameter for {@link PackageInstaller.SessionParams} to indicate that this
+     * session is from a managed user or profile.
+     * @hide
+     */
+    public static final int INSTALL_FROM_MANAGED_USER_OR_PROFILE = 1 << 26;
+
     /** @hide */
     @IntDef(flag = true, value = {
             DONT_KILL_APP,
