@@ -89,6 +89,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
@@ -8689,7 +8690,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        // focus-transfer can re-order windows and thus potentially causes visible changes:
+        final Transition transition = mAtmService.getTransitionController()
+                .requestTransitionIfNeeded(TRANSIT_TO_FRONT, task);
         mAtmService.setFocusedTask(task.mTaskId, touchedActivity);
+        if (transition != null) {
+            transition.setReady(task, true /* ready */);
+        }
     }
 
     /**
