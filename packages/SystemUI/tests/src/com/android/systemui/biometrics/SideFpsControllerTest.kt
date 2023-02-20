@@ -267,6 +267,17 @@ class SideFpsControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testShowOverlayReasonWhenDisplayChanged() = testWithDisplay {
+        sideFpsController.show(SideFpsUiRequestSource.AUTO_SHOW, REASON_AUTH_KEYGUARD)
+        executor.runAllReady()
+        sideFpsController.orientationListener.onDisplayChanged(1 /* displayId */)
+        executor.runAllReady()
+
+        assertThat(sideFpsController.orientationReasonListener.reason)
+            .isEqualTo(REASON_AUTH_KEYGUARD)
+    }
+
+    @Test
     fun testShowsAndHides() = testWithDisplay {
         overlayController.show(SENSOR_ID, REASON_UNKNOWN)
         executor.runAllReady()

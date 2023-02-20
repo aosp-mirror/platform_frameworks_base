@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -350,7 +351,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
 
-        verify(mSideFpsController).show(SideFpsUiRequestSource.PRIMARY_BOUNCER);
+        verify(mSideFpsController).show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
         verify(mSideFpsController, never()).hide(any());
     }
 
@@ -363,7 +365,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
 
         verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any());
+        verify(mSideFpsController, never()).show(any(), anyInt());
     }
 
     @Test
@@ -375,7 +377,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
 
         verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any());
+        verify(mSideFpsController, never()).show(any(), anyInt());
     }
 
     @Test
@@ -387,7 +389,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
 
         verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any());
+        verify(mSideFpsController, never()).show(any(), anyInt());
     }
 
     @Test
@@ -395,13 +397,14 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         setupGetSecurityView();
         setupConditionsToEnableSideFpsHint();
         mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-        verify(mSideFpsController, atLeastOnce()).show(SideFpsUiRequestSource.PRIMARY_BOUNCER);
+        verify(mSideFpsController, atLeastOnce()).show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
         reset(mSideFpsController);
 
         mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.INVISIBLE);
 
         verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any());
+        verify(mSideFpsController, never()).show(any(), anyInt());
     }
 
     @Test
@@ -416,13 +419,14 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         setupGetSecurityView();
         setupConditionsToEnableSideFpsHint();
         mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-        verify(mSideFpsController, atLeastOnce()).show(SideFpsUiRequestSource.PRIMARY_BOUNCER);
+        verify(mSideFpsController, atLeastOnce()).show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
         reset(mSideFpsController);
 
         mKeyguardSecurityContainerController.onStartingToHide();
 
         verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any());
+        verify(mSideFpsController, never()).show(any(), anyInt());
     }
 
     @Test
@@ -430,13 +434,14 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         setupGetSecurityView();
         setupConditionsToEnableSideFpsHint();
         mKeyguardSecurityContainerController.onBouncerVisibilityChanged(View.VISIBLE);
-        verify(mSideFpsController, atLeastOnce()).show(SideFpsUiRequestSource.PRIMARY_BOUNCER);
+        verify(mSideFpsController, atLeastOnce()).show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
         reset(mSideFpsController);
 
         mKeyguardSecurityContainerController.onPause();
 
         verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any());
+        verify(mSideFpsController, never()).show(any(), anyInt());
     }
 
     @Test
@@ -448,7 +453,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         mKeyguardSecurityContainerController.onResume(0);
 
-        verify(mSideFpsController).show(SideFpsUiRequestSource.PRIMARY_BOUNCER);
+        verify(mSideFpsController).show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
         verify(mSideFpsController, never()).hide(any());
     }
 
@@ -463,7 +469,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         mKeyguardSecurityContainerController.onResume(0);
 
         verify(mSideFpsController).hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
-        verify(mSideFpsController, never()).show(any());
+        verify(mSideFpsController, never()).show(any(), anyInt());
     }
 
     @Test
