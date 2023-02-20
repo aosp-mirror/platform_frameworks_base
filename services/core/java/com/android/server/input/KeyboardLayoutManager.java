@@ -45,14 +45,17 @@ import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Toast;
 
@@ -75,6 +78,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -102,8 +106,10 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     private final PersistentDataStore mDataStore;
     private final Handler mHandler;
 
-    private final List<InputDevice> mKeyboardsWithMissingLayouts = new ArrayList<>();
-    private boolean mKeyboardLayoutNotificationShown = false;
+    // Connected keyboards with associated keyboard layouts (either auto-detected or manually
+    // selected layout). If the mapped value is null/empty, it means that no layout has been
+    // configured for the keyboard and user might need to manually configure it from the Settings.
+    private final SparseArray<Set<String>> mConfiguredKeyboards = new SparseArray<>();
     private Toast mSwitchedKeyboardLayoutToast;
 
     // This cache stores "best-matched" layouts so that we don't need to run the matching
@@ -158,10 +164,8 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
 
     @Override
     public void onInputDeviceRemoved(int deviceId) {
-        if (!useNewSettingsUi()) {
-            mKeyboardsWithMissingLayouts.removeIf(device -> device.getId() == deviceId);
-            maybeUpdateNotification();
-        }
+        mConfiguredKeyboards.remove(deviceId);
+        maybeUpdateNotification();
     }
 
     @Override
@@ -178,13 +182,53 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                     if (layout != null) {
                         setCurrentKeyboardLayoutForInputDevice(inputDevice.getIdentifier(), layout);
                     } else {
-                        mKeyboardsWithMissingLayouts.add(inputDevice);
+                        mConfiguredKeyboards.put(inputDevice.getId(), new HashSet<>());
                     }
                 }
-                maybeUpdateNotification();
+            }
+        } else {
+            final InputDeviceIdentifier identifier = inputDevice.getIdentifier();
+            final String key = getLayoutDescriptor(identifier);
+            Set<String> selectedLayouts = new HashSet<>();
+            boolean needToShowMissingLayoutNotification = false;
+            for (ImeInfo imeInfo : getImeInfoListForLayoutMapping()) {
+                // Check if the layout has been previously configured
+                String layout = getKeyboardLayoutForInputDeviceInternal(identifier,
+                        new ImeInfo(imeInfo.mUserId, imeInfo.mImeSubtypeHandle,
+                                imeInfo.mImeSubtype));
+                if (layout == null) {
+                    needToShowMissingLayoutNotification = true;
+                    continue;
+                }
+                selectedLayouts.add(layout);
+            }
+
+            if (needToShowMissingLayoutNotification) {
+                // If even one layout not configured properly we will show configuration
+                // notification allowing user to set the keyboard layout.
+                selectedLayouts.clear();
+            }
+
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "Layouts selected for input device: " + identifier + " -> selectedLayouts: "
+                                + selectedLayouts);
+            }
+            mConfiguredKeyboards.set(inputDevice.getId(), selectedLayouts);
+
+            synchronized (mDataStore) {
+                try {
+                    if (!mDataStore.setSelectedKeyboardLayouts(key, selectedLayouts)) {
+                        // No need to show the notification only if layout selection didn't change
+                        // from the previous configuration
+                        return;
+                    }
+                } finally {
+                    mDataStore.saveIfNeeded();
+                }
             }
         }
-        // TODO(b/259530132): Show notification for new Settings UI
+        maybeUpdateNotification();
     }
 
     private String getDefaultKeyboardLayout(final InputDevice inputDevice) {
@@ -991,66 +1035,140 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     }
 
     private void maybeUpdateNotification() {
+        if (mConfiguredKeyboards.size() == 0) {
+            hideKeyboardLayoutNotification();
+            return;
+        }
+        for (int i = 0; i < mConfiguredKeyboards.size(); i++) {
+            // If we have a keyboard with no selected layouts, we should always show missing
+            // layout notification even if there are other keyboards that are configured properly.
+            if (mConfiguredKeyboards.valueAt(i).isEmpty()) {
+                showMissingKeyboardLayoutNotification();
+                return;
+            }
+        }
+        showConfiguredKeyboardLayoutNotification();
+    }
+
+    // Must be called on handler.
+    private void showMissingKeyboardLayoutNotification() {
+        final Resources r = mContext.getResources();
+        final String missingKeyboardLayoutNotificationContent = r.getString(
+                R.string.select_keyboard_layout_notification_message);
+
+        if (mConfiguredKeyboards.size() == 1) {
+            final InputDevice device = getInputDevice(mConfiguredKeyboards.keyAt(0));
+            if (device == null) {
+                return;
+            }
+            showKeyboardLayoutNotification(
+                    r.getString(
+                            R.string.select_keyboard_layout_notification_title,
+                            device.getName()),
+                    missingKeyboardLayoutNotificationContent,
+                    device);
+        } else {
+            showKeyboardLayoutNotification(
+                    r.getString(R.string.select_multiple_keyboards_layout_notification_title),
+                    missingKeyboardLayoutNotificationContent,
+                    null);
+        }
+    }
+
+    private void showKeyboardLayoutNotification(@NonNull String intentTitle,
+            @NonNull String intentContent, @Nullable InputDevice targetDevice) {
+        final NotificationManager notificationManager = mContext.getSystemService(
+                NotificationManager.class);
+        if (notificationManager == null) {
+            return;
+        }
+
+        final Intent intent = new Intent(Settings.ACTION_HARD_KEYBOARD_SETTINGS);
+
+        if (targetDevice != null) {
+            intent.putExtra(Settings.EXTRA_INPUT_DEVICE_IDENTIFIER, targetDevice.getIdentifier());
+        }
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        final PendingIntent keyboardLayoutIntent = PendingIntent.getActivityAsUser(mContext, 0,
+                intent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
+
+        Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.PHYSICAL_KEYBOARD)
+                        .setContentTitle(intentTitle)
+                        .setContentText(intentContent)
+                        .setContentIntent(keyboardLayoutIntent)
+                        .setSmallIcon(R.drawable.ic_settings_language)
+                        .setColor(mContext.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
+                        .setAutoCancel(true)
+                        .build();
+        notificationManager.notifyAsUser(null,
+                SystemMessageProto.SystemMessage.NOTE_SELECT_KEYBOARD_LAYOUT,
+                notification, UserHandle.ALL);
+    }
+
+    // Must be called on handler.
+    private void hideKeyboardLayoutNotification() {
         NotificationManager notificationManager = mContext.getSystemService(
                 NotificationManager.class);
         if (notificationManager == null) {
             return;
         }
-        if (!mKeyboardsWithMissingLayouts.isEmpty()) {
-            if (mKeyboardsWithMissingLayouts.size() > 1) {
-                // We have more than one keyboard missing a layout, so drop the
-                // user at the generic input methods page, so they can pick which
-                // one to set.
-                showMissingKeyboardLayoutNotification(notificationManager, null);
-            } else {
-                showMissingKeyboardLayoutNotification(notificationManager,
-                        mKeyboardsWithMissingLayouts.get(0));
-            }
-        } else if (mKeyboardLayoutNotificationShown) {
-            hideMissingKeyboardLayoutNotification(notificationManager);
-        }
+
+        notificationManager.cancelAsUser(null,
+                SystemMessageProto.SystemMessage.NOTE_SELECT_KEYBOARD_LAYOUT,
+                UserHandle.ALL);
     }
 
-    // Must be called on handler.
-    private void showMissingKeyboardLayoutNotification(NotificationManager notificationManager,
-            InputDevice device) {
-        if (!mKeyboardLayoutNotificationShown) {
-            final Intent intent = new Intent(Settings.ACTION_HARD_KEYBOARD_SETTINGS);
-            if (device != null) {
-                intent.putExtra(Settings.EXTRA_INPUT_DEVICE_IDENTIFIER, device.getIdentifier());
-            }
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            final PendingIntent keyboardLayoutIntent = PendingIntent.getActivityAsUser(mContext, 0,
-                    intent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
+    private void showConfiguredKeyboardLayoutNotification() {
+        final Resources r = mContext.getResources();
 
-            Resources r = mContext.getResources();
-            Notification notification =
-                    new Notification.Builder(mContext, SystemNotificationChannels.PHYSICAL_KEYBOARD)
-                            .setContentTitle(r.getString(
-                                    R.string.select_keyboard_layout_notification_title))
-                            .setContentText(r.getString(
-                                    R.string.select_keyboard_layout_notification_message))
-                            .setContentIntent(keyboardLayoutIntent)
-                            .setSmallIcon(R.drawable.ic_settings_language)
-                            .setColor(mContext.getColor(
-                                    com.android.internal.R.color.system_notification_accent_color))
-                            .build();
-            notificationManager.notifyAsUser(null,
-                    SystemMessageProto.SystemMessage.NOTE_SELECT_KEYBOARD_LAYOUT,
-                    notification, UserHandle.ALL);
-            mKeyboardLayoutNotificationShown = true;
+        if (mConfiguredKeyboards.size() != 1) {
+            showKeyboardLayoutNotification(
+                    r.getString(R.string.keyboard_layout_notification_multiple_selected_title),
+                    r.getString(R.string.keyboard_layout_notification_multiple_selected_message),
+                    null);
+            return;
         }
+
+        final InputDevice inputDevice = getInputDevice(mConfiguredKeyboards.keyAt(0));
+        final Set<String> selectedLayouts = mConfiguredKeyboards.valueAt(0);
+        if (inputDevice == null || selectedLayouts == null || selectedLayouts.isEmpty()) {
+            return;
+        }
+
+        showKeyboardLayoutNotification(
+                r.getString(
+                        R.string.keyboard_layout_notification_selected_title,
+                        inputDevice.getName()),
+                createConfiguredNotificationText(mContext, selectedLayouts),
+                inputDevice);
     }
 
-    // Must be called on handler.
-    private void hideMissingKeyboardLayoutNotification(NotificationManager notificationManager) {
-        if (mKeyboardLayoutNotificationShown) {
-            mKeyboardLayoutNotificationShown = false;
-            notificationManager.cancelAsUser(null,
-                    SystemMessageProto.SystemMessage.NOTE_SELECT_KEYBOARD_LAYOUT,
-                    UserHandle.ALL);
+    private String createConfiguredNotificationText(@NonNull Context context,
+            @NonNull Set<String> selectedLayouts) {
+        final Resources r = context.getResources();
+        List<String> layoutNames = new ArrayList<>();
+        selectedLayouts.forEach(
+                (layoutDesc) -> layoutNames.add(getKeyboardLayout(layoutDesc).getLabel()));
+        Collections.sort(layoutNames);
+        switch (layoutNames.size()) {
+            case 1:
+                return r.getString(R.string.keyboard_layout_notification_one_selected_message,
+                        layoutNames.get(0));
+            case 2:
+                return r.getString(R.string.keyboard_layout_notification_two_selected_message,
+                        layoutNames.get(0), layoutNames.get(1));
+            case 3:
+                return r.getString(R.string.keyboard_layout_notification_three_selected_message,
+                        layoutNames.get(0), layoutNames.get(1), layoutNames.get(2));
+            default:
+                return r.getString(
+                        R.string.keyboard_layout_notification_more_than_three_selected_message,
+                        layoutNames.get(0), layoutNames.get(1), layoutNames.get(2));
         }
     }
 
@@ -1092,6 +1210,31 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         InputManager inputManager = mContext.getSystemService(InputManager.class);
         return inputManager != null ? inputManager.getInputDeviceByDescriptor(
                 identifier.getDescriptor()) : null;
+    }
+
+    private List<ImeInfo> getImeInfoListForLayoutMapping() {
+        List<ImeInfo> imeInfoList = new ArrayList<>();
+        UserManager userManager = Objects.requireNonNull(
+                mContext.getSystemService(UserManager.class));
+        InputMethodManager inputMethodManager = Objects.requireNonNull(
+                mContext.getSystemService(InputMethodManager.class));
+        for (UserHandle userHandle : userManager.getUserHandles(true /* excludeDying */)) {
+            int userId = userHandle.getIdentifier();
+            for (InputMethodInfo imeInfo : inputMethodManager.getEnabledInputMethodListAsUser(
+                    userId)) {
+                for (InputMethodSubtype imeSubtype :
+                        inputMethodManager.getEnabledInputMethodSubtypeList(
+                                imeInfo, true /* allowsImplicitlyEnabledSubtypes */)) {
+                    if (!imeSubtype.isSuitableForPhysicalKeyboardLayoutMapping()) {
+                        continue;
+                    }
+                    imeInfoList.add(
+                            new ImeInfo(userId, InputMethodSubtypeHandle.of(imeInfo, imeSubtype),
+                                    imeSubtype));
+                }
+            }
+        }
+        return imeInfoList;
     }
 
     private String createLayoutKey(InputDeviceIdentifier identifier, int userId,

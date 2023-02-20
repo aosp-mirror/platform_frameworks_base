@@ -2138,6 +2138,7 @@
   <java-symbol type="string" name="report" />
   <java-symbol type="string" name="select_input_method" />
   <java-symbol type="string" name="select_keyboard_layout_notification_title" />
+  <java-symbol type="string" name="select_multiple_keyboards_layout_notification_title" />
   <java-symbol type="string" name="select_keyboard_layout_notification_message" />
   <java-symbol type="string" name="smv_application" />
   <java-symbol type="string" name="smv_process" />
@@ -4964,10 +4965,19 @@
   <!-- Whether to show weather on the lockscreen by default. -->
   <java-symbol type="bool" name="config_lockscreenWeatherEnabledByDefault" />
 
+  <!-- For keyboard notification -->
+  <java-symbol type="string" name="keyboard_layout_notification_selected_title"/>
+  <java-symbol type="string" name="keyboard_layout_notification_one_selected_message"/>
+  <java-symbol type="string" name="keyboard_layout_notification_two_selected_message"/>
+  <java-symbol type="string" name="keyboard_layout_notification_three_selected_message"/>
+  <java-symbol type="string" name="keyboard_layout_notification_more_than_three_selected_message"/>
+  <java-symbol type="string" name="keyboard_layout_notification_multiple_selected_title"/>
+  <java-symbol type="string" name="keyboard_layout_notification_multiple_selected_message"/>
+
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugHighBatteryLevel" />
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
 
-  
+
   <java-symbol name="materialColorOnSecondaryFixedVariant" type="attr"/>
   <java-symbol name="materialColorOnTertiaryFixedVariant" type="attr"/>
   <java-symbol name="materialColorSurfaceContainerLowest" type="attr"/>

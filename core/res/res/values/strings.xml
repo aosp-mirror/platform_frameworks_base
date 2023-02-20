@@ -3787,8 +3787,10 @@
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=30] -->
     <string name="hardware">Show virtual keyboard</string>
 
-    <!-- Title of the notification to prompt the user to configure physical keyboard settings. -->
-    <string name="select_keyboard_layout_notification_title">Configure physical keyboard</string>
+    <!-- Title of the notification to prompt the user to configure physical keyboard settings. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="select_keyboard_layout_notification_title">Configure <xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g></string>
+    <!-- Title of the notification to prompt the user to configure physical keyboard settings when multiple keyboards connected. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="select_multiple_keyboards_layout_notification_title">Configure physical keyboards</string>
     <!-- Message of the notification to prompt the user to configure physical keyboard settings
          where the user can associate language with physical keyboard layout. -->
     <string name="select_keyboard_layout_notification_message">Tap to select language and layout</string>
@@ -6265,4 +6267,19 @@ ul.</string>
     <string name="concurrent_display_notification_thermal_content">Dual Screen is unavailable because your phone is getting too warm</string>
     <!-- Text of device state notification turn off button. [CHAR LIMIT=NONE] -->
     <string name="device_state_notification_turn_off_button">Turn off</string>
+
+    <!-- Notification title when a keyboard has been configured [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="keyboard_layout_notification_selected_title"><xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g> configured</string>
+    <!-- Notification message shown when one layout was configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_one_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when two layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_two_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="German">%2$s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when three layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_three_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="German">%2$s</xliff:g>, <xliff:g id="layout_3" example="French">%3$s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when more than three layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_more_than_three_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="English (US)">%2$s</xliff:g>, <xliff:g id="layout_3" example="French">%3$s</xliff:g>\u2026 Tap to change.</string>
+    <!-- Notification title when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="keyboard_layout_notification_multiple_selected_title">Physical keyboards configured</string>
+    <!-- Notification message when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_multiple_selected_message">Tap to view keyboards</string>
 </resources>
