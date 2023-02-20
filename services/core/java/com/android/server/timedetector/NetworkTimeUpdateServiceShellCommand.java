@@ -157,7 +157,7 @@ class NetworkTimeUpdateServiceShellCommand extends ShellCommand {
                 SET_SERVER_CONFIG_SERVER_ARG, SET_SERVER_CONFIG_SERVER_ARG,
                 SET_SERVER_CONFIG_TIMEOUT_ARG);
         pw.printf("      NTP server URIs must be in the form \"ntp://hostname\" or"
-                + " \"ntp://hostname:port\"");
+                + " \"ntp://hostname:port\"\n");
         pw.printf("  %s\n", SHELL_COMMAND_RESET_SERVER_CONFIG);
         pw.printf("    Resets/clears the NTP server config set via %s.\n",
                 SHELL_COMMAND_SET_SERVER_CONFIG);
