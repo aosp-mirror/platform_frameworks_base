@@ -926,6 +926,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             requestedInstallerPackageName = null;
         }
 
+        final var dpmi = LocalServices.getService(DevicePolicyManagerInternal.class);
+        if (dpmi != null && dpmi.isUserOrganizationManaged(userId)) {
+            params.installFlags |= PackageManager.INSTALL_FROM_MANAGED_USER_OR_PROFILE;
+        }
+
         if (isApex || mContext.checkCallingOrSelfPermission(
                 Manifest.permission.ENFORCE_UPDATE_OWNERSHIP) == PackageManager.PERMISSION_DENIED) {
             params.installFlags &= ~PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP;
