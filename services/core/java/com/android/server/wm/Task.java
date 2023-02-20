@@ -1290,12 +1290,12 @@ class Task extends TaskFragment {
         return null;
     }
 
-    void updateTaskMovement(boolean toTop, int position) {
+    void updateTaskMovement(boolean toTop, boolean toBottom, int position) {
         EventLogTags.writeWmTaskMoved(mTaskId, getRootTaskId(), getDisplayId(), toTop ? 1 : 0,
                 position);
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
         if (taskDisplayArea != null && isLeafTask()) {
-            taskDisplayArea.onLeafTaskMoved(this, toTop);
+            taskDisplayArea.onLeafTaskMoved(this, toTop, toBottom);
         }
         if (isPersistable) {
             mLastTimeMoved = System.currentTimeMillis();
@@ -2561,7 +2561,7 @@ class Task extends TaskFragment {
 
         final Task task = child.asTask();
         if (task != null) {
-            task.updateTaskMovement(toTop, position);
+            task.updateTaskMovement(toTop, position == POSITION_BOTTOM, position);
         }
     }
 
@@ -4323,6 +4323,8 @@ class Task extends TaskFragment {
         dispatchTaskInfoChangedIfNeeded(false /* force */);
         final Task parentTask = getParent().asTask();
         if (parentTask != null) parentTask.dispatchTaskInfoChangedIfNeeded(false /* force */);
+
+        mAtmService.getTaskChangeNotificationController().notifyTaskFocusChanged(mTaskId, hasFocus);
     }
 
     void onPictureInPictureParamsChanged() {
@@ -4655,13 +4657,9 @@ class Task extends TaskFragment {
                 final Task lastFocusedTask = displayArea.getFocusedRootTask();
                 displayArea.positionChildAt(POSITION_BOTTOM, this, false /*includingParents*/);
                 displayArea.updateLastFocusedRootTask(lastFocusedTask, reason);
-                mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
-                        getTaskInfo());
             }
             if (task != null && task != this) {
                 positionChildAtBottom(task);
-                mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
-                        task.getTaskInfo());
             }
             return;
         }
@@ -5923,7 +5921,7 @@ class Task extends TaskFragment {
         if (canBeLaunchedOnDisplay(newParent.getDisplayId())) {
             reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
             if (isLeafTask()) {
-                newParent.onLeafTaskMoved(this, onTop);
+                newParent.onLeafTaskMoved(this, onTop, !onTop);
             }
         } else {
             Slog.w(TAG, "Task=" + this + " can't reparent to " + newParent);

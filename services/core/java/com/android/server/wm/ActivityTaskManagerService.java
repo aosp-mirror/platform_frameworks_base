@@ -4764,13 +4764,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mWindowManager.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
                         true /*updateInputWindows*/);
             }
-            if (task != prevFocusTask) {
-                if (prevFocusTask != null) {
-                    mTaskChangeNotificationController.notifyTaskFocusChanged(
-                            prevFocusTask.mTaskId, false);
-                }
-                mTaskChangeNotificationController.notifyTaskFocusChanged(task.mTaskId, true);
-            }
         }
         if (task != prevTask) {
             mTaskSupervisor.mRecentTasks.add(task);
