@@ -4590,6 +4590,36 @@ class Task extends TaskFragment {
         }
     }
 
+    /**
+     * Abort an incomplete pip-entry. If left in this state, it will cover everything but remain
+     * paused. If this is needed, there is a bug -- this should only be used for recovery.
+     */
+    void abortPipEnter(ActivityRecord top) {
+        // an incomplete state has the task PINNED but the activity not.
+        if (!inPinnedWindowingMode() || top.inPinnedWindowingMode() || !canMoveTaskToBack(this)) {
+            return;
+        }
+        final Transition transition = new Transition(TRANSIT_TO_BACK, 0 /* flags */,
+                mTransitionController, mWmService.mSyncEngine);
+        mTransitionController.moveToCollecting(transition);
+        mTransitionController.requestStartTransition(transition, this, null /* remoteTransition */,
+                null /* displayChange */);
+        if (top.getLastParentBeforePip() != null) {
+            final Task lastParentBeforePip = top.getLastParentBeforePip();
+            if (lastParentBeforePip.isAttached()) {
+                top.reparent(lastParentBeforePip, lastParentBeforePip.getChildCount() /* top */,
+                        "movePinnedActivityToOriginalTask");
+            }
+        }
+        if (isAttached()) {
+            setWindowingMode(WINDOWING_MODE_UNDEFINED);
+            moveTaskToBackInner(this);
+        }
+        if (top.isAttached()) {
+            top.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        }
+    }
+
     void resumeNextFocusAfterReparent() {
         adjustFocusToNextFocusableTask("reparent", true /* allowFocusSelf */,
                 true /* moveDisplayToTop */);
