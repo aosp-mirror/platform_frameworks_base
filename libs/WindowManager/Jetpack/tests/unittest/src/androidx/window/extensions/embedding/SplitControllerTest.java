@@ -67,6 +67,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 
 import android.annotation.NonNull;
 import android.app.Activity;
@@ -82,6 +83,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArraySet;
 import android.view.WindowInsets;
 import android.view.WindowMetrics;
 import android.window.TaskFragmentInfo;
@@ -100,12 +102,14 @@ import androidx.window.extensions.layout.WindowLayoutInfo;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -1321,6 +1325,125 @@ public class SplitControllerTest {
                 true /* isOnCreated */);
 
         verify(mTransaction).startActivityInTaskFragment(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testFinishActivityStacks_emptySet_earlyReturn() {
+        mSplitController.finishActivityStacks(Collections.emptySet());
+
+        verify(mSplitController, never()).updateContainersInTaskIfVisible(any(), anyInt());
+    }
+
+    @Test
+    public void testFinishActivityStacks_invalidStacks_earlyReturn() {
+        mSplitController.finishActivityStacks(Collections.singleton(new Binder()));
+
+        verify(mSplitController, never()).updateContainersInTaskIfVisible(any(), anyInt());
+    }
+
+    @Test
+    public void testFinishActivityStacks_finishSingleActivityStack() {
+        TaskFragmentContainer tf = mSplitController.newContainer(mActivity, TASK_ID);
+        tf.setInfo(mTransaction, createMockTaskFragmentInfo(tf, mActivity));
+
+        List<TaskFragmentContainer> containers = mSplitController.mTaskContainers.get(TASK_ID)
+                .mContainers;
+
+        assertEquals(containers.get(0), tf);
+
+        mSplitController.finishActivityStacks(Collections.singleton(tf.getTaskFragmentToken()));
+
+        verify(mSplitPresenter).deleteTaskFragment(any(), eq(tf.getTaskFragmentToken()));
+        assertTrue(containers.isEmpty());
+    }
+
+    @Test
+    public void testFinishActivityStacks_finishActivityStacksInOrder() {
+        TaskFragmentContainer bottomTf = mSplitController.newContainer(mActivity, TASK_ID);
+        TaskFragmentContainer topTf = mSplitController.newContainer(mActivity, TASK_ID);
+        bottomTf.setInfo(mTransaction, createMockTaskFragmentInfo(bottomTf, mActivity));
+        topTf.setInfo(mTransaction, createMockTaskFragmentInfo(topTf, createMockActivity()));
+
+        List<TaskFragmentContainer> containers = mSplitController.mTaskContainers.get(TASK_ID)
+                .mContainers;
+
+        assertEquals(containers.size(), 2);
+
+        Set<IBinder> activityStackTokens = new ArraySet<>(new IBinder[]{
+                topTf.getTaskFragmentToken(), bottomTf.getTaskFragmentToken()});
+
+        mSplitController.finishActivityStacks(activityStackTokens);
+
+        ArgumentCaptor<IBinder> argumentCaptor = ArgumentCaptor.forClass(IBinder.class);
+
+        verify(mSplitPresenter, times(2)).deleteTaskFragment(any(), argumentCaptor.capture());
+
+        List<IBinder> fragmentTokens = argumentCaptor.getAllValues();
+        assertEquals("The ActivityStack must be deleted from the lowest z-order "
+                + "regardless of the order in ActivityStack set",
+                bottomTf.getTaskFragmentToken(), fragmentTokens.get(0));
+        assertEquals("The ActivityStack must be deleted from the lowest z-order "
+                        + "regardless of the order in ActivityStack set",
+                topTf.getTaskFragmentToken(), fragmentTokens.get(1));
+
+        assertTrue(containers.isEmpty());
+    }
+
+    @Test
+    public void testUpdateSplitAttributes_invalidSplitContainerToken_earlyReturn() {
+        mSplitController.updateSplitAttributes(new Binder(), SPLIT_ATTRIBUTES);
+
+        verify(mTransactionManager, never()).startNewTransaction();
+    }
+
+    @Test
+    public void testUpdateSplitAttributes_nullParams_throwException() {
+        assertThrows(NullPointerException.class,
+                () -> mSplitController.updateSplitAttributes(null, SPLIT_ATTRIBUTES));
+
+        final SplitContainer splitContainer = mock(SplitContainer.class);
+        final IBinder token = new Binder();
+        doReturn(token).when(splitContainer).getToken();
+        doReturn(splitContainer).when(mSplitController).getSplitContainer(eq(token));
+
+        assertThrows(NullPointerException.class,
+                () -> mSplitController.updateSplitAttributes(token, null));
+    }
+
+    @Test
+    public void testUpdateSplitAttributes_doNotNeedToUpdateSplitContainer_doNotApplyTransaction() {
+        final SplitContainer splitContainer = mock(SplitContainer.class);
+        final IBinder token = new Binder();
+        doReturn(token).when(splitContainer).getToken();
+        doReturn(splitContainer).when(mSplitController).getSplitContainer(eq(token));
+        doReturn(false).when(mSplitController).updateSplitContainerIfNeeded(
+                eq(splitContainer), any(), eq(SPLIT_ATTRIBUTES));
+        TransactionManager.TransactionRecord testRecord =
+                mock(TransactionManager.TransactionRecord.class);
+        doReturn(testRecord).when(mTransactionManager).startNewTransaction();
+
+        mSplitController.updateSplitAttributes(token, SPLIT_ATTRIBUTES);
+
+        verify(splitContainer).updateDefaultSplitAttributes(eq(SPLIT_ATTRIBUTES));
+        verify(testRecord).abort();
+    }
+
+    @Test
+    public void testUpdateSplitAttributes_splitContainerUpdated_updateAttrs() {
+        final SplitContainer splitContainer = mock(SplitContainer.class);
+        final IBinder token = new Binder();
+        doReturn(token).when(splitContainer).getToken();
+        doReturn(splitContainer).when(mSplitController).getSplitContainer(eq(token));
+        doReturn(true).when(mSplitController).updateSplitContainerIfNeeded(
+                eq(splitContainer), any(), eq(SPLIT_ATTRIBUTES));
+        TransactionManager.TransactionRecord testRecord =
+                mock(TransactionManager.TransactionRecord.class);
+        doReturn(testRecord).when(mTransactionManager).startNewTransaction();
+
+        mSplitController.updateSplitAttributes(token, SPLIT_ATTRIBUTES);
+
+        verify(splitContainer).updateDefaultSplitAttributes(eq(SPLIT_ATTRIBUTES));
+        verify(testRecord).apply(eq(false));
     }
 
     /** Creates a mock activity in the organizer process. */
