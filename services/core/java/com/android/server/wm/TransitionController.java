@@ -97,6 +97,12 @@ class TransitionController {
             new ArrayList<>();
 
     /**
+     * List of runnables to run when there are no ongoing transitions. Use this for state-validation
+     * checks (eg. to recover from incomplete states). Eventually this should be removed.
+     */
+    final ArrayList<Runnable> mStateValidators = new ArrayList<>();
+
+    /**
      * Currently playing transitions (in the order they were started). When finished, records are
      * removed from this list.
      */
@@ -659,6 +665,23 @@ class TransitionController {
         updateRunningRemoteAnimation(record, false /* isPlaying */);
         record.finishTransition();
         mRunningLock.doNotifyLocked();
+        // Run state-validation checks when no transitions are active anymore.
+        if (!inTransition()) {
+            validateStates();
+        }
+    }
+
+    private void validateStates() {
+        for (int i = 0; i < mStateValidators.size(); ++i) {
+            mStateValidators.get(i).run();
+            if (inTransition()) {
+                // the validator may have started a new transition, so wait for that before
+                // checking the rest.
+                mStateValidators.subList(0, i + 1).clear();
+                return;
+            }
+        }
+        mStateValidators.clear();
     }
 
     void moveToPlaying(Transition transition) {
