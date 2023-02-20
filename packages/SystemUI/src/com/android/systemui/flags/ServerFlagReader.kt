@@ -57,6 +57,7 @@ class ServerFlagReaderImpl @Inject constructor(
         override fun onPropertiesChanged(properties: DeviceConfig.Properties) {
             if (isTestHarness) {
                 Log.w(TAG, "Ignore server flag changes in Test Harness mode.")
+                return
             }
             if (properties.namespace != namespace) {
                 return
