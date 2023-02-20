@@ -1194,6 +1194,20 @@ public final class CompanionDeviceManager {
         }
     }
 
+    /**
+     * Enable or disable secure transport for testing. Defaults to enabled.
+     *
+     * @param enabled true to enable. false to disable.
+     * @hide
+     */
+    public void enableSecureTransport(boolean enabled) {
+        try {
+            mService.enableSecureTransport(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private boolean checkFeaturePresent() {
         boolean featurePresent = mService != null;
         if (!featurePresent && DEBUG) {
