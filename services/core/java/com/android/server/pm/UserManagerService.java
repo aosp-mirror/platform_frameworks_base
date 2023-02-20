@@ -2609,6 +2609,9 @@ public class UserManagerService extends IUserManager.Stub {
 
             applyUserRestrictionsForAllUsersLR();
             for (int i = 0; i < updatedUserIds.size(); i++) {
+                if (updatedUserIds.get(i) == UserHandle.USER_ALL) {
+                    continue;
+                }
                 applyUserRestrictionsLR(updatedUserIds.get(i));
             }
         }
