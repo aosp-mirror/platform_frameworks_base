@@ -102,6 +102,7 @@ import android.app.AppOpsManager;
 import android.app.ApplicationExitInfo;
 import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -144,6 +145,7 @@ import android.provider.DeviceConfig;
 import android.stats.storage.StorageEnums;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -317,10 +319,16 @@ final class InstallPackageHelper {
 
         InstallSource installSource = request.getInstallSource();
         final boolean isApex = (scanFlags & SCAN_AS_APEX) != 0;
+        final boolean pkgAlreadyExists = oldPkgSetting != null;
+        final boolean isAllowUpdateOwnership = parsedPackage.isAllowUpdateOwnership();
+        final String oldUpdateOwner =
+                pkgAlreadyExists ? oldPkgSetting.getInstallSource().mUpdateOwnerPackageName : null;
         final String updateOwnerFromSysconfig = isApex || !pkgSetting.isSystem() ? null
                 : mPm.mInjector.getSystemConfig().getSystemAppUpdateOwnerPackageName(
                         parsedPackage.getPackageName());
-        // For new install (standard install), the installSource isn't null.
+        final boolean isUpdateOwnershipEnabled = oldUpdateOwner != null;
+
+        // For standard install (install via session), the installSource isn't null.
         if (installSource != null) {
             // If this is part of a standard install, set the initiating package name, else rely on
             // previous device state.
@@ -334,39 +342,68 @@ final class InstallPackageHelper {
             }
 
             // Handle the update ownership enforcement for APK
-            if (updateOwnerFromSysconfig != null) {
-                // For system app, we always use the update owner from sysconfig if presented.
-                installSource = installSource.setUpdateOwnerPackageName(updateOwnerFromSysconfig);
-            } else if (!parsedPackage.isAllowUpdateOwnership()) {
+            if (!isAllowUpdateOwnership) {
                 // If the app wants to opt-out of the update ownership enforcement via manifest,
                 // it overrides the installer's use of #setRequestUpdateOwnership.
                 installSource = installSource.setUpdateOwnerPackageName(null);
             } else if (!isApex) {
-                final boolean isUpdate = oldPkgSetting != null;
-                final String oldUpdateOwner =
-                        isUpdate ? oldPkgSetting.getInstallSource().mUpdateOwnerPackageName : null;
-                final boolean isUpdateOwnershipEnabled = oldUpdateOwner != null;
+                // User installer UID as "current" userId if present; otherwise, use the userId
+                // from InstallRequest.
+                final int userId = installSource.mInstallerPackageUid != Process.INVALID_UID
+                        ? UserHandle.getUserId(installSource.mInstallerPackageUid)
+                        : request.getUserId();
+                // Whether the parsedPackage is installed on the userId
+                // If the oldPkgSetting doesn't exist, this package isn't installed for all users.
+                final boolean isUpdate = pkgAlreadyExists && (userId >= UserHandle.USER_SYSTEM
+                        // If userID >= 0, we could check via oldPkgSetting.getInstalled(userId).
+                        ? oldPkgSetting.getInstalled(userId)
+                        // When userId is -1 (USER_ALL) and it's not installed for any user,
+                        // treat it as not installed.
+                        : oldPkgSetting.getNotInstalledUserIds().length
+                                <= (UserManager.isHeadlessSystemUserMode() ? 1 : 0));
                 final boolean isRequestUpdateOwnership = (request.getInstallFlags()
                         & PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP) != 0;
+                final boolean isSameUpdateOwner =
+                        TextUtils.equals(oldUpdateOwner, installSource.mInstallerPackageName);
 
-                // Here we assign the update owner for the package, and the rules are:
-                // -. If the installer doesn't request update ownership on initial installation,
-                //    keep the update owner as null.
-                // -. If the installer doesn't want to be the owner to provide the subsequent
-                //    update (doesn't request to be the update owner), e.g., non-store installer
-                //    (file manager), ADB, or DO/PO, we should not update the owner.
-                // -. Else, the installer requests update ownership on initial installation or
-                //    update, we use installSource.mUpdateOwnerPackageName as the update owner.
-                if (!isRequestUpdateOwnership || (isUpdate && !isUpdateOwnershipEnabled)) {
-                    installSource = installSource.setUpdateOwnerPackageName(oldUpdateOwner);
+                // Here we handle the update owner for the package, and the rules are:
+                // -. Only enabling update ownership enforcement on initial installation if the
+                //    installer has requested.
+                // -. Once the installer changes and users agree to proceed, clear the update
+                //    owner (package state in other users are taken into account as well).
+                if (!isUpdate) {
+                    if (!isRequestUpdateOwnership) {
+                        installSource = installSource.setUpdateOwnerPackageName(null);
+                    } else if ((!isUpdateOwnershipEnabled && pkgAlreadyExists)
+                            || (isUpdateOwnershipEnabled && !isSameUpdateOwner)) {
+                        installSource = installSource.setUpdateOwnerPackageName(null);
+                    }
+                } else if (!isSameUpdateOwner || !isUpdateOwnershipEnabled) {
+                    installSource = installSource.setUpdateOwnerPackageName(null);
                 }
             }
 
             pkgSetting.setInstallSource(installSource);
-        // non-standard install (addForInit and install existing packages), installSource is null.
-        } else if (updateOwnerFromSysconfig != null) {
-            // For system app, we always use the update owner from sysconfig if presented.
-            pkgSetting.setUpdateOwnerPackage(updateOwnerFromSysconfig);
+        // For non-standard install (addForInit), installSource is null.
+        } else if (pkgSetting.isSystem()) {
+            // We still honor the manifest attr if the system app wants to opt-out of it.
+            if (!isAllowUpdateOwnership) {
+                pkgSetting.setUpdateOwnerPackage(null);
+            } else {
+                final boolean isSameUpdateOwner = isUpdateOwnershipEnabled
+                        && TextUtils.equals(oldUpdateOwner, updateOwnerFromSysconfig);
+
+                // Here we handle the update owner for the system package, and the rules are:
+                // -. We use the update owner from sysconfig as the initial value.
+                // -. Once an app becomes to system app later via OTA, only retains the update
+                //    owner if it's consistence with sysconfig.
+                // -. Clear the update owner when update owner changes from sysconfig.
+                if (!pkgAlreadyExists || isSameUpdateOwner) {
+                    pkgSetting.setUpdateOwnerPackage(updateOwnerFromSysconfig);
+                } else {
+                    pkgSetting.setUpdateOwnerPackage(null);
+                }
+            }
         }
 
         if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
@@ -641,6 +678,18 @@ final class InstallPackageHelper {
             }
 
             if (installed) {
+                final String updateOwner = pkgSetting.getInstallSource().mUpdateOwnerPackageName;
+                final var dpmi = mInjector.getLocalService(DevicePolicyManagerInternal.class);
+                final boolean isFromManagedUserOrProfile =
+                        dpmi != null && dpmi.isUserOrganizationManaged(userId);
+                // Here we handle the update owner when install existing package, and the rules are:
+                // -. Retain the update owner when enable a system app in managed user or profile.
+                // -. Retain the update owner if the installer is the same.
+                // -. Clear the update owner when update owner changes.
+                if (!preLockSnapshot.isCallerSameApp(updateOwner, callingUid)
+                        && (!pkgSetting.isSystem() || !isFromManagedUserOrProfile)) {
+                    pkgSetting.setUpdateOwnerPackage(null);
+                }
                 if (pkgSetting.getPkg() != null) {
                     final PermissionManagerServiceInternal.PackageInstalledParams.Builder
                             permissionParamsBuilder =
