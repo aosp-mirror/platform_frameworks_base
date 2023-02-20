@@ -37,7 +37,6 @@ public class PinShapeHintingView extends LinearLayout implements PinShapeInput {
 
     private int mPinLength;
     private int mDotDiameter;
-    private int mDotSpacing;
     private int mColor = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary)
             .getDefaultColor();
     private int mPosition = 0;
@@ -48,8 +47,7 @@ public class PinShapeHintingView extends LinearLayout implements PinShapeInput {
         super(context, attrs);
         mPinShapeAdapter = new PinShapeAdapter(context);
         mPinLength = DEFAULT_PIN_LENGTH;
-        mDotDiameter = context.getResources().getDimensionPixelSize(R.dimen.default_dot_diameter);
-        mDotSpacing = context.getResources().getDimensionPixelSize(R.dimen.default_dot_spacing);
+        mDotDiameter = context.getResources().getDimensionPixelSize(R.dimen.password_shape_size);
 
         for (int i = 0; i < mPinLength; i++) {
             ImageView pinDot = new ImageView(context, attrs);
