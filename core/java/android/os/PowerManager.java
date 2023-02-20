@@ -3048,7 +3048,7 @@ public final class PowerManager {
      *
      * @see #isAllowedInLowPowerStandby(String)
      */
-    public static final String LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN =
+    public static final String FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY =
             "com.android.lowpowerstandby.WAKE_ON_LAN";
 
     /**
@@ -3130,10 +3130,25 @@ public final class PowerManager {
         @LowPowerStandbyAllowedReason
         private final int mAllowedReasons;
 
-        /** Features that are allowed to be used in Low Power Standby. */
+        /**
+         * Features that are allowed to be used in Low Power Standby.
+         *
+         * @see #FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY
+         */
         @NonNull
         private final Set<String> mAllowedFeatures;
 
+        /**
+         * Create a policy that defines the restrictions enforced by Low Power Standby.
+         *
+         * @param identifier Name of the policy, used for debugging & metrics.
+         * @param exemptPackages Packages that are exempt from Low Power Standby restrictions.
+         * @param allowedReasons Reasons that this policy allows apps to be automatically exempted
+         *                       from Low Power Standby restrictions for.
+         * @param allowedFeatures Features that are allowed to be used in Low Power Standby.
+         *                        Features are declared as strings, see
+         *                        {@link #FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY} as an example.
+         */
         public LowPowerStandbyPolicy(@NonNull String identifier,
                 @NonNull Set<String> exemptPackages,
                 @LowPowerStandbyAllowedReason int allowedReasons,
