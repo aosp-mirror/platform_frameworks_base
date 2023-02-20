@@ -18,6 +18,8 @@ package com.android.server.voiceinteraction;
 
 import static android.service.voice.HotwordDetectionService.AUDIO_SOURCE_MICROPHONE;
 
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_DETECTED_EXCEPTION;
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_PROCESS_RESTARTED_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__START_SOFTWARE_DETECTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECTED;
@@ -131,6 +133,10 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                                     "Security exception occurs in #onDetected method."));
                         } catch (RemoteException e1) {
                             notifyOnDetectorRemoteException();
+                            HotwordMetricsLogger.writeDetectorEvent(
+                                    HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
+                                    HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
+                                    mVoiceInteractionServiceUid);
                             throw e1;
                         }
                         return;
@@ -148,6 +154,10 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                                     "Copy audio stream failure."));
                         } catch (RemoteException e1) {
                             notifyOnDetectorRemoteException();
+                            HotwordMetricsLogger.writeDetectorEvent(
+                                    HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
+                                    HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
+                                    mVoiceInteractionServiceUid);
                             throw e1;
                         }
                         return;
@@ -156,6 +166,10 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                         mSoftwareCallback.onDetected(newResult, null, null);
                     } catch (RemoteException e1) {
                         notifyOnDetectorRemoteException();
+                        HotwordMetricsLogger.writeDetectorEvent(
+                                HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
+                                HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_DETECTED_EXCEPTION,
+                                mVoiceInteractionServiceUid);
                         throw e1;
                     }
                     Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(newResult)
