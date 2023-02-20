@@ -26,8 +26,6 @@ import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECT
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -297,6 +295,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                             && mController.isAdvancedLayoutSupported()) {
                         //If device is connected and there's other selectable devices, layout as
                         // one of selected devices.
+                        updateTitleIcon(R.drawable.media_output_icon_volume,
+                                mController.getColorItemContent());
                         boolean isDeviceDeselectable = isDeviceIncluded(
                                 mController.getDeselectableMediaDevice(), device);
                         updateGroupableCheckBox(true, isDeviceDeselectable, device);
@@ -372,7 +372,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mEndClickIcon.setOnClickListener(null);
             mEndTouchArea.setOnClickListener(null);
             updateEndClickAreaColor(mController.getColorSeekbarProgress());
-            mEndClickIcon.setColorFilter(mController.getColorItemContent());
+            mEndClickIcon.setImageTintList(
+                    ColorStateList.valueOf(mController.getColorItemContent()));
             mEndClickIcon.setOnClickListener(
                     v -> mController.tryToLaunchInAppRoutingIntent(device.getId(), v));
             mEndTouchArea.setOnClickListener(v -> mCheckBox.performClick());
@@ -380,8 +381,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
         public void updateEndClickAreaColor(int color) {
             if (mController.isAdvancedLayoutSupported()) {
-                mEndTouchArea.getBackground().setColorFilter(
-                        new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
+                mEndTouchArea.setBackgroundTintList(
+                        ColorStateList.valueOf(color));
             }
         }
 
@@ -395,22 +396,22 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         private void updateConnectionFailedStatusIcon() {
             mStatusIcon.setImageDrawable(
                     mContext.getDrawable(R.drawable.media_output_status_failed));
-            mStatusIcon.setColorFilter(mController.getColorItemContent());
+            mStatusIcon.setImageTintList(
+                    ColorStateList.valueOf(mController.getColorItemContent()));
         }
 
         private void updateDeviceStatusIcon(Drawable drawable) {
             mStatusIcon.setImageDrawable(drawable);
-            mStatusIcon.setColorFilter(mController.getColorItemContent());
+            mStatusIcon.setImageTintList(
+                    ColorStateList.valueOf(mController.getColorItemContent()));
             if (drawable instanceof AnimatedVectorDrawable) {
                 ((AnimatedVectorDrawable) drawable).start();
             }
         }
 
         private void updateProgressBarColor() {
-            mProgressBar.getIndeterminateDrawable().setColorFilter(
-                    new PorterDuffColorFilter(
-                            mController.getColorItemContent(),
-                            PorterDuff.Mode.SRC_IN));
+            mProgressBar.getIndeterminateDrawable().setTintList(
+                    ColorStateList.valueOf(mController.getColorItemContent()));
         }
 
         public void updateEndClickArea(MediaDevice device, boolean isDeviceDeselectable) {
@@ -420,9 +421,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mEndTouchArea.setImportantForAccessibility(
                     View.IMPORTANT_FOR_ACCESSIBILITY_YES);
             if (mController.isAdvancedLayoutSupported()) {
-                mEndTouchArea.getBackground().setColorFilter(
-                        new PorterDuffColorFilter(mController.getColorItemBackground(),
-                                PorterDuff.Mode.SRC_IN));
+                mEndTouchArea.setBackgroundTintList(
+                        ColorStateList.valueOf(mController.getColorItemBackground()));
             }
             setUpContentDescriptionForView(mEndTouchArea, true, device);
         }
@@ -451,11 +451,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new));
                 final Drawable addDrawable = mContext.getDrawable(R.drawable.ic_add);
                 mTitleIcon.setImageDrawable(addDrawable);
-                mTitleIcon.setColorFilter(mController.getColorItemContent());
+                mTitleIcon.setImageTintList(
+                        ColorStateList.valueOf(mController.getColorItemContent()));
                 if (mController.isAdvancedLayoutSupported()) {
-                    mIconAreaLayout.getBackground().setColorFilter(
-                            new PorterDuffColorFilter(mController.getColorItemBackground(),
-                                    PorterDuff.Mode.SRC_IN));
+                    mIconAreaLayout.setBackgroundTintList(
+                            ColorStateList.valueOf(mController.getColorItemBackground()));
                 }
                 mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
             }
