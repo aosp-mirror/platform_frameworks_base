@@ -164,10 +164,10 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_AUDIO_ROUTING = "settings_audio_routing";
 
-    /** Flag to enable/disable flash alerts
+    /** Flag to enable/disable flash notifications
      *  @hide
      */
-    public static final String SETTINGS_FLASH_ALERTS = "settings_flash_alerts";
+    public static final String SETTINGS_FLASH_NOTIFICATIONS = "settings_flash_notifications";
 
     /**
      * Flag to disable/enable showing udfps enroll view in settings. If it's disabled, udfps enroll
@@ -232,7 +232,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE, "false");
         DEFAULT_FLAGS.put(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM, "false");
         DEFAULT_FLAGS.put(SETTINGS_AUDIO_ROUTING, "false");
-        DEFAULT_FLAGS.put(SETTINGS_FLASH_ALERTS, "false");
+        DEFAULT_FLAGS.put(SETTINGS_FLASH_NOTIFICATIONS, "true");
         DEFAULT_FLAGS.put(SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API, "false");
         DEFAULT_FLAGS.put(SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, "false");
