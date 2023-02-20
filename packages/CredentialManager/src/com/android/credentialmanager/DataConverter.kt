@@ -287,6 +287,7 @@ class GetFlowUtils {
                     pendingIntent = structuredAuthEntry.pendingIntent,
                     fillInIntent = entry.frameworkExtrasIntent,
                     title = title,
+                    providerDisplayName = providerDisplayName,
                     icon = providerIcon,
                     isUnlockedAndEmpty = entry.status != AuthenticationEntry.STATUS_LOCKED,
                     isLastUnlocked =

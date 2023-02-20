@@ -16,69 +16,144 @@
 
 package com.android.credentialmanager.common.ui
 
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 
+/**
+ * The headline for a screen. E.g. "Create a passkey for X", "Choose a saved sign-in for X".
+ *
+ * Centered horizontally; headline-small typography; on-surface color.
+ */
 @Composable
-fun TextOnSurface(
-    text: String,
-    modifier: Modifier = Modifier,
-    textAlign: TextAlign? = null,
-    style: TextStyle,
-) {
-    TextInternal(
+fun HeadlineText(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier.wrapContentHeight(),
         text = text,
         color = MaterialTheme.colorScheme.onSurface,
-        modifier = modifier,
-        textAlign = textAlign,
-        style = style,
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.headlineSmall,
     )
 }
 
+/**
+ * Body-medium typography; on-surface-variant color.
+ */
 @Composable
-fun TextSecondary(
-    text: String,
-    modifier: Modifier = Modifier,
-    textAlign: TextAlign? = null,
-    style: TextStyle,
-) {
-    TextInternal(
-        text = text,
-        color = MaterialTheme.colorScheme.secondary,
-        modifier = modifier,
-        textAlign = textAlign,
-        style = style,
-    )
-}
-
-@Composable
-fun TextOnSurfaceVariant(
-    text: String,
-    modifier: Modifier = Modifier,
-    textAlign: TextAlign? = null,
-    style: TextStyle,
-) {
-    TextInternal(
+fun BodyMediumText(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier.wrapContentHeight(),
         text = text,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier,
-        textAlign = textAlign,
-        style = style,
+        style = MaterialTheme.typography.bodyMedium,
     )
 }
 
+/**
+ * Body-small typography; on-surface-variant color.
+ */
 @Composable
-private fun TextInternal(
-    text: String,
-    color: Color,
-    modifier: Modifier,
-    textAlign: TextAlign?,
-    style: TextStyle,
-) {
-    Text(text = text, color = color, modifier = modifier, textAlign = textAlign, style = style)
+fun BodySmallText(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier.wrapContentHeight(),
+        text = text,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.bodySmall,
+    )
+}
+
+/**
+ * Title-large typography; on-surface color.
+ */
+@Composable
+fun LargeTitleText(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier.wrapContentHeight(),
+        text = text,
+        color = MaterialTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.titleLarge,
+    )
+}
+
+/**
+ * Title-small typography; on-surface color.
+ */
+@Composable
+fun SmallTitleText(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier.wrapContentHeight(),
+        text = text,
+        color = MaterialTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.titleSmall,
+    )
+}
+
+/**
+ * Title-small typography.
+ */
+@Composable
+fun SectionHeaderText(text: String, modifier: Modifier = Modifier, color: Color) {
+    Text(
+        modifier = modifier.wrapContentHeight(),
+        text = text,
+        color = color,
+        style = MaterialTheme.typography.titleSmall,
+    )
+}
+
+/**
+ * Body-medium typography; inverse-on-surface color.
+ */
+@Composable
+fun SnackbarContentText(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier.wrapContentHeight(),
+        text = text,
+        color = MaterialTheme.colorScheme.inverseOnSurface,
+        style = MaterialTheme.typography.bodyMedium,
+    )
+}
+
+/**
+ * Label-large typography; inverse-primary color.
+ */
+@Composable
+fun SnackbarActionText(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier.wrapContentHeight(),
+        text = text,
+        color = MaterialTheme.colorScheme.inversePrimary,
+        style = MaterialTheme.typography.labelLarge,
+    )
+}
+
+/**
+ * Label-large typography; on-surface-variant color; centered.
+ */
+@Composable
+fun LargeLabelTextOnSurfaceVariant(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier.wrapContentHeight(),
+        text = text,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.labelLarge,
+    )
+}
+
+/**
+ * Label-large typography; color following parent spec; centered.
+ */
+@Composable
+fun LargeLabelText(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier.wrapContentHeight(),
+        text = text,
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.labelLarge,
+    )
 }
