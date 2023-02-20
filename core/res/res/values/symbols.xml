@@ -4963,4 +4963,50 @@
 
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugHighBatteryLevel" />
   <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
+
+  
+  <java-symbol name="materialColorOnSecondaryFixedVariant" type="attr"/>
+  <java-symbol name="materialColorOnTertiaryFixedVariant" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainerLowest" type="attr"/>
+  <java-symbol name="materialColorOnPrimaryFixedVariant" type="attr"/>
+  <java-symbol name="materialColorOnSecondaryContainer" type="attr"/>
+  <java-symbol name="materialColorOnTertiaryContainer" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainerLow" type="attr"/>
+  <java-symbol name="materialColorOnPrimaryContainer" type="attr"/>
+  <java-symbol name="materialColorSecondaryFixedDim" type="attr"/>
+  <java-symbol name="materialColorOnErrorContainer" type="attr"/>
+  <java-symbol name="materialColorOnSecondaryFixed" type="attr"/>
+  <java-symbol name="materialColorOnSurfaceInverse" type="attr"/>
+  <java-symbol name="materialColorTertiaryFixedDim" type="attr"/>
+  <java-symbol name="materialColorOnTertiaryFixed" type="attr"/>
+  <java-symbol name="materialColorPrimaryFixedDim" type="attr"/>
+  <java-symbol name="materialColorSecondaryContainer" type="attr"/>
+  <java-symbol name="materialColorErrorContainer" type="attr"/>
+  <java-symbol name="materialColorOnPrimaryFixed" type="attr"/>
+  <java-symbol name="materialColorPrimaryInverse" type="attr"/>
+  <java-symbol name="materialColorSecondaryFixed" type="attr"/>
+  <java-symbol name="materialColorSurfaceInverse" type="attr"/>
+  <java-symbol name="materialColorSurfaceVariant" type="attr"/>
+  <java-symbol name="materialColorTertiaryContainer" type="attr"/>
+  <java-symbol name="materialColorTertiaryFixed" type="attr"/>
+  <java-symbol name="materialColorPrimaryContainer" type="attr"/>
+  <java-symbol name="materialColorOnBackground" type="attr"/>
+  <java-symbol name="materialColorPrimaryFixed" type="attr"/>
+  <java-symbol name="materialColorOnSecondary" type="attr"/>
+  <java-symbol name="materialColorOnTertiary" type="attr"/>
+  <java-symbol name="materialColorSurfaceDim" type="attr"/>
+  <java-symbol name="materialColorSurfaceBright" type="attr"/>
+  <java-symbol name="materialColorSecondary" type="attr"/>
+  <java-symbol name="materialColorOnError" type="attr"/>
+  <java-symbol name="materialColorSurface" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainerHigh" type="attr"/>
+  <java-symbol name="materialColorTertiary" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainerHighest" type="attr"/>
+  <java-symbol name="materialColorOnSurfaceVariant" type="attr"/>
+  <java-symbol name="materialColorOutline" type="attr"/>
+  <java-symbol name="materialColorOnPrimary" type="attr"/>
+  <java-symbol name="materialColorOnSurface" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainer" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainer" type="attr"/>
+
 </resources>
