@@ -150,6 +150,17 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         )
     }
 
+    fun logQsExpandImmediateChanged(newValue: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                bool1 = newValue
+            },
+            { "qsExpandImmediate=$bool1" }
+        )
+    }
+
     fun logQsExpansionChanged(
             message: String,
             qsExpanded: Boolean,
