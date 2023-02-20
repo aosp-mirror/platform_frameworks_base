@@ -237,6 +237,7 @@ class TestPhoneWindowManager {
         overrideLaunchAccessibility();
         doReturn(false).when(mPhoneWindowManager).keyguardOn();
         doNothing().when(mContext).startActivityAsUser(any(), any());
+        Mockito.reset(mContext);
     }
 
     void tearDown() {
@@ -399,8 +400,12 @@ class TestPhoneWindowManager {
     void assertLaunchCategory(String category) {
         waitForIdle();
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
-        Assert.assertTrue(intentCaptor.getValue().getSelector().hasCategory(category));
+        try {
+            verify(mContext).startActivityAsUser(intentCaptor.capture(), any());
+            Assert.assertTrue(intentCaptor.getValue().getSelector().hasCategory(category));
+        } catch (Throwable t) {
+            throw new AssertionError("failed to assert " + category, t);
+        }
         // Reset verifier for next call.
         Mockito.reset(mContext);
     }
