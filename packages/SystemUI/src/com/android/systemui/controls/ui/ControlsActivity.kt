@@ -68,7 +68,7 @@ class ControlsActivity @Inject constructor(
 
         getLifecycle().addObserver(
             ControlsAnimations.observerForAnimations(
-                requireViewById<ViewGroup>(R.id.control_detail_root),
+                requireViewById(R.id.control_detail_root),
                 window,
                 intent,
                 !featureFlags.isEnabled(Flags.USE_APP_PANELS)
@@ -95,7 +95,7 @@ class ControlsActivity @Inject constructor(
     override fun onStart() {
         super.onStart()
 
-        parent = requireViewById<ViewGroup>(R.id.global_actions_controls)
+        parent = requireViewById(R.id.control_detail_root)
         parent.alpha = 0f
         if (featureFlags.isEnabled(Flags.USE_APP_PANELS) && !keyguardStateController.isUnlocked) {
             controlsSettingsDialogManager.maybeShowDialog(this) {
