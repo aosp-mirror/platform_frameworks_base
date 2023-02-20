@@ -16,6 +16,8 @@
 
 package com.android.wm.shell;
 
+import android.os.Build;
+
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellInit;
@@ -41,6 +43,9 @@ public class ProtoLogController implements ShellCommandHandler.ShellCommandActio
 
     void onInit() {
         mShellCommandHandler.addCommandCallback("protolog", this, this);
+        if (Build.IS_DEBUGGABLE) {
+            mShellProtoLog.startProtoLog(null /* PrintWriter */);
+        }
     }
 
     @Override
