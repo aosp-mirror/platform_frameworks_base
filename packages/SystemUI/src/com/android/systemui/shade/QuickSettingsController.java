@@ -1378,6 +1378,9 @@ public class QuickSettingsController {
     }
 
     private void collapseOrExpandQs() {
+        if (mSplitShadeEnabled) {
+            return; // QS is always expanded in split shade
+        }
         onExpansionStarted();
         if (getExpanded()) {
             flingQs(0, FLING_COLLAPSE, null, true);
