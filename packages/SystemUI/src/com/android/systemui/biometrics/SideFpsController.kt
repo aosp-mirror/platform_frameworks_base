@@ -64,6 +64,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.traceSection
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -211,7 +212,9 @@ constructor(
         requests.add(request)
         mainExecutor.execute {
             if (overlayView == null) {
-                createOverlayForDisplay(reason)
+                traceSection("SideFpsController#show(request=${request.name}, reason=$reason") {
+                    createOverlayForDisplay(reason)
+                }
             } else {
                 Log.v(TAG, "overlay already shown")
             }
@@ -223,7 +226,7 @@ constructor(
         requests.remove(request)
         mainExecutor.execute {
             if (requests.isEmpty()) {
-                overlayView = null
+                traceSection("SideFpsController#hide(${request.name}") { overlayView = null }
             }
         }
     }
