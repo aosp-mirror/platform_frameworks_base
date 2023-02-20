@@ -803,6 +803,10 @@ public class QuickSettingsController {
         }
     }
 
+    void setOverScrollAmount(int overExpansion) {
+        mQs.setOverScrollAmount(overExpansion);
+    }
+
     private void setOverScrolling(boolean overscrolling) {
         mStackScrollerOverscrolling = overscrolling;
         if (mQs != null) {
