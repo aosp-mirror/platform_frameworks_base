@@ -10763,6 +10763,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("\n\n** Cache info for pid " + pid + " [" + r.processName + "] **");
                 pw.flush();
                 try {
+                    if (pid == Process.myPid()) {
+                        // Directly dump to target fd for local dump to avoid hang.
+                        try (ParcelFileDescriptor pfd = ParcelFileDescriptor.fromFd(fd.getInt$())) {
+                            thread.dumpCacheInfo(pfd, args);
+                        }
+                        continue;
+                    }
                     TransferPipe tp = new TransferPipe();
                     try {
                         thread.dumpCacheInfo(tp.getWriteFd(), args);
