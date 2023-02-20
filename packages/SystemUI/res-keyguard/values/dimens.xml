@@ -71,7 +71,7 @@
     <dimen name="password_dot_size">9dp</dimen>
 
     <!-- The size of the shape in the PIN unlock method. -->
-    <dimen name="password_shape_size">34dp</dimen>
+    <dimen name="password_shape_size">30dp</dimen>
 
     <!-- The size of PIN text in the PIN unlock method. -->
     <integer name="scaled_password_text_size">40</integer>
